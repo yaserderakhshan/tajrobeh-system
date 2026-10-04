@@ -1,0 +1,88 @@
+<!-- wp:template-part {"slug":"tj-header","theme":"twentytwentyfive","tagName":"div","className":"tjl"} /-->
+
+<!-- wp:group {"tagName":"main","className":"tj-art","layout":{"type":"constrained"}} -->
+<main class="wp-block-group tj-art">
+<!-- wp:group {"align":"full","className":"tj-art-head","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull tj-art-head">
+<!-- wp:html -->
+<nav class="tj-crumb" aria-label="مسیر"><a href="/">خانه</a><a href="/mag/">مجله</a><span id="tjCrumbCat"></span></nav>
+<!-- /wp:html -->
+<!-- wp:post-terms {"term":"category","className":"tj-art-cat"} /-->
+<!-- wp:post-title {"level":1} /-->
+<!-- wp:group {"className":"tj-art-byline","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
+<div class="wp-block-group tj-art-byline">
+<!-- wp:group {"className":"tj-art-meta","layout":{"type":"flex","flexWrap":"wrap"}} -->
+<div class="wp-block-group tj-art-meta">
+<!-- wp:post-author-name {"isLink":true,"className":"tj-art-au"} /-->
+<!-- wp:post-date {"format":"j F Y"} /-->
+<!-- wp:html -->
+<span class="tj-art-rt" id="tjArtRT"></span>
+<!-- /wp:html -->
+</div>
+<!-- /wp:group -->
+<!-- wp:html -->
+<div class="tj-art-review" id="tjReview" hidden></div>
+<!-- /wp:html -->
+</div>
+<!-- /wp:group -->
+<!-- wp:post-featured-image {"sizeSlug":"large","align":"wide","aspectRatio":"16/9","className":"tj-art-fi"} /-->
+<!-- wp:html -->
+<aside class="tj-about" id="tjAbout" hidden></aside>
+<!-- /wp:html -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:post-content {"align":"full","layout":{"type":"constrained"}} /-->
+
+<!-- wp:group {"className":"tj-art-foot","layout":{"type":"constrained"}} -->
+<div class="wp-block-group tj-art-foot">
+<!-- wp:html -->
+<div class="tj-art-share" id="tjShare"><span class="tj-sh-l">این نوشته را هم‌رسانی کنید</span><a data-net="tg" href="#" target="_blank" rel="noopener nofollow" aria-label="تلگرام"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M21.9 4.3 18.8 19c-.2 1-.9 1.3-1.7.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.4-4.9 9-8.1c.4-.3-.1-.5-.6-.2L6.7 12.8 1.9 11.3c-1-.3-1-1 .2-1.5l18.4-7.1c.9-.3 1.6.2 1.4 1.6z"/></svg></a><a data-net="wa" href="#" target="_blank" rel="noopener nofollow" aria-label="واتساپ"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.6 14.1c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5-4.5-.2-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .7.5l.9 2.1c.1.2.1.4 0 .5l-.4.6-.3.3c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.7-.1l.9-1c.2-.2.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg></a><a data-net="x" href="#" target="_blank" rel="noopener nofollow" aria-label="ایکس"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.8 21h-6l-4.7-6.1L5.6 21h-3l7-8-7-10h6.1l4.3 5.6L17.5 3z"/></svg></a><button type="button" id="tjCopy" aria-label="کپی نشانی"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></button></div>
+<!-- /wp:html -->
+<!-- wp:post-terms {"term":"post_tag","separator":"  ","className":"tj-art-tags"} /-->
+<!-- wp:group {"className":"tj-art-aubox","layout":{"type":"flex","flexWrap":"wrap"}} -->
+<div class="wp-block-group tj-art-aubox">
+<!-- wp:html -->
+<span class="tj-aubox-l">نویسندهٔ این نوشته</span>
+<!-- /wp:html -->
+<!-- wp:post-author-name {"isLink":true,"className":"tj-aubox-n"} /-->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:html -->
+<aside class="tj-art-cta"><div class="tj-art-cta-in"><h2>می‌خواهید دربارهٔ این‌ها با یک تراپیست حرف بزنید؟</h2><p>تیم پذیرش تجربه کمک می‌کند تراپیست مناسب خودتان را پیدا کنید. جلسه‌ها آنلاین برگزار می‌شود و در چند شهر حضوری هم هست.</p><div class="tj-art-cta-btns"><a class="tj-btn-red" href="/get-therapy/">شروع تراپی</a><a class="tj-btn-ghost" href="/persian-therapy/">ایرانیان خارج از کشور</a></div></div></aside>
+<!-- /wp:html -->
+
+<!-- wp:group {"align":"wide","className":"tj-art-more","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide tj-art-more">
+<!-- wp:heading {"level":2,"className":"tj-art-more-h"} -->
+<h2 class="wp-block-heading tj-art-more-h">بعد از این چه بخوانم؟</h2>
+<!-- /wp:heading -->
+<!-- wp:query {"query":{"perPage":3,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","sticky":"ignore","inherit":false},"align":"wide","layout":{"type":"default"}} -->
+<div class="wp-block-query alignwide">
+<!-- wp:post-template {"align":"full","className":"tj-next-list","layout":{"type":"default"}} -->
+<!-- wp:group {"className":"tj-next tj-art-card","layout":{"type":"default"}} -->
+<div class="wp-block-group tj-next tj-art-card">
+<!-- wp:post-featured-image {"sizeSlug":"medium","isLink":true,"aspectRatio":"4/3","className":"tj-next-img"} /-->
+<!-- wp:group {"className":"tj-next-body","layout":{"type":"default"}} -->
+<div class="wp-block-group tj-next-body">
+<!-- wp:post-terms {"term":"category","className":"tjm-cat"} /-->
+<!-- wp:post-title {"level":3,"isLink":true} /-->
+<!-- wp:post-date {"format":"j F Y","className":"tj-next-date"} /-->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+</div>
+<!-- /wp:query -->
+</div>
+<!-- /wp:group -->
+<!-- wp:html -->
+<script>(function(){function q(s,r){return (r||document).querySelector(s);}function qa(s,r){return [].slice.call((r||document).querySelectorAll(s));}function A(){return String.fromCharCode(38);}function fa(x){return String(x).replace(/[0-9]/g,function(d){return "۰۱۲۳۴۵۶۷۸۹".charAt(parseInt(d,10));});}function E(t,c,x){var e=document.createElement(t);if(c){e.className=c;}if(x!=null){e.textContent=x;}return e;}var C=q(".entry-content");if(!C){return;}qa(".tj-art time[datetime]").forEach(function(t){try{var d=new Date(t.getAttribute("datetime"));if(!isNaN(d)){t.textContent=new Intl.DateTimeFormat("fa-IR",{calendar:"persian",year:"numeric",month:"long",day:"numeric"}).format(d);}}catch(e){}});var words=(C.innerText||"").trim().split(/\s+/).length;var mins=Math.max(1,Math.round(words/220));var rt=q("#tjArtRT");if(rt){rt.textContent="حدود "+fa(mins)+" دقیقه خواندن";}var cb=q("#tjCrumbCat"),cat=q(".tj-art-cat a");if(cb){if(cat){var ca=E("a");ca.href=cat.href;ca.textContent=cat.textContent;cb.appendChild(ca);}else{cb.parentNode.removeChild(cb);}}var about=null;try{var wk=document.createTreeWalker(C,NodeFilter.SHOW_COMMENT,null,false),nd;while((nd=wk.nextNode())){var v0=nd.nodeValue||"";if(v0.replace(/^\s+/,"").indexOf("tj-about")===0){about=v0;break;}}}catch(e){}var info={};if(about){about.split(/\r?\n/).forEach(function(line){line=line.trim();var i=line.indexOf(":");if(i<0){i=line.indexOf("：");}if(i<1){return;}var k=line.slice(0,i).trim(),v2=line.slice(i+1).trim();if(k){if(v2){info[k]=v2;}}});}var host=q("#tjAbout");if(host){var any=false;var frag=document.createDocumentFragment();["نویسنده اصلی","عنوان اصلی","انتشار در","سال انتشار","ترجمه","بازبینی و ویرایش"].forEach(function(k){if(!info[k]){return;}any=true;var row=E("div","tj-ab-row");row.appendChild(E("span","tj-ab-k",k));row.appendChild(E("span","tj-ab-v",info[k]));frag.appendChild(row);});if(any){var row2=E("div","tj-ab-row");row2.appendChild(E("span","tj-ab-k","تعداد کلمات"));row2.appendChild(E("span","tj-ab-v",fa(words)+" کلمه"));frag.appendChild(row2);host.appendChild(E("p","tj-ab-t","دربارهٔ این متن"));host.appendChild(frag);host.hidden=false;}}var rv=q("#tjReview");if(rv){var rn=info["بازبینی علمی"];if(rn){rv.appendChild(E("span","tj-rev-b","✓"));rv.appendChild(E("span","tj-rev-l","بازبینی علمی"));var ru=info["نشانی بازبین"];if(ru){var ra=E("a","tj-rev-n",rn);ra.href=ru;rv.appendChild(ra);}else{rv.appendChild(E("span","tj-rev-n",rn));}rv.hidden=false;}}var hs=qa("h2,h3",C).filter(function(x){return (x.textContent||"").trim().length>1;});if(hs.length>2){var d2=document.createElement("details");d2.className="tj-toc";d2.open=(innerWidth>900);var sm=E("summary",null,"فهرست مطالب");d2.appendChild(sm);var ol0=E("ol");hs.forEach(function(x,i){if(!x.id){x.id="tj-h-"+i;}var li0=E("li",x.tagName==="H3"?"lv3":"lv2");var a0=E("a",null,(x.textContent||"").trim());a0.href="#"+x.id;li0.appendChild(a0);ol0.appendChild(li0);});d2.appendChild(ol0);var anc=C.querySelector("h2");if(!anc){anc=C.firstElementChild;}if(anc){C.insertBefore(d2,anc);}}(function(){var defs=qa("a[name]",C).filter(function(a){var nm=a.getAttribute("name")||"";if(nm.indexOf("_ftn")!==0){return false;}return nm.indexOf("_ftnref")!==0;});if(!defs.length){return;}var ol1=E("ol","tj-fns-list");var cnt=0;defs.forEach(function(a){var num=(a.getAttribute("name")||"").replace(/[^0-9]+/g,"");var blk=a.parentNode;while(blk){if(blk===C){break;}if(blk.tagName==="P"){break;}if(blk.tagName==="LI"){break;}blk=blk.parentNode;}if(!blk){return;}if(blk===C){return;}var li1=E("li");li1.id="tj-fn-"+num;if(num){li1.value=parseInt(num,10);}a.parentNode.removeChild(a);while(blk.firstChild){li1.appendChild(blk.firstChild);}if(li1.firstChild){if(li1.firstChild.nodeType===3){li1.firstChild.nodeValue=li1.firstChild.nodeValue.replace(/^[\s\u200c]+/,"");}}var bk=E("a","tj-fn-back","↑");bk.href="#tj-fnref-"+num;bk.setAttribute("aria-label","بازگشت به متن");li1.appendChild(bk);if((li1.textContent||"").replace(/\s+/g,"").length>1){ol1.appendChild(li1);cnt++;}if(blk.parentNode){blk.parentNode.removeChild(blk);}});if(!cnt){return;}var sec=E("section","tj-fns");sec.appendChild(E("h2","tj-fns-h","پی‌نوشت‌ها"));sec.appendChild(ol1);C.appendChild(sec);qa("a[name]",C).forEach(function(a){var nm=a.getAttribute("name")||"";if(nm.indexOf("_ftnref")!==0){return;}var num=nm.replace(/[^0-9]+/g,"");var sup=E("sup","tj-fn");var lk=E("a",null,fa(num));lk.href="#tj-fn-"+num;lk.id="tj-fnref-"+num;lk.setAttribute("title","پی‌نوشت "+fa(num));sup.appendChild(lk);a.parentNode.replaceChild(sup,a);});})();(function(){var h2s=qa("h2,h3",C).filter(function(x){if(x.closest(".tj-fns")){return false;}if((x.textContent||"").trim().length<2){return false;}return true;});if(h2s.length<3){return;}var MAP={};MAP["روانکاوی"]=[["روان‌درمانی تحلیلی و روانکاوی","/therapy/individual-therapy/"],["سوپرویژن و آموزش","/therapy/supervision/"]];MAP["روان‌درمانی"]=[["روان‌درمانی فردی","/therapy/individual-therapy/"],["گروه‌درمانی","/therapy/group-therapy/"]];MAP["کودک و نوجوان"]=[["تراپی کودک","/therapy/child-therapy/"],["تراپی نوجوان","/therapy/teen-therapy/"]];MAP["زوج‌درمانی"]=[["زوج‌درمانی","/therapy/couple-therapy/"],["مشاورهٔ پیش از ازدواج","/therapy/premarital-counseling/"]];MAP["سبک زندگی"]=[["همهٔ خدمات تجربه","/therapy/"],["مدرسهٔ تجربه زندگی","/course/"]];var key=cat?(cat.textContent||"").trim():"";var links=MAP[key];if(!links){links=[["همهٔ خدمات تجربه","/therapy/"],["مجلهٔ تجربه","/mag/"]];}var box=E("aside","tj-basics");box.appendChild(E("p","tj-basics-t","از کجا شروع کنم؟"));var ul=E("ul");links.concat([["تراپیست مناسب خودت را پیدا کن","/get-therapy/"]]).forEach(function(p2){var li2=E("li");var a3=E("a",null,p2[0]);a3.href=p2[1];li2.appendChild(a3);ul.appendChild(li2);});box.appendChild(ul);var t3=h2s[1];if(t3){if(t3.parentNode){t3.parentNode.insertBefore(box,t3);}}})();var sh=q("#tjShare");if(sh){var U=encodeURIComponent(location.href),T=encodeURIComponent(document.title.split(" - ")[0]);qa("a[data-net]",sh).forEach(function(a){var k=a.getAttribute("data-net");if(k==="tg"){a.href="https://t.me/share/url?url="+U+A()+"text="+T;}if(k==="wa"){a.href="https://wa.me/?text="+T+"%20"+U;}if(k==="x"){a.href="https://twitter.com/intent/tweet?url="+U+A()+"text="+T;}});var cp=q("#tjCopy");if(cp){cp.addEventListener("click",function(){try{navigator.clipboard.writeText(location.href);cp.classList.add("done");setTimeout(function(){cp.classList.remove("done");},1600);}catch(e){}});}}var here=location.pathname.replace(/\/+$/,"");var shown2=0;qa(".tj-art-card").forEach(function(k){var a4=k.querySelector("a");var pp=a4?a4.pathname.replace(/\/+$/,""):"";if(pp===here){k.style.display="none";}else if(shown2>=2){k.style.display="none";}else{shown2++;}});})();</script>
+<!-- /wp:html -->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"tj-footer","theme":"twentytwentyfive","tagName":"div","className":"tjl"} /-->
+<!-- /wp:group -->

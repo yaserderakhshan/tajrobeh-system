@@ -1,0 +1,516 @@
+<!-- wp:html -->
+<style>
+/* == yd: yaser-derakhshan v3 (home-v2 language) == */
+.yd{font-family:var(--tj-font);color:var(--tj-soft);direction:rtl;font-size:17px;line-height:1.9;--tj-tint:#faeced;--tj-tint-2:#fdf4f4;--tj-red-400:#d9737a;--tj-yellow:#f2c14e;--w:1180px;overflow-x:clip}
+.yd *,.yd *::before,.yd *::after{box-sizing:border-box}
+.yd,.yd *{overflow-wrap:normal;word-break:normal;letter-spacing:0}
+.yd h1,.yd h2,.yd h3,.yd h4{color:var(--tj-ink);margin:0;line-height:1.55;font-weight:700;text-wrap:balance}
+.yd p{margin:0}
+.yd a{color:inherit;text-decoration:none}
+.yd img{max-width:100%;height:auto;display:block}
+.yd button{font-family:inherit}
+.yd .wrap{max-width:var(--w);margin-inline:auto;padding-inline:24px}
+.yd section{padding-block:clamp(44px,5.5vw,80px)}
+.yd .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tj-red);background:var(--tj-tint);padding:5px 13px;border-radius:999px;margin-bottom:12px}
+.yd .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tj-red)}
+.yd .h2{font-size:clamp(23px,3vw,34px);margin-bottom:10px}
+.yd .lede{font-size:clamp(15.5px,1.3vw,17.5px);color:var(--tj-soft);max-width:62ch;line-height:2}
+.yd .center{text-align:center}.yd .center .lede{margin-inline:auto}
+.yd .head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
+.yd .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 20px;border-radius:var(--tj-r-btn);font-size:15px;font-weight:600;border:1.5px solid transparent;transition:.18s ease;white-space:nowrap;cursor:pointer;line-height:1.4}
+.yd .btn-brand{background:var(--tj-red);color:#fff}
+.yd .btn-brand:hover{background:var(--tj-red-600);box-shadow:0 8px 20px -8px rgba(200,63,73,.5);color:#fff}
+.yd .btn-ghost{background:#fff;color:var(--tj-ink-2);border-color:var(--tj-line)}
+.yd .btn-ghost:hover{border-color:var(--tj-red-400);color:var(--tj-red-600);background:var(--tj-tint)}
+.yd .btn-sm{min-height:38px;padding:6px 14px;font-size:14px}
+.yd .btn svg{width:15px;height:15px;flex:none}
+.yd .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.yd .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.yd .rv{opacity:1;transform:none;transition:none}}
+.yd .hs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 14px;scrollbar-width:none;scroll-behavior:smooth}
+.yd .hs::-webkit-scrollbar{display:none}
+.yd .hs>*{scroll-snap-align:start;flex:0 0 auto}
+.yd .arrows{display:flex;gap:8px}
+.yd .arrows button{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--tj-line);background:#fff;color:var(--tj-ink);cursor:pointer;display:grid;place-items:center;transition:.15s}
+.yd .arrows button:hover{border-color:var(--tj-red);color:var(--tj-red)}
+.yd .arrows svg{width:16px;height:16px}
+
+/* hero */
+.yd .hero{background:#fff;padding-block:clamp(28px,4vw,56px) clamp(32px,4vw,56px)}
+.yd .hero .wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:40px;align-items:center}
+.yd .who{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.yd .who img{width:64px;height:64px;border-radius:50%;object-fit:cover;object-position:center top;border:2px solid var(--tj-line);flex:none}
+.yd .who .role{font-size:14px;color:var(--tj-mut);line-height:1.7}
+.yd .hero h1{font-size:clamp(28px,3.4vw,42px);line-height:1.4;margin:0 0 6px}
+.yd .hero .lede{margin:0 0 22px;max-width:56ch}
+.yd .ctas{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.yd .hero .art{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.yd .hero .art img{width:100%;max-width:230px;height:auto;object-fit:contain}
+.yd .hero .art small{font-size:12px;color:var(--tj-mut)}
+
+/* audio */
+.yd .audio{background:var(--tj-sunk)}
+.yd .agrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:30px}
+.yd .ac{background:#fff;border:1px solid var(--tj-line);border-radius:20px;overflow:hidden;display:grid;grid-template-columns:150px 1fr;transition:.2s}
+.yd .ac:hover{border-color:var(--tj-red-400);box-shadow:0 16px 34px -24px rgba(14,14,14,.3)}
+.yd .ac.wide{grid-column:1/-1}
+.yd .ac .art{display:flex;align-items:center;justify-content:center;padding:18px 14px;border-inline-end:1px solid var(--tj-line);background:#fff}
+.yd .ac .art img{width:100%;max-height:150px;object-fit:contain}
+.yd .ac .body{padding:18px 20px 18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.yd .ac .k{font-size:12.5px;color:var(--tj-red);font-weight:700}
+.yd .ac h3{font-size:18px;line-height:1.5}
+.yd .ac h3 .lat{display:block;font-size:12.5px;color:var(--tj-mut);font-weight:400;margin-top:2px}
+.yd .ac .d{font-size:14px;color:var(--tj-soft);line-height:1.85}
+.yd .ac .poem{font-size:14px;color:var(--tj-ink-2);line-height:1.95;border-inline-start:2px solid var(--tj-red);padding-inline-start:12px;margin:4px 0}
+.yd .arow{display:flex;align-items:center;gap:12px;margin-top:auto;padding-top:10px;flex-wrap:wrap}
+.yd .pbtn{width:44px;height:44px;border-radius:50%;background:var(--tj-ink);color:#fff;border:0;display:grid;place-items:center;cursor:pointer;flex:none;transition:.2s}
+.yd .pbtn:hover{background:var(--tj-red)}
+.yd .pbtn svg{width:17px;height:17px}
+.yd .prog{flex:1;min-width:110px;height:6px;border-radius:99px;background:var(--tj-line);position:relative;cursor:pointer}
+.yd .prog i{position:absolute;inset-block:0;inset-inline-start:0;width:0;background:var(--tj-red);border-radius:99px}
+.yd .dur{font-size:12.5px;color:var(--tj-mut);font-variant-numeric:tabular-nums;white-space:nowrap}
+.yd .err{font-size:12px;color:var(--tj-red-600);display:none}
+.yd .facts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--tj-mut);margin-top:2px}
+.yd .facts span{display:inline-flex;align-items:center;gap:6px}
+.yd .facts span::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--tj-red-400)}
+.yd .ac .go{margin-top:auto;padding-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.yd .chip{display:inline-flex;align-items:center;gap:6px;background:var(--tj-sunk);border-radius:999px;padding:4px 12px;font-size:12.5px;color:var(--tj-mut)}
+.yd .chip:hover{background:var(--tj-tint);color:var(--tj-red-600)}
+
+/* writings */
+.yd .writing{background:#fff}
+.yd .wgrid{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:40px;align-items:start;margin-top:26px}
+.yd .wlist{background:#fff;border:1px solid var(--tj-line);border-radius:20px;padding:6px 26px}
+.yd .wrow{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--tj-line);transition:.15s}
+.yd .wrow:last-child{border-bottom:0}
+.yd .wrow .n{width:34px;height:34px;border-radius:10px;background:var(--tj-tint);color:var(--tj-red);display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.yd .wrow .k{display:block;font-size:12px;color:var(--tj-red);font-weight:700;margin-bottom:2px}
+.yd .wrow b{display:block;font-size:16px;color:var(--tj-ink);line-height:1.6}
+.yd .wrow span.x{display:block;font-size:13px;color:var(--tj-mut);line-height:1.75;margin-top:2px}
+.yd .wrow svg{width:16px;height:16px;flex:none;margin-inline-start:auto;color:var(--tj-line);transition:.15s}
+.yd .wrow:hover b{color:var(--tj-red)}
+.yd .wrow:hover svg{color:var(--tj-red);transform:translateX(-4px)}
+.yd .wart{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding-top:8px}
+.yd .wart img{width:170px;height:auto}
+.yd .wart p{font-size:13.5px;color:var(--tj-mut);line-height:1.8}
+
+/* story timeline */
+.yd .tl{background:var(--tj-sunk);overflow:hidden}
+.yd .tl-line{height:2px;background:var(--tj-line);margin-top:22px}
+.yd .tl-track{padding-top:34px}
+.yd .tl-item{width:212px;background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:18px 18px 20px;position:relative}
+.yd .tl-item::before{content:"";position:absolute;top:-22px;right:22px;width:14px;height:14px;border-radius:50%;background:var(--tj-red);border:3px solid var(--tj-sunk);box-shadow:0 0 0 1px var(--tj-line)}
+.yd .tl-item .pic{width:60px;height:60px;border-radius:14px;overflow:hidden;background:var(--tj-sunk);display:grid;place-items:center;margin-bottom:12px}
+.yd .tl-item .pic img{width:100%;height:100%;object-fit:cover}
+.yd .tl-item .pic.il{background:#fff;border:1px solid var(--tj-line)}
+.yd .tl-item .pic.il img{object-fit:contain;padding:6px;mix-blend-mode:multiply}
+.yd .tl-item .y{font-size:13px;color:var(--tj-red);font-weight:700}
+.yd .tl-item h3{font-size:16.5px;margin:6px 0 8px}
+.yd .tl-item p{font-size:13.5px;color:var(--tj-soft);line-height:1.85}
+.yd .tl-item.now{background:var(--tj-red);border-color:var(--tj-red)}
+.yd .tl-item.now h3,.yd .tl-item.now p{color:#fff}
+.yd .tl-item.now .y{color:#ffd6d9}
+.yd .tl-item.now .pic{background:#fff}
+.yd .tl-item.now::before{background:#fff;border-color:var(--tj-red)}
+.yd .src{font-size:13.5px;color:var(--tj-mut);margin-top:8px}
+.yd .src a{color:var(--tj-red-600);border-bottom:1px solid var(--tj-tint)}
+
+/* social */
+.yd .social{background:#fff;overflow:hidden}
+.yd .sub{display:flex;align-items:center;gap:10px;margin:34px 0 18px;font-size:14px;color:var(--tj-mut);font-weight:600}
+.yd .sub svg{width:17px;height:17px;color:var(--tj-ink)}
+.yd .sub a{margin-inline-start:auto;font-size:13px;color:var(--tj-red-600);font-weight:600}
+.yd .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;padding:10px 0 12px}
+.yd .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:stretch;margin-top:22px}
+.yd .scol{display:flex;flex-direction:column}
+.yd .scol .sub{margin:0 0 14px}
+.yd .twstack{flex:1;display:flex;flex-direction:column;gap:14px}
+.yd .twstack .tw{flex:1}
+.yd .scol .pola{transform:rotate(-1.1deg)}
+.yd .scol .pola:hover{transform:rotate(0) translateY(-6px)}
+.yd .pola{background:#fff;border:1px solid var(--tj-line);border-radius:6px;padding:12px 12px 16px;box-shadow:0 18px 40px -22px rgba(14,14,14,.35);transition:.25s;position:relative;display:block}
+.yd .pola:nth-child(1){transform:rotate(-1.6deg)}
+.yd .pola:nth-child(2){transform:rotate(1.2deg) translateY(8px)}
+.yd .pola:nth-child(3){transform:rotate(-1deg)}
+.yd .pola:hover{transform:rotate(0) translateY(-6px);z-index:2;border-color:var(--tj-red-400)}
+.yd .pola .shot{aspect-ratio:4/5;overflow:hidden;border-radius:3px;background:var(--tj-sunk);display:grid;place-items:center}
+.yd .pola .shot img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.yd .pola:hover .shot img{transform:scale(1.03)}
+.yd .pola .shot.txt{background:#141414;color:#fafafc;padding:22px 20px;text-align:center}
+.yd .pola .shot.txt p{white-space:pre-line;font-size:14.5px;line-height:2.05;color:#fafafc}
+.yd .pola .shot.quote{background:var(--tj-tint);padding:22px 20px;text-align:center;align-content:center}
+.yd .pola .shot.quote p{font-size:17px;line-height:2;color:var(--tj-ink);font-weight:700;text-wrap:balance}
+.yd .pola .shot.quote small{display:block;margin-top:12px;font-size:12.5px;color:var(--tj-red-600);font-weight:600}
+.yd .pola .cap{font-size:13.5px;color:var(--tj-ink-2);line-height:1.8;margin:12px 4px 10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.yd .pola .who2{display:flex;align-items:center;gap:10px;margin:0 4px}
+.yd .pola .who2 img{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:center top;border:2px solid var(--tj-tint)}
+.yd .pola .who2 b{display:block;font-size:13px;color:var(--tj-ink);direction:ltr;text-align:right}
+.yd .pola .who2 small{display:block;font-size:11.5px;color:var(--tj-mut)}
+.yd .pola .who2 .f{margin-inline-start:auto;font-size:11.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.yd .pola .tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-2deg);width:70px;height:20px;background:rgba(242,193,78,.6);border-radius:2px}
+.yd .tw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.yd .tw{border:1px solid var(--tj-line);border-radius:18px;background:#fff;padding:16px 18px;display:flex;flex-direction:column;transition:.2s}
+.yd .tw:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.yd .tw-h{display:flex;align-items:center;gap:10px}
+.yd .tw-h img{width:40px;height:40px;border-radius:50%;object-fit:cover;object-position:center top;flex:none}
+.yd .tw-h .nm{min-width:0;line-height:1.35}
+.yd .tw-h .nm b{font-size:14px;color:var(--tj-ink);font-weight:700;display:block}
+.yd .tw-h .nm span{font-size:12.5px;color:var(--tj-mut);direction:ltr;display:inline-block}
+.yd .tw-h svg{width:18px;height:18px;margin-inline-start:auto;color:var(--tj-ink);flex:none}
+.yd .tw-reply{font-size:12.5px;color:var(--tj-mut);background:var(--tj-sunk);border-radius:10px;padding:7px 11px;margin-top:12px;line-height:1.7}
+.yd .tw-reply b{color:var(--tj-ink-2)}
+.yd .tw-body{margin-top:12px;font-size:14.5px;color:var(--tj-ink-2);line-height:1.95;white-space:pre-line;flex:1}
+.yd .tw-foot{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12.5px;color:var(--tj-mut)}
+.yd .tw-foot a{color:var(--tj-red-600);margin-inline-start:auto;font-weight:600}
+
+/* closing */
+.yd .close{background:var(--tj-tint);text-align:center}
+.yd .close img{width:150px;margin:0 auto 10px;mix-blend-mode:multiply}
+.yd .close .h2{font-size:clamp(22px,2.8vw,30px)}
+.yd .close .lede{margin:8px auto 22px}
+.yd .close .ctas{justify-content:center}
+
+.wp-block-post-content>.yd.alignfull{max-width:none;width:auto}
+
+@media (max-width:1024px){
+.yd .agrid{grid-template-columns:1fr}
+.yd .ig-grid{gap:18px}
+.yd .wgrid{grid-template-columns:1fr}
+.yd .wart{flex-direction:row;text-align:start;justify-content:flex-start}
+.yd .wart img{width:110px}
+}
+@media (max-width:760px){
+.yd{font-size:16px}
+.yd section{padding-block:40px}
+.yd .hero{padding-block:14px 32px}
+.yd .hero .wrap{grid-template-columns:1fr;gap:4px}
+.yd .hero .art{order:-1}
+.yd .hero .art img{max-width:150px}
+.yd .hero .art small{display:none}
+.yd .hero h1{font-size:27px}
+.yd .who img{width:52px;height:52px}
+.yd .hero .lede{font-size:15px;margin-bottom:18px}
+.yd .ctas .btn{flex:1 1 auto}
+.yd .ac{grid-template-columns:1fr}
+.yd .ac .art{border-inline-end:0;border-bottom:1px solid var(--tj-line);padding:14px}
+.yd .ac .art img{max-height:120px}
+.yd .ac .body{padding:16px}
+.yd .wlist{padding:4px 16px}
+.yd .wrow{padding:13px 0;gap:12px}
+.yd .wrow .n{width:30px;height:30px;border-radius:8px}
+.yd .wrow b{font-size:15px}
+.yd .tl-item{width:220px}
+.yd .tl .arrows{display:none}
+.yd .ig-grid{grid-template-columns:1fr;gap:26px;max-width:340px;margin-inline:auto}
+.yd .sgrid{grid-template-columns:1fr;gap:22px}
+.yd .scol{max-width:360px;margin-inline:auto;width:100%}
+.yd .pola:nth-child(2){transform:rotate(1.2deg)}
+.yd .tw-grid{grid-template-columns:1fr}
+.yd .sub{margin-top:26px}
+}
+
+/* video */
+.yd .video{background:#fff;border-block-end:1px solid var(--tj-line)}
+.yd .vhead{margin-bottom:26px;align-items:end}
+.yd .vgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.yd .vc{background:#fff;border:1px solid var(--tj-line);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transition:.2s;min-width:0}
+.yd .vc:hover{border-color:var(--tj-red-400);box-shadow:0 16px 34px -24px rgba(14,14,14,.3)}
+.yd .vc .cover{position:relative;display:block;width:100%;padding:0;border:0;background:var(--tj-sunk);cursor:pointer;line-height:0;aspect-ratio:16/9;overflow:hidden}
+.yd .vc .cover img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+.yd .vc:hover .cover img{transform:scale(1.03)}
+.yd .vc .cover::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(14,14,14,.45),rgba(14,14,14,0) 58%)}
+.yd .vc .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.94);color:var(--tj-red);display:grid;place-items:center;z-index:2;transition:.2s}
+.yd .vc:hover .play{background:var(--tj-red);color:#fff}
+.yd .vc .play svg{width:19px;height:19px;margin-left:3px}
+.yd .vc .t{position:absolute;bottom:10px;right:12px;z-index:2;background:rgba(14,14,14,.72);color:#fff;font-size:12px;line-height:1.8;border-radius:999px;padding:1px 9px;font-variant-numeric:tabular-nums}
+.yd .vc .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.yd .vc .k{font-size:12.5px;color:var(--tj-red);font-weight:700}
+.yd .vc h3{font-size:17px;line-height:1.55}
+.yd .vc h3 .lat{display:block;font-size:12.5px;color:var(--tj-mut);font-weight:400;margin-top:2px}
+.yd .vc .d{font-size:14px;color:var(--tj-soft);line-height:1.85}
+.yd .vc .nb{display:none;font-size:12.5px;color:var(--tj-red-600);line-height:1.8}
+.yd .vc.blocked .nb{display:block}
+.yd .vc .go{margin-top:auto;padding-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.yd .vc .frame{width:100%;aspect-ratio:16/9;background:#000;line-height:0}
+.yd .vc .frame iframe{width:100%;height:100%;border:0;display:block}
+.yd .vsub{font-size:17px;color:var(--tj-ink);margin:34px 0 14px;display:flex;align-items:center;gap:14px}
+.yd .vsub::after{content:"";flex:1;height:1px;background:var(--tj-line)}
+.yd .vlist{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.yd .vlist .vc .body{padding:14px 16px 16px}
+.yd .vlist .vc h3{font-size:15.5px}
+.yd .vlist .vc .d{font-size:13.5px}
+.yd .vlist .vc .play{width:44px;height:44px}
+.yd .vlist .vc .play svg{width:16px;height:16px}
+@media (max-width:1024px){.yd .vgrid{grid-template-columns:1fr 1fr}.yd .vlist{grid-template-columns:1fr 1fr}}
+@media (max-width:760px){.yd .vgrid{grid-template-columns:1fr}.yd .vlist{grid-template-columns:1fr}}
+</style>
+
+<div class="yd alignfull" id="yd">
+
+<section class="hero">
+<div class="wrap">
+<div class="art">
+<img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-magritte.webp" alt="تصویرسازی دست‌کشیده: مردی با کلاه و کراوات قرمز که یک توت‌فرنگی جای صورتش نشسته است" width="738" height="933" loading="eager" fetchpriority="high">
+<small>با ادای دین به مگریت</small>
+</div>
+<div>
+<div class="who">
+<div><h1>یاسر درخشان</h1><p class="role">در حال ساختن تجربه · علاقه‌مند به روانکاوی لکانی</p></div>
+</div>
+<p class="lede">اینجا تحلیل‌های روانکاوانه‌ام از فیلم و سریال، چند نوشته در مجلهٔ تجربه و متن‌های کوتاهی که در اینستاگرام و ایکس می‌نویسم، کنار هم جمع شده‌اند. اگر دنبال یکی از این‌ها آمده‌اید، همین‌جاست.</p>
+<div class="ctas">
+<a class="btn btn-ghost btn-sm" href="#audio">تحلیل‌های صوتی</a>
+<a class="btn btn-ghost btn-sm" href="https://www.instagram.com/psychoanalytically/" target="_blank" rel="noopener">اینستاگرام</a>
+<a class="btn btn-ghost btn-sm" href="https://x.com/derakhshanyaser" target="_blank" rel="noopener">ایکس</a>
+<a class="btn btn-ghost btn-sm" href="https://t.me/tajrobehmohajer" target="_blank" rel="noopener">کانال مهاجران تجربه</a>
+<a class="btn btn-ghost btn-sm" href="https://tajrobeh.life/mag/author/yaserderakhshan/">نوشته‌ها در مجله</a>
+</div>
+</div>
+</div>
+</section>
+
+<section class="audio" id="audio">
+<div class="wrap">
+<div class="rv"><span class="eyebrow">تحلیل روانکاوانهٔ فیلم و سریال</span><h2 class="h2">تحلیل‌های صوتی</h2><p class="lede">این‌ها را در جلسه‌های مدرسهٔ تجربهٔ زندگی و برای مخاطبان تجربه ضبط کرده‌ام. فیلم برای من بهانه است؛ راهی که از «دیگری» به خودمان برسیم، با مقاومت کمتر.</p></div>
+<div class="agrid">
+
+<a class="ac rv" href="https://tajrobeh.life/yaserderakhshan/scenes-from-a-marriage/">
+<div class="art"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-hero-left.webp" alt="تصویرسازی: کسی روی کاناپهٔ سبز نشسته و کوسنی با نقش توت‌فرنگی کنارش است" width="428" height="453" loading="lazy"></div>
+<div class="body">
+<span class="k">دورهٔ کامل · ۸ قسمت</span>
+<h3>سی‌تی اسکن یک رابطه<span class="lat">Scenes from a Marriage</span></h3>
+<p class="d">تحلیل مینی‌سریال «صحنه‌هایی از یک ازدواج»؛ هشت قسمت صوتی به شکل پادکست، دوازده متن دوره و سه نظرسنجی که خودتان هم می‌توانید در آن شرکت کنید.</p>
+<div class="facts"><span>۸ قسمت صوتی</span><span>۱۲ متن</span><span>۳ نظرسنجی</span></div>
+<div class="go"><span class="btn btn-ghost btn-sm">ورود به صفحهٔ دوره <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></span></div>
+</div>
+</a>
+
+<div class="ac rv" data-audio="qg">
+<div class="art"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-icon-standards.webp" alt="تصویرسازی: یک صندلی راحتی با تاجی قرمز روی آن" width="150" height="152" loading="lazy"></div>
+<div class="body">
+<span class="k">مینی‌سریال · یک جلسهٔ کامل</span>
+<h3>کویینز گمبیت<span class="lat">The Queen's Gambit</span></h3>
+<p class="d">دربارهٔ بث هارمون، صفحهٔ شطرنج و آنچه یک نابغهٔ تنها با خودش به بازی می‌برد.</p>
+<div class="arow"><button type="button" class="pbtn" aria-label="پخش کویینز گمبیت"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button><div class="prog" role="progressbar" aria-label="پیشرفت پخش"><i></i></div><span class="dur">۱ ساعت و ۵۳ دقیقه</span></div>
+<span class="err">فایل صوتی در دسترس نیست.</span>
+</div>
+</div>
+
+<div class="ac rv" data-audio="uno">
+<div class="art"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-persian-dandelion.webp" alt="تصویرسازی: دستی که قاصدکی را رها می‌کند و دانه‌هایش به شکل توت‌فرنگی‌های کوچک پرواز می‌کنند" width="1100" height="781" loading="lazy"></div>
+<div class="body">
+<span class="k">مینی‌سریال · یک جلسهٔ کامل</span>
+<h3>آن‌آرتودوکس<span class="lat">Unorthodox</span></h3>
+<p class="d">دربارهٔ استی، گریز از جامعهٔ بسته، بدن، و بهایی که برای «خود شدن» می‌پردازیم.</p>
+<div class="arow"><button type="button" class="pbtn" aria-label="پخش آن‌آرتودوکس"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button><div class="prog" role="progressbar" aria-label="پیشرفت پخش"><i></i></div><span class="dur">۱ ساعت و ۵۸ دقیقه</span></div>
+<span class="err">فایل صوتی در دسترس نیست.</span>
+</div>
+</div>
+
+<div class="ac rv" data-audio="bm">
+<div class="art"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-icon-match.webp" alt="تصویرسازی: آینه‌ای دستی که چشمی در آن پیداست" width="150" height="152" loading="lazy"></div>
+<div class="body">
+<span class="k">سریال · یک جلسهٔ کامل</span>
+<h3>مرگ دیگران با ما چه می‌کند؟<span class="lat">Black Mirror · Be Right Back</span></h3>
+<p class="d">دربارهٔ سوگ؛ از اپیزود «زود برمی‌گردم» تا مقالهٔ «ماتم و مالیخولیا»ی فروید، و آنچه از دست دادن با بازمانده می‌کند.</p>
+<div class="arow"><button type="button" class="pbtn" aria-label="پخش تحلیل بلک میرور"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button><div class="prog" role="progressbar" aria-label="پیشرفت پخش"><i></i></div><span class="dur">۱ ساعت و ۱۸ دقیقه</span></div>
+<span class="err">فایل صوتی در دسترس نیست.</span>
+</div>
+</div>
+
+<div class="ac rv wide" data-audio="mig">
+<div class="art"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-persian-path.webp" alt="تصویرسازی: دستی با مداد قرمز راهی می‌کشد و توت‌فرنگی‌های کوچک روی آن راه می‌دوند" width="1100" height="1037" loading="lazy"></div>
+<div class="body">
+<span class="k">جستار صوتی · دربارهٔ مهاجرت</span>
+<h3>هیچ‌گاه دیگر به خانه باز نمی‌گردیم</h3>
+<p class="poem">وقتی همگی مهاجر هستیم، چون «تولد» نخستین مهاجرت است. کودکی که زبان را از مادرش آموخته، به «زبان مادری» سخن می‌گوید؛ نه فارسی، نه انگلیسی، به زبانِ مادرش. زبان من را می‌فهمی؟</p>
+<div class="arow"><button type="button" class="pbtn" aria-label="پخش جستار مهاجرت"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button><div class="prog" role="progressbar" aria-label="پیشرفت پخش"><i></i></div><span class="dur">۹ دقیقه</span><a class="chip" href="https://t.me/tajrobehmohajer" target="_blank" rel="noopener">کانال مهاجران تجربه</a></div>
+<span class="err">فایل صوتی در دسترس نیست.</span>
+</div>
+</div>
+
+</div>
+</div>
+<audio id="ydAudio" preload="none"></audio>
+</section>
+<section class="video" id="video">
+<div class="wrap">
+<div class="head vhead rv"><div><span class="eyebrow">یوتیوب</span><h2 class="h2">ویدیوها</h2><p class="lede">این ویدیوها برای سال‌های ۱۴۰۰ و ۱۴۰۱ است و هنوز روی کانال یوتیوبم می‌مانند: تحلیل فیلم و سریال، دو گفت‌وگوی زنده و دو ویدیوی کوتاه دربارهٔ خودِ روانکاوی. اگر یوتیوب برایتان باز می‌شود، همین‌جا پخش می‌شوند.</p></div><a class="btn btn-ghost" href="https://www.youtube.com/@yaserderakhshan" target="_blank" rel="noopener">کانال یوتیوب <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg></a></div>
+<div class="vgrid">
+<article class="vc rv" data-yt="38pkKMRErWg"><button type="button" class="cover" aria-label="پخش ویدیو: مرگ دیگران با ما چه می‌کند؟"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-blackmirror.webp" alt="کاور ویدیوی تحلیل سریال بلک میرور" width="640" height="360" loading="lazy"><span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span><span class="t">۱۸ دقیقه</span></button><div class="body"><span class="k">تحلیل سریال · ۱۴۰۱</span><h3>مرگ دیگران با ما چه می‌کند؟<span class="lat">Black Mirror · Be Right Back</span></h3><p class="d">سوگ از دو مسیر: مقالهٔ «ماتم و مالیخولیا»ی فروید، و پژوهش‌های نوروساینس دربارهٔ نقش دوپامین در سوگ. نسخهٔ بلندِ صوتی همین تحلیل هم بالاتر در همین صفحه هست.</p><p class="nb">یوتیوب از این شبکه باز نمی‌شود، برای همین ویدیو اینجا پخش نشد.</p><div class="go"><a class="chip yt" href="https://www.youtube.com/watch?v=38pkKMRErWg" target="_blank" rel="noopener">تماشا در یوتیوب</a></div></div></article>
+<article class="vc rv" data-yt="AFQ9zBShZXE"><button type="button" class="cover" aria-label="پخش ویدیو: اپیزود اول فرندز، صحنه به صحنه"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-friends.webp" alt="کاور ویدیوی تحلیل روانشناختی سریال فرندز" width="640" height="360" loading="lazy"><span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span><span class="t">۱۳ دقیقه</span></button><div class="body"><span class="k">تحلیل سریال · ۱۴۰۱</span><h3>اپیزود اول فرندز، صحنه به صحنه<span class="lat">Friends · S01E01</span></h3><p class="d">خوانش روانکاوانهٔ نیمهٔ اول قسمت اول؛ همان لحظه‌هایی که در تماشای معمولی از کنارشان رد می‌شویم.</p><p class="nb">یوتیوب از این شبکه باز نمی‌شود، برای همین ویدیو اینجا پخش نشد.</p><div class="go"><a class="chip yt" href="https://www.youtube.com/watch?v=AFQ9zBShZXE" target="_blank" rel="noopener">تماشا در یوتیوب</a></div></div></article>
+<article class="vc rv" data-yt="3afdyPouOfk"><button type="button" class="cover" aria-label="پخش ویدیو: صحنه‌هایی از یک ازدواج"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-scenes.webp" alt="کاور ویدیوی تحلیل سریال صحنه‌هایی از یک ازدواج" width="640" height="360" loading="lazy"><span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span><span class="t">۷ دقیقه</span></button><div class="body"><span class="k">تحلیل مینی‌سریال · ۱۴۰۱</span><h3>صحنه‌هایی از یک ازدواج<span class="lat">Scenes from a Marriage</span></h3><p class="d">دربارهٔ رابطهٔ عاطفی و اثری که فرهنگ و مهاجرت بر آن می‌گذارد. تحلیل کامل و هشت‌قسمتی این سریال در صفحهٔ دوره است.</p><p class="nb">یوتیوب از این شبکه باز نمی‌شود، برای همین ویدیو اینجا پخش نشد.</p><div class="go"><a class="chip yt" href="https://www.youtube.com/watch?v=3afdyPouOfk" target="_blank" rel="noopener">تماشا در یوتیوب</a><a class="chip" href="https://tajrobeh.life/yaserderakhshan/scenes-from-a-marriage/">صفحهٔ دوره</a></div></div></article>
+</div>
+<h3 class="vsub rv">گفت‌وگوها و ویدیوهای کوتاه</h3>
+<div class="vlist">
+<article class="vc rv" data-yt="ubUVeUWyHDQ"><button type="button" class="cover" aria-label="پخش ویدیو: هیپنوتیزم چیست؟"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-hypnosis.webp" alt="کاور ویدیوی هیپنوتیزم چیست" width="640" height="360" loading="lazy"><span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span><span class="t">۱۵ دقیقه</span></button><div class="body"><span class="k">فکت چک · ۱۴۰۱</span><h3>هیپنوتیزم چیست؟<span class="lat">Psychoanalysis and Hypnosis</span></h3><p class="d">نسبت روانکاوی با هیپنوتیزم؛ اینکه فروید چرا هیپنوتیزم را کنار گذاشت و هیپنوتیزم علمیِ امروز چه می‌گوید.</p><p class="nb">یوتیوب از این شبکه باز نمی‌شود، برای همین ویدیو اینجا پخش نشد.</p><div class="go"><a class="chip yt" href="https://www.youtube.com/watch?v=ubUVeUWyHDQ" target="_blank" rel="noopener">تماشا در یوتیوب</a></div></div></article>
+<article class="vc rv" data-yt="2KUUj2Cb7Sk"><button type="button" class="cover" aria-label="پخش ویدیو: مشاوره، روانکاوی و روان‌پزشکی چه فرقی دارند؟"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-approaches.webp" alt="کاور ویدیوی مقایسهٔ مشاوره و روانکاوی و روان‌پزشکی" width="640" height="360" loading="lazy"><span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span><span class="t">۱۱ دقیقه</span></button><div class="body"><span class="k">راهنما · ۱۴۰۱</span><h3>مشاوره، روانکاوی و روان‌پزشکی چه فرقی دارند؟</h3><p class="d">چهار رویکرد در سلامت روان، با مثال، و اینکه هرکدام به کار چه کسی می‌آید.</p><p class="nb">یوتیوب از این شبکه باز نمی‌شود، برای همین ویدیو اینجا پخش نشد.</p><div class="go"><a class="chip yt" href="https://www.youtube.com/watch?v=2KUUj2Cb7Sk" target="_blank" rel="noopener">تماشا در یوتیوب</a></div></div></article>
+<article class="vc rv" data-yt="M-CcXtUpqBo"><button type="button" class="cover" aria-label="پخش ویدیو: مهاجرت از دیدگاه روانکاوی"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-migration.webp" alt="کاور ویدیوی گفت‌وگو دربارهٔ مهاجرت از دیدگاه روانکاوی" width="640" height="360" loading="lazy"><span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span><span class="t">۴۷ دقیقه</span></button><div class="body"><span class="k">گفت‌وگوی زنده · ۱۴۰۱</span><h3>مهاجرت از دیدگاه روانکاوی</h3><p class="d">گفت‌وگوی زندهٔ من و مهدیه پوریادگار دربارهٔ آنچه مهاجرت با آدم می‌کند.</p><p class="nb">یوتیوب از این شبکه باز نمی‌شود، برای همین ویدیو اینجا پخش نشد.</p><div class="go"><a class="chip yt" href="https://www.youtube.com/watch?v=M-CcXtUpqBo" target="_blank" rel="noopener">تماشا در یوتیوب</a></div></div></article>
+<article class="vc rv" data-yt="orlvjlt7PB0"><button type="button" class="cover" aria-label="پخش ویدیو: احساس گناه و عذاب وجدان"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-guilt.webp" alt="کاور ویدیوی گفت‌وگو دربارهٔ احساس گناه و شرم" width="640" height="360" loading="lazy"><span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span><span class="t">۴۱ دقیقه</span></button><div class="body"><span class="k">گفت‌وگوی زنده · ۱۴۰۰</span><h3>احساس گناه و عذاب وجدان<span class="lat">Shame and Guilt</span></h3><p class="d">گفت‌وگوی زندهٔ من و محمد شاد دربارهٔ شرم و تفاوتش با احساس گناه، از دید فروید.</p><p class="nb">یوتیوب از این شبکه باز نمی‌شود، برای همین ویدیو اینجا پخش نشد.</p><div class="go"><a class="chip yt" href="https://www.youtube.com/watch?v=orlvjlt7PB0" target="_blank" rel="noopener">تماشا در یوتیوب</a></div></div></article>
+</div>
+</div>
+</section>
+
+
+<section class="tjk-joinsec" style="padding:8px 0 4px"><div class="wrap"><style>.tjk-join{max-width:860px;margin:26px auto;padding:14px 18px;display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:6px 18px;align-items:center;background:#fff;border:1.5px solid var(--tj-line,#e7e7ea);border-radius:22px;position:relative;box-sizing:border-box}
+.tjk-join:hover{border-color:var(--tj-red-400,#d9737a)}
+.tjk-join img{display:block;width:74px;height:auto;max-width:none;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.tjk-join:hover img{transform:translateY(-3px) rotate(-3deg)}
+.tjk-join .tx{min-width:0}
+.tjk-join .tx b{display:block;font-size:16.5px;line-height:1.7;color:var(--tj-ink,#0e0e0e)}
+.tjk-join .tx span{display:block;font-size:14px;line-height:1.85;color:var(--tj-soft,#55555c)}
+.tjk-join .tx i{display:inline-block;font-style:normal;font-size:11.5px;font-weight:700;color:#fff;background:var(--tj-red,#c83f49);border-radius:99px;padding:0 9px;margin-left:6px;vertical-align:2px}
+.tjk-join a.go{display:inline-block;white-space:nowrap;text-decoration:none;font-size:14.5px;font-weight:700;color:#fff;background:var(--tj-ink,#0e0e0e);border-radius:99px;padding:9px 20px;transition:background .25s}
+.tjk-join a.go:hover{background:var(--tj-red,#c83f49)}
+.tjk-join a.go:focus-visible{outline:2px solid var(--tj-red,#c83f49);outline-offset:3px}
+@media (max-width:640px){.tjk-join{grid-template-columns:56px minmax(0,1fr);padding:12px 14px}.tjk-join img{width:56px}.tjk-join a.go{grid-column:1 / -1;text-align:center}}
+@media (prefers-reduced-motion:reduce){.tjk-join img{transition:none}}</style><aside class="tjk-join" aria-label="رودمپ کاناپه در تلگرام"><img src="/wp-content/uploads/2026/09/tjl-ju-cta.png" alt="" width="584" height="537" loading="lazy" decoding="async"><div class="tx"><b><i>زنده</i>کاناپه: هر هفته یک فیلم، با نگاه روانکاوانه</b><span>می‌بینیم، تحلیلش را می‌خوانیم و می‌شنویم. رایگان است و با ریتم خودتان.</span></div><a class="go" href="https://t.me/tajrobehlife_bot?start=rm-kanape-yd" target="_blank" rel="noopener">همراه می‌شوم، در تلگرام</a></aside></div></section>
+<section class="writing" id="writing">
+<div class="wrap">
+<div class="rv"><span class="eyebrow">مجلهٔ تجربه</span><h2 class="h2">نوشته‌ها</h2><p class="lede">چند نوشته و گزارش جلسه که در مجلهٔ تجربه منتشر شده است.</p></div>
+<div class="wgrid">
+<div class="wlist rv">
+<a class="wrow" href="https://tajrobeh.life/mag/%d8%b2%d9%86%d8%af%da%af%db%8c-%d9%86%d8%a7%d9%85%d9%87-%da%98%d8%a7%da%a9-%d9%84%da%a9%d8%a7%d9%86/"><span class="n">۱</span><div><span class="k">چهره‌های روانکاوی</span><b>زندگی‌نامهٔ ژاک لکان (۱۹۰۲ تا ۱۹۸۱)</b><span class="x">تایم‌لاین زندگی لکان، با عکس‌هایی از آلبوم‌های کمتر دیده‌شده</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a>
+<a class="wrow" href="https://tajrobeh.life/mag/%da%af%d8%b2%d8%a7%d8%b1%d8%b4-%d8%ac%d9%84%d8%b3%d9%87-%d8%aa%d8%ad%d9%84%db%8c%d9%84-%d8%b3%d8%b1%db%8c%d8%a7%d9%84-%d8%b5%d8%ad%d9%86%d9%87%d9%87%d8%a7%db%8c%db%8c-%d8%a7%d8%b2-%db%8c/"><span class="n">۲</span><div><span class="k">تحلیل فیلم و سریال</span><b>گزارش جلسهٔ تحلیل سریال صحنه‌هایی از یک ازدواج</b><span class="x">سینما و روانکاوی هر دو در ۱۸۹۵ متولد شدند؛ با یادداشت‌های اعضای مدرسه</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a>
+<a class="wrow" href="https://tajrobeh.life/mag/%d8%ac%d9%84%d8%b3%d9%87-%d8%aa%d8%ad%d9%84%db%8c%d9%84-%d8%b3%d8%b1%db%8c%d8%a7%d9%84-%d8%a8%d9%84%da%a9-%d9%85%db%8c%d8%b1%d9%88%d8%b1/"><span class="n">۳</span><div><span class="k">تحلیل فیلم و سریال</span><b>جلسهٔ تحلیل بلک میرور با محوریت سوگ و فقدان</b><span class="x">اپیزود «زود برمی‌گردم» و مقالهٔ «ماتم و مالیخولیا»ی فروید</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a>
+<a class="wrow" href="https://tajrobeh.life/mag/%d8%b5%d8%ad%d9%86%d9%87%d9%87%d8%a7%db%8c%db%8c-%d8%a7%d8%b2-%db%8c%da%a9-%d8%a7%d8%b2%d8%af%d9%88%d8%a7%d8%ac/"><span class="n">۴</span><div><span class="k">تحلیل فیلم و سریال</span><b>نگاهی به مینی‌سریال صحنه‌هایی از یک ازدواج</b><span class="x">ما عشق می‌خواستیم، نه زندگی</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a>
+</div>
+<div class="wart rv">
+<img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-ed-cta.webp" alt="تصویرسازی: خودکاری قرمز که از نوکش جوانه‌ای سبز روییده است" width="892" height="906" loading="lazy">
+<div><p>بقیهٔ نوشته‌ها، به مرور، در صفحهٔ نویسنده جمع می‌شوند.</p><a class="btn btn-ghost btn-sm" href="https://tajrobeh.life/mag/author/yaserderakhshan/" style="margin-top:10px">همهٔ نوشته‌ها در مجله</a></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="tl" id="story">
+<div class="wrap">
+<div class="head rv">
+<div><span class="eyebrow">تایم‌لاین</span><h2 class="h2">تجربه چطور شروع شد</h2><p class="lede">خلاصهٔ کوتاهی از مسیر؛ یک ایده، یک قاشق مربای توت‌فرنگی، و کالبدی که با آن ساخته شد.</p></div>
+<div class="arrows" data-for="ydTrack"><button type="button" aria-label="قبلی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg></button><button type="button" aria-label="بعدی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></button></div>
+</div>
+<div class="tl-line"></div>
+<div class="hs tl-track" id="ydTrack">
+<div class="tl-item"><div class="pic il"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-berry.webp" alt="تصویرسازی توت‌فرنگی" width="378" height="308" loading="lazy"></div><span class="y">تولد · ۱۳۹۸</span><h3>یک قاشق مربای توت‌فرنگی</h3><p>دنبال ایده‌ای بودم که جان و تن را همراه کند؛ مثالش شد چشیدن یک قاشق مربای توت‌فرنگی، همان لحظه، با حضور کامل.</p></div>
+<div class="tl-item"><div class="pic"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/yd-clinic1.jpg" alt="اتاق درمان کلینیک تجربه" width="1049" height="1100" loading="lazy"></div><span class="y">کلینیک</span><h3>کالبدی در خدمت انسان</h3><p>مطب قدیمی در میدان ونک تخریب شد و کلینیک تجربه با معماری‌ای متعهد به همان ایده ساخته شد.</p></div>
+<div class="tl-item"><div class="pic"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/yd-clinic2.jpg" alt="دیوار سبز کلینیک تجربه" width="736" height="1100" loading="lazy"></div><span class="y">رویداد</span><h3>اولین چشیدن</h3><p>در «تجربهٔ کتاب» همه هم‌زمان یک قاشق مربا چشیدند؛ تجربه‌ای که همه داشتند و هیچ‌وقت به آن توجه نکرده بودند.</p></div>
+<div class="tl-item"><div class="pic il"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-school-art.webp" alt="تصویرسازی: صندلی تاشو با توت‌فرنگی‌ای که کلاه فارغ‌التحصیلی بر سر دارد" width="516" height="835" loading="lazy"></div><span class="y">۱۳۹۹</span><h3>مدرسهٔ تجربه</h3><p>برای اینکه آموزش و بالین در یک‌جا تجربه شود، مدرسهٔ تجربهٔ زندگی متولد شد.</p></div>
+<div class="tl-item now"><div class="pic il"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-feat-intro.webp" alt="تصویرسازی: دستی که پرچمی با لامپ روشن بالا برده است" width="292" height="328" loading="lazy"></div><span class="y">۱۴۰۴</span><h3>پلتفرم و یک نام تازه</h3><p>تراپی استاندارد را به تکنولوژی نزدیک کردیم و شعار شد «یه توت‌فرنگی ما رو نجات داد».</p></div>
+</div>
+<p class="src">روایت کامل با تصویر: <a href="https://www.instagram.com/p/DOoX-1bkRBl/" target="_blank" rel="noopener">پست «طعم توت‌فرنگی»</a> در اینستاگرام تجربه.</p>
+</div>
+</section>
+
+<section class="social" id="social">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">شبکه‌های اجتماعی</span><h2 class="h2">در اینستاگرام و ایکس</h2><p class="lede">تازه‌ترین چیزهایی که آنجا گذاشته‌ام؛ گاهی تحلیل یک فیلم، گاهی یک یادداشت کوتاه.</p></div>
+<div class="sgrid">
+<div class="scol rv">
+<div class="sub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>اینستاگرام<a href="https://www.instagram.com/psychoanalytically/" target="_blank" rel="noopener">@psychoanalytically</a></div>
+<a class="pola" href="https://www.instagram.com/p/DcT4PB6jTtU/" target="_blank" rel="noopener"><span class="tape"></span><div class="shot"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-ig-yaser-post.webp" alt="پست اینستاگرام یاسر درخشان دربارهٔ فیلم The Invite" width="721" height="900" loading="lazy"></div><p class="cap">فیلم «دعوت» را اگر با نگاه روانکاوی فرویدی لکانی ببینید، فیلم دیگری می‌شود.</p><div class="who2"><img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-ig-yaser-pic.webp" alt="@experientiallifecenter" width="36" height="36" loading="lazy"><div><b>@experientiallifecenter</b><small>با امضای #یاسر_درخشان</small></div><span class="f">دیدن پست</span></div></a>
+</div>
+<div class="scol rv">
+<div class="sub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.2 8.3L23 22h-6.6l-5.2-6.8L5.3 22H2.1l7.7-8.8L1.6 2h6.8l4.7 6.2z"/></svg>ایکس<a href="https://x.com/derakhshanyaser" target="_blank" rel="noopener">@derakhshanyaser</a></div>
+<div class="twstack">
+<div class="tw">
+<div class="tw-h"><div class="nm"><b>یاسر درخشان</b><span>@derakhshanyaser</span></div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.2 8.3L23 22h-6.6l-5.2-6.8L5.3 22H2.1l7.7-8.8L1.6 2h6.8l4.7 6.2z"/></svg></div>
+<div class="tw-reply">در پاسخ به: <b>«اگر عامل تروما بمیرد، تروما از بین می‌رود؟»</b></div>
+<p class="tw-body">خیر، تروما از بین نمی‌رود. در مقالهٔ «سوگواری و ملانکولی»، فروید توضیح می‌دهد که از دست دادن اُبژه (عامل تروما) می‌تواند به جای سوگواریِ موفق، به ملانکولی منجر شود: ابژه درونی‌سازی‌شده و خشم و گناه به ایگو حمله می‌کند.</p>
+<div class="tw-foot">تیر ۱۴۰۵<a href="https://x.com/derakhshanyaser/status/2075555307736928362" target="_blank" rel="noopener">دیدن در ایکس</a></div>
+</div>
+<div class="tw">
+<div class="tw-h"><div class="nm"><b>یاسر درخشان</b><span>@derakhshanyaser</span></div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.2 8.3L23 22h-6.6l-5.2-6.8L5.3 22H2.1l7.7-8.8L1.6 2h6.8l4.7 6.2z"/></svg></div>
+<p class="tw-body">این سنگینی مبهم صبحگاهی نه خستگی ساده، بلکه تجلی شکاف بنیادین سوژه است: شکاف میان آرمان و واقعیت، میان «من» و «منِ آرمانی». جهان و ما هیچ‌گاه کامل نخواهیم بود.</p>
+<div class="tw-foot">اردیبهشت ۱۴۰۵<a href="https://x.com/derakhshanyaser/status/2053070393469243632" target="_blank" rel="noopener">دیدن در ایکس</a></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var root=document.getElementById('yd'); if(!root) return;
+  var FA=function(s){return String(s).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+  var fmt=function(t){t=Math.max(0,Math.floor(t||0));var h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;var mm=String(m);if(h>0){mm=(m>9?'':'0')+m;}var ss=(s>9?'':'0')+s;return FA(h>0?h+':'+mm+':'+ss:mm+':'+ss);};
+
+  /* reveal */
+  var rv=root.querySelectorAll('.rv');
+  if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -6% 0px'});rv.forEach(function(el){io.observe(el);});}else{rv.forEach(function(el){el.classList.add('in');});}
+
+  /* timeline arrows */
+  root.querySelectorAll('.arrows[data-for]').forEach(function(a){
+    var tr=document.getElementById(a.getAttribute('data-for')); if(!tr) return;
+    var bs=a.querySelectorAll('button');
+    bs[0].addEventListener('click',function(){tr.scrollBy({left:280,behavior:'smooth'});});
+    bs[1].addEventListener('click',function(){tr.scrollBy({left:-280,behavior:'smooth'});});
+  });
+
+  /* audio player (multi-part) */
+  var U='https://tajrobeh.life/wp-content/uploads/2026/09/';
+  var ITEMS={
+    qg:{parts:[[U+'queens-gambit-0.mp3',1350],[U+'queens-gambit-1.mp3',1350],[U+'queens-gambit-2.mp3',1350],[U+'queens-gambit-3.mp3',1350],[U+'queens-gambit-4.mp3',1350],[U+'queens-gambit-5.mp3',31]]},
+    uno:{parts:[[U+'unorthodox-0.mp3',1400],[U+'unorthodox-1.mp3',1400],[U+'unorthodox-2.mp3',1400],[U+'unorthodox-3.mp3',1400],[U+'unorthodox-4.mp3',1400],[U+'unorthodox-5.mp3',92]]},
+    bm:{parts:[[U+'blackmirror-0.mp3',941],[U+'blackmirror-1.mp3',941],[U+'blackmirror-2.mp3',941],[U+'blackmirror-3.mp3',941],[U+'blackmirror-4.mp3',937]]},
+    mig:{parts:[[U+'immigration.mp3',553]]}
+  };
+  Object.keys(ITEMS).forEach(function(k){var it=ITEMS[k];it.total=it.parts.reduce(function(a,p){return a+p[1];},0);it.starts=[];var acc=0;it.parts.forEach(function(p){it.starts.push(acc);acc+=p[1];});});
+  var PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',PAUSE='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
+  var audio=document.getElementById('ydAudio');if(!audio)return;
+  var cur=null;
+  root.querySelectorAll('.ac[data-audio]').forEach(function(card){
+    var key=card.getAttribute('data-audio'),it=ITEMS[key];
+    var btn=card.querySelector('.pbtn'),prog=card.querySelector('.prog'),fill=prog.querySelector('i'),dur=card.querySelector('.dur'),orig=dur.textContent,err=card.querySelector('.err');
+    card._it=it;card._btn=btn;card._fill=fill;card._dur=dur;card._orig=orig;card._err=err;card._pi=0;
+    btn.addEventListener('click',function(){
+      if(cur===card){if(audio.paused){audio.play();}else{audio.pause();}return;}
+      if(cur){cur._btn.innerHTML=PLAY;cur._fill.style.width=0;cur._dur.textContent=cur._orig;}
+      cur=card;card._pi=0;err.style.display='none';audio.src=it.parts[0][0];var p=audio.play();if(p){p.catch(function(){});}
+    });
+    prog.addEventListener('click',function(e){
+      if(cur!==card)return;var r=prog.getBoundingClientRect();var x=(r.right-e.clientX)/r.width;var target=x*it.total;
+      var pi=0;for(var j=0;j<it.parts.length;j++){if(target>=it.starts[j])pi=j;}
+      card._pi=pi;audio.src=it.parts[pi][0];audio.addEventListener('loadedmetadata',function h(){audio.currentTime=target-it.starts[pi];audio.removeEventListener('loadedmetadata',h);});audio.play();
+    });
+  });
+  audio.addEventListener('timeupdate',function(){if(!cur)return;var it=cur._it;var elapsed=it.starts[cur._pi]+audio.currentTime;cur._fill.style.width=(elapsed/it.total*100)+'%';cur._dur.textContent=fmt(elapsed)+' / '+fmt(it.total);});
+  audio.addEventListener('ended',function(){if(!cur)return;var it=cur._it;if(cur._pi<it.parts.length-1){cur._pi++;audio.src=it.parts[cur._pi][0];audio.play();}else{cur._btn.innerHTML=PLAY;cur._fill.style.width=0;cur._dur.textContent=cur._orig;cur=null;}});
+  audio.addEventListener('play',function(){if(cur)cur._btn.innerHTML=PAUSE;});
+  audio.addEventListener('pause',function(){if(cur){if(!audio.ended){cur._btn.innerHTML=PLAY;}}});
+  audio.addEventListener('error',function(){if(cur){cur._err.style.display='block';cur._btn.innerHTML=PLAY;}});
+})();
+</script>
+<script>
+(function(){
+var sec=document.getElementById("video");
+if(!sec){return}
+var st=0;
+var probe=new Image();
+probe.onload=function(){st=1};
+probe.onerror=function(){st=2};
+probe.src="https://i.ytimg.com/vi/38pkKMRErWg/default.jpg";
+sec.addEventListener("click",function(e){
+ var b=e.target.closest(".cover");
+ if(!b){return}
+ var card=b.closest(".vc");
+ if(!card){return}
+ if(st===2){card.classList.add("blocked");return}
+ var id=card.getAttribute("data-yt");
+ var d=document.createElement("div");
+ d.className="frame";
+ var f=document.createElement("iframe");
+ f.src="https://www.youtube-nocookie.com/embed/"+id+"?autoplay=1";
+ f.setAttribute("allow","accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen");
+ f.setAttribute("allowfullscreen","");
+ f.setAttribute("loading","lazy");
+ f.title=card.querySelector("h3").textContent;
+ d.appendChild(f);
+ b.replaceWith(d);
+});
+})();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"ProfilePage","@id":"https://tajrobeh.life/yaserderakhshan/#profilepage","url":"https://tajrobeh.life/yaserderakhshan/","name":"یاسر درخشان","inLanguage":"fa-IR","mainEntity":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"hasPart":[{"@id":"https://tajrobeh.life/yaserderakhshan/#audio-qg"},{"@id":"https://tajrobeh.life/yaserderakhshan/#audio-uno"},{"@id":"https://tajrobeh.life/yaserderakhshan/#audio-bm"},{"@id":"https://tajrobeh.life/yaserderakhshan/#audio-mig"}]},{"@type":"Person","@id":"https://tajrobeh.life/yaserderakhshan/#person","name":"یاسر درخشان","alternateName":"Yaser Derakhshan","url":"https://tajrobeh.life/yaserderakhshan/","image":"https://tajrobeh.life/wp-content/uploads/2026/09/tjl-magritte.webp","description":"در حال ساختن تجربه؛ تحلیل روانکاوانهٔ فیلم و سریال، نوشته‌های مجلهٔ تجربه و متن‌های کوتاه در اینستاگرام و ایکس.","worksFor":{"@type":"Organization","name":"مرکز تجربه زندگی","alternateName":"Tajrobeh","url":"https://tajrobeh.life"},"knowsAbout":["روانکاوی","روانکاوی لکانی","تحلیل روانکاوانه فیلم و سریال","ژاک لکان","زیگموند فروید"],"sameAs":["https://www.instagram.com/psychoanalytically/","https://www.instagram.com/experientiallifecenter/","https://x.com/derakhshanyaser","https://t.me/tajrobehmohajer","https://tajrobeh.life/mag/author/yaserderakhshan/"]},{"@type":"AudioObject","@id":"https://tajrobeh.life/yaserderakhshan/#audio-qg","name":"تحلیل روانکاوانهٔ مینی‌سریال کویینز گمبیت","description":"یک جلسهٔ صوتی کامل دربارهٔ بث هارمون، صفحهٔ شطرنج و آنچه یک نابغهٔ تنها با خودش به بازی می‌برد.","inLanguage":"fa","duration":"PT1H53M","encodingFormat":"audio/mpeg","contentUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/queens-gambit-0.mp3","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"about":{"@type":"TVSeries","name":"The Queen's Gambit"}},{"@type":"AudioObject","@id":"https://tajrobeh.life/yaserderakhshan/#audio-uno","name":"تحلیل روانکاوانهٔ مینی‌سریال آن‌آرتودوکس","description":"دربارهٔ استی، گریز از جامعهٔ بسته، بدن، و بهایی که برای خود شدن می‌پردازیم.","inLanguage":"fa","duration":"PT1H58M","encodingFormat":"audio/mpeg","contentUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/unorthodox-0.mp3","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"about":{"@type":"TVSeries","name":"Unorthodox"}},{"@type":"AudioObject","@id":"https://tajrobeh.life/yaserderakhshan/#audio-bm","name":"مرگ دیگران با ما چه می‌کند؟ تحلیل روانکاوانهٔ بلک میرور","description":"دربارهٔ سوگ؛ از اپیزود «زود برمی‌گردم» تا مقالهٔ ماتم و مالیخولیای فروید.","inLanguage":"fa","duration":"PT1H18M21S","encodingFormat":"audio/mpeg","contentUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/blackmirror-0.mp3","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"about":{"@type":"TVSeries","name":"Black Mirror"}},{"@type":"AudioObject","@id":"https://tajrobeh.life/yaserderakhshan/#audio-mig","name":"هیچ‌گاه دیگر به خانه باز نمی‌گردیم؛ جستاری صوتی دربارهٔ مهاجرت","description":"جستار صوتی کوتاه دربارهٔ مهاجرت، تولد به‌عنوان نخستین مهاجرت و زبان مادری.","inLanguage":"fa","duration":"PT9M13S","encodingFormat":"audio/mpeg","contentUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/immigration.mp3","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"}},{"@type":"VideoObject","@id":"https://tajrobeh.life/yaserderakhshan/#video-blackmirror","name":"مرگ دیگران با ما چه می‌کند؟ تحلیل سریال بلک میرور","description":"تحلیل روانکاوانه و نوروساینس سوگ از خلال اپیزود «زود برمی‌گردم» سریال بلک میرور.","inLanguage":"fa","duration":"PT18M3S","uploadDate":"2023-01-20","thumbnailUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-blackmirror.webp","embedUrl":"https://www.youtube-nocookie.com/embed/38pkKMRErWg","contentUrl":"https://www.youtube.com/watch?v=38pkKMRErWg","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"publisher":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"}},{"@type":"VideoObject","@id":"https://tajrobeh.life/yaserderakhshan/#video-friends","name":"تحلیل روانشناختی اپیزود اول سریال فرندز","description":"خوانش روانکاوانهٔ نیمهٔ اول قسمت اول سریال فرندز، صحنه به صحنه.","inLanguage":"fa","duration":"PT13M34S","uploadDate":"2022-09-12","thumbnailUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-friends.webp","embedUrl":"https://www.youtube-nocookie.com/embed/AFQ9zBShZXE","contentUrl":"https://www.youtube.com/watch?v=AFQ9zBShZXE","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"publisher":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"}},{"@type":"VideoObject","@id":"https://tajrobeh.life/yaserderakhshan/#video-scenes","name":"تحلیل روانکاوانهٔ سریال صحنه‌هایی از یک ازدواج","description":"دربارهٔ رابطهٔ عاطفی در مینی‌سریال صحنه‌هایی از یک ازدواج و اثر فرهنگ و مهاجرت بر آن.","inLanguage":"fa","duration":"PT6M53S","uploadDate":"2022-06-20","thumbnailUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-scenes.webp","embedUrl":"https://www.youtube-nocookie.com/embed/3afdyPouOfk","contentUrl":"https://www.youtube.com/watch?v=3afdyPouOfk","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"publisher":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"}},{"@type":"VideoObject","@id":"https://tajrobeh.life/yaserderakhshan/#video-hypnosis","name":"هیپنوتیزم چیست؟ نسبت روانکاوی و هیپنوتیزم","description":"تاریخچهٔ هیپنوتیزم، دلیل کنار گذاشتنش توسط فروید، و هیپنوتیزم علمی امروز.","inLanguage":"fa","duration":"PT15M6S","uploadDate":"2023-03-10","thumbnailUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-hypnosis.webp","embedUrl":"https://www.youtube-nocookie.com/embed/ubUVeUWyHDQ","contentUrl":"https://www.youtube.com/watch?v=ubUVeUWyHDQ","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"publisher":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"}},{"@type":"VideoObject","@id":"https://tajrobeh.life/yaserderakhshan/#video-approaches","name":"مقایسهٔ مشاوره، روانکاوی، روان‌درمانی و روان‌پزشکی","description":"تفاوت چهار رویکرد در سلامت روان و اینکه هرکدام مناسب چه کسی است.","inLanguage":"fa","duration":"PT10M58S","uploadDate":"2022-07-31","thumbnailUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-approaches.webp","embedUrl":"https://www.youtube-nocookie.com/embed/2KUUj2Cb7Sk","contentUrl":"https://www.youtube.com/watch?v=2KUUj2Cb7Sk","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"publisher":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"}},{"@type":"VideoObject","@id":"https://tajrobeh.life/yaserderakhshan/#video-migration","name":"مهاجرت از دیدگاه روانکاوی","description":"گفت‌وگوی زندهٔ یاسر درخشان و مهدیه پوریادگار دربارهٔ مهاجرت از دیدگاه روانکاوی.","inLanguage":"fa","duration":"PT46M34S","uploadDate":"2022-05-22","thumbnailUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-migration.webp","embedUrl":"https://www.youtube-nocookie.com/embed/M-CcXtUpqBo","contentUrl":"https://www.youtube.com/watch?v=M-CcXtUpqBo","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"publisher":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"}},{"@type":"VideoObject","@id":"https://tajrobeh.life/yaserderakhshan/#video-guilt","name":"گفت‌وگو دربارهٔ احساس گناه و عذاب وجدان","description":"گفت‌وگوی زندهٔ یاسر درخشان و محمد شاد دربارهٔ شرم و تفاوت آن با احساس گناه از دید فروید.","inLanguage":"fa","duration":"PT41M9S","uploadDate":"2021-04-26","thumbnailUrl":"https://tajrobeh.life/wp-content/uploads/2026/09/tjl-yt-guilt.webp","embedUrl":"https://www.youtube-nocookie.com/embed/orlvjlt7PB0","contentUrl":"https://www.youtube.com/watch?v=orlvjlt7PB0","author":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"},"publisher":{"@id":"https://tajrobeh.life/yaserderakhshan/#person"}}]}</script>
+<!-- /wp:html -->

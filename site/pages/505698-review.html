@@ -1,0 +1,99 @@
+<!-- wp:html -->
+<style>
+main.tj-page{margin-block-start:0}
+#vxed{--r:#c83f49;--r4:#d9737a;--ink:#0e0e0e;--soft:#4e4e4e;--mut:#676768;--line:#dfdfe2;--sunk:#f5f5f8;--tint:#faeced;--ok:#1f7a55;direction:rtl;max-width:860px;margin:0 auto;padding:28px 16px 140px;color:var(--ink);font-size:17px;line-height:1.9;overflow-wrap:normal;word-break:normal}
+#vxed .eb{color:var(--r);font-size:13px;font-weight:700}
+#vxed h1{font-size:clamp(22px,4vw,30px);line-height:1.5;margin:4px 0 8px}
+#vxed .meta{color:var(--soft);font-size:14px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+#vxed .meta a{color:var(--r)!important}
+#vxed .pill{border:1px solid var(--line);border-radius:999px;padding:0 10px;font-size:12px}
+#vxed .bar{height:6px;background:var(--sunk);border-radius:9px;margin:20px 0 8px;overflow:hidden}
+#vxed .bar i{display:block;height:100%;background:var(--r);width:0;transition:width .4s}
+#vxed .c{border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin:14px 0;transition:opacity .25s,border-color .25s,box-shadow .25s;background:#fff}
+#vxed .c.on{border-color:var(--r4);box-shadow:0 8px 26px rgba(200,63,73,.08)}
+#vxed .c.off{opacity:.55}
+#vxed .ch{display:flex;align-items:center;gap:10px;justify-content:space-between}
+#vxed .tag{font-size:12px;color:var(--mut)}
+#vxed .tag b{color:var(--ink)}
+#vxed .sw{position:relative;width:46px;height:26px;border-radius:99px;background:var(--line);border:0;cursor:pointer;flex:none;transition:background .2s;padding:0}
+#vxed .sw:after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+#vxed .c.on .sw{background:var(--r)}
+#vxed .c.on .sw:after{transform:translateX(-20px)}
+#vxed .df{margin:10px 0 4px;font-size:16px;line-height:2.15;background:var(--sunk);border-radius:12px;padding:10px 12px}
+#vxed .df del{color:#8a2c33;text-decoration:line-through;text-decoration-color:var(--r);background:rgba(200,63,73,.08);border-radius:4px;padding:0 2px}
+#vxed .df ins{text-decoration:none;background:var(--tint);font-weight:700;border-bottom:2px solid var(--r);border-radius:4px;padding:0 2px}
+#vxed .why{font-size:13px;color:var(--soft)}
+#vxed .ed{font-size:13px;color:var(--r);background:none;border:0;cursor:pointer;padding:0;font-family:inherit}
+#vxed textarea{width:100%;min-height:110px;font:inherit;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}
+#vxed .notes{background:var(--sunk);border-radius:16px;padding:12px 16px;margin:18px 0}
+#vxed .notes h3{margin:0 0 6px;font-size:15px}
+#vxed .notes li{font-size:14px;color:var(--soft)}
+#vxed .msg{margin:14px 0;padding:12px 14px;border-radius:14px;background:var(--tint)}
+#vxed .msg.done{border:1px solid var(--ok);background:#f1faf5}
+#vxed .sk{height:120px;border-radius:18px;background:linear-gradient(90deg,#f5f5f8,#fbfbfd,#f5f5f8);background-size:200% 100%;animation:vxs 1.2s infinite;margin:14px 0}
+@keyframes vxs{to{background-position:-200% 0}}
+#vxft{position:fixed;inset:auto 0 0 0;z-index:9999;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid #dfdfe2;display:none}
+#vxft .in{max-width:860px;margin:0 auto;padding:12px 16px;display:flex;gap:10px;align-items:center;justify-content:space-between;direction:rtl}
+#vxft .cnt{font-size:14px;color:#4e4e4e}
+#vxft .btn{font:inherit;font-weight:700;border-radius:999px;border:1px solid #c83f49;background:#c83f49!important;color:#fff!important;padding:9px 20px;cursor:pointer}
+#vxft .btn.gh{background:#fff!important;color:#c83f49!important}
+#vxft .btn:disabled{opacity:.5}
+</style>
+<div id="vxed"><div class="eb" id="vxeb">بازبینی علمی</div><h1 id="vxh">بررسی اصلاحات</h1><div id="app"><div class="sk"></div><div class="sk"></div></div></div>
+<div id="vxft"><div class="in"><span class="cnt" id="cnt"></span><span><button class="btn gh" id="bs" type="button">ذخیره</button> <button class="btn" id="bg" type="button">…</button></span></div></div>
+<script>
+(function(){
+var EXEC='https://script.google.com/macros/s/AKfycbxD-DYhZ9LFjwB9az_DpMprzF_ItJkdad_DutMGPk1qY3ksBb45aMHYZBsXTCepYhsC8Q/exec';
+var Q=new URLSearchParams(location.search),A={c:Q.get('c')||'',w:Q.get('w')||'',k:Q.get('k')||''},D=null,ROLE='';
+function esc(s){return String(s==null?'':s).replace(/[<>"]/g,function(c){return{'<':'&lt;','>':'&gt;','"':'&quot;'}[c];}).replace(/&(?![a-z#0-9]+;)/g,'&amp;');}
+function tok(s){return String(s||'').split(/(\s+)/);}
+function diff(a,b){var x=tok(a),y=tok(b),n=x.length,m=y.length,L=[],i,j;for(i=0;i<=n;i++){L.push(new Array(m+1).fill(0));}for(i=n-1;i>=0;i--){for(j=m-1;j>=0;j--){L[i][j]=x[i]===y[j]?L[i+1][j+1]+1:Math.max(L[i+1][j],L[i][j+1]);}}var o='';i=0;j=0;while(i<n||j<m){var same=false;if(i<n){if(j<m){same=x[i]===y[j];}}if(same){o+=esc(x[i]);i++;j++;}else if(j<m){if(i>=n||L[i][j+1]>=L[i+1][j]){o+='<ins>'+esc(y[j])+'</ins>';j++;}else{o+='<del>'+esc(x[i])+'</del>';i++;}}else{o+='<del>'+esc(x[i])+'</del>';i++;}}return o.replace(/<\/ins><ins>/g,'').replace(/<\/del><del>/g,'');}
+function kindLbl(c){return c.kind==='add'?'افزودن بند تازه':(c.kind==='del'?'حذف':'اصلاح');}
+function $(id){return document.getElementById(id);}
+function render(){
+	var d=D.d,h='';
+	$('vxeb').textContent='بازبینی علمی · '+D.e.code;$('vxh').textContent=d.title;
+	h+='<div class="meta"><span>بازبین: <b>'+esc(d.reviewer)+'</b></span><span class="pill">'+esc(d.verdict)+'</span>'+(D.link?'<a href="'+esc(D.link)+'" target="_blank" rel="noopener">دیدن مقاله</a>':'')+(d.doc?'<a href="'+esc(d.doc)+'" target="_blank" rel="noopener">سند بازبین</a>':'')+'</div>';
+	if(D.e.st==='منتشر شد'){h+='<div class="msg done">این اصلاحات منتشر شده است. '+esc(D.e.res||'')+'</div>';}
+	h+='<div class="bar"><i id="pb"></i></div>';
+	d.changes.forEach(function(c){
+		var body=c.kind==='add'?'<ins>'+esc(c.neu)+'</ins>':(c.kind==='del'?'<del>'+esc(c.old)+'</del>':diff(c.old,c.neu));
+		h+='<div class="c '+(c.on?'on':'off')+'" id="c'+c.id+'"><div class="ch"><span class="tag"><b>'+kindLbl(c)+'</b> · '+(c.src==='doc'?'از متن سند بازبین':'ساخته‌شده از یادداشت بازبین؛ با دقت ببینید')+'</span><button class="sw" type="button" aria-label="پذیرش این تغییر" data-id="'+c.id+'"></button></div>'
+		+(c.kind==='add'?(c.after?'<div class="why">بعد از: «'+esc(String(c.after).slice(0,90))+'…»</div>':''):'')
+		+'<div class="df">'+body+'</div>'+(c.why?'<div class="why">'+esc(c.why)+'</div>':'')
+		+(c.kind!=='del'?'<button class="ed" type="button" data-id="'+c.id+'">ویرایش متن تازه</button><div id="t'+c.id+'"></div>':'')+'</div>';
+	});
+	if(d.notes){if(d.notes.length){h+='<div class="notes"><h3>نکته‌های کلی بازبین (روی متن اعمال نمی‌شود)</h3><ul>'+d.notes.map(function(n){return '<li>'+esc(n)+'</li>';}).join('')+'</ul></div>';}}
+	if(d.raw){h+='<div class="notes"><h3>یادداشت کامل بازبین</h3><div style="white-space:pre-wrap;font-size:14px">'+esc(d.raw)+'</div></div>';}
+	h+='<div id="res"></div>';
+	$('app').innerHTML=h;wire();count();
+}
+function count(){var on=D.d.changes.filter(function(c){return c.on;}).length,t=D.d.changes.length;$('cnt').textContent=on+' از '+t+' تغییر پذیرفته';$('pb').style.width=(t?on*100/t:0)+'%';}
+function find(id){return D.d.changes.filter(function(x){return String(x.id)===String(id);})[0];}
+function wire(){
+	[].slice.call(document.querySelectorAll('#vxed .sw')).forEach(function(b){b.onclick=function(){var c=find(b.getAttribute('data-id'));c.on=!c.on;$('c'+c.id).className='c '+(c.on?'on':'off');count();};});
+	[].slice.call(document.querySelectorAll('#vxed .ed')).forEach(function(b){b.onclick=function(){var c=find(b.getAttribute('data-id')),box=$('t'+c.id);if(box.firstChild){return;}var ta=document.createElement('textarea');ta.value=c.neu;ta.oninput=function(){c.neu=ta.value;c.on=true;$('c'+c.id).className='c on';count();};box.appendChild(ta);ta.focus();};});
+}
+function dec(){return D.d.changes.map(function(c){return {id:c.id,on:c.on,neu:c.neu};});}
+function act(a){
+	var bs=$('bs'),bg=$('bg');bs.disabled=true;bg.disabled=true;
+	fetch(EXEC,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({api:'ved',c:A.c,w:A.w,k:A.k,act:a,dec:dec()})}).then(function(r){return r.json();}).then(function(r){
+		bs.disabled=false;bg.disabled=false;
+		if(!r.ok){$('res').innerHTML='<div class="msg">'+esc(r.error||'خطا')+'</div>';return;}
+		var m='<div class="msg done">'+esc(r.msg||'انجام شد')+(r.total!=null?' '+r.applied+' از '+r.total+' تغییر روی مقاله نشست.':'');
+		if(r.bad){if(r.bad.length){m+='<br>جای دقیق این‌ها پیدا نشد و باید دستی نگاه شود: '+r.bad.map(function(b){return '#'+b.id;}).join('، ');}}
+		if(r.link){m+='<br><a href="'+esc(r.link)+'?v='+Date.now()+'" target="_blank" rel="noopener">دیدن مقاله</a>';}
+		$('res').innerHTML=m+'</div>';$('res').scrollIntoView({behavior:'smooth'});
+	}).catch(function(e){bs.disabled=false;bg.disabled=false;$('res').innerHTML='<div class="msg">ارتباط برقرار نشد. دوباره امتحان کنید.</div>';});
+}
+fetch(EXEC+'?api=ved&ec='+encodeURIComponent(A.c)+'&w='+encodeURIComponent(A.w)+'&k='+encodeURIComponent(A.k)).then(function(r){return r.json();}).then(function(r){
+	if(!r.ok){$('app').innerHTML='<div class="msg">'+esc(r.error||'پیدا نشد')+'</div>';return;}
+	D=r;ROLE=r.role;var bg=$('bg');
+	bg.textContent=ROLE==='owner'?'✅ تأیید و انتشار روی مقاله':'فرستادن برای تأیید نهایی';
+	if(ROLE!=='viewer'){$('vxft').style.display='block';}
+	bg.onclick=function(){act(ROLE==='owner'?'publish':'send');};$('bs').onclick=function(){act('save');};
+	render();
+}).catch(function(){$('app').innerHTML='<div class="msg">ارتباط برقرار نشد. صفحه را دوباره باز کنید.</div>';});
+})();
+</script>
+<!-- /wp:html -->

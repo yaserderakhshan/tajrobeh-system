@@ -1,0 +1,159 @@
+<!-- wp:html -->
+<style>
+/* == tj-header (سراسری؛ نسخهٔ home-v2) == */
+.tjh{font-family:var(--tj-font);direction:rtl;position:sticky;top:0;z-index:70;background:rgba(254,254,254,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(223,223,226,.6)}
+.tjh *{box-sizing:border-box}
+.tjh a,.tjh a:hover,.tjh a:focus-visible{text-decoration:none;color:inherit}
+.tjh .bar{max-width:1180px;margin-inline:auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:68px}
+.tjh .brand{display:flex;align-items:center;gap:36px;min-width:0}
+.tjh .logo{display:block;width:102px;height:29px;flex:none}
+.tjh .logo img{width:102px;height:29px;object-fit:contain;display:block}
+.tjh nav{display:flex;align-items:center;gap:4px}
+.tjh nav>div{position:relative}
+.tjh nav>div>a,.tjh nav>a{display:inline-flex;align-items:center;gap:5px;font-weight:500;font-size:15px;color:var(--tj-soft);padding:8px 12px;border-radius:8px;white-space:nowrap;transition:.15s}
+.tjh nav>div>a:hover,.tjh nav>a:hover,.tjh nav>div:hover>a{background:var(--tj-sunk);color:var(--tj-ink)}
+.tjh nav a[aria-current="page"],.tjh nav>div.on>a{color:var(--tj-red)}
+.tjh nav>div>a svg{width:12px;height:12px;opacity:.6}
+.tjh .dd{position:absolute;top:100%;right:0;min-width:240px;background:#fff;border:1px solid var(--tj-line);border-radius:14px;padding:8px;box-shadow:0 18px 40px -20px rgba(14,14,14,.35);opacity:0;visibility:hidden;transform:translateY(6px);transition:.18s;display:grid;gap:2px}
+.tjh nav>div:hover .dd,.tjh nav>div:focus-within .dd{opacity:1;visibility:visible;transform:none}
+.tjh .dd a{display:block;padding:9px 12px;border-radius:9px;font-size:14px;color:var(--tj-ink-2)}
+.tjh .dd a:hover{background:var(--tj-sunk);color:var(--tj-red)}
+.tjh .dd a small{display:block;font-size:12px;color:var(--tj-mut);margin-top:1px}
+.tjh .dd .sep{height:1px;background:var(--tj-line);margin:6px 4px}
+.tjh .dd.wide{min-width:520px;grid-template-columns:1fr 1fr}
+.tjh .dd.wide .sep{grid-column:1/-1}
+.tjh .dd .h{grid-column:1/-1;font-size:11.5px;color:var(--tj-mut);padding:6px 12px 2px;font-weight:600;letter-spacing:.02em}
+.tjh .end{display:flex;align-items:center;gap:8px}
+.tjh .cta{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 20px;border-radius:var(--tj-r-btn);background:var(--tj-red);color:#fff;font-weight:600;font-size:14px;white-space:nowrap;transition:.15s}
+.tjh .cta:hover{background:var(--tj-red-600);color:#fff}
+.tjh .cta.alt{background:transparent;color:var(--tj-ink);border:1.5px solid var(--tj-line)}
+.tjh .cta.alt:hover{border-color:var(--tj-ink);background:transparent;color:var(--tj-ink)}
+.tjh .burger{display:none;width:42px;height:42px;border:0;background:none;cursor:pointer;color:var(--tj-ink);place-items:center;padding:0;margin:0}
+.tjh .burger svg{width:24px;height:24px}
+.tjh .tog{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;margin:0}
+.tjh .prog{position:absolute;bottom:-1px;right:0;height:2px;background:var(--tj-red);width:0;transition:width .1s linear}
+@media (max-width:1024px){
+.tjh .brand{gap:0;flex:1}
+.tjh .burger{display:grid}
+.tjh nav{position:absolute;inset-inline:0;top:100%;flex-direction:column;align-items:stretch;gap:0;background:#fff;border-bottom:1px solid var(--tj-line);padding:8px 16px 16px;display:none;max-height:calc(100vh - 110px);overflow:auto}
+.tjh .tog:checked ~ .bar nav{display:flex}
+.tjh nav>div>a,.tjh nav>a{width:100%;padding:12px 8px;font-size:16px;border-radius:0;border-bottom:1px solid var(--tj-line)}
+.tjh .dd{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:0;padding:0 8px 8px;min-width:0;background:#f8f8fa;border-radius:0 0 10px 10px}
+.tjh .dd.wide{grid-template-columns:1fr}
+.tjh .cta.alt{display:none}
+.tjh .cta{font-size:13px;padding:0 14px;height:38px}
+}
+@media (max-width:600px){
+.tjh .bar{padding:10px 16px;min-height:60px}
+.tjh .logo,.tjh .logo img{width:92px;height:26px}
+}
+
+/* == منوی موبایل: آکاردئون، قفل صفحه، محو انتهای اسکرول، ردیف دکمه == */
+html.tjh-lock,body.tjh-lock{overflow:hidden}
+.tjh .dd a.monly{display:none}
+.tjh .mcta{display:none}
+.tjh nav>div.open>.dd{opacity:1;visibility:visible;transform:none}
+@media (max-width:1024px){
+.tjh nav{padding:4px 16px 0;max-height:calc(100vh - var(--tjh-h,60px));max-height:calc(100dvh - var(--tjh-h,60px));overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.tjh nav>div>a,.tjh nav>a{padding:14px 6px;font-size:16px;font-weight:600;color:var(--tj-ink)}
+.tjh nav>div>a svg{margin-inline-start:auto;width:18px;height:18px;opacity:.7;transition:transform .2s}
+.tjh nav>div.open>a svg{transform:rotate(180deg)}
+.tjh nav>div.open>a{color:var(--tj-red);border-bottom-color:transparent}
+.tjh nav>div>.dd{display:none}
+.tjh nav>div.open>.dd{display:grid;margin-bottom:6px}
+.tjh .dd a{padding:10px 12px;font-size:15px}
+.tjh .dd a small{font-size:12.5px}
+.tjh .dd a.monly{display:block;font-weight:600;color:var(--tj-red)}
+.tjh .mcta{display:flex;gap:10px;position:sticky;bottom:0;background:#fff;padding:12px 0 14px;margin-top:auto}
+.tjh .mcta::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:40px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff);pointer-events:none;opacity:0;transition:opacity .2s}
+.tjh nav.more .mcta::before{opacity:1}
+.tjh nav::before{content:"";position:fixed;inset:0;top:var(--tjh-h,60px);background:rgba(14,14,14,.38);z-index:-1}
+.tjh .mcta .cta{flex:1;height:46px;font-size:15px;padding:0 10px}
+.tjh .mcta .cta.alt{display:inline-flex}
+}
+</style>
+<header class="tjh" id="tjh">
+<input type="checkbox" id="tjhTog" class="tog">
+<div class="bar">
+<div class="brand">
+<a class="logo" href="/" aria-label="تجربه"><img src="/wp-content/uploads/2026/09/TajrobehMainLogo.webp" alt="مرکز تجربه زندگی" width="102" height="29"></a>
+<nav aria-label="ناوبری اصلی">
+<div><a href="/therapy/">خدمات <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></a>
+<div class="dd wide">
+<span class="h">خدمات</span>
+<a href="/therapy/individual-therapy/">تراپی فردی<small>افسردگی، اضطراب، روابط، خودشناسی</small></a>
+<a href="/therapy/couple-therapy/">تراپی زوج‌ها<small>و مشاوره‌ی پیش از ازدواج</small></a>
+<a href="/therapy/child-therapy/">کودک و نوجوان<small>بازی‌درمانی و درمان تحلیلی</small></a>
+<a href="/therapy/psychiatry/">روانپزشکی<small>ویزیت و دارودرمانی</small></a>
+<a href="/therapy/group-therapy/">گروه‌درمانی<small>گروه‌های تحلیلی</small></a>
+<a href="/therapy/supervision/">سوپرویژن<small>برای درمانگران</small></a>
+<span class="sep"></span>
+<span class="h">رویکردها</span>
+<a href="/approaches/psychoanalysis/">روانکاوی</a>
+<a href="/approaches/psychodynamic-therapy/">روان‌درمانی تحلیلی</a>
+<span class="sep"></span>
+<a href="/get-therapy/" data-tj-fun="start_therapy_click"><b>پیدا کردن تراپیست مناسب ←</b></a>
+<a href="/help/"><b>با چه چیزی درگیرید ←</b></a>
+<a href="/tests/"><b>تست‌های رایگان ←</b></a>
+<a href="/persian-therapy/"><b>فارسی‌زبانان خارج از ایران ←</b></a>
+<a class="monly" href="/therapy/">همه‌ی خدمات ←</a>
+</div></div>
+<div><a href="/partners/">حضوری <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></a>
+<div class="dd">
+<span class="h">تهران</span>
+<a href="/کلینیک-روانکاوی-تهران/">کلینیک تجربه<small>ونک، کوچهٔ بیستم گاندی · ۶ اتاق</small></a>
+<span class="sep"></span>
+<span class="h">شهرهای دیگر</span>
+<a href="/partners/karaj/">کرج<small>میانه، رجایی‌شهر</small></a>
+<a href="/partners/isfahan/">اصفهان<small>تجربه پارتنر اصفهان</small></a>
+<a href="/partners/nur/">نور<small>جان‌پناه، مازندران</small></a>
+<a href="/partners/mashhad/">مشهد<small>مجموعهٔ آن، وکیل‌آباد</small></a>
+<span class="sep"></span>
+<a href="/partners/"><b>همهٔ فضاهای حضوری ←</b></a>
+<a href="/partners/rules/"><b>فضایی دارید؟ پارتنر شوید ←</b></a>
+</div></div>
+<a href="/enterprise/">سازمان‌ها</a>
+<div><a href="/school/">مدرسه </a> <div class="dd wide"> <span class="h">دوره‌ها و استادان</span> <a href="/school/clinical-experience/">تجربهٔ بالینی<small>روانکاوی و روان‌درمانی تحلیلی</small></a> <a href="/school/eft/">درمان هیجان‌مدار (EFT)<small>سطح ۱ تا ۳، ۱۲۳ ساعت</small></a> <a href="/school/modern-psychoanalysis/">روانکاوی مدرن<small>کار با ساختارهای پیشاکلامی</small></a> <a href="/school/faculty/">هیئت علمی و استادان<small>سه دپارتمان، سوپروایزرها، منتورها</small></a> <span class="sep"></span> <span class="h">برنامه‌ها و مسیر</span> <a href="/school/events/">تقویم و رویدادها<small>کلاس، سوپرویژن، کیس‌خوانی، ژورنال کلاب</small></a> <a href="/school/community/">کامیونیتی تجربه<small>عضویت رایگان دانشجویان</small></a> <a href="/how-to-become-a-therapist/">چطور درمانگر شویم<small>نقشهٔ راه و تست آمادگی</small></a> <a href="/school/associations/">همکاری با انجمن‌ها<small>برای تشکل‌های دانشجویی</small></a> <span class="sep"></span> <a href="/school/" style="grid-column:1/-1"><b>همهٔ مدرسه ←</b></a> </div></div>
+<a href="/mag/">مجله</a>
+<div><a href="/about-us/">درباره‌ی تجربه <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></a>
+<div class="dd">
+<a href="/about-us/">داستان تجربه</a>
+<a href="/#supervisors">سوپروایزرها</a>
+<a href="/editorial/">تیم تحریریه</a>
+<a href="/joinus/">برای تراپیست‌ها</a>
+<a href="/contact-us/">تماس با ما</a>
+</div></div>
+<div class="mcta"><a class="cta" href="/get-therapy/" data-tj-fun="start_therapy_click">شروع تراپی</a><a class="cta alt" href="https://t.me/tajrobehlife_bot?start=hdr_menu" target="_blank" rel="noopener">بات تلگرام تجربه</a></div>
+</nav>
+</div>
+<div class="end">
+<a class="cta alt" href="https://tajrobeh.life/login" rel="nofollow">ورود</a>
+<a class="cta" href="/get-therapy/">شروع تراپی</a>
+<label class="burger" for="tjhTog" aria-label="منو"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></label>
+</div>
+</div>
+<div class="prog" id="tjhProg"></div>
+</header>
+<script>(function(){var h=document.getElementById('tjh');if(!h)return;
+var p=document.getElementById('tjhProg');function u(){var d=document.documentElement,m=d.scrollHeight-d.clientHeight;p.style.width=(m>0?(d.scrollTop/m*100):0)+'%';}window.addEventListener('scroll',u,{passive:true});u();
+var path=location.pathname.replace(/\/+$/,'')||'/';
+h.querySelectorAll('nav a[href]').forEach(function(a){var ap=a.getAttribute('href');if(!ap||ap.indexOf('#')>-1||ap.indexOf('http')===0)return;var href;try{href=new URL(ap,location.origin).pathname.replace(/\/+$/,'')||'/';}catch(e){return;}if(href==='/'){if(path!=='/')return;}
+var hit=(path===href);if(!hit){if(href!=='/'){if(path.indexOf(href+'/')===0)hit=true;}}if(hit){a.setAttribute('aria-current','page');var d=a.closest('nav>div');if(d)d.classList.add('on');}});
+var tog=document.getElementById('tjhTog'),nav=h.querySelector('nav');if(!tog)return;if(!nav)return;
+var mq=window.matchMedia('(max-width:1024px)'),touch=window.matchMedia('(hover:none)');
+function setH(){h.style.setProperty('--tjh-h',h.offsetHeight+'px');}
+function more(){nav.classList.toggle('more',nav.scrollTop+nav.clientHeight<nav.scrollHeight-6);}
+function lock(on){document.documentElement.classList.toggle('tjh-lock',on);document.body.classList.toggle('tjh-lock',on);}
+function closeAll(){h.querySelectorAll('nav>div.open').forEach(function(o){o.classList.remove('open');});}
+function closeMenu(){tog.checked=false;lock(false);closeAll();}
+tog.addEventListener('change',function(){setH();lock(tog.checked);if(tog.checked){nav.scrollTop=0;setTimeout(more,60);}else{closeAll();}});
+nav.addEventListener('scroll',more,{passive:true});nav.addEventListener('click',function(e){if(e.target===nav)closeMenu();});
+window.addEventListener('resize',function(){setH();if(!mq.matches)closeMenu();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMenu();});
+h.querySelectorAll('nav>div>a').forEach(function(a){var d=a.parentNode;a.addEventListener('click',function(e){if(!mq.matches){if(!touch.matches)return;}
+if(!d.classList.contains('open')){e.preventDefault();closeAll();d.classList.add('open');setTimeout(more,260);return;}
+if(mq.matches){e.preventDefault();d.classList.remove('open');setTimeout(more,260);}});});
+nav.querySelectorAll('a[href]').forEach(function(a){a.addEventListener('click',function(){var d=a.parentNode;if(d.parentNode===nav){if(d.tagName==='DIV'){if(!d.classList.contains('mcta'))return;}}closeMenu();});});
+document.addEventListener('click',function(e){if(mq.matches)return;if(h.contains(e.target))return;closeAll();});
+})();</script>
+<!-- /wp:html -->

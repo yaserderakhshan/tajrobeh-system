@@ -1,0 +1,576 @@
+<!-- wp:html -->
+<style>
+/* == tj2: home-v2 draft (v4) == */
+.tj2{font-family:var(--tj-font);color:var(--tj-soft);direction:rtl;font-size:17px;line-height:1.9;--tj-tint:#faeced;--tj-tint-2:#fdf4f4;--tj-red-400:#d9737a;--tj-yellow:#f2c14e;--w:1180px;overflow-x:clip}
+.tj2 *,.tj2 *::before,.tj2 *::after{box-sizing:border-box}
+.tj2,.tj2 *{overflow-wrap:normal;word-break:normal}
+.tj2 h1,.tj2 h2,.tj2 h3,.tj2 h4{color:var(--tj-ink);margin:0;line-height:1.55;font-weight:700;text-wrap:balance}
+.tj2 p{margin:0}
+.tj2 a{color:inherit;text-decoration:none}
+.tj2 img{max-width:100%;height:auto;display:block}
+.tj2 button{font-family:inherit}
+.tj2 .wrap{max-width:var(--w);margin-inline:auto;padding-inline:24px}
+.tj2 section{padding-block:clamp(48px,6vw,88px)}
+.tj2 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tj-red);background:var(--tj-tint);padding:5px 13px;border-radius:999px;margin-bottom:12px}
+.tj2 .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tj-red)}
+.tj2 .h2{font-size:clamp(23px,3vw,36px);margin-bottom:10px}
+.tj2 .lede{font-size:clamp(15.5px,1.3vw,18px);color:var(--tj-soft);max-width:62ch;line-height:2}
+.tj2 .center{text-align:center}.tj2 .center .lede{margin-inline:auto}
+.tj2 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 24px;border-radius:var(--tj-r-btn);font-size:16px;font-weight:600;border:1.5px solid transparent;transition:.18s ease;white-space:nowrap;cursor:pointer;line-height:1.4}
+.tj2 .btn-brand{background:var(--tj-red);color:#fff}
+.tj2 .btn-brand:hover{background:var(--tj-red-600);box-shadow:0 8px 20px -8px rgba(200,63,73,.5);color:#fff}
+.tj2 .btn-ghost{background:#fff;color:var(--tj-ink-2);border-color:var(--tj-line)}
+.tj2 .btn-ghost:hover{border-color:var(--tj-red-400);color:var(--tj-red-600);background:var(--tj-tint)}
+.tj2 .btn svg{width:14px;height:14px;flex:none}
+.tj2 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.tj2 .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.tj2 .rv{opacity:1;transform:none;transition:none}}
+.tj2 .hs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 14px;scrollbar-width:none;scroll-behavior:smooth}
+.tj2 .hs::-webkit-scrollbar{display:none}
+.tj2 .hs>*{scroll-snap-align:start;flex:0 0 auto}
+.tj2 .arrows{display:flex;gap:8px}
+.tj2 .arrows button{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--tj-line);background:#fff;color:var(--tj-ink);cursor:pointer;display:grid;place-items:center;transition:.15s}
+.tj2 .arrows button:hover{border-color:var(--tj-red);color:var(--tj-red)}
+.tj2 .arrows svg{width:16px;height:16px}
+.tj2 .head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
+.tj2 .hero{padding-block:clamp(36px,5vw,72px) clamp(36px,5vw,64px);background:#fff}
+.tj2 .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px;align-items:center}
+.tj2 .hero h1{font-size:clamp(28px,3.4vw,44px);line-height:1.5;margin:14px 0 16px;max-width:22ch}
+.tj2 .hero h1 em{font-style:normal;color:var(--tj-red)}
+.tj2 .hero .lede{margin:0 0 24px;max-width:56ch}
+.tj2 .ctas{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.tj2 .hero .art{display:flex;align-items:center;justify-content:center}
+.tj2 .hero .art img{width:100%;max-width:440px;height:auto;object-fit:contain}
+.tj2 .nums{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:30px;padding-top:22px;border-top:1px solid var(--tj-line)}
+.tj2 .nums div{display:flex;align-items:baseline;gap:7px}
+.tj2 .nums b{font-size:24px;font-weight:800;color:var(--tj-red);line-height:1;font-variant-numeric:tabular-nums}
+.tj2 .nums span{font-size:13px;color:var(--tj-mut)}
+.tj2 .eco{background:var(--tj-sunk)}
+.tj2 .eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:34px}
+.tj2 .eco-card{border:1px solid var(--tj-line);border-radius:20px;padding:0 0 22px;background:#fff;transition:.2s;display:flex;flex-direction:column;overflow:hidden}
+.tj2 .eco-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px);box-shadow:0 16px 34px -20px rgba(14,14,14,.3)}
+.tj2 .eco-card .pic{height:190px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;padding:16px 16px 0;border-bottom:1px solid var(--tj-line);background:#fff}
+.tj2 .eco-card .pic img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom}
+.tj2 .eco-card .n{font-size:12.5px;color:var(--tj-red);font-weight:700;margin:16px 22px 4px}
+.tj2 .eco-card h3{font-size:18px;margin:0 22px 8px}
+.tj2 .eco-card p{font-size:14px;line-height:1.9;color:var(--tj-soft);margin:0 22px 12px;flex:1}
+.tj2 .eco-card .go{font-size:13.5px;color:var(--tj-ink);font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 22px}
+.tj2 .eco-card .go svg{width:12px;height:12px}
+.tj2 .tl{background:#fff;overflow:hidden}
+.tj2 .tl-line{height:2px;background:var(--tj-line);margin-top:22px}
+.tj2 .tl-track{padding-top:34px}
+.tj2 .tl-item{width:250px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:20px 18px;position:relative}
+.tj2 .tl-item::before{content:"";position:absolute;top:-22px;right:22px;width:14px;height:14px;border-radius:50%;background:var(--tj-red);border:3px solid #fff;box-shadow:0 0 0 1px var(--tj-line)}
+.tj2 .tl-item .y{font-size:13px;color:var(--tj-red);font-weight:700}
+.tj2 .tl-item h3{font-size:16.5px;margin:6px 0 8px}
+.tj2 .tl-item p{font-size:13.5px;color:var(--tj-soft);line-height:1.85}
+.tj2 .tl-item.now{background:var(--tj-red);border-color:var(--tj-red)}
+.tj2 .tl-item.now h3,.tj2 .tl-item.now p{color:#fff}
+.tj2 .tl-item.now .y{color:#ffd6d9}
+.tj2 .tl-item.now::before{background:#fff;border-color:var(--tj-red)}
+.tj2 .svc{background:var(--tj-sunk)}
+.tj2 .svc-list{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-top:30px;background:#fff;border:1px solid var(--tj-line);border-radius:20px;padding:8px 28px}
+.tj2 .svc-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--tj-line);transition:.15s}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:0}
+.tj2 .svc-row img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .svc-row b{display:block;font-size:16px;color:var(--tj-ink)}
+.tj2 .svc-row span{display:block;font-size:13px;color:var(--tj-mut);line-height:1.7}
+.tj2 .svc-row svg{width:16px;height:16px;flex:none;margin-inline-start:auto;color:var(--tj-line);transition:.15s}
+.tj2 .svc-row:hover b{color:var(--tj-red)}
+.tj2 .svc-row:hover svg{color:var(--tj-red);transform:translateX(-4px)}
+.tj2 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
+.tj2 .chip{font-size:13.5px;padding:7px 14px;border-radius:999px;border:1px solid var(--tj-line);background:#fff;color:var(--tj-soft);transition:.15s;cursor:pointer;line-height:1.6}
+.tj2 .chip:hover,.tj2 .chip.on{border-color:var(--tj-red);color:var(--tj-red);background:var(--tj-tint)}
+.tj2 .chips .lbl{font-size:13px;color:var(--tj-mut);align-self:center;margin-inline-end:4px;flex:none;white-space:nowrap}
+.tj2 .how{background:#fff}
+.tj2 .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px;counter-reset:st}
+.tj2 .how-step{background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:24px 20px;position:relative}
+.tj2 .how-step::before{counter-increment:st;content:counter(st,persian);position:absolute;top:-14px;right:18px;width:30px;height:30px;border-radius:50%;background:var(--tj-red);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+.tj2 .how-step img{width:48px;height:48px;object-fit:contain;margin-bottom:10px}
+.tj2 .how-step h3{font-size:16.5px;margin-bottom:6px}
+.tj2 .how-step p{font-size:14px;line-height:1.9}
+.tj2 .how-note{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:center;font-size:14px;color:var(--tj-mut)}
+.tj2 .how-note span{display:inline-flex;align-items:center;gap:7px}
+.tj2 .how-note svg{width:16px;height:16px;color:var(--tj-red)}
+.tj2 .th{background:var(--tj-sunk)}
+.tj2 .thc{width:150px;border:1px solid var(--tj-line);border-radius:16px;padding:12px 10px 14px;text-align:center;background:#fff;transition:.18s;position:relative}
+.tj2 .thc:hover{border-color:var(--tj-red-400);box-shadow:0 10px 26px -16px rgba(14,14,14,.3)}
+.tj2 .thc.hide{display:none}
+.tj2 .thc img.ph{width:92px;height:92px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid var(--tj-sunk)}
+.tj2 .thc b{display:block;font-size:14px;color:var(--tj-ink);line-height:1.5;font-weight:700}
+.tj2 .thc .sp{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px;line-height:1.6;min-height:2.6em}
+.tj2 .thc .yr{display:inline-block;font-size:11.5px;color:var(--tj-red);background:var(--tj-tint);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .vf{position:absolute;top:10px;left:10px;width:18px;height:18px}
+.tj2 .thc .pen{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--tj-ink);background:var(--tj-yellow);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .pen svg{width:10px;height:10px}
+.tj2 .thc.more{background:var(--tj-tint);border-color:var(--tj-red-400);display:flex;flex-direction:column;justify-content:center;gap:6px}
+.tj2 .thc.more b{color:var(--tj-red);font-size:26px}
+.tj2 .thc.more span{font-size:13px;color:var(--tj-ink-2)}
+.tj2 .thc.more .btn{margin:8px auto 0;min-height:36px;font-size:13px;padding:6px 14px}
+.tj2 .dots{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.tj2 .dots i{width:6px;height:6px;border-radius:50%;background:var(--tj-line);transition:.2s}
+.tj2 .dots i.on{width:18px;border-radius:3px;background:var(--tj-red)}
+.tj2 .std{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+.tj2 .std>div{display:flex;gap:12px;align-items:center;border:1px solid var(--tj-line);border-radius:14px;padding:14px 16px;background:#fff}
+.tj2 .std img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .std b{display:block;font-size:14.5px;color:var(--tj-ink)}
+.tj2 .std span{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .sup{background:#fff}
+.tj2 .supc{width:230px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:16px;display:flex;gap:12px;align-items:center;transition:.2s}
+.tj2 .supc:hover{border-color:var(--tj-red-400);transform:translateY(-3px);background:#fff}
+.tj2 .supc img{width:64px;height:76px;border-radius:12px;object-fit:cover;flex:none}
+.tj2 .supc b{display:block;color:var(--tj-ink);font-size:14.5px;line-height:1.5}
+.tj2 .supc .ap{display:block;font-size:12.5px;color:var(--tj-red);margin-top:3px}
+.tj2 .sup .hs{margin-top:28px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center}
+.tj2 .school p.lede{margin-bottom:22px}
+.tj2 .path div{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#fff;border:1px solid var(--tj-line);border-radius:14px;margin-bottom:8px;font-size:15px;color:var(--tj-ink)}
+.tj2 .path div i{width:30px;height:30px;border-radius:50%;background:var(--tj-tint);color:var(--tj-red);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px;flex:none}
+.tj2 .path div:last-child{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .path div:last-child i{background:#fff}
+.tj2 .path small{display:block;font-size:12.5px;color:var(--tj-mut)}
+.tj2 .path div:last-child small{color:#ffd6d9}
+.tj2 .cities{background:#fff}
+.tj2 .map{position:relative;background:var(--tj-sunk);border-radius:24px;padding:22px;overflow:hidden;margin:30px auto 0;max-width:640px}
+.tj2 .map svg{width:100%;height:auto;display:block}
+.tj2 .map .land{fill:#fff;stroke:var(--tj-ink);stroke-width:1.5;stroke-linejoin:round}
+.tj2 .map text{font-family:var(--tj-font);font-size:15px;fill:var(--tj-ink);font-weight:700}
+.tj2 .map text.sea{fill:var(--tj-mut);font-weight:500;font-size:13px}
+.tj2 .map .pin{transform-box:fill-box;transform-origin:50% 100%;animation:tjbob 3.2s ease-in-out infinite}
+.tj2 .map .pin.d1{animation-delay:-.7s}.tj2 .map .pin.d2{animation-delay:-1.4s}.tj2 .map .pin.d3{animation-delay:-2.1s}.tj2 .map .pin.d4{animation-delay:-2.8s}
+@keyframes tjbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+.tj2 .map .shadow{fill:rgba(14,14,14,.14)}
+.tj2 .map .de{position:absolute;left:22px;top:22px;bottom:auto;background:#fff;border:1px solid var(--tj-line);border-radius:14px;padding:8px 12px;font-size:13px;color:var(--tj-ink);display:flex;gap:10px;align-items:center}
+.tj2 .map .de img{width:22px;height:22px}
+.tj2 .map .de small{display:block;color:var(--tj-mut);font-size:11.5px}
+.tj2 .dia{background:#fff}
+.tj2 .dia .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.tj2 .clocks{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;background:var(--tj-sunk);padding:14px;border-radius:22px;position:relative}
+.tj2 .clocks .live{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tj-mut);padding:0 4px 2px}
+.tj2 .clocks .live i{width:8px;height:8px;border-radius:50%;background:#3fb26a;animation:tjpulse 1.6s infinite}
+@keyframes tjpulse{0%{box-shadow:0 0 0 0 rgba(63,178,106,.5)}70%{box-shadow:0 0 0 7px rgba(63,178,106,0)}100%{box-shadow:0 0 0 0 rgba(63,178,106,0)}}
+.tj2 .clock{background:#fff;border:1px solid var(--tj-line);border-radius:16px;padding:12px 14px;transition:.2s}
+.tj2 .clock .c{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .clock .t{display:block;font-size:26px;font-weight:800;color:var(--tj-ink);direction:ltr;text-align:right;font-variant-numeric:tabular-nums;line-height:1.2}
+.tj2 .clock .t small{font-size:14px;font-weight:600;color:var(--tj-mut)}
+.tj2 .clock .s{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px}
+.tj2 .clock.on{border-color:var(--tj-red-400);background:var(--tj-tint)}
+.tj2 .clock.on .s{color:var(--tj-red-600);font-weight:600}
+.tj2 .dia ul{list-style:none;padding:0;margin:18px 0 24px;display:grid;gap:10px}
+.tj2 .dia li{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;color:var(--tj-ink-2)}
+.tj2 .dia li::before{content:"";width:22px;height:22px;flex:none;border-radius:50%;background:var(--tj-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c83f49' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L20 7'/></svg>") center/12px no-repeat;margin-top:3px}
+.tj2 .dia .orbit{width:110px;margin-bottom:6px}
+.tj2 .mag{background:var(--tj-sunk)}
+.tj2 .mag-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:14px;margin-top:28px}
+.tj2 .art-card{background:#fff;border:1px solid var(--tj-line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:.2s}
+.tj2 .art-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .art-card img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.tj2 .art-card .b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tj2 .art-card .k{font-size:12px;color:var(--tj-red);font-weight:700}
+.tj2 .art-card h3{font-size:15px;line-height:1.6}
+.tj2 .art-card p{font-size:13px;color:var(--tj-mut);line-height:1.8;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .art-card.big img{aspect-ratio:16/9}
+.tj2 .art-card.big h3{font-size:19px}
+.tj2 .today{margin-top:16px;background:#fff;border:1px dashed var(--tj-red-400);border-radius:16px;padding:14px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.tj2 .today .k{font-size:12.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .today a{font-weight:600;color:var(--tj-ink)}
+.tj2 .today a:hover{color:var(--tj-red)}
+.tj2 .today .cnt{margin-inline-start:auto;font-size:13px;color:var(--tj-mut)}
+.tj2 .ig{background:#fff;overflow:hidden}
+.tj2 .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:38px;padding:10px 0 16px}
+.tj2 .pola{background:#fff;border:1px solid var(--tj-line);border-radius:6px;padding:12px 12px 16px;box-shadow:0 18px 40px -22px rgba(14,14,14,.35);transition:.25s;position:relative;display:block}
+.tj2 .pola:nth-child(1){transform:rotate(-2deg)}
+.tj2 .pola:nth-child(2){transform:rotate(1.2deg) translateY(10px)}
+.tj2 .pola:nth-child(3){transform:rotate(-1deg)}
+.tj2 .pola:hover{transform:rotate(0) translateY(-6px);z-index:2;border-color:var(--tj-red-400)}
+.tj2 .pola .shot{aspect-ratio:4/5;overflow:hidden;border-radius:3px;background:var(--tj-sunk)}
+.tj2 .pola .shot img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.tj2 .pola:hover .shot img{transform:scale(1.03)}
+.tj2 .pola .cap{font-size:13.5px;color:var(--tj-ink-2);line-height:1.8;margin:12px 4px 10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .pola .who{display:flex;align-items:center;gap:10px;margin:0 4px}
+.tj2 .pola .who img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--tj-tint)}
+.tj2 .pola .who b{display:block;font-size:13px;color:var(--tj-ink);direction:ltr;text-align:right}
+.tj2 .pola .who small{display:block;font-size:11.5px;color:var(--tj-mut)}
+.tj2 .pola .who .f{margin-inline-start:auto;font-size:11.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .pola .tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-2deg);width:70px;height:20px;background:rgba(242,193,78,.6);border-radius:2px}
+.tj2 .org{background:var(--tj-sunk)}
+.tj2 .org .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center}
+.tj2 .org .logos{display:flex;gap:28px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.tj2 .org .logos img{height:34px;width:auto;opacity:.9}
+.tj2 .faq{background:#fff}
+.tj2 .faq-list{max-width:820px;margin:26px auto 0;display:grid;gap:10px}
+.tj2 details{border:1px solid var(--tj-line);border-radius:14px;background:#fff;padding:0 20px;transition:border-color .2s,background .2s}
+.tj2 details[open]{border-color:var(--tj-red-400);background:var(--tj-tint-2)}
+.tj2 summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:700;color:var(--tj-ink);font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;outline:none}
+.tj2 summary:focus{outline:none}
+.tj2 summary:focus-visible{outline:2px solid var(--tj-red-400);outline-offset:6px;border-radius:8px}
+.tj2 summary::-webkit-details-marker{display:none}
+.tj2 summary::after{content:"";width:9px;height:9px;border-inline-start:2px solid var(--tj-red);border-block-end:2px solid var(--tj-red);transform:rotate(-45deg);transition:transform .25s;flex:none;margin-inline-start:6px}
+.tj2 details[open] summary::after{transform:rotate(45deg)}
+.tj2 details .ans{overflow:hidden}
+.tj2 details p{padding:0 0 18px;font-size:15px;line-height:1.95;color:var(--tj-soft)}
+.tj2 details p a{color:var(--tj-red);font-weight:600}
+.tj2 .berry{background:var(--tj-tint);text-align:center}
+.tj2 .berry img{width:100px;margin:0 auto 16px;animation:tjfloat2 5s ease-in-out infinite}
+@keyframes tjfloat2{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(4deg) translateY(-6px)}}
+.tj2 .berry .h2{font-size:clamp(23px,3vw,34px)}
+.tj2 .berry .lede{margin:10px auto 24px}
+.tj2 .berry .ctas{justify-content:center}
+.tj2 .berry .small{font-size:13px;color:var(--tj-mut);margin-top:14px}
+.wp-block-post-content>.tj2.alignfull{max-width:none;width:auto}
+@media (max-width:1024px){
+.tj2 .eco-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .how-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .std{grid-template-columns:repeat(2,1fr)}
+.tj2 .mag-grid{grid-template-columns:1fr 1fr}
+.tj2 .art-card.big{grid-column:1/-1}
+.tj2 .ig-grid{gap:18px}
+.tj2 .school .wrap{grid-template-columns:1fr}
+.tj2 .org .wrap{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+.tj2{font-size:16px}
+.tj2 section{padding-block:40px}
+.tj2 .hero{padding-block:16px 32px}
+.tj2 .hero .wrap{grid-template-columns:1fr;gap:6px}
+.tj2 .hero .art{order:-1;justify-content:center}
+.tj2 .hero .art img{max-width:190px}
+.tj2 .hero h1{font-size:26px;margin:8px 0 12px}
+.tj2 .hero .lede{font-size:15px;margin-bottom:18px}
+.tj2 .ctas .btn{flex:1;min-height:44px;font-size:15px;padding:8px 14px}
+.tj2 .nums{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:22px;padding-top:18px}
+.tj2 .nums b{font-size:20px}.tj2 .nums span{font-size:12px}
+.tj2 .eco-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}
+.tj2 .eco-grid::-webkit-scrollbar{display:none}
+.tj2 .eco-card{flex:0 0 78%;scroll-snap-align:start}
+.tj2 .eco-card .pic{height:140px}
+.tj2 .tl-item{width:220px}
+.tj2 .svc-list{grid-template-columns:1fr;gap:0;padding:4px 16px}
+.tj2 .svc-row{padding:12px 0;gap:12px}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:1px solid var(--tj-line)}
+.tj2 .svc-row:last-child{border-bottom:0}
+.tj2 .svc-row img{width:32px;height:32px}
+.tj2 .svc-row b{font-size:15px}.tj2 .svc-row span{font-size:12.5px}
+.tj2 .chips{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
+.tj2 .chips::-webkit-scrollbar{display:none}
+.tj2 .chip{white-space:nowrap;flex:none}
+.tj2 .how-grid{grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.tj2 .how-step{padding:20px 12px 14px}
+.tj2 .how-step img{width:36px;height:36px}
+.tj2 .how-step h3{font-size:14.5px}
+.tj2 .how-step p{font-size:12.5px;line-height:1.75}
+.tj2 .how-note{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;text-align:right}
+.tj2 .thc{width:138px}
+.tj2 .std{grid-template-columns:1fr 1fr;gap:8px}
+.tj2 .std>div{flex-direction:column;text-align:center;gap:6px;padding:12px 8px}
+.tj2 .std b{font-size:13px}.tj2 .std span{font-size:11.5px}
+.tj2 .supc{width:200px}
+.tj2 .map{padding:12px;border-radius:18px}
+.tj2 .map text{font-size:18px}.tj2 .map text.sea{font-size:15px}
+.tj2 .map .de{left:10px;top:10px;bottom:auto;padding:6px 10px;font-size:12px}
+.tj2 .dia .wrap{grid-template-columns:1fr;gap:22px}
+.tj2 .clocks{grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.tj2 .clock{padding:10px}.tj2 .clock .t{font-size:19px}.tj2 .clock .t small{font-size:11px}.tj2 .clock .s{font-size:10.5px}
+.tj2 .mag-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:20px}
+.tj2 .mag-grid::-webkit-scrollbar{display:none}
+.tj2 .art-card{flex:0 0 76%;scroll-snap-align:start}
+.tj2 .art-card.big img{aspect-ratio:16/10}
+.tj2 .art-card.big h3{font-size:15px}
+.tj2 .today .cnt{display:none}
+.tj2 .ig-grid{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 6px 16px;scrollbar-width:none}
+.tj2 .ig-grid::-webkit-scrollbar{display:none}
+.tj2 .pola{flex:0 0 76%;scroll-snap-align:center}
+.tj2 .pola:nth-child(n){transform:none}
+.tj2 .org .logos{gap:18px}.tj2 .org .logos img{height:26px}
+.tj2 .berry .ctas .btn{flex:1 1 100%}
+.tj2 .arrows{display:none}
+}
+.tj2 .map{max-width:620px}
+.tj2 .map .mi{position:relative}
+.tj2 .map .mi svg{width:100%;height:auto;display:block}
+.tj2 .map .mp{--pin:20px;position:absolute;transform:translate(-50%,calc(-1 * var(--pin)));text-align:center;line-height:1.2;pointer-events:none;width:max-content}
+.tj2 .map .mp img{display:block;margin:0 auto 2px;width:var(--pin);height:var(--pin);object-fit:contain;animation:tjbob 3.2s ease-in-out infinite;transform-origin:50% 100%}
+.tj2 .map .mp b{display:block;font-size:13.5px;font-weight:700;color:var(--tj-ink);text-shadow:0 0 6px var(--tj-sunk),0 0 2px var(--tj-sunk)}
+.tj2 .map .mp.big{--pin:30px}
+.tj2 .map .mp.big b{font-size:15px}
+.tj2 .map .mp.up{display:flex;flex-direction:column-reverse;transform:translate(-50%,calc(-1 * var(--pin) - 1.3em))}
+.tj2 .map .mp.up img{margin:2px auto 0}
+.tj2 .map .mp.lw b{position:absolute;right:calc(100% + 4px);top:calc(var(--pin) - 1.2em)}
+.tj2 .map .mp.d1 img{animation-delay:-.7s}
+.tj2 .map .mp.d2 img{animation-delay:-1.4s}
+.tj2 .map .mp.d3 img{animation-delay:-2.1s}
+.tj2 .map .mp.d4 img{animation-delay:-2.8s}
+.tj2 .map .sea{position:absolute;transform:translate(-50%,-50%);font-size:12.5px;color:var(--tj-mut);white-space:nowrap;pointer-events:none}
+.tj2 .clock.on{border-color:#bfe0cb;background:#f3faf5}
+.tj2 .clock.on .s{color:#2e8b57;font-weight:600}
+.tj2 .thc .loc{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--tj-soft);background:var(--tj-sunk);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .loc svg{width:11px;height:11px;flex:none;color:var(--tj-mut)}
+.tj2 .thc .sp{min-height:3.1em}
+.tj2 .thc .sch{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:#fff;background:var(--tj-red);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .sch svg{width:10px;height:10px}
+.tj2 .thc .pen{top:auto;bottom:8px;right:8px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:block}
+.tj2 .axes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.tj2 .axes>div{background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:20px 20px 22px;transition:.2s}
+.tj2 .axes>div:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .axes i{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--tj-tint);color:var(--tj-red);margin-bottom:12px}
+.tj2 .axes i svg{width:20px;height:20px}
+.tj2 .axes b{display:block;font-size:16px;color:var(--tj-ink);margin-bottom:6px}
+.tj2 .axes p{font-size:14px;color:var(--tj-soft);line-height:1.9;margin:0}
+.tj2 .ring{margin-top:14px;background:var(--tj-ink);color:#fff;border-radius:18px;padding:18px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tj2 .ring b{font-size:22px;color:#fff;white-space:nowrap}
+.tj2 .ring span{font-size:14.5px;color:rgba(255,255,255,.72);line-height:1.9;flex:1;min-width:220px}
+.tj2 .ring .dot{width:9px;height:9px;border-radius:50%;background:var(--tj-yellow);flex:none;min-width:0}
+.tj2 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:34px;position:relative}
+.tj2 .steps::before{content:"";position:absolute;top:19px;right:10%;left:10%;height:2px;background:var(--tj-line)}
+.tj2 .steps>div{text-align:center;padding:0 8px;position:relative}
+.tj2 .steps i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid var(--tj-red-400);color:var(--tj-red);font-style:normal;font-weight:800;font-size:14px;margin:0 auto 12px;position:relative;z-index:1}
+.tj2 .steps>div:last-child i{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .steps b{display:block;font-size:14.5px;color:var(--tj-ink);margin-bottom:4px}
+.tj2 .steps span{display:block;font-size:12.5px;color:var(--tj-mut);line-height:1.8}
+.tj2 .school .ctas{justify-content:center;margin-top:30px}
+.tj2 .org .logos img{height:30px}
+.tj2 .org .logos img.dk{height:26px}
+@media (max-width:1024px){
+.tj2 .axes{grid-template-columns:1fr}
+.tj2 .steps{grid-template-columns:1fr 1fr 1fr;gap:22px 0}
+.tj2 .steps::before{display:none}
+}
+@media (max-width:760px){
+.tj2 .map .mp b{font-size:11.5px}
+.tj2 .map .mp.big b{font-size:12.5px}
+.tj2 .map .mp{--pin:15px}
+.tj2 .map .mp.big{--pin:22px}
+.tj2 .map .sea{font-size:10.5px}
+.tj2 .steps{grid-template-columns:1fr 1fr;gap:20px 0}
+.tj2 .ring{padding:16px 18px;gap:10px}
+.tj2 .ring b{font-size:18px}
+}
+.tj2 .sup{background:var(--tj-tint-2)}
+.tj2 .supc{background:#fff;width:250px;padding:18px}
+.tj2 .supc:hover{background:#fff}
+.tj2 .supc img{width:76px;height:92px;border-radius:14px}
+.tj2 .supc b{font-size:15px}
+.tj2 .school .wrap{display:grid}
+.tj2 .school{background:#fff}
+.tj2 .path div{background:var(--tj-sunk)}
+.tj2 .thc .meta{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px;min-height:24px}
+.tj2 .thc .loc,.tj2 .thc .sch,.tj2 .thc .pen{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;margin:0;line-height:1.7;font-weight:600;top:auto;right:auto;bottom:auto}
+.tj2 .thc .loc{background:var(--tj-sunk);color:var(--tj-soft);font-weight:500}
+.tj2 .thc .sch{background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .thc .pen{background:#fdf3d6;color:#6b4f00}
+.tj2 .thc .loc svg,.tj2 .thc .sch svg,.tj2 .thc .pen svg{width:11px;height:11px}
+</style>
+
+<style>
+#tj2 .abt-intro{padding:64px 0 30px;text-align:center}
+#tj2 .abt-intro .eyebrow{margin-inline:auto}
+#tj2 .abt-intro h1{font-size:clamp(28px,4vw,50px);line-height:1.4;margin:6px auto 16px;max-width:20ch;color:var(--tj-ink);font-weight:800}
+#tj2 .abt-intro h1 em{font-style:normal;color:var(--tj-red)}
+#tj2 .abt-intro .lede{margin-inline:auto;max-width:60ch}
+#tj2 .abt-intro .nums{justify-content:center;border-top:1px solid var(--tj-line);border-bottom:1px solid var(--tj-line);padding:20px 0;margin-top:34px}
+#tj2 .clinic-gal{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+#tj2 .clinic-gal figure{margin:0}
+#tj2 .clinic-gal img{width:100%;height:200px;object-fit:cover;border-radius:16px;display:block}
+#tj2 .clinic-cap{color:var(--tj-mut);font-size:15px;line-height:1.9;max-width:62ch;margin:20px auto 0;text-align:center}
+#tj2 .abt-close{padding:60px 0}
+#tj2 .abt-cta{background:var(--tj-ink);border-radius:24px;padding:46px 34px;text-align:center}
+#tj2 .abt-cta h2{color:#fff;font-size:clamp(22px,2.6vw,32px);margin:0 0 10px;font-weight:800}
+#tj2 .abt-cta p{color:#c9c9cf;max-width:56ch;margin:0 auto 22px;font-size:16px;line-height:1.9}
+#tj2 .abt-cta .ctas{justify-content:center}
+#tj2 .abt-foot{margin-top:34px;text-align:center;color:var(--tj-mut);font-size:14.5px;line-height:2}
+#tj2 .abt-foot a{color:var(--tj-red);text-decoration:none}
+#tj2 .abt-foot b{color:var(--tj-ink)}
+@media(max-width:1024px){#tj2 .clinic-gal{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){#tj2 .clinic-gal{grid-template-columns:1fr}}
+</style>
+<div class="tj2 alignfull" id="tj2">
+
+<section class="abt-intro" id="about-top">
+<div class="wrap">
+<span class="eyebrow">درباره‌ی تجربه</span>
+<h1>ما یک اپ رزرو نیستیم؛ یک <em>اکوسیستم درمانی</em> هستیم که تراپیست‌ها ساخته‌اند</h1>
+<p class="lede">مرکز تجربه زندگی از تابستان ۱۳۹۸ در تهران شروع شد و امروز یک کلینیک حضوری، یک مدرسه‌ی تربیت تراپیست، جمعی از سوپروایزرها و یک مجله‌ی تألیفی است. این صفحه روایت همان مسیر است؛ اینکه تجربه از کجا آمد و چرا این‌طور ساخته شد.</p>
+<div class="nums" aria-label="تجربه در یک نگاه">
+<div><b data-count="100000" data-suffix="+">۱۰۰،۰۰۰+</b><span>جلسه</span></div>
+<div><b data-count="150" data-suffix="+">۱۵۰+</b><span>تراپیست تأییدشده</span></div>
+<div><b data-count="12" data-suffix="+">۱۲+</b><span>سوپروایزر</span></div>
+<div><b data-count="6">۶</b><span>شهر حضوری</span></div>
+<div><b data-count="5">۵</b><span>کشور</span></div>
+</div>
+</div>
+</section>
+<section class="tl" id="story">
+<div class="wrap">
+<div class="head rv">
+<div><span class="eyebrow">داستان تجربه</span><h2 class="h2">از یک اتاق تا یک اکوسیستم</h2><p class="lede">تجربه بی‌تبلیغ رشد کرده است؛ با ارجاع مراجعانی که حالشان بهتر شد و درمانگرانی که ماندند.</p></div>
+<div class="arrows" data-for="tlTrack"><button type="button" aria-label="قبلی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg></button><button type="button" aria-label="بعدی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></button></div>
+</div>
+<div class="tl-line"></div>
+<div class="hs tl-track" id="tlTrack">
+<div class="tl-item"><span class="y">تابستان ۱۳۹۸</span><h3>شروع در تهران</h3><p>مرکز تجربه زندگی با چند اتاق درمان و چند تراپیست تحلیلی کار خود را آغاز می‌کند.</p></div>
+<div class="tl-item"><span class="y">۱۳۹۹</span><h3>تراپی آنلاین</h3><p>با همه‌گیری، جلسات به فضای آنلاین می‌روند و اولین مراجعان خارج از تهران و خارج از ایران می‌آیند.</p></div>
+<div class="tl-item"><span class="y">۱۴۰۰</span><h3>مدرسه تجربه زندگی</h3><p>آموزش روانکاوی با سیلابس‌های مبتنی بر IPA شروع می‌شود؛ اساتید مدرسه همان سوپروایزرهای کلینیک‌اند.</p></div>
+<div class="tl-item"><span class="y">۱۴۰۱</span><h3>مجله و پلتفرم</h3><p>مجله‌ی تجربه با مقالات تألیفی و پلتفرم مچ‌میکینگ راه می‌افتد.</p></div>
+<div class="tl-item"><span class="y">۱۴۰۲</span><h3>تجربه پارتنرز</h3><p>همکاری با کلینیک‌های معتبر در مشهد، اصفهان، کرج و نور برای جلسات حضوری.</p></div>
+<div class="tl-item"><span class="y">۱۴۰۳</span><h3>تجربه سازمانی</h3><p>سازمان‌ها سلامت روان کارکنانشان را به تجربه می‌سپارند.</p></div>
+<div class="tl-item"><span class="y">۱۴۰۴</span><h3>فراتر از مرز</h3><p>تراپیست‌های مقیم آلمان، انگلیس، آمریکا و کانادا و اولین پارتنر حضوری در آلمان.</p></div>
+<div class="tl-item now"><span class="y">۱۴۰۵</span><h3>۱۰۰ هزار جلسه</h3><p>و هنوز همان اصل اول: هیچ تراپیستی بدون مصاحبه، سوپرویژن و درمان شخصی وارد تجربه نمی‌شود.</p></div>
+</div>
+</div>
+</section>
+<section class="eco" id="eco">
+<div class="wrap">
+<div class="center rv">
+<span class="eyebrow">اکوسیستم تجربه</span>
+<h2 class="h2">چهار بازو، یک بدنه</h2>
+<p class="lede">هر بخش تجربه از بخش دیگر تغذیه می‌کند: مدرسه تراپیست می‌سازد، سوپروایزرها کیفیتش را نگه می‌دارند، کلینیک‌ها درمان را حضوری می‌کنند و مجله همه‌ی این دانش را با شما در میان می‌گذارد. پلتفرم فقط درِ ورودی است.</p>
+</div>
+<div class="eco-grid">
+<a class="eco-card rv" href="/therapy/"><div class="pic"><img src="/wp-content/uploads/2026/09/tjl-sc-hero-900.webp" alt="کلینیک حضوری مرکز تجربه زندگی در تهران" loading="lazy"></div><span class="n">کلینیک تجربه</span><h3>درمان، آنلاین و حضوری</h3><p>۱۵۰+ تراپیست در رویکردهای تحلیلی، شناختی و هیجان‌مدار؛ با معارفه‌ی رایگان و امکان تغییر تراپیست بدون هزینه.</p><span class="go">خدمات کلینیک <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></span></a>
+<a class="eco-card rv" href="/school/"><div class="pic"><img src="/wp-content/uploads/2026/09/tjl-feat-intro.webp" alt="پلتفرم آنلاین تجربه برای رزرو و مدیریت جلسات تراپی" loading="lazy"></div><span class="n">مدرسه تجربه زندگی</span><h3>جایی که تراپیست ساخته می‌شود</h3><p>آموزش روانکاوی با سیلابس‌های مبتنی بر IPA؛ دانش‌آموخته‌های مدرسه، تراپیست‌های فردای کلینیک‌اند.</p><span class="go">درباره‌ی مدرسه <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></span></a>
+<a class="eco-card rv" href="/mag/"><div class="pic"><img src="/wp-content/uploads/2026/09/tjl-ed-hero-900.webp" alt="مدرسه تجربه زندگی، آموزش روانکاوی" loading="lazy"></div><span class="n">مجله تجربه</span><h3>۲۶۷ مقاله‌ی تألیفی</h3><p>زندگی‌نامه‌ها، مفاهیم روانکاوی، تحلیل فیلم و کتاب؛ همه نوشته و راستی‌آزمایی‌شده به دست تراپیست‌های تجربه.</p><span class="go">خواندن مجله <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></span></a>
+<a class="eco-card rv" href="#cities"><div class="pic"><img src="/wp-content/uploads/2026/09/tjl-hero-right.webp" alt="تراپی فارسی‌زبانان خارج از ایران" loading="lazy"></div><span class="n">تجربه پارتنرز</span><h3>فضای حضوری در شهر شما</h3><p>کلینیک خودمان در تهران و کلینیک‌های پارتنر در مشهد، اصفهان، کرج، نور و آلمان؛ با همان تراپیست‌ها و همان استانداردها.</p><span class="go">نقشه‌ی شهرها <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></span></a>
+</div>
+</div>
+</section>
+
+<section class="th" id="criteria" style="padding-block:70px">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">استاندارد تجربه</span><h2 class="h2">هیچ تراپیستی بدون این چهار معیار وارد نمی‌شود</h2><p class="lede">همین سخت‌گیری، تفاوت یک فهرست اسم با یک کلینیک واقعی است. هر تراپیست پیش از ورود این مسیر را طی می‌کند و بعد از ورود هم زیر نظارت می‌ماند.</p></div>
+<div class="std rv">
+<div><img src="/wp-content/uploads/2026/09/tjl-crit-science.webp" alt="معیار اول: مصاحبه‌ی علمی تراپیست" loading="lazy"><div><b>مصاحبه‌ی علمی</b><span>سنجش دانش نظری و بالینی</span></div></div>
+<div><img src="/wp-content/uploads/2026/09/tjl-crit-roleplay.webp" alt="معیار دوم: شبیه‌سازی جلسه" loading="lazy"><div><b>شبیه‌سازی جلسه</b><span>مصاحبه‌ی عملی (Role Playing)</span></div></div>
+<div><img src="/wp-content/uploads/2026/09/tjl-crit-personal.webp" alt="معیار سوم: درمان شخصی تراپیست" loading="lazy"><div><b>درمان شخصی تراپیست</b><span>تجربه‌ی بلندمدت روی کاناپه</span></div></div>
+<div><img src="/wp-content/uploads/2026/09/tjl-crit-supervision.webp" alt="معیار چهارم: نظارت بالینی مداوم" loading="lazy"><div><b>نظارت بالینی مداوم</b><span>سوپرویژن متناسب با رویکرد</span></div></div></div>
+</div>
+</section>
+<section class="sup" id="supervisors">
+<div class="wrap">
+<div class="head rv">
+<div><span class="eyebrow">سرمایه‌ی تجربه</span><h2 class="h2">سوپروایزرهایی که پشت هر جلسه ایستاده‌اند</h2><p class="lede">تراپیست‌های تجربه زیر نظر اساتیدی کار می‌کنند که خودشان سال‌ها درمانگر بوده‌اند و در دانشگاه درس داده‌اند. همین افراد اساتید مدرسه‌ی تجربه هم هستند؛ کیفیتی که در کلاس آموزش می‌دهند، در اتاق درمان هم نگه داشته می‌شود.</p></div>
+<div class="arrows" data-for="supTrack"><button type="button" aria-label="قبلی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg></button><button type="button" aria-label="بعدی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></button></div>
+</div>
+<div class="hs" id="supTrack">
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-01.webp" alt="پریس تنظیفی" loading="lazy"><div><b>پریس تنظیفی</b><span class="ap">روانکاوی لکانی</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-02.webp" alt="دکتر مهدیه عطری‌فرد" loading="lazy"><div><b>دکتر مهدیه عطری‌فرد</b><span class="ap">CBT و طرحواره‌درمانی</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-03.webp" alt="دکتر زهرا قنبری" loading="lazy"><div><b>دکتر زهرا قنبری</b><span class="ap">رویکرد تحلیلی</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-04.webp" alt="دکتر نرگس شریف‌زاده" loading="lazy"><div><b>دکتر نرگس شریف‌زاده</b><span class="ap">روانپزشک</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-05.webp" alt="دکتر عدنان ثابت" loading="lazy"><div><b>دکتر عدنان ثابت</b><span class="ap">رویکرد تحلیلی</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-06.webp" alt="دکتر مصطفی طوبائی" loading="lazy"><div><b>دکتر مصطفی طوبائی</b><span class="ap">هیجان‌مدار (EFT)</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-muyia.webp" alt="دکتر پیمان طاهری" loading="lazy"><div><b>دکتر پیمان طاهری</b><span class="ap">هیجان‌مدار (EFT)</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-09.webp" alt="دکتر مهرناز یکتا" loading="lazy"><div><b>دکتر مهرناز یکتا</b><span class="ap">رویکرد تحلیلی</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-10.webp" alt="دکتر رضا کریمی" loading="lazy"><div><b>دکتر رضا کریمی</b><span class="ap">CBT</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-11.webp" alt="شهره فراهانی" loading="lazy"><div><b>شهره فراهانی</b><span class="ap">رویکرد تحلیلی</span></div></div>
+</div>
+</div>
+</section>
+<section class="cities" id="cities">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">جلسات حضوری</span><h2 class="h2">کلینیک تجربه در تهران، و پنج شهر دیگر</h2><p class="lede">کلینیک تجربه در میدان ونک تهران، کلینیک خودمان است. با تجربه پارتنرز، همین استاندارد به کلینیک‌های معتبر شهرهای دیگر می‌رسد؛ تراپیست، پرونده و پذیرش همچنان یک‌جا در تجربه می‌ماند.</p></div>
+<div class="map rv">
+<div class="mi">
+<svg viewBox="0 0 480 436" aria-label="نقشه‌ی شهرهای حضوری تجربه" role="img">
+<defs><filter id="tjMapSh" x="-5%" y="-5%" width="110%" height="115%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#0e0e0e" flood-opacity=".08"/></filter></defs>
+<path class="land" filter="url(#tjMapSh)" d="M245.0,81.4 L266.0,75.9 L283.1,59.7 L299.1,60.5 L309.6,55.2 L326.6,57.8 L353.1,72.2 L372.2,75.3 L399.6,100.5 L417.5,101.5 L419.6,125.4 L403.2,181.4 L413.6,185.6 L403.4,201.2 L411.3,223.8 L413.1,241.9 L431.3,246.6 L433.2,264.9 L411.5,290.7 L423.4,305.6 L433.0,322.7 L455.9,335.2 L456.6,360.2 L468.0,364.8 L470.0,377.9 L435.5,392.6 L426.4,425.6 L355.3,410.5 L328.2,406.8 L318.0,372.0 L306.6,366.9 L288.2,372.0 L264.0,385.7 L234.7,376.3 L210.6,354.5 L187.5,346.4 L171.5,319.5 L153.8,281.6 L140.9,286.2 L125.7,276.8 L116.8,287.9 L103.5,273.0 L103.3,257.8 L95.6,257.8 L99.6,237.3 L87.2,215.7 L57.9,200.1 L41.3,173.1 L46.9,151.0 L58.9,141.2 L57.1,124.6 L41.4,116.1 L25.9,82.2 L12.8,59.4 L17.5,50.7 L10.0,18.1 L26.4,10.0 L30.2,20.7 L42.3,33.8 L58.7,37.6 L67.4,36.8 L95.6,15.8 L104.6,13.7 L111.7,22.0 L103.4,36.1 L118.4,51.0 L124.3,49.5 L131.9,70.5 L154.6,76.4 L171.3,90.7 L205.3,95.5 L242.7,88.0 L245.0,81.4 Z"/>
+</svg>
+<span class="sea" style="left:39%;top:12%">دریای خزر</span>
+<span class="sea" style="left:38%;top:84%">خلیج فارس</span>
+<span class="mp big" style="left:38.4%;top:28.5%"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt=""><b>تهران</b></span>
+<span class="mp d1 lw" style="left:33.8%;top:26%"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt=""><b>کرج</b></span>
+<span class="mp d2 up" style="left:41.6%;top:24.3%"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt=""><b>نور</b></span>
+<span class="mp d3" style="left:79.4%;top:24.6%"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt=""><b>مشهد</b></span>
+<span class="mp d4" style="left:39.8%;top:48.3%"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt=""><b>اصفهان</b></span>
+</div>
+<div class="de"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" loading="lazy"><span>آلمان<small>پارتنر حضوری در اروپا</small></span></div>
+</div>
+
+<div class="clinic-gal">
+<figure><img src="/wp-content/uploads/2026/09/tajrobeh-clinic-lounge-view.jpg" alt="فضای نشیمن کلینیک تجربه با ویو شهر تهران" loading="lazy"></figure>
+<figure><img src="/wp-content/uploads/2026/09/tajrobeh-clinic-reading-nook.jpg" alt="گوشه‌ی مطالعه‌ی کلینیک تجربه" loading="lazy"></figure>
+<figure><img src="/wp-content/uploads/2026/09/tajrobeh-clinic-library-corner.jpg" alt="گوشه‌ی کتابخانه‌ی کلینیک تجربه" loading="lazy"></figure>
+<figure><img src="/wp-content/uploads/2026/09/tajrobeh-clinic-bathroom-detail.jpg" alt="جزئیات طراحی داخلی کلینیک تجربه" loading="lazy"></figure>
+</div>
+<p class="clinic-cap">کلینیک تجربه در میدان ونک تهران، کلینیک خودمان است. در فرایند تراپی کوچک‌ترین جزئیات معماری محیط هم اهمیت دارند؛ طراحی داخلی این فضا نه‌فقط روان‌شناسانه، که معمارانه است.</p>
+<div class="center rv" style="margin-top:24px"><a class="btn btn-ghost" href="/get-therapy/">درخواست جلسه‌ی حضوری</a></div>
+</div>
+</section>
+
+<section class="abt-report" id="report">
+<style>
+.tj2 .abt-report{background:var(--tj-sunk)}
+.tj2 .rep-box{max-width:920px;margin:32px auto 0;background:#fff;border:1px solid var(--tj-line);border-radius:24px;padding:28px 28px 26px}
+.tj2 .rep-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 0 22px}
+.tj2 .rep-stat{background:var(--tj-sunk);border-radius:16px;padding:16px 14px;text-align:center}
+.tj2 .rep-stat b{display:block;font-size:30px;line-height:1.1;color:var(--tj-red);font-weight:800}
+.tj2 .rep-stat span{display:block;margin-top:6px;font-size:13px;color:var(--tj-mut)}
+.tj2 .rep-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.tj2 .rep-foot p{margin:0;font-size:14px;color:var(--tj-mut);max-width:520px}
+@media (max-width:640px){.tj2 .rep-stats{grid-template-columns:1fr 1fr}.tj2 .rep-box{padding:20px 16px}.tj2 .rep-stat b{font-size:24px}}
+</style>
+<div class="wrap">
+<div class="center rv">
+<span class="eyebrow">شفافیت</span>
+<h2 class="h2">گزارش سالانه: چه کسانی، چرا و با چه انتظاری به رواندرمانی می‌آیند</h2>
+<p class="lede">آنچه از ۹ هزار فرم پذیرش و ۴۳ پرسشنامه یاد گرفتیم، بدون نام و بدون شناسه، به‌صورت عمومی منتشر شده است تا پژوهشگران، رسانه‌ها و خود مراجعان بتوانند به آن استناد کنند.</p>
+</div>
+<div class="rep-box rv">
+<div class="rep-stats">
+<div class="rep-stat"><b>۹٬۰۵۷</b><span>فرم پذیرش تحلیل‌شده</span></div>
+<div class="rep-stat"><b>۸۲٪</b><span>مراجعان زن هستند</span></div>
+<div class="rep-stat"><b>۲۵ سال</b><span>میانهٔ سن مراجعان</span></div>
+</div>
+<div class="rep-foot">
+<p>اضطراب، ریشه‌یابی مشکلات و نشخوار فکری پرتکرارترین دلایل مراجعه‌اند؛ روش‌شناسی و قواعد حریم خصوصی داده‌ها در خود گزارش آمده است.</p>
+<a class="btn btn-brand" href="/report/">خواندن گزارش کامل</a>
+</div>
+</div>
+</div>
+</section>
+
+<section class="abt-close">
+<div class="wrap">
+<div class="abt-cta">
+<h2>اگر تا اینجا رسیدید، شاید وقتش باشد</h2>
+<p>چند سؤال کوتاه، پیشنهاد تراپیست متناسب با شرایط شما، و یک جلسه‌ی معارفه‌ی رایگان با خودِ تراپیست. اگر ارتباط شکل نگرفت، تراپیست دیگری معرفی می‌شود.</p>
+<div class="ctas"><a class="btn btn-brand" href="/get-therapy/"><svg viewBox="0 0 13.25 13.25" fill="none" aria-hidden="true"><path d="M7.918 1.918a1 1 0 0 1 1.414 1.414L6.039 6.625l3.293 3.293a1 1 0 0 1-1.414 1.414l-4-4a1 1 0 0 1 0-1.414l4-4Z" fill="currentColor"/></svg>شروع تراپی</a><a class="btn btn-ghost" href="/contact-us/">تماس با ما</a></div>
+</div>
+<div class="abt-foot">
+تجربه را تراپیست‌ها بنا کرده‌اند؛ <a href="/yaserderakhshan/">یاسر درخشان</a> در حال ساختن تجربه است.<br>
+<b>کلینیک تجربه:</b> تهران، میدان ونک، کوچه بیستم گاندی، پلاک ۱۶، واحد ۹<br>
+دارای پروانه‌ی فعالیت از سازمان نظام بهزیستی کشور به شماره‌ی ۷۱۷/۰۰۸/۲۱۰۱۵۲
+</div>
+</div>
+</section>
+</div>
+<script>
+(function(){
+var root=document.getElementById('tj2'); if(!root) return;
+var fa=function(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+var fmt=function(n){return fa(n.toLocaleString('en-US')).replace(/,/g,'،');};
+var rv=root.querySelectorAll('.rv');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -6% 0px'});rv.forEach(function(el){io.observe(el);});}else{rv.forEach(function(el){el.classList.add('in');});}
+var cs=root.querySelectorAll('[data-count]');
+function runCount(el){var end=+el.getAttribute('data-count'),suf=el.getAttribute('data-suffix')||'',t0=null,dur=1400;function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);el.textContent=fmt(Math.round(end*p))+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+/* شمارش متحرک اعداد حذف شد (پرش چیدمان) */
+root.querySelectorAll('.arrows[data-for]').forEach(function(a){var tr=document.getElementById(a.getAttribute('data-for'));if(!tr)return;var b=a.querySelectorAll('button');b[0].addEventListener('click',function(){tr.scrollBy({left:tr.clientWidth*0.8,behavior:'smooth'});});b[1].addEventListener('click',function(){tr.scrollBy({left:-tr.clientWidth*0.8,behavior:'smooth'});});});
+var thTrack=document.getElementById('thTrack'),dots=document.getElementById('thDots');
+function buildDots(){if(!thTrack||!dots)return;var pages=Math.max(1,Math.ceil(thTrack.scrollWidth/thTrack.clientWidth));dots.innerHTML='';if(pages>10){dots.style.display='none';return;}dots.style.display='';for(var i=0;i<pages;i++){dots.appendChild(document.createElement('i'));}updDots();}
+function updDots(){if(!thTrack||!dots)return;var max=thTrack.scrollWidth-thTrack.clientWidth,p=max>0?Math.abs(thTrack.scrollLeft)/max:0,n=dots.children.length,idx=Math.round(p*(n-1));for(var i=0;i<n;i++)dots.children[i].classList.toggle('on',i===idx);}
+if(thTrack){buildDots();thTrack.addEventListener('scroll',updDots,{passive:true});window.addEventListener('resize',buildDots);}
+var filt=document.getElementById('thFilter');
+if(filt){if(thTrack){filt.addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;filt.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});b.classList.add('on');var tag=b.getAttribute('data-tag');thTrack.querySelectorAll('.thc:not(.more)').forEach(function(c){var tags=(c.getAttribute('data-tags')||'').split(' ');var hide=(tag==='all')?false:(tags.indexOf(tag)<0);c.classList.toggle('hide',hide);});thTrack.scrollTo({left:0});buildDots();});}}
+function parts(tz){try{var f=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});var o={};f.formatToParts(new Date()).forEach(function(p){o[p.type]=p.value;});return {h:+o.hour%24,m:+o.minute,s:+o.second};}catch(e){return null;}}
+function tick(){root.querySelectorAll('.clock').forEach(function(c){var p=parts(c.getAttribute('data-tz'));if(!p)return;var t=c.querySelector('.t');var hm=fa(('0'+p.h).slice(-2))+':'+fa(('0'+p.m).slice(-2));var sm=t.querySelector('small');if(!sm){t.textContent='';t.appendChild(document.createTextNode(hm));sm=document.createElement('small');t.appendChild(sm);}else{t.firstChild.nodeValue=hm;}sm.textContent=':'+fa(('0'+p.s).slice(-2));var good=(p.h>=8)?(p.h<23):false;c.classList.toggle('on',good);c.querySelector('.s').textContent=good?'ساعت مناسب جلسه':'وقت استراحت؛ تراپیست برای ساعت شما هست';});}
+tick();setInterval(tick,1000);
+root.querySelectorAll('details').forEach(function(d){var s=d.querySelector('summary'),a=d.querySelector('.ans');if(!s||!a)return;s.addEventListener('click',function(e){e.preventDefault();if(d.hasAttribute('data-anim'))return;d.setAttribute('data-anim','1');if(d.open){var h=a.offsetHeight;a.style.height=h+'px';a.style.transition='height .3s ease';requestAnimationFrame(function(){a.style.height='0px';});setTimeout(function(){d.open=false;a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},300);}else{d.open=true;var h2=a.offsetHeight;a.style.height='0px';a.style.transition='height .32s ease';requestAnimationFrame(function(){a.style.height=h2+'px';});setTimeout(function(){a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},330);}});});
+var arts=[['/mag/زندگی-نامه-ژاک-لکان/','زندگی‌نامه‌ی ژاک لکان'],['/mag/زندگینامه-زیگموند-فروید/','زندگی‌نامه‌ی زیگموند فروید'],['/mag/چگونه-روان-درمانگر-انتخاب-کنیم؟/','چگونه روان‌درمانگر انتخاب کنیم؟'],['/mag/ردفلگهای-تراپیست-و-اهمیت-اصول-حرفه/','ردفلگ‌های تراپیست و اصول حرفه‌ای در اتاق تراپی'],['/mag/سوپرویژن-چیست-و-چرا-مهم-است؟/','سوپرویژن چیست و چرا مهم است؟'],['/mag/رواندرمانی-تحلیلی/','روان‌درمانی تحلیلی چیست؟'],['/mag/زندگینامه-دونالد-وینیکات/','زندگی‌نامه‌ی دونالد وینیکات'],['/mag/مهاجرت-از-دیدگاه-روانکاوی/','مهاجرت از دیدگاه روانکاوی'],['/mag/افسانههای-رایج-درباره-روانکاوی/','افسانه‌های رایج درباره‌ی روانکاوی'],['/mag/اتاق-تراپی-رازها-و-رمزها/','اتاق تراپی: رازها و رمزها'],['/mag/گروهدرمانی-چیست؟/','گروه‌درمانی چیست؟'],['/mag/سلامت-روان-در-مهاجرت/','سلامت روان در مهاجرت؛ چرا به روانشناس هم‌زبان نیاز داریم؟'],['/mag/زندگینامه-کارن-هورنای/','زندگی‌نامه‌ی کارن هورنای'],['/mag/سمپتوم-چیست-تعریف-نشانه-در-روانکاوی/','سمپتوم چیست؟']];
+var tl=document.getElementById('todayLink');if(tl){var day=Math.floor(Date.now()/86400000),a=arts[day%arts.length];tl.href=a[0];tl.textContent=a[1];}
+})();
+
+</script>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"AboutPage","@id":"https://tajrobeh.life/about-us/#webpage","url":"https://tajrobeh.life/about-us/","name":"درباره‌ی مرکز تجربه زندگی","inLanguage":"fa-IR","isPartOf":{"@id":"https://tajrobeh.life/#website"},"about":{"@id":"https://tajrobeh.life/#organization"},"description":"مرکز تجربه زندگی؛ اکوسیستمی برای سلامت روان که تراپیست‌ها ساخته‌اند. کلینیک حضوری در تهران و پنج شهر، مدرسه‌ی تربیت تراپیست، سوپروایزرها و مجله‌ی تألیفی."},{"@type":"MedicalBusiness","@id":"https://tajrobeh.life/#organization","name":"مرکز تجربه زندگی","alternateName":["تجربه","Tajrobeh"],"url":"https://tajrobeh.life/","foundingDate":"2019","founder":{"@type":"Person","name":"یاسر درخشان","url":"https://tajrobeh.life/yaserderakhshan/"},"telephone":"+982191008867","email":"reception@tajrobeh.life","address":{"@type":"PostalAddress","streetAddress":"میدان ونک، کوچه بیستم گاندی، پلاک ۱۶، واحد ۹","addressLocality":"تهران","addressCountry":"IR"},"areaServed":[{"@type":"Country","name":"Iran"},{"@type":"Country","name":"Germany"},{"@type":"Country","name":"United Kingdom"},{"@type":"Country","name":"United States"},{"@type":"Country","name":"Canada"}],"sameAs":["https://instagram.com/tajrobeh.life","https://t.me/tajrobeh_life","https://x.com/tajrobeh_life"]}]}</script>
+<!-- /wp:html -->

@@ -1,0 +1,38 @@
+name: سایت · چک PR
+
+# روی هر PR که /site را عوض کند: نحو PHP و JSON، خط تیره، رمز در خط‌های تازه (site-check.mjs)،
+# و برنامهٔ انتشار با سنجش ناهمخوانی با سایت زنده (site-deploy.mjs plan؛ فقط خواندن با claude-ops).
+on:
+  pull_request:
+    paths:
+      - 'site/**'
+      - '.github/workflows/site-*.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: چک فایل‌ها
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: node site/tools/site-check.mjs
+      # v170.9: در PR رمز وردپرس نیست (رمزها فقط در Environment «production» برای main)؛ مقایسه با سایت زنده بی ورود
+      # و فقط برای اطلاع است. سنجش کامل پیش از نوشتن، در site-deploy روی main انجام می‌شود.
+      - name: برنامهٔ انتشار و ناهمخوانی با سایت زنده (بی ورود)
+        continue-on-error: true
+        env:
+          BEFORE: ${{ github.event.pull_request.base.sha }}
+          AFTER: ${{ github.event.pull_request.head.sha }}
+        run: node site/tools/site-deploy.mjs plan

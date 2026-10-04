@@ -1,0 +1,29 @@
+<script>
+/* Tajrobeh — اصلاح ورودی شماره: ارقام فارسی/عربی به لاتین تبدیل می‌شوند تا اعتبارسنجی رد نکند */
+(function(){
+  var FA="\u06F0\u06F1\u06F2\u06F3\u06F4\u06F5\u06F6\u06F7\u06F8\u06F9";
+  var AR="\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669";
+  function toLatin(s){
+    return String(s).replace(/[\u06F0-\u06F9]/g,function(c){return FA.indexOf(c)})
+                    .replace(/[\u0660-\u0669]/g,function(c){return AR.indexOf(c)})
+                    .replace(/[\s\-()]/g,"");
+  }
+  function fix(el){
+    if(!el) return;
+    var v=toLatin(el.value);
+    if(/^\+?98/.test(v)) v=v.replace(/^\+?98/,"0");
+    if(/^9\d{9}$/.test(v)) v="0"+v;
+    if(v!==el.value){ el.value=v; el.dispatchEvent(new Event("input",{bubbles:true})); }
+  }
+  function isPhone(el){
+    if(!el||el.tagName!=="INPUT") return false;
+    var n=(el.name||"").toLowerCase();
+    return el.type==="tel" || n==="mobile" || n==="phone" || n==="whatsapp";
+  }
+  document.addEventListener("blur", function(e){ if(isPhone(e.target)) fix(e.target); }, true);
+  document.addEventListener("submit", function(e){
+    var f=e.target; if(!f||!f.querySelectorAll) return;
+    [].slice.call(f.querySelectorAll("input")).forEach(function(i){ if(isPhone(i)) fix(i); });
+  }, true);
+})();
+</script>

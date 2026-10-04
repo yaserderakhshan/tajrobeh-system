@@ -1,0 +1,58 @@
+<script>
+/* Tajrobeh — لایه رویدادها. تا وقتی gtag لود نشده هیچ درخواستی نمی‌زند. */
+(function(){
+  function ev(name, params){ try{ if(window.gtag) gtag("event", name, params||{}); }catch(e){} }
+  window.tjTrack = ev;
+  function pageKind(){
+    var p=location.pathname;
+    if(p==="/"||p==="") return "home";
+    if(p.indexOf("/mag/")===0) return p==="/mag/"?"mag_home":"article";
+    if(p.indexOf("/approaches/")===0) return "approach";
+    if(p.indexOf("/therapy/")===0) return "service";
+    if(p.indexOf("/school")===0) return "school";
+    if(p.indexOf("/get-therapy")===0) return "get_therapy";
+    if(p.indexOf("/persian-therapy")===0) return "persian_therapy";
+    if(p.indexOf("/enterprise")===0) return "enterprise";
+    return "other";
+  }
+  var KIND=pageKind();
+  document.addEventListener("click", function(e){
+    var a=e.target.closest && e.target.closest("a"); if(!a) return;
+    var href=a.getAttribute("href")||"";
+    var label=(a.textContent||"").trim().slice(0,60);
+    if(href.indexOf("tajrobeh.life/login")>-1){ ev("cta_start_request",{page_kind:KIND, link_text:label, page_path:location.pathname}); return; }
+    if(href.indexOf("wa.me")>-1){ ev("whatsapp_click",{page_kind:KIND, page_path:location.pathname}); return; }
+    if(href.indexOf("tel:")===0){ ev("phone_click",{page_kind:KIND}); return; }
+    if(href.indexOf("mailto:")===0){ ev("email_click",{page_kind:KIND}); return; }
+    if(/^https?:/.test(href) && href.indexOf(location.hostname)===-1){ ev("outbound_click",{page_kind:KIND, host:(href.split("/")[2]||"")}); return; }
+  }, true);
+  /* عمق مطالعه فقط روی مقاله‌ها */
+  if(KIND==="article"){
+    var marks={25:false,50:false,75:false,100:false};
+    var t0=Date.now();
+    function onScroll(){
+      var h=document.documentElement.scrollHeight-window.innerHeight;
+      if(h<=0) return;
+      var pct=Math.round((window.scrollY/h)*100);
+      [25,50,75,100].forEach(function(m){
+        if(!marks[m] && pct>=m){ marks[m]=true; ev("read_depth",{percent:m, seconds:Math.round((Date.now()-t0)/1000), page_path:location.pathname}); }
+      });
+    }
+    window.addEventListener("scroll", onScroll, {passive:true});
+  }
+  /* ارسال فرم‌های فلوئنت */
+  document.addEventListener("fluentform_submission_success", function(e){
+    var id=""; try{ id=(e.detail&&e.detail.form&&e.detail.form.id)||""; }catch(err){}
+    var now=Date.now(); if(window.__tjLeadAt){ if(now-window.__tjLeadAt<4000){ return; } } window.__tjLeadAt=now;
+    var lm={"6":"school","8":"school","11":"school","3":"b2b","7":"therapy","5":"therapy","9":"therapy","10":"contact"};
+    ev("generate_lead",{form_id:String(id), lead_line:(lm[String(id)]||"other"), page_kind:KIND, page_path:location.pathname});
+  });
+  /* باز شدن کشوهای پرسش‌های پرتکرار */
+  document.addEventListener("toggle", function(e){
+    var d=e.target; if(!d||d.tagName!=="DETAILS"||!d.open) return;
+    if(!d.closest(".faq")) return;
+    var q=(d.querySelector("summary")||{}).textContent||"";
+    ev("faq_open",{question:q.trim().slice(0,80), page_kind:KIND});
+  }, true);
+})();
+</script>

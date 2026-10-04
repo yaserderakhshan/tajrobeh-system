@@ -1,0 +1,377 @@
+<!-- wp:html -->
+<style>
+/* == ydc: scenes from a marriage course (v1) == */
+.ydc{font-family:var(--tj-font);color:var(--tj-soft);direction:rtl;font-size:16.5px;line-height:1.95;--tint:#fbeeef;--tint2:#fdf6f6;--w:860px;overflow-x:clip}
+.ydc *,.ydc *::before,.ydc *::after{box-sizing:border-box}
+.ydc,.ydc *{overflow-wrap:normal;word-break:normal}
+.ydc h1,.ydc h2,.ydc h3,.ydc h4{color:var(--tj-ink);margin:0;line-height:1.55;font-weight:700;text-wrap:balance}
+.ydc p{margin:0}
+.ydc a{color:inherit;text-decoration:none}
+.ydc button{font-family:inherit}
+.ydc .wrap{max-width:var(--w);margin-inline:auto;padding-inline:24px}
+.ydc section{padding-block:clamp(34px,4.5vw,56px);border-top:1px solid var(--tj-line)}
+.ydc section.first{border-top:0;padding-top:clamp(30px,5vw,56px)}
+.ydc .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tj-red);background:var(--tint);padding:5px 13px;border-radius:999px;margin-bottom:12px}
+.ydc .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tj-red)}
+.ydc h1{font-size:clamp(24px,3.2vw,34px);margin-bottom:6px}
+.ydc h1 small{display:block;font-size:.6em;font-weight:400;color:var(--tj-mut);margin-top:4px}
+.ydc .h2{font-size:clamp(21px,2.4vw,28px);margin-bottom:8px}
+.ydc .lede{font-size:16px;color:var(--tj-mut);max-width:62ch;line-height:1.95;margin-bottom:18px}
+.ydc .crumb{font-size:13.5px;color:var(--tj-mut);margin-bottom:14px}
+.ydc .crumb a{color:var(--tj-red-600)}
+.ydc .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ydc .meta span{font-size:12.5px;background:var(--tj-sunk);border-radius:999px;padding:3px 11px;color:var(--tj-mut)}
+.ydc .player{background:#fff;border:1px solid var(--tj-line);border-radius:16px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;position:sticky;top:78px;z-index:20;box-shadow:0 10px 30px -22px rgba(34,34,34,.3)}
+.ydc .play{width:56px;height:56px;border-radius:50%;background:var(--tj-red);border:0;display:grid;place-items:center;cursor:pointer;color:#fff;transition:.2s;flex:none}
+.ydc .play:hover{background:var(--tj-red-600)}
+.ydc .play svg{width:22px;height:22px}
+.ydc .now{min-width:0}
+.ydc .now .t{font-size:15.5px;font-weight:600;color:var(--tj-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ydc .now .s{font-size:12.5px;color:var(--tj-mut);margin-top:2px}
+.ydc .bar{margin-top:10px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:12px;color:var(--tj-mut);font-variant-numeric:tabular-nums}
+.ydc .range{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:99px;background:linear-gradient(to left,var(--tj-red) var(--p,0%),#e4e4e8 var(--p,0%));outline:0;margin:0}
+.ydc .range::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--tj-red)}
+.ydc .range::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--tj-red)}
+.ydc .ctrl{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.ydc .ctrl button{border:1px solid var(--tj-line);background:#fff;border-radius:999px;padding:3px 11px;font-size:12px;cursor:pointer;color:var(--tj-ink-2)}
+.ydc .ctrl button:hover{border-color:var(--tj-red);color:var(--tj-red-600)}
+.ydc .err{font-size:12.5px;color:var(--tj-red-600);margin-top:6px;display:none}
+.ydc .eps{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.ydc .ep{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:#fff;border:1px solid var(--tj-line);border-radius:12px;padding:12px 14px;cursor:pointer;transition:.18s}
+.ydc .ep:hover{border-color:#c9c9ce}
+.ydc .ep.active{border-color:var(--tj-red);background:var(--tint2)}
+.ydc .ep .n{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--tj-sunk);font-weight:600;color:var(--tj-ink-2);font-variant-numeric:tabular-nums}
+.ydc .ep.active .n{background:var(--tj-red);color:#fff}
+.ydc .ep .ti{font-weight:600;font-size:15px;color:var(--tj-ink)}
+.ydc .ep .de{font-size:13px;color:var(--tj-mut);margin-top:1px}
+.ydc .ep .du{font-size:12.5px;color:var(--tj-mut);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ydc .ep .du a{color:var(--tj-mut);margin-inline-start:8px;font-size:11.5px;border:1px solid var(--tj-line);border-radius:999px;padding:1px 8px}
+.ydc .ep .du a:hover{color:var(--tj-red-600);border-color:var(--tj-red)}
+@media (max-width:600px){.ydc .player{top:70px;padding:14px}.ydc .play{width:48px;height:48px}.ydc .ep{grid-template-columns:auto 1fr}.ydc .ep .du{grid-column:2}}
+.ydc .toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-bottom:26px}
+.ydc .toc a{display:flex;gap:8px;align-items:center;border:1px solid var(--tj-line);border-radius:10px;padding:8px 12px;font-size:13.5px;color:var(--tj-ink-2);transition:.18s;background:#fff}
+.ydc .toc a:hover{border-color:var(--tj-red);color:var(--tj-red-600)}
+.ydc .toc a b{font-weight:600;color:var(--tj-red);font-variant-numeric:tabular-nums;min-width:20px}
+.ydc .lesson{border-top:1px solid var(--tj-line);padding-block:30px;scroll-margin-top:170px}
+.ydc .lesson:first-of-type{border-top:0;padding-top:0}
+.ydc .lesson h3{font-size:clamp(19px,2.2vw,23px);margin-bottom:4px}
+.ydc .lesson .tag{font-size:12.5px;color:var(--tj-red);margin-bottom:12px}
+.ydc .lesson p{margin:0 0 14px;max-width:66ch;color:var(--tj-soft)}
+.ydc .lesson p strong{color:var(--tj-ink);font-weight:600}
+.ydc .lesson ul{max-width:66ch;color:var(--tj-soft);padding-inline-start:20px;margin:0 0 14px}
+.ydc .lesson li{margin-bottom:6px}
+.ydc .callout{border-inline-start:3px solid var(--tj-red);background:var(--tint2);border-radius:12px;padding:14px 18px;margin:14px 0;max-width:66ch;color:var(--tj-ink-2)}
+.ydc .quote{background:var(--tj-sunk);border-radius:14px;padding:20px 22px;margin:16px 0;max-width:66ch}
+.ydc .quote p{color:var(--tj-ink);font-size:17px;line-height:2;margin:0}
+.ydc .quote small{display:block;color:var(--tj-mut);font-size:12.5px;margin-top:8px}
+.ydc .qlist{display:grid;gap:8px;margin:14px 0 18px;max-width:66ch}
+.ydc .qlist div{background:#fff;border:1px solid var(--tj-line);border-radius:12px;padding:12px 16px;display:flex;gap:10px;align-items:flex-start}
+.ydc .qlist div::before{content:"?";flex:none;width:26px;height:26px;border-radius:50%;background:var(--tint);color:var(--tj-red);display:grid;place-items:center;font-weight:700;font-size:14px;margin-top:5px}
+.ydc .note{font-size:13.5px;color:var(--tj-mut);background:var(--tj-sunk);border-radius:8px;padding:8px 12px;display:inline-block;margin-bottom:14px}
+.ydc details.acc{border:1px solid var(--tj-line);border-radius:12px;background:#fff;margin:14px 0;max-width:66ch;overflow:hidden}
+.ydc details.acc summary{cursor:pointer;list-style:none;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:600;color:var(--tj-ink)}
+.ydc details.acc summary::-webkit-details-marker{display:none}
+.ydc details.acc summary::after{content:"+";font-size:20px;color:var(--tj-red);transition:.2s;flex:none}
+.ydc details.acc[open] summary::after{transform:rotate(45deg)}
+.ydc details.acc .body{padding:0 18px 18px;border-top:1px solid var(--tj-line);padding-top:14px}
+.ydc details.acc h4{margin:16px 0 6px;font-size:16px}
+.ydc .credit{font-size:13px;color:var(--tj-mut)}
+.ydc .linkcard{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;border:1px solid var(--tj-line);border-radius:12px;padding:12px 16px;max-width:66ch;background:#fff;transition:.18s;margin:12px 0}
+.ydc .linkcard:hover{border-color:var(--tj-red)}
+.ydc .linkcard b{display:block;font-weight:600;color:var(--tj-ink);font-size:15px}
+.ydc .linkcard span{font-size:13px;color:var(--tj-mut)}
+.ydc .linkcard .arr{color:var(--tj-mut);font-size:13px}
+.ydc .pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.ydc .poll{background:#fff;border:1px solid var(--tj-line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.ydc .poll h3{font-size:15.5px;line-height:1.85;font-weight:600;min-height:3.7em}
+.ydc .poll .opts{display:grid;gap:8px}
+.ydc .opt{position:relative;border:1px solid var(--tj-line);border-radius:10px;padding:10px 14px;cursor:pointer;background:#fff;color:var(--tj-ink-2);font-size:14.5px;text-align:start;overflow:hidden;transition:.2s}
+.ydc .opt:hover{border-color:var(--tj-red)}
+.ydc .opt .fill{position:absolute;inset:0;width:0;background:var(--tint);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.ydc .opt .lab{position:relative;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.ydc .opt .pct{font-variant-numeric:tabular-nums;opacity:0;transition:.4s .3s;font-size:13px;color:var(--tj-red-600);font-weight:600}
+.ydc .poll.voted .opt{cursor:default}
+.ydc .poll.voted .opt .pct{opacity:1}
+.ydc .poll.voted .opt.mine{border-color:var(--tj-red)}
+.ydc .poll.voted .opt.mine .lab::after{content:"انتخاب شما";font-size:11px;color:var(--tj-red-600);margin-inline-start:8px}
+.ydc .poll .foot{font-size:12px;color:var(--tj-mut);display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.ydc .poll .foot button{background:none;border:0;color:var(--tj-mut);font-size:12px;cursor:pointer;text-decoration:underline}
+.ydc .back{font-size:14px;color:var(--tj-mut)}
+.ydc .back a{color:var(--tj-red-600)}
+</style>
+
+<div class="ydc alignfull">
+
+<section class="first"><div class="wrap">
+  <div class="crumb"><a href="https://tajrobeh.life/yaserderakhshan/">یاسر درخشان</a> · تحلیل روانکاوانهٔ سریال</div>
+  <h1>سی‌تی اسکن یک رابطه<small>تحلیل روانکاوانهٔ مینی‌سریال «صحنه‌هایی از یک ازدواج» (Scenes from a Marriage)</small></h1>
+  <p class="lede">اگر هر «صحنه»ی این سریال را زیر ذره‌بین روانکاوی بگذاریم، حاصلش شبیه یک عکس سی‌تی اسکن می‌شود: پر از برش‌های مختلف از زوایای یک رابطه. این صفحه همهٔ آن برش‌هاست: هشت قسمت صوتی، متن‌های دوره و نظرسنجی‌هایی که خودتان هم می‌توانید در آن شرکت کنید. این دوره را برای اعضای مدرسهٔ تجربهٔ زندگی و درمانگران کلینیک برگزار کردم.</p>
+  <div class="meta"><span>۸ قسمت صوتی · حدود ۷ ساعت</span><span>۱۲ متن دوره</span><span>۳ نظرسنجی</span><span>HBO, 2021</span></div>
+</div></section>
+
+<section id="podcast"><div class="wrap">
+  <span class="eyebrow">پادکست دوره</span>
+  <h2 class="h2">قسمت‌های صوتی</h2>
+  <p class="lede">پخش‌کننده بالای صفحه می‌ماند و جای پخش هر قسمت را به خاطر می‌سپارد.</p>
+  <div class="player" id="ydcPlayer">
+    <button class="play" id="ydcPlayBtn" aria-label="پخش / توقف">
+      <svg id="ydcIcPlay" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="ydcIcPause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+    </button>
+    <div class="now">
+      <div class="t" id="ydcTitle">قسمتی را انتخاب کنید</div>
+      <div class="s" id="ydcSub">سی‌تی اسکن یک رابطه · یاسر درخشان</div>
+      <div class="bar"><span id="ydcCur">۰:۰۰</span><input class="range" type="range" id="ydcSeek" min="0" max="1000" value="0" aria-label="جای پخش"><span id="ydcDur">۰:۰۰</span></div>
+      <div class="ctrl">
+        <button type="button" data-skip="-15">۱۵ ثانیه عقب</button>
+        <button type="button" data-skip="30">۳۰ ثانیه جلو</button>
+        <button type="button" id="ydcSpd">سرعت ۱×</button>
+        <button type="button" data-step="-1">قسمت قبل</button>
+        <button type="button" data-step="1">قسمت بعد</button>
+      </div>
+      <div class="err" id="ydcErr">فایل صوتی این قسمت هنوز روی سایت قرار نگرفته است.</div>
+    </div>
+  </div>
+  <audio id="ydcAudio" preload="none"></audio>
+  <ol class="eps" id="ydcEps"></ol>
+</div></section>
+
+<section id="texts"><div class="wrap">
+  <span class="eyebrow">متن‌ها</span>
+  <h2 class="h2">متن‌های دوره</h2>
+  <p class="lede">این متن‌ها همراه قسمت‌های صوتی نوشته شده‌اند. پیشنهاد می‌کنم به ترتیب بخوانید؛ هر متن با پرسشی تمام می‌شود که می‌توانید از خودتان بپرسید.</p>
+
+  <nav class="toc" aria-label="فهرست متن‌ها">
+    <a href="#t1"><b>۱</b> سریال چیست و از کجا آمده</a>
+    <a href="#t2"><b>۲</b> قرارداد ما: پرسش، نه پاسخ</a>
+    <a href="#t3"><b>۳</b> چرا از فیلم برای شناخت خودمان استفاده می‌کنیم؟</a>
+    <a href="#t4"><b>۴</b> دفترچهٔ دوره: پل بین فیلم و شما</a>
+    <a href="#t5"><b>۵</b> پرسش اصلی سریال</a>
+    <a href="#t6"><b>۶</b> نقش‌های جنسیتی چیست و چگونه محدودمان می‌کند</a>
+    <a href="#t7"><b>۷</b> مردانگی و زنانگی در رابطهٔ میرا و جاناتان</a>
+    <a href="#t8"><b>۸</b> زندگی بی‌نهایت داستان است</a>
+    <a href="#t9"><b>۹</b> روانکاوی و روایت</a>
+    <a href="#t10"><b>۱۰</b> به بهانهٔ یک صحنه: تماشای پورن</a>
+    <a href="#t11"><b>۱۱</b> نکته‌ای از پشت صحنه</a>
+    <a href="#t12"><b>۱۲</b> مطالعهٔ بیشتر</a>
+  </nav>
+
+  <article class="lesson" id="t1">
+    <div class="tag">۱ · مقدمه</div>
+    <h3>سریال چیست و از کجا آمده</h3>
+    <p>سریال «صحنه‌هایی از یک ازدواج» نسخهٔ جدیدی از <strong>سریالی به همین نام در سال ۱۹۷۴ ساختهٔ اینگمار برگمان</strong>، کارگردان سوئدی است. یکی از تولیدکنندگان سریال جدید هم نوهٔ اوست. سریال قدیمی داستانی مشابه اما با زاویهٔ دید متفاوتی دارد و سریال جدید خواسته خودش را با تغییرات اجتماعی دنیای معاصر هماهنگ‌تر کند و به مسئلهٔ «ازدواج» به شکلی به‌روزتر پاسخ بدهد.</p>
+    <p>چالش‌های دنیای امروز و پیچیدگی‌های تازه‌ای که در یک ازدواج پیش می‌آید، در این نسخه به صورت <strong>«کلیشهٔ برعکسِ»</strong> نسخهٔ قدیمی به تصویر کشیده شده است. این «کلیشهٔ برعکس» کلیدی است که در متن‌های بعدی بارها به آن برمی‌گردیم.</p>
+  </article>
+
+  <article class="lesson" id="t2">
+    <div class="tag">۲ · قرارداد دوره</div>
+    <h3>قرارداد ما: پرسش، نه پاسخ</h3>
+    <p>اولین نکته‌ای که می‌خواهم با هم بر سر آن توافق کنیم این است: به تمام مطالبی که اینجا می‌خوانید با این دید نگاه کنید که قرار است <strong>«پرسش‌های جدیدی»</strong> به شما ارائه شود، نه پاسخ‌های جدید.</p>
+    <div class="callout">پس در هر مطلب، دنبال پرسشی باشید که بتوانید از <strong>خودتان</strong> بپرسید.</div>
+  </article>
+
+  <article class="lesson" id="t3">
+    <div class="tag">۳ · روش</div>
+    <h3>چرا از یک فیلم برای شناخت خودمان استفاده می‌کنیم؟</h3>
+    <p>سؤال اول می‌تواند این باشد: ما اصلاً سریال را با چه هدفی می‌بینیم؟ آیا این سریال و کاراکترهای محدودش فقط یک فیلم‌اند، یا می‌خواهیم از خلال فیلم و شناخت کاراکترها به شناختی از زندگی خودمان پل بزنیم؟ معلوم است که دومی را می‌خواهیم. اما چرا؟ می‌توانیم مستقیم سراغ خودمان برویم؛ روانکاوی تلاشش همین است.</p>
+    <p>در این تکنیک اما می‌خواهیم سد و مانعِ <strong>«مقاومت‌های خودمان در روانکاوی»</strong> را از راه دیدن فیلم دور بزنیم. در اتاق روانکاوی وقتی از ما خواسته می‌شود از خودمان حرف بزنیم، اضطرابی ایجاد می‌شود و مقاومت‌ها به کمکمان می‌آیند تا خیلی از خودمان نگوییم و اضطراب را کنترل کنیم؛ چون مسئله خودمانیم و ناخودآگاه اجازه نمی‌دهد مواد شخصی ما به این راحتی ابراز شوند، چون حالمان بد می‌شود.</p>
+    <p>اینجا در عوض، قرار نیست از خودمان بشنویم و ببینیم؛ قرار است یک <strong>«دیگری»</strong> یعنی کاراکترهای فیلم را تحلیل کنیم. قضیه آسان‌تر می‌شود و مقاومت کمتری تجربه می‌کنیم.</p>
+  </article>
+
+  <article class="lesson" id="t4">
+    <div class="tag">۴ · تمرین</div>
+    <h3>دفترچهٔ دوره: پل بین فیلم و شما</h3>
+    <p>حالا چطور بین این دو (تحلیل فیلم و شناخت خودمان) پل بزنیم؟ باید فیلم را بسیار با دقت ببینیم و <strong>«صحنه‌هایی»</strong> را که ما را تریگر می‌کند، یعنی برایمان مهم‌تر تلقی می‌شود یا احساس، فکر یا خاطره‌ای را در ما زنده می‌کند، حتماً در دفترچه‌ای مخصوص این دوره یادداشت کنیم (کاغذی یا نوت گوشی).</p>
+    <p>این یادداشت‌ها در ادامه «پل» خواهند شد. پس <strong>فیلم برای ما نقش پل و کاتالیزور را دارد.</strong></p>
+    <ul>
+      <li>هر صحنه‌ای که حس تند یا غیرمنتظره‌ای در شما ایجاد کرد، شمارهٔ قسمت و یک خط توضیح بنویسید.</li>
+      <li>ننویسید «چرا» تریگر شدید؛ فقط ثبت کنید. تفسیر مال بعد است.</li>
+      <li>اگر در درمان تحلیلی هستید، همین یادداشت‌ها می‌تواند مادهٔ چند جلسه باشد.</li>
+    </ul>
+  </article>
+
+  <article class="lesson" id="t5">
+    <div class="tag">۵ · پرسش اصلی</div>
+    <h3>پرسش اصلی سریال</h3>
+    <p>سؤال اصلی سریال که در دقیقه‌های اول توسط مصاحبه‌کننده پرسیده می‌شود، موضوعی است که برای درک سریال و عمیق‌تر شدن روی مسئله باید به آن توجه ویژه کنیم:</p>
+    <div class="quote"><p><strong>تحول در هنجارهای جنسیتی چگونه روی ازدواج‌های تک‌همسری تأثیر می‌گذارد؟</strong></p><small dir="ltr" style="text-align:end">How do evolving gender norms affect monogamous marriages?</small></div>
+    <p>هنجارها و نقش‌های جنسیتی در طول تاریخ تحول پیدا کرده‌اند، اما در سال‌های اخیر تحولشان یک‌باره با سرعت خیلی زیادی همراه شده؛ سرعتی بیشتر از سرعت درک ما نسبت به این تحولات. همین می‌تواند زمینه‌ساز مشکلات زیادی در ارتباط بین پارتنرها باشد.</p>
+  </article>
+
+  <article class="lesson" id="t6">
+    <div class="tag">۶ · متن مکمل</div>
+    <h3>نقش‌های جنسیتی چیست و چگونه محدودمان می‌کند</h3>
+    <p>در جامعه نقش‌های جنسیتی خاصی وجود دارد که به مردان و زنان به طور سنتی آموزش داده شده و گاه زورگویانه تحمیل می‌شود: مرد باید قوی باشد و مسئولیت مالی خانواده را بر عهده بگیرد، زن از لحاظ عاطفی از همه مراقبت کند. مردان سطل زباله را بیرون می‌برند و زنان ظرف‌ها را می‌شویند. مردان هزینهٔ شام را می‌پردازند و زنان از کودکان مراقبت می‌کنند.</p>
+    <p>این ایده‌آل‌ها دربارهٔ اینکه هر کس چگونه باید بر اساس جنسیتش رفتار کند، می‌تواند به سلامت روان و روابط فرد آسیب بزند. برای فهم سریال، متن زیر را که برای همین دوره ترجمه شده، بخوانید.</p>
+    <details class="acc">
+      <summary>متن کامل: نقش‌های جنسیتی، چگونه محدودمان می‌کنند و چرا باید شکسته شوند</summary>
+      <div class="body">
+        <p>جنسی هند (روانشناس و درمانگر سلامت جنسی) می‌گوید: «نقش‌های جنسیتی می‌تواند با ایجاد عدم تعادل قدرت و محدود کردن توانایی ما برای بیان واقعی خود، تأثیر مهمی بر روابط ما داشته باشد. <strong>زمانی که نقش‌های جنسیتی سنتی را درونی می‌کنیم، ممکن است برای انطباق با برخی انتظارات از نحوهٔ رفتار مردان و زنان در روابط احساس فشار کنیم. این می‌تواند به ناامیدی، رنجش و فقدان صمیمیت منجر شود.</strong>»</p>
+        <p>شناسایی، درک و به چالش کشیدن نقش‌های جنسیتی به تضعیف قدرت آن‌ها و از بین بردن محدودیت‌هایشان در روابط حال و آینده کمک می‌کند.</p>
+        <h4>نقش‌های جنسیتی چیست؟</h4>
+        <p>سام می‌گوید: «نقش‌های جنسیتی به شکل زیست‌شناختی تعیین نمی‌شوند. نقش‌های جنسیتی به صورت اجتماعی ساخته می‌شوند و ممکن است بین جوامع و فرهنگ‌های مختلف به شدت متفاوت باشند.» به طور اساسی، نقش‌های جنسیتی مجموعه‌ای از ویژگی‌های قراردادی هستند که اجتماع باور دارد هر فرد باید بر اساس جنسیتش به آن‌ها وفادار باشد. برای مردان، این به معنای کنار گذاشتن احساسات به نفع یک کیف پول بزرگ و حضور قوی است. زنان مجبورند مراقبت‌کننده و مهربان باشند و نسبت به مردان زندگی‌شان اطاعت داشته باشند.</p>
+        <p>نقش‌های جنسیتی مبتنی بر نظم مردسالاری، سیستمی از رسوم و روش‌های اجتماعی، قانونی، اقتصادی، سیاسی و فرهنگی که مردان را به عنوان گروه اجتماعی مسلط نشان می‌دهد، در مکان‌های بی‌شماری در سراسر جهان شکل گرفته و بر آن تأکید شده است. باورهای فرهنگی در طول زمان نقش مردان را به عنوان تأمین‌کننده و نقش زنان را به عنوان خانه‌دار در فضاهایی مانند مؤسسات مذهبی و آموزشی و نهادهای دولتی تقویت کرده‌اند. هنجارهای اجتماعی این آموزه‌ها را منعکس می‌کنند و خانواده‌ها، همسالان و رسانه‌ها «قوانین نانوشته‌ای دربارهٔ رفتارهای قابل قبول برای مردان و زنان در یک جامعه یا فرهنگ خاص» را دنبال می‌کنند. همه چیز، از تلویزیون گرفته تا مجلات، به تعیین نحوهٔ «باید» زنان و مردان کمک کرده است.</p>
+        <p>ایدئولوژی سنتی وظایف مردان و زنان را از هم جدا می‌کند: مردان نان‌آور خانه‌اند و زنان مراقب. از سوی دیگر، یک موضع برابری‌طلبانه به دنبال حذف جنسیت به عنوان هر نوع تعیین‌کنندهٔ وظایف است. در وسط، جایی که بیشتر جامعه آگاهانه یا ناآگاهانه قرار دارد، چیزی به نام ایدئولوژی انتقالی وجود دارد: مرد تأمین‌کننده است، اما در کارهای خانه هم نقش دارد.</p>
+        <h4>چگونه نقش‌های جنسیتی افراد را محدود می‌کنند؟</h4>
+        <p>جنبش‌های فمینیستی در طول قرن بیستم برای برابری جنسیتی و حقوق زنان مبارزه کردند و این به تغییرات مهمی منجر شد: زنان سفیدپوست در سال ۱۹۲۰ حق رأی به دست آوردند، زنان سیاه‌پوست در سال ۱۹۶۵، و زنان شروع به گرفتن مدارک تحصیلی بالاتر، داشتن شغل تمام‌وقت و در مجموع مستقل‌تر شدن کردند. در دو دههٔ گذشته، فعالان برای نابودی نقش‌های جنسیتی و ایجاد جامعه‌ای تلاش می‌کنند که در آن افراد بر اساس شخصیتشان تعریف شوند، نه جنسیتشان. پیشرفت‌هایی بوده اما همچنان آهسته است.</p>
+        <p>به گفتهٔ ربکا مینور، متخصص جنسیت و عضو هیئت علمی پاره‌وقت دانشگاه بوستون، سه نقطهٔ کلیدی که این موضوع بر آن‌ها تأثیر می‌گذارد عبارت‌اند از: انتخاب شغل، بیان احساسات و مسئولیت‌های خانگی.</p>
+        <p>اشتباه نیست که فردی شغلی را بخواهد که در حیطهٔ نقش جنسیتی سنتی او قرار می‌گیرد، تا زمانی که این اختیار را داشته باشد که هر کاری را که می‌خواهد انجام دهد و برای آن دستمزد برابر دریافت کند. از نظر احساسی، به مردان گفته می‌شود نباید احساسات رقیق داشته باشند و اگر دارند بهتر است سریع آن‌ها را از بین ببرند. زنان می‌توانند احساسی و مهربان باشند، اما نمی‌توانند قوی و قدرتمند باشند. مینور می‌گوید: «<strong>این انتظارات می‌توانند افراد را از بیان واقعی احساسات خود بازدارند و به سرکوب عاطفی و تیرگی روابط منجر شوند.</strong>»</p>
+        <p>بدون توجه به اینکه زنان کار می‌کنند یا خیر، وظایف خانه و مراقبت از کودکان معمولاً به آن‌ها واگذار می‌شود. اگر مرد پول بیشتری به دست آورد (که همیشه این‌طور نیست)، چرا باید در خانه کمک کند؟ و اگر کمک کند، برای برخی هنوز تحقیرکننده یا غیرمعمول تلقی می‌شود.</p>
+        <p>نقش‌های جنسیتی می‌توانند بر سلامت روان هم اثر بسیار منفی بگذارند. زنان و مردانی که احساس می‌کنند کلیشه‌های ظالمانهٔ جنسیتی آن‌ها را تعیین کرده، شرم، شک و اندوه را تجربه می‌کنند. وقتی افراد نمی‌توانند با انتظارات جامعه دربارهٔ رفتار بر اساس جنسیتشان مطابقت پیدا کنند، ممکن است انزوا، درک‌نشدن و حتی تنبیه را تجربه کنند و در نتیجه دچار احساس شکست، اضطراب، استرس یا افسردگی شوند.</p>
+        <h4>شکستن ایدهٔ نقش‌های جنسیتی برای روابط سالم‌تر</h4>
+        <p>قرار ملاقات و روابط اغلب بستر آزمون نهایی نقش‌های جنسیتی است. این نقش‌ها تصوری ایجاد می‌کنند که یک روش «درست» و «نادرست» برای رفتار هر فرد در رابطه وجود دارد، در حالی که تنها چیزی که اهمیت دارد شخصیت و سازگاری است. سام می‌گوید: «نقش‌های جنسیتی سنتی توانایی ما را برای بیان واقعی خود در روابط محدود می‌کند.» نه تنها نقش‌های جنسیتی در روابط زمانش گذشته، بلکه بسیاری از مردم حتی در یک رابطهٔ تک‌همسر و دگرجنس‌گرا هم نیستند. افراد LGBTQ ممکن است بر اساس هویت یا گرایش جنسی‌شان در روابط و جامعه تبعیض و ستم را تجربه کنند و این می‌تواند به احساس انزوا و آسیب به سلامت روان منجر شود.</p>
+        <p>وقتی این تصور نادرست را کنار بگذاریم، فضایی برای یک رابطهٔ سالم و حمایتی ایجاد می‌شود. مینور می‌گوید: «<strong>شکستن نقش‌های جنسیتی به افراد این امکان را می‌دهد که آشکارا و صادقانه دربارهٔ نیازها، خواسته‌ها و احساساتشان بدون ترس از قضاوت یا انتقام ارتباط برقرار کنند.</strong> این باعث ارتباط مؤثرتر و همدلانه‌تر و درک و اتصال بیشتری بین همسرها می‌شود.» همچنین فضایی فراهم می‌کند تا افراد به علاقه‌های خود پی ببرند، عدم تعادل قدرت را اصلاح کنند و فضایی صمیمی و سالم برای رشد رابطه بسازند.</p>
+        <p class="credit">منبع: Verywell Mind · برگردان به فارسی: نیلوفر حسینی (عضو مدرسهٔ تجربهٔ زندگی)</p>
+      </div>
+    </details>
+  </article>
+
+  <article class="lesson" id="t7">
+    <div class="tag">۷ · تحلیل</div>
+    <h3>مردانگی و زنانگی در رابطهٔ میرا و جاناتان</h3>
+    <p>وقتی دو نفر وارد یک ارتباط عاطفی جدی می‌شوند، با فرض اینکه یکی مرد و یکی زن است، خواه‌ناخواه <strong>«هنجارها و نقش‌های جنسیتی»</strong> را با خودشان می‌برند. مثلاً آقا ممکن است بیشتر تمایل داشته باشد کارهای بیرون از خانه را انجام دهد و خانم بیشتر مراقبت از فرزندان را بر عهده بگیرد. اما در دنیای امروز این نقش‌ها به کلی دگرگون شده است.</p>
+    <p>وقتی خانم‌ها هم کار می‌کنند و مانند <strong>میرا</strong> درآمدشان از مرد هم بیشتر است، مطمئنم آن هنجارهای سنتیِ انتظارات نقش جنسیتی دیگر در آن رابطه به طور کامل قابل پیاده‌سازی نیست و آن زوج حتماً به تنظیمات جدیدی برای تعیین نقش‌هایشان نیاز دارند. ممکن است این کار را با گفتگو پیش ببرند و گاه ممکن است به همراهی یک زوج‌درمانگر نیاز باشد؛ ولی قطعاً لازم است به عنوان یک مسئله بررسی‌اش کنند و به نظر مشترکی برسند.</p>
+    <p>در مثال <strong>جاناتان</strong> می‌بینید که آن «کلیشهٔ برعکسی» که سریال دنبال می‌کند اینجا هم کار می‌کند: جاناتان مسئول مراقبت از دخترشان است و میرا کمتر می‌رسد این کار را انجام دهد.</p>
+    <div class="callout">هر جنسیتی روی یک طرف دوقطبی قرار ندارد. مردها هم بخش‌های فمینین (زنانه) و زن‌ها هم بخش‌های مسکیولین (مردانه) دارند؛ و این تقسیم‌بندی بر مبنای برداشت عرفی از این مفاهیم است. همان چیزی که همهٔ ما در قالب «هنجارها و انتظارات جنسیتی» با خودمان حمل می‌کنیم.</div>
+    <p>منظور از مردانگی و زنانگی در تعریف اولیه، تفاوتی است که جامعه (فرهنگ) به سبب تفاوت بیولوژیک زن و مرد به آن جنسیت نسبت داده است. این هم از مفاهیمی است که در سریال به چالش کشیده شده و بهانهٔ خوبی است تا هر کس نزد خودش مردانگی و زنانگی خودش را به چالش بکشد و زیر سؤال ببرد. اگر در جلسهٔ روانکاوی این اتفاق بیفتد، حتماً نتایج جالبی دارد.</p>
+  </article>
+
+  <article class="lesson" id="t8">
+    <div class="tag">۸ · روایت</div>
+    <h3>زندگی بی‌نهایت داستان است</h3>
+    <p>زندگی خودش بی‌نهایت داستان است. و جالب‌تر آنکه هر کسی نیز یک داستان نیست! در واقع هر کسی به تنهایی خودش بی‌نهایت داستان است. اما چگونه؟</p>
+    <p>اینکه هر اتفاقی را چطور <strong>«روایت»</strong> کنیم و از چه زاویه‌ای به آن نگاه کنیم، هر بار به ما داستان تازه‌ای می‌دهد. اینکه هر کدام چه می‌بینیم، حتماً به جایی که ایستاده‌ایم و برداشتمان از آنچه دیده می‌شود برمی‌گردد. اینکه در زندگی یا در رابطه از یک اتفاق «داستان»های مختلف می‌سازیم، بیش از آنکه به آن اتفاق برگردد، به شیوهٔ نگرش ما به ماجرا برمی‌گردد.</p>
+    <p>در واقع ما اتفاق را از دریچهٔ نگاهمان به درونمان می‌بریم و پس از آن «داستان» در درون ما ساخته می‌شود. <strong>به قول لکان، ما واقعیت (بیرونی) را به درون خودمان می‌بریم و تبدیل به حقیقت (درونی) خودمان می‌کنیم.</strong></p>
+    <div class="quote"><p>وقتی به یک نفر دیگر نگاه می‌کنیم، چه می‌بینیم؟</p></div>
+    <p>این متنی بود که برای همان صحنهٔ مصاحبه نوشته بودم و یک سال قبل در اینستاگرام گذاشته بودم و از مخاطب‌ها خواسته بودم «روایت» خودشان از این صحنه را بگویند. چهارصد و خرده‌ای روایت در کامنت‌ها هست که می‌توانید بخوانید. اگر سریال را دیده باشید می‌دانید داستان این صحنه چیست. <strong>اما در کامنت‌ها ببینید که آدم‌ها چطور برای «یک» صحنه، به تعداد بیننده‌ها «روایت» تولید می‌کنند. آیا این اتفاق در زندگی واقعی ما هر روز و هر ساعت نمی‌افتد؟</strong></p>
+    <a class="linkcard" href="https://www.instagram.com/p/CuNFCG7rp-y/" target="_blank" rel="noopener"><div><b>پست «سی‌تی اسکن سریال/رابطه» در اینستاگرام</b><span>روایت‌های مخاطبان از این صحنه را در کامنت‌ها بخوانید</span></div><span class="arr">دیدن ←</span></a>
+  </article>
+
+  <article class="lesson" id="t9">
+    <div class="tag">۹ · تکمیل قسمت سوم</div>
+    <h3>روانکاوی و روایت</h3>
+    <div class="note">این بخش از کتابی که در قسمت صوتی سوم معرفی کردم، مکمل همان قسمت است.</div>
+    <p><strong>روانکاوی</strong> روایت‌های مهمی را که موانعی در مسیر زندگی مراجع ایجاد کرده‌اند شناسایی می‌کند؛ همین شناسایی باید به درک عمیق‌تر منجر شود و آمادگی فهم روایت‌های قدیمی ارائه‌شده در شکل‌های جدید را ایجاد کند و البته به مراجع، آزادی شناسایی روایت‌های جدید را نیز بدهد.</p>
+    <p>مراجعان به ما مراجعه می‌کنند چرا که موانعی برای زندگی کردن روایت‌های خود دارند و به جای آن، زندگی شخص دیگری را زندگی می‌کنند؛ از دیدن روایت‌های رهاشدهٔ خود وحشت دارند؛ یا نمی‌توانند عواقب روایتی را که ساخته‌اند تحمل کنند. آن‌ها درد یک زندگیِ زندگی‌نکرده را حس می‌کنند و می‌خواهند بدانند زندگی چه کسی را زندگی کرده‌اند و چگونه می‌توانند زندگی خود را زندگی کنند.</p>
+    <div class="quote"><p>هدف تحلیل این است که به مراجعان کمک کنیم روایت‌هایی را که زندگی کرده‌اند کشف کنند و از این راه به روایت‌هایی که می‌خواهند زندگی کنند دست بیابند.</p><small>Busch, F. (2013). Creating a Psychoanalytic Mind: A Psychoanalytic Method and Theory.</small></div>
+    <p>مؤلفِ روایتِ خود شدن، عامل تعیین‌کنندهٔ یک تحلیلِ به اندازهٔ کافی خوب است. هرچند دیگران هم می‌توانند نقش تعیین‌کننده‌ای در شکل‌گیری و ادامهٔ روایت‌های مراجعان داشته باشند، اما پیشرفت تحلیلی به سمت بهتر زیستن تنها هنگامی اتفاق می‌افتد که مراجع بپذیرد مؤلف روایت‌هایی است که در تحلیل بروز کرده‌اند؛ مؤلف شکل‌گیری، تداوم و نتایج آن‌ها.</p>
+  </article>
+
+  <article class="lesson" id="t10">
+    <div class="tag">۱۰ · اپیزود دوم، صحنهٔ دوم</div>
+    <h3>به بهانهٔ یک صحنه: تماشای پورن</h3>
+    <p>می‌خواهم توجهتان را به <strong>مسئلهٔ تماشا کردن پورن</strong> جلب کنم. این‌ها پرسش‌هایی هستند که اگر در یک رابطهٔ عاطفی جدی و بلندمدت هستیم، می‌توانیم از خودمان بپرسیم و با پارتنرمان درباره‌شان صحبت کنیم:</p>
+    <div class="qlist">
+      <div>نظر شما نسبت به اینکه پارتنرتان پورن ببیند چیست؟</div>
+      <div>آیا تماشای پورن را حق پارتنرتان می‌دانید یا از نظر شما باید در این باره محدودیتی در نظر گرفته شود؟</div>
+      <div>آیا صرفِ دیدن پورن مسئلهٔ اصلی است یا ژانری که تماشا می‌شود هم می‌تواند مهم باشد؟</div>
+      <div>آیا تعداد دفعات تماشا هم مهم است؟ اگر کم باشد یا زیاد، از نظر شما تفاوتی دارد؟</div>
+    </div>
+    <p>و اگر در یک درمان تحلیلی هستید، این می‌تواند محتوای خوبی برای صحبت در چندین جلسه باشد.</p>
+  </article>
+
+  <article class="lesson" id="t11">
+    <div class="tag">۱۱ · پشت صحنه</div>
+    <h3>نکته‌ای از پشت صحنه</h3>
+    <p>در صحنهٔ ورودی هر اپیزود، به خاطر هم‌زمانی فیلم‌برداری با پاندمی کرونا، عوامل مجبور به استفاده از ماسک بودند و فقط بازیگرها ماسک نداشتند. در مورد بدل هم، پیش از شروع فیلم‌برداری اصلی و برای هماهنگی‌های نهایی دوربین و صدا از این تکنیک استفاده می‌کنند تا وقتی بازیگر اصلی می‌نشیند، همه چیز حاضر باشد.</p>
+    <p>اما اینکه اصلاً چرا کارگردان از چنین ورودی‌ای برای فیلم استفاده می‌کند و در اپیزودهای بعدی هم آن را تکرار می‌کند، پرسشی است که در قسمت‌های صوتی به آن پرداخته‌ام: مرز بین «فیلم» و «واقعیت» را کجا می‌گذاریم؟</p>
+  </article>
+
+  <article class="lesson" id="t12">
+    <div class="tag">۱۲ · مطالعهٔ بیشتر</div>
+    <h3>مطالعهٔ بیشتر</h3>
+    <p>در مجلهٔ تجربه دو نوشته دربارهٔ همین سریال هست: گزارش جلسهٔ تحلیل سریال با ۵۳ شرکت‌کننده و یادداشت‌های تحلیلی اعضای مدرسه، و نگاهی به مینی‌سریال از دریچهٔ «ما عشق می‌خواستیم، نه زندگی».</p>
+    <a class="linkcard" href="https://tajrobeh.life/mag/%da%af%d8%b2%d8%a7%d8%b1%d8%b4-%d8%ac%d9%84%d8%b3%d9%87-%d8%aa%d8%ad%d9%84%db%8c%d9%84-%d8%b3%d8%b1%db%8c%d8%a7%d9%84-%d8%b5%d8%ad%d9%86%d9%87%d9%87%d8%a7%db%8c%db%8c-%d8%a7%d8%b2-%db%8c/"><div><b>گزارش جلسهٔ تحلیل سریال صحنه‌هایی از یک ازدواج</b><span>مجلهٔ تجربه · یادداشت‌های شرکت‌کنندگان دوره</span></div><span class="arr">خواندن ←</span></a>
+    <a class="linkcard" href="https://tajrobeh.life/mag/%d8%b5%d8%ad%d9%86%d9%87%d9%87%d8%a7%db%8c%db%8c-%d8%a7%d8%b2-%db%8c%da%a9-%d8%a7%d8%b2%d8%af%d9%88%d8%a7%d8%ac/"><div><b>نگاهی به مینی‌سریال صحنه‌هایی از یک ازدواج</b><span>مجلهٔ تجربه · ما عشق می‌خواستیم، نه زندگی</span></div><span class="arr">خواندن ←</span></a>
+  </article>
+</div></section>
+
+<section id="polls"><div class="wrap">
+  <span class="eyebrow">نظرسنجی</span>
+  <h2 class="h2">شما چه فکر می‌کنید؟</h2>
+  <p class="lede">این سه پرسش را در طول دوره از شرکت‌کنندگان پرسیدم. گزینهٔ خودتان را انتخاب کنید تا ببینید بقیه چه جوابی دادند.</p>
+  <div class="pgrid" id="ydcPolls"></div>
+  <p class="back" style="margin-top:26px">بازگشت به <a href="https://tajrobeh.life/yaserderakhshan/">صفحهٔ یاسر درخشان</a></p>
+</div></section>
+
+</div>
+
+<script>
+(function(){
+  var FA=function(s){return String(s).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+  var fmt=function(t){t=Math.max(0,Math.floor(t||0));var h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;var mm=String(m);if(h>0){mm=(m>9?'':'0')+m;}var ss=(s>9?'':'0')+s;return FA(h>0?h+':'+mm+':'+ss:mm+':'+ss);};
+  var store={get:function(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+  var U='https://tajrobeh.life/wp-content/uploads/2026/09/';
+  var EPS=[
+    {n:1,title:'سی‌تی اسکن ۱ · چرا با فیلم خودمان را می‌شناسیم؟',desc:'قرارداد دوره، دور زدن مقاومت، دفترچهٔ یادداشت',parts:[[U+'scenes-01.mp3',1582]]},
+    {n:2,title:'سی‌تی اسکن ۲ · پرسش اصلی سریال',desc:'هنجارهای جنسیتی و ازدواج تک‌همسری؛ کلیشهٔ برعکس',parts:[[U+'scenes-02.mp3',1509]]},
+    {n:3,title:'سی‌تی اسکن ۳ · روایت',desc:'زندگی بی‌نهایت داستان است؛ متن ۹ مکمل این قسمت است',parts:[[U+'scenes-03.mp3',1099]]},
+    {n:4,title:'سی‌تی اسکن ۴ · مردانگی و زنانگی',desc:'میرا، جاناتان و نقش‌هایی که با خودمان به رابطه می‌بریم',parts:[[U+'scenes-04.mp3',1154]]},
+    {n:5,title:'سی‌تی اسکن ۵ · به بهانهٔ یک صحنه',desc:'پرسش‌هایی برای گفتگو با پارتنر',parts:[[U+'scenes-05.mp3',889]]},
+    {n:6,title:'سی‌تی اسکن ۶ · مرز فیلم و واقعیت',desc:'ورودی اپیزودها، ماسک‌ها، بدل‌ها و سؤال کارگردان',parts:[[U+'scenes-06.mp3',1546]]},
+    {n:7,title:'جلسهٔ تحلیل · بخش اول',desc:'نشست کامل تحلیل سریال با شرکت‌کنندگان دوره',parts:[[U+'scenes-07-0.mp3',1500],[U+'scenes-07-1.mp3',1500],[U+'scenes-07-2.mp3',1499],[U+'scenes-07-3.mp3',1500],[U+'scenes-07-4.mp3',46]]},
+    {n:8,title:'جلسهٔ تحلیل · بخش دوم',desc:'ادامهٔ نشست، پرسش و پاسخ',parts:[[U+'scenes-08-0.mp3',1500],[U+'scenes-08-1.mp3',1500],[U+'scenes-08-2.mp3',1499],[U+'scenes-08-3.mp3',1375]]}
+  ];
+  EPS.forEach(function(e){e.total=e.parts.reduce(function(a,p){return a+p[1];},0);e.starts=[];var acc=0;e.parts.forEach(function(p){e.starts.push(acc);acc+=p[1];});});
+  var PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',PAUSE='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
+  var audio=document.getElementById('ydcAudio');if(!audio)return;
+  var epsEl=document.getElementById('ydcEps'),seek=document.getElementById('ydcSeek'),tCur=document.getElementById('ydcCur'),tDur=document.getElementById('ydcDur'),icPlay=document.getElementById('ydcIcPlay'),icPause=document.getElementById('ydcIcPause'),errEl=document.getElementById('ydcErr');
+  var cur=-1,pi=0,speeds=[1,1.25,1.5,2],si=0,pendingSeek=null;
+  EPS.forEach(function(e,i){
+    var li=document.createElement('li');li.className='ep';li.id='ydcep'+e.n;
+    li.innerHTML='<div class="n">'+FA(e.n)+'</div><div><div class="ti">'+e.title+'</div><div class="de">'+e.desc+'</div></div><div class="du">'+fmt(e.total)+'</div>';
+    li.addEventListener('click',function(){if(cur===i){toggle();}else{loadEp(i,true,0);}});
+    epsEl.appendChild(li);
+  });
+  audio.addEventListener('loadedmetadata',function(){if(pendingSeek!==null){audio.currentTime=pendingSeek;pendingSeek=null;}});
+  function highlight(){var items=document.querySelectorAll('.ydc .ep');Array.prototype.forEach.call(items,function(el,k){el.classList.toggle('active',k===cur);});}
+  function setInfo(){var e=EPS[cur];document.getElementById('ydcTitle').textContent=e.title;document.getElementById('ydcSub').textContent='قسمت '+FA(e.n)+' از '+FA(EPS.length)+' · '+fmt(e.total);}
+  function seekGlobal(g,autoplay){var e=EPS[cur];if(g<0)g=0;if(g>e.total)g=e.total;var np=0;for(var j=0;j<e.parts.length;j++){if(g>=e.starts[j])np=j;}pi=np;pendingSeek=g-e.starts[pi];audio.src=e.parts[pi][0];if(autoplay){var p=audio.play();if(p){p.catch(function(){});}}}
+  function loadEp(i,autoplay,resume){cur=i;pi=0;errEl.style.display='none';setInfo();highlight();var e=EPS[i];audio.playbackRate=speeds[si];store.set('sfm-last',i);var r=resume||0;var saved=store.get('sfm-pos-'+e.n);if(saved){if(saved+10<e.total){r=saved;}}if(r>0){seekGlobal(r,autoplay);}else{audio.src=e.parts[0][0];if(autoplay){var p=audio.play();if(p){p.catch(function(){});}}}}
+  function elapsed(){if(cur<0)return 0;return EPS[cur].starts[pi]+audio.currentTime;}
+  function toggle(){if(cur<0){var l=store.get('sfm-last');loadEp(l===null?0:l,true,0);return;}if(audio.paused){audio.play();}else{audio.pause();}}
+  function step(d){var n=cur<0?0:cur+d;if(n>EPS.length-1)n=EPS.length-1;if(n<0)n=0;loadEp(n,true,0);}
+  function skip(s){if(cur<0)return;seekGlobal(elapsed()+s,true);}
+  document.getElementById('ydcPlayBtn').addEventListener('click',toggle);
+  document.getElementById('ydcSpd').addEventListener('click',function(){si=(si+1)%speeds.length;audio.playbackRate=speeds[si];this.textContent='سرعت '+FA(speeds[si])+'×';});
+  Array.prototype.forEach.call(document.querySelectorAll('.ydc .ctrl [data-skip]'),function(b){b.addEventListener('click',function(){skip(parseInt(b.getAttribute('data-skip'),10));});});
+  Array.prototype.forEach.call(document.querySelectorAll('.ydc .ctrl [data-step]'),function(b){b.addEventListener('click',function(){step(parseInt(b.getAttribute('data-step'),10));});});
+  audio.addEventListener('play',function(){icPlay.style.display='none';icPause.style.display='';});
+  audio.addEventListener('pause',function(){icPlay.style.display='';icPause.style.display='none';});
+  audio.addEventListener('error',function(){errEl.style.display='block';icPlay.style.display='';icPause.style.display='none';});
+  audio.addEventListener('timeupdate',function(){if(cur<0)return;var e=EPS[cur],g=elapsed(),p=g/e.total*100;seek.value=Math.round(p*10);seek.style.setProperty('--p',p+'%');tCur.textContent=fmt(g);tDur.textContent=fmt(e.total);if(Math.floor(audio.currentTime)%5===0){store.set('sfm-pos-'+e.n,g);}});
+  audio.addEventListener('ended',function(){if(cur<0)return;var e=EPS[cur];if(pi<e.parts.length-1){pi++;audio.src=e.parts[pi][0];audio.play();}else{store.set('sfm-pos-'+e.n,0);if(cur<EPS.length-1){loadEp(cur+1,true,0);}}});
+  seek.addEventListener('input',function(){if(cur<0)return;seekGlobal(seek.value/1000*EPS[cur].total,false);});
+  (function(){var l=store.get('sfm-last');if(l!==null){if(EPS[l]){loadEp(l,false,0);}}})();
+
+  var POLLS=[
+    {id:'p1',q:'«اگر به افراد نوروتیک، آنچه را که در خیال‌پردازی‌هایشان به شدت مشتاق آن هستند در واقعیت به آن‌ها ارائه دهیم، باز هم از آن می‌گریزند!» این نقل‌قول فروید را روی کدام کاراکتر بیشتر می‌توانید تطبیق دهید؟',opts:[['میرا',28],['جاناتان',10]]},
+    {id:'p2',q:'شما معمولاً در رابطه حرفتان را مستقیم می‌زنید یا غیرمستقیم منظورتان را پیش می‌برید؟',opts:[['مستقیم؛ صحبت کردن',34],['غیرمستقیم؛ روش‌هایی به جز صحبت کردن',14]]},
+    {id:'p3',q:'آیا برای شما تجربهٔ «عشق اول» در رابطهٔ عاطفی اولتان متفاوت از بقیهٔ روابط عاطفی و عشق‌ها بوده است؟',opts:[['بله',27],['خیر',12]]}
+  ];
+  var pg=document.getElementById('ydcPolls');
+  POLLS.forEach(function(p){
+    var total=p.opts.reduce(function(a,o){return a+o[1];},0);
+    var el=document.createElement('div');el.className='poll';el.id=p.id;
+    var html='<h3>'+p.q+'</h3><div class="opts">';
+    p.opts.forEach(function(o,i){html+='<button type="button" class="opt" data-i="'+i+'"><span class="fill"></span><span class="lab"><span>'+o[0]+'</span><span class="pct"></span></span></button>';});
+    html+='</div><div class="foot"><span class="cnt">'+FA(total)+' نفر در دوره پاسخ داده‌اند</span><button type="button" class="reset" style="display:none">تغییر پاسخ</button></div>';
+    el.innerHTML=html;pg.appendChild(el);
+    var reveal=function(mine){
+      el.classList.add('voted');
+      Array.prototype.forEach.call(el.querySelectorAll('.opt'),function(b,i){
+        var c=p.opts[i][1]+(mine===i?1:0),t=total+1,pct=Math.round(c/t*100);
+        b.querySelector('.fill').style.width=pct+'%';
+        b.querySelector('.pct').textContent=FA(pct)+'٪';
+        b.classList.toggle('mine',i===mine);
+      });
+      el.querySelector('.cnt').textContent=FA(total+1)+' نفر پاسخ داده‌اند (با احتساب شما)';
+      el.querySelector('.reset').style.display='';
+    };
+    Array.prototype.forEach.call(el.querySelectorAll('.opt'),function(b){b.addEventListener('click',function(){if(el.classList.contains('voted'))return;var i=parseInt(b.getAttribute('data-i'),10);store.set('sfm-'+p.id,i);reveal(i);});});
+    el.querySelector('.reset').addEventListener('click',function(){store.set('sfm-'+p.id,null);el.classList.remove('voted');Array.prototype.forEach.call(el.querySelectorAll('.fill'),function(f){f.style.width=0;});el.querySelector('.cnt').textContent=FA(total)+' نفر در دوره پاسخ داده‌اند';el.querySelector('.reset').style.display='none';});
+    var saved=store.get('sfm-'+p.id);if(saved!==null){if(saved!==undefined){reveal(saved);}}
+  });
+})();
+</script>
+<!-- /wp:html -->

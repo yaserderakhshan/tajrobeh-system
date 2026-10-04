@@ -1,0 +1,507 @@
+<!-- wp:html -->
+<style>
+/* == tj2b: enterprise v3 (home-v2 language) == */
+.tj2{font-family:var(--tj-font);color:var(--tj-soft);direction:rtl;font-size:17px;line-height:1.9;--tj-tint:#faeced;--tj-tint-2:#fdf4f4;--tj-red-400:#d9737a;--tj-yellow:#f2c14e;--w:1180px;overflow-x:clip}
+.tj2 *,.tj2 *::before,.tj2 *::after{box-sizing:border-box}
+.tj2,.tj2 *{overflow-wrap:normal;word-break:normal}
+.tj2 h1,.tj2 h2,.tj2 h3,.tj2 h4{color:var(--tj-ink);margin:0;line-height:1.55;font-weight:700;text-wrap:balance}
+.tj2 p{margin:0}
+.tj2 a{color:inherit;text-decoration:none}
+.tj2 img{max-width:100%;height:auto;display:block}
+.tj2 button{font-family:inherit}
+.tj2 .wrap{max-width:var(--w);margin-inline:auto;padding-inline:24px}
+.tj2 section{padding-block:clamp(48px,6vw,88px)}
+.tj2 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tj-red);background:var(--tj-tint);padding:5px 13px;border-radius:999px;margin-bottom:12px}
+.tj2 .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tj-red)}
+.tj2 .h2{font-size:clamp(23px,3vw,36px);margin-bottom:10px}
+.tj2 .lede{font-size:clamp(15.5px,1.3vw,18px);color:var(--tj-soft);max-width:62ch;line-height:2}
+.tj2 .center{text-align:center}.tj2 .center .lede{margin-inline:auto}
+.tj2 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 24px;border-radius:var(--tj-r-btn);font-size:16px;font-weight:600;border:1.5px solid transparent;transition:.18s ease;white-space:nowrap;cursor:pointer;line-height:1.4}
+.tj2 .btn-brand{background:var(--tj-red);color:#fff}
+.tj2 .btn-brand:hover{background:var(--tj-red-600);box-shadow:0 8px 20px -8px rgba(200,63,73,.5);color:#fff}
+.tj2 .btn-ghost{background:#fff;color:var(--tj-ink-2);border-color:var(--tj-line)}
+.tj2 .btn-ghost:hover{border-color:var(--tj-red-400);color:var(--tj-red-600);background:var(--tj-tint)}
+.tj2 .btn svg{width:14px;height:14px;flex:none}
+.tj2 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.tj2 .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.tj2 .rv{opacity:1;transform:none;transition:none}}
+.tj2 .hero{padding-block:clamp(36px,5vw,72px) clamp(36px,5vw,64px);background:#fff}
+.tj2 .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px;align-items:center}
+.tj2 .hero h1{font-size:clamp(28px,3.4vw,44px);line-height:1.5;margin:14px 0 16px;max-width:22ch}
+.tj2 .hero h1 em{font-style:normal;color:var(--tj-red)}
+.tj2 .hero .lede{margin:0 0 24px;max-width:56ch}
+.tj2 .ctas{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.tj2 .hero .art{display:flex;align-items:center;justify-content:center}
+.tj2 .hero .art{gap:22px;align-items:flex-end}
+.tj2 .hero .art img{width:auto;max-height:500px;height:auto;object-fit:contain}
+.tj2 .hero .art img.b{max-height:440px}
+.tj2 .nums{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:30px;padding-top:22px;border-top:1px solid var(--tj-line)}
+.tj2 .nums div{display:flex;align-items:baseline;gap:7px}
+.tj2 .nums b{font-size:24px;font-weight:800;color:var(--tj-red);line-height:1;font-variant-numeric:tabular-nums}
+.tj2 .nums span{font-size:13px;color:var(--tj-mut)}
+.tj2 .eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:34px}
+.tj2 .eco-card{border:1px solid var(--tj-line);border-radius:20px;padding:0 0 22px;background:#fff;transition:.2s;display:flex;flex-direction:column;overflow:hidden}
+.tj2 .eco-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px);box-shadow:0 16px 34px -20px rgba(14,14,14,.3)}
+.tj2 .eco-card .pic{height:170px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;padding:16px 16px 0;border-bottom:1px solid var(--tj-line);background:#fff}
+.tj2 .eco-card .pic img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom}
+.tj2 .eco-card .n{font-size:12.5px;color:var(--tj-red);font-weight:700;margin:16px 22px 4px}
+.tj2 .eco-card h3{font-size:18px;margin:0 22px 8px}
+.tj2 .eco-card p{font-size:14px;line-height:1.9;color:var(--tj-soft);margin:0 22px 12px;flex:1}
+.tj2 .eco-card .go{font-size:13.5px;color:var(--tj-ink);font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 22px}
+.tj2 .eco-card .go svg{width:12px;height:12px}
+.tj2 .axes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.tj2 .axes>div{background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:20px 20px 22px;transition:.2s}
+.tj2 .axes>div:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .axes i{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--tj-tint);margin-bottom:12px}
+.tj2 .axes i img{width:30px;height:30px;object-fit:contain}
+.tj2 .axes b{display:block;font-size:16px;color:var(--tj-ink);margin-bottom:6px}
+.tj2 .axes p{font-size:14px;color:var(--tj-soft);line-height:1.9;margin:0}
+.tj2 .ring{margin-top:14px;background:var(--tj-ink);color:#fff;border-radius:18px;padding:18px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tj2 .ring b{font-size:22px;color:#fff;white-space:nowrap}
+.tj2 .ring span{font-size:14.5px;color:rgba(255,255,255,.72);line-height:1.9;flex:1;min-width:220px}
+.tj2 .ring .dot{width:9px;height:9px;border-radius:50%;background:var(--tj-yellow);flex:none;min-width:0}
+.tj2 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:34px;position:relative}
+.tj2 .steps::before{content:"";position:absolute;top:19px;right:12%;left:12%;height:2px;background:var(--tj-line)}
+.tj2 .steps>div{text-align:center;padding:0 8px;position:relative}
+.tj2 .steps i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid var(--tj-red-400);color:var(--tj-red);font-style:normal;font-weight:800;font-size:14px;margin:0 auto 12px;position:relative;z-index:1}
+.tj2 .steps>div:last-child i{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .steps b{display:block;font-size:14.5px;color:var(--tj-ink);margin-bottom:4px}
+.tj2 .steps span{display:block;font-size:12.5px;color:var(--tj-mut);line-height:1.8}
+.tj2 .faq-list{max-width:820px;margin:26px auto 0;display:grid;gap:10px}
+.tj2 details{border:1px solid var(--tj-line);border-radius:14px;background:#fff;padding:0 20px;transition:border-color .2s,background .2s}
+.tj2 details[open]{border-color:var(--tj-red-400);background:var(--tj-tint-2)}
+.tj2 summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:700;color:var(--tj-ink);font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;outline:none}
+.tj2 summary h3{font-size:16px;font-weight:700;margin:0;line-height:1.6}
+.tj2 summary:focus{outline:none}
+.tj2 summary:focus-visible{outline:2px solid var(--tj-red-400);outline-offset:6px;border-radius:8px}
+.tj2 summary::-webkit-details-marker{display:none}
+.tj2 summary::after{content:"";width:9px;height:9px;border-inline-start:2px solid var(--tj-red);border-block-end:2px solid var(--tj-red);transform:rotate(-45deg);transition:transform .25s;flex:none;margin-inline-start:6px}
+.tj2 details[open] summary::after{transform:rotate(45deg)}
+.tj2 details .ans{overflow:hidden}
+.tj2 details p,.tj2 details ul{padding:0 0 18px;font-size:15px;line-height:1.95;color:var(--tj-soft);margin:0}
+.tj2 details ul{padding-inline-start:20px}
+.tj2 details li{margin-bottom:6px}
+.tj2 details p a{color:var(--tj-red);font-weight:600}
+.tj2 .berry{background:var(--tj-tint);text-align:center}
+.tj2 .berry img{width:100px;margin:0 auto 16px;animation:tjfloat2 5s ease-in-out infinite}
+@keyframes tjfloat2{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(4deg) translateY(-6px)}}
+.tj2 .berry .h2{font-size:clamp(23px,3vw,34px)}
+.tj2 .berry .lede{margin:10px auto 24px}
+.tj2 .berry .ctas{justify-content:center}
+.tj2 .berry .small{font-size:13px;color:var(--tj-mut);margin-top:14px}
+.wp-block-post-content>.tj2.alignfull{max-width:none;width:auto}
+/* -- page specific -- */
+.tj2b .logos-strip{background:var(--tj-sunk);padding-block:22px}
+.tj2b .logos-strip .wrap{display:flex;align-items:center;gap:14px 34px;flex-wrap:wrap;justify-content:center}
+.tj2b .logos-strip span{font-size:13.5px;color:var(--tj-mut)}
+.tj2b .logos-strip img{height:30px;width:auto;opacity:.9}
+.tj2b .logos-strip img.dk{height:26px}
+.tj2b .eco{background:#fff}
+.tj2b .eco-card .for{display:block;font-size:13px;color:var(--tj-ink);font-weight:600;margin:0 22px 8px;padding:6px 10px;background:var(--tj-sunk);border-radius:8px}
+.tj2b .std{background:var(--tj-sunk)}
+.tj2b .bmk{margin-top:26px;background:#fff;border:1px solid var(--tj-line);border-radius:20px;padding:22px 24px}
+.tj2b .bmk .t{font-size:14px;color:var(--tj-mut);margin-bottom:14px}
+.tj2b .bmk .row{display:flex;flex-wrap:wrap;gap:8px}
+.tj2b .bmk button{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--tj-line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;transition:.15s;font-size:13.5px;color:var(--tj-soft);direction:ltr}
+.tj2b .bmk button img{height:18px;width:auto;opacity:.85}
+.tj2b .bmk button:hover,.tj2b .bmk button.on{border-color:var(--tj-red);color:var(--tj-red);background:var(--tj-tint)}
+.tj2b .bmk .panel{margin-top:16px;padding-top:16px;border-top:1px dashed var(--tj-line);display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
+.tj2b .bmk .panel img{height:34px;width:auto;margin-top:6px}
+.tj2b .bmk .panel p{font-size:15px;line-height:1.95;color:var(--tj-ink-2)}
+.tj2b .bmk .panel a{display:inline-flex;font-size:12.5px;color:var(--tj-red);font-weight:600;margin-top:6px}
+.tj2b .paths{background:#fff}
+.tj2b .aud{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}
+.tj2b .aud a{display:flex;flex-direction:column;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:22px 20px;transition:.2s}
+.tj2b .aud a:hover{border-color:var(--tj-red-400);background:#fff;transform:translateY(-3px);box-shadow:0 16px 34px -20px rgba(14,14,14,.3)}
+.tj2b .aud img{width:56px;height:56px;object-fit:contain;margin-bottom:12px}
+.tj2b .aud b{font-size:17px;color:var(--tj-ink);margin-bottom:6px}
+.tj2b .aud p{font-size:14px;line-height:1.9;flex:1}
+.tj2b .aud .go{font-size:13.5px;color:var(--tj-red);font-weight:600;margin-top:12px}
+.tj2b .story{background:var(--tj-tint-2)}
+.tj2b .story .wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:44px;align-items:center}
+.tj2b .vid{position:relative;max-width:380px;margin-inline:auto;background:#fff;border:1px solid var(--tj-line);border-radius:22px;padding:10px;box-shadow:0 24px 48px -30px rgba(14,14,14,.4)}
+.tj2b .vid video{width:100%;aspect-ratio:4/5;border-radius:14px;background:#111;display:block;object-fit:cover}
+.tj2b .vid .cap{font-size:12.5px;color:var(--tj-mut);text-align:center;padding:10px 6px 4px;line-height:1.7}
+.tj2b .vid .cap a{color:var(--tj-red);font-weight:600}
+.tj2b .story .copy p{margin-top:14px;font-size:15.5px;line-height:2}
+.tj2b .story .copy p.war{background:#fff;border-inline-start:3px solid var(--tj-red);border-radius:12px;padding:14px 18px;color:var(--tj-ink-2)}
+.tj2b .ways{background:#fff}
+.tj2b .way-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.tj2b .way{background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:22px;display:flex;flex-direction:column;transition:.2s}
+.tj2b .way:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2b .way img{width:52px;height:52px;object-fit:contain;margin-bottom:12px}
+.tj2b .way .tag{display:inline-block;align-self:flex-start;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--tj-sunk);color:var(--tj-ink-2);margin-bottom:10px}
+.tj2b .way.free .tag{background:var(--tj-tint);color:var(--tj-red)}
+.tj2b .way b{font-size:17px;color:var(--tj-ink);margin-bottom:6px}
+.tj2b .way p{font-size:14.5px;line-height:1.9;flex:1}
+.tj2b .way small{display:block;font-size:12.5px;color:var(--tj-mut);margin-top:12px;padding-top:10px;border-top:1px dashed var(--tj-line)}
+.tj2b .priv{background:var(--tj-sunk)}
+.tj2b .priv .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:40px;align-items:center}
+.tj2b .see{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tj2b .see>div{background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:18px 20px}
+.tj2b .see b{display:block;font-size:14px;color:var(--tj-ink);margin-bottom:10px}
+.tj2b .see ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.tj2b .see li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--tj-ink-2);line-height:1.8}
+.tj2b .see li::before{content:"";width:20px;height:20px;flex:none;border-radius:50%;margin-top:4px;background:var(--tj-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c83f49' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L20 7'/></svg>") center/11px no-repeat}
+.tj2b .see .no li::before{background:#f1f1f2 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23676768' stroke-width='3' stroke-linecap='round'><path d='M6 6l12 12M18 6L6 18'/></svg>") center/10px no-repeat}
+.tj2b .priv .note{margin-top:16px;font-size:14px;color:var(--tj-mut)}
+.tj2b .ev{background:#fff}
+.tj2b .ev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}
+.tj2b .ev-card{background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:22px 20px;display:flex;flex-direction:column}
+.tj2b .ev-card b{font-size:30px;font-weight:800;color:var(--tj-red);line-height:1.2;font-variant-numeric:tabular-nums;margin-bottom:8px}
+.tj2b .ev-card p{font-size:14.5px;line-height:1.85;color:var(--tj-ink-2);flex:1}
+.tj2b .ev-card a{font-size:12px;color:var(--tj-mut);margin-top:12px;border-top:1px dashed var(--tj-line);padding-top:8px}
+.tj2b .ev-card a:hover{color:var(--tj-red)}
+.tj2b .how{background:var(--tj-sunk)}
+.tj2b .start{background:#fff;scroll-margin-top:90px}
+.tj2b .start .wrap{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:44px;align-items:start}
+.tj2b .start .copy p{margin-top:12px;font-size:15.5px;line-height:2}
+.tj2b .contact{margin-top:22px;display:grid;gap:8px}
+.tj2b .contact a{display:flex;align-items:center;gap:12px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:14px;padding:12px 16px;font-size:15px;color:var(--tj-ink);transition:.15s}
+.tj2b .contact a:hover{border-color:var(--tj-red-400);color:var(--tj-red)}
+.tj2b .contact a small{color:var(--tj-mut);font-size:12.5px;margin-inline-start:auto;direction:ltr}
+.tj2b .ffwrap{background:#fff;border:1px solid var(--tj-line);border-radius:20px;padding:24px}
+.tj2b .ffwrap .ff-el-group{margin-bottom:16px}
+.tj2b .ffwrap .ff-el-input--label label{font-family:var(--tj-font)!important;font-size:14px!important;font-weight:600!important;color:var(--tj-ink)!important}
+.tj2b .ffwrap input[type=text],.tj2b .ffwrap input[type=email],.tj2b .ffwrap input[type=tel],.tj2b .ffwrap select,.tj2b .ffwrap textarea{font-family:var(--tj-font)!important;font-size:15px!important;min-height:46px;border:1px solid var(--tj-line)!important;border-radius:10px!important;background:#fff!important;color:var(--tj-ink)!important;padding-inline:12px!important;box-shadow:none!important}
+.tj2b .ffwrap textarea{min-height:96px;padding-block:10px!important}
+.tj2b .ffwrap input:focus,.tj2b .ffwrap select:focus,.tj2b .ffwrap textarea:focus{outline:2px solid var(--tj-red);outline-offset:1px;border-color:transparent!important}
+.tj2b .ffwrap .ff-btn-submit{font-family:var(--tj-font)!important;background:var(--tj-red)!important;border-color:var(--tj-red)!important;color:#fff!important;border-radius:var(--tj-r-btn)!important;min-height:50px;width:100%;font-size:16px!important;font-weight:600!important}
+.tj2b .ffwrap .ff-btn-submit:hover{opacity:.93}
+.tj2b .guide{background:var(--tj-sunk)}
+.tj2b .faqs{background:#fff}
+@media (max-width:1024px){
+.tj2 .eco-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .axes{grid-template-columns:1fr}
+.tj2 .steps{grid-template-columns:1fr 1fr;gap:22px 0}
+.tj2 .steps::before{display:none}
+.tj2b .aud{grid-template-columns:repeat(2,1fr)}
+.tj2b .way-grid{grid-template-columns:1fr}
+.tj2b .ev-grid{grid-template-columns:repeat(2,1fr)}
+.tj2b .story .wrap,.tj2b .priv .wrap,.tj2b .start .wrap{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+.tj2{font-size:16px}
+.tj2 section{padding-block:40px}
+.tj2 .hero{padding-block:16px 32px}
+.tj2 .hero .wrap{grid-template-columns:1fr;gap:6px}
+.tj2 .hero .art{order:-1;justify-content:center}
+.tj2 .hero .art{gap:14px}.tj2 .hero .art img{max-height:210px}.tj2 .hero .art img.b{max-height:185px}
+.tj2 .hero h1{font-size:26px;margin:8px 0 12px}
+.tj2 .hero .lede{font-size:15px;margin-bottom:18px}
+.tj2 .ctas .btn{flex:1;min-height:44px;font-size:15px;padding:8px 14px}
+.tj2 .nums{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:22px;padding-top:18px}
+.tj2 .nums b{font-size:20px}.tj2 .nums span{font-size:12px}
+.tj2 .eco-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}
+.tj2 .eco-grid::-webkit-scrollbar{display:none}
+.tj2 .eco-card{flex:0 0 78%;scroll-snap-align:start}
+.tj2 .eco-card .pic{height:140px}
+.tj2 .ring{padding:16px 18px;gap:10px}.tj2 .ring b{font-size:18px}
+.tj2 .steps{grid-template-columns:1fr 1fr;gap:20px 0}
+.tj2 .berry .ctas .btn{flex:1 1 100%}
+.tj2b .logos-strip .wrap{gap:10px 20px}.tj2b .logos-strip img{height:24px}.tj2b .logos-strip img.dk{height:21px}.tj2b .logos-strip span{flex-basis:100%;text-align:center}
+.tj2b .aud{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}
+.tj2b .aud::-webkit-scrollbar{display:none}
+.tj2b .aud a{flex:0 0 76%;scroll-snap-align:start}
+.tj2b .bmk{padding:16px}.tj2b .bmk .row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}.tj2b .bmk button{flex:none}
+.tj2b .bmk .panel{grid-template-columns:1fr}.tj2b .bmk .panel img{display:none}
+.tj2b .vid{max-width:300px}
+.tj2b .story .copy p{font-size:15px}
+.tj2b .see{gap:8px}.tj2b .see>div{padding:14px 14px}.tj2b .see li{font-size:13px;gap:7px}.tj2b .see li::before{width:16px;height:16px;margin-top:5px}
+.tj2 .axes{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}.tj2 .axes::-webkit-scrollbar{display:none}.tj2 .axes>div{flex:0 0 80%;scroll-snap-align:start}
+.tj2b .way-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}.tj2b .way-grid::-webkit-scrollbar{display:none}.tj2b .way{flex:0 0 82%;scroll-snap-align:start}
+.tj2b .story .copy p{margin-top:10px}.tj2b .story .copy p.war{padding:12px 14px}
+.tj2b .contact a{padding:10px 14px;font-size:14px}
+.tj2b .ev-grid{grid-template-columns:1fr 1fr;gap:10px}
+.tj2b .ev-card{padding:16px 14px}.tj2b .ev-card b{font-size:24px}.tj2b .ev-card p{font-size:13px}
+.tj2b .ffwrap{padding:16px}
+.tj2 .faq-list{margin-top:18px}
+.tj2 summary{padding:13px 0}.tj2 summary h3{font-size:15px}
+.tj2 details p,.tj2 details ul{font-size:14.5px}
+}
+
+/* == فرم گفت‌وگوی کوتاه: فشرده و دوستونی == */
+.tj2b .ffwrap .ff-el-group{margin-bottom:12px}
+.tj2b .ffwrap .ff-el-input--label{margin-bottom:4px}
+.tj2b .ffwrap .ff-el-input--label label{font-size:13.5px}
+.tj2b .ffwrap .ff-el-form-control{padding:9px 12px;min-height:44px;font-size:15px}
+.tj2b .ffwrap textarea.ff-el-form-control{min-height:88px}
+.tj2b .ffwrap .ff_submit_btn_wrapper{margin-top:4px}
+@media (min-width:600px){
+.tj2b .ffwrap form.frm-fluent-form>fieldset{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;align-items:start;border:0;margin:0;padding:0;min-width:0}
+.tj2b .ffwrap form.frm-fluent-form>fieldset>.ff-el-group{margin-bottom:10px;min-width:0}
+.tj2b .ffwrap form.frm-fluent-form>fieldset>legend,.tj2b .ffwrap form.frm-fluent-form>fieldset>input[type=hidden]{grid-column:1/-1}
+.tj2b .ffwrap form.frm-fluent-form>fieldset>.ff-el-group:has(textarea),.tj2b .ffwrap form.frm-fluent-form>fieldset>.ff_submit_btn_wrapper,.tj2b .ffwrap form.frm-fluent-form>fieldset>.ff-el-group:has(select[name="interest"]),.tj2b .ffwrap form.frm-fluent-form>fieldset>.ff-el-group:has(select[name="org_type"]),.tj2b .ffwrap form.frm-fluent-form>.ff-message-success,.tj2b .ffwrap form.frm-fluent-form>.ff-errors-in-stack{grid-column:1/-1}
+.tj2b .ffwrap form.frm-fluent-form .ff_submit_btn_wrapper button{width:100%}
+}
+@media (min-width:1025px){.tj2b .start .copy{position:sticky;top:96px;align-self:start}}
+</style>
+<div class="tj2 tj2b alignfull" id="tj2b">
+
+<section class="hero" id="hero">
+<div class="wrap">
+<div class="copy">
+<span class="eyebrow">تجربه سازمانی، از ۱۳۹۸</span>
+<h1>سلامت روان سازمانی، با <em>استانداردی که یک کلینیک واقعی</em> پشتش ایستاده</h1>
+<p class="lede">برای شرکت‌ها، مدرسه‌ها، مهدکودک‌ها و انجمن‌های علمی دانشگاه. از استرس روزمره تا درمان تخصصی، با تراپیست‌های تأییدشده و زیر نظارت سوپروایزر. این همکاری می‌تواند هیچ هزینه‌ای برای سازمان شما نداشته باشد.</p>
+<div class="ctas">
+<a class="btn btn-brand" href="#start">یک گفت‌وگوی کوتاه</a>
+<a class="btn btn-ghost" href="#story">داستان تکنولایف</a>
+</div>
+<div class="nums" aria-label="تجربه در یک نگاه">
+<div><b data-count="150" data-suffix="+">۱۵۰+</b><span>تراپیست تأییدشده</span></div>
+<div><b data-count="100000" data-suffix="+">۱۰۰،۰۰۰+</b><span>جلسه از ۱۳۹۸</span></div>
+<div><b data-count="6">۶</b><span>شهر حضوری، ۵ کشور</span></div>
+<div><b>۰</b><span>حداقل سهم سازمان</span></div>
+</div>
+</div>
+<div class="art"><img class="b" src="/wp-content/uploads/2026/09/tjl-b2b-hero-right-e1788366159195.png" decoding="async" alt="سلامت روان سازمانی، با استانداردی که یک کلینیک واقعی پشتش ایستاده" loading="eager"><img src="/wp-content/uploads/2026/09/tjl-b2b-hero-left-e1788366165789.png" fetchpriority="high" decoding="async" alt="تصویرسازی دو همکار، نماد خدمات سلامت روان سازمانی تجربه" loading="eager"></div>
+</div>
+</section>
+
+<div class="logos-strip">
+<div class="wrap">
+<span>سازمان‌هایی که با ما همراه شده‌اند</span>
+<img src="/wp-content/uploads/2026/09/tjl-logo-technolife.png" alt="تکنولایف" loading="lazy">
+<img class="dk" src="/wp-content/uploads/2026/09/tjl-logo-sarmayedanesh.png" alt="دیجی‌کالا" loading="lazy">
+<img src="/wp-content/uploads/2026/09/tjl-logo-digikala.png" alt="کارگزاری سرمایه و دانش" loading="lazy">
+</div>
+</div>
+
+<section class="eco" id="eco">
+<div class="wrap">
+<div class="center rv">
+<span class="eyebrow">چه چیزی پشت این خدمت ایستاده</span>
+<h2 class="h2">یک اکوسیستم واقعی، نه فهرستی از اسم‌ها</h2>
+<p class="lede">تجربه یک اپ رزرو نیست. کلینیکی است که از ۱۳۹۸ کار می‌کند، مدرسه‌ای که تراپیست تربیت می‌کند، سوپروایزرهایی که پشت هر جلسه ایستاده‌اند و پلتفرمی که همه را از ایران تا آلمان و کانادا به کارکنان شما می‌رساند. برای سازمان شما یعنی: هر سرویس از همان جایی می‌آید که بقیهٔ کار ما از آن می‌آید.</p>
+</div>
+<div class="eco-grid">
+<a class="eco-card rv" href="/therapy/"><div class="pic"><img src="/wp-content/uploads/2026/09/tjl-sc-hero-900.webp" alt="کلینیک حضوری مرکز تجربه زندگی در تهران" loading="lazy"></div><span class="n">کلینیک تجربه</span><h3>جلسات همکاران شما همین‌جا برگزار می‌شود</h3><span class="for">برای سازمان: تراپی فردی، حضوری یا آنلاین</span><p>۱۵۰+ تراپیست در رویکردهای تحلیلی، شناختی و هیجان‌مدار؛ در تهران و پنج شهر دیگر، یا آنلاین. با معارفهٔ رایگان و امکان تغییر تراپیست.</p><span class="go">خدمات کلینیک <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></span></a>
+<a class="eco-card rv" href="/school/"><div class="pic"><img src="/wp-content/uploads/2026/09/tjl-ed-hero-900.webp" alt="مدرسه تجربه زندگی، آموزش روانکاوی" loading="lazy"></div><span class="n">مدرسه تجربه زندگی</span><h3>سوپرویژن مربی‌ها از همین‌جا می‌آید</h3><span class="for">برای سازمان: سوپرویژن کادر و کارگاه‌ها</span><p>همان استادانی که در مدرسه تراپیست تربیت می‌کنند، سوپروایزر مشاور مدرسه و مربی مهدکودک شما می‌شوند.</p><span class="go">دربارهٔ مدرسه <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></span></a>
+<a class="eco-card rv" href="#standard"><div class="pic"><img src="/wp-content/uploads/2026/09/tjl-svc-supervision.png" alt="نظارت بالینی سوپروایزر بر جلسات تراپی" loading="lazy"></div><span class="n">سوپروایزرها</span><h3>هیچ تراپیستی بدون نظارت کار نمی‌کند</h3><span class="for">برای سازمان: کیفیت ساختاری، نه شعاری</span><p>هر تراپیست پیش از ورود مصاحبهٔ علمی و شبیه‌سازی جلسه می‌دهد و بعد از ورود زیر نظارت بالینی می‌ماند.</p><span class="go">استاندارد ما <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></span></a>
+<a class="eco-card rv" href="/mag/"><div class="pic"><img src="/wp-content/uploads/2026/09/tjl-feat-intro.webp" alt="مجله تجربه، مقاله‌های تألیفی تراپیست‌ها" loading="lazy"></div><span class="n">مجلهٔ تجربه</span><h3>محتوای آموزشی برای کارکنان شما</h3><span class="for">برای سازمان: خبرنامه و روزهای سخت</span><p>۲۶۷ مقالهٔ تألیفی به قلم تراپیست‌ها؛ دربارهٔ فرسودگی، رابطه، سوگ و هر چیزی که در محیط کار پیش می‌آید.</p><span class="go">خواندن مجله <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></span></a>
+</div>
+</div>
+</section>
+
+<section class="std" id="standard">
+<div class="wrap">
+<div class="center rv">
+<span class="eyebrow">استانداردی که پیشنهاد می‌کنیم</span>
+<h2 class="h2">همان کاری که بهترین برنامه‌های جهان می‌کنند</h2>
+<p class="lede">ما دنبال بستن یک توافق‌نامه نیستیم؛ دنبال این هستیم که سلامت روان در جمع شما همان‌قدر جدی گرفته شود که در بهترین شرکت‌های دنیا. این استاندارد سه پایه دارد.</p>
+</div>
+<div class="axes rv">
+<div><i><img src="/wp-content/uploads/2026/09/tjl-icon-match.png" alt="تراپیست تأییدشده، نه فهرست اسم"></i><b>تراپیست تأییدشده، نه فهرست اسم</b><p>مصاحبهٔ علمی، شبیه‌سازی جلسه، درمان شخصی و سوپرویژن مستمر. همان چیزی که برنامه‌های جهانی از شبکهٔ درمانگران‌شان می‌خواهند.</p></div>
+<div><i><img src="/wp-content/uploads/2026/09/tjl-b2b-i3.png" alt="محرمانگی ساختاری، نه شعاری"></i><b>محرمانگی ساختاری، نه شعاری</b><p>سازمان فقط می‌بیند چه کسی از مزیت استفاده کرده. نام تراپیست، موضوع جلسه و ریز هزینه هرگز به سازمان نمی‌رسد و گزارش کلی زیر ۱۰ نفر داده نمی‌شود.</p></div>
+<div><i><img src="/wp-content/uploads/2026/09/tjl-svc-group.png" alt="از استرس روزمره تا درمان تخصصی"></i><b>از استرس روزمره تا درمان تخصصی</b><p>تراپی فردی، گروه بالینت، سوپرویژن کادر، کارگاه و جلسات حمایتی در بحران. یک درِ ورودی، طیف کامل.</p></div>
+</div>
+<div class="bmk rv" id="bmk">
+<p class="t">این هفت نام با تجربه کار نمی‌کنند؛ نمونه‌های استاندارد جهانی این حوزه‌اند. روی هر لوگو بزنید تا ببینید دقیقاً چه می‌کنند. آمازون هم در بیش از ۶۰ کشور برنامهٔ سلامت روان دارد، از تراپی فوری تا پوشش خانوادهٔ کارکنان.</p>
+<div class="row" role="tablist">
+<button type="button" class="on" data-i="0"><img src="/wp-content/uploads/2026/09/tjl-bmk-starbucks.png" alt="لوگوی Starbucks">Starbucks</button>
+<button type="button" data-i="1"><img src="/wp-content/uploads/2026/09/tjl-bmk-google.png" alt="لوگوی Google">Google</button>
+<button type="button" data-i="2"><img src="/wp-content/uploads/2026/09/tjl-bmk-sap.png" alt="لوگوی SAP">SAP</button>
+<button type="button" data-i="3"><img src="/wp-content/uploads/2026/09/tjl-bmk-unilever.png" alt="لوگوی Unilever">Unilever</button>
+<button type="button" data-i="4"><img src="/wp-content/uploads/2026/09/tjl-bmk-paypal.png" alt="لوگوی PayPal">PayPal</button>
+<button type="button" data-i="5"><img src="/wp-content/uploads/2026/09/tjl-bmk-hsbc.png" alt="لوگوی HSBC">HSBC</button>
+<button type="button" data-i="6"><img src="/wp-content/uploads/2026/09/tjl-bmk-goldmansachs.png" alt="لوگوی Goldman Sachs">Goldman Sachs</button>
+</div>
+<div class="panel">
+<img id="bmkLogo" src="/wp-content/uploads/2026/09/tjl-bmk-starbucks.png" alt="لوگوی Starbucks">
+<div><p id="bmkText">به همهٔ کارکنان آمریکا و اعضای خانواده‌شان، از روز اول استخدام، سالانه ۲۰ جلسهٔ درمان رایگان می‌دهد. جلسه حضوری یا ویدیویی است و انتخاب درمانگر با خودِ فرد.</p><a id="bmkSrc" href="https://www.starbucksbenefits.com/en-us/home/partner-family-support/employee-assistance-program-eap/" target="_blank" rel="noopener nofollow">سند رسمی مزایای استارباکس</a></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="paths" id="paths">
+<div class="wrap">
+<div class="center rv">
+<span class="eyebrow">چهار مسیر</span>
+<h2 class="h2">جمع شما کدام است؟</h2>
+<p class="lede">هر مسیر سرویس‌های خودش را دارد؛ ولی درِ ورودی یکی است: یک گفت‌وگوی کوتاه.</p>
+</div>
+<div class="aud rv">
+<a href="#start" data-orgtype="company"><img src="/wp-content/uploads/2026/09/tjl-plan-1.png" alt="شرکت‌ها و کسب‌وکارها"><b>شرکت‌ها و کسب‌وکارها</b><p>مزیت تراپی برای کارکنان، تراپی مدیران، گروه بالینت برای تیم‌های پرفشار و کارگاه‌های فرسودگی و ارتباط.</p><span class="go">شروع برای شرکت</span></a>
+<a href="#start" data-orgtype="school"><img src="/wp-content/uploads/2026/09/tjl-icon-cap.png" alt="مدرسه‌ها"><b>مدرسه‌ها</b><p>سوپرویژن مشاور مدرسه، کانال ارجاع روشن برای دانش‌آموزان و جلسه با والدین و کادر.</p><span class="go">شروع برای مدرسه</span></a>
+<a href="#start" data-orgtype="kindergarten"><img src="/wp-content/uploads/2026/09/tjl-svc-child.png" alt="مهدکودک‌ها"><b>مهدکودک‌ها</b><p>سوپرویژن منظم مربی‌ها با متخصص کودک، راهنمای رفتارهای دشوار و حمایت از مربی در برابر فرسودگی.</p><span class="go">شروع برای مهدکودک</span></a>
+<a href="#start" data-orgtype="university"><img src="/wp-content/uploads/2026/09/tjl-icon-book.png" alt="انجمن‌های علمی دانشگاه"><b>انجمن‌های علمی دانشگاه</b><p>نشست‌های مشترک، مزیت درمان با سهم دانشجویی و همکاری محتوایی با مجلهٔ تجربه.</p><span class="go">شروع برای انجمن</span></a>
+</div>
+</div>
+</section>
+
+<section class="story" id="story">
+<div class="wrap">
+<div class="vid rv">
+<video controls preload="metadata" playsinline poster="/wp-content/uploads/2026/09/tj-b2b-technolife-poster.jpg"><source src="/wp-content/uploads/2026/09/video.mp4" type="video/mp4"></video>
+<p class="cap">بازخورد منابع انسانی تکنولایف دربارهٔ استقرار سیستم سلامت روان · <a href="https://www.instagram.com/p/DbyUw0mEezT/" target="_blank" rel="noopener">نسخهٔ کامل در اینستاگرام</a></p>
+</div>
+<div class="copy rv">
+<span class="eyebrow">یک داستان واقعی</span>
+<h2 class="h2">تکنولایف؛ از یک مزیت کارمندی تا روزهای جنگ</h2>
+<p>تکنولایف با ساده‌ترین شکل شروع کرد: کارکنان با لینک دعوت اختصاصی وارد پلتفرم شدند و روی جلسه‌های درمان مزیت گرفتند. سازمان چیزی نپرداخت و هر نفر صورت‌حساب خودش را داشت.</p>
+<p>بعد لایهٔ دوم آمد: گروه بالینت برای کادر، با فسیلیتاتور تجربه. این بار طرف حساب خودِ شرکت بود، نه اعضا.</p>
+<p class="war">و در روزهای جنگ، وقتی فشار روی بعضی تیم‌ها از حد گذشت، همین رابطه به کار آمد: برای گروه‌های تحت فشار تکنولایف جلسه‌های حمایتی و گروه‌های بالینت برگزار کردیم. همکاری سازمانی برای ما یعنی همین؛ بودن، وقتی واقعاً لازم است.</p>
+</div>
+</div>
+</section>
+
+<section class="ways" id="ways">
+<div class="wrap">
+<div class="center rv">
+<span class="eyebrow">مدل مشارکت هزینه</span>
+<h2 class="h2">از صفر تا کامل؛ سهم سازمان را خودتان انتخاب می‌کنید</h2>
+<p class="lede">سه شکل همکاری داریم و می‌شود از ساده‌ترینش شروع کرد. هیچ‌کدام تعهد بلندمدت نمی‌خواهد.</p>
+</div>
+<div class="way-grid rv">
+<div class="way free"><img src="/wp-content/uploads/2026/09/tjl-plan-1.png" alt="مزیت برای کارکنان"><span class="tag">سهم سازمان: صفر</span><b>مزیت برای کارکنان</b><p>سازمان فقط معرفی می‌کند. هر نفر با لینک اختصاصی وارد می‌شود، مزیت می‌گیرد و صورت‌حساب خودش را دارد. هیچ هزینه‌ای برای سازمان ندارد.</p><small>طرف حساب: خودِ فرد</small></div>
+<div class="way"><img src="/wp-content/uploads/2026/09/tjl-plan-2.png" alt="سرویس برای خودِ سازمان"><span class="tag">سهم سازمان: توافقی</span><b>سرویس برای خودِ سازمان</b><p>سوپرویژن کادر، گروه بالینت، کارگاه‌ها و جلسات حمایتی. طرف حساب سازمان است و محتوای جلسه‌ها به سازمان نمی‌رود.</p><small>طرف حساب: سازمان</small></div>
+<div class="way"><img src="/wp-content/uploads/2026/09/tjl-plan-3.png" alt="تراپی با سهم سازمان"><span class="tag">سهم سازمان: بخشی یا کامل</span><b>تراپی با سهم سازمان</b><p>سازمان بخشی یا همهٔ هزینهٔ جلسات کارکنان را می‌پذیرد؛ مثلاً دو جلسهٔ اول. فرد فقط ادامه را می‌پردازد و سازمان ریز جلسه‌ها را نمی‌بیند.</p><small>طرف حساب: مشترک</small></div>
+</div>
+</div>
+</section>
+
+<section class="priv" id="privacy">
+<div class="wrap">
+<div class="rv">
+<span class="eyebrow">محرمانگی</span>
+<h2 class="h2">سازمان چه می‌بیند و چه نمی‌بیند</h2>
+<p class="lede">محرمانگی در خدمات سازمانی یک بند تشریفاتی نیست؛ شرط اثربخشی است. اگر همکار شما مطمئن نباشد که جلسه‌اش پیش خودش می‌ماند، اصلاً نمی‌آید.</p>
+<p class="note">این خط در توافق‌نامهٔ همکاری نوشته می‌شود؛ نه فقط در یک صفحهٔ وب.</p>
+</div>
+<div class="see rv">
+<div><b>سازمان می‌بیند</b><ul><li>چه کسی از مزیت استفاده کرده</li><li>گزارش کلی استفاده، فقط بالای ۱۰ نفر</li><li>صورت‌حساب سرویس‌های سازمانی</li></ul></div>
+<div class="no"><b>سازمان نمی‌بیند</b><ul><li>نام تراپیست</li><li>موضوع و محتوای جلسه</li><li>ریز هزینهٔ هر جلسه</li><li>ارزیابی سوپروایزر</li></ul></div>
+</div>
+</div>
+</section>
+
+<section class="ev" id="evidence">
+<div class="wrap">
+<div class="center rv">
+<span class="eyebrow">چرا این یک استاندارد جهانی است</span>
+<h2 class="h2">چهار عدد که به زبان ساده معنی دارند</h2>
+</div>
+<div class="ev-grid rv">
+<div class="ev-card"><b>۱۲ میلیارد روز کاری</b><p>هر سال به‌خاطر افسردگی و اضطراب در جهان از دست می‌رود؛ معادل حدود یک تریلیون دلار بهره‌وری.</p><a href="https://www.who.int/news-room/fact-sheets/detail/mental-health-at-work" target="_blank" rel="noopener nofollow">سازمان جهانی بهداشت</a></div>
+<div class="ev-card"><b>۱ به ۴</b><p>هر یک دلار که صرف درمان افسردگی و اضطراب می‌شود، حدود چهار دلار سلامت و بهره‌وری برمی‌گرداند.</p><a href="https://www.who.int/news/item/13-04-2016-investing-in-treatment-for-depression-and-anxiety-leads-to-fourfold-return" target="_blank" rel="noopener nofollow">سازمان جهانی بهداشت، ۲۰۱۶</a></div>
+<div class="ev-card"><b>۴٫۷ پوند</b><p>بازگشت به‌ازای هر یک پوندی که کارفرمای بریتانیایی برای سلامت روان کارکنان هزینه می‌کند.</p><a href="https://www.deloitte.com/uk/en/about/press-room/poor-mental-health-costs-uk-employers-51-billion-a-year-for-employees.html" target="_blank" rel="noopener nofollow">Deloitte، ۲۰۲۴</a></div>
+<div class="ev-card"><b>۶۹ درصد</b><p>از کارکنانی که از مزیت سلامت روان کارفرما استفاده کردند، بهبود معنادار در افسردگی داشتند.</p><a href="https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2793174" target="_blank" rel="noopener nofollow">JAMA Network Open، ۲۰۲۲</a></div>
+</div>
+</div>
+</section>
+
+<section class="how" id="how">
+<div class="wrap">
+<div class="center rv">
+<span class="eyebrow">شروع همکاری</span>
+<h2 class="h2">چهار قدم تا اولین جلسه</h2>
+</div>
+<div class="steps rv">
+<div><i>۱</i><b>گفت‌وگوی کوتاه</b><span>بیست دقیقه، آنلاین یا تلفنی؛ دربارهٔ جمع شما و آنچه لازم دارد.</span></div>
+<div><i>۲</i><b>توافق‌نامهٔ همکاری</b><span>با خط محرمانگی صریح و مدل مشارکت هزینه‌ای که خودتان انتخاب کرده‌اید.</span></div>
+<div><i>۳</i><b>لینک دعوت اختصاصی</b><span>همکاران شما وارد می‌شوند و با معارفهٔ رایگان تراپیست‌شان را انتخاب می‌کنند.</span></div>
+<div><i>۴</i><b>گزارش کلی</b><span>فقط استفادهٔ کلی، فقط بالای ۱۰ نفر؛ و یک تماس دوره‌ای برای تنظیم مسیر.</span></div>
+</div>
+</div>
+</section>
+
+<section class="start" id="start">
+<div class="wrap">
+<div class="copy rv">
+<span class="eyebrow">گفت‌وگوی کوتاه</span>
+<h2 class="h2">بگویید جمع شما چه شکلی است</h2>
+<p>فرم را پر کنید یا مستقیم با پذیرش تجربه حرف بزنید. بدون تعهد، بدون پیگیری آزاردهنده؛ فقط یک گفت‌وگو برای اینکه ببینیم کدام مسیر به کار شما می‌آید.</p>
+<div class="contact">
+
+<a href="tel:+982191008867">تماس تلفنی <small>021 9100 8867</small></a>
+<a href="mailto:reception@tajrobeh.life">ایمیل <small>reception@tajrobeh.life</small></a>
+</div>
+</div>
+<div class="ffwrap rv">[fluentform id="3"]</div>
+</div>
+</section>
+
+<section class="guide" id="guide">
+<div class="wrap">
+<div class="center rv">
+<span class="eyebrow">راهنمای کامل</span>
+<h2 class="h2">سلامت روان سازمانی؛ هرچه باید بدانید</h2>
+<p class="lede">هر بخش را باز کنید تا فقط همان را بخوانید.</p>
+</div>
+<div class="faq-list rv">
+<details><summary><h3>سازمان‌ها فقط از فرآیندها ساخته نشده‌اند</h3></summary><div class="ans"><p>وقتی دربارهٔ موفقیت یک سازمان صحبت می‌کنیم، معمولاً به شاخص‌هایی مانند بهره‌وری، درآمد و رشد توجه می‌شود. اما در پس تمام این شاخص‌ها چیزی قرار دارد که کمتر دیده می‌شود: وضعیت روانی افرادی که هر روز در آن سازمان زندگی و کار می‌کنند. سازمان‌ها تنها مجموعه‌ای از ساختارها و وظایف نیستند؛ شبکه‌ای از روابط، هیجان‌ها، تعارض‌ها، امیدها، فرسودگی‌ها و تجربه‌های انسانی هستند. هرچه این شبکه سالم‌تر باشد، سازمان هم پویاتر و کارآمدتر خواهد بود.</p></div></details>
+<details><summary><h3>خدمات سازمانی سلامت روان چیست؟</h3></summary><div class="ans"><p>مجموعه‌ای از سرویس‌های تخصصی روان‌شناختی که با هدف ارتقای سلامت روان اعضای یک نهاد، کاهش تنش‌های سازمانی، بهبود ارتباطات و افزایش کیفیت عملکرد فردی و گروهی ارائه می‌شود. برخلاف تصور رایج، این خدمات صرفاً زمانی کاربرد ندارند که سازمان با بحران مواجه شده باشد. بسیاری از سازمان‌های موفق، سلامت روان اعضایشان را بخشی از توسعهٔ پایدار خود می‌دانند و پیش از بروز مشکلات جدی سراغش می‌روند.</p></div></details>
+<details><summary><h3>چرا سلامت روان کارکنان برای سازمان اهمیت دارد؟</h3></summary><div class="ans"><p>فرسودگی شغلی، استرس مزمن، تعارض‌های بین‌فردی و فشارهای کاری تنها بر زندگی شخصی افراد اثر نمی‌گذارند؛ مستقیماً بر عملکرد سازمان هم اثر دارند. وقتی سلامت روان کارکنان نادیده گرفته شود، این‌ها بالا می‌رود:</p><ul><li>کاهش انگیزهٔ کاری و افت بهره‌وری</li><li>افزایش فرسودگی شغلی و غیبت</li><li>کاهش تعهد سازمانی و رضایت شغلی</li><li>افزایش تعارض‌های تیمی و نرخ ترک شغل</li></ul></div></details>
+<details><summary><h3>چه نهادهایی از این خدمات استفاده می‌کنند؟</h3></summary><div class="ans"><p>در تجربه چهار دستهٔ اصلی داریم و مسیر هر کدام جداست:</p><ul><li><b>شرکت‌ها و کسب‌وکارها.</b> رشد سریع و افزایش فشار کاری، تغییرات ساختاری یا مدیریتی، تعارض‌های درون‌سازمانی، فرسودگی کارکنان، ادغام یا بازسازی، و مشاغل با سطح استرس بالا.</li><li><b>مدرسه‌ها.</b> مدرسه معمولاً اولین جایی است که نشانه‌ها دیده می‌شوند، ولی مسیر روشنی برای ارجاع ندارد. سوپرویژن مشاور مدرسه و یک کانال ارجاع درست، همان چیزی است که این حلقه را می‌بندد.</li><li><b>مهدکودک‌ها و پیش‌دبستان.</b> مربی مهد با رفتارهایی روبه‌رو است که هیچ‌کس برایشان آماده‌اش نکرده. سوپرویژن منظم با متخصص کودک، هم به مربی کمک می‌کند و هم به گروه بچه‌ها.</li><li><b>انجمن‌های علمی دانشگاه.</b> دانشجو یکی از پرخطرترین گروه‌های سنی برای شروع اختلالات روانی است. نشست مشترک، مزیت درمان با سهم دانشجویی و همکاری محتوایی، سه شکل سادهٔ همکاری‌اند.</li></ul></div></details>
+<details><summary><h3>نشانه‌هایی که خبر از نیاز سازمان به مداخله دارند</h3></summary><div class="ans"><p>بسیاری از مشکلات سازمانی اول به شکل مسائل عملکردی دیده می‌شوند، اما ریشه‌شان در روابط انسانی است. نشانه‌های مهم: افزایش تنش میان کارکنان، کاهش همکاری بین تیم‌ها، خستگی و فرسودگی گسترده، افت روحیه، افزایش شکایت‌های درون‌سازمانی، کاهش تعلق سازمانی، بی‌انگیزگی، و افزایش جابه‌جایی نیروها. شناخت به‌موقع این نشانه‌ها از شکل‌گیری بحران‌های بزرگ‌تر جلوگیری می‌کند.</p></div></details>
+<details><summary><h3>خدمات سازمانی تجربه شامل چه مواردی است؟</h3></summary><div class="ans"><ul><li><b>مشاوره و روان‌درمانی فردی اعضا.</b> برای کسانی که با استرس، فرسودگی، مشکلات شغلی یا چالش‌های فردی روبه‌رو هستند.</li><li><b>تراپی مدیران و رهبران سازمان.</b> برای مدیریت فشار تصمیم‌گیری، تعارض‌ها و مسئولیت‌های سنگین.</li><li><b>سوپرویژن کادر.</b> برای مربی مهدکودک، مشاور مدرسه و روان‌شناس سازمان. صورت‌حساب با سازمان است و محتوای جلسه با سازمان نیست.</li><li><b>گروه بالینت.</b> گروهی ثابت از ۸ تا ۱۲ نفر برای حرفه‌ای‌هایی که کارشان با آدم‌هاست: پزشک، پرستار، معلم، مربی، مشاور و مدیر. موضوعش رابطهٔ حرفه‌ای با مراجع است، نه حل کیس. همین تفاوت، بالینت را از سوپرویژن جدا می‌کند.</li><li><b>جلسات حمایتی در بحران.</b> برای روزهایی که فشار از حد می‌گذرد؛ همان کاری که در روزهای جنگ برای تیم‌های تکنولایف کردیم.</li><li><b>کارگاه‌های سلامت روان سازمانی.</b> مدیریت استرس، پیشگیری از فرسودگی شغلی، مهارت‌های ارتباطی، تاب‌آوری و هوش هیجانی.</li><li><b>مداخلات تیمی.</b> بهبود همکاری، حل تعارض و افزایش انسجام گروهی.</li><li><b>کانال ارجاع سازمانی.</b> برای مواردی که خودِ سازمان تشخیص می‌دهد کسی به تراپی نیاز دارد.</li></ul></div></details>
+<details><summary><h3>فرسودگی شغلی؛ رایج‌ترین دلیل مراجعهٔ سازمان‌ها</h3></summary><div class="ans"><p>فرسودگی تنها خستگی نیست. بسیاری از کارکنان فرسوده احساس می‌کنند انرژی روانی‌شان را از دست داده‌اند، نسبت به کار بی‌تفاوت شده‌اند یا دیگر توان درگیر شدن با وظایف روزمره را ندارند. اگر ادامه پیدا کند، نه‌تنها عملکرد فرد بلکه کیفیت کلی سازمان هم افت می‌کند. این موضوع در مشاغل مراقبتی و آموزشی شدیدتر است؛ مرور نظام‌مندی در سال ۲۰۲۳ نشان داد حدود یک‌سوم مربیان مهدکودک قصد دارند ظرف چهار سال حرفهٔ آموزش را ترک کنند.</p></div></details>
+<details><summary><h3>محرمانگی؛ سخت‌ترین بخش کار سازمانی</h3></summary><div class="ans"><p>در خدمات سازمانی سلامت روان، محرمانگی یک بند حقوقی تشریفاتی نیست؛ شرط اثربخشی است. قاعدهٔ ما یک خط روشن دارد: سازمان می‌فهمد چه کسی دارد از مزیت استفاده می‌کند، و همین. نام درمانگر، نوع سرویس، موضوع جلسه و ریز هزینهٔ هر جلسه به سازمان نمی‌رود.</p><p>دلیلش فنی است: نام درمانگر خودش نوع مسئله را لو می‌دهد، و ریز هزینهٔ جلسه‌به‌جلسه الگو می‌سازد که می‌شود از آن دربارهٔ شدت مسئلهٔ یک نفر حدس زد. گزارش تجمیعی هم زیر کف ۱۰ نفر ارائه نمی‌شود، چون «۲ نفر از ۸ نفر» عملاً قابل شناسایی است.</p></div></details>
+<details><summary><h3>خدمات حضوری و آنلاین</h3></summary><div class="ans"><p>خدمات سازمانی تجربه می‌تواند حضوری، آنلاین یا ترکیبی اجرا شود. حالت حضوری برای سازمان‌هایی مناسب است که ترجیح می‌دهند جلسه‌ها در محل شرکت یا در کلینیک برگزار شود؛ تجربه در تهران کلینیک خودش را دارد و در مشهد، اصفهان، کرج، نور و آلمان کلینیک‌های پارتنر. حالت آنلاین برای شرکت‌های دارای شعب متعدد، سازمان‌های دورکار و تیم‌های پراکنده مناسب است. هر دو شیوه با استاندارد حرفه‌ای یکسان و محرمانگی کامل اجرا می‌شوند.</p></div></details>
+<details><summary><h3>شواهد علمی برای مدرسه، مهدکودک و دانشگاه</h3></summary><div class="ans"><ul><li><b>۴۸ درصد</b> اختلالات روانی پیش از ۱۸ سالگی آغاز می‌شوند و اوج سن شروع ۱۴٫۵ سالگی است؛ یعنی مدرسه و مهدکودک حاشیه نیستند، خط اول‌اند. <a href="https://www.nature.com/articles/s41380-021-01161-7" target="_blank" rel="noopener nofollow">Molecular Psychiatry، متاآنالیز ۱۹۲ مطالعه، ۲۰۲۲</a></li><li><b>۲٫۶ برابر</b> در مدرسه، مداخلهٔ هدفمند بیش از دو برابر برنامهٔ فراگیر اثر دارد؛ شناسایی و ارجاع درست، از کارگاه عمومی مؤثرتر است. <a href="https://www.jaacap.org/article/S0890-8567(17)31926-3/fulltext" target="_blank" rel="noopener nofollow">JAACAP، ۴۳ کارآزمایی، ۲۰۱۸</a></li><li><b>یک‌سوم</b> دانشجویان سال اول دست‌کم یک اختلال روانی را تجربه کرده‌اند؛ انجمن علمی نزدیک‌ترین نهاد به این آدم‌هاست. <a href="https://pubmed.ncbi.nlm.nih.gov/30211576/" target="_blank" rel="noopener nofollow">پروژهٔ دانشجویی سلامت روان جهانی WHO، ۲۰۱۸</a></li><li><b>یک‌سوم</b> مربیان مهدکودک قصد دارند ظرف چهار سال حرفهٔ آموزش را ترک کنند؛ مداخلات مبتنی بر کوچینگ و مشاوره ریسک فرسودگی را کم می‌کنند. <a href="https://www.iier.org.au/iier33/ng.pdf" target="_blank" rel="noopener nofollow">Issues in Educational Research، ۲۰۲۳</a></li><li><b>۱۱ کارآزمایی</b> نشان می‌دهند گروه‌های بالینت همدلی حرفه‌ای را به‌طور معنادار افزایش می‌دهند؛ دربارهٔ کاهش فرسودگی، شواهد اولیه امیدبخش است ولی هنوز قطعی نیست و ما هم قطعی نمی‌گوییم. <a href="https://link.springer.com/article/10.1186/s12909-024-06098-3" target="_blank" rel="noopener nofollow">BMC Medical Education، ۲۰۲۴</a></li></ul></div></details>
+<details><summary><h3>چرا سازمان‌ها تجربه را انتخاب می‌کنند؟</h3></summary><div class="ans"><ul><li>پشت پلتفرم یک کلینیک واقعی از سال ۱۳۹۸ ایستاده است، نه یک دایرکتوری از اسم‌ها.</li><li>هر درمانگر پیش از ورود مصاحبهٔ علمی و شبیه‌سازی جلسه می‌دهد، خودش در درمان شخصی بوده و بعد از ورود زیر نظارت بالینی سوپروایزر کار می‌کند.</li><li>مدرسهٔ تجربه همان جایی است که سوپروایزرها در آن تدریس می‌کنند؛ کادرسازی و درمان از یک منبع می‌آیند.</li><li>تیم پذیرش انسانی، فرم را با خودِ فرد کامل می‌کند و ارجاع را پیگیری می‌کند.</li><li>خط محرمانگی صریح و نوشته‌شده در توافق‌نامهٔ همکاری.</li><li>درمانگر در ایران، آلمان، انگلستان، آمریکا و کانادا؛ مناسب سازمان‌هایی که نیروی خارج از کشور دارند.</li></ul></div></details>
+</div>
+</div>
+</section>
+
+<section class="faqs" id="faq">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">پرسش‌های پرتکرار</span><h2 class="h2">پیش از شروع، این‌ها را بدانید</h2></div>
+<div class="faq-list rv">
+<details><summary><h3>آیا خدمات سازمانی فقط برای سازمان‌های بزرگ است؟</h3></summary><div class="ans"><p>خیر. کسب‌وکارهای کوچک و متوسط، مهدکودک‌ها، مدرسه‌ها و انجمن‌های دانشجویی هم می‌توانند از این خدمات استفاده کنند. مسیر پایه برای سازمان هزینه‌ای ندارد و همین باعث می‌شود اندازهٔ سازمان مانع شروع نباشد.</p></div></details>
+<details><summary><h3>آیا اطلاعات اعضا محرمانه باقی می‌ماند؟</h3></summary><div class="ans"><p>بله. سازمان فقط می‌بیند چه کسی از مزیت استفاده کرده است. نام درمانگر، نوع سرویس، موضوع جلسه و ریز هزینهٔ هر جلسه به سازمان داده نمی‌شود و گزارش تجمیعی زیر کف ۱۰ نفر ارائه نمی‌شود.</p></div></details>
+<details><summary><h3>سوپرویژن مربی مهد یا مشاور مدرسه چطور کار می‌کند؟</h3></summary><div class="ans"><p>سازمان توافق‌نامه امضا می‌کند و صورت‌حساب با سازمان است. سوپروایزر از میان اساتید و سوپروایزرهای تجربه انتخاب می‌شود و جلسه‌ها منظم برگزار می‌شود. محتوای جلسه و ارزیابی سوپروایزر به سازمان داده نمی‌شود؛ سازمان فقط حضور را می‌بیند.</p></div></details>
+<details><summary><h3>گروه بالینت با گروه‌درمانی چه تفاوتی دارد؟</h3></summary><div class="ans"><p>گروه‌درمانی برای خودِ اعضا و دربارهٔ زندگی خودشان است و هر عضو صورت‌حساب خودش را دارد. گروه بالینت برای حرفه‌ای‌هایی است که کارشان با آدم‌هاست و موضوعش رابطهٔ حرفه‌ای با مراجع است؛ طرف حساب آن سازمان است و اعضا صورت‌حساب نمی‌بینند.</p></div></details>
+<details><summary><h3>اگر کارمندی از سازمان جدا شود، درمانش قطع می‌شود؟</h3></summary><div class="ans"><p>نه. حذف عضو فقط مزیت سازمانی را برمی‌دارد و درمان ادامه پیدا می‌کند. مسئولیت به‌روز نگه‌داشتن فهرست اعضا با سازمان است.</p></div></details>
+<details><summary><h3>امکان ارائهٔ خدمات آنلاین وجود دارد؟</h3></summary><div class="ans"><p>بله. خدمات سازمانی می‌تواند حضوری، آنلاین یا ترکیبی اجرا شود و برای نیروهای خارج از کشور هم درمانگر فارسی‌زبان در آلمان، انگلستان، آمریکا و کانادا داریم.</p></div></details>
+<details><summary><h3>سهم سازمان در هزینه چقدر است؟</h3></summary><div class="ans"><p>مسیر پایه برای سازمان بی‌هزینه است. در مسیرهای دیگر، سهم سازمان و نرخ سرویس‌های اختصاصی مثل بالینت و سوپرویژن در گفت‌وگوی اول و بر اساس بخش‌های سازمان تعیین می‌شود.</p></div></details>
+<details><summary><h3>مهم‌ترین مزیت این خدمات چیست؟</h3></summary><div class="ans"><p>بالا رفتن سلامت روان اعضا، کاهش فرسودگی شغلی و بهبود کیفیت عملکرد فردی و سازمانی. و برای مدرسه و مهدکودک، یک چیز اضافه: مسیر روشنی برای اینکه بدانند کِی و کجا باید ارجاع بدهند.</p></div></details>
+</div>
+</div>
+</section>
+
+<section class="berry" id="berry">
+<div class="wrap rv">
+<img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" loading="lazy">
+<h2 class="h2">یک قاشق مربای توت‌فرنگی برای جمع شما</h2>
+<p class="lede">تراپی برای ما همان توت‌فرنگی است؛ کوچک، شیرین و نجات‌بخش. اگر فکر می‌کنید جمع شما به آن نیاز دارد، همین‌جا شروع کنید.</p>
+<div class="ctas"><a class="btn btn-brand" href="#start">یک گفت‌وگوی کوتاه</a><a class="btn btn-ghost" href="https://t.me/tajrobehlife_bot" target="_blank" rel="noopener">پرسیدن در تلگرام</a></div>
+<p class="small">بدون تعهد. اولین قدم همیشه یک گفت‌وگوست.</p>
+</div>
+</section>
+
+</div>
+<script>
+(function(){
+var root=document.getElementById('tj2b'); if(!root) return;
+var fa=function(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+var fmt=function(n){return fa(n.toLocaleString('en-US')).replace(/,/g,'،');};
+var rv=root.querySelectorAll('.rv');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -6% 0px'});rv.forEach(function(el){io.observe(el);});}else{rv.forEach(function(el){el.classList.add('in');});}
+var cs=root.querySelectorAll('[data-count]');
+function runCount(el){var end=+el.getAttribute('data-count'),suf=el.getAttribute('data-suffix')||'',t0=null,dur=1400;function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);el.textContent=fmt(Math.round(end*p))+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);setTimeout(function(){el.textContent=fmt(end)+suf;},dur+250);}
+/* شمارش متحرک اعداد حذف شد: باعث پرش چیدمان می‌شد؛ اعداد نهایی همان‌طور که در HTML هستند نمایش داده می‌شوند */
+var bm=[
+['tjl-bmk-starbucks','به همهٔ کارکنان آمریکا و اعضای خانواده‌شان، از روز اول استخدام، سالانه ۲۰ جلسهٔ درمان رایگان می‌دهد. جلسه حضوری یا ویدیویی است و انتخاب درمانگر با خودِ فرد.','https://www.starbucksbenefits.com/en-us/home/partner-family-support/employee-assistance-program-eap/','سند رسمی مزایای استارباکس'],
+['tjl-bmk-google','شبکهٔ همتا-حمایت Blue Dot را دارد: نزدیک به ۲٬۰۰۰ کارمند آموزش‌دیده که کارشان فقط گوش دادن است. این درمان نیست؛ لایه‌ای است که آدم را زودتر به درمان می‌رساند. از یک حرکت خودجوش کارکنان در ۲۰۱۶ شروع شد و بعد رسمی شد.','https://blog.google/inside-google/life-at-google/big-story-behind-little-blue-dot/','وبلاگ رسمی گوگل'],
+['tjl-bmk-sap','شاخص سلامت فرهنگ کسب‌وکار را به‌عنوان یک KPI رسمی در گزارش سالانه‌اش منتشر می‌کند. صد درصد کارکنان به برنامهٔ حمایت رایگان و محرمانه دسترسی دارند و بیش از ۱۶ هزار نفر دورهٔ دوروزهٔ Search Inside Yourself را گذرانده‌اند.','https://www.sap.com/about/workplace-health-well-being.html','سایت رسمی SAP'],
+['tjl-bmk-unilever','از سال ۲۰۲۰ نزدیک به ۴٬۰۰۰ همکار را به‌عنوان Mental Health Champion آموزش داده و برنامهٔ Healthier U را به بیش از ۵۹ هزار کارمند در ۵۶ کشور رسانده است.','https://www.unilever.com/working-at-unilever/employee-wellbeing/','سایت رسمی یونیلیور'],
+['tjl-bmk-paypal','مشاورهٔ متنی و ویدیویی را برای کارکنان فراهم کرده و برنامهٔ سلامت روان را به خانوادهٔ آن‌ها هم گسترش داده است.','https://www.paypalbenefits.com/mental-health-resources-hub','مرکز مزایای پی‌پال'],
+['tjl-bmk-hsbc','برنامهٔ سلامت روان کارکنانش را بر پایهٔ استاندارد سازمان جهانی بهداشت بنا کرده و آگاهی کارکنان از منابع موجود را دوره‌ای می‌سنجد. نکته‌اش همین سنجش دوره‌ای است: بدون اندازه‌گیری، برنامه فقط یک اعلامیه است.','',''],
+['tjl-bmk-goldmansachs','مدیران و نمایندگان منابع انسانی را در کمک‌های اولیهٔ سلامت روان آموزش می‌دهد و ابزارهای خواب، تمرکز و سلامت هیجانی را در اختیار کارکنان گذاشته است.','','']
+];
+var bmk=document.getElementById('bmk');
+if(bmk){bmk.querySelectorAll('.row button').forEach(function(b){b.addEventListener('click',function(){var i=+b.getAttribute('data-i');var d=bm[i];if(!d)return;bmk.querySelectorAll('.row button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');document.getElementById('bmkLogo').src='/wp-content/uploads/2026/09/'+d[0]+'.png';var p=document.getElementById('bmkText');p.style.opacity=0;setTimeout(function(){p.textContent=d[1];p.style.transition='opacity .3s';p.style.opacity=1;},120);var a=document.getElementById('bmkSrc');if(d[2]){a.href=d[2];a.textContent=d[3];a.style.display='';}else{a.style.display='none';}});});}
+function setOrg(v){var sel=root.querySelector('select[name="org_type"]');if(sel){sel.value=v;sel.dispatchEvent(new Event('change',{bubbles:true}));}}
+root.querySelectorAll('[data-orgtype]').forEach(function(a){a.addEventListener('click',function(){setOrg(a.getAttribute('data-orgtype'));});});
+var q=new URLSearchParams(location.search).get('orgtype');
+if(q){setTimeout(function(){setOrg(q);},400);}
+root.querySelectorAll('details').forEach(function(d){var s=d.querySelector('summary'),a=d.querySelector('.ans');if(!s)return;if(!a)return;s.addEventListener('click',function(e){e.preventDefault();if(d.hasAttribute('data-anim'))return;d.setAttribute('data-anim','1');if(d.open){var h=a.offsetHeight;a.style.height=h+'px';a.style.transition='height .3s ease';requestAnimationFrame(function(){a.style.height='0px';});setTimeout(function(){d.open=false;a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},300);}else{d.open=true;var h2=a.offsetHeight;a.style.height='0px';a.style.transition='height .32s ease';requestAnimationFrame(function(){a.style.height=h2+'px';});setTimeout(function(){a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},330);}});});
+})();
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"Service","@id":"https://tajrobeh.life/enterprise/#service","name":"خدمات سلامت روان سازمانی تجربه","serviceType":"Organizational mental health services","provider":{"@id":"https://tajrobeh.life/#organization"},"areaServed":[{"@type":"Country","name":"Iran"},{"@type":"Country","name":"Germany"},{"@type":"Country","name":"Canada"}],"audience":[{"@type":"Audience","audienceType":"شرکت‌ها"},{"@type":"Audience","audienceType":"مدرسه‌ها"},{"@type":"Audience","audienceType":"مهدکودک‌ها"},{"@type":"Audience","audienceType":"انجمن‌های علمی دانشگاه"}],"description":"تراپی فردی برای کارکنان، سوپرویژن کادر، گروه بالینت، کارگاه و جلسات حمایتی در بحران؛ با تراپیست‌های تأییدشده و زیر نظارت سوپروایزر. مسیر پایه برای سازمان بدون هزینه است."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"آیا خدمات سازمانی فقط برای سازمان‌های بزرگ است؟","acceptedAnswer":{"@type":"Answer","text":"خیر. کسب‌وکارهای کوچک و متوسط، مهدکودک‌ها، مدرسه‌ها و انجمن‌های دانشجویی هم می‌توانند استفاده کنند. مسیر پایه برای سازمان هزینه‌ای ندارد."}},{"@type":"Question","name":"آیا اطلاعات اعضا محرمانه باقی می‌ماند؟","acceptedAnswer":{"@type":"Answer","text":"بله. سازمان فقط می‌بیند چه کسی از مزیت استفاده کرده است. نام درمانگر، نوع سرویس، موضوع جلسه و ریز هزینه به سازمان داده نمی‌شود و گزارش تجمیعی زیر ۱۰ نفر ارائه نمی‌شود."}},{"@type":"Question","name":"سوپرویژن مربی مهد یا مشاور مدرسه چطور کار می‌کند؟","acceptedAnswer":{"@type":"Answer","text":"سازمان توافق‌نامه امضا می‌کند و صورت‌حساب با سازمان است. سوپروایزر از میان اساتید تجربه انتخاب می‌شود و جلسه‌ها منظم برگزار می‌شود. محتوای جلسه به سازمان داده نمی‌شود."}},{"@type":"Question","name":"گروه بالینت با گروه‌درمانی چه تفاوتی دارد؟","acceptedAnswer":{"@type":"Answer","text":"گروه‌درمانی برای خودِ اعضا و دربارهٔ زندگی خودشان است. گروه بالینت برای حرفه‌ای‌هایی است که کارشان با آدم‌هاست و موضوعش رابطهٔ حرفه‌ای با مراجع است؛ طرف حساب آن سازمان است."}},{"@type":"Question","name":"اگر کارمندی از سازمان جدا شود، درمانش قطع می‌شود؟","acceptedAnswer":{"@type":"Answer","text":"نه. حذف عضو فقط مزیت سازمانی را برمی‌دارد و درمان ادامه پیدا می‌کند."}},{"@type":"Question","name":"امکان ارائهٔ خدمات آنلاین وجود دارد؟","acceptedAnswer":{"@type":"Answer","text":"بله. حضوری، آنلاین یا ترکیبی؛ و برای نیروهای خارج از کشور درمانگر فارسی‌زبان در آلمان، انگلستان، آمریکا و کانادا."}},{"@type":"Question","name":"سهم سازمان در هزینه چقدر است؟","acceptedAnswer":{"@type":"Answer","text":"مسیر پایه برای سازمان بی‌هزینه است. در مسیرهای دیگر، سهم سازمان و نرخ سرویس‌های اختصاصی مثل بالینت و سوپرویژن در گفت‌وگوی اول تعیین می‌شود."}},{"@type":"Question","name":"مهم‌ترین مزیت این خدمات چیست؟","acceptedAnswer":{"@type":"Answer","text":"بالا رفتن سلامت روان اعضا، کاهش فرسودگی شغلی و بهبود عملکرد فردی و سازمانی؛ و برای مدرسه و مهدکودک، مسیر روشن ارجاع."}}]}]}
+</script>
+<!-- /wp:html -->

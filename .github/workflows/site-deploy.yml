@@ -1,0 +1,76 @@
+name: سایت · انتشار
+
+# مرج روی main که /site را عوض کند = انتشار روی tajrobeh.life با کاربر claude-ops:
+# برنامه و سنجش ناهمخوانی ← برگهٔ آزمایشی خصوصی ← انتشار ← تست دود ← پاک کردن کش ← نظارت ۱۵ دقیقه ← برگشت خودکار اگر خطا.
+# برگهٔ 503886 (مینی‌اپ) و پل tj-ops اینجا منتشر نمی‌شوند. رمزها فقط WP_USER و WP_APP_PASSWORD.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/pages/**'
+      - 'site/snippets/**'
+      - 'site/css/**'
+      - 'site/templates/**'
+      - 'site/template-parts/**'
+      - 'site/yoast-meta.json'
+  workflow_dispatch:
+    inputs:
+      before:
+        description: 'کامیت پایه (نسخه‌ای که الان روی سایت است)'
+        required: true
+      after:
+        description: 'کامیت مقصد (پیش‌فرض: main)'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment: production   # v170.9: رمزها فقط در Environment «production» (فقط main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: انتشار، تست دود، نظارت
+        id: deploy
+        env:
+          BEFORE: ${{ github.event.inputs.before || github.event.before }}
+          AFTER: ${{ github.event.inputs.after || github.sha }}
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          BOT_API_URL: ${{ secrets.BOT_API_URL }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+          REPORT_CHAT_ID: ${{ secrets.REPORT_CHAT_ID }}
+          MONITOR_MIN: '15'
+          # رمزهای تازه که در گیت خالی‌اند و هنگام نوشتن اسنیپت گذاشته می‌شوند (site/tools/secrets.mjs)
+          SITE_SECRET_TJ_CAMP_SECRET_V2: ${{ secrets.CP_WP_SECRET }}
+          SITE_SECRET_TJ_LEAD_SECRET: ${{ secrets.SITE_LEAD_SECRET }}   # بات v170.9: امضای لید سایت؛ همان Secret که بات در Script Properties دارد
+        run: node site/tools/site-deploy.mjs apply
+      - name: تست دود کمپین
+        if: success()
+        env:
+          CP_WP_SECRET: ${{ secrets.CP_WP_SECRET }}
+        run: node site/tools/site-camp-smoke.mjs
+      # اسنیپت تازه شناسه گرفت: شناسه در snippets/index.json نوشته می‌شود (کامیت تازه، بی بازنویسی تاریخچه)
+      - name: ثبت شناسهٔ اسنیپت‌های تازه
+        if: steps.deploy.outputs.created != ''
+        env:
+          CREATED: ${{ steps.deploy.outputs.created }}
+        run: |
+          node -e '
+            const fs=require("fs");const p="site/snippets/index.json";const idx=JSON.parse(fs.readFileSync(p,"utf8"));
+            for(const c of JSON.parse(process.env.CREATED)){const e=idx.find(x=>x.file===c.file);if(e)e.id=c.id;}
+            fs.writeFileSync(p,JSON.stringify(idx,null,1)+"\n");'
+          git config user.name "tajrobeh-site-deploy"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -qam "سایت: شناسهٔ اسنیپت تازه در index.json" && git push origin HEAD:main

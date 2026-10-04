@@ -1,0 +1,326 @@
+<!-- wp:html -->
+<style>
+main.tj-page{margin-block-start:0}.wp-block-post-content>.tjr.alignfull{margin-top:0}
+.tjr {
+  --paper:#fbf7f5; --paper-2:#f6eeec; --ink:#241c1e; --ink-2:#5c4f52; --ink-3:#8c7f82;
+  --line:#e6d9d8; --straw:#c83f49; --straw-deep:#8e2d34; --straw-soft:#faeced; --straw-mid:#e6a7ab;
+  --green:#49795c; --green-soft:#f0f7f3; --blue:#29798b;
+  --shadow:0 1px 0 rgba(36,28,30,.06);
+}
+.tjr * { box-sizing:border-box; }
+.tjr { margin:0; background:var(--paper); color:var(--ink); font-size:17px; line-height:1.9; direction:rtl; font-variant-numeric:tabular-nums; }
+.tjr a { color:var(--straw); }
+.tjr .wrap { max-width:1120px; margin:0 auto; padding:0 24px; display:grid; grid-template-columns:220px minmax(0,1fr); gap:48px; }
+@media (max-width:860px) {.tjr .wrap { grid-template-columns:1fr; gap:0; } .tjr nav.toc { display:none; } }
+.tjr nav.toc { position:sticky; top:24px; align-self:start; padding-top:96px; font-size:14px; }
+.tjr nav.toc a { display:block; color:var(--ink-3); text-decoration:none; padding:6px 0; border-inline-start:2px solid var(--line); padding-inline-start:12px; }
+.tjr nav.toc a.on, .tjr nav.toc a:hover { color:var(--straw); border-color:var(--straw); }
+.tjr nav.toc .eyebrow { margin-bottom:8px; }
+.tjr .rmain { min-width:0; }
+.tjr header.hero { padding:72px 0 40px; border-bottom:1px solid var(--line); }
+.tjr .eyebrow { font-size:12px; letter-spacing:.08em; color:var(--straw); }
+.tjr h1 { font-size:clamp(34px,5vw,56px); line-height:1.25; margin:8px 0 12px; font-weight:400; text-wrap:balance; }
+.tjr .lede { font-size:20px; color:var(--ink-2); max-width:62ch; margin:0 0 20px; text-wrap:pretty; }
+.tjr .badge { display:inline-block; font-size:12px; padding:2px 10px; border-radius:999px; background:var(--straw-soft); color:var(--straw-deep); border:1px solid var(--straw-mid); }
+.tjr .meta { font-size:14px; color:var(--ink-3); display:flex; flex-wrap:wrap; gap:6px 20px; }
+.tjr section { padding:48px 0; border-bottom:1px solid var(--line); scroll-margin-top:24px; }
+.tjr section h2 { font-size:30px; font-weight:400; margin:0 0 6px; line-height:1.3; text-wrap:balance; }
+.tjr section .sub { color:var(--ink-3); margin:0 0 24px; font-size:15px; }
+.tjr h3 { font-size:19px; font-weight:400; margin:32px 0 8px; color:var(--straw-deep); }
+.tjr p { max-width:68ch; margin:0 0 14px; text-wrap:pretty; }
+.tjr .tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:24px 0; }
+@media (max-width:560px) {.tjr .tiles { grid-template-columns:repeat(2,1fr); } }
+.tjr .tile { background:var(--paper-2); padding:18px 18px 14px; border-radius:14px; }
+.tjr .tile b { display:block; font-size:38px; line-height:1.1; font-weight:400; color:var(--straw); }
+.tjr .tile span { font-size:14px; color:var(--ink-2); display:block; margin-top:8px; line-height:1.5; }
+.tjr .bars { display:grid; gap:8px; margin:16px 0; }
+.tjr .bar { display:grid; grid-template-columns:minmax(120px,220px) 1fr 52px; align-items:center; gap:12px; font-size:15px; }
+.tjr .bar-t { height:14px; background:var(--paper-2); border-radius:999px; overflow:hidden; }
+.tjr .bar-t i { display:block; height:100%; background:var(--straw); border-radius:999px; transition:width .5s ease; }
+.tjr .bar.alt .bar-t i { background:var(--blue); }
+.tjr .bar.g .bar-t i { background:var(--green); }
+.tjr .bar-v { color:var(--ink-2); text-align:left; direction:ltr; }
+.tjr .seg { display:inline-flex; gap:4px; background:var(--paper-2); padding:4px; border-radius:999px; margin:8px 0 12px; flex-wrap:wrap; }
+.tjr .seg button { border:0; background:transparent; font:inherit; font-size:14px; padding:4px 14px; border-radius:999px; color:var(--ink-2); cursor:pointer; }
+.tjr .seg button.on { background:var(--paper); color:var(--straw); box-shadow:var(--shadow); }
+.tjr .seg button:focus-visible { outline:2px solid var(--straw); }
+.tjr .stack { display:flex; height:22px; border-radius:999px; overflow:hidden; margin:10px 0 6px; }
+.tjr .stack i { display:block; height:100%; }
+.tjr .legend { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:14px; color:var(--ink-2); }
+.tjr .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-inline-end:6px; vertical-align:middle; }
+.tjr .profiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin:16px 0; }
+.tjr .prof { border:1px solid var(--line); border-radius:14px; padding:16px; }
+.tjr .prof b { font-weight:400; font-size:26px; color:var(--straw); }
+.tjr .prof h4 { margin:0; font-weight:400; font-size:17px; }
+.tjr .prof p { font-size:14px; color:var(--ink-2); margin:6px 0 0; }
+.tjr .hours { display:grid; grid-template-columns:repeat(24,1fr); gap:3px; align-items:end; height:140px; margin:16px 0 4px; direction:ltr; }
+.tjr .hours i { display:block; background:var(--straw-mid); border-radius:3px 3px 0 0; position:relative; }
+.tjr .hours i.hi { background:var(--straw); }
+.tjr .hours i:hover::after, .tjr .hours i:focus::after { content:attr(data-t); position:absolute; bottom:100%; left:50%; transform:translateX(-50%); font-size:12px; background:var(--ink); color:var(--paper); padding:2px 8px; border-radius:6px; white-space:nowrap; margin-bottom:4px; }
+.tjr .hours-x { display:flex; justify-content:space-between; font-size:12px; color:var(--ink-3); direction:ltr; }
+.tjr .note { background:var(--straw-soft); border-inline-start:3px solid var(--straw); padding:12px 16px; border-radius:0 10px 10px 0; font-size:15px; margin:18px 0; max-width:72ch; }
+.tjr .privacy { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin:20px 0; }
+.tjr .rule { background:var(--green-soft); border-radius:14px; padding:16px; font-size:15px; }
+.tjr .rule b { display:block; font-weight:400; color:var(--green); margin-bottom:4px; }
+.tjr details { border-top:1px solid var(--line); padding:12px 0; max-width:72ch; }
+.tjr summary { cursor:pointer; color:var(--straw-deep); }
+.tjr .cite { background:var(--paper-2); border-radius:14px; padding:18px 20px; max-width:72ch; }
+.tjr .cite code { display:block; font-family:inherit; font-size:15px; background:var(--paper); padding:12px 14px; border-radius:10px; margin:10px 0; border:1px solid var(--line); }
+.tjr button.copy { font:inherit; font-size:14px; background:var(--straw); color:#fefefe; border:0; border-radius:999px; padding:8px 18px; cursor:pointer; }
+.tjr button.copy:focus-visible { outline:2px solid var(--ink); }
+.tjr footer { padding:40px 0 64px; font-size:14px; color:var(--ink-3); }
+.tjr table { border-collapse:collapse; width:100%; max-width:72ch; font-size:15px; margin:12px 0; }
+.tjr td, .tjr th { text-align:right; padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+.tjr th { color:var(--ink-3); font-weight:400; font-size:13px; }
+.tjr .tablewrap { overflow-x:auto; }
+@media (prefers-reduced-motion: reduce) {.tjr .bar-t i { transition:none; } }
+.tjr h1,.tjr h2,.tjr h3,.tjr h4{font-family:inherit}
+
+</style>
+
+<div class="tjr alignfull"><div class="wrap">
+<nav class="toc" aria-label="فهرست">
+  <div class="eyebrow">فهرست گزارش</div>
+  <a href="#s1">اعداد کلیدی</a>
+  <a href="#s2">چه کسانی می‌آیند</a>
+  <a href="#s3">چرا می‌آیند</a>
+  <a href="#s4">چه درمانگری می‌خواهند</a>
+  <a href="#s5">چطور و کِی</a>
+  <a href="#s5b">فارسی‌زبانان خارج از ایران</a>
+  <a href="#s5c">چرا تراپی قبلی را رها کرده بودند</a>
+  <a href="#s6">پشت صحنه: مدرسه و درمانگران</a>
+  <a href="#s7">روش‌شناسی و حریم خصوصی</a>
+  <a href="#s8">استناد به این گزارش</a>
+</nav>
+<div class="rmain">
+<header class="hero">
+  <div class="eyebrow" style="margin-top:14px">مرکز تجربه زندگی · گزارش سالانه</div>
+  <h1>چه کسانی، چرا و با چه انتظاری به رواندرمانی می‌آیند</h1>
+  <p class="lede">گزارش سالانهٔ ۱۴۰۴ مرکز تجربه زندگی، ساخته‌شده از فرم‌های پذیرش، فرم‌های مدرسه و مصاحبه‌های جذب درمانگر. هدفش این است که برای فارسی‌زبانان یک مرجع قابل استناد دربارهٔ رفتار مراجعان رواندرمانی وجود داشته باشد؛ چیزی که تا امروز در وب فارسی کم بوده است.</p>
+  <div class="meta">
+    <span>پایگاه: نزدیک به ۹ هزار فرم پذیرش، ۱۴۰۱ تا دی ۱۴۰۴</span>
+    <span>نُرم‌های اصلی: حدود ۴٬۲۰۰ فرم، مهر ۱۴۰۳ تا دی ۱۴۰۴</span>
+    <span>انتشار: شهریور ۱۴۰۵</span>
+  </div>
+</header>
+
+<section id="s1">
+  <h2>اعداد کلیدی</h2>
+  <p class="sub">هر عدد این صفحه یک درصد است، نه یک شمارش. چرا؟ در بخش روش‌شناسی توضیح داده‌ایم.</p>
+  <div class="tiles">
+    <div class="tile"><b>۸۲٪</b><span>از متقاضیان تراپی زن هستند</span></div>
+    <div class="tile"><b>۲۵</b><span>میانهٔ سن؛ ۸۶٪ زیر ۳۵ سال</span></div>
+    <div class="tile"><b>۶۵٪</b><span>می‌خواهند ریشهٔ مشکلشان را بفهمند؛ پرتکرارترین دلیل مراجعه</span></div>
+    <div class="tile"><b>۸۰٪</b><span>درمانگری می‌خواهند که تحلیل عمیق داشته باشد</span></div>
+    <div class="tile"><b>۶۱٪</b><span>پیش‌تر تجربهٔ رواندرمانی داشته‌اند</span></div>
+    <div class="tile"><b>۵۹٪</b><span>جلسهٔ آنلاین را ترجیح می‌دهند</span></div>
+  </div>
+  <p>تصویر کلی ساده است: مراجع رواندرمانی در این پایگاه بیشتر زن است، جوان است، اغلب قبلاً تراپی را تجربه کرده، و بیش از آنکه دنبال «راه‌حل سریع» باشد دنبال فهمیدن است. این تصویر با آنچه در ذهن عموم دربارهٔ «مشاوره» هست فرق دارد و برای هر کسی که محتوا، خدمت یا سیاستی برای سلامت روان فارسی‌زبانان می‌سازد اهمیت دارد.</p>
+</section>
+
+<section id="s2">
+  <h2>چه کسانی به تراپی می‌آیند</h2>
+  <p class="sub">نمای جمعیت‌شناختی متقاضیان. پایگاه: همهٔ فرم‌های پذیرش ۱۴۰۱ تا ۱۴۰۴.</p>
+  <h3>جنسیت</h3>
+  <div class="stack"><i style="width:82%;background:var(--straw)"></i><i style="width:18%;background:var(--straw-mid)"></i></div>
+  <div class="legend"><span><i style="background:var(--straw)"></i>زن ۸۲٪</span><span><i style="background:var(--straw-mid)"></i>مرد ۱۸٪</span><span style="color:var(--ink-3)">سایر: کمتر از ۱٪</span></div>
+  <p style="margin-top:14px">نسبت چهار به یک زن به مرد در همهٔ سال‌ها ثابت مانده است. همین نسبت تقریباً عیناً در متقاضیان مدرسهٔ تجربه و درمانگران متقاضی همکاری هم دیده می‌شود (۸۲٪ و ۸۳٪). یعنی رواندرمانی فارسی‌زبان، هم در طرف مراجع و هم در طرف درمانگر، فضایی عمدتاً زنانه است.</p>
+  <h3>سن</h3>
+  <div class="bars">
+    <div class="bar "><span class="bar-l">۱۵ تا ۲۴ سال</span><span class="bar-t"><i style="width:44%"></i></span><span class="bar-v">۴۴٪</span></div>
+<div class="bar "><span class="bar-l">۲۵ تا ۳۴ سال</span><span class="bar-t"><i style="width:42%"></i></span><span class="bar-v">۴۲٪</span></div>
+<div class="bar "><span class="bar-l">۳۵ تا ۴۴ سال</span><span class="bar-t"><i style="width:11%"></i></span><span class="bar-v">۱۱٪</span></div>
+<div class="bar "><span class="bar-l">۴۵ تا ۵۴ سال</span><span class="bar-t"><i style="width:2%"></i></span><span class="bar-v">۲٪</span></div>
+<div class="bar "><span class="bar-l">۵۵ سال به بالا</span><span class="bar-t"><i style="width:1%"></i></span><span class="bar-v">۱٪</span></div>
+  </div>
+  <p>میانهٔ سن ۲۵ سال است. نکتهٔ کمتر گفته‌شده این است که مراجع بالای ۴۵ سال تقریباً غایب است: کمتر از ۳٪. این می‌تواند نشانهٔ نیاز پاسخ‌داده‌نشده باشد، یا نشانهٔ اینکه این گروه از مسیرهای دیگری کمک می‌گیرند.</p>
+  <h3>وضعیت تأهل و محل زندگی</h3>
+  <p>۷۳٪ مجرد، ۲۲٪ متأهل و حدود ۳٪ جداشده. نزدیک به نیمی از متقاضیان ساکن تهران‌اند و بقیه در شهرهای دیگر ایران یا خارج از کشور؛ همین پراکندگی است که سهم بالای تراپی آنلاین را توضیح می‌دهد.</p>
+</section>
+
+<section id="s3">
+  <h2>چرا می‌آیند</h2>
+  <p class="sub">دلایل مراجعه، به انتخاب خود متقاضی از میان ۹ گزینه (چندانتخابی). هر نفر به‌طور میانگین ۴٫۵ دلیل انتخاب می‌کند.</p>
+  <div class="seg" role="tablist" aria-label="تفکیک">
+    <button class="on" data-k="all" role="tab">همه</button>
+    <button data-k="زن" role="tab">زنان</button>
+    <button data-k="مرد" role="tab">مردان</button>
+    <button data-k="۱۵ تا ۲۴" role="tab">۱۵ تا ۲۴ سال</button>
+    <button data-k="۲۵ تا ۳۴" role="tab">۲۵ تا ۳۴ سال</button>
+    <button data-k="۳۵ تا ۴۴" role="tab">۳۵ تا ۴۴ سال</button>
+  </div>
+  <div class="bars" id="reasons"></div>
+  <p>دو خوشهٔ روشن در داده دیده می‌شود. خوشهٔ <b>علامت</b>: افسردگی، بی‌حوصلگی، بی‌انگیزگی، اهمال، اضطراب و نشخوار فکری. خوشهٔ <b>بینش</b>: شناخت بهتر خود، ریشه‌یابی مشکلات و مشکل در روابط. سه‌چهارم متقاضیان دست‌کم یک دلیل بینشی انتخاب می‌کنند؛ یعنی اکثریت فقط برای «رفع علامت» نمی‌آیند.</p>
+  <div class="note">تفاوت‌های معنادار: زنان بیش از مردان اضطراب را دلیل مراجعه می‌دانند (۶۲٪ در برابر ۵۰٪). اهمال با سن پایین می‌آید: نزدیک به نیمی از زیر ۲۵ ساله‌ها آن را انتخاب می‌کنند، در برابر یک‌سوم ۳۵ تا ۴۴ ساله‌ها. ریشه‌یابی در همهٔ سنین حدود ۶۰ تا ۷۰٪ ثابت است.</div>
+  <h3>چه خدمتی می‌خواهند</h3>
+  <div class="bars">
+    <div class="bar alt"><span class="bar-l">رواندرمانی فردی</span><span class="bar-t"><i style="width:82%"></i></span><span class="bar-v">۸۲٪</span></div>
+<div class="bar alt"><span class="bar-l">زوج‌درمانی و پیش از ازدواج</span><span class="bar-t"><i style="width:14%"></i></span><span class="bar-v">۱۴٪</span></div>
+<div class="bar alt"><span class="bar-l">روان‌پزشکی و دارودرمانی</span><span class="bar-t"><i style="width:2%"></i></span><span class="bar-v">۲٪</span></div>
+<div class="bar alt"><span class="bar-l">رواندرمانی کودک</span><span class="bar-t"><i style="width:2%"></i></span><span class="bar-v">۲٪</span></div>
+  </div>
+</section>
+
+<section id="s4">
+  <h2>چه درمانگری می‌خواهند</h2>
+  <p class="sub">اولویت متقاضی در مسیر درمان، از میان ۵ گزینه (چندانتخابی)، و آنچه در متن آزاد دربارهٔ درمانگر مطلوب نوشته‌اند.</p>
+  <div class="bars">
+    <div class="bar "><span class="bar-l">تحلیل عمیقی از مشکلاتم داشته باشد</span><span class="bar-t"><i style="width:80%"></i></span><span class="bar-v">۸۰٪</span></div>
+<div class="bar "><span class="bar-l">بیشتر نظر بدهد و راهکار ارائه کند</span><span class="bar-t"><i style="width:66%"></i></span><span class="bar-v">۶۶٪</span></div>
+<div class="bar "><span class="bar-l">کوتاه‌مدت باشد و زیر ۶ ماه تمام شود</span><span class="bar-t"><i style="width:35%"></i></span><span class="bar-v">۳۵٪</span></div>
+<div class="bar "><span class="bar-l">بیشتر شنونده باشد و درک بالایی داشته باشد</span><span class="bar-t"><i style="width:29%"></i></span><span class="bar-v">۲۹٪</span></div>
+<div class="bar "><span class="bar-l">دربارهٔ یک مشکل خاص راهنمایی کند</span><span class="bar-t"><i style="width:24%"></i></span><span class="bar-v">۲۴٪</span></div>
+  </div>
+  <p>ترکیب پاسخ‌ها چهار سبک انتظار می‌سازد. بزرگ‌ترین گروه کسانی هستند که هم عمق می‌خواهند و هم راهکار؛ یعنی درمانگری که فقط گوش نمی‌دهد. این همان چیزی است که در فرم‌های پایان درمان هم به‌صورت شکایت برمی‌گردد: درمانگر فقط گوش می‌داد.</p>
+  <div class="profiles">
+    <div class="prof"><b>≈۵۰٪</b><h4>تحلیل‌گر فعال</h4><p>عمق و راهکار با هم. درمانگری می‌خواهد که در جلسه فعال باشد و مسیر بدهد.</p></div>
+    <div class="prof"><b>≈۲۵٪</b><h4>کاوشگر</h4><p>عمق و شنونده‌بودن. مسیر کلاسیک تحلیلی و بلندمدت.</p></div>
+    <div class="prof"><b>≈۲۰٪</b><h4>حل‌مسئله</h4><p>کوتاه‌مدت و راهکارمحور. مناسب رویکردهای شناختی رفتاری و طرحواره.</p></div>
+    <div class="prof"><b>≈۵٪</b><h4>نامشخص</h4><p>ترکیب ناسازگار؛ نیاز به یک گفت‌وگوی کوتاه پیش از ارجاع.</p></div>
+  </div>
+  <h3>جنسیت و سن درمانگر</h3>
+  <p>حدود یک‌سوم متقاضیان صریحاً درمانگر زن می‌خواهند و کمتر از یک‌دهم درمانگر مرد؛ بقیه یا اشاره‌ای نمی‌کنند یا می‌گویند فرقی ندارد. مردان هم بیشتر درمانگر زن می‌خواهند تا مرد. حدود یک‌سوم به سن درمانگر اشاره می‌کنند و عبارت پرتکرارشان «نه خیلی مسن» است.</p>
+</section>
+
+<section id="s5">
+  <h2>چطور و کِی</h2>
+  <p class="sub">شکل جلسه و زمان پرکردن فرم درخواست.</p>
+  <h3>آنلاین یا حضوری</h3>
+  <div class="stack"><i style="width:59%;background:var(--blue)"></i><i style="width:41%;background:var(--straw-mid)"></i></div>
+  <div class="legend"><span><i style="background:var(--blue)"></i>آنلاین ۵۹٪</span><span><i style="background:var(--straw-mid)"></i>حضوری ۴۱٪</span></div>
+  <h3>ساعت درخواست</h3>
+  <p>سهم هر ساعت شبانه‌روز از فرم‌های ثبت‌شده (به وقت تهران). موس را روی ستون‌ها ببرید.</p>
+  <div class="hours" id="hours"></div>
+  <div class="hours-x"><span>۰۰</span><span>۰۶</span><span>۱۲</span><span>۱۸</span><span>۲۳</span></div>
+  <p style="margin-top:14px">اوج درخواست بین ۲۰ تا ۲۴ شب است و ساعت ۲۲ به‌تنهایی ۸٪ فرم‌ها را دارد؛ یعنی تصمیم به شروع تراپی بیشتر در تنهایی شب گرفته می‌شود، نه در ساعت کاری. برای هر مرکزی که پذیرش دارد، معنایش این است که پاسخ صبح فردا باید سریع و بی‌فاصله باشد.</p>
+</section>
+
+<section id="s5b">
+  <h2>فارسی‌زبانان خارج از ایران</h2>
+  <p class="sub">متقاضیانی که شهر محل سکونتشان بیرون از ایران است. پایگاه: حدود ۳۷۵ فرم پذیرش، ۱۴۰۱ تا ۱۴۰۴.</p>
+  <p>از هر صد متقاضی تراپی در مرکز تجربه زندگی، حدود چهار نفر خارج از ایران زندگی می‌کنند و این سهم در همهٔ سال‌ها ثابت مانده است. بیشترشان از آلمان، کانادا، ترکیه، امارات و ایتالیا فرم پر کرده‌اند.</p>
+  <h3>آنلاین یا حضوری</h3>
+  <div class="stack"><i style="width:99%;background:var(--blue)"></i><i style="width:1%;background:var(--straw-mid)"></i></div>
+  <div class="legend"><span><i style="background:var(--blue)"></i>آنلاین ۹۹٪</span><span><i style="background:var(--straw-mid)"></i>حضوری ۱٪</span></div>
+  <h3>سهم متأهلان</h3>
+  <div class="bars">
+    <div class="bar "><span class="bar-l">متأهل، خارج از ایران</span><span class="bar-t"><i style="width:29%"></i></span><span class="bar-v">۲۹٪</span></div>
+    <div class="bar "><span class="bar-l">متأهل، همهٔ متقاضیان</span><span class="bar-t"><i style="width:22%"></i></span><span class="bar-v">۲۲٪</span></div>
+  </div>
+  <p style="margin-top:14px">میانهٔ سن متقاضیان خارج از ایران ۲۸ سال است، سه سال بیشتر از کل متقاضیان، و سهم متأهلان در میانشان بیشتر است. بیشترشان پیش‌تر تراپی رفته‌اند و در متن آزاد، مهاجرت یکی از دلیل‌های رها شدن درمان قبلی‌شان است. برای همین تراپی آنلاین به زبان فارسی برای آن‌ها ادامهٔ یک مسیر است، نه شروع آن. <a href="/persian-therapy/">تراپی فارسی برای ساکنان خارج از ایران</a></p>
+</section>
+
+<section id="s5c">
+  <h2>چرا تراپی قبلی را رها کرده بودند</h2>
+  <p class="sub">از میان کسانی که پیش‌تر تراپی رفته‌اند و دلیل ترک درمانگر قبلی را نوشته‌اند. پایگاه: حدود ۲٬۲۲۵ متن آزاد، کدگذاری‌شده؛ هر متن ممکن است چند دلیل داشته باشد.</p>
+  <div class="bars">
+    <div class="bar "><span class="bar-l">زمان و مشغله</span><span class="bar-t"><i style="width:22%"></i></span><span class="bar-v">۲۲٪</span></div>
+    <div class="bar "><span class="bar-l">مهاجرت و جابه‌جایی</span><span class="bar-t"><i style="width:14%"></i></span><span class="bar-v">۱۴٪</span></div>
+    <div class="bar "><span class="bar-l">هزینه</span><span class="bar-t"><i style="width:14%"></i></span><span class="bar-v">۱۴٪</span></div>
+    <div class="bar "><span class="bar-l">ارتباط نگرفتن با درمانگر</span><span class="bar-t"><i style="width:13%"></i></span><span class="bar-v">۱۳٪</span></div>
+    <div class="bar "><span class="bar-l">بی‌نتیجه بودن</span><span class="bar-t"><i style="width:12%"></i></span><span class="bar-v">۱۲٪</span></div>
+    <div class="bar "><span class="bar-l">درمانگر فقط گوش می‌داد</span><span class="bar-t"><i style="width:8%"></i></span><span class="bar-v">۸٪</span></div>
+    <div class="bar "><span class="bar-l">دوری راه</span><span class="bar-t"><i style="width:7%"></i></span><span class="bar-v">۷٪</span></div>
+  </div>
+  <p style="margin-top:14px">پرتکرارترین دلیل‌ها بیرون از اتاق درمان‌اند: وقت، هزینه، جابه‌جایی و فاصله. دلیل‌هایی که به خود رابطهٔ درمانی برمی‌گردند، یعنی ارتباط نگرفتن، بی‌نتیجه بودن و درمانگری که فقط گوش می‌دهد، هرکدام بین ۸ تا ۱۳ درصد متن‌ها آمده‌اند. ۶۱٪ متقاضیان پیش‌تر تراپی رفته‌اند و این تجربه را با خود به شروع دوباره می‌آورند. <a href="/get-therapy/">درخواست تراپی در تجربه</a></p>
+</section>
+
+<section id="s6">
+  <h2>پشت صحنه: مدرسه و درمانگران</h2>
+  <p class="sub">طرف عرضه: چه کسانی می‌خواهند درمانگر شوند و چه کسانی برای همکاری اپلای می‌کنند.</p>
+  <h3>متقاضیان دورهٔ تجربهٔ بالینی</h3>
+  <div class="tiles">
+    <div class="tile"><b>۸۲٪</b><span>زن</span></div>
+    <div class="tile"><b>۲۶</b><span>میانهٔ سن متقاضیان</span></div>
+    <div class="tile"><b>۲۸٪</b><span>خودشان هیچ‌وقت تراپی نگرفته‌اند</span></div>
+    <div class="tile"><b>۳۳٪</b><span>پیش‌تر مراجع دیده‌اند</span></div>
+  </div>
+  <p>هدف اعلام‌شدهٔ نزدیک به نیمی از متقاضیان «تسلط بر رویکرد تحلیلی» است، نه صرفاً مدرک. اینکه بیش از یک‌چهارم کسانی که می‌خواهند درمانگر شوند خودشان هرگز روی صندلی مراجع ننشسته‌اند، یکی از یافته‌هایی است که سیاست پذیرش مدرسه را شکل داده است.</p>
+  <h3>درمانگران متقاضی همکاری</h3>
+  <div class="bars">
+    <div class="bar g"><span class="bar-l">تحلیلی و روانکاوی</span><span class="bar-t"><i style="width:51%"></i></span><span class="bar-v">۵۱٪</span></div>
+<div class="bar g"><span class="bar-l">شناختی رفتاری</span><span class="bar-t"><i style="width:25%"></i></span><span class="bar-v">۲۵٪</span></div>
+<div class="bar g"><span class="bar-l">طرحواره</span><span class="bar-t"><i style="width:15%"></i></span><span class="bar-v">۱۵٪</span></div>
+<div class="bar g"><span class="bar-l">هیجان‌مدار</span><span class="bar-t"><i style="width:11%"></i></span><span class="bar-v">۱۱٪</span></div>
+<div class="bar g"><span class="bar-l">ISTDP</span><span class="bar-t"><i style="width:6%"></i></span><span class="bar-v">۶٪</span></div>
+  </div>
+  <p>رویکرد اعلام‌شدهٔ بیش از ۳۰۰ درمانگر متقاضی همکاری (چندانتخابی؛ حدود ۶۰٪ ساکن تهران، ۴۴٪ بیش از یک سال درمان فردی گرفته‌اند). در مصاحبه‌های جذب، پنج حوزه‌ای که بیش از همه نیاز به رشد دارند: دانش نظری (۶۱٪)، تشخیص‌گذاری (۵۷٪)، فرمول‌بندی کیس (۵۵٪)، سوپرویژن (۵۳٪) و مصاحبهٔ بالینی (۴۹٪). درصدها سهم مصاحبه‌شونده‌هایی است که مصاحبه‌گر آن حوزه را برایشان علامت زده است.</p>
+</section>
+
+<section id="s7">
+  <h2>روش‌شناسی و حریم خصوصی</h2>
+  <p class="sub">چه چیزی منتشر می‌کنیم، چه چیزی هرگز منتشر نمی‌کنیم، و چرا.</p>
+  <p>این گزارش از داده‌ای ساخته شده که مراجعان و متقاضیان در فرم‌های مرکز نوشته‌اند. آن‌ها این اطلاعات را برای گرفتن خدمت داده‌اند، نه برای انتشار. بنابراین قاعدهٔ ما ساده است: هیچ عددی در این صفحه نباید بتواند به یک نفر، یا به وضعیت تجاری مرکز، برگردد. این قواعد از استانداردهای انتشار آمار سلامت (از جمله راهنمای «کنترل افشا» مراکز آماری سلامت و اصل «حداقل داده» در HIPAA) گرفته شده و برای شرایط ما تنظیم شده است.</p>
+  <div class="privacy">
+    <div class="rule"><b>فقط درصد، نه شمارش</b>هیچ تعداد مراجع، تعداد جلسه، تعداد درمانگر فعال یا حجم ماهانه منتشر نمی‌شود. اندازهٔ پایگاه فقط به‌صورت گردشده («نزدیک به ۹ هزار») ذکر می‌شود.</div>
+    <div class="rule"><b>هیچ روند زمانی</b>نمودار ماهانه، رشد سالانه یا مقایسهٔ دوره‌ها منتشر نمی‌شود. روند فعالیت مرکز دادهٔ تجاری است، نه یافتهٔ عمومی.</div>
+    <div class="rule"><b>آستانهٔ ۱۰۰</b>هیچ درصدی روی گروهی کوچک‌تر از ۱۰۰ نفر گزارش نمی‌شود. گروه‌های کوچک‌تر یا ادغام می‌شوند یا حذف.</div>
+    <div class="rule"><b>حداکثر دو بعد</b>هیچ جدولی بیش از دو متغیر را با هم تقاطع نمی‌دهد (مثلاً جنسیت × دلیل مراجعه). تقاطع سه‌بعدی می‌تواند افراد را شناسایی‌پذیر کند.</div>
+    <div class="rule"><b>بازه‌های سنی ۱۰ ساله و جغرافیای کلی</b>سن فقط در بازه، محل زندگی فقط در سطح «تهران، سایر شهرها، خارج از کشور».</div>
+    <div class="rule"><b>هیچ چیز در سطح درمانگر</b>هیچ داده‌ای دربارهٔ یک درمانگر مشخص، نمرهٔ مصاحبه یا نتیجهٔ کار او منتشر نمی‌شود. ارزیابی درمانگران فقط تجمیعی است.</div>
+    <div class="rule"><b>متن آزاد فقط تحلیل‌شده</b>هیچ نقل قول مستقیمی از فرم‌ها منتشر نمی‌شود، حتی بی‌نام. متن آزاد فقط به‌صورت الگوهای شمارش‌شده وارد گزارش می‌شود.</div>
+    <div class="rule"><b>حذف پیش از تحلیل</b>نام، شماره و شناسه‌ها پیش از هر تحلیلی از داده جدا شده و در گزارش هیچ ردی از آن‌ها نیست.</div>
+  </div>
+  <h3>محدودیت‌ها</h3>
+  <p>این داده توصیف مراجعان یک مرکز است، نه جمعیت ایران. مرکز تجربه زندگی رویکرد تحلیلی دارد و مخاطبش را از راه محتوا و مدرسه جذب می‌کند؛ پس سهم کسانی که «ریشه‌یابی» می‌خواهند احتمالاً بالاتر از میانگین بازار است. همهٔ پاسخ‌ها خوداظهاری‌اند. فرم‌های پیش از مهر ۱۴۰۳ به دلیل تغییر ساختار فرم فقط برای متغیرهای جمعیت‌شناختی به کار رفته‌اند و نُرم دلایل و ترجیحات فقط از دورهٔ جدید محاسبه شده است. فرم‌های پایان درمان (کمتر از ۱۰۰ پاسخ) طبق قاعدهٔ آستانه به‌صورت عددی منتشر نشده و فقط جهت یافته‌ها در متن آمده است.</p>
+  <details><summary>پرسش‌های فرم پذیرش که مبنای این گزارش‌اند</summary>
+    <div class="tablewrap"><table>
+      <tr><th>پرسش</th><th>نوع</th><th>در گزارش</th></tr>
+      <tr><td>جنسیت، سن، وضعیت تأهل، شهر</td><td>تک‌انتخابی و عددی</td><td>بخش ۲</td></tr>
+      <tr><td>علل اصلی مراجعه (۹ گزینه + سایر)</td><td>چندانتخابی</td><td>بخش ۳</td></tr>
+      <tr><td>خدمت درخواستی</td><td>تک‌انتخابی</td><td>بخش ۳</td></tr>
+      <tr><td>اولویت و ترجیح در مسیر درمان (۵ گزینه)</td><td>چندانتخابی</td><td>بخش ۴</td></tr>
+      <tr><td>ویژگی‌های درمانگر مطلوب</td><td>متن آزاد، فقط تحلیل کلیدواژه</td><td>بخش ۴</td></tr>
+      <tr><td>آنلاین یا حضوری</td><td>تک‌انتخابی</td><td>بخش ۵</td></tr>
+      <tr><td>سابقهٔ مراجعه به رواندرمانگر</td><td>بله/خیر</td><td>بخش ۱</td></tr>
+    </table></div>
+  </details>
+</section>
+
+<section id="s8">
+  <h2>استناد به این گزارش</h2>
+  <p class="sub">استفاده از اعداد این گزارش با ذکر منبع آزاد است.</p>
+  <div class="cite">
+    <div>شکل پیشنهادی استناد:</div>
+    <code id="citation">مرکز تجربه زندگی (۱۴۰۵). گزارش سالانهٔ ۱۴۰۴: چه کسانی، چرا و با چه انتظاری به رواندرمانی می‌آیند. tajrobeh.life/report/</code>
+    <button class="copy" id="copybtn">کپی متن استناد</button>
+    <span id="copied" style="font-size:14px;color:var(--green);margin-inline-start:12px" hidden>کپی شد</span>
+  </div>
+  <p style="margin-top:20px">اگر عددی از این گزارش را در متن خودتان می‌آورید، بازهٔ زمانی و پایگاه را همراهش بیاورید؛ مثلاً: «به استناد گزارش سالانهٔ مرکز تجربه زندگی، ۶۵٪ متقاضیان رواندرمانی ریشه‌یابی مشکلات را دلیل مراجعه می‌دانند (نُرم مهر ۱۴۰۳ تا دی ۱۴۰۴)». برای دسترسی به جدول‌های تجمیعی بیشتر یا پرسش دربارهٔ روش، از راه سایت با ما تماس بگیرید.</p>
+</section>
+<footer>مرکز تجربه زندگی · tajrobeh.life · اعداد این گزارش تاریخ دارند و با انتشار نسخهٔ بعدی به‌روز می‌شوند.</footer>
+</div>
+</div></div>
+<script>
+(function(){
+  var R = {"labels": ["افسردگی", "اضطراب", "بی‌حوصلگی", "بی‌انگیزگی", "افکار وسواس‌گونه و نشخوار فکری", "تعویق کارها و اهمال", "شناخت بهتر خود", "ریشه‌یابی مشکلات", "مشکل در روابط با دیگران"], "all": [43, 60, 44, 43, 54, 43, 50, 65, 47], "زن": [44, 62, 44, 43, 56, 43, 51, 66, 47], "مرد": [43, 50, 40, 43, 46, 43, 45, 61, 44], "۱۵ تا ۲۴": [47, 65, 49, 47, 61, 49, 56, 69, 53], "۲۵ تا ۳۴": [43, 59, 41, 43, 53, 43, 48, 64, 45], "۳۵ تا ۴۴": [37, 52, 40, 39, 43, 35, 44, 59, 38]};
+  var H = [5.7, 4.4, 2.7, 1.1, 0.7, 0.5, 0.8, 1.2, 2.2, 3.9, 4.1, 5.1, 5.5, 5.7, 5.2, 5.0, 5.0, 4.8, 4.7, 5.1, 5.9, 6.1, 8.0, 6.7];
+  function fa(s){ return String(s).replace(/[0-9.]/g, function(c){ return '۰۱۲۳۴۵۶۷۸۹٫'['0123456789.'.indexOf(c)]; }); }
+  var box = document.getElementById('reasons');
+  function draw(k){
+    var vals = R[k]; var html = '';
+    for (var i=0;i<R.labels.length;i++){
+      html += '<div class="bar"><span class="bar-l">'+R.labels[i]+'</span><span class="bar-t"><i style="width:'+vals[i]+'%"></i></span><span class="bar-v">'+fa(vals[i])+'٪</span></div>';
+    }
+    box.innerHTML = html;
+  }
+  draw('all');
+  var btns = document.querySelectorAll('.seg button');
+  btns.forEach(function(b){ b.addEventListener('click', function(){ btns.forEach(function(x){ x.classList.remove('on'); }); b.classList.add('on'); draw(b.dataset.k); }); });
+  var hb = document.getElementById('hours'); var mx = Math.max.apply(null,H);
+  H.forEach(function(v,i){ var el=document.createElement('i'); el.style.height=(v/mx*100)+'%'; el.tabIndex=0; el.setAttribute('data-t', fa(i)+':۰۰ · '+fa(v)+'٪'); if(v>=5.9) el.className='hi'; hb.appendChild(el); });
+  var cb=document.getElementById('copybtn');
+  cb.addEventListener('click', function(){
+    var t=document.getElementById('citation').textContent;
+    function ok(){ document.getElementById('copied').hidden=false; setTimeout(function(){ document.getElementById('copied').hidden=true; },2000); }
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok, ok); else ok();
+  });
+  var links=document.querySelectorAll('nav.toc a'); var secs=[].map.call(links,function(a){ return document.querySelector(a.getAttribute('href')); });
+  if ('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ links.forEach(function(a){ a.classList.toggle('on', a.getAttribute('href')==='#'+e.target.id); }); } }); },{rootMargin:'-30% 0px -60% 0px'});
+    secs.forEach(function(s){ if(s) io.observe(s); });
+  }
+})();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Report","@id":"https://tajrobeh.life/report/#report","name":"گزارش سالانهٔ ۱۴۰۴ مرکز تجربه زندگی","headline":"چه کسانی، چرا و با چه انتظاری به رواندرمانی می‌آیند","inLanguage":"fa","datePublished":"2026-09-07","dateModified":"2026-10-03","author":{"@type":"Organization","name":"مرکز تجربه زندگی","url":"https://tajrobeh.life/"},"publisher":{"@type":"Organization","name":"مرکز تجربه زندگی","url":"https://tajrobeh.life/"},"about":["روان‌درمانی","تراپی آنلاین","سلامت روان"],"isBasedOn":{"@id":"https://tajrobeh.life/report/#dataset"}},{"@type":"Dataset","@id":"https://tajrobeh.life/report/#dataset","name":"دادهٔ تجمیعی فرم‌های پذیرش مرکز تجربه زندگی ۱۴۰۱ تا ۱۴۰۴","description":"آمار تجمیعی و درصدی از حدود ۹ هزار فرم درخواست رواندرمانی: جمعیت‌شناسی، دلایل مراجعه، انتظار از درمانگر، شکل جلسه، متقاضیان خارج از ایران و دلایل ترک درمان قبلی. هیچ دادهٔ فردی منتشر نمی‌شود.","inLanguage":"fa","temporalCoverage":"2023-03/2026-01","spatialCoverage":"ایران و فارسی‌زبانان خارج از ایران","creator":{"@type":"Organization","name":"مرکز تجربه زندگی"},"license":"https://tajrobeh.life/report/#s8","isAccessibleForFree":true,"variableMeasured":["جنسیت","سن","وضعیت تأهل","دلیل مراجعه","انتظار از درمانگر","آنلاین یا حضوری","محل سکونت","دلیل ترک درمان قبلی"]}]}</script>
+<!-- /wp:html -->

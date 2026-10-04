@@ -1,0 +1,56 @@
+[
+ {
+  "from": "http://tajrobeh.life/",
+  "code": 301,
+  "to": "https://tajrobeh.life/",
+  "src": "سرور"
+ },
+ {
+  "from": "https://www.tajrobeh.life/",
+  "code": 301,
+  "to": "https://tajrobeh.life/",
+  "src": "سرور"
+ },
+ {
+  "from": "https://tajrobeh.life/couple-therapy/",
+  "code": 301,
+  "to": "https://tajrobeh.life/therapy/couple-therapy/",
+  "src": "505693"
+ },
+ {
+  "from": "https://tajrobeh.life/eft/",
+  "code": 301,
+  "to": "https://tajrobeh.life/school/eft/",
+  "src": "505693"
+ },
+ {
+  "from": "https://tajrobeh.life/mag/school-new/",
+  "code": 301,
+  "to": "https://tajrobeh.life/school/",
+  "src": "505693"
+ },
+ {
+  "from": "https://tajrobeh.life/mag/joinus-new/",
+  "code": 301,
+  "to": "https://tajrobeh.life/joinus/",
+  "src": "505693"
+ },
+ {
+  "from": "https://tajrobeh.life/school/cbt/",
+  "code": 301,
+  "to": "https://tajrobeh.life/school/",
+  "src": "505693"
+ },
+ {
+  "from": "https://tajrobeh.life/mag/services_type/",
+  "code": 301,
+  "to": "https://tajrobeh.life/therapy/",
+  "src": "505693"
+ },
+ {
+  "from": "https://tajrobeh.life/magazine/",
+  "code": 301,
+  "to": "https://tajrobeh.life/mag/",
+  "src": "505693"
+ }
+]

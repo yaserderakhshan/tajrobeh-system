@@ -1,0 +1,29 @@
+name: سایت · آزمون پل tj-ops
+
+# فقط خواندن: GET /tj-ops/v1/state با claude-ops و بی رمز. با expect=off کلید خاموش را می‌سنجد.
+on:
+  workflow_dispatch:
+    inputs:
+      expect:
+        description: 'وضعیت کلید در «تنظیمات › عمومی»: on یا off'
+        default: 'on'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    environment: production   # v170.9: رمزها فقط در Environment «production» (فقط main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: آزمون
+        env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          EXPECT: ${{ github.event.inputs.expect }}
+        run: node site/tools/site-bridge-test.mjs

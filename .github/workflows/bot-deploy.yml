@@ -1,0 +1,553 @@
+name: دیپلوی بات
+
+# با هر مرج روی شاخهٔ اصلی (شاخهٔ پیش‌فرض مخزن) که bot/ را عوض کند، و با اجرای دستی. از v166.8:
+# ۱) بررسی محلی پیش از هر تماس با گوگل: سینتکس، ترتیب فایل‌ها، نام تکراری، و اجرای همهٔ مجموعه‌های تست
+#    با دادهٔ ساختگی (.github/scripts/bot-precheck.mjs). مردود = هیچ چیزی به Apps Script نمی‌رود.
+# ۲) clasp push. کارهای زمان‌دار (تریگرها همیشه آخرین کد push‌شده را اجرا می‌کنند) تا سبز شدن تست‌ها
+#    متوقف می‌مانند (CI_PAUSE_UNTIL در ci_key.gs؛ ci.gs → ciPaused_).
+# ۳) نسخهٔ تازه اول روی دیپلوی آزمایشی «CI staging» می‌رود و همهٔ تست‌ها (tgRun) آنجا اجرا می‌شوند.
+#    مراجعان در این مدت همچنان نسخهٔ قبلی را روی نشانی اصلی می‌بینند.
+# ۴) فقط اگر همه سبز بود، همان نسخه روی دیپلوی اصلی می‌رود (آدرس وبهوک عوض نمی‌شود)، کارهای زمان‌دار ادامه
+#    پیدا می‌کنند و برچسب bot-live جابه‌جا می‌شود.
+# ۵) تا MONITOR_MIN دقیقه (از ۹ مهر ۱۴۰۵: ۲۰) تب «خطاها» پایش می‌شود. خطای تازه = برگشت.
+# ۶) بعد از پایش سبز، برچسب گیت bot-<نسخه> (از bot/version.gs) زده می‌شود؛ همان شماره در توضیح نسخه و دیپلوی Apps Script است.
+#    اجرای دستی با run_once یک تابع نگهداری از فهرست CI_ONCE_ALLOW را یک بار اجرا می‌کند (ci.gs → ciOnce_).
+# ۷) برگشت خودکار (اگر هر گامی بعد از push قرمز شد): کد برچسب bot-live پیشین دوباره push می‌شود، دیپلوی اصلی
+#    (اگر عوض شده بود) به شمارهٔ نسخهٔ قبلی برمی‌گردد، و برای مرج‌ها یک PR معکوس ساخته و مرج می‌شود.
+# شرح کامل: .claude/skills/tajrobeh-bot/SKILL.md بخش ۱۶
+
+on:
+  push:
+    # شاخهٔ پیش‌فرض main است (از ۱۰ مهر ۱۴۰۵)؛ شرط if پایین فقط شاخهٔ پیش‌فرض را اجرا می‌کند
+    branches: [main]
+    paths:
+      - 'bot/**'
+      - '.github/workflows/bot-deploy.yml'
+      - '.github/scripts/**'
+      - 'site/pages/503886-app.html'   # v169.4: برگهٔ مینی‌اپ بعد از انتشار سبز خودکار روی سایت می‌رود
+  workflow_dispatch:
+    inputs:
+      label:
+        description: 'برچسب نسخه در توضیح دیپلوی. خالی (پیش‌فرض): TG_CODE_VERSION از bot/version.gs'
+        required: false
+      run_once:
+        description: 'بعد از انتشار سبز، این تابع نگهداری یک بار اجرا شود (فقط با تأیید یاسر؛ فهرست مجاز در ci.gs)'
+        type: choice
+        options: ['', tgApResumePrivatize, tgErrScrub]
+        default: ''
+      force:
+        description: 'حتی اگر کد زندهٔ Apps Script تغییری بیرون از گیت دارد، رویش بنویس (فقط با تأیید یاسر)'
+        type: boolean
+        default: false
+      mode:
+        description: 'deploy: دیپلوی و تست · snapshot: فقط کد زنده را بی‌دیپلوی بکش (بررسی کلید، اثر انگشت، پیوست یک‌روزه)'
+        type: choice
+        options: [deploy, snapshot]
+        default: deploy
+
+# v170.5: concurrency گیت‌هاب برداشته شد؛ فقط یک اجرای منتظر نگه می‌داشت و اجرای منتظر قبلی را بی‌صدا لغو می‌کرد.
+# به‌جایش کار lock: هر اجرا صبر می‌کند تا همهٔ اجراهای زودتر (با پایششان) تمام شوند (.github/scripts/bot-lock.mjs).
+
+permissions:
+  contents: write        # برچسب bot-live و شاخهٔ PR معکوس
+  pull-requests: write   # PR معکوس در برگشت خودکار
+  actions: read          # قفل انتشار: دیدن اجراهای دیگر همین گردش کار
+
+env:
+  CLASP_VERSION: 3.4.1
+  STAGING_DESC: CI staging
+  MONITOR_MIN: 5    # v170.12 (تصمیم یاسر): پایش ۵ دقیقه؛ خطای تازه در این مدت یعنی برگشت خودکار
+  PAUSE_MIN: 75
+
+jobs:
+  # v170.5: قفل انتشار. دو انتشار هرگز هم‌زمان نیستند؛ انتشار دوم صبر می‌کند تا اولی و پایشش تمام شود.
+  lock:
+    if: (github.event_name == 'workflow_dispatch' && inputs.mode != 'snapshot') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: صبر برای انتشارهای زودتر
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/bot-lock.mjs wait
+
+  deploy:
+    needs: lock
+    if: (github.event_name == 'workflow_dispatch' && inputs.mode != 'snapshot') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    # v170.9: همهٔ رمزها و شناسهٔ پروژه فقط در Environment «production» (فقط main به آن دسترسی دارد)
+    environment: production
+    env:
+      SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
+      DEPLOYMENT_ID: ${{ secrets.DEPLOYMENT_ID }}
+    timeout-minutes: 200
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: بررسی سینتکس و ترتیب فایل‌های bot
+        run: |
+          mkdir -p /tmp/syn
+          for f in bot/*.gs; do cp "$f" "/tmp/syn/$(basename "$f" .gs).js"; node --check "/tmp/syn/$(basename "$f" .gs).js" || exit 1; done
+          jq -e . bot/appsscript.json > /dev/null
+          echo "سینتکس همهٔ فایل‌ها سالم است."
+          # ترتیب اجرای فایل‌ها در Apps Script همان ترتیب push است. building.gs، partners.gs و v162.gs در سطح بالا
+          # به متغیرهای telegram.gs چیز اضافه می‌کنند؛ اگر پیش از آن اجرا شوند بی‌صدا شکست می‌خورند (Version 168 تا 171).
+          test "$(jq -r '.filePushOrder[0]' bot/.clasp.json)" = "Code.gs" && test "$(jq -r '.filePushOrder[1]' bot/.clasp.json)" = "telegram.gs" \
+            || { echo "::error::filePushOrder در bot/.clasp.json باید با Code.gs و بعد telegram.gs شروع شود"; exit 1; }
+          echo "ترتیب فایل‌ها: $(jq -r '.filePushOrder | join(" → ")' bot/.clasp.json)"
+
+      - name: بررسی محلی و همهٔ تست‌ها با دادهٔ ساختگی (پیش از هر تماس با گوگل)
+        run: node .github/scripts/bot-precheck.mjs
+
+      - name: نصب clasp و ورود
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+        run: |
+          if [ -z "$CLASPRC_JSON" ]; then echo "::error::سکرت CLASPRC_JSON خالی است"; exit 1; fi
+          printf '%s' "$CLASPRC_JSON" > ~/.clasprc.json
+          chmod 600 ~/.clasprc.json
+          jq -e . ~/.clasprc.json > /dev/null || { echo "::error::CLASPRC_JSON یک JSON معتبر نیست"; exit 1; }
+          npm install -g "@google/clasp@${CLASP_VERSION}" > /dev/null
+          clasp --version
+          # v170.9: شناسهٔ پروژه در گیت نیست؛ از سکرت SCRIPT_ID در bot/.clasp.json نوشته می‌شود
+          [ -n "$SCRIPT_ID" ] && [ -n "$DEPLOYMENT_ID" ] || { echo "::error::سکرت SCRIPT_ID یا DEPLOYMENT_ID در Environment «production» خالی است"; exit 1; }
+          jq --arg id "$SCRIPT_ID" '.scriptId = $id' bot/.clasp.json > /tmp/clasp.json && mv /tmp/clasp.json bot/.clasp.json
+
+      - name: برچسب نسخه
+        id: label
+        env:
+          INPUT_LABEL: ${{ inputs.label }}
+        run: |
+          L="$INPUT_LABEL"
+          V=$(sed -nE "s/^var TG_CODE_VERSION = '([^']+)';.*/\1/p" bot/version.gs 2>/dev/null || true)
+          [ -z "$L" ] && L="$V"
+          if [ -z "$L" ]; then L=$(git log -1 --format=%s -- bot/ | grep -oE 'v[0-9]+(\.[0-9]+)+' | head -1 || true); fi
+          [ -z "$L" ] && L="بی‌برچسب"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "label=$L" >> "$GITHUB_OUTPUT"
+          echo "short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "برچسب: $L"
+      # clasp push کل پروژه را جایگزین می‌کند. اگر کسی در ادیتور Apps Script چیزی عوض کرده که در گیت نیست،
+      # بی‌صدا پاک می‌شد. پس کد زنده باید یا با آخرین دیپلوی این مسیر (برچسب bot-live) یکی باشد، یا با
+      # شاخهٔ اصلی پیش از این مرج، یا با همین کامیت. وگرنه کار می‌ایستد (مگر force).
+      - name: بررسی کد زنده پیش از بازنویسی
+        env:
+          BEFORE: ${{ github.event.before }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -e
+          R=/tmp/remote; rm -rf $R; mkdir -p $R
+          cp bot/.clasp.json $R/
+          (cd $R && clasp pull > /dev/null)
+          rm -f $R/.clasp.json $R/ci_key.gs
+          echo "فایل‌های پروژهٔ زنده:"; (cd $R && ls -1)
+
+          same_as() {  # $1: پوشه‌ای با فایل‌های bot یک کامیت
+            local a b
+            a=$( (cd $R && ls -1 | sort) ); b=$( (cd "$1" && ls -1 *.gs *.html appsscript.json 2>/dev/null | grep -v '^ci_key.gs$' | sort) )
+            [ "$a" = "$b" ] || return 1
+            for f in $(cd $R && ls -1); do
+              diff -q --strip-trailing-cr <(sed -e '$a\' "$R/$f") <(sed -e '$a\' "$1/$f") > /dev/null || return 1
+            done
+          }
+          page_into() {  # $1: کامیت، $2: پوشهٔ فایل‌های bot همان کامیت
+            [ -f "$2/wppage.gs" ] || return 0
+            git show "$1:site/pages/503886-app.html" > /tmp/page_in.html 2>/dev/null || return 0
+            if grep -q WP_PAGE_SRC "$2/wppage.gs"; then node .github/scripts/page-gs.mjs /tmp/page_in.html "$2/app_page.gs" > /dev/null
+            else cp /tmp/page_in.html "$2/app_page.html"; fi
+          }
+          snap() {  # $1: کامیت، $2: پوشهٔ خروجی
+            rm -rf "$2"; mkdir -p "$2"
+            git archive "$1" bot 2>/dev/null | tar -x -C "$2" --strip-components=1 || return 1
+            # v169.4: از نسخه‌ای که wppage.gs دارد، برگهٔ مینی‌اپ هم در پروژه است؛ از v170.5 متن دقیق در app_page.gs، پیش از آن app_page.html
+            page_into "$1" "$2" 
+          }
+
+          # اثر انگشت کد زنده؛ اگر با bot/.live-reviewed یکی باشد یعنی همین حالت زنده بازبینی شده و بازنویسی‌اش مجاز است
+          export LC_ALL=C
+          FP=$( (cd $R && for f in $(ls -1 | sort); do printf '%s  ' "$f"; sed -e '$a\' "$f" | tr -d '\r' | sha256sum | cut -d' ' -f1; done) | sha256sum | cut -d' ' -f1)
+          echo "اثر انگشت کد زنده: $FP"
+          if [ -f bot/.live-reviewed ] && [ "$(awk 'NF && $1 !~ /^#/ {print $1; exit}' bot/.live-reviewed)" = "$FP" ]; then
+            echo "کد زنده همان حالتی است که در bot/.live-reviewed بازبینی و ثبت شده؛ بازنویسی امن است."; exit 0
+          fi
+
+          CANDS="HEAD"
+          git rev-parse -q --verify refs/tags/bot-live > /dev/null && CANDS="$CANDS bot-live"
+          if [ -n "$BEFORE" ] && ! echo "$BEFORE" | grep -q '^0*$' && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then CANDS="$CANDS $BEFORE"; fi
+          for c in $CANDS; do
+            if snap "$c" /tmp/snap && same_as /tmp/snap; then echo "کد زنده با $c یکی است؛ بازنویسی امن است."; exit 0; fi
+          done
+
+          echo "::warning::کد زندهٔ Apps Script با هیچ‌کدام از این‌ها یکی نیست: $CANDS"
+          snap HEAD /tmp/snap
+          for f in $(cd $R && ls -1); do
+            if [ ! -f "/tmp/snap/$f" ]; then echo "فقط در پروژهٔ زنده: $f";
+            elif ! diff -q --strip-trailing-cr <(sed -e '$a\' "$R/$f") <(sed -e '$a\' "/tmp/snap/$f") > /dev/null; then
+              echo "متفاوت: $f ($(diff --strip-trailing-cr <(sed -e '$a\' "$R/$f") <(sed -e '$a\' "/tmp/snap/$f") | grep -c '^[<>]') خط)"; fi
+          done
+          if [ "$FORCE" = "true" ]; then echo "::warning::force روشن است؛ بازنویسی می‌شود."; exit 0; fi
+          echo "::error::کد زنده تغییرهایی بیرون از گیت دارد. اول آن‌ها را به مخزن بیاور، یا اجرای دستی را با force بزن."
+          exit 1
+
+      - name: وضعیت فعلی (برای برگشت)
+        id: prev
+        working-directory: bot
+        run: |
+          set -e
+          PREV_REF=$(git rev-parse -q --verify 'refs/tags/bot-live^{commit}' || true)
+          # v170.9.2: پشتوانهٔ برگشت فقط برچسب bot-live و فقط اگر عین کد زنده باشد (bot-prev.sh prev-ref)
+          # v170.14: مخزن عمومی تازه برچسب ندارد؛ فقط در همان حالت و فقط با اثر دقیق bot/.live-reviewed، پشتیبان کد زنده (live)
+          PREV_REF=$(cd "$GITHUB_WORKSPACE" && bash .github/scripts/bot-prev.sh prev-ref "$PREV_REF" /tmp/remote /tmp/live_backup bot/.live-reviewed)
+          echo "پشتوانهٔ برگشت: $PREV_REF"
+          DEPS=$(clasp list-deployments --json)
+          PREV_VERSION=$(echo "$DEPS" | jq -r --arg d "$DEPLOYMENT_ID" '.[] | select(.deploymentId == $d) | .versionNumber // empty')
+          [ -n "$PREV_VERSION" ] || { echo "::error::شمارهٔ نسخهٔ فعلی دیپلوی اصلی خوانده نشد"; exit 1; }
+          STAGING_ID=$(echo "$DEPS" | jq -r --arg p "$STAGING_DESC" '[.[] | select((.description // "") | startswith($p))][0].deploymentId // empty')
+          MAXV=$(clasp list-versions --json | jq '[.[].versionNumber] | max // 0')
+          VCOUNT=$(clasp list-versions --json | jq 'length')
+          echo "prev_ref=$PREV_REF" >> "$GITHUB_OUTPUT"
+          echo "prev_version=$PREV_VERSION" >> "$GITHUB_OUTPUT"
+          echo "staging_id=$STAGING_ID" >> "$GITHUB_OUTPUT"
+          echo "کد فعلی (bot-live): $PREV_REF · نسخهٔ فعلی دیپلوی اصلی: $PREV_VERSION · دیپلوی آزمایشی: ${STAGING_ID:-هنوز ساخته نشده} · بزرگ‌ترین شمارهٔ نسخه: $MAXV"
+          # Apps Script حداکثر ۲۰۰ نسخه نگه می‌دارد؛ بعدش ساخت نسخهٔ تازه شکست می‌خورد و نسخه‌های قدیمی باید از ادیتور پاک شوند
+          if [ "$VCOUNT" -ge 197 ]; then echo "::error::پروژهٔ Apps Script $VCOUNT نسخه دارد و سقف ۲۰۰ است. نسخه‌های قدیمی را از ادیتور (Project history) پاک کنید؛ انتشار انجام نمی‌شود."; exit 1; fi
+          if [ "$VCOUNT" -ge 185 ]; then echo "::warning::پروژهٔ Apps Script $VCOUNT نسخه دارد؛ نزدیک سقف ۲۰۰ است."; fi
+
+      - name: ساخت کلید یک‌بارمصرف و زمان توقف کارهای زمان‌دار
+        id: key
+        run: |
+          K=$(openssl rand -hex 32)
+          echo "::add-mask::$K"
+          H=$(printf '%s' "$K" | sha256sum | cut -d' ' -f1)
+          NOW=$(date +%s)
+          EXP=$(( ( NOW + 190*60 ) * 1000 ))
+          PAUSE=$(( ( NOW + PAUSE_MIN*60 ) * 1000 ))
+          BUILD="${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          cat > bot/ci_key.gs <<EOF
+          /* ساخته‌شده در GitHub Actions (اجرای ${GITHUB_RUN_ID}). در گیت نیست. ci.gs را ببین. */
+          var CI_KEY_HASH = '$H';
+          var CI_KEY_EXP = $EXP;
+          var CI_BUILD = '$BUILD';
+          var CI_PAUSE_UNTIL = $PAUSE;
+          EOF
+          umask 077; printf '%s' "$K" > "$RUNNER_TEMP/ci_key"
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+          echo "t0=$(( NOW * 1000 ))" >> "$GITHUB_OUTPUT"
+
+      # v169.4: برگهٔ مینی‌اپ (یک منبع: site/pages/503886-app.html) به پروژهٔ Apps Script؛ هشش برای سنجش پیش از نوشتن روی سایت
+      - name: برگهٔ مینی‌اپ در پروژه
+        id: page
+        run: |
+          # v170.5: متن دقیق صفحه به شکل رشته در app_page.gs (HtmlService فایل HTML را هنگام خواندن عوض می‌کرد). هش با همان یکدست‌سازی wpPageNorm_.
+          rm -f bot/app_page.html
+          echo "sha=$(node .github/scripts/page-gs.mjs site/pages/503886-app.html bot/app_page.gs)" >> "$GITHUB_OUTPUT"
+          echo "برگهٔ مینی‌اپ: $(wc -c < site/pages/503886-app.html) بایت در bot/app_page.gs"
+
+      - name: ارسال کد (clasp push)؛ کارهای زمان‌دار تا سبز شدن تست‌ها متوقف‌اند
+        id: push
+        working-directory: bot
+        run: clasp push --force
+
+      - name: ساخت نسخه و دیپلوی آزمایشی
+        id: stage
+        working-directory: bot
+        env:
+          DESC: ${{ steps.label.outputs.label }} · ${{ steps.label.outputs.short }} · GitHub Actions
+          STAGING_ID: ${{ steps.prev.outputs.staging_id }}
+        run: |
+          set -e
+          V=$(clasp create-version "$DESC" --json | jq -r '.versionNumber // empty')
+          [ -n "$V" ] && [ "$V" != "0" ] || { echo "::error::نسخهٔ تازه ساخته نشد"; exit 1; }
+          if [ -n "$STAGING_ID" ]; then
+            OUT=$(clasp update-deployment "$STAGING_ID" -V "$V" -d "$STAGING_DESC · $DESC" --json)
+          else
+            OUT=$(clasp create-deployment -V "$V" -d "$STAGING_DESC · $DESC" --json)
+          fi
+          echo "$OUT"
+          SID=$(echo "$OUT" | jq -r '.deploymentId // empty')
+          SV=$(echo "$OUT" | jq -r '.versionNumber // empty')
+          [ -n "$SID" ] && [ "$SV" = "$V" ] || { echo "::error::دیپلوی آزمایشی نسخهٔ $V را نگرفت"; exit 1; }
+          [ "$SID" != "$DEPLOYMENT_ID" ] || { echo "::error::دیپلوی آزمایشی با دیپلوی اصلی یکی است"; exit 1; }
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "staging=$SID" >> "$GITHUB_OUTPUT"
+          echo "::notice::Version $V روی دیپلوی آزمایشی؛ نشانی اصلی هنوز روی Version ${{ steps.prev.outputs.prev_version }} است."
+
+      - name: اجرای همهٔ تست‌ها روی دیپلوی آزمایشی
+        env:
+          BOT_EXEC_URL: https://script.google.com/macros/s/${{ steps.stage.outputs.staging }}/exec
+          CI_BUILD: ${{ steps.key.outputs.build }}
+          BOT_VERSION: ${{ steps.stage.outputs.version }}
+          BOT_LABEL: ${{ steps.label.outputs.label }}
+          PAGE_SHA: ${{ steps.page.outputs.sha }}
+        run: node .github/scripts/bot-tests.mjs
+
+      - name: انتشار روی دیپلوی اصلی (فقط بعد از سبز شدن همهٔ تست‌ها)
+        id: promote
+        working-directory: bot
+        env:
+          DESC: ${{ steps.label.outputs.label }} · ${{ steps.label.outputs.short }} · GitHub Actions
+          V: ${{ steps.stage.outputs.version }}
+        run: |
+          set -e
+          OUT=$(clasp update-deployment "$DEPLOYMENT_ID" -V "$V" -d "$DESC" --json)
+          echo "$OUT"
+          D=$(echo "$OUT" | jq -r '.deploymentId // empty'); PV=$(echo "$OUT" | jq -r '.versionNumber // empty')
+          [ "$D" = "$DEPLOYMENT_ID" ] && [ "$PV" = "$V" ] || { echo "::error::دیپلوی اصلی نسخهٔ $V را نگرفت ($D @ $PV)"; exit 1; }
+          echo "::notice::منتشر شد: Version $V ($DESC)"
+          {
+            echo "## دیپلوی بات"
+            echo ""
+            echo "- نسخه: **Version $V** (قبلی: ${{ steps.prev.outputs.prev_version }})"
+            echo "- برچسب: ${{ steps.label.outputs.label }} · کامیت \`${{ steps.label.outputs.short }}\`"
+            echo "- دیپلوی: \`$DEPLOYMENT_ID\` (آدرس وبهوک عوض نشد)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: نشانی اصلی و ادامهٔ کارهای زمان‌دار
+        env:
+          BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
+          CI_BUILD: ${{ steps.key.outputs.build }}
+        run: node .github/scripts/bot-monitor.mjs promote
+
+      # v169.4: سکرت‌های وردپرس (کاربر Editor) به Script Properties. مقدار در کد یا لاگ نمی‌آید (گیت‌هاب سکرت‌ها را می‌پوشاند و اسکریپت چاپشان نمی‌کند).
+      - name: سکرت‌های وردپرس به Script Properties
+        continue-on-error: true
+        env:
+          BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
+          CI_BUILD: ${{ steps.key.outputs.build }}
+          WP_BOT_USER: ${{ secrets.WP_BOT_USER }}
+          WP_BOT_APP_PASSWORD: ${{ secrets.WP_BOT_APP_PASSWORD }}
+          CP_WP_SECRET: ${{ secrets.CP_WP_SECRET }}
+          SITE_LEAD_SECRET: ${{ secrets.SITE_LEAD_SECRET }}
+          SITE_SIG_ENFORCE: ${{ vars.SITE_SIG_ENFORCE }}   # v170.9: ۱ = لید سایت بی امضای درست رد می‌شود
+        run: node .github/scripts/bot-monitor.mjs props
+
+      - name: پایش خطاها بعد از انتشار
+        env:
+          BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
+          CI_BUILD: ${{ steps.key.outputs.build }}
+          CI_T0: ${{ steps.key.outputs.t0 }}
+          POLL_SEC: '60'   # v170.12: پایش ۵ دقیقه، هر دقیقه یک بار
+        run: node .github/scripts/bot-monitor.mjs watch
+
+      # v170.9.2: برچسب فقط بعد از پایش سبز. پیش از این قبل از پایش زده می‌شد و اگر پایش قرمز و برگشت از پشتیبان کد زنده بود،
+      # برچسب روی کدی می‌ماند که دیگر زنده نبود (اجرای 37152498810).
+      - name: برچسب bot-live روی کد زنده
+        run: |
+          git tag -f bot-live HEAD
+          git push -f origin refs/tags/bot-live || echo "::warning::برچسب bot-live فرستاده نشد"
+
+      - name: برچسب گیت نسخه (bot-<نسخه>)
+        if: success() && steps.label.outputs.version != ''
+        env:
+          V: ${{ steps.label.outputs.version }}
+        run: |
+          T="bot-$V"
+          if git rev-parse -q --verify "refs/tags/$T" > /dev/null; then
+            echo "::notice::برچسب $T از قبل هست ($(git rev-parse --short "$T^{commit}")); دست نخورد."
+          else
+            git tag "$T" HEAD && git push origin "refs/tags/$T" && echo "::notice::برچسب $T زده شد." || echo "::warning::برچسب $T فرستاده نشد"
+          fi
+          echo "- برچسب گیت: \`$T\`" >> "$GITHUB_STEP_SUMMARY"
+          # نسخه‌های قبلی CHANGELOG که برچسب ندارند: کامیت مرج PR آخر آن ردیف روی شاخهٔ اصلی
+          grep -E '^\| v[0-9]' CHANGELOG.md | while IFS='|' read -r _ ver _ prs _; do
+            ver=$(echo "$ver" | xargs); n=$(echo "$prs" | grep -oE '#[0-9]+' | tail -1 | tr -d '#')
+            [ -n "$n" ] && [ "$ver" != "$V" ] || continue
+            git rev-parse -q --verify "refs/tags/bot-$ver" > /dev/null && continue
+            c=$(git log --first-parent --format=%H -E --grep="\(#$n\)$" HEAD | head -1)
+            [ -n "$c" ] || continue
+            git tag "bot-$ver" "$c" && git push origin "refs/tags/bot-$ver" 2>&1 | tail -3 && git ls-remote --exit-code origin "refs/tags/bot-$ver" > /dev/null && echo "برچسب قبلی: bot-$ver ← $(git rev-parse --short "$c")" || echo "::warning::برچسب bot-$ver فرستاده نشد"
+          done
+
+      # v166.22: کارهای یک‌بارهٔ CI_ONCE_AUTO (ci.gs) بعد از هر انتشار سبز، اگر قبلاً اجرا نشده‌اند. شکستش انتشار را برنمی‌گرداند.
+      - name: کارهای یک‌بارهٔ خودکار
+        if: success()
+        continue-on-error: true
+        env:
+          BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
+          CI_BUILD: ${{ steps.key.outputs.build }}
+        run: node .github/scripts/bot-monitor.mjs once-auto
+
+      # v169.4: بعد از انتشار و پایش سبز، اگر برگهٔ مینی‌اپ عوض شده، روی برگهٔ 503886 (و فقط همان) نوشته می‌شود. شکستش انتشار بات را برنمی‌گرداند.
+      - name: انتشار برگهٔ مینی‌اپ (503886)
+        if: success()
+        continue-on-error: true
+        env:
+          BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
+          CI_BUILD: ${{ steps.key.outputs.build }}
+          PAGE_SHA: ${{ steps.page.outputs.sha }}
+        run: node .github/scripts/bot-monitor.mjs page-sync
+
+      # فقط اجرای دستی با run_once، فقط بعد از انتشار و پایش سبز. شکستش انتشار را برنمی‌گرداند.
+      - name: اجرای یک‌بارهٔ تابع نگهداری
+        if: success() && github.event_name == 'workflow_dispatch' && inputs.run_once != ''
+        continue-on-error: true
+        env:
+          BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
+          CI_BUILD: ${{ steps.key.outputs.build }}
+          ONCE_FN: ${{ inputs.run_once }}
+        run: node .github/scripts/bot-monitor.mjs once
+
+      # ---------- برگشت خودکار: فقط اگر کد push شده بود و گامی بعد از آن قرمز شد ----------
+      - name: برگشت خودکار به نسخهٔ قبل
+        id: rollback
+        # لغو دستی پیش از انتشار اصلی هم برمی‌گرداند (وگرنه کارهای زمان‌دار بعد از PAUSE_MIN کد تست‌نشده را اجرا می‌کردند)
+        if: (failure() || (cancelled() && steps.promote.outcome != 'success')) && steps.push.outcome == 'success'
+        env:
+          PREV_REF: ${{ steps.prev.outputs.prev_ref }}
+          PREV_VERSION: ${{ steps.prev.outputs.prev_version }}
+          PROMOTED: ${{ steps.promote.outcome }}
+        run: |
+          set -e
+          echo "::warning::برگشت به کد $PREV_REF (Version $PREV_VERSION)"
+          R=/tmp/prev
+          # کد برگشت (کامیت bot-live، یا در اولین دیپلوی مخزن تازه پشتیبان کد زنده) با .clasp.json پرشده از سکرت
+          bash .github/scripts/bot-prev.sh rollback-src "$PREV_REF" $R bot/.clasp.json
+          # کد قبلی بی ci_key.gs: کارهای زمان‌دار خودبه‌خود از توقف بیرون می‌آیند
+          (cd $R && clasp push --force)
+          if [ "$PROMOTED" = "success" ]; then
+            OUT=$(cd bot && clasp update-deployment "$DEPLOYMENT_ID" -V "$PREV_VERSION" -d "برگشت خودکار · اجرای $GITHUB_RUN_ID" --json)
+            echo "$OUT"
+            [ "$(echo "$OUT" | jq -r '.versionNumber // empty')" = "$PREV_VERSION" ] || { echo "::error::دیپلوی اصلی به Version $PREV_VERSION برنگشت. فوراً دستی بررسی شود."; exit 1; }
+          fi
+          if [ "$PREV_REF" != "live" ]; then
+            git tag -f bot-live "$PREV_REF"
+            git push -f origin refs/tags/bot-live || echo "::warning::برچسب bot-live برنگشت"
+          fi
+          {
+            echo ""
+            echo "## ↩️ برگشت خودکار"
+            echo ""
+            echo "- کد Apps Script به \`$( [ "$PREV_REF" = live ] && echo 'کد زندهٔ پیش از دیپلوی' || git rev-parse --short "$PREV_REF")\` برگشت (کارهای زمان‌دار با کد قبلی ادامه دارند)."
+            if [ "$PROMOTED" = "success" ]; then echo "- دیپلوی اصلی به **Version $PREV_VERSION** برگشت."; else echo "- دیپلوی اصلی عوض نشده بود؛ مراجعان در تمام این مدت نسخهٔ قبلی را داشتند."; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: PR معکوس برای همگام ماندن مخزن با کد زنده
+        if: always() && steps.rollback.outcome == 'success' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+          BASE: ${{ github.ref_name }}
+        run: |
+          set -e
+          if [ -z "$BEFORE" ] || echo "$BEFORE" | grep -q '^0*$' || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            echo "::warning::کامیت پیش از مرج معلوم نیست؛ PR معکوس ساخته نشد."; exit 0
+          fi
+          # v170.9.1: اولین دیپلوی مخزن تازه کامیت قبلی بی bot/ دارد؛ PR معکوس کل مخزن را برمی‌گرداند. کد زنده همان پشتیبان است.
+          if ! git cat-file -e "$BEFORE:bot/version.gs" 2>/dev/null; then
+            echo "::warning::کامیت پیش از مرج کد بات ندارد (اولین دیپلوی مخزن)؛ PR معکوس ساخته نشد. کد زنده به پشتیبان برگشت."; exit 0
+          fi
+          # .clasp.json در گام آماده‌سازی شناسهٔ پروژه گرفته؛ به نسخهٔ گیت برمی‌گردد تا git apply روی index بنشیند
+          git checkout -- bot/.clasp.json
+          SHORT=$(git rev-parse --short HEAD)
+          BR="revert/bot-$SHORT-$GITHUB_RUN_ID"
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BR"
+          # v170.9.2: گردش کارها برگردانده نمی‌شوند؛ توکن گردش کار اجازهٔ نوشتن در .github/workflows ندارد (اجرای 37152498810)
+          git diff --binary "$BEFORE" HEAD -- . ':(exclude).github/workflows' > /tmp/rev.patch
+          git apply -R --index /tmp/rev.patch
+          git commit -m "برگشت خودکار: $SHORT (دیپلوی بات قرمز شد، اجرای $GITHUB_RUN_ID)"
+          git push origin "$BR"
+          URL=$(gh pr create --base "$BASE" --head "$BR" \
+            --title "برگشت خودکار: $SHORT" \
+            --body "دیپلوی بات در [اجرای $GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) قرمز شد و کد زنده خودکار به نسخهٔ قبل برگشت. این PR مخزن را با کد زنده یکی می‌کند. مرجش دیپلوی تازه‌ای نمی‌سازد." ) \
+            || { echo "::warning::ساخت PR با توکن گردش کار مجاز نیست (Settings → Actions → Allow GitHub Actions to create pull requests). شاخهٔ $BR فرستاده شد؛ PR را دستی بسازید."; exit 0; }
+          echo "PR معکوس: $URL"
+          gh pr merge "$URL" --squash --delete-branch || echo "::warning::PR معکوس خودکار مرج نشد؛ دستی مرج کنید: $URL"
+          echo "- PR معکوس: $URL" >> "$GITHUB_STEP_SUMMARY"
+
+  # کد زندهٔ Apps Script را بی‌دیپلوی می‌کشد: اول همهٔ فایل‌ها برای کلید و توکن جست‌وجو می‌شوند (اگر چیزی پیدا
+  # شود کار می‌ایستد و فقط فایل:سطر گزارش می‌شود)، بعد اثر انگشت و فهرست فایل‌های متفاوت در خلاصهٔ اجرا می‌آید
+  # و خود فایل‌ها آرتیفکت یک‌روزه می‌شوند. به گیت کامیت نمی‌شود (کد زنده ممکن است دادهٔ شخصی داشته باشد).
+  snapshot:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'snapshot'
+    runs-on: ubuntu-latest
+    # v170.9: همهٔ رمزها و شناسهٔ پروژه فقط در Environment «production» (فقط main به آن دسترسی دارد)
+    environment: production
+    env:
+      SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
+      DEPLOYMENT_ID: ${{ secrets.DEPLOYMENT_ID }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: نصب clasp و ورود
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+        run: |
+          printf '%s' "$CLASPRC_JSON" > ~/.clasprc.json
+          chmod 600 ~/.clasprc.json
+          npm install -g "@google/clasp@${CLASP_VERSION}" > /dev/null
+          jq --arg id "$SCRIPT_ID" '.scriptId = $id' bot/.clasp.json > /tmp/clasp.json && mv /tmp/clasp.json bot/.clasp.json
+
+      - name: کشیدن کد زنده
+        run: |
+          set -e
+          R=$RUNNER_TEMP/remote; rm -rf $R; mkdir -p $R
+          cp bot/.clasp.json $R/
+          (cd $R && clasp pull > /dev/null)
+          rm -f $R/.clasp.json $R/ci_key.gs
+          echo "فایل‌های پروژهٔ زنده:"; (cd $R && ls -1)
+
+      - name: جست‌وجوی کلید و توکن در همهٔ فایل‌های کد زنده
+        run: |
+          R=$RUNNER_TEMP/remote
+          PAT='AIza[0-9A-Za-z_-]{30,}|[0-9]{8,10}:AA[0-9A-Za-z_-]{30,}|sk-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,}|xox[abpr]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY|ya29\.[0-9A-Za-z_-]{20,}|1//0[0-9A-Za-z_-]{20,}|GOCSPX-[A-Za-z0-9_-]{10,}|EAA[A-Za-z0-9]{40,}|AKIA[0-9A-Z]{16}'
+          # فقط نام فایل و شمارهٔ سطر؛ خود مقدار هرگز چاپ نمی‌شود
+          HITS=$(cd $R && grep -rnoE "$PAT" . | cut -d: -f1,2 | sort -u || true)
+          if [ -n "$HITS" ]; then
+            echo "::error::در کد زنده چیزی شبیه کلید یا توکن هست. هیچ چیز ثبت نشد. جاها (فایل:سطر):"
+            echo "$HITS"
+            {
+              echo "## ❌ کد زنده ثبت نشد"
+              echo "در این جاها چیزی شبیه کلید یا توکن هست (فایل:سطر). آن را در ادیتور به Script Properties ببرید و کلید را عوض کنید:"
+              echo '```'; echo "$HITS"; echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "در $(cd $R && ls -1 | wc -l) فایل چیزی شبیه کلید یا توکن پیدا نشد."
+
+      - name: اثر انگشت و خلاصهٔ تفاوت با همین کامیت
+        run: |
+          R=$RUNNER_TEMP/remote
+          export LC_ALL=C
+          FP=$( (cd $R && for f in $(ls -1 | sort); do printf '%s  ' "$f"; sed -e '$a\' "$f" | tr -d '\r' | sha256sum | cut -d' ' -f1; done) | sha256sum | cut -d' ' -f1)
+          {
+            echo "## کد زنده (بی‌دیپلوی)"
+            echo ""
+            echo "اثر انگشت: \`$FP\`"
+            echo ""
+            echo "| فایل | وضعیت نسبت به این کامیت |"
+            echo "|---|---|"
+            for f in $(cd $R && ls -1); do
+              if [ ! -f "bot/$f" ]; then echo "| $f | فقط در کد زنده |";
+              else n=$(diff --strip-trailing-cr <(sed -e '$a\' "$R/$f") <(sed -e '$a\' "bot/$f") | grep -c '^[<>]'); if [ "$n" != "0" ]; then echo "| $f | $n خط متفاوت |"; fi; fi
+            done
+            for f in bot/*.gs; do [ -f "$R/$(basename "$f")" ] || echo "| $(basename "$f") | فقط در گیت |"; done
+            echo ""
+            echo "فایل‌ها به‌صورت آرتیفکت «bot-live» پیوست این اجراست و بعد از یک روز پاک می‌شود. به گیت کامیت نمی‌شود، چون کد زنده ممکن است دادهٔ شخصی (مثلاً شمارهٔ واقعی در تست‌ها) داشته باشد."
+            echo "اگر بعد از بازبینی باید همین حالت زنده بازنویسی شود، این اثر انگشت را در bot/.live-reviewed بگذارید."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "اثر انگشت کد زنده: $FP"
+
+      - name: پیوست کد زنده (یک روزه)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bot-live
+          path: ${{ runner.temp }}/remote/
+          retention-days: 1

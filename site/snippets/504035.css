@@ -1,0 +1,379 @@
+/* دکمهٔ برند وقتی span است (کارت «همه را ببینید» در فهرست درمانگران) متن سفید بگیرد.
+   قاعدهٔ .tj2 .thc.more span رنگ خاکستری تیره را روی پس‌زمینهٔ قرمز می‌نشاند و
+   نسبت کنتراست ۳٫۲ می‌شد. این انتخابگر دقیق‌تر است تا بدون important برنده شود. */
+.tj2 .thc.more span.btn.btn-brand{color:#fff}
+.tj2 .btn.btn-brand{color:#fff}
+
+/* برگ کوچک کنار عنوان‌ها با نسبت اصلی نمایش داده شود، نه کشیده. */
+.tj2 .de img{object-fit:contain}
+
+/* گزینهٔ پیش‌فرض سلکت‌های فرم (مثل «نقش شما در انجمن») مثل placeholder بقیهٔ فیلدها کم‌رنگ باشد تا فرم یکدست دیده شود. */
+.tj2 .formbox select:has(option[value=""]:checked),.tj2 .ff-el-form-control:is(select):has(option[value=""]:checked){color:var(--tj-mut,#676768)!important}
+.tj2 .formbox ::placeholder{color:var(--tj-mut,#676768);opacity:1}
+
+/* == بلوک بات تلگرام (کارت «سه ضربه تا وقت معارفه») ==
+   ۲۱ شهریور ۱۴۰۵. این کارت تا امروز فقط در استایل خودِ صفحه‌های /therapy/* بود
+   و هر صفحهٔ تازه باید دوباره کپی‌اش می‌کرد. از این به بعد سراسری است.
+   قاعده‌های موبایل فقط داخل @media بمانند؛ یک بار سطح‌بالا کپی شدند و کارت
+   در دسکتاپ تک‌ستونی شد. */
+.tj2 .tjp-bk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);max-width:980px;margin:30px auto 0;background:#fff;border:1px solid var(--tj-line);border-radius:28px;overflow:hidden;text-align:right;box-shadow:0 30px 60px -48px rgba(14,14,14,.45)}
+.tj2 .tjp-bk-copy{padding:38px 40px 32px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.tj2 .tjp-bk-fast{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--tj-ink);background:var(--tj-yellow);padding:5px 13px 5px 15px;border-radius:999px}
+.tj2 .tjp-bk-fast svg{width:13px;height:13px}
+.tj2 .tjp-bk-copy h3{font-size:clamp(22px,2.3vw,27px);line-height:1.55;margin:16px 0 20px;color:var(--tj-ink)}
+.tj2 .tjp-bk-steps{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:0;width:100%}
+.tj2 .tjp-bk-steps li{position:relative;display:flex;align-items:center;gap:12px;font-size:15px;color:var(--tj-ink);line-height:1.7;padding:6px 0}
+.tj2 .tjp-bk-steps b{position:relative;z-index:1;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:13.5px;background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .tjp-bk-steps li:not(:last-child)::after{content:"";position:absolute;inset-inline-start:14px;top:34px;height:calc(100% - 26px);border-inline-start:2px dotted var(--tj-red-400);opacity:.5}
+.tj2 .tjp-bk-steps li:last-child b{background:var(--tj-red);color:#fff}
+.tj2 .tjp-bk-go{width:100%;justify-content:center;padding-block:15px;font-size:16px}
+.tj2 .tjp-bk-facts{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-wrap:wrap;gap:6px 18px}
+.tj2 .tjp-bk-facts li{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--tj-soft)}
+.tj2 .tjp-bk-facts svg{width:15px;height:15px;color:var(--tj-mut)}
+.tj2 .tjp-bk-demo{position:relative;background:var(--tj-ink);display:grid;place-items:center;padding:36px 30px;overflow:hidden;isolation:isolate}
+.tj2 .tjp-bk-demo::before{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.12) 1.2px,transparent 1.4px) 0 0/18px 18px;z-index:-1}
+.tj2 .tjp-bk-demo::after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:var(--tj-red);filter:blur(80px);opacity:.5;top:-110px;inset-inline-end:-90px;z-index:-1}
+.tj2 .tjp-chat{width:100%;max-width:330px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:26px;padding:14px 14px 18px;display:flex;flex-direction:column;gap:9px;box-shadow:0 30px 50px -30px rgba(0,0,0,.6)}
+.tj2 .tjp-chat-top{display:flex;align-items:center;gap:10px;padding:2px 4px 11px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:4px}
+.tj2 .tjp-chat-top .av{width:36px;height:36px;border-radius:50%;background:var(--tj-red);color:#fff;display:grid;place-items:center;flex:none}
+.tj2 .tjp-chat-top .av svg{width:17px;height:17px}
+.tj2 .tjp-chat-top b{display:block;font-size:13.5px;color:#fff;line-height:1.5}
+.tj2 .tjp-chat-top small{display:block;font-size:11.5px;color:rgba(255,255,255,.55);line-height:1.5}
+.tj2 .tjp-chat .bb{margin:0;align-self:flex-start;max-width:90%;background:#fff;color:var(--tj-ink);font-size:13.5px;line-height:1.8;padding:8px 13px;border-radius:16px 16px 5px 16px}
+.tj2 .tjp-chat .ok{display:inline-flex;align-items:center;gap:6px;background:var(--tj-yellow);font-weight:700}
+.tj2 .tjp-chat .ok svg{width:15px;height:15px;stroke-width:2.6}
+.tj2 .tjp-chat .ch{display:flex;gap:6px}
+.tj2 .tjp-chat .ch span{flex:1;text-align:center;font-size:12.5px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:11px;padding:7px 4px;line-height:1.6}
+.tj2 .tjp-chat .m1{animation:tjpA1 9s infinite both}
+.tj2 .tjp-chat .m2{animation:tjpA2 9s infinite both}
+.tj2 .tjp-chat .m3{animation:tjpA3 9s infinite both}
+.tj2 .tjp-chat .m4{animation:tjpA4 9s infinite both}
+.tj2 .tjp-chat .m5{animation:tjpA5 9s infinite both}
+.tj2 .tjp-chat .o1{animation:tjpO1 9s infinite both}
+.tj2 .tjp-chat .o2{animation:tjpO2 9s infinite both}
+@keyframes tjpulse{0%{box-shadow:0 0 0 0 rgba(63,178,106,.5)}70%{box-shadow:0 0 0 7px rgba(63,178,106,0)}100%{box-shadow:0 0 0 0 rgba(63,178,106,0)}}
+@keyframes tjpb{from{height:8px}to{height:44px}}
+@keyframes tjpw{from{height:4px}to{height:16px}}
+@keyframes tjpA1{0%,3%{opacity:0;transform:translateY(8px)}8%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes tjpA2{0%,11%{opacity:0;transform:translateY(8px)}16%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes tjpA3{0%,29%{opacity:0;transform:translateY(8px)}34%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes tjpA4{0%,37%{opacity:0;transform:translateY(8px)}42%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes tjpA5{0%,55%{opacity:0;transform:translateY(8px) scale(.96)}61%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes tjpO1{0%,20%{background:transparent;border-color:rgba(255,255,255,.28);transform:none}22%{transform:scale(.92)}25%,100%{background:var(--tj-red);border-color:var(--tj-red);transform:none}}
+@keyframes tjpO2{0%,46%{background:transparent;border-color:rgba(255,255,255,.28);transform:none}48%{transform:scale(.92)}51%,100%{background:var(--tj-red);border-color:var(--tj-red);transform:none}}
+@keyframes tjpld{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){
+.tj2 .tjp-chat *{animation:none!important}
+.tj2 .tjp-chat .on{background:var(--tj-red);border-color:var(--tj-red)}
+}
+@media (max-width:760px){
+.tj2 .tjp-bk{grid-template-columns:1fr;border-radius:22px}
+.tj2 .tjp-bk-copy{padding:26px 20px 24px}
+.tj2 .tjp-bk-demo{padding:26px 16px}
+}
+
+
+/* ===== tjx-start: استاندارد صفحهٔ پربازدید مجله v1 (۲۶ شهریور ۱۴۰۵) ===== */
+/* == استاندارد صفحهٔ پربازدید مجله v1 · tjx == */
+.tjx{--r:var(--tj-red,#c83f49);--r6:var(--tj-red-600,#b63942);--r4:var(--tj-red-400,#d9737a);--ink:var(--tj-ink,#0e0e0e);--soft:var(--tj-soft,#4e4e4e);--mut:var(--tj-mut,#676768);--line:var(--tj-line,#dfdfe2);--sunk:var(--tj-sunk,#f5f5f8);--tint:var(--tj-tint,#faeced);direction:rtl;overflow-wrap:normal;word-break:normal;color:var(--ink)}
+.tjx *{box-sizing:border-box}
+.tjx p{overflow-wrap:normal;word-break:normal}
+
+/* بلوک پاسخ کوتاه */
+.tjx-ans{border:1px solid var(--r4);border-radius:16px;background:var(--tint);padding:18px 20px;margin:0 0 14px}
+.tjx-ans .q{margin:0 0 8px;font-weight:700;font-size:17px;line-height:1.7;color:var(--r6)}
+.tjx-ans .a{margin:0;font-size:16px;line-height:2;color:var(--ink)}
+
+/* شناسنامهٔ مطلب */
+.tjx-meta{margin:0 0 18px;font-size:13px;line-height:2;color:var(--mut);border-inline-start:3px solid var(--r4);padding-inline-start:12px}
+.tjx-meta b{color:var(--soft);font-weight:600}
+
+/* فهرست مطالب */
+.tjx-toc{border:1px solid var(--line);border-radius:16px;background:#fff;padding:16px 20px;margin:0 0 26px}
+.tjx-toc .t{margin:0 0 10px;font-weight:700;font-size:15px;color:var(--ink)}
+.tjx-toc ol{margin:0;padding:0;list-style:none;counter-reset:tjx;display:grid;grid-template-columns:1fr 1fr;gap:6px 22px}
+.tjx-toc li{counter-increment:tjx;position:relative;padding-inline-start:26px;font-size:14.5px;line-height:1.85}
+.tjx-toc li::before{content:counter(tjx);position:absolute;inset-inline-start:0;top:3px;width:19px;height:19px;border-radius:50%;background:var(--tint);color:var(--r);font-size:11px;font-weight:700;display:grid;place-items:center}
+.tjx-toc a{color:var(--soft);text-decoration:none;border-bottom:1px solid transparent}
+.tjx-toc a:hover{color:var(--r);border-bottom-color:var(--r4)}
+
+/* تیترها و متن */
+.tjx h2{scroll-margin-top:90px;font-size:23px;line-height:1.65;margin:38px 0 12px;color:var(--ink)}
+.tjx h3{scroll-margin-top:90px;font-size:18px;line-height:1.7;margin:26px 0 8px;color:var(--ink)}
+.tjx p{font-size:17px;line-height:1.95;color:var(--soft);margin:0 0 14px}
+.tjx .lead{background:var(--sunk);border-radius:12px;padding:14px 16px;color:var(--ink);font-size:16px;line-height:2;margin:0 0 16px}
+.tjx ul.tjx-list{margin:0 0 16px;padding:0;list-style:none;display:grid;gap:8px}
+.tjx ul.tjx-list li{position:relative;padding-inline-start:20px;font-size:16px;line-height:1.9;color:var(--soft)}
+.tjx ul.tjx-list li::before{content:"";position:absolute;inset-inline-start:0;top:12px;width:7px;height:7px;border-radius:50%;background:var(--r4)}
+.tjx a{color:var(--r);font-weight:600}
+
+/* جدول */
+.tjx-tw{margin:0 0 20px}
+.tjx-tw .cap{margin:0 0 8px;font-size:14px;font-weight:700;color:var(--ink)}
+.tjx table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:15px}
+.tjx thead th{background:var(--tint);color:var(--r6);font-weight:700;text-align:start;padding:11px 13px;font-size:14px;line-height:1.7}
+.tjx tbody td{padding:11px 13px;border-top:1px solid var(--line);color:var(--soft);line-height:1.85;vertical-align:top}
+.tjx tbody tr:nth-child(even) td{background:#fcfcfd}
+.tjx tbody td:first-child{color:var(--ink);font-weight:600}
+.tjx .src{margin:6px 0 0;font-size:12.5px;color:var(--mut);line-height:1.9}
+
+/* گام‌ها */
+.tjx-steps{margin:0 0 22px;padding:0;list-style:none;counter-reset:st;display:grid;gap:10px}
+.tjx-steps li{counter-increment:st;position:relative;border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px 16px 14px 16px;padding-inline-start:56px}
+.tjx-steps li::before{content:counter(st);position:absolute;inset-inline-start:15px;top:14px;width:28px;height:28px;border-radius:50%;background:var(--r);color:#fff;font-size:14px;font-weight:700;display:grid;place-items:center}
+.tjx-steps b{display:block;font-size:16px;color:var(--ink);margin:0 0 4px}
+.tjx-steps span{display:block;font-size:15px;line-height:1.9;color:var(--soft)}
+
+/* تصویر کنار متن */
+body.single .entry-content .tjx figure.tjx-fig{float:inline-end;margin:0 0 14px 0!important;margin-inline-start:22px!important;max-width:190px!important;text-align:center}
+body.single .entry-content .tjx figure.tjx-fig img{width:100%!important;max-inline-size:100%!important;height:auto}
+.tjx-fig img{display:block;width:100%;height:auto;margin:0 auto}
+.tjx-fig figcaption{font-size:12.5px;color:var(--mut);line-height:1.8;margin-top:6px}
+.tjx-clear{clear:both}
+
+/* جعبهٔ مسیر */
+.tjx-box{border:1px solid var(--r4);border-radius:18px;background:var(--tint);padding:20px 22px;margin:26px 0}
+.tjx-box .h{display:flex;align-items:center;gap:14px;margin:0 0 10px}
+.tjx-box .h img{flex:none;width:52px;height:auto}
+.tjx-box .h b{font-size:18px;color:var(--ink);line-height:1.6}
+.tjx-box p{color:var(--ink);font-size:16px;margin:0 0 14px}
+.tjx-btns{display:flex;flex-wrap:wrap;gap:10px}
+.tjx-btns a{display:inline-block;padding:11px 18px;border-radius:999px;font-size:15px;font-weight:700;text-decoration:none;line-height:1.6}
+.tjx-btns a.p{background:var(--r)!important;color:#fff!important;border:1px solid var(--r)!important}
+.tjx-btns a.p:hover{background:var(--r6)!important;color:#fff!important}
+.tjx-btns a.g{background:#fff!important;color:var(--r)!important;border:1px solid var(--r4)!important}
+.tjx-btns a.g:hover{background:var(--sunk)!important;color:var(--r6)!important}
+
+/* پرسش‌های پرتکرار */
+.tjx-faq{max-width:820px;margin:0 0 22px;display:grid;gap:10px}
+.tjx-faq details{border:1px solid var(--line);border-radius:14px;background:#fff;padding:0 20px;transition:border-color .2s,background .2s}
+.tjx-faq details[open]{border-color:var(--r4);background:var(--tint)}
+.tjx-faq summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:700;color:var(--ink);font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;outline:none}
+.tjx-faq summary:focus{outline:none}
+.tjx-faq summary:focus-visible{outline:2px solid var(--r4);outline-offset:6px;border-radius:8px}
+.tjx-faq summary::-webkit-details-marker{display:none}
+.tjx-faq summary::after{content:"";width:9px;height:9px;border-inline-start:2px solid var(--r);border-block-end:2px solid var(--r);transform:rotate(-45deg);transition:transform .25s;flex:none;margin-inline-start:6px}
+.tjx-faq details[open] summary::after{transform:rotate(45deg)}
+.tjx-faq details p{padding:0 0 18px;margin:0;font-size:15px;line-height:1.95;color:var(--soft)}
+
+/* منابع */
+.tjx-src{border-top:1px solid var(--line);margin:28px 0 0;padding:16px 0 0}
+.tjx-src .t{margin:0 0 8px;font-size:14px;font-weight:700;color:var(--ink)}
+.tjx-src ol{margin:0;padding-inline-start:20px}
+.tjx-src li{font-size:13.5px;line-height:2;color:var(--mut)}
+
+@media (max-width:760px){
+  .tjx h2{font-size:20px}
+  .tjx p{font-size:16px}
+  .tjx-toc ol{grid-template-columns:1fr}
+  body.single .entry-content .tjx figure.tjx-fig{float:none;margin:0 auto 16px!important;max-width:150px!important}
+  .tjx table{border:0;font-size:15px}
+  .tjx thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .tjx tbody tr{display:block;border:1px solid var(--line);border-radius:14px;margin:0 0 10px;background:#fff;overflow:hidden}
+  .tjx tbody tr:nth-child(even) td{background:transparent}
+  .tjx tbody td{display:block;border:0;border-top:1px solid var(--line);padding:9px 14px}
+  .tjx tbody td:first-child{background:var(--tint);color:var(--r6);border-top:0;font-size:15px}
+  .tjx tbody td[data-h]::before{content:attr(data-h);display:block;font-size:12px;font-weight:700;color:var(--mut);margin:0 0 3px}
+  .tjx-box .h img{width:44px}
+}
+@media (prefers-reduced-motion: reduce){.tjx-faq summary::after{transition:none}}
+/* tjx-dup-toc: وقتی فهرست مطالب استاندارد روی صفحه هست، فهرست جاوااسکریپتی قالب تکراری می‌شود */
+.entry-content:has(.tjx-toc) details.tj-toc{display:none!important}
+/* مسیر خواندن (tjx-path، ۶ مهر ۱۴۰۵): چند مطلب مرتبط بعد از جعبهٔ تبدیل، شماره‌دار */
+.tjx-path{border:1px solid var(--line);border-radius:18px;background:#fff;padding:18px 20px;margin:26px 0}
+.tjx-path .t{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;font-weight:700;font-size:16px;color:var(--ink)}
+.tjx-path .t span{font-size:12.5px;font-weight:600;color:var(--mut)}
+.tjx-path ol{margin:0;padding:0;list-style:none;counter-reset:pa;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tjx-path li{counter-increment:pa;margin:0}
+.tjx-path li a{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none!important;color:var(--ink)!important;font-weight:700;font-size:15px;line-height:1.8;height:100%;box-sizing:border-box;transition:border-color .2s,background .2s}
+.tjx-path li a::before{content:counter(pa);flex:none;width:26px;height:26px;border-radius:50%;background:var(--tint);color:var(--r);font-size:13px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+.tjx-path li a:hover{border-color:var(--r4);background:var(--tint)}
+.tjx-path li a span{display:block;min-width:0}
+.tjx-path li a small{display:block;font-size:12.5px;font-weight:500;color:var(--mut);line-height:1.8;margin-top:2px}
+@media (max-width:760px){.tjx-path ol{grid-template-columns:1fr}}
+/* tjx-link-fix (۷ مهر ۱۴۰۵): قاعدهٔ قالب «body.single .entry-content a» لینک‌های فهرست مطالب را قرمز و زیرخط‌دار می‌کرد و در هاور خط دوتایی می‌شد؛ شماره‌ها هم لاتین بودند */
+body.single .entry-content .tjx-toc a{color:var(--soft)!important;text-decoration:none!important;border-bottom:1px solid transparent!important;font-weight:500!important}
+body.single .entry-content .tjx-toc a:hover,body.single .entry-content .tjx-toc a:focus-visible{color:var(--r)!important;border-bottom-color:var(--r4)!important}
+body.single .entry-content .tjx-path li a,body.single .entry-content .tjx-path li a:hover{text-decoration:none!important}
+body.single .entry-content .tjx-meta a{text-decoration:none!important}
+.tjx-toc li::before{content:counter(tjx,persian)!important}
+.tjx-path li a::before{content:counter(pa,persian)!important}
+.tjx-steps li::before{content:counter(st,persian)!important}
+/* مکث کوتاه (tjmk، ۷ مهر ۱۴۰۵): دو سؤال از مطلب و یک سؤال تأملی که بات را باز می‌کند؛ رفتار در اسنیپت 505571؛ پیشوند tjq مال ویجت انتخاب تراپیست است */
+.tjmk{border:1px solid var(--line);border-radius:20px;background:#fff;padding:18px 20px;margin:30px 0}
+.tjmk-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 16px}
+.tjmk-k{font-size:12px;font-weight:700;line-height:1;color:var(--r);background:var(--tint);border-radius:999px;padding:6px 11px}
+.tjmk-h b{flex:1 1 220px;font-size:16px;line-height:1.7;color:var(--ink)}
+.tjmk-p{flex:0 0 100%;height:4px;background:var(--sunk);border-radius:4px;overflow:hidden}
+.tjmk-p i{display:block;height:100%;width:0;background:var(--r);border-radius:4px;transition:width .35s ease}
+.tjmk-q{margin:0 0 16px}
+.tjmk-q:last-child{margin-bottom:0}
+.tjmk-on .tjmk-q.tjmk-wait{display:none}
+.tjmk-t{font-weight:700;font-size:16px;line-height:1.9;color:var(--ink);margin:0 0 10px}
+.tjmk-o{display:grid;gap:8px}
+body.single .entry-content .tjmk-o button{appearance:none;box-sizing:border-box;display:block;width:100%;margin:0;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit;font-size:15px;font-weight:500;line-height:1.8;color:var(--soft);background:#fff;text-align:start;box-shadow:none;transition:border-color .2s,background .2s}
+body.single .entry-content .tjmk-o button:hover{border-color:var(--r4);background:var(--tint);color:var(--ink)}
+body.single .entry-content .tjmk-o button:focus-visible{outline:2px solid var(--r4);outline-offset:2px}
+body.single .entry-content .tjmk-o button[disabled]{cursor:default}
+body.single .entry-content .tjmk-o button[disabled]:hover{border-color:var(--line);background:#fff;color:var(--soft)}
+body.single .entry-content .tjmk-o button.is-ok,body.single .entry-content .tjmk-o button.is-ok:hover{border-color:var(--r);background:var(--tint);color:var(--ink);font-weight:700}
+body.single .entry-content .tjmk-o button.is-ok::before{content:"✓";color:var(--r);font-weight:800;margin-inline-end:8px}
+body.single .entry-content .tjmk-o button.is-no,body.single .entry-content .tjmk-o button.is-no:hover{border-color:var(--line);background:var(--sunk);color:var(--mut);text-decoration:line-through}
+.tjmk-e{margin:10px 0 0;font-size:14.5px;line-height:1.95;color:var(--ink);background:var(--sunk);border-radius:12px;padding:10px 14px}
+.tjmk-end{margin:12px 0 0;border:1px solid var(--r4);background:var(--tint);border-radius:14px;padding:14px 16px}
+.tjmk-m{font-size:15px;line-height:1.95;color:var(--ink);margin:0 0 12px}
+body.single .entry-content .tjmk-bot{display:inline-block;background:var(--r)!important;color:#fff!important;text-decoration:none!important;border-radius:999px;padding:9px 18px;font-weight:700;font-size:14.5px;line-height:1.6}
+body.single .entry-content .tjmk-bot:hover{background:var(--r6)!important}
+@media (max-width:760px){.tjmk{padding:16px}}
+/* tjx-sch: پل مقالهٔ مجله به دوره‌های مدرسه و تقویم زنده (مهر ۱۴۰۵) */
+.tjx .tjx-sch{margin:28px 0 34px;padding:22px 20px;border:1px solid var(--tj-line,#dfdfe2);border-radius:18px;background:#fff}
+.tjx .tjx-sch-h .k{display:inline-block;font-size:13px;font-weight:700;color:var(--tj-red,#c83f49);background:var(--tj-tint,#faeced);border-radius:99px;padding:2px 12px;margin-bottom:8px}
+.tjx .tjx-sch-h b{display:block;font-size:21px;line-height:1.6;color:var(--tj-ink,#0e0e0e);font-weight:800}
+.tjx .tjx-sch-h .s{font-size:15px;line-height:1.9;color:var(--tj-soft,#4e4e4e);margin-top:6px}
+.tjx .tjx-sch-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+body.single .entry-content .tjx .tjx-sch-g a.c{display:flex;flex-direction:column;gap:4px;padding:14px 14px 12px;border:1px solid var(--tj-line,#dfdfe2);border-radius:14px;text-decoration:none!important;color:var(--tj-soft,#4e4e4e)!important;background:#fff;transition:border-color .2s,transform .2s}
+body.single .entry-content .tjx .tjx-sch-g a.c:hover{border-color:var(--tj-red-400,#d9737a);transform:translateY(-2px)}
+.tjx .tjx-sch-g .code{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--tj-red,#c83f49);border:1px solid var(--tj-red-400,#d9737a);border-radius:6px;padding:0 7px;direction:ltr}
+.tjx .tjx-sch-g b{display:block;font-size:16px;color:var(--tj-ink,#0e0e0e);line-height:1.6}
+.tjx .tjx-sch-g .d{display:block;font-size:13.5px;line-height:1.8}
+.tjx .tjx-sch-g .go{display:block;margin-top:auto;padding-top:6px;font-size:13px;font-weight:700;color:var(--tj-red,#c83f49)}
+.tjx .tjx-sch-g .go::after{content:" ←"}
+.tjx .tjx-live{margin-top:18px;border-top:1px dashed var(--tj-line,#dfdfe2);padding-top:14px}
+.tjx .tjx-live .t{font-size:15px;font-weight:800;color:var(--tj-ink,#0e0e0e);margin-bottom:8px}
+body.single .entry-content .tjx .tjx-live ul{list-style:none!important;margin:0!important;padding:0!important;display:grid;gap:8px}
+body.single .entry-content .tjx .tjx-live li{margin:0!important;padding:0!important}
+body.single .entry-content .tjx .tjx-live li::before,body.single .entry-content .tjx .tjx-live li::marker{content:none!important}
+body.single .entry-content .tjx .tjx-live li a{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:12px;background:var(--tj-sunk,#f5f5f8);text-decoration:none!important;color:var(--tj-soft,#4e4e4e)!important}
+body.single .entry-content .tjx .tjx-live li a:hover{background:var(--tj-tint,#faeced)}
+body.single .entry-content .tjx .tjx-live li img{width:44px!important;height:44px!important;border-radius:50%;object-fit:cover;flex:none;margin:0!important;filter:grayscale(.2)}
+.tjx .tjx-live li .dot{width:12px;height:12px;border-radius:50%;background:var(--tj-red,#c83f49);flex:none}
+.tjx .tjx-live li .b{display:flex;flex-direction:column;min-width:0;flex:1}
+.tjx .tjx-live li .w{font-size:12.5px;font-weight:700;color:var(--tj-red,#c83f49)}
+.tjx .tjx-live li b{font-size:15px;color:var(--tj-ink,#0e0e0e);line-height:1.6}
+.tjx .tjx-live li .m{font-size:12.5px;color:var(--tj-mut,#676768)}
+.tjx .tjx-live li .a{flex:none;font-size:12px;font-weight:700;color:var(--tj-soft,#4e4e4e);border:1px solid var(--tj-line,#dfdfe2);border-radius:99px;padding:1px 10px;background:#fff}
+.tjx .tjx-live li.em{font-size:14px;color:var(--tj-mut,#676768);padding:8px 0}
+.tjx .tjx-live .f{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+body.single .entry-content .tjx .tjx-live .f a{font-size:13.5px;font-weight:700;border:1px solid var(--tj-red-400,#d9737a);color:var(--tj-red,#c83f49)!important;border-radius:99px;padding:4px 14px;text-decoration:none!important;background:#fff}
+@media (max-width:760px){.tjx .tjx-sch{padding:18px 14px}.tjx .tjx-sch-g{grid-template-columns:minmax(0,1fr)}.tjx .tjx-live li .a{display:none}.tjx .tjx-sch-h b{font-size:19px}}
+@media (max-width:760px){.tjx .tjx-sch-g .d{display:none}body.single .entry-content .tjx .tjx-sch-g a.c{padding:10px 12px;gap:2px}.tjx .tjx-sch-g .go{padding-top:2px}}
+/* /tjx-sch */
+/* tjx-fig float guard: شکل شناور به سکشن بعد و کادر lead نریزد (۱۰ مهر ۱۴۰۵) */
+body.single .entry-content .tjx h2{clear:both}
+body.single .entry-content .tjx p.lead{display:flow-root}
+/* ===== tjx-end ===== */
+
+/* ===== tj-faq v1 start: پرسش‌های پرتکرار یک شکل در کل سایت (۴ مهر ۱۴۰۵). مرجع: FAQ صفحهٔ اصلی. هر FAQ تازه همین مارکاپ را بگیرد؛ استایل اختصاصی ننویس. ===== */
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq){display:grid;gap:8px;max-width:820px;margin-inline:auto}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details{margin:0;border:1px solid var(--tj-line,#dfdfe2);border-radius:16px;background:var(--tj-sunk,#f5f5f8);padding:0 18px;box-shadow:none;transition:border-color .2s,background-color .2s,box-shadow .2s}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details:hover{border-color:var(--tj-red-400,#d9737a)}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details[open]{background:#fff;border-color:var(--tj-red-400,#d9737a);box-shadow:0 14px 30px -24px rgba(14,14,14,.3)}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>summary{cursor:pointer;list-style:none;margin:0;padding:14px 0;border:0;background:none;font-family:inherit;font-weight:700;font-size:15.5px;line-height:1.7;color:var(--tj-ink,#0e0e0e);display:flex;justify-content:space-between;align-items:center;gap:14px;outline:none;text-align:start}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>summary::-webkit-details-marker{display:none}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>summary::marker{content:""}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>summary::before{content:none;display:none}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>summary::after{content:"";display:block;position:static;width:8px;height:8px;border:0;border-inline-start:2px solid var(--tj-red,#c83f49);border-block-end:2px solid var(--tj-red,#c83f49);background:none;transform:rotate(-45deg);transition:transform .25s;flex:none;margin:0;margin-inline-start:6px}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details[open]>summary::after{transform:rotate(45deg)}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>summary:focus-visible{outline:2px solid var(--tj-red-400,#d9737a);outline-offset:6px;border-radius:8px}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>summary :is(h2,h3,h4,.tj-qt){margin:0;padding:0;font:inherit;color:inherit;line-height:inherit;flex:1;min-width:0}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>summary>p:has(.tj-hchev),html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq) .tj-hchev{display:none}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>:not(summary){overflow:hidden;margin:0;padding:0;border:0;background:none}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details :is(p,li){font-size:14.5px;line-height:1.9;color:var(--tj-soft,#4e4e4e)}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>:not(summary) p{margin:0;padding:0 0 12px}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>:not(summary)>:last-child{padding-bottom:16px}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>p{margin:0;padding:0 0 12px}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>p:last-child{padding-bottom:16px}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details a{color:var(--tj-red,#c83f49);font-weight:600}
+@media (max-width:760px){
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details{padding:0 14px}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>summary{font-size:14.5px;padding:13px 0}
+html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details :is(p,li){font-size:13.5px}
+}
+@media (prefers-reduced-motion:reduce){html:not(#tjq) body :is(.tj2 .faq-list,.tjl .faq,.tjx-faq)>details>summary::after{transition:none}}
+/* ===== tj-faq v1 end ===== */
+
+/* ===== tj-form v1 start: فرم‌های یک شکل در کل سایت (۴ مهر ۱۴۰۵). رفتار در اسنیپت JS «tj-form v1». استایل اختصاصی فرم در صفحه ننویس. ===== */
+html:not(#tjq) body .frm-fluent-form{font-family:inherit;direction:rtl;text-align:start}
+html:not(#tjq) body .frm-fluent-form .ff-el-group{margin-bottom:14px}
+html:not(#tjq) body .frm-fluent-form .ff-el-input--label label{font-size:14px;font-weight:700;color:var(--tj-ink,#0e0e0e);margin-bottom:6px;display:inline-block}
+html:not(#tjq) body .frm-fluent-form :is(input.ff-el-form-control,select.ff-el-form-control,textarea.ff-el-form-control){box-sizing:border-box;width:100%;min-height:52px;height:auto;padding:14px 16px;border:1px solid var(--tj-line,#dfdfe2);border-radius:12px;background:#fff;color:var(--tj-ink,#0e0e0e);font-family:inherit;font-size:15px;line-height:1.6;box-shadow:none;outline:none;transition:border-color .15s,box-shadow .15s;text-align:start}
+html:not(#tjq) body .frm-fluent-form textarea.ff-el-form-control{min-height:112px;resize:vertical}
+html:not(#tjq) body .frm-fluent-form :is(input,select,textarea).ff-el-form-control:hover{border-color:#c9c9ce}
+html:not(#tjq) body .frm-fluent-form :is(input,select,textarea).ff-el-form-control:focus{border-color:var(--tj-red-400,#d9737a);box-shadow:0 0 0 3px var(--tj-tint,#faeced)}
+html:not(#tjq) body .frm-fluent-form ::placeholder{color:var(--tj-mut,#676768);opacity:1}
+html:not(#tjq) body .frm-fluent-form select.ff-el-form-control{appearance:none;-webkit-appearance:none;padding-inline-end:42px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23c83f49' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:left 16px center!important;background-size:12px 8px!important;cursor:pointer}
+html:not(#tjq) body .frm-fluent-form select.ff-el-form-control.tjf-empty{color:var(--tj-mut,#676768)}
+html:not(#tjq) body .frm-fluent-form .tjf-fl{position:relative}
+html:not(#tjq) body .frm-fluent-form .tjf-fl>.tjf-lbl{position:absolute;inset-inline-start:12px;top:26px;transform:translateY(-50%);max-width:calc(100% - 60px);padding:0 5px;background:#fff;color:var(--tj-mut,#676768);font-size:15px;font-weight:400;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;transition:top .15s,font-size .15s,color .15s;z-index:1;border-radius:4px}
+html:not(#tjq) body .frm-fluent-form .tjf-fl:is(.is-filled,:focus-within)>.tjf-lbl{top:0;font-size:12px;color:var(--tj-soft,#4e4e4e)}
+html:not(#tjq) body .frm-fluent-form .tjf-fl:focus-within>.tjf-lbl{color:var(--tj-red-600,#b63942)}
+html:not(#tjq) body .frm-fluent-form .tjf-fl:has(>textarea)>.tjf-lbl{top:14px;transform:none;white-space:normal;line-height:1.75;max-width:calc(100% - 28px)}
+html:not(#tjq) body .frm-fluent-form .tjf-fl:has(>textarea):is(.is-filled,:focus-within)>.tjf-lbl{top:0;transform:translateY(-50%);white-space:nowrap;line-height:1.3}
+html:not(#tjq) body .frm-fluent-form .tjf-fl>.tjf-lbl .tjf-opt{color:var(--tj-mut,#676768);font-size:.9em}
+html:not(#tjq) body .frm-fluent-form .tjf-fl :is(input,textarea)::placeholder{color:transparent}
+html:not(#tjq) body .frm-fluent-form .ff-el-is-error :is(input,select,textarea).ff-el-form-control{border-color:var(--tj-red,#c83f49);box-shadow:none}
+html:not(#tjq) body .frm-fluent-form :is(.error,.text-danger,.ff-el-is-error .error){color:var(--tj-red-600,#b63942);font-size:12.5px;margin-top:6px;line-height:1.6}
+html:not(#tjq) body .frm-fluent-form .ff-el-input--content:has(.ff-el-form-check){display:flex;flex-wrap:wrap;gap:8px}
+html:not(#tjq) body .frm-fluent-form .ff-el-form-check{margin:0}
+html:not(#tjq) body .frm-fluent-form .ff-el-form-check-label{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border:1px solid var(--tj-line,#dfdfe2);border-radius:12px;background:#fff;color:var(--tj-ink,#0e0e0e);font-size:14.5px;cursor:pointer;transition:border-color .15s,background-color .15s;margin:0}
+html:not(#tjq) body .frm-fluent-form .ff-el-form-check-label:hover{border-color:var(--tj-red-400,#d9737a)}
+html:not(#tjq) body .frm-fluent-form .ff-el-form-check:has(input:checked) .ff-el-form-check-label{border-color:var(--tj-red,#c83f49);background:var(--tj-tint,#faeced)}
+html:not(#tjq) body .frm-fluent-form .ff-el-form-check-input{accent-color:var(--tj-red,#c83f49);width:16px;height:16px;margin:0}
+html:not(#tjq) body .frm-fluent-form .ff-el-form-check:has(input:focus-visible) .ff-el-form-check-label{outline:2px solid var(--tj-red-400,#d9737a);outline-offset:2px}
+html:not(#tjq) body .frm-fluent-form .ff_submit_btn_wrapper{margin:6px 0 0;text-align:center}
+html:not(#tjq) body .frm-fluent-form :is(.ff-btn-submit,button[type=submit]){display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:52px;padding:12px 24px;border:0;border-radius:999px;background:var(--tj-red,#c83f49);color:#fff;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 12px 24px -16px rgba(200,63,73,.8);transition:background-color .15s,transform .15s}
+html:not(#tjq) body .frm-fluent-form :is(.ff-btn-submit,button[type=submit]):hover{background:var(--tj-red-600,#b63942);color:#fff}
+html:not(#tjq) body .frm-fluent-form :is(.ff-btn-submit,button[type=submit]):active{transform:scale(.99)}
+html:not(#tjq) body .frm-fluent-form :is(.ff-btn-submit,button[type=submit]):disabled{opacity:.7;cursor:progress}
+html:not(#tjq) body .tjf-privacy{display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;padding:0;color:var(--tj-mut,#676768);font-size:12.5px;line-height:1.8;text-align:start}
+html:not(#tjq) body .tjf-privacy svg{flex:none;width:15px;height:15px;margin-top:3px;color:var(--tj-red,#c83f49)}
+html:not(#tjq) body .tjf-privacy[dir=ltr]{direction:ltr;text-align:left}
+html:not(#tjq) body .frm-fluent-form .tjf-phone{display:flex;gap:8px;direction:ltr}
+html:not(#tjq) body .frm-fluent-form .tjf-phone>select.tjf-cc{flex:none;width:118px;min-height:52px;padding:0 30px 0 12px;border:1px solid var(--tj-line,#dfdfe2);border-radius:12px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23c83f49' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center/11px 7px;appearance:none;-webkit-appearance:none;font-family:inherit;font-size:14.5px;color:var(--tj-ink,#0e0e0e);cursor:pointer}
+html:not(#tjq) body .frm-fluent-form .tjf-phone>select.tjf-cc:focus{border-color:var(--tj-red-400,#d9737a);box-shadow:0 0 0 3px var(--tj-tint,#faeced);outline:none}
+html:not(#tjq) body .frm-fluent-form .tjf-phone>.tjf-fl,html:not(#tjq) body .frm-fluent-form .tjf-phone>input{flex:1;min-width:0}
+html:not(#tjq) body .frm-fluent-form .tjf-phone input{direction:ltr;text-align:left}
+html:not(#tjq) body .frm-fluent-form .tjs-hide{display:none!important}
+html:not(#tjq) body .frm-fluent-form .tjs-prog{margin:0 0 18px}
+html:not(#tjq) body .frm-fluent-form .tjs-seg{display:flex;gap:6px}
+html:not(#tjq) body .frm-fluent-form .tjs-seg>i{flex:1;height:5px;border-radius:99px;background:var(--tj-line,#dfdfe2);transition:background-color .25s}
+html:not(#tjq) body .frm-fluent-form .tjs-seg>i.on{background:var(--tj-red,#c83f49)}
+html:not(#tjq) body .frm-fluent-form .tjs-cap{display:flex;justify-content:space-between;margin-top:8px;font-size:12.5px;color:var(--tj-mut,#676768)}
+html:not(#tjq) body .frm-fluent-form .tjs-cap b{color:var(--tj-ink,#0e0e0e);font-weight:700}
+html:not(#tjq) body .frm-fluent-form .tjs-nav{display:flex;gap:10px;margin-top:6px}
+html:not(#tjq) body .frm-fluent-form .tjs-nav button{min-height:52px;border-radius:999px;font-family:inherit;font-size:15.5px;font-weight:700;cursor:pointer;padding:0 22px;transition:background-color .15s,border-color .15s}
+html:not(#tjq) body .frm-fluent-form .tjs-next{flex:1;border:0;background:var(--tj-ink,#0e0e0e);color:#fff}
+html:not(#tjq) body .frm-fluent-form .tjs-next:hover{background:#333}
+html:not(#tjq) body .frm-fluent-form .tjs-prev{flex:none;border:1px solid var(--tj-line,#dfdfe2);background:#fff;color:var(--tj-ink,#0e0e0e)}
+html:not(#tjq) body .frm-fluent-form .tjs-prev:hover{border-color:var(--tj-red-400,#d9737a)}
+html:not(#tjq) body .frm-fluent-form .tjs-step-in{animation:tjsIn .28s ease both}
+@keyframes tjsIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+html:not(#tjq) body .ff-message-success{display:flex;gap:14px;align-items:flex-start;margin:0;padding:22px 20px;border:1px solid var(--tj-red-400,#d9737a);border-radius:18px;background:#fff;color:var(--tj-ink,#0e0e0e);font-size:15px;line-height:1.9;box-shadow:0 18px 40px -30px rgba(14,14,14,.35);text-align:start}
+html:not(#tjq) body .ff-message-success .tjf-ok{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--tj-tint,#faeced);color:var(--tj-red,#c83f49)}
+html:not(#tjq) body .ff-message-success .tjf-ok svg{width:20px;height:20px}
+html:not(#tjq) body .ff-message-success .tjf-msg{flex:1;min-width:0}
+html:not(#tjq) body .ff-message-success .tjf-msg p{margin:0 0 6px}
+html:not(#tjq) body .ff-message-success .tjf-msg p:last-child{margin:0}
+@media (prefers-reduced-motion:reduce){html:not(#tjq) body .frm-fluent-form .tjs-step-in{animation:none}}
+/* tj-form desktop btn */
+@media (min-width:761px){html:not(#tjq) body .frm-fluent-form :is(.ff-btn-submit,button[type=submit]){width:auto;min-width:260px}}
+/* ===== tj-form v1 end ===== */
+
+/* ===== tj-steps v1 start: مراحل شماره‌دار (how-grid و steps) در موبایل به شکل یک تایم‌لاین عمودی واحد (۴ مهر ۱۴۰۵). دسکتاپ دست نخورده. ===== */
+@media (max-width:760px){
+html:not(#tjq) body .tj2 .how-grid{display:grid;grid-template-columns:minmax(0,1fr)!important;gap:10px;position:relative;counter-reset:st}
+html:not(#tjq) body .tj2 .how-grid::before{content:"";position:absolute;inset-inline-start:15px;top:22px;bottom:22px;width:2px;border-radius:2px;background:linear-gradient(to bottom,var(--tj-red-400,#d9737a),var(--tj-line,#dfdfe2))}
+html:not(#tjq) body .tj2 .how-grid>.how-step{position:relative;margin:0;margin-inline-start:44px;padding:14px 16px;text-align:start;min-width:0}
+html:not(#tjq) body .tj2 .how-grid>.how-step:has(>img){display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;align-items:start}
+html:not(#tjq) body .tj2 .how-grid>.how-step::before{top:14px;right:auto;left:auto;inset-inline-start:-44px;width:32px;height:32px;font-size:14px}
+html:not(#tjq) body .tj2 .how-grid>.how-step>img{grid-row:1/span 3;width:40px;height:40px;margin:0}
+html:not(#tjq) body .tj2 .how-grid>.how-step>h3{margin:0 0 3px;font-size:15px;line-height:1.6}
+html:not(#tjq) body .tj2 .how-grid>.how-step>p{margin:0;font-size:13.5px;line-height:1.8}
+html:not(#tjq) body .tj2 .steps{display:grid;grid-template-columns:minmax(0,1fr)!important;gap:16px;position:relative}
+html:not(#tjq) body .tj2 .steps::before{content:"";display:block;position:absolute;top:19px;bottom:19px;right:auto;left:auto;inset-inline-start:18px;width:2px;height:auto;border-radius:2px;background:linear-gradient(to bottom,var(--tj-red-400,#d9737a),var(--tj-line,#dfdfe2))}
+html:not(#tjq) body .tj2 .steps>div{display:grid;grid-template-columns:38px minmax(0,1fr);column-gap:14px;align-items:start;padding:0;text-align:start;min-width:0}
+html:not(#tjq) body .tj2 .steps>div>i{grid-row:1/span 2;margin:0}
+html:not(#tjq) body .tj2 .steps>div>b{margin:6px 0 2px;font-size:15px}
+html:not(#tjq) body .tj2 .steps>div>span{font-size:13.5px}
+}
+/* ===== tj-steps v1 end ===== */

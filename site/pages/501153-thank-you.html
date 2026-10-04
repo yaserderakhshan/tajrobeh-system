@@ -1,0 +1,38 @@
+<!-- wp:html -->
+<section class="tj-ty">
+  <div class="tj-ty__art">
+    <img src="https://tajrobeh.life/wp-content/uploads/2026/09/tjl-persian-dandelion.webp" alt="دانه‌های قاصدک که از دست‌ها جدا می‌شوند" width="2044" height="1451" loading="eager" />
+  </div>
+  <h1 class="tj-ty__title">پیامت رسید.</h1>
+  <p class="tj-ty__lead">اولین قدم را شجاعانه برداشتی. باقی‌اش با ما.</p>
+  <ol class="tj-ty__steps">
+    <li><span class="tj-ty__n">۱</span><div><b>پیامت را می‌خوانیم</b><span>همکاران پذیرش، در همان ساعت کاری</span></div></li>
+    <li><span class="tj-ty__n">۲</span><div><b>یک نفر از تجربه به تو پیام می‌دهد</b><span>تا <strong>۲ ساعت کاری</strong>، از شمارهٔ <bdi class="tj-ty__num" id="tjTyNum">+90 535 513 69 50</bdi></span></div></li>
+    <li><span class="tj-ty__n">۳</span><div><b>با هم تراپیست مناسبت را پیدا می‌کنیم</b><span>جلسهٔ معارفه رایگان است و با خودِ تراپیست</span></div></li>
+  </ol>
+  <div class="tj-ty__cta">
+    <p class="tj-ty__ctaq">الان عجله داری؟</p>
+    <a class="tj-ty__btn" id="tjTyWa" target="_blank" rel="noopener">همین حالا در واتس‌اپ بنویس</a>
+    <p class="tj-ty__hours" id="tjTyHours"></p>
+  </div>
+  <p class="tj-ty__fine">شمارهٔ تو فقط برای همین گفت‌وگو استفاده می‌شود.</p>
+</section>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var from = q.get('from') || '';
+  var abroad = from === 'PT-01';
+  var num = abroad ? '905355136950' : '989021110865';
+  var disp = abroad ? '+90 535 513 69 50' : '۰۹۰۲۱۱۱۰۸۶۵';
+  var el = document.getElementById('tjTyNum'); if (el) el.textContent = disp;
+  var a = document.getElementById('tjTyWa');
+  a.href = 'https://wa.me/' + num + '?text=' + encodeURIComponent('سلام، فرم را پر کردم [' + (from || 'FORM') + '] و عجله دارم');
+  var now = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tehran'}));
+  var mins = now.getHours()*60 + now.getMinutes();
+  var open = mins >= 570 && mins <= 1050;
+  document.getElementById('tjTyHours').textContent = open
+    ? 'پذیرش الان پاسخگوست، تا ۱۷:۳۰ به وقت تهران.'
+    : 'الان خارج از ساعت کاری است. پیامت را بگذار؛ فردا از ۹:۳۰ به وقت تهران جواب می‌دهیم.';
+})();
+</script>
+<!-- /wp:html -->

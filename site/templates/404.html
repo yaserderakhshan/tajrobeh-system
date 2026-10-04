@@ -1,0 +1,51 @@
+<!-- wp:template-part {"slug":"tj-header","theme":"twentytwentyfive","tagName":"div","className":"tjl"} /-->
+
+<!-- wp:group {"tagName":"main","className":"tjm","layout":{"type":"constrained"}} -->
+<main class="wp-block-group tjm">
+<!-- wp:group {"className":"tjm-hero tjm-404","layout":{"type":"constrained"}} -->
+<div class="wp-block-group tjm-hero tjm-404">
+<!-- wp:html -->
+<style>.tjm-404 .tjm-404-art{display:block;margin:0 auto 16px;width:auto;height:auto;max-width:170px}@media(max-width:760px){.tjm-404 .tjm-404-art{max-width:120px}}</style>
+<img class="tjm-404-art" src="/wp-content/uploads/2026/09/tjl-tuti-buddy.webp" alt="" width="328" height="458" loading="eager" decoding="async">
+<span class="tjm-eyebrow">خطای ۴۰۴</span>
+<h1>این صفحه پیدا نشد</h1>
+<p>شاید نشانی عوض شده باشد یا اشتباه تایپ شده. می‌توانید جست‌وجو کنید یا از این‌جا ادامه دهید.</p>
+<!-- /wp:html -->
+<!-- wp:search {"label":"جست‌وجو","showLabel":false,"placeholder":"دنبال چه می‌گردید؟","buttonText":"جست‌وجو","className":"tjm-search"} /-->
+<!-- wp:html -->
+<nav class="tjm-chips" aria-label="پیوندهای مفید">
+<a href="/">صفحهٔ اصلی</a>
+<a href="/mag/">مجله</a>
+<a href="/therapy/">خدمات تراپی</a>
+<a href="/get-therapy/">شروع تراپی</a>
+<a href="/how-to-become-a-therapist/">چطور درمانگر شویم؟</a>
+<a href="/contact-us/">تماس با ما</a>
+</nav>
+<!-- /wp:html -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:group {"align":"wide","className":"tjm-more","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide tjm-more">
+<!-- wp:heading {"level":2,"className":"tjm-more-h"} -->
+<h2 class="wp-block-heading tjm-more-h">تازه‌ترین نوشته‌های مجله</h2>
+<!-- /wp:heading -->
+<!-- wp:query {"query":{"perPage":3,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","sticky":"ignore","inherit":false},"align":"wide","layout":{"type":"default"}} -->
+<div class="wp-block-query alignwide">
+<!-- wp:post-template {"align":"full","className":"tjm-grid","layout":{"type":"grid","columnCount":3}} -->
+<!-- wp:group {"className":"tjm-card","layout":{"type":"constrained"}} -->
+<div class="wp-block-group tjm-card">
+<!-- wp:post-featured-image {"sizeSlug":"medium_large","isLink":true,"aspectRatio":"16/9"} /-->
+<!-- wp:post-terms {"term":"category","className":"tjm-cat"} /-->
+<!-- wp:post-title {"level":3,"isLink":true} /-->
+</div>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+</div>
+<!-- /wp:query -->
+</div>
+<!-- /wp:group -->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"tj-footer","theme":"twentytwentyfive","tagName":"div","className":"tjl"} /-->

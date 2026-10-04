@@ -1,0 +1,885 @@
+<!-- wp:html -->
+<style>
+/* == tj2: home-v2 draft (v4) == */
+.tj2{font-family:var(--tj-font);color:var(--tj-soft);direction:rtl;font-size:17px;line-height:1.9;--tj-tint:#faeced;--tj-tint-2:#fdf4f4;--tj-red-400:#d9737a;--tj-yellow:#f2c14e;--w:1180px;overflow-x:clip}
+.tj2 *,.tj2 *::before,.tj2 *::after{box-sizing:border-box}
+.tj2,.tj2 *{overflow-wrap:normal;word-break:normal}
+.tj2 h1,.tj2 h2,.tj2 h3,.tj2 h4{color:var(--tj-ink);margin:0;line-height:1.55;font-weight:700;text-wrap:balance}
+.tj2 p{margin:0}
+.tj2 a{color:inherit;text-decoration:none}
+.tj2 img{max-width:100%;height:auto;display:block}
+.tj2 button{font-family:inherit}
+.tj2 .wrap{max-width:var(--w);margin-inline:auto;padding-inline:24px}
+.tj2 section{padding-block:clamp(48px,6vw,88px)}
+.tj2 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tj-red);background:var(--tj-tint);padding:5px 13px;border-radius:999px;margin-bottom:12px}
+.tj2 .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tj-red)}
+.tj2 .h2{font-size:clamp(23px,3vw,36px);margin-bottom:10px}
+.tj2 .lede{font-size:clamp(15.5px,1.3vw,18px);color:var(--tj-soft);max-width:62ch;line-height:2}
+.tj2 .center{text-align:center}.tj2 .center .lede{margin-inline:auto}
+.tj2 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 24px;border-radius:var(--tj-r-btn);font-size:16px;font-weight:600;border:1.5px solid transparent;transition:.18s ease;white-space:nowrap;cursor:pointer;line-height:1.4}
+.tj2 .btn-brand{background:var(--tj-red);color:#fff}
+.tj2 .btn-brand:hover{background:var(--tj-red-600);box-shadow:0 8px 20px -8px rgba(200,63,73,.5);color:#fff}
+.tj2 .btn-ghost{background:#fff;color:var(--tj-ink-2);border-color:var(--tj-line)}
+.tj2 .btn-ghost:hover{border-color:var(--tj-red-400);color:var(--tj-red-600);background:var(--tj-tint)}
+.tj2 .btn svg{width:14px;height:14px;flex:none}
+.tj2 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.tj2 .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.tj2 .rv{opacity:1;transform:none;transition:none}}
+.tj2 .hs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 14px;scrollbar-width:none;scroll-behavior:smooth}
+.tj2 .hs::-webkit-scrollbar{display:none}
+.tj2 .hs>*{scroll-snap-align:start;flex:0 0 auto}
+.tj2 .arrows{display:flex;gap:8px}
+.tj2 .arrows button{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--tj-line);background:#fff;color:var(--tj-ink);cursor:pointer;display:grid;place-items:center;transition:.15s}
+.tj2 .arrows button:hover{border-color:var(--tj-red);color:var(--tj-red)}
+.tj2 .arrows svg{width:16px;height:16px}
+.tj2 .head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
+.tj2 .hero{padding-block:clamp(36px,5vw,72px) clamp(36px,5vw,64px);background:#fff}
+.tj2 .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px;align-items:center}
+.tj2 .hero h1{font-size:clamp(28px,3.4vw,44px);line-height:1.5;margin:14px 0 16px;max-width:22ch}
+.tj2 .hero h1 em{font-style:normal;color:var(--tj-red)}
+.tj2 .hero .lede{margin:0 0 24px;max-width:56ch}
+.tj2 .ctas{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.tj2 .hero .art{display:flex;align-items:center;justify-content:center}
+.tj2 .hero .art img{width:100%;max-width:440px;height:auto;object-fit:contain}
+.tj2 .nums{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:30px;padding-top:22px;border-top:1px solid var(--tj-line)}
+.tj2 .nums div{display:flex;align-items:baseline;gap:7px}
+.tj2 .nums b{font-size:24px;font-weight:800;color:var(--tj-red);line-height:1;font-variant-numeric:tabular-nums}
+.tj2 .nums span{font-size:13px;color:var(--tj-mut)}
+.tj2 .eco{background:var(--tj-sunk)}
+.tj2 .eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:34px}
+.tj2 .eco-card{border:1px solid var(--tj-line);border-radius:20px;padding:0 0 22px;background:#fff;transition:.2s;display:flex;flex-direction:column;overflow:hidden}
+.tj2 .eco-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px);box-shadow:0 16px 34px -20px rgba(14,14,14,.3)}
+.tj2 .eco-card .pic{height:190px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;padding:16px 16px 0;border-bottom:1px solid var(--tj-line);background:#fff}
+.tj2 .eco-card .pic img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom}
+.tj2 .eco-card .n{font-size:12.5px;color:var(--tj-red);font-weight:700;margin:16px 22px 4px}
+.tj2 .eco-card h3{font-size:18px;margin:0 22px 8px}
+.tj2 .eco-card p{font-size:14px;line-height:1.9;color:var(--tj-soft);margin:0 22px 12px;flex:1}
+.tj2 .eco-card .go{font-size:13.5px;color:var(--tj-ink);font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 22px}
+.tj2 .eco-card .go svg{width:12px;height:12px}
+.tj2 .tl{background:#fff;overflow:hidden}
+.tj2 .tl-line{height:2px;background:var(--tj-line);margin-top:22px}
+.tj2 .tl-track{padding-top:34px}
+.tj2 .tl-item{width:250px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:20px 18px;position:relative}
+.tj2 .tl-item::before{content:"";position:absolute;top:-22px;right:22px;width:14px;height:14px;border-radius:50%;background:var(--tj-red);border:3px solid #fff;box-shadow:0 0 0 1px var(--tj-line)}
+.tj2 .tl-item .y{font-size:13px;color:var(--tj-red);font-weight:700}
+.tj2 .tl-item h3{font-size:16.5px;margin:6px 0 8px}
+.tj2 .tl-item p{font-size:13.5px;color:var(--tj-soft);line-height:1.85}
+.tj2 .tl-item.now{background:var(--tj-red);border-color:var(--tj-red)}
+.tj2 .tl-item.now h3,.tj2 .tl-item.now p{color:#fff}
+.tj2 .tl-item.now .y{color:#ffd6d9}
+.tj2 .tl-item.now::before{background:#fff;border-color:var(--tj-red)}
+.tj2 .svc{background:var(--tj-sunk)}
+.tj2 .svc-list{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-top:30px;background:#fff;border:1px solid var(--tj-line);border-radius:20px;padding:8px 28px}
+.tj2 .svc-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--tj-line);transition:.15s}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:0}
+.tj2 .svc-row img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .svc-row b{display:block;font-size:16px;color:var(--tj-ink)}
+.tj2 .svc-row span{display:block;font-size:13px;color:var(--tj-mut);line-height:1.7}
+.tj2 .svc-row svg{width:16px;height:16px;flex:none;margin-inline-start:auto;color:var(--tj-line);transition:.15s}
+.tj2 .svc-row:hover b{color:var(--tj-red)}
+.tj2 .svc-row:hover svg{color:var(--tj-red);transform:translateX(-4px)}
+.tj2 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
+.tj2 .chip{font-size:13.5px;padding:7px 14px;border-radius:999px;border:1px solid var(--tj-line);background:#fff;color:var(--tj-soft);transition:.15s;cursor:pointer;line-height:1.6}
+.tj2 .chip:hover,.tj2 .chip.on{border-color:var(--tj-red);color:var(--tj-red);background:var(--tj-tint)}
+.tj2 .chips .lbl{font-size:13px;color:var(--tj-mut);align-self:center;margin-inline-end:4px;flex:none;white-space:nowrap}
+.tj2 .how{background:#fff}
+.tj2 .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px;counter-reset:st}
+.tj2 .how-step{background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:24px 20px;position:relative}
+.tj2 .how-step::before{counter-increment:st;content:counter(st,persian);position:absolute;top:-14px;right:18px;width:30px;height:30px;border-radius:50%;background:var(--tj-red);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+.tj2 .how-step img{width:48px;height:48px;object-fit:contain;margin-bottom:10px}
+.tj2 .how-step h3{font-size:16.5px;margin-bottom:6px}
+.tj2 .how-step p{font-size:14px;line-height:1.9}
+.tj2 .how-note{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:center;font-size:14px;color:var(--tj-mut)}
+.tj2 .how-note span{display:inline-flex;align-items:center;gap:7px}
+.tj2 .how-note svg{width:16px;height:16px;color:var(--tj-red)}
+.tj2 .th{background:var(--tj-sunk)}
+.tj2 .thc{width:150px;border:1px solid var(--tj-line);border-radius:16px;padding:12px 10px 14px;text-align:center;background:#fff;transition:.18s;position:relative}
+.tj2 .thc:hover{border-color:var(--tj-red-400);box-shadow:0 10px 26px -16px rgba(14,14,14,.3)}
+.tj2 .thc.hide{display:none}
+.tj2 .thc img.ph{width:92px;height:92px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid var(--tj-sunk)}
+.tj2 .thc b{display:block;font-size:14px;color:var(--tj-ink);line-height:1.5;font-weight:700}
+.tj2 .thc .sp{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px;line-height:1.6;min-height:2.6em}
+.tj2 .thc .yr{display:inline-block;font-size:11.5px;color:var(--tj-red);background:var(--tj-tint);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .vf{position:absolute;top:10px;left:10px;width:18px;height:18px}
+.tj2 .thc .pen{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--tj-ink);background:var(--tj-yellow);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .pen svg{width:10px;height:10px}
+.tj2 .thc.more{background:var(--tj-tint);border-color:var(--tj-red-400);display:flex;flex-direction:column;justify-content:center;gap:6px}
+.tj2 .thc.more b{color:var(--tj-red);font-size:26px}
+.tj2 .thc.more span{font-size:13px;color:var(--tj-ink-2)}
+.tj2 .thc.more .btn{margin:8px auto 0;min-height:36px;font-size:13px;padding:6px 14px}
+.tj2 .dots{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.tj2 .dots i{width:6px;height:6px;border-radius:50%;background:var(--tj-line);transition:.2s}
+.tj2 .dots i.on{width:18px;border-radius:3px;background:var(--tj-red)}
+.tj2 .std{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+.tj2 .std>div{display:flex;gap:12px;align-items:center;border:1px solid var(--tj-line);border-radius:14px;padding:14px 16px;background:#fff}
+.tj2 .std img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .std b{display:block;font-size:14.5px;color:var(--tj-ink)}
+.tj2 .std span{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .sup{background:#fff}
+.tj2 .supc{width:230px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:16px;display:flex;gap:12px;align-items:center;transition:.2s}
+.tj2 .supc:hover{border-color:var(--tj-red-400);transform:translateY(-3px);background:#fff}
+.tj2 .supc img{width:64px;height:76px;border-radius:12px;object-fit:cover;flex:none}
+.tj2 .supc b{display:block;color:var(--tj-ink);font-size:14.5px;line-height:1.5}
+.tj2 .supc .ap{display:block;font-size:12.5px;color:var(--tj-red);margin-top:3px}
+.tj2 .sup .hs{margin-top:28px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center}
+.tj2 .school p.lede{margin-bottom:22px}
+.tj2 .path div{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#fff;border:1px solid var(--tj-line);border-radius:14px;margin-bottom:8px;font-size:15px;color:var(--tj-ink)}
+.tj2 .path div i{width:30px;height:30px;border-radius:50%;background:var(--tj-tint);color:var(--tj-red);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px;flex:none}
+.tj2 .path div:last-child{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .path div:last-child i{background:#fff}
+.tj2 .path small{display:block;font-size:12.5px;color:var(--tj-mut)}
+.tj2 .path div:last-child small{color:#ffd6d9}
+.tj2 .cities{background:#fff}
+.tj2 .map{position:relative;background:var(--tj-sunk);border-radius:24px;padding:22px;overflow:hidden;margin:30px auto 0;max-width:640px}
+.tj2 .map svg{width:100%;height:auto;display:block}
+.tj2 .map .land{fill:#fff;stroke:var(--tj-ink);stroke-width:1.5;stroke-linejoin:round}
+.tj2 .map text{font-family:var(--tj-font);font-size:15px;fill:var(--tj-ink);font-weight:700}
+.tj2 .map text.sea{fill:var(--tj-mut);font-weight:500;font-size:13px}
+.tj2 .map .pin{transform-box:fill-box;transform-origin:50% 100%;animation:tjbob 3.2s ease-in-out infinite}
+.tj2 .map .pin.d1{animation-delay:-.7s}.tj2 .map .pin.d2{animation-delay:-1.4s}.tj2 .map .pin.d3{animation-delay:-2.1s}.tj2 .map .pin.d4{animation-delay:-2.8s}
+@keyframes tjbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+.tj2 .map .shadow{fill:rgba(14,14,14,.14)}
+.tj2 .map .de{position:absolute;left:22px;top:22px;bottom:auto;background:#fff;border:1px solid var(--tj-line);border-radius:14px;padding:8px 12px;font-size:13px;color:var(--tj-ink);display:flex;gap:10px;align-items:center}
+.tj2 .map .de img{width:22px;height:22px}
+.tj2 .map .de small{display:block;color:var(--tj-mut);font-size:11.5px}
+.tj2 .dia{background:#fff}
+.tj2 .dia .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.tj2 .clocks{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;background:var(--tj-sunk);padding:14px;border-radius:22px;position:relative}
+.tj2 .clocks .live{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tj-mut);padding:0 4px 2px}
+.tj2 .clocks .live i{width:8px;height:8px;border-radius:50%;background:#3fb26a;animation:tjpulse 1.6s infinite}
+@keyframes tjpulse{0%{box-shadow:0 0 0 0 rgba(63,178,106,.5)}70%{box-shadow:0 0 0 7px rgba(63,178,106,0)}100%{box-shadow:0 0 0 0 rgba(63,178,106,0)}}
+.tj2 .clock{background:#fff;border:1px solid var(--tj-line);border-radius:16px;padding:12px 14px;transition:.2s}
+.tj2 .clock .c{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .clock .t{display:block;font-size:26px;font-weight:800;color:var(--tj-ink);direction:ltr;text-align:right;font-variant-numeric:tabular-nums;line-height:1.2}
+.tj2 .clock .t small{font-size:14px;font-weight:600;color:var(--tj-mut)}
+.tj2 .clock .s{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px}
+.tj2 .clock.on{border-color:var(--tj-red-400);background:var(--tj-tint)}
+.tj2 .clock.on .s{color:var(--tj-red-600);font-weight:600}
+.tj2 .dia ul{list-style:none;padding:0;margin:18px 0 24px;display:grid;gap:10px}
+.tj2 .dia li{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;color:var(--tj-ink-2)}
+.tj2 .dia li::before{content:"";width:22px;height:22px;flex:none;border-radius:50%;background:var(--tj-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c83f49' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L20 7'/></svg>") center/12px no-repeat;margin-top:3px}
+.tj2 .dia .orbit{width:110px;margin-bottom:6px}
+.tj2 .mag{background:var(--tj-sunk)}
+.tj2 .mag-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:14px;margin-top:28px}
+.tj2 .art-card{background:#fff;border:1px solid var(--tj-line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:.2s}
+.tj2 .art-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .art-card img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.tj2 .art-card .b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tj2 .art-card .k{font-size:12px;color:var(--tj-red);font-weight:700}
+.tj2 .art-card h3{font-size:15px;line-height:1.6}
+.tj2 .art-card p{font-size:13px;color:var(--tj-mut);line-height:1.8;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .art-card.big img{aspect-ratio:16/9}
+.tj2 .art-card.big h3{font-size:19px}
+.tj2 .today{margin-top:16px;background:#fff;border:1px dashed var(--tj-red-400);border-radius:16px;padding:14px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.tj2 .today .k{font-size:12.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .today a{font-weight:600;color:var(--tj-ink)}
+.tj2 .today a:hover{color:var(--tj-red)}
+.tj2 .today .cnt{margin-inline-start:auto;font-size:13px;color:var(--tj-mut)}
+.tj2 .ig{background:#fff;overflow:hidden}
+.tj2 .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:38px;padding:10px 0 16px}
+.tj2 .pola{background:#fff;border:1px solid var(--tj-line);border-radius:6px;padding:12px 12px 16px;box-shadow:0 18px 40px -22px rgba(14,14,14,.35);transition:.25s;position:relative;display:block}
+.tj2 .pola:nth-child(1){transform:rotate(-2deg)}
+.tj2 .pola:nth-child(2){transform:rotate(1.2deg) translateY(10px)}
+.tj2 .pola:nth-child(3){transform:rotate(-1deg)}
+.tj2 .pola:hover{transform:rotate(0) translateY(-6px);z-index:2;border-color:var(--tj-red-400)}
+.tj2 .pola .shot{aspect-ratio:4/5;overflow:hidden;border-radius:3px;background:var(--tj-sunk)}
+.tj2 .pola .shot img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.tj2 .pola:hover .shot img{transform:scale(1.03)}
+.tj2 .pola .cap{font-size:13.5px;color:var(--tj-ink-2);line-height:1.8;margin:12px 4px 10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .pola .who{display:flex;align-items:center;gap:10px;margin:0 4px}
+.tj2 .pola .who img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--tj-tint)}
+.tj2 .pola .who b{display:block;font-size:13px;color:var(--tj-ink);direction:ltr;text-align:right}
+.tj2 .pola .who small{display:block;font-size:11.5px;color:var(--tj-mut)}
+.tj2 .pola .who .f{margin-inline-start:auto;font-size:11.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .pola .tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-2deg);width:70px;height:20px;background:rgba(242,193,78,.6);border-radius:2px}
+.tj2 .org{background:var(--tj-sunk)}
+.tj2 .org .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center}
+.tj2 .org .logos{display:flex;gap:28px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.tj2 .org .logos img{height:34px;width:auto;opacity:.9}
+.tj2 .faq{background:#fff}
+.tj2 .faq-list{max-width:820px;margin:26px auto 0;display:grid;gap:10px}
+.tj2 details{border:1px solid var(--tj-line);border-radius:14px;background:#fff;padding:0 20px;transition:border-color .2s,background .2s}
+.tj2 details[open]{border-color:var(--tj-red-400);background:var(--tj-tint-2)}
+.tj2 summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:700;color:var(--tj-ink);font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;outline:none}
+.tj2 summary:focus{outline:none}
+.tj2 summary:focus-visible{outline:2px solid var(--tj-red-400);outline-offset:6px;border-radius:8px}
+.tj2 summary::-webkit-details-marker{display:none}
+.tj2 summary::after{content:"";width:9px;height:9px;border-inline-start:2px solid var(--tj-red);border-block-end:2px solid var(--tj-red);transform:rotate(-45deg);transition:transform .25s;flex:none;margin-inline-start:6px}
+.tj2 details[open] summary::after{transform:rotate(45deg)}
+.tj2 details .ans{overflow:hidden}
+.tj2 details p{padding:0 0 18px;font-size:15px;line-height:1.95;color:var(--tj-soft)}
+.tj2 details p a{color:var(--tj-red);font-weight:600}
+.tj2 .berry{background:var(--tj-tint);text-align:center}
+.tj2 .berry img{width:100px;margin:0 auto 16px;animation:tjfloat2 5s ease-in-out infinite}
+@keyframes tjfloat2{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(4deg) translateY(-6px)}}
+.tj2 .berry .h2{font-size:clamp(23px,3vw,34px)}
+.tj2 .berry .lede{margin:10px auto 24px}
+.tj2 .berry .ctas{justify-content:center}
+.tj2 .berry .small{font-size:13px;color:var(--tj-mut);margin-top:14px}
+.wp-block-post-content>.tj2.alignfull{max-width:none;width:auto}
+@media (max-width:1024px){
+.tj2 .eco-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .how-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .std{grid-template-columns:repeat(2,1fr)}
+.tj2 .mag-grid{grid-template-columns:1fr 1fr}
+.tj2 .art-card.big{grid-column:1/-1}
+.tj2 .ig-grid{gap:18px}
+.tj2 .school .wrap{grid-template-columns:1fr}
+.tj2 .org .wrap{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+.tj2{font-size:16px}
+.tj2 section{padding-block:40px}
+.tj2 .hero{padding-block:16px 32px}
+.tj2 .hero .wrap{grid-template-columns:1fr;gap:6px}
+.tj2 .hero .art{order:-1;justify-content:center}
+.tj2 .hero .art img{max-width:190px}
+.tj2 .hero h1{font-size:26px;margin:8px 0 12px}
+.tj2 .hero .lede{font-size:15px;margin-bottom:18px}
+.tj2 .ctas .btn{flex:1;min-height:44px;font-size:15px;padding:8px 14px}
+.tj2 .nums{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:22px;padding-top:18px}
+.tj2 .nums b{font-size:20px}.tj2 .nums span{font-size:12px}
+.tj2 .eco-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}
+.tj2 .eco-grid::-webkit-scrollbar{display:none}
+.tj2 .eco-card{flex:0 0 78%;scroll-snap-align:start}
+.tj2 .eco-card .pic{height:140px}
+.tj2 .tl-item{width:220px}
+.tj2 .svc-list{grid-template-columns:1fr;gap:0;padding:4px 16px}
+.tj2 .svc-row{padding:12px 0;gap:12px}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:1px solid var(--tj-line)}
+.tj2 .svc-row:last-child{border-bottom:0}
+.tj2 .svc-row img{width:32px;height:32px}
+.tj2 .svc-row b{font-size:15px}.tj2 .svc-row span{font-size:12.5px}
+.tj2 .chips{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
+.tj2 .chips::-webkit-scrollbar{display:none}
+.tj2 .chip{white-space:nowrap;flex:none}
+.tj2 .how-grid{grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.tj2 .how-step{padding:20px 12px 14px}
+.tj2 .how-step img{width:36px;height:36px}
+.tj2 .how-step h3{font-size:14.5px}
+.tj2 .how-step p{font-size:12.5px;line-height:1.75}
+.tj2 .how-note{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;text-align:right}
+.tj2 .thc{width:138px}
+.tj2 .std{grid-template-columns:1fr 1fr;gap:8px}
+.tj2 .std>div{flex-direction:column;text-align:center;gap:6px;padding:12px 8px}
+.tj2 .std b{font-size:13px}.tj2 .std span{font-size:11.5px}
+.tj2 .supc{width:200px}
+.tj2 .map{padding:12px;border-radius:18px}
+.tj2 .map text{font-size:18px}.tj2 .map text.sea{font-size:15px}
+.tj2 .map .de{left:10px;top:10px;bottom:auto;padding:6px 10px;font-size:12px}
+.tj2 .dia .wrap{grid-template-columns:1fr;gap:22px}
+.tj2 .clocks{grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.tj2 .clock{padding:10px}.tj2 .clock .t{font-size:19px}.tj2 .clock .t small{font-size:11px}.tj2 .clock .s{font-size:10.5px}
+.tj2 .mag-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:20px}
+.tj2 .mag-grid::-webkit-scrollbar{display:none}
+.tj2 .art-card{flex:0 0 76%;scroll-snap-align:start}
+.tj2 .art-card.big img{aspect-ratio:16/10}
+.tj2 .art-card.big h3{font-size:15px}
+.tj2 .today .cnt{display:none}
+.tj2 .ig-grid{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 6px 16px;scrollbar-width:none}
+.tj2 .ig-grid::-webkit-scrollbar{display:none}
+.tj2 .pola{flex:0 0 76%;scroll-snap-align:center}
+.tj2 .pola:nth-child(n){transform:none}
+.tj2 .org .logos{gap:18px}.tj2 .org .logos img{height:26px}
+.tj2 .berry .ctas .btn{flex:1 1 100%}
+.tj2 .arrows{display:none}
+}
+.tj2 .map{max-width:620px}
+.tj2 .map .mi{position:relative}
+.tj2 .map .mi svg{width:100%;height:auto;display:block}
+.tj2 .map .mp{--pin:20px;position:absolute;transform:translate(-50%,calc(-1 * var(--pin)));text-align:center;line-height:1.2;pointer-events:none;width:max-content}
+.tj2 .map .mp img{display:block;margin:0 auto 2px;width:var(--pin);height:var(--pin);object-fit:contain;animation:tjbob 3.2s ease-in-out infinite;transform-origin:50% 100%}
+.tj2 .map .mp b{display:block;font-size:13.5px;font-weight:700;color:var(--tj-ink);text-shadow:0 0 6px var(--tj-sunk),0 0 2px var(--tj-sunk)}
+.tj2 .map .mp.big{--pin:30px}
+.tj2 .map .mp.big b{font-size:15px}
+.tj2 .map .mp.up{display:flex;flex-direction:column-reverse;transform:translate(-50%,calc(-1 * var(--pin) - 1.3em))}
+.tj2 .map .mp.up img{margin:2px auto 0}
+.tj2 .map .mp.lw b{position:absolute;right:calc(100% + 4px);top:calc(var(--pin) - 1.2em)}
+.tj2 .map .mp.d1 img{animation-delay:-.7s}
+.tj2 .map .mp.d2 img{animation-delay:-1.4s}
+.tj2 .map .mp.d3 img{animation-delay:-2.1s}
+.tj2 .map .mp.d4 img{animation-delay:-2.8s}
+.tj2 .map .sea{position:absolute;transform:translate(-50%,-50%);font-size:12.5px;color:var(--tj-mut);white-space:nowrap;pointer-events:none}
+.tj2 .clock.on{border-color:#bfe0cb;background:#f3faf5}
+.tj2 .clock.on .s{color:#2e8b57;font-weight:600}
+.tj2 .thc .loc{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--tj-soft);background:var(--tj-sunk);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .loc svg{width:11px;height:11px;flex:none;color:var(--tj-mut)}
+.tj2 .thc .sp{min-height:3.1em}
+.tj2 .thc .sch{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:#fff;background:var(--tj-red);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .sch svg{width:10px;height:10px}
+.tj2 .thc .pen{top:auto;bottom:8px;right:8px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:block}
+.tj2 .axes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.tj2 .axes>div{background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:20px 20px 22px;transition:.2s}
+.tj2 .axes>div:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .axes i{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--tj-tint);color:var(--tj-red);margin-bottom:12px}
+.tj2 .axes i svg{width:20px;height:20px}
+.tj2 .axes b{display:block;font-size:16px;color:var(--tj-ink);margin-bottom:6px}
+.tj2 .axes p{font-size:14px;color:var(--tj-soft);line-height:1.9;margin:0}
+.tj2 .ring{margin-top:14px;background:var(--tj-ink);color:#fff;border-radius:18px;padding:18px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tj2 .ring b{font-size:22px;color:#fff;white-space:nowrap}
+.tj2 .ring span{font-size:14.5px;color:rgba(255,255,255,.72);line-height:1.9;flex:1;min-width:220px}
+.tj2 .ring .dot{width:9px;height:9px;border-radius:50%;background:var(--tj-yellow);flex:none;min-width:0}
+.tj2 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:34px;position:relative}
+.tj2 .steps::before{content:"";position:absolute;top:19px;right:10%;left:10%;height:2px;background:var(--tj-line)}
+.tj2 .steps>div{text-align:center;padding:0 8px;position:relative}
+.tj2 .steps i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid var(--tj-red-400);color:var(--tj-red);font-style:normal;font-weight:800;font-size:14px;margin:0 auto 12px;position:relative;z-index:1}
+.tj2 .steps>div:last-child i{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .steps b{display:block;font-size:14.5px;color:var(--tj-ink);margin-bottom:4px}
+.tj2 .steps span{display:block;font-size:12.5px;color:var(--tj-mut);line-height:1.8}
+.tj2 .school .ctas{justify-content:center;margin-top:30px}
+.tj2 .org .logos img{height:30px}
+.tj2 .org .logos img.dk{height:26px}
+@media (max-width:1024px){
+.tj2 .axes{grid-template-columns:1fr}
+.tj2 .steps{grid-template-columns:1fr 1fr 1fr;gap:22px 0}
+.tj2 .steps::before{display:none}
+}
+@media (max-width:760px){
+.tj2 .map .mp b{font-size:11.5px}
+.tj2 .map .mp.big b{font-size:12.5px}
+.tj2 .map .mp{--pin:15px}
+.tj2 .map .mp.big{--pin:22px}
+.tj2 .map .sea{font-size:10.5px}
+.tj2 .steps{grid-template-columns:1fr 1fr;gap:20px 0}
+.tj2 .ring{padding:16px 18px;gap:10px}
+.tj2 .ring b{font-size:18px}
+}
+.tj2 .sup{background:var(--tj-tint-2)}
+.tj2 .supc{background:#fff;width:250px;padding:18px}
+.tj2 .supc:hover{background:#fff}
+.tj2 .supc img{width:76px;height:92px;border-radius:14px}
+.tj2 .supc b{font-size:15px}
+.tj2 .school .wrap{display:grid}
+.tj2 .school{background:#fff}
+.tj2 .path div{background:var(--tj-sunk)}
+.tj2 .thc .meta{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px;min-height:24px}
+.tj2 .thc .loc,.tj2 .thc .sch,.tj2 .thc .pen{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;margin:0;line-height:1.7;font-weight:600;top:auto;right:auto;bottom:auto}
+.tj2 .thc .loc{background:var(--tj-sunk);color:var(--tj-soft);font-weight:500}
+.tj2 .thc .sch{background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .thc .pen{background:#fdf3d6;color:#6b4f00}
+.tj2 .thc .loc svg,.tj2 .thc .sch svg,.tj2 .thc .pen svg{width:11px;height:11px}
+
+.tj2 .thc .mnt{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;line-height:1.7;font-weight:700;color:var(--tj-red);background:var(--tj-tint);border:1px solid var(--tj-red-400);margin:0}
+.tj2 .thc .mnt svg{width:11px;height:11px;flex:none}
+
+.tj2 .supc .supmag{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;color:var(--tj-red-600);text-decoration:none;border-bottom:1px solid var(--tj-red-400)}
+/* ==== get-therapy v2 ==== */
+main.tj-page{margin-block-start:0}
+.wp-block-post-content>.tj2.alignfull{margin-top:0}
+.tj2 .hero .art{display:block;text-align:center;min-width:0}
+.tj2 .hero .art img{display:block;margin:0 auto;width:auto;height:auto;max-width:min(100%,440px);max-height:560px;object-fit:contain}
+.tj2 #need .art img,.tj2 #abroad .art img{display:block;margin:0 auto;width:auto;height:auto;max-width:min(100%,330px);max-height:340px;object-fit:contain}
+.tj2 .gt-hide{display:none}
+.tj2 #need .chips{justify-content:flex-start}
+.tj2 #need .chip{font-size:14.5px;padding:9px 16px}
+.tj2 #need .chip:hover{border-color:var(--tj-red);color:var(--tj-red)}
+.tj2 #callback .formbox{max-width:720px;margin:28px auto 0}
+.tj2 #callback .formbox fieldset{grid-template-columns:minmax(0,1fr)!important}
+@media (max-width:760px){.tj2 .hero .art img{max-width:210px;max-height:300px}.tj2 #need .art,.tj2 #abroad .art{display:none}}
+
+.tj2 .formbox{background:#fff;border:1px solid var(--tj-line);border-radius:22px;padding:26px}
+
+.tj2 .formbox .ff-el-group{margin-bottom:14px}
+
+.tj2 .formbox .ff-el-input--label label{font-size:14px;color:var(--tj-ink);font-weight:600}
+
+.tj2 .formbox input,.tj2 .formbox select,.tj2 .formbox textarea{font-family:inherit!important;border-radius:12px!important;border:1.5px solid var(--tj-line)!important;padding:12px 14px!important;font-size:15px!important;background:#fff!important;color:var(--tj-ink)!important}
+
+.tj2 .formbox .ff-btn-submit{background:var(--tj-red)!important;color:#fff!important;border-radius:999px!important;padding:12px 28px!important;font-family:inherit!important;font-weight:700!important;border:0!important;font-size:16px!important;min-height:46px}
+
+.tj2 .formbox fieldset{grid-template-columns:minmax(0,1fr)!important;column-gap:0!important}
+
+.tj2 .formbox fieldset>*{grid-column:1/-1!important}
+
+.tj2 .formbox .ff-text-left,.tj2 .formbox .ff_submit_btn_wrapper{text-align:right!important}
+
+.tj2 .formbox select{color:var(--tj-mut)!important}
+
+.tj2 .formbox select:has(option:checked:not([value=""])){color:var(--tj-ink)!important}
+
+.tj2 .formbox ::placeholder{color:var(--tj-mut);opacity:1}
+
+/* need-chips mobile fix 1405-06-28: گرید بدون min-width به عرض چیپ‌ها کش می‌آمد */
+.tj2 #need .wrap>div{min-width:0;max-width:100%}
+.tj2 #need .chips{flex-wrap:wrap;overflow:visible;justify-content:flex-start}
+@media (max-width:760px){.tj2 #need .chip{font-size:15px;padding:11px 16px}}
+
+/* == gtw v2: ویجت شروع تراپی · 1405-06-29 == */
+main.tj-page{margin-block-start:0}.wp-block-post-content>.tj2.alignfull{margin-top:0}
+body.gt-focus .tjh nav,body.gt-focus .tjh .burger,body.gt-focus .tjh .cta.alt,body.gt-focus .tjh .mcta{display:none!important}
+body:has(#gtw) .tjh nav,body:has(#gtw) .tjh .burger,body:has(#gtw) .tjh .cta.alt{display:none!important}
+body.gt-focus #tjFabRoot,body:has(#gtw) #tjFabRoot{display:none!important}
+.tj2 #start.gtw-sec{background:#fff;padding:34px 0 26px}
+.tj2 .gtw-head{text-align:center;max-width:680px;margin:0 auto 20px}
+.tj2 .gtw-head h1{font-size:clamp(26px,5.4vw,40px);line-height:1.45;margin:10px 0 8px}
+.tj2 .gtw-head h1 em{font-style:normal;color:var(--tj-red)}
+.tj2 .gtw-head .lede{font-size:15.5px;line-height:1.9;color:var(--tj-soft);margin:0 auto;max-width:600px;text-align:center}
+.tj2 .gtw{max-width:720px;margin:0 auto;border:1px solid var(--tj-line);border-radius:22px;background:#fff;padding:20px 22px 16px;box-shadow:0 10px 34px rgba(14,14,14,.06);transition:max-width .25s}
+.tj2 .gtw.wide{max-width:1000px}
+/* استپر */
+.tj2 .gtw-steps{list-style:none;margin:0 0 18px;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:relative}
+.tj2 .gtw-steps li{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;margin:0;padding:0;text-align:center;min-width:0}
+.tj2 .gtw-steps li::before{content:"";position:absolute;top:13px;inset-inline-start:calc(-50% + 18px);width:calc(100% - 36px);height:2px;background:var(--tj-line);border-radius:2px}
+.tj2 .gtw-steps li:first-child::before{display:none}
+.tj2 .gtw-steps li.done::before,.tj2 .gtw-steps li.now::before{background:var(--tj-red-400)}
+.tj2 .gtw-steps .n{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;line-height:1;background:#fff;border:2px solid var(--tj-line);color:var(--tj-mut);transition:.2s}
+.tj2 .gtw-steps .n svg{width:14px;height:14px}
+.tj2 .gtw-steps .l{font-size:12.5px;line-height:1.6;color:var(--tj-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tj2 .gtw-steps li.now .n{border-color:var(--tj-red);color:var(--tj-red);box-shadow:0 0 0 4px var(--tj-tint)}
+.tj2 .gtw-steps li.now .l{color:var(--tj-ink);font-weight:700}
+.tj2 .gtw-steps li.done .n{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .gtw-steps li.done .l{color:var(--tj-soft)}
+.tj2 .gtw-steps li.done{cursor:pointer}
+.tj2 .gtw-steps li.done:hover .l{color:var(--tj-red)}
+/* پنل و گزینه‌ها */
+.tj2 .gtw-panel{animation:gtwIn .28s ease both;min-height:236px}
+@keyframes gtwIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.tj2 .gtw-panel{animation:none}}
+.tj2 .gtw-q{font-size:19px;font-weight:700;line-height:1.7;margin:0 0 2px;color:var(--tj-ink);text-align:start}
+.tj2 .gtw-hint{font-size:13.5px;color:var(--tj-mut);line-height:1.8;margin:0 0 14px;text-align:start}
+.tj2 .gtw-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tj2 .gtw-opts.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tj2 .gtw-opt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;min-height:58px;padding:10px 12px;border:1px solid var(--tj-line);border-radius:14px;background:#fff;color:var(--tj-ink)!important;font:inherit;font-size:15px;line-height:1.6;cursor:pointer;text-decoration:none!important;transition:border-color .15s,background .15s,transform .1s;-webkit-tap-highlight-color:transparent}
+.tj2 .gtw-opt small{display:block;font-size:12px;color:var(--tj-mut);line-height:1.6}
+.tj2 .gtw-opt:hover,.tj2 .gtw-opt:focus-visible{border-color:var(--tj-red);background:var(--tj-tint);outline:none}
+.tj2 .gtw-opt:active{transform:scale(.98)}
+.tj2 .gtw-opt.on{border-color:var(--tj-red);background:var(--tj-tint);color:var(--tj-red)!important}
+.tj2 .gtw-opt.wide{grid-column:1/-1}
+.tj2 .gtw-sub{margin-top:14px;padding-top:14px;border-top:1px dashed var(--tj-line)}
+.tj2 .gtw-sub .gtw-opt{min-height:46px;font-size:14px}
+/* پاورقی ویجت */
+.tj2 .gtw-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid var(--tj-sunk);min-height:30px}
+.gtw-foot{flex-wrap:wrap}.tj2 .gtw-fast{flex-basis:100%;font-size:14px;color:var(--tj-mut);line-height:1.9}.tj2 .gtw-fast a{color:var(--tj-red);font-weight:700;text-decoration:underline;text-underline-offset:4px}.tj2 .gtw.wide .gtw-fast{display:none}
+.tj2 .gtw-back{appearance:none;border:0;background:none;font:inherit;font-size:13.5px;color:var(--tj-soft);cursor:pointer;padding:4px 0;display:inline-flex;align-items:center;gap:6px}
+.tj2 .gtw-back svg{width:14px;height:14px}
+.tj2 .gtw-back:hover{color:var(--tj-red)}
+.tj2 .gtw-back[hidden]{display:inline-flex;visibility:hidden}
+.tj2 .gtw-assure{font-size:12.5px;color:var(--tj-mut);line-height:1.7;text-align:end}
+/* نتیجه */
+.tj2 .gtw-sum{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.tj2 .gtw-sum span{font-size:12.5px;line-height:1.6;color:var(--tj-soft);background:var(--tj-sunk);border-radius:999px;padding:3px 10px}
+.tj2 .gtw-cards{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:6px}
+.tj2 .gtw-card{position:relative;display:flex;flex-direction:column;border:1px solid var(--tj-line);border-radius:18px;padding:16px;background:#fff;transition:border-color .18s,box-shadow .18s;min-width:0}
+.tj2 .gtw-card:hover{border-color:var(--tj-red-400);box-shadow:0 10px 26px -16px rgba(14,14,14,.3)}
+.tj2 .gtw-card .vf{position:absolute;top:12px;inset-inline-end:12px;width:18px;height:18px}
+.tj2 .gtw-card .who{display:flex;align-items:center;gap:12px;min-width:0}
+.tj2 .gtw-card .ph{flex:none;width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--tj-sunk);background:var(--tj-sunk);display:block}
+.tj2 .gtw-card .mono{flex:none;width:64px;height:64px;border-radius:50%;background:var(--tj-tint);color:var(--tj-red);border:3px solid var(--tj-sunk);display:grid;place-items:center;font-size:17px;font-weight:700;letter-spacing:1px}
+.tj2 .gtw-card .id{min-width:0;padding-inline-end:22px}
+.tj2 .gtw-card b{display:block;font-size:15.5px;line-height:1.6;color:var(--tj-ink);font-weight:700}
+.tj2 .gtw-card .tt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px;color:var(--tj-mut);line-height:1.7}
+.tj2 .gtw-card .meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.tj2 .gtw-card .meta span{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;line-height:1.7;padding:2px 9px;border-radius:999px;background:var(--tj-sunk);color:var(--tj-soft)}
+.tj2 .gtw-card .meta span.yr{background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .gtw-card .meta svg{width:11px;height:11px;flex:none;color:var(--tj-mut)}
+.tj2 .gtw-card .hl{position:relative;margin:12px 0 0;padding-inline-start:12px;border-inline-start:2px solid var(--tj-red-400);font-size:13.5px;line-height:1.85;color:var(--tj-soft);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .gtw-card .grow{flex:1 1 auto;min-height:12px}
+.tj2 .gtw-card .slot{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--tj-tint)}
+.tj2 .gtw-card .slot svg{flex:none;width:20px;height:20px;color:var(--tj-red)}
+.tj2 .gtw-card .slot small{display:block;font-size:11.5px;line-height:1.6;color:var(--tj-red-600)}
+.tj2 .gtw-card .slot strong{display:block;font-size:14px;line-height:1.7;color:var(--tj-ink);font-weight:700}
+.tj2 .gtw-card .slot.none{background:var(--tj-sunk)}
+.tj2 .gtw-card .slot.none svg{color:var(--tj-mut)}
+.tj2 .gtw-card .slot.none small{color:var(--tj-mut)}
+.tj2 .gtw-card .slot.none strong{font-weight:500;color:var(--tj-soft);font-size:13px}
+.tj2 .gtw-card .slot.wait{background:var(--tj-sunk);overflow:hidden;position:relative}
+.tj2 .gtw-card .slot.wait::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.75) 50%,transparent 70%);animation:gtwSh 1.4s linear infinite}
+@keyframes gtwSh{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+.tj2 .gtw-card .slot.wait svg,.tj2 .gtw-card .slot.wait small{color:var(--tj-mut)}
+.tj2 .gtw-card .slot.wait strong{font-weight:500;color:var(--tj-soft);font-size:13px}
+.tj2 .gtw-card a.btn{display:flex;justify-content:center;text-align:center;width:100%;margin-top:10px;font-size:14.5px;padding:11px 14px;box-sizing:border-box}
+.tj2 .gtw-card a.more{display:block;text-align:center;font-size:12.5px;color:var(--tj-mut)!important;text-decoration:none;margin-top:8px;line-height:1.6}
+.tj2 .gtw-card a.more:hover{color:var(--tj-red)!important;text-decoration:underline}
+.tj2 .gtw-altnote{margin:10px 2px 0}
+.tj2 .gtw-card .tag{align-self:flex-start;display:inline-block;margin:0 0 10px;font-size:11.5px;line-height:1.7;padding:2px 10px;border-radius:999px;background:var(--tj-ink);color:#fff;font-weight:500}
+.tj2 .gtw-card.is-alt{border-style:dashed}
+.tj2 .gtw-or{display:flex;align-items:center;gap:12px;margin:18px 0 10px;font-size:12.5px;color:var(--tj-mut)}
+.tj2 .gtw-or::before,.tj2 .gtw-or::after{content:"";flex:1;height:1px;background:var(--tj-line)}
+.tj2 .gtw-doors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tj2 .gtw-doors .gtw-opt{min-height:54px;font-size:14px}
+.tj2 .gtw-note{font-size:12.5px;color:var(--tj-mut);line-height:1.9;margin:10px 2px 0;text-align:start}
+.tj2 .gtw-abinfo{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;padding:10px 12px;border:1px solid var(--tj-line);border-radius:12px;font-size:13px;line-height:1.85;color:var(--tj-soft)}
+.tj2 .gtw-abinfo svg{flex:none;width:18px;height:18px;margin-top:3px;color:var(--tj-red)}
+.tj2 .gtw-formwrap .formbox{margin-top:8px;box-shadow:none;border:0;padding:0;max-width:none}
+.tj2 .gtw-formwrap fieldset{grid-template-columns:minmax(0,1fr)!important}
+.tj2 .gtw-hide{display:none!important}
+.tj2 .gtw-trust{list-style:none;margin:18px auto 0;padding:0;max-width:720px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.tj2 .gtw-trust li{display:flex;gap:7px;align-items:flex-start;font-size:13px;line-height:1.8;color:var(--tj-soft);margin:0}
+.tj2 .gtw-trust svg{flex:none;width:16px;height:16px;margin-top:4px;color:var(--tj-red)}
+.tj2 #after .how-step svg.ic{display:block;width:48px;height:48px;margin-bottom:10px;color:var(--tj-mut)}
+@media (max-width:760px){.tj2 #after .how-step svg.ic{width:36px;height:36px}}
+.tj2 .gtw-old{font-size:13px;color:var(--tj-mut);text-align:center;margin:26px 0 0}
+.tj2 .gtw-old a{color:var(--tj-soft)!important;text-decoration:underline}
+.tj2 #callback .formbox{max-width:560px;margin-inline:auto}
+.gtw-bar{position:fixed;inset-inline:0;bottom:0;z-index:60;display:none;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid #dfdfe2;transform:translateY(110%);transition:transform .25s}
+.gtw-bar.show{transform:none}
+.gtw-bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:999px;background:#c83f49;color:#fff!important;font-size:15.5px;font-weight:700;text-decoration:none!important}
+@media (min-width:761px){
+.tj2 .gtw-opts:not(.c3){grid-template-columns:repeat(4,minmax(0,1fr))}
+.tj2 .gtw-opts:not(.c3) .gtw-opt{min-height:72px}
+.tj2 .gtw-opts.s2{grid-template-columns:repeat(4,minmax(0,1fr))}
+.tj2 .gtw-cards.n2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tj2 .gtw-cards.n3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tj2 .gtw-cards.n1{max-width:420px}
+.tj2 .gtw-cards.n2 .gtw-card .tag,.tj2 .gtw-cards.n3 .gtw-card .tag{position:absolute;top:12px;inset-inline-start:12px;margin:0}
+.tj2 .gtw-cards.n2 .gtw-card .who,.tj2 .gtw-cards.n3 .gtw-card .who{flex-direction:column;text-align:center;gap:8px}
+.tj2 .gtw-cards.n2 .gtw-card .id,.tj2 .gtw-cards.n3 .gtw-card .id{padding-inline-end:0}
+.tj2 .gtw-cards.n2 .gtw-card .ph,.tj2 .gtw-cards.n3 .gtw-card .ph,.tj2 .gtw-cards.n2 .gtw-card .mono,.tj2 .gtw-cards.n3 .gtw-card .mono{width:76px;height:76px}
+.tj2 .gtw-cards.n2 .gtw-card .meta,.tj2 .gtw-cards.n3 .gtw-card .meta{justify-content:center}
+.tj2 .gtw-cards.n2 .gtw-card .tt,.tj2 .gtw-cards.n3 .gtw-card .tt{min-height:3.4em}
+}
+@media (max-width:760px){
+.gtw-bar{display:block}
+.tj2 #start.gtw-sec{padding:18px 0 22px}
+.tj2 .gtw-head{margin-bottom:14px}
+.tj2 .gtw-head .eyebrow{display:none}
+.tj2 .gtw-head h1{margin-top:0}
+.tj2 .gtw-head .lede{font-size:14.5px;line-height:1.85}
+.tj2 .gtw{padding:16px 14px 12px;border-radius:18px}
+.tj2 .gtw-steps{margin-bottom:14px}
+.tj2 .gtw-steps .l{font-size:11.5px}
+.tj2 .gtw-panel{min-height:0}
+.tj2 .gtw-q{font-size:17.5px}
+.tj2 .gtw-opts.c3{grid-template-columns:repeat(1,minmax(0,1fr))}
+.tj2 .gtw-opts.c3 .gtw-opt{min-height:52px}
+.tj2 .gtw-sub .gtw-opts.c3{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tj2 .gtw-trust{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px}
+.tj2 .gtw-doors{grid-template-columns:minmax(0,1fr)}
+.tj2 .gtw-assure{font-size:11.5px}
+body.gt-focus .tj2{padding-bottom:76px}
+}
+/* == gtw match: لحظهٔ انتخاب، چرا این گزینه، همراهی · 1405-07-11 == */
+.tj2 .gtw-match{padding:6px 0 4px}
+.tj2 .gtw-match ol{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.tj2 .gtw-match li{display:flex;gap:12px;align-items:flex-start;opacity:.35;transition:opacity .3s}
+.tj2 .gtw-match li.now,.tj2 .gtw-match li.ok{opacity:1}
+.tj2 .gtw-match .dot{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--tj-line);display:grid;place-items:center;margin-top:3px;box-sizing:border-box;color:#fff}
+.tj2 .gtw-match li.now .dot{border-color:var(--tj-red-400);border-top-color:transparent;animation:gtwSpin .8s linear infinite}
+.tj2 .gtw-match li.ok .dot{background:var(--tj-red);border-color:var(--tj-red);animation:none}
+.tj2 .gtw-match .dot svg{width:14px;height:14px}
+.tj2 .gtw-match b{display:block;font-size:15px;line-height:1.75;color:var(--tj-ink);font-weight:700;text-align:start}
+.tj2 .gtw-match small{display:block;font-size:12.5px;line-height:1.75;color:var(--tj-mut);text-align:start}
+.tj2 .gtw-match small:empty{display:none}
+@keyframes gtwSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.tj2 .gtw-match li.now .dot{animation:none}}
+.tj2 .gtw-card .why{margin:10px 0 0;font-size:12.5px;line-height:1.85;color:var(--tj-soft);text-align:start}
+.tj2 .gtw-card .why span{color:var(--tj-red-600);font-weight:700}
+.tj2 .gtw-cards.n2 .gtw-card .why,.tj2 .gtw-cards.n3 .gtw-card .why{text-align:center}
+.tj2 .gtw-care{margin:16px 0 0;padding:14px 16px;border-radius:16px;background:var(--tj-sunk)}
+.tj2 .gtw-care p{margin:0 0 10px;font-size:13.5px;line-height:1.9;color:var(--tj-soft);text-align:start}
+.tj2 .gtw-care .acts{display:flex;flex-wrap:wrap;gap:8px}
+.tj2 .gtw-care .acts a,.tj2 .gtw-care .acts button{font:inherit;font-size:13px;line-height:1.6;padding:6px 14px;border-radius:999px;border:1px solid var(--tj-red-400);background:#fff;color:var(--tj-red-600)!important;text-decoration:none;cursor:pointer}
+.tj2 .gtw-care .acts a:hover,.tj2 .gtw-care .acts button:hover{background:var(--tj-tint)}
+</style>
+<div class="tj2 alignfull" id="tj2">
+<section class="gtw-sec" id="start"><div class="wrap">
+<div class="gtw-head"><span class="eyebrow">شروع تراپی</span><h1>شروع تراپی آنلاین یا حضوری با <em>سه انتخاب ساده</em></h1><p class="lede" id="gtwLede">سه سؤال کوتاه جواب بدهید تا تراپیست‌های هم‌خوان با شما و نزدیک‌ترین وقت معارفهٔ رایگان را همین‌جا ببینید. بدون ثبت‌نام و بدون کد تأیید.</p></div>
+<div class="gtw" id="gtw" aria-live="polite">
+<ol class="gtw-steps" aria-label="مراحل"><li class="now" data-s="1"><span class="n">۱</span><span class="l">موضوع</span></li><li data-s="2"><span class="n">۲</span><span class="l">جلسه</span></li><li data-s="3"><span class="n">۳</span><span class="l">تراپیست</span></li><li data-s="4"><span class="n">۴</span><span class="l">پیشنهاد</span></li></ol>
+<div class="gtw-panel"><h2 class="gtw-q">چه چیزی این روزها بیشتر مشغولتان کرده؟</h2><p class="gtw-hint">یکی را بزنید. اگر هیچ‌کدام دقیق نبود هم مهم نیست.</p>
+<div class="gtw-opts"><a class="gtw-opt" data-k="anx" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-anx" target="_blank" rel="noopener">اضطراب و فکرهای تکراری</a><a class="gtw-opt" data-k="rel" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-rel" target="_blank" rel="noopener">رابطه و زوج</a><a class="gtw-opt" data-k="dep" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-dep" target="_blank" rel="noopener">بی‌حالی و افسردگی</a><a class="gtw-opt" data-k="self" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-self" target="_blank" rel="noopener">خودشناسی</a><a class="gtw-opt" data-k="fam" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-fam" target="_blank" rel="noopener">خانواده</a><a class="gtw-opt" data-k="grief" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-grief" target="_blank" rel="noopener">سوگ و فقدان</a><a class="gtw-opt" data-k="child" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-child" target="_blank" rel="noopener">کودک و نوجوان</a><a class="gtw-opt" data-k="unsure" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-unsure" target="_blank" rel="noopener">هنوز نمی‌دانم</a></div></div>
+<div class="gtw-foot"><button type="button" class="gtw-back" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>قدم قبل</button><span class="gtw-assure">رایگان است و شما را به چیزی متعهد نمی‌کند</span><span class="gtw-fast">حوصلهٔ سؤال ندارید؟ <a href="https://t.me/tajrobehlife_bot?start=gt-unsure" data-gt="w-fast-bot" target="_blank" rel="noopener">مستقیم با پذیرش در تلگرام</a> یا <a href="#callback" data-gt="w-fast-call">شماره‌ام را می‌گذارم</a></span></div>
+</div>
+<ul class="gtw-trust"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>جلسهٔ معارفه رایگان است و حدود بیست دقیقه طول می‌کشد</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>پذیرش در همان روز کاری جواب می‌دهد</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>تغییر تراپیست در هر مرحله بدون هزینه است</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span id="gtwPrice">هر جلسه از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان</span></li></ul>
+</div></section>
+<section class="tjvc" id="voice-match" aria-labelledby="tjvc-h">
+<style>
+.tjvc{--r:#c83f49;--r4:#d9737a;--ink:#0e0e0e;--soft:#4e4e4e;--line:#dfdfe2;--tint:#faeced;direction:rtl;margin:56px auto;max-width:1180px;padding:0 16px;overflow-wrap:normal;word-break:normal}
+.tjvc-in{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:40px;align-items:center;border:1px solid var(--line);border-radius:28px;padding:36px;background:#fff;box-shadow:0 18px 50px rgba(14,14,14,.06)}
+.tjvc-art{position:relative;aspect-ratio:1/1;max-width:340px;width:100%;margin:0 auto;border-radius:50%;background:radial-gradient(circle at 50% 50%,var(--tint) 0,var(--tint) 46%,#fff 47%,#fff 60%,var(--tint) 61%,var(--tint) 62%,#fff 63%);display:grid;place-items:center}
+.tjvc-mic{width:92px;height:92px;border-radius:50%;background:var(--r);display:grid;place-items:center;box-shadow:0 0 0 0 rgba(200,63,73,.35);animation:tjvcP 2.4s infinite}
+.tjvc-mic svg{width:40px;height:40px;fill:#fff}
+@keyframes tjvcP{0%{box-shadow:0 0 0 0 rgba(200,63,73,.35)}70%{box-shadow:0 0 0 26px rgba(200,63,73,0)}100%{box-shadow:0 0 0 0 rgba(200,63,73,0)}}
+.tjvc-wave{position:absolute;inset:auto 12% 16% 12%;display:flex;align-items:center;justify-content:center;gap:4px;height:40px}
+.tjvc-wave i{display:block;width:4px;height:100%;border-radius:4px;background:var(--r4);transform:scaleY(.25);animation:tjvcW 1.2s ease-in-out infinite}
+.tjvc-wave i:nth-child(3n){animation-delay:-.3s}.tjvc-wave i:nth-child(3n+1){animation-delay:-.6s}.tjvc-wave i:nth-child(4n){animation-delay:-.9s;background:var(--r)}
+@keyframes tjvcW{0%,100%{transform:scaleY(.2)}50%{transform:scaleY(1)}}
+.tjvc-k{display:inline-block;font-size:13px;font-weight:700;color:var(--r);background:var(--tint);border-radius:999px;padding:2px 12px}
+.tjvc h2{font-size:clamp(24px,3.2vw,34px);line-height:1.45;margin:10px 0 8px;color:var(--ink)}
+.tjvc p{color:var(--soft);font-size:17px;line-height:1.95;margin:0 0 14px}
+.tjvc-steps{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.tjvc-steps li{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:4px 14px 4px 6px;font-size:14px;color:var(--ink)}
+.tjvc-steps b{width:24px;height:24px;border-radius:50%;background:var(--tint);color:var(--r);display:grid;place-items:center;font-size:13px}
+.tjvc-btn{display:inline-flex;align-items:center;gap:10px;background:var(--r)!important;color:#fff!important;text-decoration:none!important;font-weight:700;border-radius:999px;padding:12px 26px;box-shadow:0 10px 24px rgba(200,63,73,.25);transition:transform .2s}
+.tjvc-btn:hover{transform:translateY(-2px)}
+.tjvc-btn svg{width:18px;height:18px;fill:#fff}
+.tjvc .tjvc-pv{font-size:13px;color:#676768;margin:14px 0 0;line-height:1.85}
+@media (max-width:760px){.tjvc-in{grid-template-columns:minmax(0,1fr);padding:24px 18px;gap:18px}.tjvc-art{max-width:200px}.tjvc-mic{width:70px;height:70px}.tjvc-mic svg{width:30px;height:30px}}
+@media (prefers-reduced-motion:reduce){.tjvc-mic,.tjvc-wave i{animation:none}}
+</style>
+<div class="tjvc-in">
+<div class="tjvc-art" aria-hidden="true"><span class="tjvc-mic"><svg viewBox="0 0 24 24"><path d="M12 14.5a3.5 3.5 0 0 0 3.5-3.5V5.5a3.5 3.5 0 1 0-7 0V11a3.5 3.5 0 0 0 3.5 3.5zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.9V19H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2.1a6 6 0 0 0 5-5.9z"/></svg></span><div class="tjvc-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div class="tjvc-tx">
+<span class="tjvc-k">تازه در بات تجربه</span>
+<h2 id="tjvc-h">فقط بگویید؛ ما گوش می‌دهیم</h2>
+<p>لازم نیست سؤال‌ها را یکی‌یکی جواب بدهید. در بات تلگرام تجربه یک ویس بفرستید و هر چه در ذهنتان است بگویید: چه چیزی اذیتتان می‌کند و از تراپی چه می‌خواهید. برداشت ما از حرفتان را می‌بینید و تأیید می‌کنید، و بعد درمانگری پیشنهاد می‌شود که به حرفتان نزدیک‌تر است.</p>
+<ul class="tjvc-steps"><li><b>۱</b>یک ویس یک تا سه دقیقه‌ای</li><li><b>۲</b>برداشت ما را می‌بینید و تأیید می‌کنید</li><li><b>۳</b>پیشنهاد درمانگر و معارفهٔ رایگان</li></ul>
+<a class="tjvc-btn" href="https://t.me/tajrobehlife_bot?start=vxc" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14.5a3.5 3.5 0 0 0 3.5-3.5V5.5a3.5 3.5 0 1 0-7 0V11a3.5 3.5 0 0 0 3.5 3.5zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.9V19H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2.1a6 6 0 0 0 5-5.9z"/></svg>با صدای خودم می‌گویم</a>
+<p class="tjvc-pv">فایل صدای شما نزد ما ذخیره نمی‌شود و فقط به متن تبدیل می‌شود. این متن فقط در اختیار مسئول پذیرش در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت شما منتشر یا با کسی به اشتراک گذاشته نمی‌شود.</p>
+</div>
+</div>
+</section>
+
+<section class="how" id="after"><div class="wrap"><div class="center rv"><span class="eyebrow">بعد از سه انتخاب</span><h2 class="h2">چهار قدم تا اولین جلسه</h2></div><div class="how-grid"><div class="how-step rv"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="سه انتخاب کوتاه"><path d="M3.5 6.4l1.5 1.5 2.8-3"></path><path d="M11 6.4h9.5"></path><path d="M3.5 12.4l1.5 1.5 2.8-3"></path><path d="M11 12.4h9.5"></path><path d="M3.5 18.4l1.5 1.5 2.8-3"></path><path d="M11 18.4h9.5"></path></svg><h3>سه انتخاب کوتاه</h3><p>موضوعی که مشغولتان کرده، آنلاین یا حضوری، و ترجیحتان دربارهٔ تراپیست. همین‌جا روی همین صفحه.</p></div><div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-2.webp" alt="تراپیست هم‌خوان" width="77" height="77" loading="lazy"><h3>تراپیست هم‌خوان</h3><p>تراپیست‌های هم‌خوان و وقت آزادشان را می‌بینید. اگر ترجیح بدهید، تیم ارجاع تجربه درخواستتان را می‌خواند و خودش معرفی می‌کند.</p></div><div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-3.webp" alt="جلسهٔ معارفهٔ رایگان" width="77" height="77" loading="lazy"><h3>جلسهٔ معارفهٔ رایگان</h3><p>حدود بیست دقیقه آشنایی با خود تراپیست. سؤال می‌پرسید و بعد با اطمینان بیشتری تصمیم می‌گیرید.</p></div><div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-4.webp" alt="شروع تراپی" width="77" height="77" loading="lazy"><h3>شروع تراپی</h3><p>آنلاین از هر جای دنیا، یا حضوری در کلینیک. تغییر تراپیست در هر مرحله بدون هزینه است.</p></div></div></div></section>
+<section class="how" id="callback"><div class="wrap"><div class="center rv"><span class="eyebrow">راه دوم</span><h2 class="h2">ترجیح می‌دهید ما تماس بگیریم؟</h2><p class="lede">فقط اسم و شماره‌تان را بگذارید. همکاران پذیرش همان روز کاری تماس می‌گیرند و بقیه‌اش را با هم پیش می‌بریم. اطلاعات شما فقط در اختیار مسئول پذیرش مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت شما منتشر یا با کسی به اشتراک گذاشته نمی‌شود.</p></div><div id="gtwFormHome"><div class="formbox">[fluentform id="7"]</div></div><div id="gtwFormHomeAb" class="gtw-hide"><div class="formbox">[fluentform id="5"]</div></div></div></section>
+<section class="faq" id="faq"><div class="wrap"><div class="center rv"><span class="eyebrow">پرسش‌های پرتکرار</span><h2 class="h2">چیزهایی که معمولاً می‌پرسند</h2></div><div class="faq-list rv"><details><summary>باید همین حالا هزینه‌ای پرداخت کنم؟</summary><div class="ans"><p>نه. جلسهٔ معارفه رایگان است. هزینهٔ جلسهٔ اول پیش از برگزاری آن پرداخت می‌شود و جلسه‌های بعدی تا پایان همان ماه.</p></div></details><details class="tj-price-faq"><summary>هزینهٔ هر جلسه چقدر است؟</summary><div class="ans"><p>هزینهٔ هر جلسهٔ تراپی برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست و نوع خدمت بستگی دارد؛ عدد دقیق پیش از شروع به شما گفته می‌شود. برای فارسی‌زبانان ساکن خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسهٔ معارفه در هر دو حالت رایگان است.</p></div></details><details><summary>اگر تراپیست مناسب من نبود چه؟</summary><div class="ans"><p>در تمام مراحل می‌توانید تراپیستتان را بدون هزینه تغییر دهید. ارتباط درمانی درست، مهم‌ترین عامل موفقیت تراپی است و بخشی از کار ما همین است.</p></div></details><details><summary>باید از قبل بدانم چه نوع تراپی می‌خواهم؟</summary><div class="ans"><p>نه. کار تیم ارجاع تجربه دقیقاً همین است: از روی آنچه می‌نویسید، مسیر مناسب را پیشنهاد می‌دهد.</p></div></details><details><summary>تراپی آنلاین است یا حضوری؟</summary><div class="ans"><p>هر دو. تراپی آنلاین از هر جای دنیا برگزار می‌شود و حضوری در کلینیک تجربه. می‌توانید ترکیبی هم پیش بروید؛ مثلاً معارفه آنلاین و ادامه حضوری.</p></div></details><details><summary>تراپی آنلاین به اندازهٔ جلسهٔ حضوری اثر دارد؟</summary><div class="ans"><p>پژوهش‌ها نشان داده‌اند برای بسیاری از مشکلات رایج مثل اضطراب و افسردگی، رواندرمانی آنلاین اثری نزدیک به جلسهٔ حضوری دارد. اگر جای خلوت و اینترنت پایدار داشته باشید، تفاوت زیادی حس نمی‌کنید. در <a href="/report/">دادهٔ پذیرش خود تجربه</a> هم بیشتر متقاضیان جلسهٔ آنلاین را ترجیح داده‌اند.</p></div></details><details><summary>خارج از ایران زندگی می‌کنم.</summary><div class="ans"><p>تجربه تراپیست‌های فارسی‌زبان برای ایرانیان خارج از کشور دارد. جلسه به وقت محلی خودتان ست می‌شود و پرداخت ارزی است.</p></div></details><details><summary>چرا تلگرام؟</summary><div class="ans"><p>چون سریع‌ترین راه است: بدون ثبت‌نام، بدون کد تأیید و بدون فرم بلند. اگر تلگرام ندارید، فرم پذیرش همین صفحه همان کار را می‌کند.</p></div></details><details><summary>آیا مهم است درمانگر زن باشد یا مرد؟</summary><div class="ans"><p>جنسیت درمانگر به‌تنهایی تعیین‌کننده نیست؛ مهم‌تر از آن احساس امنیت، اعتماد و تناسب میان مراجع و درمانگر است. با این حال ترجیح شما را می‌پرسیم و رعایت می‌کنیم.</p></div></details><details><summary>اطلاعاتم کجا می‌رود؟</summary><div class="ans"><p>فقط نزد تیم پذیرش تجربه و تراپیستی که به شما معرفی می‌شود. چیزی جای دیگری نمی‌رود و برای تبلیغات استفاده نمی‌شود.</p></div></details></div></div></section>
+<section class="berry" id="ready"><div class="wrap rv"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" width="378" height="308" loading="lazy"><h2 class="h2">هر وقت آماده بودید</h2><p class="lede">جلسهٔ معارفه رایگان است و شما را به هیچ چیز متعهد نمی‌کند. اگر امروز نشد، هر وقت دیگری هم همین‌جاست.</p><div class="ctas"><a class="btn btn-brand" data-gt="berry" href="#start">پیدا کردن تراپیست من</a><a class="btn btn-ghost" data-gt="bot-feed" href="https://t.me/tajrobehlife_bot?start=gt-k" target="_blank" rel="noopener">هنوز آماده نیستم، در تلگرام خبرم کنید</a></div><p class="gtw-old">از قبل مراجع تجربه هستید؟ <a href="/login" rel="nofollow" data-gt="login">ورود به حساب</a></p></div></section>
+</div>
+<div class="gtw-bar" id="gtwBar"><a href="#start" data-gt="sticky">پیدا کردن تراپیست من، رایگان</a></div>
+
+<script>
+(function(){
+var root=document.getElementById('tj2'); if(!root) return;
+var fa=function(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+var fmt=function(n){return fa(n.toLocaleString('en-US')).replace(/,/g,'،');};
+var rv=root.querySelectorAll('.rv');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -6% 0px'});rv.forEach(function(el){io.observe(el);});}else{rv.forEach(function(el){el.classList.add('in');});}
+var cs=root.querySelectorAll('[data-count]');
+function runCount(el){var end=+el.getAttribute('data-count'),suf=el.getAttribute('data-suffix')||'',t0=null,dur=1400;function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);el.textContent=fmt(Math.round(end*p))+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+/* شمارش متحرک اعداد حذف شد (پرش چیدمان) */
+root.querySelectorAll('.arrows[data-for]').forEach(function(a){var tr=document.getElementById(a.getAttribute('data-for'));if(!tr)return;var b=a.querySelectorAll('button');b[0].addEventListener('click',function(){tr.scrollBy({left:tr.clientWidth*0.8,behavior:'smooth'});});b[1].addEventListener('click',function(){tr.scrollBy({left:-tr.clientWidth*0.8,behavior:'smooth'});});});
+var thTrack=document.getElementById('thTrack'),dots=document.getElementById('thDots');
+function buildDots(){if(!thTrack||!dots)return;var pages=Math.max(1,Math.ceil(thTrack.scrollWidth/thTrack.clientWidth));dots.innerHTML='';if(pages>10){dots.style.display='none';return;}dots.style.display='';for(var i=0;i<pages;i++){dots.appendChild(document.createElement('i'));}updDots();}
+function updDots(){if(!thTrack||!dots)return;var max=thTrack.scrollWidth-thTrack.clientWidth,p=max>0?Math.abs(thTrack.scrollLeft)/max:0,n=dots.children.length,idx=Math.round(p*(n-1));for(var i=0;i<n;i++)dots.children[i].classList.toggle('on',i===idx);}
+if(thTrack){buildDots();thTrack.addEventListener('scroll',updDots,{passive:true});window.addEventListener('resize',buildDots);}
+var filt=document.getElementById('thFilter');
+if(filt){if(thTrack){filt.addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;filt.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});b.classList.add('on');var tag=b.getAttribute('data-tag');thTrack.querySelectorAll('.thc:not(.more)').forEach(function(c){var tags=(c.getAttribute('data-tags')||'').split(' ');var hide=(tag==='all')?false:(tags.indexOf(tag)<0);c.classList.toggle('hide',hide);});thTrack.scrollTo({left:0});buildDots();});}}
+function parts(tz){try{var f=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});var o={};f.formatToParts(new Date()).forEach(function(p){o[p.type]=p.value;});return {h:+o.hour%24,m:+o.minute,s:+o.second};}catch(e){return null;}}
+function tick(){root.querySelectorAll('.clock').forEach(function(c){var p=parts(c.getAttribute('data-tz'));if(!p)return;var t=c.querySelector('.t');var hm=fa(('0'+p.h).slice(-2))+':'+fa(('0'+p.m).slice(-2));var sm=t.querySelector('small');if(!sm){t.textContent='';t.appendChild(document.createTextNode(hm));sm=document.createElement('small');t.appendChild(sm);}else{t.firstChild.nodeValue=hm;}sm.textContent=':'+fa(('0'+p.s).slice(-2));var good=(p.h>=8)?(p.h<23):false;c.classList.toggle('on',good);c.querySelector('.s').textContent=good?'ساعت مناسب جلسه':'وقت استراحت؛ تراپیست برای ساعت شما هست';});}
+tick();setInterval(tick,1000);
+root.querySelectorAll('details').forEach(function(d){var s=d.querySelector('summary'),a=d.querySelector('.ans');if(!s||!a)return;s.addEventListener('click',function(e){e.preventDefault();if(d.hasAttribute('data-anim'))return;d.setAttribute('data-anim','1');if(d.open){var h=a.offsetHeight;a.style.height=h+'px';a.style.transition='height .3s ease';requestAnimationFrame(function(){a.style.height='0px';});setTimeout(function(){d.open=false;a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},300);}else{d.open=true;var h2=a.offsetHeight;a.style.height='0px';a.style.transition='height .32s ease';requestAnimationFrame(function(){a.style.height=h2+'px';});setTimeout(function(){a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},330);}});});
+var arts=[['/mag/زندگی-نامه-ژاک-لکان/','زندگی‌نامه‌ی ژاک لکان'],['/mag/زندگینامه-زیگموند-فروید/','زندگی‌نامه‌ی زیگموند فروید'],['/mag/چگونه-روان-درمانگر-انتخاب-کنیم؟/','چگونه روان‌درمانگر انتخاب کنیم؟'],['/mag/ردفلگهای-تراپیست-و-اهمیت-اصول-حرفه/','ردفلگ‌های تراپیست و اصول حرفه‌ای در اتاق تراپی'],['/mag/سوپرویژن-چیست-و-چرا-مهم-است؟/','سوپرویژن چیست و چرا مهم است؟'],['/mag/رواندرمانی-تحلیلی/','روان‌درمانی تحلیلی چیست؟'],['/mag/زندگینامه-دونالد-وینیکات/','زندگی‌نامه‌ی دونالد وینیکات'],['/mag/مهاجرت-از-دیدگاه-روانکاوی/','مهاجرت از دیدگاه روانکاوی'],['/mag/افسانههای-رایج-درباره-روانکاوی/','افسانه‌های رایج درباره‌ی روانکاوی'],['/mag/اتاق-تراپی-رازها-و-رمزها/','اتاق تراپی: رازها و رمزها'],['/mag/گروهدرمانی-چیست؟/','گروه‌درمانی چیست؟'],['/mag/سلامت-روان-در-مهاجرت/','سلامت روان در مهاجرت؛ چرا به روانشناس هم‌زبان نیاز داریم؟'],['/mag/زندگینامه-کارن-هورنای/','زندگی‌نامه‌ی کارن هورنای'],['/mag/سمپتوم-چیست-تعریف-نشانه-در-روانکاوی/','سمپتوم چیست؟']];
+var tl=document.getElementById('todayLink');if(tl){var day=Math.floor(Date.now()/86400000),a=arts[day%arts.length];tl.href=a[0];tl.textContent=a[1];}
+})();
+
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tajrobeh.life/get-therapy/","name":"تراپی آنلاین و حضوری در مرکز تجربه زندگی","url":"https://tajrobeh.life/get-therapy/","inLanguage":"fa-IR","description":"با سه انتخاب کوتاه، تراپیست‌های هم‌خوان و نزدیک‌ترین وقت جلسهٔ معارفهٔ رایگان را ببینید."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"باید همین حالا هزینه‌ای پرداخت کنم؟","acceptedAnswer":{"@type":"Answer","text":"نه. جلسهٔ معارفه رایگان است. هزینهٔ جلسهٔ اول پیش از برگزاری آن پرداخت می‌شود و جلسه‌های بعدی تا پایان همان ماه."}},{"@type":"Question","name":"هزینهٔ هر جلسه چقدر است؟","acceptedAnswer":{"@type":"Answer","text":"هزینهٔ هر جلسهٔ تراپی برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست و نوع خدمت بستگی دارد؛ عدد دقیق پیش از شروع به شما گفته می‌شود. برای فارسی‌زبانان ساکن خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسهٔ معارفه در هر دو حالت رایگان است."}},{"@type":"Question","name":"اگر تراپیست مناسب من نبود چه؟","acceptedAnswer":{"@type":"Answer","text":"در تمام مراحل می‌توانید تراپیستتان را بدون هزینه تغییر دهید. ارتباط درمانی درست، مهم‌ترین عامل موفقیت تراپی است و بخشی از کار ما همین است."}},{"@type":"Question","name":"باید از قبل بدانم چه نوع تراپی می‌خواهم؟","acceptedAnswer":{"@type":"Answer","text":"نه. کار تیم ارجاع تجربه دقیقاً همین است: از روی آنچه می‌نویسید، مسیر مناسب را پیشنهاد می‌دهد."}},{"@type":"Question","name":"تراپی آنلاین است یا حضوری؟","acceptedAnswer":{"@type":"Answer","text":"هر دو. تراپی آنلاین از هر جای دنیا برگزار می‌شود و حضوری در کلینیک تجربه. می‌توانید ترکیبی هم پیش بروید؛ مثلاً معارفه آنلاین و ادامه حضوری."}},{"@type":"Question","name":"تراپی آنلاین به اندازهٔ جلسهٔ حضوری اثر دارد؟","acceptedAnswer":{"@type":"Answer","text":"پژوهش‌ها نشان داده‌اند برای بسیاری از مشکلات رایج مثل اضطراب و افسردگی، رواندرمانی آنلاین اثری نزدیک به جلسهٔ حضوری دارد. اگر جای خلوت و اینترنت پایدار داشته باشید، تفاوت زیادی حس نمی‌کنید. در دادهٔ پذیرش خود تجربه هم بیشتر متقاضیان جلسهٔ آنلاین را ترجیح داده‌اند."}},{"@type":"Question","name":"خارج از ایران زندگی می‌کنم.","acceptedAnswer":{"@type":"Answer","text":"تجربه تراپیست‌های فارسی‌زبان برای ایرانیان خارج از کشور دارد. جلسه به وقت محلی خودتان ست می‌شود و پرداخت ارزی است."}},{"@type":"Question","name":"چرا تلگرام؟","acceptedAnswer":{"@type":"Answer","text":"چون سریع‌ترین راه است: بدون ثبت‌نام، بدون کد تأیید و بدون فرم بلند. اگر تلگرام ندارید، فرم پذیرش همین صفحه همان کار را می‌کند."}},{"@type":"Question","name":"آیا مهم است درمانگر زن باشد یا مرد؟","acceptedAnswer":{"@type":"Answer","text":"جنسیت درمانگر به‌تنهایی تعیین‌کننده نیست؛ مهم‌تر از آن احساس امنیت، اعتماد و تناسب میان مراجع و درمانگر است. با این حال ترجیح شما را می‌پرسیم و رعایت می‌کنیم."}},{"@type":"Question","name":"اطلاعاتم کجا می‌رود؟","acceptedAnswer":{"@type":"Answer","text":"فقط نزد تیم پذیرش تجربه و تراپیستی که به شما معرفی می‌شود. چیزی جای دیگری نمی‌رود و برای تبلیغات استفاده نمی‌شود."}}]}]}</script>
+<script>
+(function(){
+var root=document.getElementById('gtw'); if(!root){return;}
+try{document.body.classList.add('gt-focus');}catch(e){}
+var AMP=String.fromCharCode(38);
+var API='https://script.google.com/macros/s/AKfycbxD-DYhZ9LFjwB9az_DpMprzF_ItJkdad_DutMGPk1qY3ksBb45aMHYZBsXTCepYhsC8Q/exec';
+var PROXY='/wp-json/tj/v1/slots';
+var EDGE='https://tajrobeh-edge.yaserderakhshan.workers.dev/thers';
+var BOT='https://t.me/tajrobehlife_bot?start=';
+var UP='/wp-content/uploads/2026/09/';
+var TZ='';try{TZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
+var TZ_AB=false;if(TZ){if(TZ.indexOf('Tehran')<0){if(TZ!=='Iran'){TZ_AB=true;}}}
+var GEO='iran';
+function ev(n,p){p=p||{};p.page_kind='get_therapy';p.geo=GEO;
+ try{if(window.gtag){gtag('event',n,p);}}catch(e){}
+ try{window.dataLayer=window.dataLayer||[];var o={event:n};for(var k in p){o[k]=p[k];}window.dataLayer.push(o);}catch(e){}
+ try{if(window.clarity){window.clarity('event',n);}}catch(e){}}
+function zoneOf(tz){
+ if(tz==='Europe/London'||tz==='Europe/Dublin'){return 'uk';}
+ if(tz==='Europe/Istanbul'){return 'tr';}
+ if(tz.indexOf('Europe/')===0){return 'de';}
+ if(tz.indexOf('America/')===0){var w=['Los_Angeles','Vancouver','Phoenix','Denver','Edmonton','Boise','Tijuana','Anchorage'];for(var i=0;i<w.length;i++){if(tz.indexOf(w[i])>-1){return 'uw';}}return 'us';}
+ if(tz==='Asia/Dubai'||tz==='Asia/Muscat'||tz==='Asia/Qatar'||tz==='Asia/Kuwait'||tz==='Asia/Bahrain'||tz==='Asia/Riyadh'){return 'ae';}
+ return 'de';}
+var ZONES=[['de','آلمان و اروپا','Europe/Berlin'],['uk','بریتانیا','Europe/London'],['us','شرق آمریکا و کانادا','America/New_York'],['uw','غرب آمریکا و کانادا','America/Los_Angeles'],['ae','امارات و خلیج فارس','Asia/Dubai'],['tr','ترکیه','Europe/Istanbul']];
+var TOPICS={anx:['اضطراب و فکرهای تکراری','اضطراب','anx',['اضطراب','وسواس','استرس']],rel:['رابطه و زوج','رابطه','rel',['رابطه','زوج']],dep:['بی‌حالی و افسردگی','افسردگی','anx',['افسردگی']],self:['خودشناسی','خودشناسی','anx',['خودشناسی','ارزشمندی','معنا']],fam:['خانواده','خانواده','fam',['خانواده','والد']],grief:['سوگ و فقدان','سوگ','anx',['سوگ','فقدان']],child:['کودک و نوجوان','کودک و نوجوان','kid',['کودک','نوجوان']],unsure:['هنوز نمی‌دانم','هنوز نمی‌دانم','anx',[]]};
+var ORDER=['anx','rel','dep','self','fam','grief','child','unsure'];
+var GT={anx:'gt-anx',rel:'gt-rel',dep:'gt-dep',self:'gt-self',fam:'gt-fam',grief:'gt-grief',child:'gt-child',unsure:'gt-unsure'};
+var CITIES=['تهران','مشهد','اصفهان','کرج','شهر دیگر'];
+var SOFT={g:'با ترجیح جنسیتی شما همین حالا همکاری در فهرست نبود. این همکاران نزدیک‌ترین گزینه‌اند و اگر بخواهید پذیرش ترجیح شما را دنبال می‌کند.',m:'برای حضوری در این شهر همین حالا همکاری در فهرست نبود. این همکاران آنلاین کار می‌کنند. برای حضوری، پذیرش همان روز کاری با شما هماهنگ می‌کند.',gm:'با همهٔ انتخاب‌های شما همین حالا همکاری در فهرست نبود. این همکاران نزدیک‌ترین گزینه‌اند و پذیرش می‌تواند بقیه را هماهنگ کند.'};
+var S={topic:'',place:'',city:'',gender:null,abroad:false,zone:'ir',ther:'',style:''};
+var OFF=0,MDONE='',MTOK=0,THERS=null,PPL=null,SLOTS={},SLOTP={},STEP=1,T0=Date.now(),SHOWN='',HYD=0;
+function fa(n){return String(n).replace(/[0-9]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.charAt(+d);});}
+function nrm(s){return String(s||'').replace(/[‌‏\s]/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/ئ/g,'ی').replace(/^دکتر/,'');}
+function clean(s){s=String(s||'');if(/صفح.{1,3}من/.test(s)){return '';}return s.replace(/[\uD83C-\uDBFF][\uDC00-\uDFFF]/g,'').replace(/[☀-➿️]/g,'').replace(/^[\s«»"“”·]+|[\s«»"“”·]+$/g,'').trim();}
+function h(tag,attrs,kids){var e=document.createElement(tag);attrs=attrs||{};for(var k in attrs){if(k==='text'){e.textContent=attrs[k];}else if(k==='on'){for(var t in attrs.on){e.addEventListener(t,attrs.on[t]);}}else{e.setAttribute(k,attrs[k]);}}
+ kids=kids||[];for(var i=0;i<kids.length;i++){if(kids[i]){e.appendChild(kids[i]);}}return e;}
+function svg(d,w){var NS='http://www.w3.org/2000/svg';var s=document.createElementNS(NS,'svg');s.setAttribute('viewBox','0 0 24 24');s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width',w||'2');s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');s.setAttribute('aria-hidden','true');
+ for(var i=0;i<d.length;i++){var p=document.createElementNS(NS,'path');p.setAttribute('d',d[i]);s.appendChild(p);}return s;}
+var I_CAL=['M7 3v3','M17 3v3','M4 9h16','M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z','M9 14l2 2 4-4'];
+var I_PIN=['M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z','M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z'];
+var I_CHK=['M5 12.5l4.5 4.5L19 7.5'];
+var I_GLB=['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z','M3 12h18','M12 3c2.5 2.6 3.8 5.6 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z'];
+function lsGet(k,maxMin){try{var o=JSON.parse(localStorage.getItem(k)||'null');if(o){if(Date.now()-o.at<maxMin*60000){return o.v;}}}catch(e){}return null;}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify({at:Date.now(),v:v}));}catch(e){}}
+function loadThers(){if(THERS){return Promise.resolve(THERS);}var c=lsGet('gtw.thers',30);if(c){if(c.length){THERS=c;return Promise.resolve(c);}}
+ function ok(d){var l=(d?d.list:null)||[];if(!l.length){throw new Error('empty');}THERS=l;lsSet('gtw.thers',l);lsSet('gtw.thers.bk',l);return l;}
+ return fetch('/wp-json/tj/v1/thers',{credentials:'omit'}).then(function(r){return r.json();}).then(ok)['catch'](function(){return fetch(EDGE,{credentials:'omit'}).then(function(r){return r.json();}).then(ok);})['catch'](function(){var b=lsGet('gtw.thers.bk',43200);THERS=b||[];return THERS;});}
+function loadPpl(){if(PPL){return Promise.resolve(PPL);}var c=lsGet('gtw.ppl',720);if(c){PPL=c;return Promise.resolve(c);}
+ return fetch('/wp-json/wp/v2/tj_person?per_page=100'+AMP+'_fields=slug,_links,_embedded'+AMP+'_embed=wp:featuredmedia',{credentials:'omit'}).then(function(r){return r.json();}).then(function(a){var m={};for(var i=0;i<a.length;i++){var p=a[i],u='';try{var fm=p._embedded['wp:featuredmedia'][0];var sz=fm.media_details.sizes;u=(sz.thumbnail?sz.thumbnail.source_url:'')||fm.source_url;}catch(e){}if(u){m[p.slug]=u;}}PPL=m;lsSet('gtw.ppl',m);return m;})['catch'](function(){PPL={};return PPL;});}
+function slotKey(){var rep=S.topic?TOPICS[S.topic][2]:'anx';return (S.abroad?'ab-'+S.zone:'ir-ir')+'-'+rep;}
+function future(list){var now=Date.now()+2*3600000,o=[];for(var i=0;i<list.length;i++){var s=list[i];try{var p=s.d.split('-'),q=s.t.split(':');var ms=Date.UTC(+p[0],+p[1]-1,+p[2],+q[0],+q[1])-210*60000;if(ms>now){o.push(s);}}catch(e){}}return o;}
+function loadSlots(){var k=slotKey();if(SLOTS[k]){return Promise.resolve(SLOTS[k]);}if(SLOTP[k]){return SLOTP[k];}
+ var c=lsGet('gtw.s2.'+k,5);if(c){SLOTS[k]=future(c);return Promise.resolve(SLOTS[k]);}
+ var t0=Date.now();var pr=k.split('-');var qs='scope='+pr[0]+AMP+'zone='+pr[1]+AMP+'topic='+pr[2];
+ function norm(l){var o=[];for(var i=0;i<l.length;i++){o.push({n:l[i].n||l[i].therapist,d:l[i].d||l[i].dateIso,t:l[i].t||l[i].tehran||l[i].hhmm});}return o;}
+ function done(o,src){SLOTS[k]=future(o);lsSet('gtw.s2.'+k,o);ev('gtw_slots_loaded',{ms:Date.now()-t0,count:SLOTS[k].length,src:src});return SLOTS[k];}
+ SLOTP[k]=fetch(PROXY+'?'+qs,{credentials:'omit'}).then(function(r){if(!r.ok){throw new Error('proxy');}return r.json();}).then(function(d){if(!d||!d.ok){throw new Error('proxy');}return done(norm(d.slots||[]),d.src||'proxy');})
+  ['catch'](function(){return fetch(API+'?api=slots'+AMP+qs,{credentials:'omit'}).then(function(r){return r.json();}).then(function(d){return done(norm((d?d.slots:null)||[]),'direct');});})
+  ['catch'](function(){SLOTS[k]=[];return [];});
+ return SLOTP[k];}
+function dispTZ(){if(!S.abroad){return 'Asia/Tehran';}if(TZ_AB){return TZ;}for(var i=0;i<ZONES.length;i++){if(ZONES[i][0]===S.zone){return ZONES[i][2];}}return 'Europe/Berlin';}
+function whenText(s){try{var p=s.d.split('-'),q=s.t.split(':');var dt=new Date(Date.UTC(+p[0],+p[1]-1,+p[2],+q[0],+q[1])-210*60000);var tz=dispTZ();
+ var a=new Intl.DateTimeFormat('fa-IR-u-ca-persian',{weekday:'long',day:'numeric',month:'long',timeZone:tz}).format(dt);var b=new Intl.DateTimeFormat('fa-IR',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:tz}).format(dt);
+ return a+' · ساعت '+b;}catch(e){return '';}}
+/* استپر و پوسته */
+function stepLabel(n){if(n===1){return S.topic?TOPICS[S.topic][1]:'موضوع';}if(n===2){if(!S.place){return 'جلسه';}if(S.abroad){return 'خارج از ایران';}if(S.place==='on'){return 'آنلاین';}if(S.place==='in'){return 'حضوری'+(S.city?'، '+S.city:'');}return 'آنلاین یا حضوری';}
+ if(n===3){if(S.gender===null){return 'تراپیست';}return S.gender==='f'?'خانم':(S.gender==='m'?'آقا':'خانم یا آقا');}return 'پیشنهاد';}
+function shell(n){var lis=root.querySelectorAll('.gtw-steps li');var cur=n>4?4:n;for(var i=0;i<lis.length;i++){var k=i+1;var li=lis[i];li.className=k<cur?'done':(k===cur?'now':'');var num=li.querySelector('.n'),lab=li.querySelector('.l');
+  while(num.firstChild){num.removeChild(num.firstChild);}if(k<cur){num.appendChild(svg(I_CHK,'3'));}else{num.textContent=fa(k);}lab.textContent=(k<cur)?stepLabel(k):['موضوع','جلسه','تراپیست','پیشنهاد'][i];
+  if(k===cur){li.setAttribute('aria-current','step');}else{li.removeAttribute('aria-current');}}
+ var b=root.querySelector('.gtw-back');if(b){if(n>1){b.removeAttribute('hidden');}else{b.setAttribute('hidden','');}}
+ var as=root.querySelector('.gtw-assure');if(as){as.textContent=n>=4?'جلسهٔ معارفه رایگان است و با خود تراپیست برگزار می‌شود':'رایگان است و شما را به چیزی متعهد نمی‌کند';}
+ root.className='gtw'+(n===4?' wide':'');}
+function panel(kids){var old=root.querySelector('.gtw-panel');if(old){var fbs=old.querySelectorAll('.formbox');for(var i=0;i<fbs.length;i++){var hm=document.getElementById(fbs[i].getAttribute('data-home')||'gtwFormHome');if(hm){hm.appendChild(fbs[i]);}}}
+ var p=h('div',{'class':'gtw-panel'},kids);if(old){root.replaceChild(p,old);}else{root.insertBefore(p,root.querySelector('.gtw-foot'));}return p;}
+function opt(label,fn,on,small){var b=h('button',{type:'button','class':'gtw-opt'+(on?' on':''),on:{click:fn}},[h('span',{text:label}),small?h('small',{text:small}):null]);return b;}
+function go(n){STEP=n;if(n<4){OFF=0;}shell(n);if(n===1){step1();}else if(n===2){step2();}else if(n===3){step3();}else{result();}
+ try{var r=root.getBoundingClientRect();if(r.top<0){window.scrollTo(0,window.pageYOffset+r.top-84);}}catch(e){}}
+function applyGeo(){GEO=S.abroad?'abroad':'iran';var p=document.getElementById('gtwPrice');if(p){p.textContent=S.abroad?'هر جلسه ۳۵ یورو، برای دانشجو ۲۵ یورو':'هر جلسه از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان';}
+ var a=document.getElementById('gtwFormHome'),b=document.getElementById('gtwFormHomeAb');if(a){if(b){a.className=S.abroad?'gtw-hide':'';b.className=S.abroad?'':'gtw-hide';}}}
+/* قدم‌ها */
+function step1(){var kids=[h('h2',{'class':'gtw-q',text:'چه چیزی این روزها بیشتر مشغولتان کرده؟'}),h('p',{'class':'gtw-hint',text:'یکی را بزنید. اگر هیچ‌کدام دقیق نبود هم مهم نیست.'})];
+ var g=h('div',{'class':'gtw-opts'});ORDER.forEach(function(k){g.appendChild(opt(TOPICS[k][0],function(){pickTopic(k);},S.topic===k));});kids.push(g);panel(kids);}
+function pickTopic(k){S.topic=k;ev('gtw_step',{step:1,value:k});loadSlots();loadThers();loadPpl();go(2);}
+function setPlace(p){S.place=p;S.abroad=(p==='ab');if(!S.abroad){S.zone='ir';}if(p!=='in'){S.city='';}applyGeo();}
+function step2(){var kids=[h('h2',{'class':'gtw-q',text:'جلسه‌ها را چطور می‌خواهید؟'}),h('p',{'class':'gtw-hint',text:'بعداً هم می‌توانید عوضش کنید یا ترکیبی پیش بروید.'})];
+ var now='';try{now=new Intl.DateTimeFormat('fa-IR',{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());}catch(e){}
+ var g=h('div',{'class':'gtw-opts s2'});
+ var bOn=opt('آنلاین',function(){setPlace('on');ev('gtw_step',{step:2,value:'online'});loadSlots();go(3);},S.place==='on',TZ_AB?'ساکن ایران':'');
+ var bIn=opt('حضوری',function(){setPlace('in');ev('gtw_step',{step:2,value:'inperson'});loadSlots();cities();},S.place==='in',TZ_AB?'در ایران':'');
+ var bAny=opt('فرقی ندارد',function(){setPlace('any');ev('gtw_step',{step:2,value:'any'});loadSlots();go(3);},S.place==='any',TZ_AB?'ساکن ایران':'');
+ var bAb=opt('خارج از ایران هستم',function(){setPlace('ab');if(TZ_AB){S.zone=zoneOf(TZ);ev('gtw_step',{step:2,value:'abroad',zone:S.zone});loadSlots();go(3);}else{ev('gtw_step',{step:2,value:'abroad_pick'});zones();}},S.place==='ab'||(TZ_AB?!S.place:false),TZ_AB?('آنلاین، به وقت محلی شما (الان '+now+')'):'آنلاین، به وقت محلی شما');
+ if(TZ_AB){bAb.className+=' wide';g.appendChild(bAb);g.appendChild(bOn);g.appendChild(bIn);g.appendChild(bAny);g.className='gtw-opts c3';}
+ else{g.appendChild(bOn);g.appendChild(bIn);g.appendChild(bAny);g.appendChild(bAb);}
+ kids.push(g);panel(kids);if(S.place==='in'){cities();}}
+function subList(title,items,fn,cur){var p=root.querySelector('.gtw-panel');var old=p.querySelector('.gtw-sub');if(old){old.parentNode.removeChild(old);}
+ var bs=p.querySelectorAll('.gtw-opts>.gtw-opt');for(var i=0;i<bs.length;i++){var on=false;var tx=bs[i].firstChild?bs[i].firstChild.textContent:'';if(S.place==='in'){on=(tx==='حضوری');}if(S.place==='ab'){on=(tx==='خارج از ایران هستم');}bs[i].className=bs[i].className.replace(' on','')+(on?' on':'');}
+ var sub=h('div',{'class':'gtw-sub'},[h('p',{'class':'gtw-hint',text:title})]);var g=h('div',{'class':'gtw-opts c3'});items.forEach(function(it){g.appendChild(opt(it[1],function(){fn(it[0]);},cur===it[0]));});sub.appendChild(g);p.appendChild(sub);
+ try{sub.scrollIntoView({block:'nearest'});}catch(e){}}
+function cities(){subList('کدام شهر؟',CITIES.map(function(c){return [c,c];}),function(c){S.city=c;ev('gtw_step',{step:2,value:'city',city:c});go(3);},S.city);}
+function zones(){subList('کجا زندگی می‌کنید؟ وقت‌ها را به ساعت همان‌جا نشان می‌دهیم.',ZONES.map(function(z){return [z[0],z[1]];}),function(z){S.zone=z;ev('gtw_step',{step:2,value:'abroad',zone:z});loadSlots();go(3);},S.zone);}
+function step3(){var kids=[h('h2',{'class':'gtw-q',text:'ترجیح می‌دهید تراپیست خانم باشد یا آقا؟'}),h('p',{'class':'gtw-hint',text:'مهم‌تر از جنسیت، احساس امنیت و تناسب است. ولی ترجیح شما را رعایت می‌کنیم.'})];
+ var g=h('div',{'class':'gtw-opts c3'});[['f','خانم'],['m','آقا'],['','فرقی ندارد']].forEach(function(x){g.appendChild(opt(x[1],function(){S.gender=x[0];ev('gtw_step',{step:3,value:x[0]||'any'});go(4);},S.gender===x[0]));});kids.push(g);panel(kids);}
+function summary(){var a=[TOPICS[S.topic][0]];a.push(S.abroad?'خارج از ایران، آنلاین':stepLabel(2));a.push(S.gender==='f'?'تراپیست خانم':(S.gender==='m'?'تراپیست آقا':'خانم یا آقا'));if(S.style){a.push('سبک: '+S.style);}return a;}
+/* تطبیق */
+function poolOk(t){var p=t.pl||[];var need=TOPICS[S.topic][2];if(need==='rel'){return p.indexOf('rel')>-1||t.cp===1;}if(need==='kid'){return p.indexOf('kid')>-1;}if(need==='fam'){return p.indexOf('fam')>-1||p.indexOf('ind')>-1;}return p.indexOf('ind')>-1||p.length===0;}
+function modeOk(t){if(S.abroad){return true;}if(S.place==='in'){if(t.ip!==1){return false;}if(S.city){if(S.city!=='شهر دیگر'){return String(t.ct||'').indexOf(S.city)>-1;}}return true;}return true;}
+function score(t,slot){var sc=0;if(slot){sc+=20;}if(t.sl){sc+=2;}if(PPL){if(PPL[t.sl||'']){sc+=2;}}var kw=TOPICS[S.topic][3],fc=String(t.fc||'');for(var i=0;i<kw.length;i++){if(fc.indexOf(kw[i])>-1){sc+=2;break;}}if(S.abroad){if(t.ab===1){sc+=2;}}if(clean(t.hl)){sc+=1;}return sc;}
+function pick(slots){var by={};for(var i=0;i<slots.length;i++){var k=nrm(slots[i].n);if(!by[k]){by[k]=slots[i];}}
+ function run(useG,useM){var out=[];for(var j=0;j<THERS.length;j++){var t=THERS[j];if(t.a!==1){continue;}if(!poolOk(t)){continue;}if(useM){if(!modeOk(t)){continue;}}if(useG){if(S.gender){if(t.g!==S.gender){continue;}}}
+  var s=by[nrm(t.n)]||null;if(!s){if(!t.sl){continue;}if(S.abroad){if(t.ab!==1){continue;}}}out.push({t:t,s:s,sc:score(t,s)});}
+  out.sort(function(a,b){if(b.sc!==a.sc){return b.sc-a.sc;}var x=a.s?(a.s.d+a.s.t):'z',y=b.s?(b.s.d+b.s.t):'z';if(x!==y){return x<y?-1:1;}return nrm(a.t.n)<nrm(b.t.n)?-1:1;});return out;}
+ var tries=[[true,true,''],[false,true,'g'],[true,false,'m'],[false,false,'gm']];
+ for(var q=0;q<tries.length;q++){var tr=tries[q];if(tr[2].indexOf('g')>-1){if(!S.gender){continue;}}if(tr[2].indexOf('m')>-1){if(S.place!=='in'){continue;}}var o=run(tr[0],tr[1]);if(o.length){if(OFF>=o.length){OFF=0;}var res={list:o.slice(OFF,OFF+2),soft:tr[2],alt:[],total:o.length};
+   if(S.place==='in'){if(tr[1]){if(res.list.length<2){var seen={};res.list.forEach(function(x){seen[nrm(x.t.n)]=1;});var al=run(tr[0],false).filter(function(x){return !!x.s;}).filter(function(x){return !seen[nrm(x.t.n)];});res.alt=al.slice(0,2-res.list.length);}}}
+   return res;}}
+ return {list:[],soft:'',alt:[]};}
+function botCode(t){if(t){if(t.sl){return 'tm-'+t.sl;}}return S.abroad?'gt-d':GT[S.topic];}
+/* لحظهٔ انتخاب: هر خط فقط وقتی تیک می‌خورد که همان کار واقعاً انجام شده */
+function mkey(){return [S.topic,S.place,S.city,S.gender,S.zone].join('|');}
+function result(){var k=mkey();if(MDONE===k){result0();return;}
+ var tok=++MTOK;var t0=Date.now();var rm=false;try{rm=window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}var D=rm?250:750;
+ var L=[['حرف‌هایتان را گرفتیم',summary().join(' · ')],['درمانگرهای تجربه را بررسی کردیم',''],['تجربهٔ هر درمانگر را با نیاز شما سنجیدیم',''],['وقت‌های آزاد معارفه را بررسی کردیم',S.abroad?'به وقت محلی شما':''],['','']];
+ var lis=[];var ol=h('ol',{'aria-live':'polite'});
+ L.forEach(function(x){var sm=h('small',{text:x[1]});var b=h('b',{text:x[0]});var li=h('li',{},[h('span',{'class':'dot','aria-hidden':'true'}),h('div',{},[b,sm])]);if(!x[0]){li.style.display='none';}lis.push({li:li,b:b,sm:sm});ol.appendChild(li);});
+ panel([h('div',{'class':'gtw-match'},[ol])]);
+ function alive(){return tok===MTOK?STEP===4:false;}
+ function now(i){lis[i].li.className='now';}
+ function ok(i,sub){var x=lis[i];x.li.className='ok';x.li.querySelector('.dot').appendChild(svg(I_CHK,'3'));if(sub){x.sm.textContent=sub;}}
+ function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
+ var ready=false;var slp=loadSlots().then(function(s){ready=true;return s;});
+ now(0);
+ wait(D).then(function(){if(!alive()){throw 0;}ok(0);now(1);return Promise.all([loadThers(),wait(D)]);})
+ .then(function(r){if(!alive()){throw 0;}var n=0;var l=r[0]||[];for(var i=0;i<l.length;i++){if(l[i].a===1){n++;}}ok(1,n?fa(n)+' درمانگر فعال، همه زیر سوپرویژن':'');now(2);return wait(D);})
+ .then(function(){if(!alive()){throw 0;}ok(2);now(3);return Promise.race([slp,wait(2600)]).then(function(){return wait(rm?100:400);});})
+ .then(function(){if(!alive()){throw 0;}if(ready){ok(3);}else{lis[3].sm.textContent='وقت‌ها چند لحظهٔ دیگر روی کارت‌ها می‌آید';}
+  var r=pick(ready?(SLOTS[slotKey()]||[]):[]);var cn=r.list.length+(r.alt||[]).length;var tx=cn>=2?'دو گزینهٔ مناسب برایتان آماده است':(cn===1?'یک گزینهٔ مناسب برایتان آماده است':'پذیرش بهترین گزینه را برایتان پیدا می‌کند');if(r.soft){if(cn>1){tx='نزدیک‌ترین گزینه‌ها به انتخاب‌های شما آماده است';}if(cn===1){tx='نزدیک‌ترین گزینه به انتخاب‌های شما آماده است';}}
+  lis[4].b.textContent=tx;lis[4].li.style.display='';now(4);return wait(D);})
+ .then(function(){if(!alive()){throw 0;}ok(4);ev('gtw_matching',{ms:Date.now()-t0,slots_ready:ready?1:0});return wait(rm?150:550);})
+ .then(function(){if(!alive()){return;}MDONE=k;result0();})['catch'](function(){});}
+/* نتیجه: فوری نشان بده، وقت‌ها که رسید پر کن */
+function result0(){SHOWN='';var k=slotKey();var have=SLOTS[k]||null;HYD=0;
+ if(!THERS){panel([h('p',{'class':'gtw-hint',text:'یک لحظه…'})]);}
+ loadThers().then(function(){if(STEP!==4){return;}loadPpl();draw(have,false);
+  if(!have){var t0=Date.now();var to=setTimeout(function(){if(STEP===4){if(!HYD){HYD=1;draw([],true);}}},12000);
+   loadSlots().then(function(sl){clearTimeout(to);if(STEP!==4){return;}if(slotKey()!==k){return;}var late=HYD;HYD=1;ev('gtw_hydrate',{ms:Date.now()-t0,late:late});draw(sl,false);});}
+  if(!PPL){loadPpl().then(function(){if(STEP===4){photos();}});}});}
+function sig(r){return r.list.length+'.'+((r.alt||[]).length)+':'+r.list.concat(r.alt||[]).map(function(o){return nrm(o.t.n)+(o.s?o.s.d+o.s.t:'');}).join('|')+r.soft;}
+function draw(slots,timedOut){if(STEP!==4){return;}var pending=(slots===null);var r=pick(slots||[]);var sg=sig(r)+(pending?'P':'')+(timedOut?'T':'');if(sg===SHOWN){return;}var first=!SHOWN;SHOWN=sg;
+ var kids=[];
+ if(!pending){var ws=r.list.filter(function(o){return !!o.s;}).length;ev('gtw_result',{count:r.list.length,with_slots:ws,timed_out:timedOut?1:0,soft:r.soft,seconds:Math.round((Date.now()-T0)/1000)});}
+ if(S.abroad){kids.push(h('div',{'class':'gtw-abinfo'},[svg(I_GLB,'1.8'),h('span',{text:'جلسه‌ها آنلاین و به وقت محلی شما برگزار می‌شود. هر جلسه ۳۵ یورو است و برای دانشجوها ۲۵ یورو، با پرداخت ارزی. جلسهٔ معارفه رایگان است.'})]));}
+ if(!r.list.length){kids.push(h('h2',{'class':'gtw-q',text:'برای این انتخاب، پذیرش بهترین گزینه را پیدا می‌کند'}));kids.push(h('p',{'class':'gtw-hint',text:'یکی از این دو راه را انتخاب کنید. همان روز کاری جواب می‌گیرید.'}));}
+ else{kids.push(h('h2',{'class':'gtw-q',text:r.soft?'نزدیک‌ترین همکاران به انتخاب‌های شما':(r.list.length===1?'این همکار به انتخاب‌های شما می‌خورد':'این همکاران به انتخاب‌های شما می‌خورند')}));
+  kids.push(h('p',{'class':'gtw-hint',text:SOFT[r.soft]||'هر کدام را که حس بهتری به شما می‌دهد انتخاب کنید. اگر بعد از معارفه مناسب نبود، تغییر تراپیست هزینه‌ای ندارد.'}));
+  var na=(r.alt||[]).length;var cs=h('div',{'class':'gtw-cards n'+(r.list.length+na)});r.list.forEach(function(o,i){cs.appendChild(card(o,i,pending,false));});(r.alt||[]).forEach(function(o,i){cs.appendChild(card(o,i+r.list.length,false,true));});kids.push(cs);
+  if(na){kids.push(h('p',{'class':'gtw-note gtw-altnote',text:'کارت «پیشنهاد آنلاین» برای وقتی است که جلسهٔ آنلاین هم برایتان ممکن باشد. این همکار همین روزها وقت آزاد دارد.'}));}}
+  if(r.list.length){var acts=h('div',{'class':'acts'});
+   if((r.total||0)>2){acts.appendChild(h('button',{type:'button',text:'عوض کردن درمانگر',on:{click:function(){OFF+=2;ev('gtw_care',{what:'ther',off:OFF});SHOWN='';draw(SLOTS[slotKey()]||null,false);}}}));}
+   else{acts.appendChild(h('a',{'data-gt':'w-care-ther',href:BOT+botCode(null),target:'_blank',rel:'noopener',text:'عوض کردن درمانگر'}));}
+   acts.appendChild(h('a',{'data-gt':'w-care-time',href:BOT+botCode(null),target:'_blank',rel:'noopener',text:'عوض کردن زمان'}));
+   acts.appendChild(h('a',{'data-gt':'w-care-style',href:BOT+botCode(null),target:'_blank',rel:'noopener',text:'عوض کردن رویکرد'}));
+   kids.push(h('div',{'class':'gtw-care'},[h('p',{text:'ما در ادامهٔ مسیر کنارتان هستیم. هر وقت خواستید درمانگر، زمان یا رویکرد را عوض کنید، از همین‌جا می‌توانید.'}),acts]));}
+ kids.push(h('div',{'class':'gtw-or',text:r.list.length?'یا':'دو راه دارید'}));
+ var doors=h('div',{'class':'gtw-doors'});
+ doors.appendChild(h('a',{'class':'gtw-opt','data-gt':'w-desk-bot',href:BOT+botCode(null),target:'_blank',rel:'noopener'},[h('span',{text:'پذیرش در تلگرام برایم انتخاب کند'}),h('small',{text:'چند سؤال کوتاه، بدون ثبت‌نام'})]));
+ doors.appendChild(opt(S.abroad?'شماره‌ام را می‌گذارم، پیام بدهید':'شماره‌ام را می‌گذارم، تماس بگیرید',function(){ev('gtw_pick',{kind:'form'});showForm();},false,'پاسخ در همان روز کاری'));kids.push(doors);
+ var pn=panel(kids);if(!first){pn.style.animation='none';}}
+function photos(){var cs=root.querySelectorAll('.gtw-card');for(var i=0;i<cs.length;i++){var sl=cs[i].getAttribute('data-sl')||'';var u=(PPL||{})[sl];var m=cs[i].querySelector('.mono');if(u){if(m){m.parentNode.replaceChild(h('img',{'class':'ph',src:u,alt:'',width:'64',height:'64'}),m);}}}}
+function card(o,i,pending,isAlt){var t=o.t;var ph;var u=(PPL||{})[t.sl||''];var nm=String(t.n||'');var ps=nm.replace(/^دکتر\s+/,'').split(/\s+/);
+ if(u){ph=h('img',{'class':'ph',src:u,alt:nm,width:'64',height:'64'});}else{ph=h('span',{'class':'mono','aria-hidden':'true',text:(ps[0]||'').charAt(0)+' '+((ps[1]||'').charAt(0))});}
+ var tt=[clean(t.tt),clean(t.sp)].filter(function(x){return !!x;}).join(' · ');
+ var meta=h('div',{'class':'meta'});var ct=clean(String(t.ct||'').split('،')[0]);if(S.place==='in'){if(S.city){if(String(t.ct||'').indexOf(S.city)>-1){ct=S.city;}}}
+ if(isAlt){ct='';}
+ meta.appendChild(h('span',{},[svg(I_PIN,'2'),document.createTextNode(ct?ct:'آنلاین')]));
+ if(S.place!=='in'){if(ct){if(String(t.md||'').indexOf('آنلاین')>-1||String(t.md||'').indexOf('هر دو')>-1){meta.appendChild(h('span',{text:'آنلاین'}));}}}
+ if(+t.yr>0){meta.appendChild(h('span',{'class':'yr',text:fa(t.yr)+' سال سابقه'}));}
+ if(S.abroad){if(String(t.lg||'').indexOf('انگلیسی')>-1){meta.appendChild(h('span',{text:'فارسی و انگلیسی'}));}}
+ var slot;if(o.s){slot=h('div',{'class':'slot'},[svg(I_CAL,'1.9'),h('div',{},[h('small',{text:'نزدیک‌ترین وقت معارفه'+(S.abroad?'، به وقت شما':'')}),h('strong',{text:whenText(o.s)})])]);}
+ else if(pending){slot=h('div',{'class':'slot wait'},[svg(I_CAL,'1.9'),h('div',{},[h('small',{text:'وقت معارفه'}),h('strong',{text:'در حال نگاه کردن به تقویم…'})])]);}
+ else{slot=h('div',{'class':'slot none'},[svg(I_CAL,'1.9'),h('div',{},[h('small',{text:'وقت معارفه'}),h('strong',{text:'در تلگرام با هم هماهنگ می‌کنیم'})])]);}
+ var why=[];var kw=TOPICS[S.topic][3],fcs=String(t.fc||'');for(var wi=0;wi<kw.length;wi++){if(fcs.indexOf(kw[wi])>-1){why.push('در حوزهٔ '+TOPICS[S.topic][1]+' کار می‌کند');break;}}
+ if(S.gender){if(t.g===S.gender){why.push(S.gender==='f'?'تراپیست خانم':'تراپیست آقا');}}
+ if(S.place==='in'){if(S.city){if(!isAlt){if(String(t.ct||'').indexOf(S.city)>-1){why.push('حضوری در '+S.city);}}}}
+ if(S.abroad){if(t.ab===1){why.push('با مراجعان خارج از ایران کار می‌کند');}}
+ if(o.s){why.push('وقت معارفهٔ نزدیک دارد');}
+ var wy=why.length?h('p',{'class':'why'},[h('span',{text:'چرا این گزینه: '}),document.createTextNode(why.join(' · '))]):null;
+ var hl=clean(t.hl);
+ var c=h('div',{'class':'gtw-card'+(o.s?' has-slot':'')+(isAlt?' is-alt':''),'data-sl':t.sl||''},[
+  isAlt?h('span',{'class':'tag',text:'پیشنهاد آنلاین'}):null,
+  h('img',{'class':'vf',src:UP+'tjl-verified-badge.webp',alt:'تأییدشده',width:'18',height:'18'}),
+  h('div',{'class':'who'},[ph,h('div',{'class':'id'},[h('b',{text:nm}),tt?h('span',{'class':'tt',text:tt}):null])]),
+  meta,wy,hl?h('p',{'class':'hl',text:hl}):null,h('div',{'class':'grow'}),slot,
+  h('a',{'class':'btn '+(o.s||pending?'btn-brand':'btn-ghost'),'data-gt':'w-ther-'+(i+1),'data-ther':t.sl||'',href:BOT+botCode(t),target:'_blank',rel:'noopener',text:o.s?'رزرو وقت معارفهٔ رایگان':'هماهنگی معارفه در تلگرام'}),
+  t.sl?h('a',{'class':'more','data-gt':'w-ther-page',href:'/team/'+t.sl+'/',target:'_blank',rel:'noopener',text:'بیشتر دربارهٔ '+ps.join(' ')}):null]);
+ return c;}
+function showForm(){shell(5);var ab=S.abroad;var hid=ab?'gtwFormHomeAb':'gtwFormHome';var home=document.getElementById(hid);var box=home?home.querySelector('.formbox'):null;
+ var wrap=h('div',{'class':'gtw-formwrap'},[h('h2',{'class':'gtw-q',text:ab?'اسم و شمارهٔ واتس‌اپ یا تلگرامتان را بگذارید':'اسم و شماره‌تان را بگذارید'}),h('p',{'class':'gtw-hint',text:'انتخاب‌های شما همراه فرم برای پذیرش فرستاده می‌شود و لازم نیست دوباره توضیح بدهید. اطلاعات شما فقط در اختیار مسئول پذیرش مرکز تجربه زندگی قرار می‌گیرد.'})]);
+ var sm=h('div',{'class':'gtw-sum'});summary().forEach(function(x){sm.appendChild(h('span',{text:x}));});wrap.appendChild(sm);if(box){box.setAttribute('data-home',hid);wrap.appendChild(box);}
+ SHOWN='';panel([wrap]);fillTopic();STEP=5;}
+function fillTopic(){try{var v=S.topic?(summary().join(' · ')+(S.ther?' · از صفحهٔ '+S.ther:'')):'';var is=document.querySelectorAll('input[name="topic"]');for(var i=0;i<is.length;i++){if(v){is[i].value=v;}}var tz=document.querySelectorAll('input[name="timezone"]');for(var j=0;j<tz.length;j++){if(!tz[j].value){tz[j].value=TZ;}}}catch(e){}}
+/* شروع */
+root.addEventListener('click',function(e){var a=e.target.closest?e.target.closest('a.gtw-opt[data-k]'):null;if(a){e.preventDefault();e.stopPropagation();pickTopic(a.getAttribute('data-k'));return;}
+ var li=e.target.closest?e.target.closest('.gtw-steps li.done'):null;if(li){var n=+li.getAttribute('data-s');ev('gtw_back',{from_step:STEP,to:n,via:'stepper'});SHOWN='';go(n);}},true);
+var bk=root.querySelector('.gtw-back');if(bk){bk.addEventListener('click',function(){ev('gtw_back',{from_step:STEP,via:'button'});SHOWN='';go(STEP===5?4:STEP-1);});}
+applyGeo();
+try{var qs=location.search.replace(/^\?/,'').split(AMP);for(var i=0;i<qs.length;i++){var kv=qs[i].split('=');if(kv[0]==='need'){if(TOPICS[kv[1]]){S.topic=kv[1];}}if(kv[0]==='tj_style'){S.style=decodeURIComponent(kv[1]||'');}if(kv[0]==='from'){S.ther=decodeURIComponent(kv[1]||'');}}}catch(e){}
+loadThers();
+if(S.topic){ev('gtw_preset',{value:S.topic});loadSlots();loadPpl();go(2);}
+else{var idle=window.requestIdleCallback||function(f){setTimeout(f,1200);};idle(function(){if(!TZ_AB){loadSlots();}loadPpl();});}
+ev('gtw_view',{tz_abroad:TZ_AB?1:0});
+/* رهگیری کلیک‌ها و بخش‌ها: همان نام‌های قبلی */
+document.addEventListener('click',function(e){var a=e.target.closest?e.target.closest('a'):null;if(!a){return;}if(a.getAttribute('data-k')){if(a.className.indexOf('gtw-opt')>-1){return;}}var hr=a.getAttribute('href')||'';var slot=a.getAttribute('data-gt')||'';var txt=(a.textContent||'').trim().slice(0,60);
+ if(hr.indexOf('t.me/')>-1){var sp='';var qi=hr.indexOf('start=');if(qi>-1){sp=hr.slice(qi+6);}ev('bot_click',{block:slot||'gt',variant:'gtw',page_path:location.pathname,start_param:sp,link_text:txt,w_topic:S.topic,w_step:STEP});if(slot.indexOf('w-')===0){ev('gtw_pick',{kind:slot,ther:a.getAttribute('data-ther')||''});}return;}
+ if(slot){ev('gt_path_click',{block:slot,link_text:txt});}},true);
+try{if(window.IntersectionObserver){var seen={};var io=new IntersectionObserver(function(en){for(var i=0;i<en.length;i++){var t2=en[i];if(!t2.isIntersecting){continue;}var id=t2.target.id||'sec';if(seen[id]){continue;}seen[id]=1;ev('gt_section_view',{section:id});io.unobserve(t2.target);}},{threshold:0.4});
+ var secs=document.querySelectorAll('#tj2 section[id]');for(var q=0;q<secs.length;q++){io.observe(secs[q]);}}}catch(e){}
+try{var bar=document.getElementById('gtwBar');if(bar){var tick=0;var upd=function(){tick=0;var r=root.getBoundingClientRect();var vh=window.innerHeight||800;var out=(r.bottom<60)||(r.top>vh-60);bar.className='gtw-bar'+(out?' show':'');};window.addEventListener('scroll',function(){if(!tick){tick=1;setTimeout(upd,120);}},{passive:true});upd();}}catch(e){}
+document.addEventListener('fluentform_submission_success',function(){ev('gt_form_submit',{w_topic:S.topic,in_widget:STEP===5?1:0});});
+document.addEventListener('focusin',function(e){var f=e.target.closest?e.target.closest('form'):null;if(f){fillTopic();}});
+var st0=Date.now();window.addEventListener('beforeunload',function(){ev('gt_time',{seconds:Math.round((Date.now()-st0)/1000),w_step:STEP});});
+})();
+</script>
+<!-- /wp:html -->

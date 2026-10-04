@@ -1,0 +1,434 @@
+[
+ {
+  "id": 501141,
+  "file": "501141.txt",
+  "title": "نمایش پیام بعد از پاراگراف اول پست‌ها",
+  "type": "text",
+  "location": "درج بعد از پاراگراف",
+  "active": false,
+  "loc": "after_paragraph"
+ },
+ {
+  "id": 501142,
+  "file": "501142.php",
+  "title": "غیرفعال کردن کامل نظرات",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": false,
+  "loc": "everywhere"
+ },
+ {
+  "id": 501143,
+  "file": "501143.php",
+  "title": "Tajrobeh — Form to Leads Sheet",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 501145,
+  "file": "501145.html",
+  "title": "Tajrobeh — دکمهٔ شناور ارتباط (تلفن، بات، ورود)",
+  "type": "html",
+  "location": "پاورقی عریض سایت",
+  "active": true,
+  "loc": "site_wide_footer"
+ },
+ {
+  "id": 501146,
+  "file": "501146.html",
+  "title": "Tajrobeh — Form auto-fill (timezone)",
+  "type": "html",
+  "location": "پاورقی عریض سایت",
+  "active": true,
+  "loc": "site_wide_footer"
+ },
+ {
+  "id": 501147,
+  "file": "501147.php",
+  "title": "ONE-TIME import illustration",
+  "type": "php",
+  "location": "سربرگ عریض سایت",
+  "active": false,
+  "loc": "site_wide_header"
+ },
+ {
+  "id": 501154,
+  "file": "501154.css",
+  "title": "Tajrobeh — Thank-you page styles",
+  "type": "css",
+  "location": "سربرگ عریض سایت",
+  "active": true,
+  "loc": "site_wide_header"
+ },
+ {
+  "id": 502068,
+  "file": "502068.html",
+  "title": "Tajrobeh — Head tags (Search Console + Analytics)",
+  "type": "html",
+  "location": "سربرگ عریض سایت",
+  "active": true,
+  "loc": "site_wide_header"
+ },
+ {
+  "id": 502069,
+  "file": "502069.html",
+  "title": "Tajrobeh — Analytics events",
+  "type": "html",
+  "location": "پاورقی عریض سایت",
+  "active": true,
+  "loc": "site_wide_footer"
+ },
+ {
+  "id": 502071,
+  "file": "502071.html",
+  "title": "Tajrobeh — Phone input normalisation",
+  "type": "html",
+  "location": "پاورقی عریض سایت",
+  "active": true,
+  "loc": "site_wide_footer"
+ },
+ {
+  "id": 503540,
+  "file": "503540.php",
+  "title": "Tajrobeh - Mag home (/mag/)",
+  "type": "php",
+  "location": "فقط ظاهر (فرانت‌اند)",
+  "active": true,
+  "loc": "frontend_only"
+ },
+ {
+  "id": 503916,
+  "file": "503916.php",
+  "title": "Tajrobeh - hreflang (persian-therapy fa/en)",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 503917,
+  "file": "503917.php",
+  "title": "Tajrobeh - article CTA line for visitors abroad",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 503947,
+  "file": "503947.php",
+  "title": "Tajrobeh - test CTA on therapy articles",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 504035,
+  "file": "504035.css",
+  "title": "Tajrobeh — اصلاح‌های ریز دسترسی‌پذیری",
+  "type": "css",
+  "location": "سربرگ عریض سایت",
+  "active": true,
+  "loc": "site_wide_header"
+ },
+ {
+  "id": 504037,
+  "file": "504037.php",
+  "title": "Tajrobeh — robots.txt",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 504048,
+  "file": "504048.php",
+  "title": "Tajrobeh: author role card on magazine author pages",
+  "type": "php",
+  "location": "فقط ظاهر (فرانت‌اند)",
+  "active": true,
+  "loc": "frontend_only"
+ },
+ {
+  "id": 504059,
+  "file": "504059.css",
+  "title": "Tajrobeh — نشان‌های کارت‌ها (خانوادهٔ قلب)",
+  "type": "css",
+  "location": "سربرگ عریض سایت",
+  "active": true,
+  "loc": "site_wide_header"
+ },
+ {
+  "id": 504064,
+  "file": "504064.php",
+  "title": "Tajrobeh — دایرکتوری اعضا از بات",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 504078,
+  "file": "504078.php",
+  "title": "Tajrobeh — صفحهٔ افراد (تیم تجربه) v1",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 504267,
+  "file": "504267.php",
+  "title": "Tajrobeh — بلوک‌های تبدیل مقالهٔ مجله v1",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 504340,
+  "file": "504340.php",
+  "title": "Tajrobeh — llms.txt (راهنمای هوش مصنوعی)",
+  "type": "php",
+  "location": "سربرگ عریض سایت",
+  "active": true,
+  "loc": "site_wide_header"
+ },
+ {
+  "id": 504354,
+  "file": "504354.php",
+  "title": "Tajrobeh — nofollow لینک‌های ورود در مقاله‌ها",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 504841,
+  "file": "504841.php",
+  "title": "Tajrobeh — اسکیمای بازبینی بالینی مجله v3 (با بازبین‌های بات)",
+  "type": "php",
+  "location": "فقط ظاهر (فرانت‌اند)",
+  "active": true,
+  "loc": "frontend_only"
+ },
+ {
+  "id": 505050,
+  "file": "505050.php",
+  "title": "Tajrobeh · کمپین ثبت‌نام مدرسه (API و بلوک‌های زنده)",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 505078,
+  "file": "505078.php",
+  "title": "Tajrobeh — کش وقت‌های معارفه برای ویجت شروع تراپی (tj/v1/slots)",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 505103,
+  "file": "505103.php",
+  "title": "Tajrobeh — لینک‌های کوتاه بیو و سوشال (/go/…) با UTM",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 505131,
+  "file": "505131.php",
+  "title": "Tajrobeh — کش فهرست درمانگرها برای ویجت شروع تراپی (tj/v1/thers)",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 505259,
+  "file": "505259.php",
+  "title": "Tajrobeh: رتبه‌بندی جست‌وجوی کل سایت (G2)",
+  "type": "php",
+  "location": "فقط ظاهر (فرانت‌اند)",
+  "active": true,
+  "loc": "frontend_only"
+ },
+ {
+  "id": 505260,
+  "file": "505260.php",
+  "title": "Tajrobeh: لینک داخلی مقاله‌ها به صفحه‌های هدف (G3)",
+  "type": "php",
+  "location": "فقط ظاهر (فرانت‌اند)",
+  "active": true,
+  "loc": "frontend_only"
+ },
+ {
+  "id": 505281,
+  "file": "505281.html",
+  "title": "Tajrobeh: ویجت کوچک انتخاب تراپیست (سراسری)",
+  "type": "html",
+  "location": "پاورقی عریض سایت",
+  "active": true,
+  "loc": "site_wide_footer"
+ },
+ {
+  "id": 505366,
+  "file": "505366.js",
+  "title": "Tajrobeh — tj-faq v1 رفتار پرسش‌های پرتکرار",
+  "type": "js",
+  "location": "پاورقی عریض سایت",
+  "active": true,
+  "loc": "site_wide_footer"
+ },
+ {
+  "id": 505375,
+  "file": "505375.js",
+  "title": "Tajrobeh — tj-form v1 رفتار فرم‌ها (لیبل شناور، حریم خصوصی، کد کشور، چندمرحله‌ای)",
+  "type": "js",
+  "location": "پاورقی عریض سایت",
+  "active": true,
+  "loc": "site_wide_footer"
+ },
+ {
+  "id": 505452,
+  "file": "505452.php",
+  "title": "Tajrobeh school calendar ICS feed",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 505562,
+  "file": "505562.php",
+  "title": "Tajrobeh — کارت نویسندهٔ مقاله v1 (tjau، نشان نقش و رزرو معارفه با نویسندهٔ درمانگر)",
+  "type": "php",
+  "location": "فقط ظاهر (فرانت‌اند)",
+  "active": true,
+  "loc": "frontend_only"
+ },
+ {
+  "id": 505571,
+  "file": "505571.php",
+  "title": "Tajrobeh — مکث کوتاه v1 (tjq، سؤال‌های داخل مقاله و اتصال به بات)",
+  "type": "php",
+  "location": "فقط ظاهر (فرانت‌اند)",
+  "active": true,
+  "loc": "frontend_only"
+ },
+ {
+  "id": 505599,
+  "file": "505599.php",
+  "title": "tj-school-live v1 · منبع زندهٔ صفحهٔ مدرسه (REST)",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 505618,
+  "file": "505618.php",
+  "title": "Tajrobeh · مشارکت در مجله v2 (tjmc) و ریدایرکت /review/ به بات (v169)",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 505691,
+  "file": "505691.php",
+  "title": "Tajrobeh author self-join",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "active": true,
+  "loc": "everywhere"
+ },
+ {
+  "id": 505693,
+  "file": "505693.php",
+  "title": "Tajrobeh — ریدایرکت نشانی‌های قدیمی (tj-redirects v1)",
+  "type": "php",
+  "location": "فقط ظاهر (فرانت‌اند)",
+  "active": true,
+  "loc": "frontend_only"
+ },
+ {
+  "id": 505814,
+  "file": "505814.php",
+  "title": "Tajrobeh — پاک کردن کش با انتشار مطلب تازه",
+  "type": "php",
+  "location": "everywhere",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
+  "id": 505878,
+  "file": "ops-bridge.php",
+  "title": "Tajrobeh · پل انتشار مخزن (tj-ops/v1)",
+  "type": "php",
+  "location": "everywhere",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
+  "id": 505901,
+  "file": "sec-2fa.php",
+  "title": "Tajrobeh: امنیت، ورود دومرحله‌ای مدیر کل با کد بات",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
+  "id": 505902,
+  "file": "sec-admin-alert.php",
+  "title": "Tajrobeh: امنیت، هشدار ورود مدیر به یاسر",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
+  "id": 505903,
+  "file": "sec-bot-send.php",
+  "title": "Tajrobeh: امنیت، ارسال پیام امنیتی به بات (امضاشده)",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
+  "id": 505904,
+  "file": "sec-headers.php",
+  "title": "Tajrobeh: امنیت، هدرهای امنیتی",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
+  "id": 505905,
+  "file": "sec-login-limit.php",
+  "title": "Tajrobeh: امنیت، سقف تلاش ناموفق ورود",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
+  "id": 505906,
+  "file": "sec-users.php",
+  "title": "Tajrobeh: امنیت، بستن فهرست کاربران برای مهمان",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "loc": "everywhere",
+  "active": true
+ }
+]

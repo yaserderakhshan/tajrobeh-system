@@ -1,0 +1,61 @@
+{
+ "wp": "7.1.2",
+ "wp_latest": "7.1.2",
+ "php": null,
+ "theme": {
+  "stylesheet": "twentytwentyfive",
+  "version": "1.5"
+ },
+ "plugins": [
+  {
+   "plugin": "fluentform/fluentform",
+   "name": "فرم‌های فلوئنت",
+   "version": "6.2.15",
+   "status": "active",
+   "latest": "6.2.15"
+  },
+  {
+   "plugin": "redis-cache/redis-cache",
+   "name": "Redis Object Cache",
+   "version": "3.0.0",
+   "status": "active",
+   "latest": "3.0.0"
+  },
+  {
+   "plugin": "updraftplus/updraftplus",
+   "name": "UpdraftPlus - پشتیبان‌گیری/بازیابی",
+   "version": "1.26.8",
+   "status": "active",
+   "latest": "1.26.8"
+  },
+  {
+   "plugin": "wordpress-importer/wordpress-importer",
+   "name": "درون‌ریز وردپرس",
+   "version": "0.9.6",
+   "status": "inactive",
+   "latest": "0.9.6"
+  },
+  {
+   "plugin": "wp-optimize/wp-optimize",
+   "name": "بهینه‌ساز پایگاه داده - پاک‌سازی، فشرده‌سازی، کش",
+   "version": "4.7.0",
+   "status": "active",
+   "latest": "4.7.0"
+  },
+  {
+   "plugin": "insert-headers-and-footers/ihaf",
+   "name": "WPcode Lite",
+   "version": "2.3.9",
+   "status": "active",
+   "latest": "2.3.9"
+  },
+  {
+   "plugin": "wordpress-seo/wp-seo",
+   "name": "سئو Yoast",
+   "version": "28.6",
+   "status": "active",
+   "latest": "28.6"
+  }
+ ],
+ "read_at": "2026-10-04T10:12:27.041Z"
+}

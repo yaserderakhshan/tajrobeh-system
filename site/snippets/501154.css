@@ -1,0 +1,28 @@
+.tj-ty{max-width:640px;margin:0 auto;padding:8px 20px 72px;font-family:var(--tj-font,'Anjoman Max',system-ui,sans-serif);color:var(--tj-ink,#0e0e0e);text-align:center}
+.tj-ty__art{margin:0 auto 4px;max-width:440px}
+.tj-ty__art img{width:100%;height:auto;display:block}
+.tj-ty__title{font-size:clamp(28px,6vw,40px);line-height:1.25;margin:0 0 10px;font-weight:800;letter-spacing:-.01em}
+.tj-ty__lead{font-size:clamp(16px,3.6vw,19px);line-height:1.8;color:var(--tj-soft,#4e4e4e);margin:0 auto 34px;max-width:34ch}
+
+.tj-ty__steps{list-style:none;margin:0 0 34px;padding:0;text-align:start;display:grid;gap:12px}
+.tj-ty__steps li{display:flex;gap:14px;align-items:flex-start;background:var(--tj-white,#fefefe);border:1px solid var(--tj-line,#dfdfe2);border-radius:var(--tj-r-card,14px);padding:16px 18px;box-shadow:var(--tj-shadow,0 1px 2px rgba(34,34,34,.06))}
+.tj-ty__n{flex:0 0 30px;height:30px;border-radius:999px;background:var(--tj-red-50,#faeced);color:var(--tj-red,#c83f49);font-weight:800;font-size:15px;display:grid;place-items:center;margin-top:2px}
+.tj-ty__steps b{display:block;font-size:16px;font-weight:700;margin-bottom:3px;line-height:1.5}
+.tj-ty__steps span:not(.tj-ty__n){display:block;font-size:14.5px;line-height:1.75;color:var(--tj-mut,#676768)}
+.tj-ty__num{direction:ltr;unicode-bidi:isolate;white-space:nowrap;font-weight:600;color:var(--tj-ink-2,#222)}
+
+.tj-ty__cta{border-top:1px solid var(--tj-line-50,rgba(223,223,226,.5));padding-top:28px}
+.tj-ty__ctaq{font-size:16px;font-weight:700;margin:0 0 12px}
+.tj-ty__btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--tj-red,#c83f49);color:#fff!important;text-decoration:none;font-weight:700;font-size:16px;padding:14px 26px;border-radius:var(--tj-r-full,999px);transition:transform .15s ease,background .15s ease}
+.tj-ty__btn:hover{background:var(--tj-red-600,#b63942);transform:translateY(-1px);color:#fff!important}
+.tj-ty__hours{font-size:13.5px;line-height:1.7;color:var(--tj-mut,#676768);margin:14px 0 0}
+.tj-ty__fine{font-size:12.5px;line-height:1.8;color:var(--tj-mut,#676768);margin:30px 0 0;opacity:.85}
+
+@media (max-width:520px){
+  .tj-ty{padding:4px 16px 60px}
+  .tj-ty__art{max-width:320px}
+  .tj-ty__steps li{padding:14px 15px;gap:12px}
+}
+/* عنوان پیش‌فرض قالب روی صفحهٔ تشکر پنهان می‌شود چون خود صفحه تیتر دارد */
+.page-id-501153 .wp-block-post-title{display:none}
+.page-id-501153 .wp-block-post-content{margin-top:0}

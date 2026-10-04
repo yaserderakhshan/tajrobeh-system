@@ -1,0 +1,69 @@
+name: بررسی بات (PR)
+
+# روی هر PR که bot/ یا اسکریپت‌های گردش کار بات را عوض کند: سینتکس، ترتیب فایل‌ها، نام تکراری و اجرای همهٔ
+# مجموعه‌های تست با دادهٔ ساختگی (.github/scripts/bot-precheck.mjs). به گوگل و تلگرام وصل نمی‌شود و چیزی منتشر نمی‌کند.
+# مرج فقط وقتی این بررسی سبز است. انتشار زنده کار bot-deploy.yml است.
+
+on:
+  pull_request:
+    paths:
+      - 'bot/**'
+      - '.github/scripts/**'
+      - '.github/workflows/bot-*.yml'
+      - 'docs/bot/**'
+      - 'CHANGELOG.md'
+
+permissions:
+  contents: read
+  pull-requests: read   # v170.5: رزرو شمارهٔ نسخه (PRهای باز)
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: بررسی سینتکس
+        run: |
+          mkdir -p /tmp/syn
+          for f in bot/*.gs; do cp "$f" "/tmp/syn/$(basename "$f" .gs).js"; node --check "/tmp/syn/$(basename "$f" .gs).js" || exit 1; done
+          for f in .github/scripts/*.mjs; do node --check "$f" || exit 1; done
+          jq -e . bot/appsscript.json > /dev/null
+          test "$(jq -r '.filePushOrder[0]' bot/.clasp.json)" = "Code.gs" && test "$(jq -r '.filePushOrder[1]' bot/.clasp.json)" = "telegram.gs" \
+            || { echo "::error::filePushOrder در bot/.clasp.json باید با Code.gs و بعد telegram.gs شروع شود"; exit 1; }
+
+      - name: بررسی محلی و همهٔ تست‌ها با دادهٔ ساختگی (و نقشهٔ بات در docs)
+        run: node .github/scripts/bot-precheck.mjs
+
+      # هر PR که کد بات را عوض کند: شمارهٔ نسخه در bot/version.gs بالا برود و یک خط برایش در CHANGELOG.md باشد
+      - name: شمارهٔ نسخه و CHANGELOG
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -e
+          CH=$(git diff --name-only "$BASE"...HEAD)
+          if ! echo "$CH" | grep -qE '^bot/(.*\.gs|\.clasp\.json|appsscript\.json)$'; then echo "کد بات عوض نشده؛ شمارهٔ نسخه لازم نیست."; exit 0; fi
+          ver() { sed -nE "s/^var TG_CODE_VERSION = '([^']+)';.*/\1/p"; }
+          NEW=$(ver < bot/version.gs)
+          OLD=$(git show "$BASE:bot/version.gs" 2>/dev/null | ver || true)
+          [ -n "$NEW" ] || { echo "::error::TG_CODE_VERSION در bot/version.gs پیدا نشد"; exit 1; }
+          [ "$NEW" != "$OLD" ] || { echo "::error::کد بات عوض شده ولی شمارهٔ نسخه در bot/version.gs همان $OLD است. بالا ببر."; exit 1; }
+          git rev-parse -q --verify "refs/tags/bot-$NEW" > /dev/null && { echo "::error::برچسب bot-$NEW قبلاً زده شده؛ شمارهٔ تازه بگذار."; exit 1; }
+          grep -qF "$NEW" CHANGELOG.md || { echo "::error::برای $NEW خطی در CHANGELOG.md نیست."; exit 1; }
+          echo "نسخه: $OLD → $NEW · CHANGELOG دارد."
+
+      # v170.5: دو جلسه یک شماره برندارند. PR باز صاحب شمارهٔ خودش و شماره‌های خط «رزرو نسخه:» توضیحش است؛ زودترین PR برنده است
+      - name: رزرو شمارهٔ نسخه
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: node .github/scripts/bot-version.mjs check
+

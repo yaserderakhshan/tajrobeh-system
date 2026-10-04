@@ -1,0 +1,650 @@
+<!-- wp:html -->
+<style>
+/* == tj2: home-v2 draft (v4) == */
+.tj2{font-family:var(--tj-font);color:var(--tj-soft);direction:rtl;font-size:17px;line-height:1.9;--tj-tint:#faeced;--tj-tint-2:#fdf4f4;--tj-red-400:#d9737a;--tj-yellow:#f2c14e;--w:1180px;overflow-x:clip}
+.tj2 *,.tj2 *::before,.tj2 *::after{box-sizing:border-box}
+.tj2,.tj2 *{overflow-wrap:normal;word-break:normal}
+.tj2 h1,.tj2 h2,.tj2 h3,.tj2 h4{color:var(--tj-ink);margin:0;line-height:1.55;font-weight:700;text-wrap:balance}
+.tj2 p{margin:0}
+.tj2 a{color:inherit;text-decoration:none}
+.tj2 img{max-width:100%;height:auto;display:block}
+.tj2 button{font-family:inherit}
+.tj2 .wrap{max-width:var(--w);margin-inline:auto;padding-inline:24px}
+.tj2 section{padding-block:clamp(48px,6vw,88px)}
+.tj2 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tj-red);background:var(--tj-tint);padding:5px 13px;border-radius:999px;margin-bottom:12px}
+.tj2 .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tj-red)}
+.tj2 .h2{font-size:clamp(23px,3vw,36px);margin-bottom:10px}
+.tj2 .lede{font-size:clamp(15.5px,1.3vw,18px);color:var(--tj-soft);max-width:62ch;line-height:2}
+.tj2 .center{text-align:center}.tj2 .center .lede{margin-inline:auto}
+.tj2 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 24px;border-radius:var(--tj-r-btn);font-size:16px;font-weight:600;border:1.5px solid transparent;transition:.18s ease;white-space:nowrap;cursor:pointer;line-height:1.4}
+.tj2 .btn-brand{background:var(--tj-red);color:#fff}
+.tj2 .btn-brand:hover{background:var(--tj-red-600);box-shadow:0 8px 20px -8px rgba(200,63,73,.5);color:#fff}
+.tj2 .btn-ghost{background:#fff;color:var(--tj-ink-2);border-color:var(--tj-line)}
+.tj2 .btn-ghost:hover{border-color:var(--tj-red-400);color:var(--tj-red-600);background:var(--tj-tint)}
+.tj2 .btn svg{width:14px;height:14px;flex:none}
+.tj2 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.tj2 .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.tj2 .rv{opacity:1;transform:none;transition:none}}
+.tj2 .hs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 14px;scrollbar-width:none;scroll-behavior:smooth}
+.tj2 .hs::-webkit-scrollbar{display:none}
+.tj2 .hs>*{scroll-snap-align:start;flex:0 0 auto}
+.tj2 .arrows{display:flex;gap:8px}
+.tj2 .arrows button{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--tj-line);background:#fff;color:var(--tj-ink);cursor:pointer;display:grid;place-items:center;transition:.15s}
+.tj2 .arrows button:hover{border-color:var(--tj-red);color:var(--tj-red)}
+.tj2 .arrows svg{width:16px;height:16px}
+.tj2 .head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
+.tj2 .hero{padding-block:clamp(36px,5vw,72px) clamp(36px,5vw,64px);background:#fff}
+.tj2 .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px;align-items:center}
+.tj2 .hero h1{font-size:clamp(28px,3.4vw,44px);line-height:1.5;margin:14px 0 16px;max-width:22ch}
+.tj2 .hero h1 em{font-style:normal;color:var(--tj-red)}
+.tj2 .hero .lede{margin:0 0 24px;max-width:56ch}
+.tj2 .ctas{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.tj2 .hero .art{display:flex;align-items:center;justify-content:center}
+.tj2 .hero .art img{width:100%;max-width:440px;height:auto;object-fit:contain}
+.tj2 .nums{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:30px;padding-top:22px;border-top:1px solid var(--tj-line)}
+.tj2 .nums div{display:flex;align-items:baseline;gap:7px}
+.tj2 .nums b{font-size:24px;font-weight:800;color:var(--tj-red);line-height:1;font-variant-numeric:tabular-nums}
+.tj2 .nums span{font-size:13px;color:var(--tj-mut)}
+.tj2 .eco{background:var(--tj-sunk)}
+.tj2 .eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:34px}
+.tj2 .eco-card{border:1px solid var(--tj-line);border-radius:20px;padding:0 0 22px;background:#fff;transition:.2s;display:flex;flex-direction:column;overflow:hidden}
+.tj2 .eco-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px);box-shadow:0 16px 34px -20px rgba(14,14,14,.3)}
+.tj2 .eco-card .pic{height:190px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;padding:16px 16px 0;border-bottom:1px solid var(--tj-line);background:#fff}
+.tj2 .eco-card .pic img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom}
+.tj2 .eco-card .n{font-size:12.5px;color:var(--tj-red);font-weight:700;margin:16px 22px 4px}
+.tj2 .eco-card h3{font-size:18px;margin:0 22px 8px}
+.tj2 .eco-card p{font-size:14px;line-height:1.9;color:var(--tj-soft);margin:0 22px 12px;flex:1}
+.tj2 .eco-card .go{font-size:13.5px;color:var(--tj-ink);font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 22px}
+.tj2 .eco-card .go svg{width:12px;height:12px}
+.tj2 .tl{background:#fff;overflow:hidden}
+.tj2 .tl-line{height:2px;background:var(--tj-line);margin-top:22px}
+.tj2 .tl-track{padding-top:34px}
+.tj2 .tl-item{width:250px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:20px 18px;position:relative}
+.tj2 .tl-item::before{content:"";position:absolute;top:-22px;right:22px;width:14px;height:14px;border-radius:50%;background:var(--tj-red);border:3px solid #fff;box-shadow:0 0 0 1px var(--tj-line)}
+.tj2 .tl-item .y{font-size:13px;color:var(--tj-red);font-weight:700}
+.tj2 .tl-item h3{font-size:16.5px;margin:6px 0 8px}
+.tj2 .tl-item p{font-size:13.5px;color:var(--tj-soft);line-height:1.85}
+.tj2 .tl-item.now{background:var(--tj-red);border-color:var(--tj-red)}
+.tj2 .tl-item.now h3,.tj2 .tl-item.now p{color:#fff}
+.tj2 .tl-item.now .y{color:#ffd6d9}
+.tj2 .tl-item.now::before{background:#fff;border-color:var(--tj-red)}
+.tj2 .svc{background:var(--tj-sunk)}
+.tj2 .svc-list{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-top:30px;background:#fff;border:1px solid var(--tj-line);border-radius:20px;padding:8px 28px}
+.tj2 .svc-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--tj-line);transition:.15s}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:0}
+.tj2 .svc-row img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .svc-row b{display:block;font-size:16px;color:var(--tj-ink)}
+.tj2 .svc-row span{display:block;font-size:13px;color:var(--tj-mut);line-height:1.7}
+.tj2 .svc-row svg{width:16px;height:16px;flex:none;margin-inline-start:auto;color:var(--tj-line);transition:.15s}
+.tj2 .svc-row:hover b{color:var(--tj-red)}
+.tj2 .svc-row:hover svg{color:var(--tj-red);transform:translateX(-4px)}
+.tj2 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
+.tj2 .chip{font-size:13.5px;padding:7px 14px;border-radius:999px;border:1px solid var(--tj-line);background:#fff;color:var(--tj-soft);transition:.15s;cursor:pointer;line-height:1.6}
+.tj2 .chip:hover,.tj2 .chip.on{border-color:var(--tj-red);color:var(--tj-red);background:var(--tj-tint)}
+.tj2 .chips .lbl{font-size:13px;color:var(--tj-mut);align-self:center;margin-inline-end:4px;flex:none;white-space:nowrap}
+.tj2 .how{background:#fff}
+.tj2 .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px;counter-reset:st}
+.tj2 .how-step{background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:24px 20px;position:relative}
+.tj2 .how-step::before{counter-increment:st;content:counter(st,persian);position:absolute;top:-14px;right:18px;width:30px;height:30px;border-radius:50%;background:var(--tj-red);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+.tj2 .how-step img{width:48px;height:48px;object-fit:contain;margin-bottom:10px}
+.tj2 .how-step h3{font-size:16.5px;margin-bottom:6px}
+.tj2 .how-step p{font-size:14px;line-height:1.9}
+.tj2 .how-note{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:center;font-size:14px;color:var(--tj-mut)}
+.tj2 .how-note span{display:inline-flex;align-items:center;gap:7px}
+.tj2 .how-note svg{width:16px;height:16px;color:var(--tj-red)}
+.tj2 .th{background:var(--tj-sunk)}
+.tj2 .thc{width:150px;border:1px solid var(--tj-line);border-radius:16px;padding:12px 10px 14px;text-align:center;background:#fff;transition:.18s;position:relative}
+.tj2 .thc:hover{border-color:var(--tj-red-400);box-shadow:0 10px 26px -16px rgba(14,14,14,.3)}
+.tj2 .thc.hide{display:none}
+.tj2 .thc img.ph{width:92px;height:92px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid var(--tj-sunk)}
+.tj2 .thc b{display:block;font-size:14px;color:var(--tj-ink);line-height:1.5;font-weight:700}
+.tj2 .thc .sp{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px;line-height:1.6;min-height:2.6em}
+.tj2 .thc .yr{display:inline-block;font-size:11.5px;color:var(--tj-red);background:var(--tj-tint);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .vf{position:absolute;top:10px;left:10px;width:18px;height:18px}
+.tj2 .thc .pen{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--tj-ink);background:var(--tj-yellow);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .pen svg{width:10px;height:10px}
+.tj2 .thc.more{background:var(--tj-tint);border-color:var(--tj-red-400);display:flex;flex-direction:column;justify-content:center;gap:6px}
+.tj2 .thc.more b{color:var(--tj-red);font-size:26px}
+.tj2 .thc.more span{font-size:13px;color:var(--tj-ink-2)}
+.tj2 .thc.more .btn{margin:8px auto 0;min-height:36px;font-size:13px;padding:6px 14px}
+.tj2 .dots{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.tj2 .dots i{width:6px;height:6px;border-radius:50%;background:var(--tj-line);transition:.2s}
+.tj2 .dots i.on{width:18px;border-radius:3px;background:var(--tj-red)}
+.tj2 .std{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+.tj2 .std>div{display:flex;gap:12px;align-items:center;border:1px solid var(--tj-line);border-radius:14px;padding:14px 16px;background:#fff}
+.tj2 .std img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .std b{display:block;font-size:14.5px;color:var(--tj-ink)}
+.tj2 .std span{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .sup{background:#fff}
+.tj2 .supc{width:230px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:16px;display:flex;gap:12px;align-items:center;transition:.2s}
+.tj2 .supc:hover{border-color:var(--tj-red-400);transform:translateY(-3px);background:#fff}
+.tj2 .supc img{width:64px;height:76px;border-radius:12px;object-fit:cover;flex:none}
+.tj2 .supc b{display:block;color:var(--tj-ink);font-size:14.5px;line-height:1.5}
+.tj2 .supc .ap{display:block;font-size:12.5px;color:var(--tj-red);margin-top:3px}
+.tj2 .sup .hs{margin-top:28px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center}
+.tj2 .school p.lede{margin-bottom:22px}
+.tj2 .path div{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#fff;border:1px solid var(--tj-line);border-radius:14px;margin-bottom:8px;font-size:15px;color:var(--tj-ink)}
+.tj2 .path div i{width:30px;height:30px;border-radius:50%;background:var(--tj-tint);color:var(--tj-red);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px;flex:none}
+.tj2 .path div:last-child{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .path div:last-child i{background:#fff}
+.tj2 .path small{display:block;font-size:12.5px;color:var(--tj-mut)}
+.tj2 .path div:last-child small{color:#ffd6d9}
+.tj2 .cities{background:#fff}
+.tj2 .map{position:relative;background:var(--tj-sunk);border-radius:24px;padding:22px;overflow:hidden;margin:30px auto 0;max-width:640px}
+.tj2 .map svg{width:100%;height:auto;display:block}
+.tj2 .map .land{fill:#fff;stroke:var(--tj-ink);stroke-width:1.5;stroke-linejoin:round}
+.tj2 .map text{font-family:var(--tj-font);font-size:15px;fill:var(--tj-ink);font-weight:700}
+.tj2 .map text.sea{fill:var(--tj-mut);font-weight:500;font-size:13px}
+.tj2 .map .pin{transform-box:fill-box;transform-origin:50% 100%;animation:tjbob 3.2s ease-in-out infinite}
+.tj2 .map .pin.d1{animation-delay:-.7s}.tj2 .map .pin.d2{animation-delay:-1.4s}.tj2 .map .pin.d3{animation-delay:-2.1s}.tj2 .map .pin.d4{animation-delay:-2.8s}
+@keyframes tjbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+.tj2 .map .shadow{fill:rgba(14,14,14,.14)}
+.tj2 .map .de{position:absolute;left:22px;top:22px;bottom:auto;background:#fff;border:1px solid var(--tj-line);border-radius:14px;padding:8px 12px;font-size:13px;color:var(--tj-ink);display:flex;gap:10px;align-items:center}
+.tj2 .map .de img{width:22px;height:22px}
+.tj2 .map .de small{display:block;color:var(--tj-mut);font-size:11.5px}
+.tj2 .dia{background:#fff}
+.tj2 .dia .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.tj2 .clocks{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;background:var(--tj-sunk);padding:14px;border-radius:22px;position:relative}
+.tj2 .clocks .live{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tj-mut);padding:0 4px 2px}
+.tj2 .clocks .live i{width:8px;height:8px;border-radius:50%;background:#3fb26a;animation:tjpulse 1.6s infinite}
+@keyframes tjpulse{0%{box-shadow:0 0 0 0 rgba(63,178,106,.5)}70%{box-shadow:0 0 0 7px rgba(63,178,106,0)}100%{box-shadow:0 0 0 0 rgba(63,178,106,0)}}
+.tj2 .clock{background:#fff;border:1px solid var(--tj-line);border-radius:16px;padding:12px 14px;transition:.2s}
+.tj2 .clock .c{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .clock .t{display:block;font-size:26px;font-weight:800;color:var(--tj-ink);direction:ltr;text-align:right;font-variant-numeric:tabular-nums;line-height:1.2}
+.tj2 .clock .t small{font-size:14px;font-weight:600;color:var(--tj-mut)}
+.tj2 .clock .s{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px}
+.tj2 .clock.on{border-color:var(--tj-red-400);background:var(--tj-tint)}
+.tj2 .clock.on .s{color:var(--tj-red-600);font-weight:600}
+.tj2 .dia ul{list-style:none;padding:0;margin:18px 0 24px;display:grid;gap:10px}
+.tj2 .dia li{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;color:var(--tj-ink-2)}
+.tj2 .dia li::before{content:"";width:22px;height:22px;flex:none;border-radius:50%;background:var(--tj-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c83f49' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L20 7'/></svg>") center/12px no-repeat;margin-top:3px}
+.tj2 .dia .orbit{width:110px;margin-bottom:6px}
+.tj2 .mag{background:var(--tj-sunk)}
+.tj2 .mag-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:14px;margin-top:28px}
+.tj2 .art-card{background:#fff;border:1px solid var(--tj-line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:.2s}
+.tj2 .art-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .art-card img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.tj2 .art-card .b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tj2 .art-card .k{font-size:12px;color:var(--tj-red);font-weight:700}
+.tj2 .art-card h3{font-size:15px;line-height:1.6}
+.tj2 .art-card p{font-size:13px;color:var(--tj-mut);line-height:1.8;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .art-card.big img{aspect-ratio:16/9}
+.tj2 .art-card.big h3{font-size:19px}
+.tj2 .today{margin-top:16px;background:#fff;border:1px dashed var(--tj-red-400);border-radius:16px;padding:14px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.tj2 .today .k{font-size:12.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .today a{font-weight:600;color:var(--tj-ink)}
+.tj2 .today a:hover{color:var(--tj-red)}
+.tj2 .today .cnt{margin-inline-start:auto;font-size:13px;color:var(--tj-mut)}
+.tj2 .ig{background:#fff;overflow:hidden}
+.tj2 .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:38px;padding:10px 0 16px}
+.tj2 .pola{background:#fff;border:1px solid var(--tj-line);border-radius:6px;padding:12px 12px 16px;box-shadow:0 18px 40px -22px rgba(14,14,14,.35);transition:.25s;position:relative;display:block}
+.tj2 .pola:nth-child(1){transform:rotate(-2deg)}
+.tj2 .pola:nth-child(2){transform:rotate(1.2deg) translateY(10px)}
+.tj2 .pola:nth-child(3){transform:rotate(-1deg)}
+.tj2 .pola:hover{transform:rotate(0) translateY(-6px);z-index:2;border-color:var(--tj-red-400)}
+.tj2 .pola .shot{aspect-ratio:4/5;overflow:hidden;border-radius:3px;background:var(--tj-sunk)}
+.tj2 .pola .shot img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.tj2 .pola:hover .shot img{transform:scale(1.03)}
+.tj2 .pola .cap{font-size:13.5px;color:var(--tj-ink-2);line-height:1.8;margin:12px 4px 10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .pola .who{display:flex;align-items:center;gap:10px;margin:0 4px}
+.tj2 .pola .who img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--tj-tint)}
+.tj2 .pola .who b{display:block;font-size:13px;color:var(--tj-ink);direction:ltr;text-align:right}
+.tj2 .pola .who small{display:block;font-size:11.5px;color:var(--tj-mut)}
+.tj2 .pola .who .f{margin-inline-start:auto;font-size:11.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .pola .tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-2deg);width:70px;height:20px;background:rgba(242,193,78,.6);border-radius:2px}
+.tj2 .org{background:var(--tj-sunk)}
+.tj2 .org .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center}
+.tj2 .org .logos{display:flex;gap:28px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.tj2 .org .logos img{height:34px;width:auto;opacity:.9}
+.tj2 .faq{background:#fff}
+.tj2 .faq-list{max-width:820px;margin:26px auto 0;display:grid;gap:10px}
+.tj2 details{border:1px solid var(--tj-line);border-radius:14px;background:#fff;padding:0 20px;transition:border-color .2s,background .2s}
+.tj2 details[open]{border-color:var(--tj-red-400);background:var(--tj-tint-2)}
+.tj2 summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:700;color:var(--tj-ink);font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;outline:none}
+.tj2 summary:focus{outline:none}
+.tj2 summary:focus-visible{outline:2px solid var(--tj-red-400);outline-offset:6px;border-radius:8px}
+.tj2 summary::-webkit-details-marker{display:none}
+.tj2 summary::after{content:"";width:9px;height:9px;border-inline-start:2px solid var(--tj-red);border-block-end:2px solid var(--tj-red);transform:rotate(-45deg);transition:transform .25s;flex:none;margin-inline-start:6px}
+.tj2 details[open] summary::after{transform:rotate(45deg)}
+.tj2 details .ans{overflow:hidden}
+.tj2 details p{padding:0 0 18px;font-size:15px;line-height:1.95;color:var(--tj-soft)}
+.tj2 details p a{color:var(--tj-red);font-weight:600}
+.tj2 .berry{background:var(--tj-tint);text-align:center}
+.tj2 .berry img{width:100px;margin:0 auto 16px;animation:tjfloat2 5s ease-in-out infinite}
+@keyframes tjfloat2{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(4deg) translateY(-6px)}}
+.tj2 .berry .h2{font-size:clamp(23px,3vw,34px)}
+.tj2 .berry .lede{margin:10px auto 24px}
+.tj2 .berry .ctas{justify-content:center}
+.tj2 .berry .small{font-size:13px;color:var(--tj-mut);margin-top:14px}
+.wp-block-post-content>.tj2.alignfull{max-width:none;width:auto}
+@media (max-width:1024px){
+.tj2 .eco-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .how-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .std{grid-template-columns:repeat(2,1fr)}
+.tj2 .mag-grid{grid-template-columns:1fr 1fr}
+.tj2 .art-card.big{grid-column:1/-1}
+.tj2 .ig-grid{gap:18px}
+.tj2 .school .wrap{grid-template-columns:1fr}
+.tj2 .org .wrap{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+.tj2{font-size:16px}
+.tj2 section{padding-block:40px}
+.tj2 .hero{padding-block:16px 32px}
+.tj2 .hero .wrap{grid-template-columns:1fr;gap:6px}
+.tj2 .hero .art{order:-1;justify-content:center}
+.tj2 .hero .art img{max-width:190px}
+.tj2 .hero h1{font-size:26px;margin:8px 0 12px}
+.tj2 .hero .lede{font-size:15px;margin-bottom:18px}
+.tj2 .ctas .btn{flex:1;min-height:44px;font-size:15px;padding:8px 14px}
+.tj2 .nums{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:22px;padding-top:18px}
+.tj2 .nums b{font-size:20px}.tj2 .nums span{font-size:12px}
+.tj2 .eco-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}
+.tj2 .eco-grid::-webkit-scrollbar{display:none}
+.tj2 .eco-card{flex:0 0 78%;scroll-snap-align:start}
+.tj2 .eco-card .pic{height:140px}
+.tj2 .tl-item{width:220px}
+.tj2 .svc-list{grid-template-columns:1fr;gap:0;padding:4px 16px}
+.tj2 .svc-row{padding:12px 0;gap:12px}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:1px solid var(--tj-line)}
+.tj2 .svc-row:last-child{border-bottom:0}
+.tj2 .svc-row img{width:32px;height:32px}
+.tj2 .svc-row b{font-size:15px}.tj2 .svc-row span{font-size:12.5px}
+.tj2 .chips{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
+.tj2 .chips::-webkit-scrollbar{display:none}
+.tj2 .chip{white-space:nowrap;flex:none}
+.tj2 .how-grid{grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.tj2 .how-step{padding:20px 12px 14px}
+.tj2 .how-step img{width:36px;height:36px}
+.tj2 .how-step h3{font-size:14.5px}
+.tj2 .how-step p{font-size:12.5px;line-height:1.75}
+.tj2 .how-note{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;text-align:right}
+.tj2 .thc{width:138px}
+.tj2 .std{grid-template-columns:1fr 1fr;gap:8px}
+.tj2 .std>div{flex-direction:column;text-align:center;gap:6px;padding:12px 8px}
+.tj2 .std b{font-size:13px}.tj2 .std span{font-size:11.5px}
+.tj2 .supc{width:200px}
+.tj2 .map{padding:12px;border-radius:18px}
+.tj2 .map text{font-size:18px}.tj2 .map text.sea{font-size:15px}
+.tj2 .map .de{left:10px;top:10px;bottom:auto;padding:6px 10px;font-size:12px}
+.tj2 .dia .wrap{grid-template-columns:1fr;gap:22px}
+.tj2 .clocks{grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.tj2 .clock{padding:10px}.tj2 .clock .t{font-size:19px}.tj2 .clock .t small{font-size:11px}.tj2 .clock .s{font-size:10.5px}
+.tj2 .mag-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:20px}
+.tj2 .mag-grid::-webkit-scrollbar{display:none}
+.tj2 .art-card{flex:0 0 76%;scroll-snap-align:start}
+.tj2 .art-card.big img{aspect-ratio:16/10}
+.tj2 .art-card.big h3{font-size:15px}
+.tj2 .today .cnt{display:none}
+.tj2 .ig-grid{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 6px 16px;scrollbar-width:none}
+.tj2 .ig-grid::-webkit-scrollbar{display:none}
+.tj2 .pola{flex:0 0 76%;scroll-snap-align:center}
+.tj2 .pola:nth-child(n){transform:none}
+.tj2 .org .logos{gap:18px}.tj2 .org .logos img{height:26px}
+.tj2 .berry .ctas .btn{flex:1 1 100%}
+.tj2 .arrows{display:none}
+}
+.tj2 .map{max-width:620px}
+.tj2 .map .mi{position:relative}
+.tj2 .map .mi svg{width:100%;height:auto;display:block}
+.tj2 .map .mp{--pin:20px;position:absolute;transform:translate(-50%,calc(-1 * var(--pin)));text-align:center;line-height:1.2;pointer-events:none;width:max-content}
+.tj2 .map .mp img{display:block;margin:0 auto 2px;width:var(--pin);height:var(--pin);object-fit:contain;animation:tjbob 3.2s ease-in-out infinite;transform-origin:50% 100%}
+.tj2 .map .mp b{display:block;font-size:13.5px;font-weight:700;color:var(--tj-ink);text-shadow:0 0 6px var(--tj-sunk),0 0 2px var(--tj-sunk)}
+.tj2 .map .mp.big{--pin:30px}
+.tj2 .map .mp.big b{font-size:15px}
+.tj2 .map .mp.up{display:flex;flex-direction:column-reverse;transform:translate(-50%,calc(-1 * var(--pin) - 1.3em))}
+.tj2 .map .mp.up img{margin:2px auto 0}
+.tj2 .map .mp.lw b{position:absolute;right:calc(100% + 4px);top:calc(var(--pin) - 1.2em)}
+.tj2 .map .mp.d1 img{animation-delay:-.7s}
+.tj2 .map .mp.d2 img{animation-delay:-1.4s}
+.tj2 .map .mp.d3 img{animation-delay:-2.1s}
+.tj2 .map .mp.d4 img{animation-delay:-2.8s}
+.tj2 .map .sea{position:absolute;transform:translate(-50%,-50%);font-size:12.5px;color:var(--tj-mut);white-space:nowrap;pointer-events:none}
+.tj2 .clock.on{border-color:#bfe0cb;background:#f3faf5}
+.tj2 .clock.on .s{color:#2e8b57;font-weight:600}
+.tj2 .thc .loc{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--tj-soft);background:var(--tj-sunk);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .loc svg{width:11px;height:11px;flex:none;color:var(--tj-mut)}
+.tj2 .thc .sp{min-height:3.1em}
+.tj2 .thc .sch{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:#fff;background:var(--tj-red);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .sch svg{width:10px;height:10px}
+.tj2 .thc .pen{top:auto;bottom:8px;right:8px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:block}
+.tj2 .axes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.tj2 .axes>div{background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:20px 20px 22px;transition:.2s}
+.tj2 .axes>div:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .axes i{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--tj-tint);color:var(--tj-red);margin-bottom:12px}
+.tj2 .axes i svg{width:20px;height:20px}
+.tj2 .axes b{display:block;font-size:16px;color:var(--tj-ink);margin-bottom:6px}
+.tj2 .axes p{font-size:14px;color:var(--tj-soft);line-height:1.9;margin:0}
+.tj2 .ring{margin-top:14px;background:var(--tj-ink);color:#fff;border-radius:18px;padding:18px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tj2 .ring b{font-size:22px;color:#fff;white-space:nowrap}
+.tj2 .ring span{font-size:14.5px;color:rgba(255,255,255,.72);line-height:1.9;flex:1;min-width:220px}
+.tj2 .ring .dot{width:9px;height:9px;border-radius:50%;background:var(--tj-yellow);flex:none;min-width:0}
+.tj2 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:34px;position:relative}
+.tj2 .steps::before{content:"";position:absolute;top:19px;right:10%;left:10%;height:2px;background:var(--tj-line)}
+.tj2 .steps>div{text-align:center;padding:0 8px;position:relative}
+.tj2 .steps i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid var(--tj-red-400);color:var(--tj-red);font-style:normal;font-weight:800;font-size:14px;margin:0 auto 12px;position:relative;z-index:1}
+.tj2 .steps>div:last-child i{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .steps b{display:block;font-size:14.5px;color:var(--tj-ink);margin-bottom:4px}
+.tj2 .steps span{display:block;font-size:12.5px;color:var(--tj-mut);line-height:1.8}
+.tj2 .school .ctas{justify-content:center;margin-top:30px}
+.tj2 .org .logos img{height:30px}
+.tj2 .org .logos img.dk{height:26px}
+@media (max-width:1024px){
+.tj2 .axes{grid-template-columns:1fr}
+.tj2 .steps{grid-template-columns:1fr 1fr 1fr;gap:22px 0}
+.tj2 .steps::before{display:none}
+}
+@media (max-width:760px){
+.tj2 .map .mp b{font-size:11.5px}
+.tj2 .map .mp.big b{font-size:12.5px}
+.tj2 .map .mp{--pin:15px}
+.tj2 .map .mp.big{--pin:22px}
+.tj2 .map .sea{font-size:10.5px}
+.tj2 .steps{grid-template-columns:1fr 1fr;gap:20px 0}
+.tj2 .ring{padding:16px 18px;gap:10px}
+.tj2 .ring b{font-size:18px}
+}
+.tj2 .sup{background:var(--tj-tint-2)}
+.tj2 .supc{background:#fff;width:250px;padding:18px}
+.tj2 .supc:hover{background:#fff}
+.tj2 .supc img{width:76px;height:92px;border-radius:14px}
+.tj2 .supc b{font-size:15px}
+.tj2 .school .wrap{display:grid}
+.tj2 .school{background:#fff}
+.tj2 .path div{background:var(--tj-sunk)}
+.tj2 .thc .meta{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px;min-height:24px}
+.tj2 .thc .loc,.tj2 .thc .sch,.tj2 .thc .pen{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;margin:0;line-height:1.7;font-weight:600;top:auto;right:auto;bottom:auto}
+.tj2 .thc .loc{background:var(--tj-sunk);color:var(--tj-soft);font-weight:500}
+.tj2 .thc .sch{background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .thc .pen{background:#fdf3d6;color:#6b4f00}
+.tj2 .thc .loc svg,.tj2 .thc .sch svg,.tj2 .thc .pen svg{width:11px;height:11px}
+
+.tj2 .thc .mnt{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;line-height:1.7;font-weight:700;color:var(--tj-red);background:var(--tj-tint);border:1px solid var(--tj-red-400);margin:0}
+.tj2 .thc .mnt svg{width:11px;height:11px;flex:none}
+
+.tj2 .supc .supmag{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;color:var(--tj-red-600);text-decoration:none;border-bottom:1px solid var(--tj-red-400)}
+
+/* == هیرو: نسخه‌ی ۲x و شناوری توت‌فرنگی‌ها == */
+.tj2 .hero .art .dwrap{position:relative;display:inline-block;width:min(100%,440px)}
+.tj2 .hero .art .dwrap>img.dbase{display:block;width:100%;height:auto;max-width:100%;max-height:none;margin:0}
+.tj2 .hero .art .dwrap>img.seed{position:absolute;height:auto;margin:0;max-width:none;max-height:none;will-change:transform;animation:tj-drift var(--d,7s) ease-in-out var(--dl,0s) infinite alternate}
+@keyframes tj-drift{from{transform:translate(0,0) rotate(0deg)}to{transform:translate(var(--tx,-5px),var(--ty,-4px)) rotate(var(--rt,-1.2deg))}}
+.tj2 .hero .art .dwrap>img.s1{left:84.271%;top:15.286%;width:3.750%;--tx:-11px;--ty:-9px;--rt:-4deg;--d:3.7s;--dl:0s}
+.tj2 .hero .art .dwrap>img.s2{left:60.313%;top:16.864%;width:3.542%;--tx:11px;--ty:-9px;--rt:4deg;--d:4.7s;--dl:-2.1s}
+.tj2 .hero .art .dwrap>img.s3{left:70.938%;top:20.710%;width:3.333%;--tx:-11px;--ty:-9px;--rt:-4deg;--d:5.1s;--dl:-4.3s}
+.tj2 .hero .art .dwrap>img.s4{left:61.563%;top:28.205%;width:3.333%;--tx:11px;--ty:-9px;--rt:4deg;--d:4.1s;--dl:-1.2s}
+.tj2 .hero .art .dwrap>img.s5{left:78.958%;top:30.473%;width:4.271%;--tx:-11px;--ty:-9px;--rt:-4deg;--d:4.4s;--dl:-5.6s}
+.tj2 .hero .art .dwrap>img.s6{left:82.708%;top:39.349%;width:3.750%;--tx:11px;--ty:-9px;--rt:4deg;--d:4.9s;--dl:-3.4s}
+@media (prefers-reduced-motion:reduce){.tj2 .hero .art .dwrap>img.seed{animation:none}}
+@media (max-width:760px){.tj2 .hero .art .dwrap{width:min(100%,200px)}.tj2 .hero .art .dwrap>img.seed{--tx:-6px;--ty:-5px}}
+/* == سکشن «از کجا شروع کنم؟» == */
+.tj2 .start .eco-grid{grid-template-columns:repeat(3,1fr)}
+.tj2 .start .eco-card{cursor:default}
+.tj2 .start .eco-card .pic{height:150px}
+.tj2 .start .eco-card .pic img{max-height:120px}
+.tj2 .start .eco-card p{flex:1}
+.tj2 .start .acts{display:flex;align-items:center;gap:14px;margin:4px 22px 0;flex-wrap:wrap}
+.tj2 .start .acts .btn{min-height:42px;padding:8px 18px;font-size:14.5px}
+.tj2 .start .acts .lnk{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:600;color:var(--tj-red);text-decoration:none}
+.tj2 .start .acts .lnk svg{width:12px;height:12px}
+.tj2 .start .acts .lnk:hover{text-decoration:underline;text-underline-offset:4px}
+@media (max-width:1024px){.tj2 .start .eco-grid{grid-template-columns:repeat(3,1fr);gap:12px}.tj2 .start .eco-card h3{font-size:16.5px}}
+@media (max-width:760px){
+.tj2 .start .eco-grid{display:grid;grid-template-columns:1fr;gap:12px;overflow:visible;padding:0;margin-top:20px}
+.tj2 .start .eco-card{flex:none;display:grid;grid-template-columns:68px 1fr;column-gap:14px;padding:16px;align-items:start;border-radius:16px}
+.tj2 .start .eco-card .pic{grid-row:1/5;height:68px;width:68px;padding:8px;border:0;border-radius:14px;background:var(--tj-sunk);align-items:center}
+.tj2 .start .eco-card .pic img{height:100%;max-height:52px;width:auto}
+.tj2 .start .eco-card .n{margin:0 0 2px}
+.tj2 .start .eco-card h3{margin:0 0 6px;font-size:16px}
+.tj2 .start .eco-card p{margin:0 0 10px;font-size:13.5px;line-height:1.8}
+.tj2 .start .acts{margin:0;gap:12px}
+.tj2 .start .acts .btn{min-height:40px;padding:6px 14px;font-size:13.5px}
+}
+
+/* == نوار بات تلگرام == */
+.tj2 .botbar{background:var(--tj-tint);border-block:1px solid var(--tj-line)}
+.tj2 .botbar .wrap{display:flex;align-items:center;gap:14px;padding-block:10px;flex-wrap:wrap}
+.tj2 .botbar img{width:54px;height:54px;object-fit:contain;flex:none;animation:tj-bob 2.8s ease-in-out infinite}
+@keyframes tj-bob{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(6deg) translateY(-3px)}}
+.tj2 .botbar p{margin:0;font-size:14.5px;color:var(--tj-soft);flex:1;line-height:1.7;min-width:220px}
+.tj2 .botbar p b{color:var(--tj-ink)}
+.tj2 .botbar>.wrap>a{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--tj-red);white-space:nowrap;border:1.5px solid var(--tj-red-400);border-radius:999px;padding:7px 14px;background:#fff;transition:.15s}
+.tj2 .botbar>.wrap>a:hover{background:var(--tj-red);color:#fff;border-color:var(--tj-red)}
+.tj2 .botbar>.wrap>a svg{width:12px;height:12px}
+@media (prefers-reduced-motion:reduce){.tj2 .botbar img{animation:none}}
+@media (max-width:760px){.tj2 .botbar .wrap{gap:10px;padding-block:10px}.tj2 .botbar img{width:40px;height:40px}.tj2 .botbar p{font-size:13.5px;min-width:0}.tj2 .botbar>.wrap>a{flex:1 1 100%;justify-content:center;padding:9px 14px}}
+/* == هیئت علمی و سوپروایزرها (تامنیل کوچک) == */
+.tj2 .sup .head .btn{flex:none}
+.tj2 .fac-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:28px}
+.tj2 .fg{background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:16px 18px}
+.tj2 .fg.board{grid-column:1/-1;background:#fff}
+.tj2 .fg.board .ppl{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tj2 .fg h3{font-size:14px;color:var(--tj-red);font-weight:700;margin:0 0 10px}
+.tj2 .ppl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px}
+.tj2 .fg.mentors{grid-column:1/-1}
+.tj2 .fg.mentors .ppl{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tj2 .pp{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:12px;color:var(--tj-ink);min-width:0;transition:.15s}
+.tj2 .pp:hover{background:#fff}
+.tj2 .fg.board .pp:hover{background:var(--tj-sunk)}
+.tj2 .pp img,.tj2 .pp .mono{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none;border:2px solid #fff;box-shadow:0 0 0 1px var(--tj-line)}
+.tj2 .pp .mono{display:grid;place-items:center;background:var(--tj-tint);color:var(--tj-red);font-weight:800;font-size:13px}
+.tj2 .pp>span{min-width:0}
+.tj2 .pp b{display:block;font-size:14px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tj2 .pp small{display:block;font-size:12px;color:var(--tj-mut);line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tj2 .pp:hover b{color:var(--tj-red)}
+@media (max-width:1024px){.tj2 .fg.board .ppl,.tj2 .fg.mentors .ppl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){
+.tj2 .fac-grid{grid-template-columns:1fr;gap:10px;margin-top:20px}
+.tj2 .fg{padding:12px 12px}
+.tj2 .ppl,.tj2 .fg.board .ppl,.tj2 .fg.mentors .ppl{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 6px}
+.tj2 .pp{gap:8px;padding:5px 4px}
+.tj2 .pp img,.tj2 .pp .mono{width:38px;height:38px}
+.tj2 .pp b{font-size:13px}
+.tj2 .pp small{font-size:11px}
+}
+/* == مدرسه: دپارتمان‌ها == */
+.tj2 .school .wrap{align-items:start}
+.tj2 .ladder{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 20px}
+.tj2 .ladder span{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--tj-ink);background:#fff;border:1px solid var(--tj-line);border-radius:999px;padding:5px 12px}
+.tj2 .ladder span:not(:last-child)::after{content:"←";color:var(--tj-red);font-weight:800;margin-inline-start:2px}
+.tj2 .schlinks{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:16px}
+.tj2 .schlinks a{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:600;color:var(--tj-red)}
+.tj2 .schlinks a svg{width:12px;height:12px}
+.tj2 .schlinks a:hover{text-decoration:underline;text-underline-offset:4px}
+.tj2 .depts{display:grid;gap:10px}
+.tj2 .dept{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;background:#fff;border:1px solid var(--tj-line);border-radius:16px;padding:14px 16px;color:var(--tj-ink);transition:.18s}
+.tj2 .dept:hover{border-color:var(--tj-red-400);transform:translateY(-2px);box-shadow:0 14px 30px -20px rgba(14,14,14,.3)}
+.tj2 .dept .code{grid-row:1/3;font-family:inherit;font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--tj-red);background:var(--tj-tint);border-radius:10px;padding:8px 10px;direction:ltr;min-width:64px;text-align:center}
+.tj2 .dept b{font-size:16px}
+.tj2 .dept small{font-size:12.5px;color:var(--tj-mut);line-height:1.7}
+.tj2 .dept.soon{opacity:.75}
+.tj2 .dept.soon .code{background:var(--tj-sunk);color:var(--tj-mut)}
+@media (max-width:760px){.tj2 .school .wrap{gap:20px}.tj2 .dept{padding:12px 14px}.tj2 .dept .code{min-width:56px;font-size:11px}.tj2 .dept b{font-size:15px}}
+
+/* == اصلاح موبایل: هیئت علمی، نوار بات == */
+.tj2 #supervisors{background:#fff}
+@media (max-width:760px){
+.tj2 .pp b{white-space:normal;overflow:visible;text-overflow:clip;font-size:13px;line-height:1.4}
+.tj2 .pp small{display:none}
+.tj2 .fg.board .pp small{display:block;white-space:normal;overflow:visible;font-size:11px;line-height:1.4}
+.tj2 .pp{align-items:center;padding:4px 2px}
+.tj2 .botbar .more{display:none}
+.tj2 .botbar .wrap{flex-wrap:nowrap;gap:10px;padding-block:8px}
+.tj2 .botbar img{width:36px;height:36px}
+.tj2 .botbar p{font-size:13px;line-height:1.5}
+.tj2 .botbar p b{font-weight:600}
+.tj2 .botbar>.wrap>a{flex:none;padding:6px 10px;font-size:12.5px}
+}
+
+/* == اصلاح موبایل: نقشه و کارت مجله == */
+@media (max-width:760px){
+.tj2 .map .de{top:auto;bottom:10px;left:10px}
+.tj2 .art-card,.tj2 .art-card.big{flex:0 0 86%;flex-direction:row;align-items:stretch}
+.tj2 .art-card img,.tj2 .art-card.big img{width:96px;min-width:96px;height:auto;aspect-ratio:auto;object-fit:cover}
+.tj2 .art-card .b{padding:12px 12px 12px}
+.tj2 .art-card h3,.tj2 .art-card.big h3{font-size:14px}
+.tj2 .art-card p{-webkit-line-clamp:2}
+}
+
+/* == هیئت علمی: سه ستون دپارتمان == */
+@media (min-width:1025px){.tj2 .fac-grid{grid-template-columns:2fr 1fr 1fr}.tj2 .fg:nth-child(3) .ppl,.tj2 .fg:nth-child(4) .ppl{grid-template-columns:1fr}}
+
+/* == نوار بات: مدل آرام (بدون تکان) == */
+.tj2 .botbar img{animation:none!important;width:30px;height:30px}
+.tj2 .botbar .dot{width:9px;height:9px;border-radius:50%;background:#2fa36b;flex:none;box-shadow:0 0 0 0 rgba(47,163,107,.45);animation:tj-pulse 2.4s ease-out infinite}
+@keyframes tj-pulse{0%{box-shadow:0 0 0 0 rgba(47,163,107,.45)}70%{box-shadow:0 0 0 8px rgba(47,163,107,0)}100%{box-shadow:0 0 0 0 rgba(47,163,107,0)}}
+@media (prefers-reduced-motion:reduce){.tj2 .botbar .dot{animation:none}}
+@media (max-width:760px){.tj2 .botbar img{width:26px;height:26px}.tj2 .botbar .wrap{gap:8px}}
+/* == کارت تراپیست: فشرده و سبک == */
+.tj2 .thc{width:132px;padding:10px 8px 12px;border-radius:14px}
+.tj2 .thc img.ph{width:64px;height:64px;margin:0 auto 8px;border-width:2px}
+.tj2 .thc b{font-size:13.5px;line-height:1.45}
+.tj2 .thc .sp{font-size:11.5px;line-height:1.55;min-height:2.4em;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .thc .meta{gap:4px;margin-top:6px;min-height:20px}
+.tj2 .thc .loc,.tj2 .thc .sch,.tj2 .thc .pen,.tj2 .thc .mnt{font-size:10.5px;padding:1px 7px;line-height:1.6}
+.tj2 .thc .vf{width:15px;height:15px;top:8px;left:8px}
+.tj2 .thc.more{width:132px}
+.tj2 .thc.more b{font-size:22px}
+.tj2 .thc.more span{font-size:12.5px}
+.tj2 .thc.more .btn{min-height:32px;font-size:12.5px;padding:4px 12px}
+.tj2 .th .hs{gap:10px}
+@media (max-width:760px){.tj2 .thc,.tj2 .thc.more{width:120px;padding:10px 6px 10px}.tj2 .thc img.ph{width:56px;height:56px}.tj2 .thc b{font-size:12.5px}.tj2 .thc .sp{font-size:11px}}
+/* == FAQ هم‌زبان با کارت‌ها == */
+.tj2 .faq-list{gap:8px;margin-top:22px}
+.tj2 details{background:var(--tj-sunk);border-radius:16px;padding:0 18px}
+.tj2 details[open]{background:#fff;border-color:var(--tj-red-400);box-shadow:0 14px 30px -24px rgba(14,14,14,.3)}
+.tj2 summary{font-size:15.5px;padding:14px 0}
+.tj2 summary::after{width:8px;height:8px}
+.tj2 details p{font-size:14.5px;line-height:1.9;padding-bottom:16px}
+@media (max-width:760px){.tj2 details{padding:0 14px}.tj2 summary{font-size:14.5px;padding:13px 0}.tj2 details p{font-size:13.5px}}
+/* == موبایل: فشرده‌تر == */
+@media (max-width:760px){
+.tj2 section{padding-block:32px}
+.tj2 .h2{margin-bottom:8px}
+.tj2 .lede{font-size:14.5px;line-height:1.85}
+.tj2 .how-grid{gap:10px;margin-top:22px}
+.tj2 .how-step{padding:20px 14px 16px}
+.tj2 .how-step p{font-size:13px;line-height:1.75}
+.tj2 .tl-item{width:220px;padding:16px 14px}
+.tj2 .sup .head .btn{width:100%}
+}
+
+/* == چهار معیار: فشرده روی موبایل == */
+@media (max-width:760px){.tj2 .std>div{flex-direction:row;text-align:start;align-items:center;gap:10px;padding:10px 12px}.tj2 .std>div img{width:32px;height:32px;margin:0;flex:none}.tj2 .std>div b{font-size:13px}.tj2 .std>div span{font-size:11.5px;line-height:1.5}}
+</style>
+<div class="tj2 alignfull" id="tj2">
+<section class="hero" id="hero">
+<div class="wrap">
+<div class="copy">
+<span class="eyebrow">آلمان · بیمهٔ دولتی</span>
+<h1>بیمهٔ آلمان کِی هزینهٔ<br>روان‌درمانی <em>خصوصی</em> را می‌دهد</h1>
+<p class="lede">اگر با بیمهٔ دولتی آلمان در زمان معقول نوبت روان‌درمانی پیدا نکنید، بر پایهٔ بند ۳ مادهٔ ۱۳ قانون اجتماعی پنجم آلمان (§ 13 Abs. 3 SGB V) بیمه موظف است هزینهٔ درمان نزد یک درمانگر خصوصی دارای مجوز را بپردازد. نام این مسیر Kostenerstattungsverfahren است و درخواستش باید پیش از شروع درمان داده شود.</p>
+<div class="ctas">
+<a class="btn btn-brand" href="#steps">چهار قدم درخواست</a>
+<a class="btn btn-ghost" href="/persian-therapy/">تراپی فارسی، بدون انتظار</a>
+</div>
+<p class="revline" style="margin:22px 0 0;padding-top:16px;border-top:1px solid var(--tj-line);font-size:13px;line-height:2;color:var(--tj-mut)">بازبینی بالینی: <a href="/team/erfan-amirbeigi/" style="color:var(--tj-ink,#0e0e0e);font-weight:700;text-decoration:none;border-bottom:1px solid var(--tj-line)">دکتر عرفان امیربیگی</a> · دکتری تخصصی روان‌شناسی، دانشگاه آزاد تهران مرکزی · کد نظام روان‌شناسی ۷۰۸۲۸ · آخرین بازبینی: ۲۵ شهریور ۱۴۰۵</p>
+</div>
+<div class="art"><img src="/wp-content/uploads/2026/09/tjl-magritte.webp" alt="مسیر درخواست بازپرداخت هزینهٔ روان‌درمانی از بیمهٔ آلمان، تصویرسازی مرکز تجربه زندگی" width="738" height="933" fetchpriority="high" decoding="async" loading="eager"></div>
+</div>
+</section>
+
+<section class="how" id="steps">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">مسیر درخواست</span><h2 class="h2">چهار قدم تا بازپرداخت</h2><p class="lede">ترتیب این قدم‌ها مهم است. اگر مرحلهٔ اول را نگذرانده باشید، بیمه بقیه را بررسی نمی‌کند.</p></div>
+<div class="how-grid">
+<div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-1-ink.png" alt="قدم اول: جلسهٔ مشاورهٔ اولیه و گرفتن فرم PTV 11" loading="lazy"><h3>جلسهٔ مشاورهٔ اولیه</h3><p>نزد درمانگری با مجوز بیمه (Kassensitz) در Psychotherapeutische Sprechstunde شرکت کنید و فرم PTV 11 را بگیرید. بدون دست‌کم ۵۰ دقیقه از این جلسه، هیچ درمان دیگری شروع نمی‌شود.</p></div>
+<div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-2.webp" alt="قدم دوم: ثبت مکتوب ردها" loading="lazy"><h3>ثبت مکتوب ردها</h3><p>با درمانگران دارای Kassensitz تماس بگیرید و هر رد را بنویسید: نام، تاریخ، ساعت تماس و زودترین زمان ممکن شروع. توصیهٔ اتحادیهٔ روان‌درمانگران آلمان دست‌کم سه تا پنج رد است.</p></div>
+<div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-3.webp" alt="قدم سوم: جمع کردن مدارک" loading="lazy"><h3>جمع کردن مدارک</h3><p>تأییدیهٔ کتبی درمانگر خصوصی دارای Approbation برای شروع فوری، گواهی فوریت از پزشک خانواده یا روان‌پزشک، و در صورت امکان نامهٔ Terminservicestelle.</p></div>
+<div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-4.webp" alt="قدم چهارم: درخواست کتبی به بیمه" loading="lazy"><h3>درخواست کتبی به بیمه</h3><p>پیش از شروع درمان، درخواست را کتبی به Krankenkasse بدهید. جلسه‌هایی که پیش از تصمیم بیمه برگزار شوند قابل صورت‌حساب نیستند.</p></div>
+</div>
+</div>
+</section>
+
+<section class="faq" id="detail">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">جزئیات</span><h2 class="h2">آنچه پیش از درخواست باید بدانید</h2></div>
+<div class="faq-list rv">
+<details><summary>چهار پلهٔ رسمی درمان با بیمهٔ دولتی چیست؟</summary><div class="ans"><p>نظام آلمان چهار پله دارد. یک: Psychotherapeutische Sprechstunde، برای بزرگسالان تا شش واحد بیست‌وپنج دقیقه‌ای یعنی صد و پنجاه دقیقه در هر دورهٔ بیماری. دو: Akutbehandlung یا درمان فوری، تا بیست‌وچهار واحد بیست‌وپنج دقیقه‌ای، بدون نیاز به تأیید قبلی بیمه. سه: جلسات آزمایشی (probatorische Sitzungen)، برای بزرگسالان دو تا چهار جلسه. چهار: درمان کوتاه‌مدت تا دوازده جلسه و پس از آن دوازده جلسهٔ دیگر، یا درمان بلندمدت.</p></div></details>
+<details><summary>درمان بلندمدت چند جلسه است؟</summary><div class="ans"><p>سقف درخواست اول درمان بلندمدت انفرادی به روش درمان بستگی دارد: درمان سیستمی تا سی‌وشش جلسه، رفتاردرمانی تا شصت جلسه، روان‌درمانی با مبنای روان‌پویشی تا شصت جلسه، و روان‌درمانی تحلیلی تا صد و شصت جلسه. هر جلسه پنجاه دقیقه است و حداکثر سه جلسهٔ انفرادی در هفته مجاز است.</p></div></details>
+<details><summary>بیمه هزینهٔ کدام روش‌ها را می‌دهد؟</summary><div class="ans"><p>فقط چهار روش، که به آن‌ها Richtlinienverfahren می‌گویند: روان‌درمانی تحلیلی، روان‌درمانی با مبنای روان‌پویشی، رفتاردرمانی و درمان سیستمی. گشتالت، سایکودراما، هیپنوتراپی، مشاوره و کوچینگ جزو این فهرست نیستند و بیمهٔ دولتی هزینه‌شان را نمی‌پردازد.</p></div></details>
+<details><summary>Kassensitz یعنی چه و چرا برای من مهم است؟</summary><div class="ans"><p>Kassensitz مجوز محدود و برنامه‌ریزی‌شدهٔ کار با بیمهٔ دولتی است. فقط درمانگری که Kassensitz دارد می‌تواند مستقیم از بیمه صورت‌حساب بگیرد. درمانگری که مطب خصوصی دارد و Kassensitz ندارد، به‌طور عادی از بیمهٔ دولتی پول نمی‌گیرد و تنها راه پوشش هزینهٔ او همین مسیر Kostenerstattung است.</p></div></details>
+<details><summary>شمارهٔ ۱۱۶۱۱۷ چه چیزی را تضمین می‌کند و چه چیزی را نه؟</summary><div class="ans"><p>مرکز نوبت‌دهی (Terminservicestelle) باید ظرف یک هفته ارجاع بدهد و نوبت نباید بیش از چهار هفته بعد باشد، یعنی روی هم حداکثر پنج هفته. برای درمان فوری، نوبت حداکثر دو هفتهٔ بعد. برای استفاده از آن به کد ارجاع روی فرم PTV 11 نیاز دارید. نکتهٔ مهم: این مرکز فقط برای مشاورهٔ اولیه، درمان فوری و جلسات آزمایشی نوبت پیدا می‌کند و برای درمان کوتاه‌مدت یا بلندمدت جا پیدا نمی‌کند.</p></div></details>
+<details><summary>واقعاً چقدر باید منتظر ماند؟</summary><div class="ans"><p>بر پایهٔ بررسی اتحادیهٔ فدرال روان‌درمانگران آلمان روی حدود سیصد هزار بیمه‌شده، میانگین فاصله از جلسهٔ مشاورهٔ اولیه تا شروع درمان صد و چهل و دو روز بوده است. این داده از سه‌ماههٔ اول سال دو هزار و نوزده است و عدد ملی تازه‌تری از منبع رسمی منتشر نشده. در همان بررسی، کمتر از نوزده درصد در همان فصل درمان را شروع کردند و بیش از ده درصد یک سال یا بیشتر منتظر ماندند.</p></div></details>
+<details><summary>بیمه چقدر وقت دارد تصمیم بگیرد؟</summary><div class="ans"><p>سه هفته از دریافت درخواست، یا پنج هفته اگر نظر کارشناسی پزشکی گرفته شود. اگر بیمه این مهلت را بدون اطلاع کتبی موجه از دست بدهد، خدمت «تأییدشده تلقی» می‌شود؛ به این قاعده Genehmigungsfiktion می‌گویند و دادگاه اجتماعی دورتموند در ژانویهٔ دو هزار و شانزده آن را تأیید کرده است.</p></div></details>
+<details><summary>اگر بیمه رد کرد چه کنم؟</summary><div class="ans"><p>یک ماه از تاریخ دریافت تصمیم فرصت اعتراض کتبی دارید. اعتراض تلفنی یا ایمیلی معتبر نیست و ارسال سفارشی توصیه می‌شود. اگر اعتراض هم رد شد، یک ماه فرصت شکایت در دادگاه اجتماعی دارید که معمولاً برای بیمه‌شده رایگان است. اگر بیمه ظرف سه ماه اصلاً تصمیم نگیرد، طرح دعوای عدم اقدام ممکن است.</p></div></details>
+<details><summary>اول من پول می‌دهم یا بیمه؟</summary><div class="ans"><p>معمولاً شما اول پرداخت می‌کنید و بعد بیمه بازپرداخت می‌کند. صورت‌حساب درمانگر خصوصی را می‌گیرید و به بیمه می‌دهید. توجه کنید که بیمه ممکن است همهٔ مبلغ تعرفهٔ خصوصی را نپردازد و بخشی بر عهدهٔ خودتان بماند.</p></div></details>
+<details><summary>هزینهٔ مترجم را چه کسی می‌دهد؟</summary><div class="ans"><p>بیمهٔ دولتی هزینهٔ مترجم را نمی‌پردازد. دادگاه عالی اجتماعی آلمان در سال دو هزار و هشت و دادگاه ایالتی نیدرزاکسن-برمن در سال دو هزار و هجده هر دو همین را گفته‌اند. تنها استثنا مترجم زبان اشاره برای ناشنوایان است. طرح‌های قانونی برای تبدیل ترجمه به خدمت بیمه تا امروز به قانون تبدیل نشده‌اند.</p></div></details>
+<details><summary>پس اگر آلمانی بلد نیستم چه؟</summary><div class="ans"><p>یک تمایز مهم: حق مطالبهٔ درمان به زبان مادری وجود ندارد، ولی اگر درمانگری هم Approbation و هم Kassensitz داشته باشد و فارسی صحبت کند، جلسه به فارسی کاملاً عادی از بیمه پرداخت می‌شود. پس راه درست، پیدا کردن درمانگر فارسی‌زبان دارای مجوز آلمان است. کانون‌های ایالتی روان‌درمانگران فهرست زبانی دارند؛ برای نمونه کانون ایالت هسن فهرست درمانگران فارسی‌زبان را منتشر می‌کند.</p></div></details>
+<details><summary>اگر پناهجو باشم چه فرقی می‌کند؟</summary><div class="ans"><p>در دورهٔ اول اقامت، دسترسی بر پایهٔ مادهٔ چهار و مادهٔ شش قانون خدمات پناهجویان است و روان‌درمانی معمولاً از مسیر مادهٔ شش تأمین می‌شود، با درخواست کتبی به Sozialamt. نکتهٔ تازه و مهم: از بیست‌وهفتم فوریهٔ دو هزار و بیست‌وچهار، مهلت رسیدن به خدمات هم‌سطح از هجده ماه به سی‌وشش ماه افزایش یافته است. بیشتر متن‌های فارسی موجود هنوز عدد قدیمی را می‌نویسند. مراکز روان‌اجتماعی شبکهٔ سراسری هم با مترجم کار می‌کنند.</p></div></details>
+<details><summary>منابع این صفحه</summary><div class="ans"><p>پرسش‌های متداول روان‌درمانی، اتحادیهٔ فدرال پزشکان بیمه (KBV) · صفحهٔ روان‌درمانی ۱۱۶۱۱۷ · اطلاعیهٔ اتحادیهٔ فدرال روان‌درمانگران آلمان دربارهٔ صد و چهل و دو روز انتظار، دسامبر دو هزار و بیست‌ودو · اطلاعیهٔ کانون روان‌درمانگران نوردراین-وستفالن دربارهٔ برقرار بودن بند ۳ مادهٔ ۱۳، اکتبر دو هزار و هفده · راهنمای بیماران اتحادیهٔ فدرال روان‌درمانگران دربارهٔ Kostenerstattung · راهنمای مرکز مصرف‌کنندگان دربارهٔ اعتراض به بیمه · رأی دادگاه عالی اجتماعی آلمان، پروندهٔ B 6 KA 40/06 R · صفحهٔ خدمات هم‌سطح قانون پناهجویان در asyl.net.</p></div></details>
+</div>
+</div>
+</section>
+
+<section class="eco" id="next">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">در همین حال</span><h2 class="h2">تا وقتی نوبت پیدا شود</h2><p class="lede">میانگین انتظار در آلمان نزدیک پنج ماه است. در این فاصله تنها ماندن انتخاب خوبی نیست.</p></div>
+<div class="svc-list rv">
+<a class="svc-row" href="/persian-therapy/"><img src="/wp-content/uploads/2026/09/tjl-svc-individual.webp" alt="تراپی فارسی برای ساکنان خارج از ایران" loading="lazy"><div><b>تراپی فارسی برای ساکنان خارج از ایران</b><span>آنلاین، با تراپیست فارسی‌زبان، معارفهٔ رایگان</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></a>
+<a class="svc-row" href="/guide/therapieplatz-deutschland/"><img src="/wp-content/uploads/2026/09/tjl-step-1-ink.png" alt="راهنمای گرفتن نوبت روان‌درمانی در آلمان" loading="lazy"><div><b>چطور در آلمان نوبت بگیریم</b><span>مسیر کامل از شمارهٔ ۱۱۶۱۱۷ تا شروع درمان</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></a>
+<a class="svc-row" href="/tests/therapy-style/"><img src="/wp-content/uploads/2026/09/tjl-svc-couple.webp" alt="تست رایگان سبک درمانی" loading="lazy"><div><b>تست رایگان سبک درمانی من</b><span>بدون ثبت‌نام، با تفسیر</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></a>
+</div>
+</div>
+</section>
+
+<section class="faq" id="faq">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">پرسش‌های پرتکرار</span><h2 class="h2">چیزهایی که معمولاً می‌پرسند</h2></div>
+<div class="faq-list rv">
+<details><summary>Kostenerstattung هنوز در سال ۲۰۲۶ برقرار است؟</summary><div class="ans"><p>بله. بند ۳ مادهٔ ۱۳ قانون اجتماعی پنجم لغو نشده و کانون روان‌درمانگران نوردراین-وستفالن پس از اصلاح سال دو هزار و هفده صریحاً تأیید کرده که این مسیر همچنان برقرار و موجه است. اصلاح مالی سال دو هزار و بیست‌وشش از ژانویهٔ دو هزار و بیست‌وهفت سقف بیماران هر درمانگر را کاهش می‌دهد که احتمال طولانی‌تر شدن انتظار را بیشتر می‌کند.</p></div></details>
+<details><summary>چند رد لازم است تا درخواست پذیرفته شود؟</summary><div class="ans"><p>قانون عدد مشخصی نگفته است. آنچه هست توصیهٔ اتحادیهٔ فدرال روان‌درمانگران و رویهٔ جاری است: دست‌کم سه تا پنج درمانگر دارای Kassensitz باید رد کرده باشند و هر رد باید مکتوب ثبت شده باشد. هر کس عدد قطعی قانونی به شما بگوید، منبعش را بپرسید.</p></div></details>
+<details><summary>بیمه می‌تواند بگوید اول برو Sprechstunde یا درمان فوری؟</summary><div class="ans"><p>نه به‌عنوان دلیل رد. کانون روان‌درمانگران نوردراین-وستفالن تصریح کرده که بیمه باید سریع و بدون بوروکراسی تصمیم بگیرد، تشخیص جلسهٔ مشاورهٔ اولیه را بپذیرد و حق ندارد صرفاً با ارجاع به مشاورهٔ اولیه یا درمان فوری درخواست را رد کند.</p></div></details>
+<details><summary>چند درصد درخواست‌ها قبول می‌شود؟</summary><div class="ans"><p>هیچ منبع رسمی‌ای درصد پذیرش یا رد منتشر نکرده است، پس هر عددی که جایی ببینید مستند نیست. آنچه مستند است دلایل رایج رد است: نبود فرم PTV 11، فهرست ناقص ردها، و نبود گواهی فوریت.</p></div></details>
+<details><summary>هزینهٔ جلسه با تجربه چقدر است و بیمه می‌دهد؟</summary><div class="ans"><p>هزینهٔ هر جلسه برای مراجعان ساکن خارج از ایران بیست‌وپنج یورو برای دانشجو و سی‌وپنج یورو برای بقیه است و جلسهٔ معارفه رایگان است. بیمهٔ دولتی آلمان این هزینه را نمی‌پردازد، چون تراپیست‌های تجربه مجوز آلمان ندارند. این دو مسیر جایگزین هم نیستند و بسیاری از مراجعان تا پیدا شدن نوبت آلمانی از تراپی فارسی استفاده می‌کنند.</p></div></details>
+<details><summary>این صفحه جای مشاورهٔ حقوقی را می‌گیرد؟</summary><div class="ans"><p>نه. این متن از منابع رسمی آلمانی نوشته شده و تاریخ بازبینی دارد، ولی قواعد تغییر می‌کنند و شرایط هر پرونده فرق دارد. برای تصمیم نهایی با خود بیمه، کانون روان‌درمانگران ایالت خودتان یا یک مشاور حقوقی تماس بگیرید.</p></div></details>
+</div>
+</div>
+</section>
+
+<section class="berry" id="berry">
+<div class="wrap rv">
+<img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" loading="lazy">
+<h2 class="h2">پنج ماه انتظار، بدون هیچ‌کس، لازم نیست</h2>
+<p class="lede">جلسهٔ معارفه رایگان است و با خود تراپیست برگزار می‌شود. در آن هیچ درمانی انجام نمی‌شود؛ فقط می‌بینید که با هم راه می‌آیید یا نه.</p>
+<div class="ctas"><a class="btn btn-brand" href="/get-therapy/">رزرو معارفهٔ رایگان</a><a class="btn btn-ghost" href="https://t.me/tajrobehlife_bot" target="_blank" rel="noopener">سؤال دارم، در تلگرام</a></div>
+</div>
+</section>
+</div>
+<script>
+(function(){
+var root=document.getElementById('tj2'); if(!root) return;
+var fa=function(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+var fmt=function(n){return fa(n.toLocaleString('en-US')).replace(/,/g,'،');};
+var rv=root.querySelectorAll('.rv');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -6% 0px'});rv.forEach(function(el){io.observe(el);});}else{rv.forEach(function(el){el.classList.add('in');});}
+var cs=root.querySelectorAll('[data-count]');
+function runCount(el){var end=+el.getAttribute('data-count'),suf=el.getAttribute('data-suffix')||'',t0=null,dur=1400;function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);el.textContent=fmt(Math.round(end*p))+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+/* شمارش متحرک اعداد حذف شد (پرش چیدمان) */
+root.querySelectorAll('.arrows[data-for]').forEach(function(a){var tr=document.getElementById(a.getAttribute('data-for'));if(!tr)return;var b=a.querySelectorAll('button');b[0].addEventListener('click',function(){tr.scrollBy({left:tr.clientWidth*0.8,behavior:'smooth'});});b[1].addEventListener('click',function(){tr.scrollBy({left:-tr.clientWidth*0.8,behavior:'smooth'});});});
+var thTrack=document.getElementById('thTrack'),dots=document.getElementById('thDots');
+function buildDots(){if(!thTrack||!dots)return;var pages=Math.max(1,Math.ceil(thTrack.scrollWidth/thTrack.clientWidth));dots.innerHTML='';if(pages>10){dots.style.display='none';return;}dots.style.display='';for(var i=0;i<pages;i++){dots.appendChild(document.createElement('i'));}updDots();}
+function updDots(){if(!thTrack||!dots)return;var max=thTrack.scrollWidth-thTrack.clientWidth,p=max>0?Math.abs(thTrack.scrollLeft)/max:0,n=dots.children.length,idx=Math.round(p*(n-1));for(var i=0;i<n;i++)dots.children[i].classList.toggle('on',i===idx);}
+if(thTrack){buildDots();thTrack.addEventListener('scroll',updDots,{passive:true});window.addEventListener('resize',buildDots);}
+var filt=document.getElementById('thFilter');
+if(filt){if(thTrack){filt.addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;filt.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});b.classList.add('on');var tag=b.getAttribute('data-tag');thTrack.querySelectorAll('.thc:not(.more)').forEach(function(c){var tags=(c.getAttribute('data-tags')||'').split(' ');var hide=(tag==='all')?false:(tags.indexOf(tag)<0);c.classList.toggle('hide',hide);});thTrack.scrollTo({left:0});buildDots();});}}
+function parts(tz){try{var f=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});var o={};f.formatToParts(new Date()).forEach(function(p){o[p.type]=p.value;});return {h:+o.hour%24,m:+o.minute,s:+o.second};}catch(e){return null;}}
+function tick(){root.querySelectorAll('.clock').forEach(function(c){var p=parts(c.getAttribute('data-tz'));if(!p)return;var t=c.querySelector('.t');var hm=fa(('0'+p.h).slice(-2))+':'+fa(('0'+p.m).slice(-2));var sm=t.querySelector('small');if(!sm){t.textContent='';t.appendChild(document.createTextNode(hm));sm=document.createElement('small');t.appendChild(sm);}else{t.firstChild.nodeValue=hm;}sm.textContent=':'+fa(('0'+p.s).slice(-2));var good=(p.h>=8)?(p.h<23):false;c.classList.toggle('on',good);c.querySelector('.s').textContent=good?'ساعت مناسب جلسه':'وقت استراحت؛ تراپیست برای ساعت شما هست';});}
+tick();setInterval(tick,1000);
+root.querySelectorAll('details').forEach(function(d){var s=d.querySelector('summary'),a=d.querySelector('.ans');if(!s||!a)return;s.addEventListener('click',function(e){e.preventDefault();if(d.hasAttribute('data-anim'))return;d.setAttribute('data-anim','1');if(d.open){var h=a.offsetHeight;a.style.height=h+'px';a.style.transition='height .3s ease';requestAnimationFrame(function(){a.style.height='0px';});setTimeout(function(){d.open=false;a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},300);}else{d.open=true;var h2=a.offsetHeight;a.style.height='0px';a.style.transition='height .32s ease';requestAnimationFrame(function(){a.style.height=h2+'px';});setTimeout(function(){a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},330);}});});
+var arts=[['/mag/زندگی-نامه-ژاک-لکان/','زندگی‌نامه‌ی ژاک لکان'],['/mag/زندگینامه-زیگموند-فروید/','زندگی‌نامه‌ی زیگموند فروید'],['/mag/چگونه-روان-درمانگر-انتخاب-کنیم؟/','چگونه روان‌درمانگر انتخاب کنیم؟'],['/mag/ردفلگهای-تراپیست-و-اهمیت-اصول-حرفه/','ردفلگ‌های تراپیست و اصول حرفه‌ای در اتاق تراپی'],['/mag/سوپرویژن-چیست-و-چرا-مهم-است؟/','سوپرویژن چیست و چرا مهم است؟'],['/mag/رواندرمانی-تحلیلی/','روان‌درمانی تحلیلی چیست؟'],['/mag/زندگینامه-دونالد-وینیکات/','زندگی‌نامه‌ی دونالد وینیکات'],['/mag/مهاجرت-از-دیدگاه-روانکاوی/','مهاجرت از دیدگاه روانکاوی'],['/mag/افسانههای-رایج-درباره-روانکاوی/','افسانه‌های رایج درباره‌ی روانکاوی'],['/mag/اتاق-تراپی-رازها-و-رمزها/','اتاق تراپی: رازها و رمزها'],['/mag/گروهدرمانی-چیست؟/','گروه‌درمانی چیست؟'],['/mag/سلامت-روان-در-مهاجرت/','سلامت روان در مهاجرت؛ چرا به روانشناس هم‌زبان نیاز داریم؟'],['/mag/زندگینامه-کارن-هورنای/','زندگی‌نامه‌ی کارن هورنای'],['/mag/سمپتوم-چیست-تعریف-نشانه-در-روانکاوی/','سمپتوم چیست؟']];
+var tl=document.getElementById('todayLink');if(tl){var day=Math.floor(Date.now()/86400000),a=arts[day%arts.length];tl.href=a[0];tl.textContent=a[1];}
+})();
+
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"MedicalWebPage","@id":"https://tajrobeh.life/guide/kostenerstattung/#page","url":"https://tajrobeh.life/guide/kostenerstattung/","name":"بازپرداخت هزینهٔ روان‌درمانی در آلمان (Kostenerstattung)","inLanguage":"fa-IR","lastReviewed":"2026-09-16","isPartOf":{"@id":"https://tajrobeh.life/#website"},"about":{"@id":"https://tajrobeh.life/#organization"},"reviewedBy":{"@type":"Person","name":"عرفان امیربیگی","honorificPrefix":"دکتر","jobTitle":"روان‌درمانگر تحلیلی مدرن و سردبیر مجلهٔ تجربه","url":"https://tajrobeh.life/team/erfan-amirbeigi/","identifier":{"@type":"PropertyValue","name":"کد نظام روان‌شناسی و مشاورهٔ ایران","value":"70828"},"alumniOf":"دانشگاه آزاد تهران مرکزی","worksFor":{"@type":"Organization","name":"مرکز تجربه زندگی"}}},{"@type":"HowTo","@id":"https://tajrobeh.life/guide/kostenerstattung/#howto","name":"درخواست بازپرداخت هزینهٔ روان‌درمانی از بیمهٔ آلمان","inLanguage":"fa-IR","step":[{"@type":"HowToStep","position":1,"name":"جلسهٔ مشاورهٔ اولیه","text":"در Psychotherapeutische Sprechstunde نزد درمانگر دارای Kassensitz شرکت کنید و فرم PTV 11 را بگیرید."},{"@type":"HowToStep","position":2,"name":"ثبت مکتوب ردها","text":"با درمانگران دارای Kassensitz تماس بگیرید و نام، تاریخ، ساعت و زودترین زمان ممکن شروع را برای هر رد ثبت کنید."},{"@type":"HowToStep","position":3,"name":"جمع کردن مدارک","text":"تأییدیهٔ کتبی درمانگر خصوصی دارای Approbation و گواهی فوریت از پزشک خانواده یا روان‌پزشک را بگیرید."},{"@type":"HowToStep","position":4,"name":"درخواست کتبی به بیمه","text":"پیش از شروع درمان، درخواست را کتبی به Krankenkasse بدهید."}]},{"@type":"FAQPage","@id":"https://tajrobeh.life/guide/kostenerstattung/#faq","mainEntity":[{"@type":"Question","name":"Kostenerstattung هنوز در سال ۲۰۲۶ برقرار است؟","acceptedAnswer":{"@type":"Answer","text":"بله. بند ۳ مادهٔ ۱۳ قانون اجتماعی پنجم لغو نشده و کانون روان‌درمانگران نوردراین-وستفالن پس از اصلاح سال ۲۰۱۷ تأیید کرده که این مسیر همچنان برقرار است."}},{"@type":"Question","name":"چند رد لازم است تا درخواست پذیرفته شود؟","acceptedAnswer":{"@type":"Answer","text":"قانون عدد مشخصی نگفته است. توصیهٔ اتحادیهٔ فدرال روان‌درمانگران آلمان دست‌کم سه تا پنج رد مکتوب از درمانگران دارای Kassensitz است."}},{"@type":"Question","name":"بیمه چقدر وقت دارد تصمیم بگیرد؟","acceptedAnswer":{"@type":"Answer","text":"سه هفته از دریافت درخواست، یا پنج هفته اگر نظر کارشناسی پزشکی گرفته شود. از دست دادن این مهلت بدون اطلاع کتبی موجه، خدمت را تأییدشده تلقی می‌کند."}},{"@type":"Question","name":"هزینهٔ مترجم را چه کسی می‌دهد؟","acceptedAnswer":{"@type":"Answer","text":"بیمهٔ دولتی هزینهٔ مترجم را نمی‌پردازد. تنها استثنا مترجم زبان اشاره برای ناشنوایان است."}},{"@type":"Question","name":"هزینهٔ جلسه با تجربه چقدر است و بیمه می‌دهد؟","acceptedAnswer":{"@type":"Answer","text":"بیست‌وپنج یورو برای دانشجو و سی‌وپنج یورو برای بقیه، با جلسهٔ معارفهٔ رایگان. بیمهٔ دولتی آلمان این هزینه را نمی‌پردازد."}},{"@type":"Question","name":"واقعاً چقدر باید منتظر ماند؟","acceptedAnswer":{"@type":"Answer","text":"میانگین فاصله از جلسهٔ مشاورهٔ اولیه تا شروع درمان صد و چهل و دو روز بوده است، بر پایهٔ دادهٔ سه‌ماههٔ اول ۲۰۱۹ اتحادیهٔ فدرال روان‌درمانگران آلمان."}}]}]}</script>
+<!-- /wp:html -->

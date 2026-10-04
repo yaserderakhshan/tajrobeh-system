@@ -1,0 +1,42 @@
+{
+  "scriptId": "SET_BY_CI_FROM_SECRET_SCRIPT_ID",
+  "rootDir": ".",
+  "scriptExtensions": [
+    ".gs"
+  ],
+  "filePushOrder": [
+    "Code.gs",
+    "telegram.gs",
+    "building.gs",
+    "social.gs",
+    "partners.gs",
+    "maint.gs",
+    "v162.gs",
+    "school2.gs",
+    "mag_contrib.gs",
+    "author.gs",
+    "voice.gs",
+    "review.gs",
+    "seo_gemini.gs",
+    "gemini_setup.gs",
+    "mig.gs",
+    "publish.gs",
+    "v168.gs",
+    "wppage.gs",
+    "stuck.gs",
+    "leadmodel.gs",
+    "comments.gs",
+    "dq.gs",
+    "cfg.gs",
+    "ops.gs",
+    "social_ig.gs",
+    "v17013.gs",
+    "ci.gs",
+    "sitesec.gs",
+    "sec.gs",
+    "version.gs"
+  ],
+  "htmlExtensions": [
+    ".html"
+  ]
+}

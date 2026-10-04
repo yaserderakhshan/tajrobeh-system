@@ -1,0 +1,23 @@
+name: سایت · تست دود کمپین
+
+# بی نوشتن داده: رمز تازه (CP_WP_SECRET) و رد رمز غلط در /camp-push و /thers-push، و دادهٔ کمپین EFT-1.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    environment: production   # v170.9: رمزها فقط در Environment «production» (فقط main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: تست
+        env:
+          CP_WP_SECRET: ${{ secrets.CP_WP_SECRET }}
+        run: node site/tools/site-camp-smoke.mjs

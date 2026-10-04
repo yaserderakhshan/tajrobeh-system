@@ -1,0 +1,44 @@
+<!-- wp:template-part {"slug":"tj-header","theme":"twentytwentyfive","tagName":"div","className":"tjl"} /-->
+
+<!-- wp:group {"tagName":"main","className":"tjm","layout":{"type":"constrained"}} -->
+<main class="wp-block-group tjm">
+<!-- wp:group {"className":"tjm-hero tjm-hero-sm","layout":{"type":"constrained"}} -->
+<div class="wp-block-group tjm-hero tjm-hero-sm">
+<!-- wp:query-title {"type":"archive","showPrefix":false} /-->
+<!-- wp:term-description /-->
+<!-- wp:html -->
+<nav class="tjm-chips" aria-label="دسته‌ها"><a href="/mag/category/psychoanalysis/">روانکاوی</a><a href="/mag/category/psychotherapy/">روان‌درمانی</a><a href="/mag/category/movie-review/">معرفی فیلم</a><a href="/mag/category/book-review/">معرفی کتاب</a><a href="/mag/category/%d8%af%d8%b3%d8%aa-%d9%86%d9%88%d8%b4%d8%aa%d9%87-%d9%87%d8%a7/">دست‌نوشته‌ها</a><a href="/mag/category/life-style/">سبک زندگی</a><a href="/mag/category/prominent-psychoanalysts/">چهره‌ها</a><a href="/mag/category/literature/">ادبیات</a><a href="/mag/category/kids-and-teenager/">کودک و نوجوان</a></nav>
+<!-- /wp:html -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:query {"query":{"perPage":12,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true},"align":"wide","className":"tjm-q","layout":{"type":"default"}} -->
+<div class="wp-block-query alignwide tjm-q">
+<!-- wp:post-template {"align":"full","className":"tjm-grid","layout":{"type":"grid","columnCount":3}} -->
+<!-- wp:group {"className":"tjm-card","layout":{"type":"constrained"}} -->
+<div class="wp-block-group tjm-card">
+<!-- wp:post-featured-image {"sizeSlug":"medium_large","isLink":true,"aspectRatio":"16/9"} /-->
+<!-- wp:post-terms {"term":"category","className":"tjm-cat"} /-->
+<!-- wp:post-title {"level":3,"isLink":true} /-->
+<!-- wp:post-date {"format":"j F Y","className":"tjm-date"} /-->
+</div>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+<!-- wp:query-pagination {"className":"tjm-pag","layout":{"type":"flex","justifyContent":"center"}} -->
+<!-- wp:query-pagination-previous {"label":"تازه‌تر"} /-->
+<!-- wp:query-pagination-numbers /-->
+<!-- wp:query-pagination-next {"label":"قدیمی‌تر"} /-->
+<!-- /wp:query-pagination -->
+<!-- wp:query-no-results -->
+<!-- wp:paragraph --><p>نوشته‌ای پیدا نشد.</p><!-- /wp:paragraph -->
+<!-- /wp:query-no-results -->
+</div>
+<!-- /wp:query -->
+
+<!-- wp:html -->
+<script>document.addEventListener("DOMContentLoaded",function(){[].slice.call(document.querySelectorAll(".tjm time[datetime]")).forEach(function(tm){try{var d=new Date(tm.getAttribute("datetime"));if(!isNaN(d)){tm.textContent=new Intl.DateTimeFormat("fa-IR",{calendar:"persian",year:"numeric",month:"long",day:"numeric"}).format(d);}}catch(e){}});});</script>
+<!-- /wp:html -->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"tj-footer","theme":"twentytwentyfive","tagName":"div","className":"tjl"} /-->

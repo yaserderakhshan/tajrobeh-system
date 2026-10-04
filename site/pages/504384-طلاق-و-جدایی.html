@@ -1,0 +1,493 @@
+<!-- wp:html -->
+<style>
+/* == tj2: home-v2 draft (v4) == */
+.tj2{font-family:var(--tj-font);color:var(--tj-soft);direction:rtl;font-size:17px;line-height:1.9;--tj-tint:#faeced;--tj-tint-2:#fdf4f4;--tj-red-400:#d9737a;--tj-yellow:#f2c14e;--w:1180px;overflow-x:clip}
+.tj2 *,.tj2 *::before,.tj2 *::after{box-sizing:border-box}
+.tj2,.tj2 *{overflow-wrap:normal;word-break:normal}
+.tj2 h1,.tj2 h2,.tj2 h3,.tj2 h4{color:var(--tj-ink);margin:0;line-height:1.55;font-weight:700;text-wrap:balance}
+.tj2 p{margin:0}
+.tj2 a{color:inherit;text-decoration:none}
+.tj2 img{max-width:100%;height:auto;display:block}
+.tj2 button{font-family:inherit}
+.tj2 .wrap{max-width:var(--w);margin-inline:auto;padding-inline:24px}
+.tj2 section{padding-block:clamp(48px,6vw,88px)}
+.tj2 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tj-red);background:var(--tj-tint);padding:5px 13px;border-radius:999px;margin-bottom:12px}
+.tj2 .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tj-red)}
+.tj2 .h2{font-size:clamp(23px,3vw,36px);margin-bottom:10px}
+.tj2 .lede{font-size:clamp(15.5px,1.3vw,18px);color:var(--tj-soft);max-width:62ch;line-height:2}
+.tj2 .center{text-align:center}.tj2 .center .lede{margin-inline:auto}
+.tj2 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 24px;border-radius:var(--tj-r-btn);font-size:16px;font-weight:600;border:1.5px solid transparent;transition:.18s ease;white-space:nowrap;cursor:pointer;line-height:1.4}
+.tj2 .btn-brand{background:var(--tj-red);color:#fff}
+.tj2 .btn-brand:hover{background:var(--tj-red-600);box-shadow:0 8px 20px -8px rgba(200,63,73,.5);color:#fff}
+.tj2 .btn-ghost{background:#fff;color:var(--tj-ink-2);border-color:var(--tj-line)}
+.tj2 .btn-ghost:hover{border-color:var(--tj-red-400);color:var(--tj-red-600);background:var(--tj-tint)}
+.tj2 .btn svg{width:14px;height:14px;flex:none}
+.tj2 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.tj2 .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.tj2 .rv{opacity:1;transform:none;transition:none}}
+.tj2 .hs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 14px;scrollbar-width:none;scroll-behavior:smooth}
+.tj2 .hs::-webkit-scrollbar{display:none}
+.tj2 .hs>*{scroll-snap-align:start;flex:0 0 auto}
+.tj2 .arrows{display:flex;gap:8px}
+.tj2 .arrows button{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--tj-line);background:#fff;color:var(--tj-ink);cursor:pointer;display:grid;place-items:center;transition:.15s}
+.tj2 .arrows button:hover{border-color:var(--tj-red);color:var(--tj-red)}
+.tj2 .arrows svg{width:16px;height:16px}
+.tj2 .head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
+.tj2 .hero{padding-block:clamp(36px,5vw,72px) clamp(36px,5vw,64px);background:#fff}
+.tj2 .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px;align-items:center}
+.tj2 .hero h1{font-size:clamp(28px,3.4vw,44px);line-height:1.5;margin:14px 0 16px;max-width:22ch}
+.tj2 .hero h1 em{font-style:normal;color:var(--tj-red)}
+.tj2 .hero .lede{margin:0 0 24px;max-width:56ch}
+.tj2 .ctas{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.tj2 .hero .art{display:flex;align-items:center;justify-content:center}
+.tj2 .hero .art img{width:100%;max-width:440px;height:auto;object-fit:contain}
+.tj2 .nums{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:30px;padding-top:22px;border-top:1px solid var(--tj-line)}
+.tj2 .nums div{display:flex;align-items:baseline;gap:7px}
+.tj2 .nums b{font-size:24px;font-weight:800;color:var(--tj-red);line-height:1;font-variant-numeric:tabular-nums}
+.tj2 .nums span{font-size:13px;color:var(--tj-mut)}
+.tj2 .eco{background:var(--tj-sunk)}
+.tj2 .eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:34px}
+.tj2 .eco-card{border:1px solid var(--tj-line);border-radius:20px;padding:0 0 22px;background:#fff;transition:.2s;display:flex;flex-direction:column;overflow:hidden}
+.tj2 .eco-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px);box-shadow:0 16px 34px -20px rgba(14,14,14,.3)}
+.tj2 .eco-card .pic{height:190px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;padding:16px 16px 0;border-bottom:1px solid var(--tj-line);background:#fff}
+.tj2 .eco-card .pic img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom}
+.tj2 .eco-card .n{font-size:12.5px;color:var(--tj-red);font-weight:700;margin:16px 22px 4px}
+.tj2 .eco-card h3{font-size:18px;margin:0 22px 8px}
+.tj2 .eco-card p{font-size:14px;line-height:1.9;color:var(--tj-soft);margin:0 22px 12px;flex:1}
+.tj2 .eco-card .go{font-size:13.5px;color:var(--tj-ink);font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 22px}
+.tj2 .eco-card .go svg{width:12px;height:12px}
+.tj2 .tl{background:#fff;overflow:hidden}
+.tj2 .tl-line{height:2px;background:var(--tj-line);margin-top:22px}
+.tj2 .tl-track{padding-top:34px}
+.tj2 .tl-item{width:250px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:20px 18px;position:relative}
+.tj2 .tl-item::before{content:"";position:absolute;top:-22px;right:22px;width:14px;height:14px;border-radius:50%;background:var(--tj-red);border:3px solid #fff;box-shadow:0 0 0 1px var(--tj-line)}
+.tj2 .tl-item .y{font-size:13px;color:var(--tj-red);font-weight:700}
+.tj2 .tl-item h3{font-size:16.5px;margin:6px 0 8px}
+.tj2 .tl-item p{font-size:13.5px;color:var(--tj-soft);line-height:1.85}
+.tj2 .tl-item.now{background:var(--tj-red);border-color:var(--tj-red)}
+.tj2 .tl-item.now h3,.tj2 .tl-item.now p{color:#fff}
+.tj2 .tl-item.now .y{color:#ffd6d9}
+.tj2 .tl-item.now::before{background:#fff;border-color:var(--tj-red)}
+.tj2 .svc{background:var(--tj-sunk)}
+.tj2 .svc-list{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-top:30px;background:#fff;border:1px solid var(--tj-line);border-radius:20px;padding:8px 28px}
+.tj2 .svc-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--tj-line);transition:.15s}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:0}
+.tj2 .svc-row img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .svc-row b{display:block;font-size:16px;color:var(--tj-ink)}
+.tj2 .svc-row span{display:block;font-size:13px;color:var(--tj-mut);line-height:1.7}
+.tj2 .svc-row svg{width:16px;height:16px;flex:none;margin-inline-start:auto;color:var(--tj-line);transition:.15s}
+.tj2 .svc-row:hover b{color:var(--tj-red)}
+.tj2 .svc-row:hover svg{color:var(--tj-red);transform:translateX(-4px)}
+.tj2 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
+.tj2 .chip{font-size:13.5px;padding:7px 14px;border-radius:999px;border:1px solid var(--tj-line);background:#fff;color:var(--tj-soft);transition:.15s;cursor:pointer;line-height:1.6}
+.tj2 .chip:hover,.tj2 .chip.on{border-color:var(--tj-red);color:var(--tj-red);background:var(--tj-tint)}
+.tj2 .chips .lbl{font-size:13px;color:var(--tj-mut);align-self:center;margin-inline-end:4px;flex:none;white-space:nowrap}
+.tj2 .how{background:#fff}
+.tj2 .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px;counter-reset:st}
+.tj2 .how-step{background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:24px 20px;position:relative}
+.tj2 .how-step::before{counter-increment:st;content:counter(st,persian);position:absolute;top:-14px;right:18px;width:30px;height:30px;border-radius:50%;background:var(--tj-red);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+.tj2 .how-step img{width:48px;height:48px;object-fit:contain;margin-bottom:10px}
+.tj2 .how-step h3{font-size:16.5px;margin-bottom:6px}
+.tj2 .how-step p{font-size:14px;line-height:1.9}
+.tj2 .how-note{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:center;font-size:14px;color:var(--tj-mut)}
+.tj2 .how-note span{display:inline-flex;align-items:center;gap:7px}
+.tj2 .how-note svg{width:16px;height:16px;color:var(--tj-red)}
+.tj2 .th{background:var(--tj-sunk)}
+.tj2 .thc{width:150px;border:1px solid var(--tj-line);border-radius:16px;padding:12px 10px 14px;text-align:center;background:#fff;transition:.18s;position:relative}
+.tj2 .thc:hover{border-color:var(--tj-red-400);box-shadow:0 10px 26px -16px rgba(14,14,14,.3)}
+.tj2 .thc.hide{display:none}
+.tj2 .thc img.ph{width:92px;height:92px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid var(--tj-sunk)}
+.tj2 .thc b{display:block;font-size:14px;color:var(--tj-ink);line-height:1.5;font-weight:700}
+.tj2 .thc .sp{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px;line-height:1.6;min-height:2.6em}
+.tj2 .thc .yr{display:inline-block;font-size:11.5px;color:var(--tj-red);background:var(--tj-tint);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .vf{position:absolute;top:10px;left:10px;width:18px;height:18px}
+.tj2 .thc .pen{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--tj-ink);background:var(--tj-yellow);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .pen svg{width:10px;height:10px}
+.tj2 .thc.more{background:var(--tj-tint);border-color:var(--tj-red-400);display:flex;flex-direction:column;justify-content:center;gap:6px}
+.tj2 .thc.more b{color:var(--tj-red);font-size:26px}
+.tj2 .thc.more span{font-size:13px;color:var(--tj-ink-2)}
+.tj2 .thc.more .btn{margin:8px auto 0;min-height:36px;font-size:13px;padding:6px 14px}
+.tj2 .dots{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.tj2 .dots i{width:6px;height:6px;border-radius:50%;background:var(--tj-line);transition:.2s}
+.tj2 .dots i.on{width:18px;border-radius:3px;background:var(--tj-red)}
+.tj2 .std{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+.tj2 .std>div{display:flex;gap:12px;align-items:center;border:1px solid var(--tj-line);border-radius:14px;padding:14px 16px;background:#fff}
+.tj2 .std img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .std b{display:block;font-size:14.5px;color:var(--tj-ink)}
+.tj2 .std span{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .sup{background:#fff}
+.tj2 .supc{width:230px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:16px;display:flex;gap:12px;align-items:center;transition:.2s}
+.tj2 .supc:hover{border-color:var(--tj-red-400);transform:translateY(-3px);background:#fff}
+.tj2 .supc img{width:64px;height:76px;border-radius:12px;object-fit:cover;flex:none}
+.tj2 .supc b{display:block;color:var(--tj-ink);font-size:14.5px;line-height:1.5}
+.tj2 .supc .ap{display:block;font-size:12.5px;color:var(--tj-red);margin-top:3px}
+.tj2 .sup .hs{margin-top:28px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center}
+.tj2 .school p.lede{margin-bottom:22px}
+.tj2 .path div{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#fff;border:1px solid var(--tj-line);border-radius:14px;margin-bottom:8px;font-size:15px;color:var(--tj-ink)}
+.tj2 .path div i{width:30px;height:30px;border-radius:50%;background:var(--tj-tint);color:var(--tj-red);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px;flex:none}
+.tj2 .path div:last-child{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .path div:last-child i{background:#fff}
+.tj2 .path small{display:block;font-size:12.5px;color:var(--tj-mut)}
+.tj2 .path div:last-child small{color:#ffd6d9}
+.tj2 .cities{background:#fff}
+.tj2 .map{position:relative;background:var(--tj-sunk);border-radius:24px;padding:22px;overflow:hidden;margin:30px auto 0;max-width:640px}
+.tj2 .map svg{width:100%;height:auto;display:block}
+.tj2 .map .land{fill:#fff;stroke:var(--tj-ink);stroke-width:1.5;stroke-linejoin:round}
+.tj2 .map text{font-family:var(--tj-font);font-size:15px;fill:var(--tj-ink);font-weight:700}
+.tj2 .map text.sea{fill:var(--tj-mut);font-weight:500;font-size:13px}
+.tj2 .map .pin{transform-box:fill-box;transform-origin:50% 100%;animation:tjbob 3.2s ease-in-out infinite}
+.tj2 .map .pin.d1{animation-delay:-.7s}.tj2 .map .pin.d2{animation-delay:-1.4s}.tj2 .map .pin.d3{animation-delay:-2.1s}.tj2 .map .pin.d4{animation-delay:-2.8s}
+@keyframes tjbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+.tj2 .map .shadow{fill:rgba(14,14,14,.14)}
+.tj2 .map .de{position:absolute;left:22px;top:22px;bottom:auto;background:#fff;border:1px solid var(--tj-line);border-radius:14px;padding:8px 12px;font-size:13px;color:var(--tj-ink);display:flex;gap:10px;align-items:center}
+.tj2 .map .de img{width:22px;height:22px}
+.tj2 .map .de small{display:block;color:var(--tj-mut);font-size:11.5px}
+.tj2 .dia{background:#fff}
+.tj2 .dia .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.tj2 .clocks{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;background:var(--tj-sunk);padding:14px;border-radius:22px;position:relative}
+.tj2 .clocks .live{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tj-mut);padding:0 4px 2px}
+.tj2 .clocks .live i{width:8px;height:8px;border-radius:50%;background:#3fb26a;animation:tjpulse 1.6s infinite}
+@keyframes tjpulse{0%{box-shadow:0 0 0 0 rgba(63,178,106,.5)}70%{box-shadow:0 0 0 7px rgba(63,178,106,0)}100%{box-shadow:0 0 0 0 rgba(63,178,106,0)}}
+.tj2 .clock{background:#fff;border:1px solid var(--tj-line);border-radius:16px;padding:12px 14px;transition:.2s}
+.tj2 .clock .c{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .clock .t{display:block;font-size:26px;font-weight:800;color:var(--tj-ink);direction:ltr;text-align:right;font-variant-numeric:tabular-nums;line-height:1.2}
+.tj2 .clock .t small{font-size:14px;font-weight:600;color:var(--tj-mut)}
+.tj2 .clock .s{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px}
+.tj2 .clock.on{border-color:var(--tj-red-400);background:var(--tj-tint)}
+.tj2 .clock.on .s{color:var(--tj-red-600);font-weight:600}
+.tj2 .dia ul{list-style:none;padding:0;margin:18px 0 24px;display:grid;gap:10px}
+.tj2 .dia li{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;color:var(--tj-ink-2)}
+.tj2 .dia li::before{content:"";width:22px;height:22px;flex:none;border-radius:50%;background:var(--tj-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c83f49' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L20 7'/></svg>") center/12px no-repeat;margin-top:3px}
+.tj2 .dia .orbit{width:110px;margin-bottom:6px}
+.tj2 .mag{background:var(--tj-sunk)}
+.tj2 .mag-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:14px;margin-top:28px}
+.tj2 .art-card{background:#fff;border:1px solid var(--tj-line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:.2s}
+.tj2 .art-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .art-card img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.tj2 .art-card .b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tj2 .art-card .k{font-size:12px;color:var(--tj-red);font-weight:700}
+.tj2 .art-card h3{font-size:15px;line-height:1.6}
+.tj2 .art-card p{font-size:13px;color:var(--tj-mut);line-height:1.8;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .art-card.big img{aspect-ratio:16/9}
+.tj2 .art-card.big h3{font-size:19px}
+.tj2 .today{margin-top:16px;background:#fff;border:1px dashed var(--tj-red-400);border-radius:16px;padding:14px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.tj2 .today .k{font-size:12.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .today a{font-weight:600;color:var(--tj-ink)}
+.tj2 .today a:hover{color:var(--tj-red)}
+.tj2 .today .cnt{margin-inline-start:auto;font-size:13px;color:var(--tj-mut)}
+.tj2 .ig{background:#fff;overflow:hidden}
+.tj2 .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:38px;padding:10px 0 16px}
+.tj2 .pola{background:#fff;border:1px solid var(--tj-line);border-radius:6px;padding:12px 12px 16px;box-shadow:0 18px 40px -22px rgba(14,14,14,.35);transition:.25s;position:relative;display:block}
+.tj2 .pola:nth-child(1){transform:rotate(-2deg)}
+.tj2 .pola:nth-child(2){transform:rotate(1.2deg) translateY(10px)}
+.tj2 .pola:nth-child(3){transform:rotate(-1deg)}
+.tj2 .pola:hover{transform:rotate(0) translateY(-6px);z-index:2;border-color:var(--tj-red-400)}
+.tj2 .pola .shot{aspect-ratio:4/5;overflow:hidden;border-radius:3px;background:var(--tj-sunk)}
+.tj2 .pola .shot img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.tj2 .pola:hover .shot img{transform:scale(1.03)}
+.tj2 .pola .cap{font-size:13.5px;color:var(--tj-ink-2);line-height:1.8;margin:12px 4px 10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .pola .who{display:flex;align-items:center;gap:10px;margin:0 4px}
+.tj2 .pola .who img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--tj-tint)}
+.tj2 .pola .who b{display:block;font-size:13px;color:var(--tj-ink);direction:ltr;text-align:right}
+.tj2 .pola .who small{display:block;font-size:11.5px;color:var(--tj-mut)}
+.tj2 .pola .who .f{margin-inline-start:auto;font-size:11.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .pola .tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-2deg);width:70px;height:20px;background:rgba(242,193,78,.6);border-radius:2px}
+.tj2 .org{background:var(--tj-sunk)}
+.tj2 .org .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center}
+.tj2 .org .logos{display:flex;gap:28px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.tj2 .org .logos img{height:34px;width:auto;opacity:.9}
+.tj2 .faq{background:#fff}
+.tj2 .faq-list{max-width:820px;margin:26px auto 0;display:grid;gap:10px}
+.tj2 details{border:1px solid var(--tj-line);border-radius:14px;background:#fff;padding:0 20px;transition:border-color .2s,background .2s}
+.tj2 details[open]{border-color:var(--tj-red-400);background:var(--tj-tint-2)}
+.tj2 summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:700;color:var(--tj-ink);font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;outline:none}
+.tj2 summary:focus{outline:none}
+.tj2 summary:focus-visible{outline:2px solid var(--tj-red-400);outline-offset:6px;border-radius:8px}
+.tj2 summary::-webkit-details-marker{display:none}
+.tj2 summary::after{content:"";width:9px;height:9px;border-inline-start:2px solid var(--tj-red);border-block-end:2px solid var(--tj-red);transform:rotate(-45deg);transition:transform .25s;flex:none;margin-inline-start:6px}
+.tj2 details[open] summary::after{transform:rotate(45deg)}
+.tj2 details .ans{overflow:hidden}
+.tj2 details p{padding:0 0 18px;font-size:15px;line-height:1.95;color:var(--tj-soft)}
+.tj2 details p a{color:var(--tj-red);font-weight:600}
+.tj2 .berry{background:var(--tj-tint);text-align:center}
+.tj2 .berry img{width:100px;margin:0 auto 16px;animation:tjfloat2 5s ease-in-out infinite}
+@keyframes tjfloat2{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(4deg) translateY(-6px)}}
+.tj2 .berry .h2{font-size:clamp(23px,3vw,34px)}
+.tj2 .berry .lede{margin:10px auto 24px}
+.tj2 .berry .ctas{justify-content:center}
+.tj2 .berry .small{font-size:13px;color:var(--tj-mut);margin-top:14px}
+.wp-block-post-content>.tj2.alignfull{max-width:none;width:auto}
+@media (max-width:1024px){
+.tj2 .eco-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .how-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .std{grid-template-columns:repeat(2,1fr)}
+.tj2 .mag-grid{grid-template-columns:1fr 1fr}
+.tj2 .art-card.big{grid-column:1/-1}
+.tj2 .ig-grid{gap:18px}
+.tj2 .school .wrap{grid-template-columns:1fr}
+.tj2 .org .wrap{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+.tj2{font-size:16px}
+.tj2 section{padding-block:40px}
+.tj2 .hero{padding-block:16px 32px}
+.tj2 .hero .wrap{grid-template-columns:1fr;gap:6px}
+.tj2 .hero .art{order:-1;justify-content:center}
+.tj2 .hero .art img{max-width:190px}
+.tj2 .hero h1{font-size:26px;margin:8px 0 12px}
+.tj2 .hero .lede{font-size:15px;margin-bottom:18px}
+.tj2 .ctas .btn{flex:1;min-height:44px;font-size:15px;padding:8px 14px}
+.tj2 .nums{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:22px;padding-top:18px}
+.tj2 .nums b{font-size:20px}.tj2 .nums span{font-size:12px}
+.tj2 .eco-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}
+.tj2 .eco-grid::-webkit-scrollbar{display:none}
+.tj2 .eco-card{flex:0 0 78%;scroll-snap-align:start}
+.tj2 .eco-card .pic{height:140px}
+.tj2 .tl-item{width:220px}
+.tj2 .svc-list{grid-template-columns:1fr;gap:0;padding:4px 16px}
+.tj2 .svc-row{padding:12px 0;gap:12px}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:1px solid var(--tj-line)}
+.tj2 .svc-row:last-child{border-bottom:0}
+.tj2 .svc-row img{width:32px;height:32px}
+.tj2 .svc-row b{font-size:15px}.tj2 .svc-row span{font-size:12.5px}
+.tj2 .chips{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
+.tj2 .chips::-webkit-scrollbar{display:none}
+.tj2 .chip{white-space:nowrap;flex:none}
+.tj2 .how-grid{grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.tj2 .how-step{padding:20px 12px 14px}
+.tj2 .how-step img{width:36px;height:36px}
+.tj2 .how-step h3{font-size:14.5px}
+.tj2 .how-step p{font-size:12.5px;line-height:1.75}
+.tj2 .how-note{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;text-align:right}
+.tj2 .thc{width:138px}
+.tj2 .std{grid-template-columns:1fr 1fr;gap:8px}
+.tj2 .std>div{flex-direction:column;text-align:center;gap:6px;padding:12px 8px}
+.tj2 .std b{font-size:13px}.tj2 .std span{font-size:11.5px}
+.tj2 .supc{width:200px}
+.tj2 .map{padding:12px;border-radius:18px}
+.tj2 .map text{font-size:18px}.tj2 .map text.sea{font-size:15px}
+.tj2 .map .de{left:10px;top:10px;bottom:auto;padding:6px 10px;font-size:12px}
+.tj2 .dia .wrap{grid-template-columns:1fr;gap:22px}
+.tj2 .clocks{grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.tj2 .clock{padding:10px}.tj2 .clock .t{font-size:19px}.tj2 .clock .t small{font-size:11px}.tj2 .clock .s{font-size:10.5px}
+.tj2 .mag-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:20px}
+.tj2 .mag-grid::-webkit-scrollbar{display:none}
+.tj2 .art-card{flex:0 0 76%;scroll-snap-align:start}
+.tj2 .art-card.big img{aspect-ratio:16/10}
+.tj2 .art-card.big h3{font-size:15px}
+.tj2 .today .cnt{display:none}
+.tj2 .ig-grid{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 6px 16px;scrollbar-width:none}
+.tj2 .ig-grid::-webkit-scrollbar{display:none}
+.tj2 .pola{flex:0 0 76%;scroll-snap-align:center}
+.tj2 .pola:nth-child(n){transform:none}
+.tj2 .org .logos{gap:18px}.tj2 .org .logos img{height:26px}
+.tj2 .berry .ctas .btn{flex:1 1 100%}
+.tj2 .arrows{display:none}
+}
+.tj2 .map{max-width:620px}
+.tj2 .map .mi{position:relative}
+.tj2 .map .mi svg{width:100%;height:auto;display:block}
+.tj2 .map .mp{--pin:20px;position:absolute;transform:translate(-50%,calc(-1 * var(--pin)));text-align:center;line-height:1.2;pointer-events:none;width:max-content}
+.tj2 .map .mp img{display:block;margin:0 auto 2px;width:var(--pin);height:var(--pin);object-fit:contain;animation:tjbob 3.2s ease-in-out infinite;transform-origin:50% 100%}
+.tj2 .map .mp b{display:block;font-size:13.5px;font-weight:700;color:var(--tj-ink);text-shadow:0 0 6px var(--tj-sunk),0 0 2px var(--tj-sunk)}
+.tj2 .map .mp.big{--pin:30px}
+.tj2 .map .mp.big b{font-size:15px}
+.tj2 .map .mp.up{display:flex;flex-direction:column-reverse;transform:translate(-50%,calc(-1 * var(--pin) - 1.3em))}
+.tj2 .map .mp.up img{margin:2px auto 0}
+.tj2 .map .mp.lw b{position:absolute;right:calc(100% + 4px);top:calc(var(--pin) - 1.2em)}
+.tj2 .map .mp.d1 img{animation-delay:-.7s}
+.tj2 .map .mp.d2 img{animation-delay:-1.4s}
+.tj2 .map .mp.d3 img{animation-delay:-2.1s}
+.tj2 .map .mp.d4 img{animation-delay:-2.8s}
+.tj2 .map .sea{position:absolute;transform:translate(-50%,-50%);font-size:12.5px;color:var(--tj-mut);white-space:nowrap;pointer-events:none}
+.tj2 .clock.on{border-color:#bfe0cb;background:#f3faf5}
+.tj2 .clock.on .s{color:#2e8b57;font-weight:600}
+.tj2 .thc .loc{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--tj-soft);background:var(--tj-sunk);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .loc svg{width:11px;height:11px;flex:none;color:var(--tj-mut)}
+.tj2 .thc .sp{min-height:3.1em}
+.tj2 .thc .sch{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:#fff;background:var(--tj-red);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .sch svg{width:10px;height:10px}
+.tj2 .thc .pen{top:auto;bottom:8px;right:8px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:block}
+.tj2 .axes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.tj2 .axes>div{background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:20px 20px 22px;transition:.2s}
+.tj2 .axes>div:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .axes i{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--tj-tint);color:var(--tj-red);margin-bottom:12px}
+.tj2 .axes i svg{width:20px;height:20px}
+.tj2 .axes b{display:block;font-size:16px;color:var(--tj-ink);margin-bottom:6px}
+.tj2 .axes p{font-size:14px;color:var(--tj-soft);line-height:1.9;margin:0}
+.tj2 .ring{margin-top:14px;background:var(--tj-ink);color:#fff;border-radius:18px;padding:18px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tj2 .ring b{font-size:22px;color:#fff;white-space:nowrap}
+.tj2 .ring span{font-size:14.5px;color:rgba(255,255,255,.72);line-height:1.9;flex:1;min-width:220px}
+.tj2 .ring .dot{width:9px;height:9px;border-radius:50%;background:var(--tj-yellow);flex:none;min-width:0}
+.tj2 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:34px;position:relative}
+.tj2 .steps::before{content:"";position:absolute;top:19px;right:10%;left:10%;height:2px;background:var(--tj-line)}
+.tj2 .steps>div{text-align:center;padding:0 8px;position:relative}
+.tj2 .steps i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid var(--tj-red-400);color:var(--tj-red);font-style:normal;font-weight:800;font-size:14px;margin:0 auto 12px;position:relative;z-index:1}
+.tj2 .steps>div:last-child i{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .steps b{display:block;font-size:14.5px;color:var(--tj-ink);margin-bottom:4px}
+.tj2 .steps span{display:block;font-size:12.5px;color:var(--tj-mut);line-height:1.8}
+.tj2 .school .ctas{justify-content:center;margin-top:30px}
+.tj2 .org .logos img{height:30px}
+.tj2 .org .logos img.dk{height:26px}
+@media (max-width:1024px){
+.tj2 .axes{grid-template-columns:1fr}
+.tj2 .steps{grid-template-columns:1fr 1fr 1fr;gap:22px 0}
+.tj2 .steps::before{display:none}
+}
+@media (max-width:760px){
+.tj2 .map .mp b{font-size:11.5px}
+.tj2 .map .mp.big b{font-size:12.5px}
+.tj2 .map .mp{--pin:15px}
+.tj2 .map .mp.big{--pin:22px}
+.tj2 .map .sea{font-size:10.5px}
+.tj2 .steps{grid-template-columns:1fr 1fr;gap:20px 0}
+.tj2 .ring{padding:16px 18px;gap:10px}
+.tj2 .ring b{font-size:18px}
+}
+.tj2 .sup{background:var(--tj-tint-2)}
+.tj2 .supc{background:#fff;width:250px;padding:18px}
+.tj2 .supc:hover{background:#fff}
+.tj2 .supc img{width:76px;height:92px;border-radius:14px}
+.tj2 .supc b{font-size:15px}
+.tj2 .school .wrap{display:grid}
+.tj2 .school{background:#fff}
+.tj2 .path div{background:var(--tj-sunk)}
+.tj2 .thc .meta{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px;min-height:24px}
+.tj2 .thc .loc,.tj2 .thc .sch,.tj2 .thc .pen{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;margin:0;line-height:1.7;font-weight:600;top:auto;right:auto;bottom:auto}
+.tj2 .thc .loc{background:var(--tj-sunk);color:var(--tj-soft);font-weight:500}
+.tj2 .thc .sch{background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .thc .pen{background:#fdf3d6;color:#6b4f00}
+.tj2 .thc .loc svg,.tj2 .thc .sch svg,.tj2 .thc .pen svg{width:11px;height:11px}
+
+.tj2 .thc .mnt{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;line-height:1.7;font-weight:700;color:var(--tj-red);background:var(--tj-tint);border:1px solid var(--tj-red-400);margin:0}
+.tj2 .thc .mnt svg{width:11px;height:11px;flex:none}
+
+.tj2 .supc .supmag{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;color:var(--tj-red-600);text-decoration:none;border-bottom:1px solid var(--tj-red-400)}
+</style>
+<div class="tj2 alignfull" id="tj2">
+<section class="hero" id="hero">
+<div class="wrap">
+<div class="copy">
+<span class="eyebrow">راهنمای مسئله</span>
+<h1>جدایی؛ <em>سوگِ زندگی‌ای</em> که قرار بود باشد</h1>
+<p class="lede">در جدایی فقط یک آدم را از دست نمی‌دهید. آینده‌ای که برایش برنامه داشتید، نقشی که در خانواده داشتید و بخشی از هویتتان هم می‌رود. این صفحه توضیح می‌دهد چرا این سوگ سخت‌تر از سوگ‌های دیگر است و درمان چه کمکی می‌کند.</p>
+<div class="ctas">
+<a class="btn btn-brand" href="/get-therapy/?need=rel">جلسهٔ معارفهٔ رایگان</a>
+<a class="btn btn-ghost" href="/tests/therapy-style/">تست سبک درمانی من</a>
+</div>
+</div>
+<div class="art"><img src="/wp-content/uploads/2026/09/tjl-ed-cta.webp" alt="جوانه‌ای که از یک قلم سر برمی‌آورد، تصویرسازی فصل تازه پس از جدایی در مرکز تجربه زندگی" width="892" height="906" fetchpriority="high" decoding="async" loading="eager"></div>
+</div>
+</section>
+<section class="faq" id="about">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">جدایی از نزدیک</span><h2 class="h2">چه چیزی را تجربه می‌کنید</h2><p class="lede">هر بخش را باز کنید. این متن برای تشخیص نوشته نشده و جای ارزیابی حرفه‌ای را نمی‌گیرد.</p></div>
+<div class="faq-list rv">
+<details><summary>چرا این سوگ به رسمیت شناخته نمی‌شود</summary><div class="ans"><p>وقتی کسی می‌میرد، اطرافیان می‌دانند چه بگویند. در جدایی، بسیاری از آدم‌ها به‌جای همدلی نظر می‌دهند: زودتر باید تمامش می‌کردی، خوب شد راحت شدی. این جمله‌ها سوگ را بی‌اعتبار می‌کنند.</p><p>در ادبیات بالینی به این حالت سوگ به رسمیت شناخته‌نشده می‌گویند و یکی از دلایلی است که بهبود در جدایی گاهی کندتر از سوگ مرگ پیش می‌رود.</p></div></details>
+<details><summary>موج‌هایی که برمی‌گردند</summary><div class="ans"><p>بهبود در جدایی خطی نیست. هفته‌ای خوب پیش می‌رود و بعد یک آهنگ، یک خیابان یا یک عکس همه‌چیز را برمی‌گرداند. این عقب‌گرد نیست؛ شکل طبیعی سوگ است.</p><p>سالگردها، تعطیلات و مناسبت‌های خانوادگی معمولاً سخت‌ترین روزهایند و بهتر است از قبل برایشان برنامه داشته باشید.</p></div></details>
+<details><summary>چرخهٔ فکری که تمام نمی‌شود</summary><div class="ans"><p>مرور بی‌پایان اینکه کجا اشتباه شد، چه می‌شد اگر، و چرا او این‌طور کرد، شکلی از نشخوار فکری است. تا وقتی این چرخه بچرخد، سوگ نمی‌تواند پیش برود. اگر این بخش برایتان آشناست، صفحهٔ <a href="/help/نشخوار-فکری/">نشخوار فکری</a> را هم بخوانید.</p></div></details>
+<details><summary>وقتی یک نفر هنوز نرفته است</summary><div class="ans"><p>جدایی گاهی ماه‌ها پیش از جدا شدن فیزیکی شروع می‌شود و گاهی سال‌ها بعد هم تمام نشده. بودن در خانه‌ای که رابطه در آن مرده، فرسایشی‌تر از خودِ جدایی است.</p><p>در این وضعیت، کار درمانی معمولاً روی این است که تصمیم از حالت تعلیق بیرون بیاید، در هر جهتی که باشد.</p></div></details>
+<details><summary>نگاه تحلیلی: چه چیزی تکرار شد؟</summary><div class="ans"><p>در نگاه تحلیلی، انتخاب شریک و شکل پایان گرفتن رابطه هر دو تصادفی نیستند. الگوهای اولیهٔ دلبستگی معمولاً در رابطهٔ بزرگسالی بازسازی می‌شوند.</p><p>فهمیدن این الگو تنها چیزی است که از تکرار همان تجربه در رابطهٔ بعدی جلوگیری می‌کند. به همین دلیل درمان بعد از جدایی، سرمایه‌گذاری روی رابطهٔ بعدی هم هست.</p></div></details>
+<details><summary>بچه‌ها در جدایی</summary><div class="ans"><p>پژوهش‌ها نشان می‌دهند آنچه به کودک آسیب می‌زند بیشتر تعارض آشکار میان والدین است تا خودِ جدایی. کودک نباید پیام‌رسان، قاضی یا محرم اسرار باشد.</p><p>اگر تغییری در خواب، درس یا رفتار کودک دیدید، <a href="/therapy/child-therapy/">تراپی کودک و نوجوان</a> مسیر جداگانه‌ای دارد.</p></div></details>
+<details><summary>اگر خارج از ایران زندگی می‌کنید</summary><div class="ans"><p>اختلاف دربارهٔ ماندن یا برگشتن و سرعت متفاوت جا افتادن، از دلیل‌های رایج جدایی بعد از مهاجرت است. اگر در آلمان، کانادا، آمریکا یا هر کشور دیگری زندگی می‌کنید، می‌توانید دربارهٔ طلاق و جدایی به فارسی و به ساعت شهر خودتان با تراپیست‌های تجربه حرف بزنید. جلسهٔ معارفه رایگان است و هر جلسه برای دانشجو ۲۵ یورو و برای بقیه ۳۵ یورو.</p><p>صفحهٔ <a href="/help/زوج-درمانی-مهاجرت/">زوج‌درمانی بعد از مهاجرت</a> این موقعیت را جداگانه توضیح می‌دهد و <a href="/persian-therapy/">تراپی فارسی برای ایرانیان خارج از کشور</a> شرایط جلسه، هزینه و اختلاف ساعت را.</p></div></details></div>
+</div>
+</section>
+<section class="school" id="start">
+<div class="wrap">
+<div class="rv">
+<span class="eyebrow">مسیر شروع</span>
+<h2 class="h2">کار درمانی در جدایی از کجا شروع می‌شود</h2>
+<p class="lede">اول اینکه سوگتان به رسمیت شناخته شود. بعد اینکه بفهمید چه چیزی تکرار شد و چطور تکرار نشود.</p>
+<div class="ctas"><a class="btn btn-brand" href="/get-therapy/?need=rel">شروع تراپی</a><a class="btn btn-ghost" href="/persian-therapy/">خارج از ایران هستید؟</a></div>
+</div>
+<div class="path rv">
+<div><i>۱</i><span>چند سؤال کوتاه<small>آنچه اذیتتان می‌کند و ترجیح‌هایتان</small></span></div>
+<div><i>۲</i><span>پیشنهاد تراپیست<small>چند گزینهٔ هماهنگ با شما و با این مسئله</small></span></div>
+<div><i>۳</i><span>معارفهٔ رایگان<small>گفت‌وگوی کوتاه با خودِ تراپیست</small></span></div>
+<div><i>۴</i><span>سوگواری و صورت‌بندی<small>آنچه از دست رفته نام می‌گیرد</small></span></div>
+<div><i>۵</i><span>ادامهٔ درمان<small>با سوپروایزری که پشت جلسه ایستاده است</small></span></div>
+</div>
+</div>
+</section>
+<section id="book"><div class="wrap"><div class="center rv"><span class="eyebrow">بات تجربه در تلگرام</span><h2 class="h2">وقت معارفه را همان‌جا بگیرید</h2><p class="lede">اگر ترجیح می‌دهید به‌جای فرم، در تلگرام پیش بروید، بات تجربه روز و ساعت آزاد درمانگرها را نشانتان می‌دهد و رزرو را همان لحظه تأیید می‌کند.</p></div><div class="tjp-bk rv"><div class="tjp-bk-copy"><span class="tjp-bk-fast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" fill="currentColor" stroke="none"></path></svg>سریع‌ترین راه</span><h3>سه ضربه تا وقت معارفه</h3><ol class="tjp-bk-steps"><li><b>۱</b>روز را انتخاب کنید</li><li><b>۲</b>ساعت را بزنید</li><li><b>۳</b>تأیید رزرو همان لحظه می‌رسد</li></ol><a class="btn btn-brand tjp-bk-go" href="https://t.me/tajrobehlife_bot" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 3.5 2.5 11l6.5 2.2L11 20l3.2-4.2 5.3 4 2-16.3Z"></path><path d="m9 13.2 7.5-5.7"></path></svg>انتخاب وقت در تلگرام</a><ul class="tjp-bk-facts"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>حدود بیست دقیقه</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>رایگان</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>بدون ثبت‌نام</li></ul></div><div class="tjp-bk-demo" aria-hidden="true"><div class="tjp-chat"><div class="tjp-chat-top"><span class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 3.5 2.5 11l6.5 2.2L11 20l3.2-4.2 5.3 4 2-16.3Z"></path><path d="m9 13.2 7.5-5.7"></path></svg></span><span><b>بات تجربه</b><small>معمولاً در چند ثانیه پاسخ می‌دهد</small></span></div><p class="bb m1">کدام روز برای معارفه بهتان می‌خورد؟</p><div class="ch m2"><span>شنبه</span><span class="on o1">دوشنبه</span><span>چهارشنبه</span></div><p class="bb m3">این ساعت‌ها آزاد است:</p><div class="ch m4"><span>۱۰:۰۰</span><span class="on o2">۱۶:۲۰</span><span>۱۸:۴۰</span></div><p class="bb ok m5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>رزرو شد · دوشنبه، ساعت ۱۶:۲۰</p></div></div></div></div></section>
+<section class="svc" id="services">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">خدمات کلینیک</span><h2 class="h2">با کدام خدمت شروع کنم</h2><p class="lede">جدایی معمولاً با تراپی فردی کار می‌شود. اگر هنوز تصمیم گرفته نشده، کار زوجی هم ممکن است.</p></div>
+<div class="svc-list rv">
+<a class="svc-row" href="/therapy/individual-therapy/"><img src="/wp-content/uploads/2026/09/tjl-svc-individual.webp" alt="تراپی فردی" loading="lazy"><div><b>تراپی فردی</b><span>مسیر رایج پس از جدایی</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<a class="svc-row" href="/therapy/couple-therapy/"><img src="/wp-content/uploads/2026/09/tjl-svc-couple.webp" alt="تراپی زوج‌ها" loading="lazy"><div><b>تراپی زوج‌ها</b><span>وقتی تصمیم هنوز گرفته نشده</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<a class="svc-row" href="/therapy/child-therapy/"><img src="/wp-content/uploads/2026/09/tjl-svc-child.webp" alt="کودک و نوجوان" loading="lazy"><div><b>کودک و نوجوان</b><span>برای بچه‌هایی که درگیر شده‌اند</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<a class="svc-row" href="/therapy/group-therapy/"><img src="/wp-content/uploads/2026/09/tjl-svc-group.webp" alt="گروه‌درمانی تحلیلی" loading="lazy"><div><b>گروه‌درمانی تحلیلی</b><span>برای انزوای بعد از جدایی</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a>
+</div>
+<div class="chips rv"><span class="lbl">بیشتر بخوانید:</span><a class="chip" href="/help/">همهٔ مسئله‌ها</a><a class="chip" href="/help/سوگ/">سوگ</a><a class="chip" href="/help/افسردگی/">افسردگی</a><a class="chip" href="/help/خیانت/">خیانت</a><a class="chip" href="/tests/need-profile/">تست نیمرخ نیاز</a><a class="chip" href="/persian-therapy/">خارج از ایران</a></div>
+</div>
+</section>
+<section class="mag" id="reading">
+<div class="wrap">
+<div class="head rv">
+<div><span class="eyebrow">از مجلهٔ تجربه</span><h2 class="h2">دربارهٔ رابطه، پایان و آنچه می‌ماند</h2><p class="lede">چهار مطلب از مجلهٔ تجربه، نوشتهٔ خودِ تراپیست‌ها.</p></div>
+<a class="btn btn-ghost" href="/mag/">همهٔ مقاله‌ها</a>
+</div>
+<div class="mag-grid">
+<a class="art-card rv" href="/mag/گزارش-جلسه-تحلیل-سریال-صحنههایی-از-ی/"><img src="/wp-content/uploads/2026/09/1-26607-300x200.webp" alt="گزارش جلسه تحلیل سریال صحنه‌هایی از یک ازدواج" loading="lazy" width="300" height="188"><div class="b"><span class="k">تحلیل سریال</span><h3>گزارش جلسه تحلیل سریال صحنه‌هایی از یک ازدواج</h3><p>صحنه‌هایی از یک ازدواج و آناتومی فروپاشی یک رابطه.</p></div></a>
+<a class="art-card rv" href="/mag/محدودیتهای-ظرفیت-عشق-ورزیدن/"><img src="/wp-content/uploads/2026/09/web-cover-3-30830-300x169.webp" alt="محدودیت‌های ظرفیت عشق ورزیدن" loading="lazy" width="300" height="188"><div class="b"><span class="k">نظریه</span><h3>محدودیت‌های ظرفیت عشق ورزیدن</h3><p>چرا ظرفیت عشق ورزیدن در هر آدمی حد و مرزی دارد.</p></div></a>
+<a class="art-card rv" href="/mag/melancholia-in-war/"><img src="/wp-content/uploads/2026/09/e1788365871656-33104-300x169.webp" alt="ماتم و مالیخولیا در جنگ" loading="lazy" width="300" height="188"><div class="b"><span class="k">ماتم و مالیخولیا</span><h3>ماتم و مالیخولیا در جنگ</h3><p>تفاوت سوگ و افسردگی از نگاه فروید تا امروز.</p></div></a>
+<a class="art-card rv" href="/mag/چرا-عاشق-افراد-اشتباه-میشویم؟/"><img src="/wp-content/uploads/2026/09/web-31482-300x169.webp" alt="چرا عاشق افراد اشتباه می‌شویم؟" loading="lazy" width="300" height="188"><div class="b"><span class="k">روانکاوی</span><h3>چرا عاشق افراد اشتباه می‌شویم؟</h3><p>الگویی که باعث می‌شود بارها سراغ آدم‌های اشتباه برویم.</p></div></a>
+</div>
+</div>
+</section>
+<section class="faq" id="faq">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">پرسش‌های پرتکرار</span><h2 class="h2">چیزهایی که دربارهٔ جدایی می‌پرسند</h2></div>
+<div class="faq-list rv">
+<details><summary>چقدر طول می‌کشد تا حالم خوب شود؟</summary><div class="ans"><p>عدد قطعی وجود ندارد و به طول رابطه، شکل پایان و شبکهٔ حمایتی شما بستگی دارد. آنچه می‌شود گفت این است که بهبود موج‌دار است و عقب‌گردهای موقت بخشی از مسیر طبیعی‌اند.</p></div></details>
+<details><summary>تراپی باعث می‌شود فراموش کنم؟</summary><div class="ans"><p>هدف فراموشی نیست. هدف این است که خاطره از حالت زخم باز بیرون بیاید و بتوانید بدون فروریختن به آن فکر کنید.</p></div></details>
+<details><summary>اگر هنوز تصمیم نگرفته‌ام چه؟</summary><div class="ans"><p>تعلیق طولانی خودش فرساینده است. کار درمانی در این وضعیت روی روشن کردن چیزی است که جلوی تصمیم را گرفته، نه هل دادن شما به یک سمت.</p></div></details>
+<details><summary>هزینهٔ هر جلسه چقدر است؟</summary><div class="ans"><p>برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان، بسته به تراپیست و نوع خدمت. برای فارسی‌زبانان ساکن خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسهٔ معارفه رایگان است.</p></div></details>
+<details><summary>بعد از جدایی افسرده شده‌ام، طبیعی است؟</summary><div class="ans"><p>غم و بی‌انگیزگی بعد از جدایی رایج است. اگر بیش از دو هفته هر روز ادامه دارد و کار و خواب را عقب انداخته، دیگر فقط سوگ نیست و ارزیابی حرفه‌ای لازم دارد. صفحهٔ <a href="/help/افسردگی/">افسردگی</a> این مرز را توضیح می‌دهد.</p></div></details>
+<details><summary>خارج از ایران زندگی می‌کنم و اینجا کسی را ندارم</summary><div class="ans"><p>این وضعیت سوگ جدایی را سنگین‌تر می‌کند چون شبکهٔ حمایتی هم نیست. تجربه تراپیست فارسی‌زبان مقیم چند کشور دارد؛ <a href="/persian-therapy/">صفحهٔ تراپی فارسی برای ایرانیان خارج از کشور</a> شرایط جلسه و پرداخت ارزی را توضیح می‌دهد.</p></div></details>
+</div>
+</div>
+</section>
+<section class="berry" id="berry">
+<div class="wrap rv">
+<img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" loading="lazy">
+<h2 class="h2">سوگ با حرف زدن پیش می‌رود، نه با گذر زمان تنها</h2>
+<p class="lede">جلسهٔ معارفه رایگان است و در آن هیچ درمانی انجام نمی‌شود. فقط می‌بینید با تراپیست راه می‌آیید یا نه.</p>
+<div class="ctas"><a class="btn btn-brand" href="/get-therapy/?need=rel">رزرو معارفهٔ رایگان</a><a class="btn btn-ghost" href="https://t.me/tajrobehlife_bot" target="_blank" rel="noopener">سؤال دارم، در تلگرام</a></div>
+</div>
+</section>
+</div>
+
+<script>
+(function(){
+var root=document.getElementById('tj2'); if(!root) return;
+var fa=function(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+var fmt=function(n){return fa(n.toLocaleString('en-US')).replace(/,/g,'،');};
+var rv=root.querySelectorAll('.rv');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -6% 0px'});rv.forEach(function(el){io.observe(el);});}else{rv.forEach(function(el){el.classList.add('in');});}
+var cs=root.querySelectorAll('[data-count]');
+function runCount(el){var end=+el.getAttribute('data-count'),suf=el.getAttribute('data-suffix')||'',t0=null,dur=1400;function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);el.textContent=fmt(Math.round(end*p))+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+/* شمارش متحرک اعداد حذف شد (پرش چیدمان) */
+root.querySelectorAll('.arrows[data-for]').forEach(function(a){var tr=document.getElementById(a.getAttribute('data-for'));if(!tr)return;var b=a.querySelectorAll('button');b[0].addEventListener('click',function(){tr.scrollBy({left:tr.clientWidth*0.8,behavior:'smooth'});});b[1].addEventListener('click',function(){tr.scrollBy({left:-tr.clientWidth*0.8,behavior:'smooth'});});});
+var thTrack=document.getElementById('thTrack'),dots=document.getElementById('thDots');
+function buildDots(){if(!thTrack||!dots)return;var pages=Math.max(1,Math.ceil(thTrack.scrollWidth/thTrack.clientWidth));dots.innerHTML='';if(pages>10){dots.style.display='none';return;}dots.style.display='';for(var i=0;i<pages;i++){dots.appendChild(document.createElement('i'));}updDots();}
+function updDots(){if(!thTrack||!dots)return;var max=thTrack.scrollWidth-thTrack.clientWidth,p=max>0?Math.abs(thTrack.scrollLeft)/max:0,n=dots.children.length,idx=Math.round(p*(n-1));for(var i=0;i<n;i++)dots.children[i].classList.toggle('on',i===idx);}
+if(thTrack){buildDots();thTrack.addEventListener('scroll',updDots,{passive:true});window.addEventListener('resize',buildDots);}
+var filt=document.getElementById('thFilter');
+if(filt){if(thTrack){filt.addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;filt.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});b.classList.add('on');var tag=b.getAttribute('data-tag');thTrack.querySelectorAll('.thc:not(.more)').forEach(function(c){var tags=(c.getAttribute('data-tags')||'').split(' ');var hide=(tag==='all')?false:(tags.indexOf(tag)<0);c.classList.toggle('hide',hide);});thTrack.scrollTo({left:0});buildDots();});}}
+function parts(tz){try{var f=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});var o={};f.formatToParts(new Date()).forEach(function(p){o[p.type]=p.value;});return {h:+o.hour%24,m:+o.minute,s:+o.second};}catch(e){return null;}}
+function tick(){root.querySelectorAll('.clock').forEach(function(c){var p=parts(c.getAttribute('data-tz'));if(!p)return;var t=c.querySelector('.t');var hm=fa(('0'+p.h).slice(-2))+':'+fa(('0'+p.m).slice(-2));var sm=t.querySelector('small');if(!sm){t.textContent='';t.appendChild(document.createTextNode(hm));sm=document.createElement('small');t.appendChild(sm);}else{t.firstChild.nodeValue=hm;}sm.textContent=':'+fa(('0'+p.s).slice(-2));var good=(p.h>=8)?(p.h<23):false;c.classList.toggle('on',good);c.querySelector('.s').textContent=good?'ساعت مناسب جلسه':'وقت استراحت؛ تراپیست برای ساعت شما هست';});}
+tick();setInterval(tick,1000);
+root.querySelectorAll('details').forEach(function(d){var s=d.querySelector('summary'),a=d.querySelector('.ans');if(!s||!a)return;s.addEventListener('click',function(e){e.preventDefault();if(d.hasAttribute('data-anim'))return;d.setAttribute('data-anim','1');if(d.open){var h=a.offsetHeight;a.style.height=h+'px';a.style.transition='height .3s ease';requestAnimationFrame(function(){a.style.height='0px';});setTimeout(function(){d.open=false;a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},300);}else{d.open=true;var h2=a.offsetHeight;a.style.height='0px';a.style.transition='height .32s ease';requestAnimationFrame(function(){a.style.height=h2+'px';});setTimeout(function(){a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},330);}});});
+var arts=[['/mag/زندگی-نامه-ژاک-لکان/','زندگی‌نامه‌ی ژاک لکان'],['/mag/زندگینامه-زیگموند-فروید/','زندگی‌نامه‌ی زیگموند فروید'],['/mag/چگونه-روان-درمانگر-انتخاب-کنیم؟/','چگونه روان‌درمانگر انتخاب کنیم؟'],['/mag/ردفلگهای-تراپیست-و-اهمیت-اصول-حرفه/','ردفلگ‌های تراپیست و اصول حرفه‌ای در اتاق تراپی'],['/mag/سوپرویژن-چیست-و-چرا-مهم-است؟/','سوپرویژن چیست و چرا مهم است؟'],['/mag/رواندرمانی-تحلیلی/','روان‌درمانی تحلیلی چیست؟'],['/mag/زندگینامه-دونالد-وینیکات/','زندگی‌نامه‌ی دونالد وینیکات'],['/mag/مهاجرت-از-دیدگاه-روانکاوی/','مهاجرت از دیدگاه روانکاوی'],['/mag/افسانههای-رایج-درباره-روانکاوی/','افسانه‌های رایج درباره‌ی روانکاوی'],['/mag/اتاق-تراپی-رازها-و-رمزها/','اتاق تراپی: رازها و رمزها'],['/mag/گروهدرمانی-چیست؟/','گروه‌درمانی چیست؟'],['/mag/سلامت-روان-در-مهاجرت/','سلامت روان در مهاجرت؛ چرا به روانشناس هم‌زبان نیاز داریم؟'],['/mag/زندگینامه-کارن-هورنای/','زندگی‌نامه‌ی کارن هورنای'],['/mag/سمپتوم-چیست-تعریف-نشانه-در-روانکاوی/','سمپتوم چیست؟']];
+var tl=document.getElementById('todayLink');if(tl){var day=Math.floor(Date.now()/86400000),a=arts[day%arts.length];tl.href=a[0];tl.textContent=a[1];}
+})();
+
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"MedicalWebPage","@id":"https://tajrobeh.life/help/طلاق-و-جدایی/#page","url":"https://tajrobeh.life/help/طلاق-و-جدایی/","name":"طلاق و جدایی؛ سوگ، نشانه‌ها و مسیر درمان","inLanguage":"fa-IR","isPartOf":{"@id":"https://tajrobeh.life/#website"},"about":{"@type":"Thing","name":"طلاق و جدایی","alternateName":["Divorce","Separation","جدایی عاطفی"]},"audience":{"@type":"Patient"},"reviewedBy":{"@id":"https://tajrobeh.life/#organization"},"lastReviewed":"2026-09-12","description":"چرا سوگ جدایی به رسمیت شناخته نمی‌شود، چرخهٔ فکری بعد از آن چیست، و درمان چطور از تکرار الگو در رابطهٔ بعدی جلوگیری می‌کند."},{"@type":"Service","@id":"https://tajrobeh.life/help/طلاق-و-جدایی/#service","name":"درمان فردی و زوجی در جدایی و طلاق در مرکز تجربه زندگی","serviceType":"روان‌درمانی","provider":{"@id":"https://tajrobeh.life/#organization"},"areaServed":[{"@type":"Country","name":"Iran"},{"@type":"Country","name":"Germany"},{"@type":"Country","name":"United Kingdom"},{"@type":"Country","name":"United States"},{"@type":"Country","name":"Canada"}],"offers":{"@type":"Offer","priceCurrency":"IRR","url":"https://tajrobeh.life/get-therapy/","description":"۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان برای هر جلسه؛ جلسهٔ معارفه رایگان","priceSpecification":{"@type":"PriceSpecification","priceCurrency":"IRR","minPrice":"15000000","maxPrice":"30000000"}}},{"@type":"FAQPage","@id":"https://tajrobeh.life/help/طلاق-و-جدایی/#faq","mainEntity":[{"@type":"Question","name":"چقدر طول می‌کشد تا حالم خوب شود؟","acceptedAnswer":{"@type":"Answer","text":"عدد قطعی وجود ندارد و به طول رابطه، شکل پایان و شبکهٔ حمایتی شما بستگی دارد. آنچه می‌شود گفت این است که بهبود موج‌دار است و عقب‌گردهای موقت بخشی از مسیر طبیعی‌اند."}},{"@type":"Question","name":"تراپی باعث می‌شود فراموش کنم؟","acceptedAnswer":{"@type":"Answer","text":"هدف فراموشی نیست. هدف این است که خاطره از حالت زخم باز بیرون بیاید و بتوانید بدون فروریختن به آن فکر کنید."}},{"@type":"Question","name":"اگر هنوز تصمیم نگرفته‌ام چه؟","acceptedAnswer":{"@type":"Answer","text":"تعلیق طولانی خودش فرساینده است. کار درمانی در این وضعیت روی روشن کردن چیزی است که جلوی تصمیم را گرفته، نه هل دادن شما به یک سمت."}},{"@type":"Question","name":"هزینهٔ هر جلسه چقدر است؟","acceptedAnswer":{"@type":"Answer","text":"برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان، بسته به تراپیست و نوع خدمت. برای فارسی‌زبانان ساکن خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسهٔ معارفه رایگان است."}},{"@type":"Question","name":"بعد از جدایی افسرده شده‌ام، طبیعی است؟","acceptedAnswer":{"@type":"Answer","text":"غم و بی‌انگیزگی بعد از جدایی رایج است. اگر بیش از دو هفته هر روز ادامه دارد و کار و خواب را عقب انداخته، دیگر فقط سوگ نیست و ارزیابی حرفه‌ای لازم دارد. صفحهٔ افسردگی این مرز را توضیح می‌دهد."}},{"@type":"Question","name":"خارج از ایران زندگی می‌کنم و اینجا کسی را ندارم","acceptedAnswer":{"@type":"Answer","text":"این وضعیت سوگ جدایی را سنگین‌تر می‌کند چون شبکهٔ حمایتی هم نیست. تجربه تراپیست فارسی‌زبان مقیم چند کشور دارد؛ صفحهٔ تراپی فارسی برای ایرانیان خارج از کشور شرایط جلسه و پرداخت ارزی را توضیح می‌دهد."}}]}]}</script>
+<!-- /wp:html -->

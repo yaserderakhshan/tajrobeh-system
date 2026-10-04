@@ -1,0 +1,56 @@
+name: سایت · چک هفتگی
+
+# هر شنبه ساعت ۶:۴۵ تهران: سرعت (Lighthouse)، امنیت و به‌روزرسانی‌ها، لینک‌های شکسته و ۴۰۴،
+# سلامت مسیرهای لید (حضور فرم‌ها، بی ثبت آزمایشی) و ناهمخوانی مخزن با سایت. فقط خواندن.
+# خلاصه در همین اجرا و (وقتی درگاه بات تنظیم شد) برای یاسر از کنش send.
+on:
+  schedule:
+    - cron: '15 3 * * 6'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: site-audit
+  cancel-in-progress: false
+
+jobs:
+  weekly:
+    environment: production   # v170.9: رمزها فقط در Environment «production» (فقط main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: اندازه‌گیری
+        env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          SPEED_ARTICLES: ${{ vars.SPEED_ARTICLES }}
+          LEAD_SUBMIT: '0'
+          OUT: ${{ runner.temp }}/site-weekly
+        run: node site/tools/site-audit.mjs speed security leads links || echo "AUDIT_FAIL=1" >> "$GITHUB_ENV"
+      - name: ناهمخوانی مخزن و سایت
+        env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          OUT: ${{ runner.temp }}/site-weekly
+        run: node site/tools/site-pull.mjs
+      - name: گزارش
+        if: always()
+        env:
+          BOT_API_URL: ${{ secrets.BOT_API_URL }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+          REPORT_CHAT_ID: ${{ secrets.REPORT_CHAT_ID }}
+          OUT: ${{ runner.temp }}/site-weekly
+        run: node site/tools/site-weekly-report.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: site-weekly
+          path: ${{ runner.temp }}/site-weekly
+          retention-days: 90

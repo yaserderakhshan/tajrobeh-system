@@ -1,0 +1,182 @@
+<style id="tjwcss">
+/* ویجت کوچک انتخاب تراپیست */
+.tjw{--r:#c83f49;font-family:'Anjoman Max',Vazirmatn,sans-serif;direction:rtl;background:#fff;border:1px solid #dfdfe2;border-radius:20px;padding:14px;max-width:760px;margin-inline:auto;box-shadow:0 18px 40px -30px rgba(34,34,34,.45)}
+.tjw-h{display:flex;align-items:center;gap:12px}
+.tjw-h i{flex:0 0 44px;height:44px;border-radius:14px;background:#faeced;display:grid;place-items:center;font-style:normal;font-size:22px}
+.tjw-h i img{width:30px;height:auto;display:block;max-width:none}
+.tjw-h div{flex:1;min-width:0}
+.tjw-h b{display:block;color:#0e0e0e;font-size:16px;line-height:1.6}
+.tjw-h span{display:block;color:#676768;font-size:13px;line-height:1.7}
+.tjw-go{font:inherit;font-size:14.5px;border:0;border-radius:12px;background:var(--r);color:#fefefe;padding:10px 18px;cursor:pointer;white-space:nowrap}
+.tjw-body{display:none;margin-top:12px;border-top:1px dashed #e8e0e1;padding-top:12px}
+.tjw.open .tjw-body{display:block}
+.tjw.open .tjw-go{display:none}
+.tjw-q{font-size:15px;color:#222;margin:0 0 10px}
+.tjw-dots{display:flex;gap:5px;margin:0 0 10px}
+.tjw-dots s{width:22px;height:4px;border-radius:9px;background:#eee;text-decoration:none}
+.tjw-dots s.on{background:var(--r)}
+.tjw-ch{display:flex;flex-wrap:wrap;gap:8px}
+.tjw-ch button{font:inherit;font-size:14px;border:1px solid #dfdfe2;background:#fff;color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;transition:border-color .15s,background .15s}
+.tjw-ch button:hover{border-color:var(--r);background:#fff7f7}
+.tjw-res{display:grid;gap:8px}
+.tjw-card{display:flex;gap:10px;align-items:center;border:1px solid #eee;border-radius:14px;padding:10px}
+.tjw-card .av{flex:0 0 44px;width:44px;height:50px;border-radius:999px 999px 10px 10px;background:#faeced;color:var(--r);display:grid;place-items:center;font-size:18px;overflow:hidden}
+.tjw-card .av img{width:100%;height:100%;object-fit:cover;display:block}
+.tjw-card .tx{flex:1;min-width:0}
+.tjw-card b{display:block;font-size:15px;color:#0e0e0e;line-height:1.55}
+.tjw-card span{display:block;font-size:12.5px;color:#676768;line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tjw-card a{font-size:13.5px;text-decoration:none;border-radius:10px;padding:7px 12px;white-space:nowrap}
+.tjw-card a.p{background:var(--r);color:#fefefe}
+.tjw-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tjw-foot a,.tjw-foot button{font:inherit;font-size:13.5px;border:1px solid #dfdfe2;background:#fff;color:#222;border-radius:10px;padding:8px 12px;text-decoration:none;cursor:pointer}
+.tjw-note{font-size:12.5px;color:#676768;margin:8px 0 0}
+@media (max-width:760px){.tjw-h{flex-wrap:wrap}.tjw-go{width:100%}.tjw-card{flex-wrap:wrap}}
+.tjw-auto{margin:28px auto}
+</style>
+<script id="tjwjs">
+(function () {
+  if (window.__tjwLite) return; window.__tjwLite = 1;
+  var BOT = 'https://t.me/tajrobehlife_bot?start=';
+  var EDGE = 'https://tajrobeh-edge.yaserderakhshan.workers.dev/thers';
+  function ev(name, p) {
+    try { if (window.gtag) window.gtag('event', name, p || {}); } catch (e) {}
+    try { (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: name }, p || {})); } catch (e2) {}
+  }
+  function el(tag, cls, txt) { var n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; }
+  function pic(src, alt) { var n = document.createElement('img'); n.src = src; n.alt = alt || ''; n.loading = 'lazy'; n.decoding = 'async'; return n; }
+  var DATA = null, WAIT = [];
+  function thers(cb) {
+    if (DATA) return cb(DATA);
+    WAIT.push(cb);
+    if (WAIT.length > 1) return;
+    fetch(EDGE).then(function (r) { return r.json(); }).then(function (j) {
+      var a = Array.isArray(j) ? j : (j.thers || j.list || j.data || []);
+      DATA = a.filter(function (t) { return t.a === 1 || t.a === true || t.a === undefined; });
+      WAIT.splice(0).forEach(function (f) { f(DATA); });
+    }).catch(function () { DATA = []; WAIT.splice(0).forEach(function (f) { f(DATA); }); });
+  }
+  var PH = {};
+  function photos(slugs, cb) {
+    var need = slugs.filter(function (s) { return s ? PH[s] === undefined : false; });
+    if (!need.length) return cb(PH);
+    var A = String.fromCharCode(38);
+    fetch('/wp-json/wp/v2/tj_person?per_page=50' + A + '_embed=wp:featuredmedia' + A + '_fields=slug,_links,_embedded' + A + 'slug=' + need.join(','))
+      .then(function (r) { return r.json(); }).then(function (a) {
+        need.forEach(function (s) { PH[s] = ''; });
+        (a || []).forEach(function (p) {
+          try {
+            var m = p._embedded['wp:featuredmedia'][0], sz = (m.media_details || {}).sizes || {};
+            PH[p.slug] = (sz.thumbnail || sz.medium || {}).source_url || m.source_url || '';
+          } catch (e) {}
+        });
+        cb(PH);
+      }).catch(function () { cb(PH); });
+  }
+  function hasCity(t, city) { return String(t.ct || '').indexOf(city) > -1; }
+  function avatar(box, t) {
+    box.textContent = String(t.n || '').trim().charAt(0);
+    if (t.sl) photos([t.sl], function (P) { if (P[t.sl]) { box.textContent = ''; box.appendChild(pic(P[t.sl], t.n)); } });
+  }
+
+  /* ۴. ویجت کوچک انتخاب تراپیست (هر جای سایت با کلاس tjw و data-city و data-inp) */
+  var TOP = [['anx', 'اضطراب و نگرانی', /اضطراب|وسواس|پانیک|استرس/], ['dep', 'افسردگی و بی‌حوصلگی', /افسرد|سوگ|فقدان|غم/], ['rel', 'رابطه و زوج', /رابطه|زوج/], ['fam', 'خانواده و والدگری', /خانواد|والد/], ['self', 'شناخت خودم', /خودشناس|معنا|ارزشمند|اعتماد/], ['kid', 'کودک و نوجوان', /کودک|نوجوان/], ['oth', 'چیز دیگری', /./]];
+  function pickTop(k) { for (var i = 0; i < TOP.length; i++) if (TOP[i][0] === k) return TOP[i]; return TOP[6]; }
+  function okPool(t, k) {
+    var pl = t.pl || [];
+    if (k === 'rel') return pl.indexOf('rel') > -1 || t.cp === 1;
+    if (k === 'kid') return pl.indexOf('kid') > -1 || /کودک|نوجوان/.test(String(t.ag || ''));
+    return true;
+  }
+  function score(t, S) {
+    var s = 0, tp = pickTop(S.t);
+    if (tp[2].test(String(t.fc || '') + ' ' + String(t.sp || ''))) s += 2;
+    if (t.pg) s += 2;
+    if (S.m === 'in') { if (hasCity(t, S.city)) s += 5; if (String(t.md || '').indexOf('حضوری') > -1) s += 2; }
+    if (S.g === 'f') { if (t.g === 'f') s += 3; } else if (S.g === 'm') { if (t.g === 'm') s += 3; }
+    return s + Math.random() * 0.5;
+  }
+  function tjw(box) {
+    var city = box.getAttribute('data-city') || '', code = box.getAttribute('data-inp') || '', S = { city: city };
+    var head = el('div', 'tjw-h'), ic = el('i'); ic.appendChild(pic('/wp-content/uploads/2026/09/tjl-berry.webp', '')); head.appendChild(ic);
+    var hd = el('div'); hd.appendChild(el('b', '', box.getAttribute('data-title') || 'تراپیست مناسب را با سه انتخاب پیدا کنید'));
+    hd.appendChild(el('span', '', box.getAttribute('data-sub') || 'رایگان، بی‌نیاز به ثبت‌نام، همین‌جا'));
+    head.appendChild(hd);
+    var go = el('button', 'tjw-go', 'شروع'); go.type = 'button'; head.appendChild(go);
+    var body = el('div', 'tjw-body');
+    box.appendChild(head); box.appendChild(body);
+    go.onclick = function () { box.classList.add('open'); ev('tjq_open', { city: city, page: location.pathname }); step1(); };
+    function frame(n, q) {
+      body.textContent = '';
+      var d = el('div', 'tjw-dots'); for (var i = 1; i < 4; i++) d.appendChild(el('s', i > n ? '' : 'on'));
+      body.appendChild(d); body.appendChild(el('p', 'tjw-q', q));
+      var ch = el('div', 'tjw-ch'); body.appendChild(ch); return ch;
+    }
+    function btn(ch, label, fn) { var b = el('button', '', label); b.type = 'button'; b.onclick = fn; ch.appendChild(b); }
+    function step1() {
+      var ch = frame(1, 'دربارهٔ چه چیزی می‌خواهید حرف بزنید؟');
+      TOP.forEach(function (tp) { btn(ch, tp[1], function () { S.t = tp[0]; ev('tjq_step', { step: 1, value: tp[0] }); thers(function () {}); step2(); }); });
+    }
+    function step2() {
+      var ch = frame(2, 'جلسه‌ها چطور باشد؟');
+      if (city) btn(ch, 'حضوری در ' + city, function () { S.m = 'in'; ev('tjq_step', { step: 2, value: 'in' }); step3(); });
+      btn(ch, 'آنلاین', function () { S.m = 'on'; ev('tjq_step', { step: 2, value: 'on' }); step3(); });
+      btn(ch, 'فرقی ندارد', function () { S.m = 'any'; ev('tjq_step', { step: 2, value: 'any' }); step3(); });
+    }
+    function step3() {
+      var ch = frame(3, 'ترجیح دارید درمانگرتان…');
+      btn(ch, 'زن باشد', function () { S.g = 'f'; done(); });
+      btn(ch, 'مرد باشد', function () { S.g = 'm'; done(); });
+      btn(ch, 'فرقی ندارد', function () { S.g = 'x'; done(); });
+    }
+    function done() {
+      ev('tjq_step', { step: 3, value: S.g });
+      body.textContent = ''; body.appendChild(el('p', 'tjw-q', 'چند لحظه…'));
+      thers(function (all) {
+        var pool = all.filter(function (t) { return okPool(t, S.t); });
+        var soft = '';
+        if (S.m === 'in') {
+          var inCity = pool.filter(function (t) { return hasCity(t, city); });
+          if (inCity.length) pool = inCity; else soft = 'در ' + city + ' هنوز درمانگر مناسبی ثبت نشده؛ این‌ها را آنلاین ببینید یا بگذارید پذیرش هماهنگ کند.';
+        }
+        pool.sort(function (a, b) { return score(b, S) - score(a, S); });
+        var top = pool.slice(0, 3);
+        body.textContent = '';
+        body.appendChild(el('p', 'tjw-q', top.length ? 'این‌ها با انتخاب‌های شما جورترند:' : 'پذیرش تجربه برایتان انتخاب می‌کند.'));
+        var res = el('div', 'tjw-res'); body.appendChild(res);
+        top.forEach(function (t, i) {
+          var c = el('div', 'tjw-card'), av = el('div', 'av'); avatar(av, t); c.appendChild(av);
+          var tx = el('div', 'tx'); tx.appendChild(el('b', '', t.n)); tx.appendChild(el('span', '', String(t.tt || t.sp || '').split('\n')[0])); c.appendChild(tx);
+          if (t.pg) { var pg = el('a', '', 'صفحه'); pg.href = t.pg; c.appendChild(pg); }
+          var bk = el('a', 'p', 'وقت معارفه'); bk.href = BOT + (t.sl ? 'tm-' + t.sl : 'gt-' + S.t); bk.rel = 'nofollow';
+          bk.onclick = function () { ev('tjq_pick', { kind: 'ther-' + (i + 1), ther: t.sl || t.n, city: city }); };
+          c.appendChild(bk); res.appendChild(c);
+        });
+        if (soft) body.appendChild(el('p', 'tjw-note', soft));
+        var ft = el('div', 'tjw-foot');
+        var d1 = el('a', '', 'پذیرش برایم انتخاب کند'); d1.href = BOT + (S.m === 'in' ? (code ? 'inp-' + code : 'gt-' + S.t) : 'gt-' + S.t); d1.rel = 'nofollow';
+        d1.onclick = function () { ev('tjq_pick', { kind: 'desk', city: city }); };
+        var d2 = el('a', '', 'شماره‌ام را می‌گذارم'); d2.href = '/get-therapy/?need=' + ({ anx: 'anx', dep: 'dep', rel: 'rel', fam: 'fam', self: 'self', kid: 'child', oth: 'unsure' })[S.t];
+        d2.onclick = function () { ev('tjq_pick', { kind: 'form', city: city }); };
+        var d3 = el('button', '', 'از اول'); d3.type = 'button'; d3.onclick = function () { ev('tjq_back', {}); step1(); };
+        ft.appendChild(d1); ft.appendChild(d2); ft.appendChild(d3); body.appendChild(ft);
+        body.appendChild(el('p', 'tjw-note', 'جلسهٔ معارفهٔ اول آنلاین و رایگان است. اطلاعات شما فقط نزد پذیرش تجربه می‌ماند.'));
+        ev('tjq_result', { count: top.length, city: city, mode: S.m });
+      });
+    }
+  }
+  /* جای خودکار: مقاله‌های مجله، پیش از دومین تیتر */
+  try {
+    if (document.body.classList.contains('single-post')) {
+      if (!document.querySelector('.tjw')) {
+        var art = document.querySelector('.entry-content, .wp-block-post-content, article .content, article');
+        if (art) {
+          var hs = art.querySelectorAll('h2');
+          var box = document.createElement('div'); box.className = 'tjw tjw-auto'; box.setAttribute('data-title', 'دوست دارید با یک درمانگر دربارهٔ همین حرف بزنید؟'); box.setAttribute('data-sub', 'سه انتخاب، رایگان و بدون ثبت‌نام');
+          if (hs.length > 1) hs[1].parentNode.insertBefore(box, hs[1]); else art.appendChild(box);
+        }
+      }
+    }
+  } catch (eA) {}
+  document.querySelectorAll('.tjw').forEach(function (b) { if (!b.getAttribute('data-ok')) { b.setAttribute('data-ok', '1'); tjw(b); } });
+})();
+</script>

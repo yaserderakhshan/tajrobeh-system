@@ -1,0 +1,66 @@
+name: سایت · اندازه‌گیری زنده (سرعت، امنیت، لید)
+
+# از رانر گیت‌هاب: Lighthouse موبایل، هدرها و نقاط افشا، آسیب‌پذیری نسخه‌ها، و مسیرهای لید.
+# فقط خواندن. ثبت آزمایشی فرم ۷ فقط با اجرای دستی و lead_submit=1 (پیش‌فرض خاموش)، با نام «تست TEST-…» و شمارهٔ 09123456789 (بات نادیده می‌گیرد) که بعد پاک می‌شود.
+# اگر انتشار بات در جریان است، ثبت آزمایشی انجام نمی‌شود (خط «فرم تستی» در تب خطاها پایش بات را به هم نزند).
+# رمز فقط WP_USER و WP_APP_PASSWORD (کاربر claude-ops).
+on:
+  # v170.9: فقط اجرای دستی از main (رمزها فقط در Environment «production»)
+  workflow_dispatch:
+    inputs:
+      parts:
+        description: 'بخش‌ها (speed security leads)'
+        default: 'speed security leads'
+      lead_forms:
+        description: 'فرم‌های ثبت آزمایشی: 7 یا 7,5,9 یا all'
+        default: '7'
+      lead_submit:
+        description: 'ثبت آزمایشی فرم ۷ (1 یا 0)'
+        default: '0'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: site-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    environment: production   # v170.9: رمزها فقط در Environment «production» (فقط main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: انتشار بات در جریان است؟
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          n=$(gh run list -R "$GITHUB_REPOSITORY" -w bot-deploy.yml -s in_progress --json databaseId -q 'length' 2>/dev/null || echo 0)
+          echo "bot_running=$n" >> "$GITHUB_OUTPUT"
+          [ "$n" = "0" ] || echo "::warning::انتشار بات در جریان است؛ ثبت آزمایشی فرم انجام نمی‌شود"
+
+      - name: اندازه‌گیری
+        env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
+          SPEED_ARTICLES: ${{ vars.SPEED_ARTICLES }}
+          LEAD_SUBMIT: ${{ github.event_name == 'workflow_dispatch' && steps.guard.outputs.bot_running == '0' && github.event.inputs.lead_submit || '0' }}
+          LEAD_FORMS: ${{ github.event.inputs.lead_forms || '7' }}
+          OUT: ${{ runner.temp }}/site-audit
+        run: node site/tools/site-audit.mjs ${{ github.event.inputs.parts || (contains(github.event.head_commit.message, '[audit:leads]') && 'security leads' || 'speed security leads') }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: site-audit
+          path: ${{ runner.temp }}/site-audit
+          retention-days: 30

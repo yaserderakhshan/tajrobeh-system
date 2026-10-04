@@ -1,0 +1,12 @@
+{
+  "note": "مجوزهای گوگل که پروژهٔ Apps Script بات تأیید کرده است. افزودن فقط با تأیید یاسر و بعد از تأیید مجوز در ویرایشگر Apps Script (یک بار اجرای یک تابع با حساب مالک). .github/scripts/bot-scopes.mjs پیش از هر انتشار مقایسه می‌کند.",
+  "approved": [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/documents",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/script.scriptapp",
+    "https://www.googleapis.com/auth/calendar"
+  ],
+  "advanced": ["docs"]
+}

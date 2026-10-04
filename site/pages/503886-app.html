@@ -1,0 +1,2655 @@
+<!-- wp:html -->
+<!-- نسخهٔ برگهٔ مینی‌اپ: v170.0 · site/pages/503886-app.html -->
+<style>
+body:has(#tjapp) .tjh, body:has(#tjapp) .tjf,
+body:has(#tjapp) > header, body:has(#tjapp) > footer,
+body:has(#tjapp) .wp-site-blocks > header, body:has(#tjapp) .wp-site-blocks > footer { display:none !important }
+body:has(#tjapp) { background:#fefefe; margin:0 }
+body:has(#tjapp) #wpadminbar, body:has(#tjapp) .grecaptcha-badge,
+body:has(#tjapp) [class*="chat"][class*="widget"], body:has(#tjapp) [id*="chat-widget"],
+body:has(#tjapp) #tjFabRoot, body:has(#tjapp) #tjFabBackdrop, body:has(#tjapp) .tj-fab-root { display:none !important }
+body:has(#tjapp) .wp-site-blocks, body:has(#tjapp) main, body:has(#tjapp) .entry-content { margin:0 !important; padding:0 !important; max-width:none !important }
+
+#tjapp{--tj-red:#c83f49;--tj-red-600:#b63942;--tj-red-50:#faeced;--tj-ink:#222;--tj-soft:#4e4e4e;--tj-mut:#676768;
+  --tj-line:#dfdfe2;--tj-bg:#fefefe;--tj-sunk:#f5f5f8;--tj-ok:#2f7a52;--tj-ok-50:#eaf4ee;
+  font-family:'Anjoman Max','Vazirmatn',system-ui,sans-serif;color:var(--tj-ink);background:var(--tj-bg);
+  min-height:100vh;padding:0 0 110px;box-sizing:border-box;direction:rtl;text-align:right;
+  max-width:520px;margin-inline:auto;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+#tjapp *{box-sizing:border-box;min-width:0}
+#tjapp img{max-width:100%}
+
+/* ---------- نوار بالا ---------- */
+#tjapp .bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;
+  padding:14px 16px 12px;background:rgba(254,254,254,.94);backdrop-filter:blur(10px);
+  border-bottom:1px solid transparent;transition:border-color .2s}
+#tjapp .bar.sticky{border-bottom-color:var(--tj-line)}
+#tjapp .bk{flex:none;width:34px;height:34px;border-radius:12px;border:1px solid var(--tj-line);
+  background:var(--tj-bg);color:var(--tj-soft);font:inherit;font-size:16px;line-height:1;cursor:pointer;
+  display:grid;place-items:center;transition:.15s}
+#tjapp .bk:active{transform:scale(.92);background:var(--tj-sunk)}
+#tjapp .bar .ttl{font-size:16px;line-height:1.5;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tjapp .bar .tag{flex:none;font-size:12px;color:var(--tj-mut);background:var(--tj-sunk);border-radius:99px;padding:4px 10px}
+#tjapp .wrap{padding:4px 16px 0}
+
+/* ---------- تیترها ---------- */
+#tjapp h1{font-size:22px;line-height:1.5;margin:6px 0 6px;font-weight:400}
+#tjapp h2{font-size:15px;line-height:1.6;margin:22px 0 10px;font-weight:400;color:var(--tj-soft)}
+#tjapp .sub{color:var(--tj-mut);font-size:14px;line-height:1.85;margin:0 0 20px}
+#tjapp .center{text-align:center}
+
+/* ---------- کارت واحد ---------- */
+#tjapp .card{border:1px solid var(--tj-line);border-radius:20px;padding:15px 16px;margin:0 0 12px;
+  background:var(--tj-bg);animation:tjpop .22s ease both}
+@keyframes tjpop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#tjapp .card .bd{font-size:14.5px;line-height:1.95;color:var(--tj-ink);overflow-wrap:break-word;white-space:pre-wrap}
+#tjapp .card .bd a{color:var(--tj-red);text-decoration:none;word-break:break-word}
+#tjapp .card .bd b{font-weight:400;color:var(--tj-red-600)}
+#tjapp .card .bd code{background:var(--tj-sunk);border-radius:6px;padding:1px 5px;font-size:13px}
+#tjapp .card .bd blockquote{margin:8px 0;padding-inline-start:12px;border-inline-start:2px solid var(--tj-line);color:var(--tj-mut)}
+#tjapp .thumb{display:block;width:88px;height:88px;object-fit:cover;border-radius:14px;margin:0 0 10px}
+
+/* ---------- دکمه‌ها ---------- */
+#tjapp .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#tjapp .ib{border:1.5px solid var(--tj-line);border-radius:13px;padding:10px 13px;font:inherit;font-size:14px;
+  background:var(--tj-bg);color:var(--tj-ink);cursor:pointer;line-height:1.55;text-align:right;
+  flex:1 1 calc(50% - 4px);transition:.15s}
+#tjapp .ib.wide{flex-basis:100%}
+#tjapp .ib:active{transform:scale(.97);background:var(--tj-sunk)}
+#tjapp .ib.on{border-color:var(--tj-red);background:var(--tj-red-50);color:var(--tj-red-600)}
+#tjapp .ib[disabled]{opacity:.5;cursor:default}
+#tjapp .btn{display:block;width:100%;border:0;border-radius:16px;background:var(--tj-red);color:#fff;
+  font:inherit;font-size:16px;padding:15px;cursor:pointer;margin-top:14px;transition:.15s}
+#tjapp .btn:active{transform:scale(.985);background:var(--tj-red-600)}
+#tjapp .btn[disabled]{background:var(--tj-line);color:var(--tj-mut)}
+#tjapp .ghost{background:transparent;color:var(--tj-soft);border:1px solid var(--tj-line);margin-top:9px}
+#tjapp .ghost:active{background:var(--tj-sunk)}
+
+/* ---------- خانه ---------- */
+#tjapp .hi{display:flex;align-items:center;gap:12px;margin:2px 0 18px}
+#tjapp .av{width:46px;height:46px;border-radius:16px;background:var(--tj-red-50);color:var(--tj-red);
+  display:grid;place-items:center;font-size:18px;flex:none}
+#tjapp .hi .nm{font-size:17px;line-height:1.45}
+#tjapp .hi .rl{font-size:13px;line-height:1.6;color:var(--tj-mut)}
+#tjapp .roles{display:flex;gap:7px;overflow-x:auto;padding:2px 0 12px;margin-inline:-16px;padding-inline:16px;
+  scrollbar-width:none}
+#tjapp .roles::-webkit-scrollbar{display:none}
+#tjapp .rc{flex:none;border:1.5px solid var(--tj-line);background:var(--tj-bg);border-radius:99px;
+  padding:8px 14px;font:inherit;font-size:14px;color:var(--tj-soft);cursor:pointer;white-space:nowrap;transition:.15s}
+#tjapp .rc:active{transform:scale(.96)}
+#tjapp .rc.on{border-color:var(--tj-red);background:var(--tj-red-50);color:var(--tj-red-600)}
+#tjapp .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#tjapp .tile{border:1.5px solid var(--tj-line);background:var(--tj-bg);border-radius:18px;padding:14px;
+  font:inherit;font-size:14.5px;color:var(--tj-ink);cursor:pointer;text-align:right;line-height:1.6;transition:.15s}
+#tjapp .tile:active{transform:scale(.97);background:var(--tj-sunk)}
+#tjapp .tile.hero{grid-column:1 / -1;border-color:var(--tj-red);background:var(--tj-red-50)}
+#tjapp .tile .ic{display:block;font-size:19px;margin-bottom:7px}
+#tjapp .tile small{display:block;color:var(--tj-mut);font-size:12.5px;margin-top:4px;line-height:1.6}
+
+/* ---------- منوی بخش ---------- */
+#tjapp .menu{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+#tjapp .mk{border:1.5px solid var(--tj-line);border-radius:13px;padding:10px 13px;font:inherit;font-size:14px;
+  background:var(--tj-sunk);color:var(--tj-ink);cursor:pointer;line-height:1.55;text-align:right;transition:.15s}
+#tjapp .mk:active{transform:scale(.96);border-color:var(--tj-red)}
+
+/* ---------- ورودی متن ---------- */
+#tjapp .say{border:1px solid var(--tj-line);border-radius:18px;padding:12px 14px;margin:16px 0 0;background:var(--tj-bg)}
+#tjapp .say .hd{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;
+  font-size:14px;color:var(--tj-soft)}
+#tjapp .say .hd i{font-style:normal;color:var(--tj-mut);transition:transform .2s}
+#tjapp .say.open .hd i{transform:rotate(180deg)}
+#tjapp .say .bx{max-height:0;overflow:hidden;transition:max-height .25s ease}
+#tjapp .say.open .bx{max-height:340px}
+#tjapp .say.caps{margin:18px 0 0}
+#tjapp .say.caps .bx{overflow-y:auto}
+#tjapp .say.caps.open .bx{max-height:60vh}
+#tjapp .say.caps .btns{margin-top:10px}
+#tjapp .say.quiet{border:0;padding:0;margin:14px 0 0;background:none}
+#tjapp .say.quiet .hd{justify-content:center;font-size:12.5px;color:var(--tj-mut)}
+#tjapp .say.quiet .hd i{display:none}
+#tjapp .say.quiet.open{border:1px solid var(--tj-line);padding:12px 14px;background:var(--tj-bg)}
+#tjapp .say.quiet.open .hd{justify-content:space-between;font-size:14px;color:var(--tj-soft)}
+#tjapp .say.quiet.open .hd i{display:inline}
+#tjapp .tjin{display:block;width:100%;border:1.5px solid var(--tj-line);border-radius:14px;padding:12px 13px;
+  font:inherit;font-size:15px;color:var(--tj-ink);background:var(--tj-bg);margin:10px 0 0;line-height:1.85;resize:vertical}
+#tjapp .tjin:focus{outline:none;border-color:var(--tj-red)}
+
+/* ---------- حالت‌های مشترک ---------- */
+#tjapp .spin{width:26px;height:26px;border:3px solid var(--tj-line);border-top-color:var(--tj-red);
+  border-radius:50%;animation:tjsp .8s linear infinite;margin:44px auto}
+@keyframes tjsp{to{transform:rotate(360deg)}}
+#tjapp .state{text-align:center;padding:34px 10px;color:var(--tj-mut);font-size:14px;line-height:1.9}
+#tjapp .state .em{display:block;font-size:30px;margin-bottom:12px}
+#tjapp .state b{display:block;color:var(--tj-ink);font-size:16px;font-weight:400;margin-bottom:6px}
+#tjapp .note{background:var(--tj-sunk);border-radius:14px;padding:12px 14px;color:var(--tj-mut);
+  font-size:13px;line-height:1.9;margin-top:13px}
+#tjapp .note.bad{background:var(--tj-red-50);color:var(--tj-red-600)}
+#tjapp .ok{width:62px;height:62px;border-radius:50%;background:var(--tj-red-50);color:var(--tj-red);
+  display:grid;place-items:center;font-size:29px;margin:10px auto 16px}
+#tjapp .row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--tj-line);font-size:14px;line-height:1.7}
+#tjapp .row:last-child{border:0}
+#tjapp .row b{font-weight:400}
+#tjapp .row span{color:var(--tj-mut);flex:none}
+#tjapp .meet{display:block;background:var(--tj-red-50);color:var(--tj-red);border-radius:14px;padding:13px;
+  text-align:center;text-decoration:none;font-size:14px;margin-top:12px;word-break:break-word}
+#tjapp .dots{display:flex;gap:6px;margin:0 0 16px}
+#tjapp .dots i{width:22px;height:4px;border-radius:99px;background:var(--tj-line);transition:.25s}
+#tjapp .dots i.on{background:var(--tj-red);width:34px}
+#tjapp .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#tjapp .grid.one{grid-template-columns:1fr}
+#tjapp .chip{border:1.5px solid var(--tj-line);background:var(--tj-bg);border-radius:16px;padding:14px 13px;
+  font:inherit;font-size:15px;color:var(--tj-ink);cursor:pointer;text-align:right;line-height:1.65;transition:.15s}
+#tjapp .chip:active{transform:scale(.97)}
+#tjapp .chip.on{border-color:var(--tj-red);background:var(--tj-red-50)}
+#tjapp .chip small{display:block;color:var(--tj-mut);font-size:13px;margin-top:4px;line-height:1.6}
+#tjapp .who{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+#tjapp .nm{font-size:16px;line-height:1.45}
+#tjapp .ab{color:var(--tj-mut);font-size:13px;line-height:1.85;margin:0 0 12px}
+#tjapp .times{display:flex;flex-wrap:wrap;gap:8px}
+#tjapp .t{border:1.5px solid var(--tj-line);border-radius:12px;padding:9px 13px;font:inherit;font-size:14px;
+  background:var(--tj-bg);color:var(--tj-ink);cursor:pointer;line-height:1.5}
+#tjapp .t:active{transform:scale(.96)}
+#tjapp .t.on{border-color:var(--tj-red);background:var(--tj-red-50);color:var(--tj-red)}
+#tjapp .bar2{height:8px;border-radius:8px;background:var(--tj-line);overflow:hidden;margin-top:10px}
+#tjapp .bar2 i{display:block;height:8px;background:var(--tj-red)}
+#tjapp .fade{animation:tjfade .2s ease both}
+@keyframes tjfade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){
+  #tjapp *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+#tjapp .stale{display:inline-block;font-size:11px;color:var(--tj-mut);background:var(--tj-sunk);border-radius:99px;padding:1px 8px;margin-inline-start:6px;vertical-align:middle}
+#tjapp .wait{font-size:12px;color:var(--tj-mut);text-align:center;margin:10px 0}
+#tjapp .cta{display:block;width:100%;box-sizing:border-box;text-align:right;border:0;border-radius:20px;padding:18px 18px;margin:0 0 10px;cursor:pointer;font:inherit;background:var(--tj-red);color:#fff;box-shadow:0 6px 18px rgba(200,63,73,.22)}
+#tjapp .cta .k{display:block;font-size:17px;font-weight:700;margin-bottom:4px}
+#tjapp .cta .s{display:block;font-size:13px;opacity:.9}
+#tjapp .cta.alt{background:var(--tj-sunk);color:var(--tj-ink);box-shadow:none;border:1px solid var(--tj-line)}
+#tjapp .cta.alt .s{color:var(--tj-mut);opacity:1}
+#tjapp .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 12px}
+#tjapp .trio button{border:1px solid var(--tj-line);background:var(--tj-bg);border-radius:16px;padding:12px 6px;font:inherit;font-size:12px;color:var(--tj-ink);cursor:pointer;line-height:1.5}
+#tjapp .trio button span{display:block;font-size:19px;margin-bottom:4px}
+#tjapp .more{border:1px solid var(--tj-line);border-radius:18px;overflow:hidden;margin:0 0 14px;background:var(--tj-bg)}
+#tjapp .more>summary{list-style:none;cursor:pointer;padding:14px 16px;font-size:14px;color:var(--tj-soft);display:flex;justify-content:space-between;align-items:center}
+#tjapp .more>summary::-webkit-details-marker{display:none}
+#tjapp .more>summary i{font-style:normal;color:var(--tj-mut);transition:transform .18s}
+#tjapp .more[open]>summary i{transform:rotate(180deg)}
+#tjapp .mrow{display:block;width:100%;box-sizing:border-box;text-align:right;border:0;border-top:1px solid var(--tj-line);background:transparent;padding:13px 16px;font:inherit;font-size:14px;color:var(--tj-ink);cursor:pointer}
+#tjapp .mrow em{font-style:normal;color:var(--tj-mut);font-size:12px;margin-inline-start:6px}
+#tjapp .btns.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#tjapp .btns.two .ib.wide{width:auto;font-size:13px;padding:11px 8px}
+@media (max-width:340px){#tjapp .btns.two{grid-template-columns:1fr}}
+/* ---------- v115: خانهٔ تازه، درمانگرها، رودمپ ---------- */
+#tjapp .thhd{display:flex;justify-content:space-between;align-items:center;margin:2px 0 8px;font-size:14px;color:var(--tj-soft)}
+#tjapp .thhd button{border:0;background:none;font:inherit;font-size:13px;color:var(--tj-red);cursor:pointer;padding:4px 0}
+#tjapp .thstrip{display:flex;gap:10px;overflow-x:auto;margin:0 -16px 14px;padding:2px 16px 4px;scrollbar-width:none}
+#tjapp .thstrip::-webkit-scrollbar{display:none}
+#tjapp .tha{flex:none;width:60px;border:0;background:none;padding:0;font:inherit;font-size:11.5px;color:var(--tj-soft);text-align:center;cursor:pointer;line-height:1.5}
+#tjapp .tha i{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 4px;border-radius:50%;background:var(--tj-sunk) center/cover no-repeat;box-shadow:0 0 0 2px var(--tj-bg),0 0 0 3.5px var(--tj-line);font-style:normal;color:var(--tj-red);font-size:18px}
+#tjapp .tha.sk i{animation:tjsh 1.2s ease-in-out infinite}
+@keyframes tjsh{50%{opacity:.45}}
+#tjapp .tha.all i{background:var(--tj-red-50)}
+#tjapp .rmcard{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:20px;padding:12px 14px;margin:0 0 12px;background:#222;color:#fefefe;font:inherit;text-align:right;cursor:pointer;line-height:1.6}
+#tjapp .rmcard:active{transform:scale(.985)}
+#tjapp .rmcard .im{width:58px;height:58px;flex:none;object-fit:contain}
+#tjapp .rmcard .tx{flex:1}
+#tjapp .rmcard .k{display:block;font-size:15px;margin-bottom:2px}
+#tjapp .rmcard .s{display:block;font-size:12.5px;opacity:.78}
+#tjapp .rmcard .go{flex:none;font-size:20px;opacity:.6}
+#tjapp .live{display:inline-flex;align-items:center;gap:5px;font-style:normal;font-size:11px;background:var(--tj-red);color:#fff;border-radius:99px;padding:0 8px;margin-inline-start:6px;vertical-align:middle;line-height:1.8}
+#tjapp .live::before{content:'';width:6px;height:6px;border-radius:50%;background:#fff;animation:tjbl 1.4s infinite}
+@keyframes tjbl{50%{opacity:.2}}
+#tjapp .ph{width:56px;height:56px;border-radius:50%;flex:none;background:var(--tj-red-50) center/cover no-repeat;display:grid;place-items:center;color:var(--tj-red);font-size:19px}
+#tjapp .ph.sm{width:40px;height:40px;font-size:15px}
+#tjapp .ph.big{width:108px;height:135px;border-radius:18px;font-size:32px}
+#tjapp .tcard{display:flex;align-items:center;gap:12px;width:100%;border:1px solid var(--tj-line);border-radius:18px;padding:12px 14px;margin:0 0 10px;background:var(--tj-bg);font:inherit;text-align:right;cursor:pointer;color:var(--tj-ink)}
+#tjapp .tcard:active{background:var(--tj-sunk)}
+#tjapp .tcard .tx,#tjapp .tcr .tx{flex:1}
+#tjapp .tcr{display:flex;align-items:center;gap:12px}
+#tjapp .sp{display:block;font-size:12.5px;color:var(--tj-mut);line-height:1.75}
+#tjapp .bdg{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 0}
+#tjapp .bdg span{font-size:11.5px;background:var(--tj-sunk);color:var(--tj-soft);border-radius:99px;padding:1px 9px;line-height:1.8}
+#tjapp .bdg span.r{background:var(--tj-red-50);color:var(--tj-red-600)}
+#tjapp .why{list-style:none;margin:10px 0 0;padding:0;font-size:12.5px;color:var(--tj-ok);line-height:1.95}
+#tjapp .why li::before{content:'✓ '}
+#tjapp .mc .ab{margin:8px 0 10px}
+#tjapp .lnk{display:inline-block;border:0;background:none;padding:10px 0 0;font:inherit;font-size:13px;color:var(--tj-red);cursor:pointer}
+#tjapp .orow{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--tj-line)}
+#tjapp .orow .tx{flex:1;font-size:13.5px;line-height:1.6}
+#tjapp .orow small{display:block;color:var(--tj-mut);font-size:12px}
+#tjapp .thero{display:flex;gap:14px;align-items:flex-start;margin:4px 0 12px}
+#tjapp .thero .nm{font-size:18px}
+#tjapp .hlq{margin:0 0 12px;padding:10px 14px;border-inline-start:3px solid var(--tj-red);background:var(--tj-sunk);border-radius:12px;color:var(--tj-soft);font-size:14px;line-height:1.95}
+#tjapp .lbl{font-size:13px;color:var(--tj-mut);margin:0 0 6px}
+#tjapp .pad{padding:0 16px 14px;font-size:14px;line-height:1.95;white-space:pre-wrap}
+#tjapp .nx{margin:4px 0 0;padding-inline-start:20px;font-size:13.5px;line-height:2;color:var(--tj-soft)}
+#tjapp select.tjin{appearance:auto}
+#tjapp .rmhero{display:flex;gap:12px;align-items:center;background:#222;color:#fefefe;border-radius:22px;padding:16px;margin:4px 0 16px}
+#tjapp .rmhero .im{width:84px;height:84px;flex:none;object-fit:contain}
+#tjapp .rmhero .t1{font-size:19px;line-height:1.5}
+#tjapp .rmhero .t2{font-size:12.5px;opacity:.8;line-height:1.8;margin:2px 0 8px}
+#tjapp .rmhero .pill{display:inline-block;font-size:12px;background:rgba(254,254,254,.12);border-radius:99px;padding:2px 10px}
+#tjapp .stp{position:relative;padding:0 0 22px;padding-inline-start:36px}
+#tjapp .stp::before{content:'';position:absolute;inset-inline-start:12px;top:28px;bottom:2px;width:2px;background:var(--tj-line)}
+#tjapp .stp:last-of-type::before{display:none}
+#tjapp .stp .n{position:absolute;inset-inline-start:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--tj-sunk);display:grid;place-items:center;font-size:12.5px;color:var(--tj-mut)}
+#tjapp .stp.done .n{background:var(--tj-ok-50);color:var(--tj-ok)}
+#tjapp .stp.now .n{background:var(--tj-red);color:#fff}
+#tjapp .stp h3{font-size:15px;font-weight:400;margin:0 0 6px;line-height:1.7}
+#tjapp .aud{display:block;width:100%;height:40px;margin-top:4px}
+#tjapp .deck{position:relative;width:min(250px,72vw);aspect-ratio:4/5;margin:10px auto 6px}
+#tjapp .deck .cd{position:absolute;inset:0;border-radius:16px;background:#eee center/cover no-repeat;box-shadow:0 8px 22px rgba(34,34,34,.16);transition:transform .35s ease,opacity .35s ease;cursor:pointer}
+#tjapp .deck .cd.lock::after{content:attr(data-l);position:absolute;inset:0;border-radius:16px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(34,34,34,.38);color:#fff;display:grid;place-items:center;font-size:13px;line-height:1.9;text-align:center;padding:24px}
+#tjapp .deck .cd.fly{transform:translateX(-120%) rotate(-14deg)!important;opacity:0}
+#tjapp .deck .ib{position:absolute;inset:auto 0 40% 0;margin:auto;width:70%}
+#tjapp .kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+#tjapp .kpi{background:var(--tj-sunk);border-radius:14px;padding:10px 12px;font-size:12px;color:var(--tj-mut);line-height:1.6}
+#tjapp .kpi b{display:block;font-weight:400;font-size:20px;color:var(--tj-ink)}
+#tjapp .cons{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 0}
+#tjapp a.ib{text-decoration:none;color:inherit;display:flex;align-items:center;justify-content:center}
+#tjapp .tha{width:76px}
+#tjapp .tha b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:400;min-height:2.9em}
+/* v169: صف بازبینی علمی */
+#tjapp .rvrow{display:block;width:100%;text-align:right;font:inherit;cursor:pointer}
+#tjapp .rvrow .sub{display:block;margin:4px 0 0}
+#tjapp .rvst{font-size:12.5px;color:var(--tj-mut)}
+#tjapp .rvlate{color:var(--tj-red)}
+#tjapp .rvlink{color:var(--tj-red);font-size:14px;margin-inline-end:12px}
+#tjapp .rvtxt{white-space:pre-wrap;font-size:14.5px;line-height:1.95;margin:0 0 8px}
+#tjapp .rvraw{border-color:var(--tj-ink)}
+#tjapp .rvtag{font-size:12px;color:var(--tj-mut);margin:0 0 6px}
+#tjapp .rvc.on{border-color:var(--tj-red)}
+#tjapp .rvc.rej{opacity:.55}
+#tjapp .rvdf{font-size:15px;line-height:2.1;background:var(--tj-sunk);border-radius:12px;padding:10px 12px;margin:6px 0}
+#tjapp .rvdf del{color:#8e2d34;text-decoration:line-through;background:#faeced;border-radius:4px;padding:0 2px}
+#tjapp .rvdf ins{text-decoration:none;font-weight:700;background:#faeced;border-bottom:2px solid var(--tj-red);border-radius:4px;padding:0 2px}
+#tjapp .rvbtns{display:flex;gap:8px;margin:8px 0}
+/* v169.2: حضور پذیرش، فهرست روز گاندی */
+#tjapp .gdrow{display:flex;align-items:center;gap:8px;justify-content:space-between}
+#tjapp .gdrow b{font-weight:700}
+#tjapp .gdst{font-size:13px;color:var(--tj-mut)}
+#tjapp .gdbtn{min-width:64px}
+#tjapp .gdbtn.on{border-color:var(--tj-ink);font-weight:700}
+/* v169.3: خانهٔ تیم بر پایهٔ کار */
+#tjapp .rlb{border:0;background:transparent;padding:0;font:inherit;font-size:13px;color:var(--tj-mut);cursor:pointer;text-decoration:underline}
+#tjapp .hn3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 4px}
+#tjapp .hn3 button{border:1px solid var(--tj-line);background:var(--tj-bg);border-radius:16px;padding:10px 6px;font:inherit;font-size:12px;color:var(--tj-mut);cursor:pointer;line-height:1.5}
+#tjapp .hn3 b{display:block;font-size:26px;line-height:1.3;color:var(--tj-ink)}
+#tjapp .hn3 b.late{color:var(--tj-red)}
+#tjapp .nx{display:block;width:100%;box-sizing:border-box;text-align:right;border:1px solid var(--tj-line);background:var(--tj-bg);border-radius:14px;padding:9px 12px;margin:0 0 6px;font:inherit;font-size:14px;color:var(--tj-ink);cursor:pointer;line-height:1.5}
+#tjapp .nx em{display:block;font-style:normal;font-size:12px;color:var(--tj-mut)}
+#tjapp .nx.late em,#tjapp .nx .hot{color:var(--tj-red)}
+#tjapp .rlist{font-size:12.5px;color:var(--tj-mut);padding:0 16px 8px;line-height:1.8}
+#tjapp .drw{padding:0 12px 12px}
+#tjapp .inp{display:block;width:100%;box-sizing:border-box;margin:8px 0;padding:10px 12px;border:1px solid var(--tj-line);border-radius:12px;font:inherit;font-size:14px;background:var(--tj-bg);color:var(--tj-ink)}
+#tjapp .rvb{flex:1;border:1px solid var(--tj-line);border-radius:12px;background:var(--tj-bg);font:inherit;font-size:14px;padding:9px 6px;cursor:pointer}
+#tjapp .rvb.sel{background:#222222;color:#fefefe;border-color:#222222}
+#tjapp .rvta{width:100%;box-sizing:border-box;min-height:64px;font:inherit;font-size:14px;line-height:1.8;border:1px solid var(--tj-line);border-radius:12px;padding:8px 10px;margin:6px 0 0}
+#tjapp .rvbad{border-color:var(--tj-red);color:#8e2d34}
+</style>
+
+<div id="tjapp" data-clarity-mask="True"><div class="spin"></div></div>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+(function () {
+  var API = 'https://script.google.com/macros/s/AKfycbxD-DYhZ9LFjwB9az_DpMprzF_ItJkdad_DutMGPk1qY3ksBb45aMHYZBsXTCepYhsC8Q/exec';
+  var TG = (window.Telegram ? window.Telegram.WebApp : null) || null;
+  var root = document.getElementById('tjapp');
+  var PREVIEW = location.search.indexOf('preview') > -1;
+
+  var ME = null; var VKF = 0;       /* پاسخ me */
+  var ROLE = '';       /* نقش فعال خانه */
+  var STACK = [];      /* پشتهٔ صفحه‌ها */
+
+  /* ─────────── صفحه‌های کلاینت؛ فقط عنوان و نقطهٔ ورود، بدون هیچ منطقی ─────────── */
+  var PAGES = {
+    desk:   { t: 'پذیرش',            i: '📥', p: 'desk',   entry: 'desk.open' },
+    sup:    { t: 'سوپروایزر',        i: '🧭', p: 'sup',    entry: 'sup.slots' },
+    sch:    { t: 'مدرسه',            i: '🎓', p: 'sch',    entry: 'sch.desk' },
+    ther:   { t: 'درمانگر',          i: '🩺', p: 'ther',   entry: 'ther.menu' },
+    tea:    { t: 'استاد',            i: '📚', p: 'tea',    entry: 'tea.cal' },
+    stu:    { t: 'دانشجو',           i: '🌱', p: 'stu',    entry: 'stu.path' },
+    alum:   { t: 'دانش‌آموخته',      i: '🎖', p: 'alum',   entry: 'alum.club' },
+    ed:     { t: 'سردبیر مجله',      i: '✍️', p: 'ed',     entry: 'ed.desk' },
+    fin:    { t: 'مالی',             i: '💳', p: 'fin',    entry: 'fin.topics' },
+    mon:    { t: 'ناظر',             i: '📈', p: 'mon',    entry: 'mon.stat' },
+    psy:    { t: 'روان‌پزشکی',       i: '🧠', p: 'psy',    entry: 'psy.report' },
+    org:    { t: 'سازمانی',          i: '🏢', p: 'org',    entry: 'org.report' },
+    client: { t: 'مراجع',            i: '🍓', p: 'client', entry: '' },
+    meet:   { t: 'جلسهٔ معارفهٔ من', i: '🗓', p: 'client', entry: 'client.meet' },
+    pay:    { t: 'پرداخت',           i: '💸', p: 'pay',    entry: 'pay.open' },
+    ann:    { t: 'اطلاعیه‌ها',       i: '📣', p: 'client', entry: 'ann' },
+    dash:   { t: 'داشبورد من',       i: '🏠', p: 'dash',   entry: 'dash.me' },
+    task:   { t: 'کارهای من',        i: '✅', p: 'task',   entry: 'task.my' },
+    box:    { t: 'پیام‌ها',          i: '✉️', p: 'box',    entry: 'msg.open' },
+    stat:   { t: 'آمار روزانه',      i: '📈', p: 'stat',   entry: 'own.stat' },
+    vk:     { t: 'ساختمان پزشکان ونک', i: '🏢', p: 'vk', entry: 'vk.open' },
+    pa:     { t: 'تجربه پارتنرز',     i: '🏢', p: 'pa',   entry: 'pa.open' },
+    tnk:    { t: 'تنخواه',            i: '💵', p: 'tnk',  entry: 'tnk.open' },
+    bc:     { t: 'پیام همگانی',       i: '📣', p: 'bc',   entry: 'bc.open' }
+  };
+  /* ترتیب نمایش بخش‌ها در خانه، از پرمصرف‌ترین */
+  var ORDER = ['desk', 'pa', 'tnk', 'sup', 'sch', 'ther', 'tea', 'stu', 'alum', 'ed', 'fin', 'mon', 'psy', 'org', 'client'];
+  /* نقش هر بخش، برای چیدن کارت‌ها زیر نقش درست */
+  var ROLE_PAGE = {
+    'پذیرش': 'desk', 'سوپروایزر': 'sup', 'مدرسه': 'sch', 'درمانگر': 'ther', 'استاد': 'tea',
+    'دانشجو': 'stu', 'سردبیر': 'ed', 'مالی': 'fin', 'ناظر': 'mon',
+    'روان‌پزشکی': 'psy', 'سازمانی': 'org', 'مراجع': 'client',
+    'پارتنر': 'pa', 'تنخواه': 'tnk'
+  };
+  /* کارت‌های همیشگی؛ زیر کدام نقش‌ها دیده شوند */
+  var OWN = [
+    { k: 'book',  i: '🗓', t: 'رزرو جلسهٔ معارفه', s: 'وقت آزاد درمانگرها', r: ['*'] },
+    { k: 'style', i: '🧭', t: 'تست سبک درمانی من', s: 'پنج جمله، یک نتیجه', r: ['*'] },
+    { k: 'feed',  i: '📚', t: 'محتوای تجربه', s: 'فقط با اجازهٔ خودتان', r: ['*'] },
+    { k: 'mag',   i: '✍️', t: 'نوشتن برای مجله', s: 'موضوع‌های باز', r: ['*'] },
+    { k: 'page',  i: '🪪', t: 'صفحهٔ من در سایت', s: 'پروفایل و بازبینی', r: ['درمانگر', 'استاد', 'سوپروایزر', 'دانشجو'] }
+  ];
+  var SRV_VER = '', STALE = false;
+  var CAPS = [
+    { p: 'meet', a: 'client.meetcancel', l: 'لغو جلسهٔ معارفه' },
+    { p: 'client', a: 'client.intake', l: 'فرم شروع درمان' },
+    { p: 'client', a: 'client.session', l: 'رزرو جلسهٔ درمان' },
+    { p: 'client', a: 'client.faq', l: 'سؤال‌های متداول' },
+    { p: 'client', a: 'client.services', l: 'خدمات ما' },
+    { p: 'client', a: 'client.abroad', l: 'خارج از ایران هستم' },
+    { p: 'client', a: 'client.about', l: 'دربارهٔ تجربه' },
+    { p: 'client', a: 'client.human', l: 'صحبت با همکار' },
+    { p: 'client', a: 'client.school', l: 'مدرسهٔ تجربه' },
+    { p: 'ther', a: 'ther.slotadd', l: 'اعلام اسلات معارفه' },
+    { p: 'ther', a: 'ther.sessadd', l: 'اعلام وقت هفتگی درمان' },
+    { p: 'ther', a: 'ther.slots', l: 'وقت‌های هفتگی من' },
+    { p: 'ther', a: 'ther.len', l: 'طول جلسه و فاصلهٔ استراحت' },
+    { p: 'ther', a: 'ther.meetlink', l: 'لینک جلسهٔ من' },
+    { p: 'ther', a: 'ther.ticket', l: 'پیام به پذیرش' },
+    { p: 'ther', a: 'ther.tickets', l: 'پیگیری‌های من' },
+    { p: 'ther', a: 'ther.profile', l: 'پروفایل من' },
+    { p: 'ther', a: 'ther.site', l: 'صفحهٔ من در سایت' },
+    { p: 'ther', a: 'ther.week', l: 'کارنامهٔ هفتهٔ من' },
+    { p: 'ther', a: 'ther.inperson', l: 'حضوری من و درخواست پیوستن' },
+    { p: 'ther', a: 'ther.rate', l: 'نرخ و ظرفیت من' },
+    { p: 'ther', a: 'ther.refer', l: 'کارت ارجاع و پاسخ به آن' },
+    { p: 'ther', a: 'ther.held', l: 'جلسه‌های درمان و تأیید برگزاری' },
+    { p: 'ther', a: 'ther.fin', l: 'بخش مالی درمانگر' },
+    { p: 'ther', a: 'ther.sch', l: 'بخش مدرسه برای درمانگر' },
+    { p: 'ther', a: 'ther.help', l: 'راهنمای درمانگر' },
+    { p: 'desk', a: 'desk.today', l: 'جمع‌بندی امروز' },
+    { p: 'desk', a: 'desk.tickets', l: 'پیام‌های درمانگران' },
+    { p: 'desk', a: 'desk.prefs', l: 'اعلان‌های من' },
+    { p: 'desk', a: 'desk.mon', l: 'نظارت هفته' },
+    { p: 'desk', a: 'desk.coll', l: 'تماس همکاران' },
+    { p: 'desk', a: 'desk.inp', l: 'درخواست‌های حضوری' },
+    { p: 'desk', a: 'desk.inpact', l: 'تأیید یا رد درخواست حضوری' },
+    { p: 'desk', a: 'desk.pay', l: 'ساخت فاکتور تتر' },
+    { p: 'desk', a: 'desk.ann', l: 'اطلاعیه‌ها برای پذیرش' },
+    { p: 'sch', a: 'sch.join', l: 'صف درخواست عضویت' },
+    { p: 'sch', a: 'sch.joinact', l: 'تصمیم دربارهٔ درخواست عضویت' },
+    { p: 'sch', a: 'sch.alum', l: 'صف دانش‌آموختگان' },
+    { p: 'sch', a: 'sch.alumact', l: 'تأیید دانش‌آموختگی' },
+    { p: 'sch', a: 'sch.apply', l: 'صف اپلای تراپیست' },
+    { p: 'sch', a: 'sch.applyact', l: 'مراحل اپلای و تأیید شروع همکاری' },
+    { p: 'sch', a: 'sch.events', l: 'رویدادهای مدرسه' },
+    { p: 'sch', a: 'sch.report', l: 'گزارش بخش مدرسه' },
+    { p: 'tea', a: 'tea.page', l: 'صفحهٔ سایت و سیلابس‌ها' },
+    { p: 'tea', a: 'tea.info', l: 'تکمیل اطلاعات استاد' },
+    { p: 'tea', a: 'tea.public', l: 'برنامه‌های عمومی مدرسه' },
+    { p: 'tea', a: 'tea.events', l: 'رویدادها برای استاد' },
+    { p: 'sup', a: 'sup.add', l: 'اعلام اسلات خصوصی یا گروهی' },
+    { p: 'sup', a: 'sup.accept', l: 'پذیرش سوپرویژن' },
+    { p: 'sup', a: 'sup.cal', l: 'تقویم جلسه‌های سوپروایزر' },
+    { p: 'stu', a: 'stu.cal', l: 'تقویم حلقهٔ من' },
+    { p: 'stu', a: 'stu.public', l: 'برنامه‌های عمومی' },
+    { p: 'stu', a: 'stu.events', l: 'ثبت‌نام رویداد' },
+    { p: 'stu', a: 'stu.prereg', l: 'پیش‌ثبت‌نام دوره' },
+    { p: 'stu', a: 'stu.sup', l: 'یافتن وقت سوپرویژن' },
+    { p: 'stu', a: 'stu.uni', l: 'دانشگاه و رشتهٔ من' },
+    { p: 'alum', a: 'alum.public', l: 'برنامه‌های عمومی برای دانش‌آموخته' },
+    { p: 'ed', a: 'ed.new', l: 'درخواست‌های نویسندگی' },
+    { p: 'ed', a: 'ed.cal', l: 'تقویم انتشار' },
+    { p: 'ed', a: 'ed.topics', l: 'موضوعات مجله' },
+    { p: 'ed', a: 'ed.topicnew', l: 'موضوع تازه' },
+    { p: 'fin', a: 'fin.pay', l: 'فاکتورها، تسویه و تأیید پرداخت تتر' },
+    { p: 'fin', a: 'fin.report', l: 'گزارش بخش مالی' },
+    { p: 'mon', a: 'mon.day', l: 'گزارش روزانه' },
+    { p: 'mon', a: 'mon.week', l: 'گزارش این هفته' },
+    { p: 'mon', a: 'mon.health', l: 'سلامت سیستم' },
+    { p: 'mon', a: 'mon.review', l: 'بازبینی پروفایل‌ها' },
+    { p: 'psy', a: 'psy.ann', l: 'اطلاعیه‌های بخش روان‌پزشکی' },
+    { p: 'org', a: 'org.ann', l: 'اطلاعیه‌های بخش سازمانی' }
+  ];
+
+  /* کدام اندپوینت، دکمهٔ اینلاین این بخش را می‌گیرد. سرور برای هر بخش
+     فهرست پیشوند مجاز خودش را دارد، پس کورکورانه <بخش>.act نمی‌زنیم. */
+  var CB_CLIENT = ['t:', 'g:', 'nd:', 'pf:', 'ag:', 'md:', 'z:', 'b:', 's:', 'ss:', 'sw:',
+    'fu:', 'ct:', 'fd:', 'f:', 'ann:', 'tc:', 'ip:', 'iy:', 'it:', 'py:', 'sj:', 'mz:', 'pq:',
+    'hm', 'go', 'edu', 'em:ask', 'cancelmeet'];
+  var CB_THER = ['p:', 'd:', 'h:', 'n:', 'c:', 'iq:', 'ic:', 'ip:', 'iy:', 'it:', 'md:',
+    'pq:', 'py:', 'rf:', 'mt:', 'z:', 'b:', 's:', 'cancelmeet'];
+  var ACT = [
+    { s: 'task',   a: 'task.act',      p: ['tk:', 'db:'] },
+    { s: 'box',    a: 'msg.act',       p: ['ms:', 'fb:'] },
+    { s: 'box',    a: 'box.act',       p: ['bx:'] },
+    { s: 'stat',   a: 'task.act',      p: ['db:'] },
+    { s: 'desk',   a: 'desk.act',      p: ['ld:', 'wa:', 'rf:'] },
+    { s: 'desk',   a: 'desk.inpact',   p: ['iv:'] },
+    { s: 'sch',    a: 'sch.act',       p: ['sl:'] },
+    { s: 'sch',    a: 'sch.joinact',   p: ['sj:'] },
+    { s: 'sch',    a: 'sch.alumact',   p: ['al:'] },
+    { s: 'sch',    a: 'sch.applyact',  p: ['ap:'] },
+    { s: 'ther',   a: 'ther.act',      p: CB_THER },
+    { s: 'sup',    a: 'sup.act',       p: ['sv:'] },
+    { s: 'stu',    a: 'stu.act',       p: ['pz:', 'sv:', 'al:', 'sj:'] },
+    { s: 'alum',   a: 'alum.act',      p: ['al:'] },
+    { s: 'ed',     a: 'ed.act',        p: ['mz:'] },
+    { s: 'fin',    a: 'fin.act',       p: ['py:'] },
+    { s: 'mon',    a: 'mon.act',       p: ['pr:'] },
+    { s: 'pay',    a: 'pay.act',       p: ['py:'] },
+    { s: 'client', a: 'client.act',    p: CB_CLIENT },
+    { s: 'meet',   a: 'client.act',    p: CB_CLIENT },
+    { s: 'ann',    a: 'client.act',    p: CB_CLIENT }
+  ];
+  /* بخش‌هایی که اندپوینت متن آزاد دارند */
+  var SAY = {
+    vk: 'vk.say',
+    client: 'client.say', meet: 'client.say', ann: 'client.say',
+    ther: 'ther.say', desk: 'desk.say', sch: 'sch.say', sup: 'sup.say',
+    stu: 'stu.say', alum: 'alum.say', ed: 'ed.say', fin: 'fin.say', mon: 'mon.say',
+    task: 'task.say', box: 'msg.say'
+  };
+  function hit(list, cb) {
+    for (var i = 0; i < list.length; i++) {
+      var pre = list[i];
+      if (pre.indexOf(':') < 0) { if (cb === pre) return true; }
+      else if (cb.indexOf(pre) === 0) return true;
+    }
+    return false;
+  }
+  function actApi(sec, cb) {
+    var i;
+    for (i = 0; i < ACT.length; i++) { if (ACT[i].s === sec) { if (hit(ACT[i].p, cb)) return ACT[i].a; } }
+    for (i = 0; i < ACT.length; i++) { if (hit(ACT[i].p, cb)) return ACT[i].a; }
+    return sec + '.act';
+  }
+  function sayApi(sec) { return SAY[sec] || ''; }
+
+  /* ─────────── کمکی‌ها ─────────── */
+  function fa(s) { return String(s).replace(/[0-9]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.charAt(+d); }); }
+  function esc(s) { var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
+  function qa(s) { return esc(s).replace(/"/g, String.fromCharCode(38) + 'quot;'); }
+  function tap() { try { if (TG) { if (TG.HapticFeedback) TG.HapticFeedback.impactOccurred('light'); } } catch (e) {} }
+  function buzz(kind) { try { if (TG) { if (TG.HapticFeedback) TG.HapticFeedback.notificationOccurred(kind); } } catch (e) {} }
+  function $(id) { return document.getElementById(id); }
+
+  var ALLOW = ['b', 'strong', 'i', 'em', 'u', 's', 'code', 'pre', 'br', 'a', 'blockquote', 'span'];
+  function safe(html) {
+    var doc = new DOMParser().parseFromString('<div>' + String(html == null ? '' : html) + '</div>', 'text/html');
+    var out = document.createElement('div');
+    walk(doc.body.firstChild, out);
+    return out.innerHTML;
+    function walk(from, to) {
+      if (!from) return;
+      for (var n = from.firstChild; n; n = n.nextSibling) {
+        if (n.nodeType === 3) { to.appendChild(document.createTextNode(n.nodeValue)); continue; }
+        if (n.nodeType !== 1) continue;
+        var t = n.tagName.toLowerCase();
+        if (ALLOW.indexOf(t) < 0) { var sp = document.createElement('span'); walk(n, sp); to.appendChild(sp); continue; }
+        var el = document.createElement(t);
+        if (t === 'a') {
+          var h = n.getAttribute('href') || '';
+          if (/^(https?:|tg:|mailto:)/i.test(h)) { el.setAttribute('href', h); el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener'); }
+        }
+        walk(n, el);
+        to.appendChild(el);
+      }
+    }
+  }
+
+  /* ─────────── تنها راه گفت‌وگو با سرور ─────────── */
+  function call(api, extra) {
+    var o = extra || {};
+    o.api = api;
+    o.initData = TG ? (TG.initData || '') : '';
+    var body = JSON.stringify(o);
+    /* v157: سه تلاش با مهلت؛ اتصال به گوگل از ایران گاهی دیر یا قطع می‌شود */
+    function once(ms) {
+      var ctl = ('AbortController' in window) ? new AbortController() : null;
+      var timer = ctl ? setTimeout(function () { ctl.abort(); }, ms) : 0;
+      return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, signal: ctl ? ctl.signal : undefined })
+        .then(function (r) { clearTimeout(timer); return r.json(); }, function (e) { clearTimeout(timer); throw e; });
+    }
+    function wait(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+    return once(20000)
+      .catch(function () { return wait(1200).then(function () { return once(30000); }); })
+      .catch(function () { return wait(2500).then(function () { return once(40000); }); });
+  }
+
+  /* ─────────── پوستهٔ صفحه ─────────── */
+  function shell(title, tag) {
+    root.innerHTML =
+      '<div class="bar"><button class="bk" id="tjBk" type="button" aria-label="بازگشت">→</button>' +
+      '<div class="ttl">' + esc(title) + '</div>' +
+      (tag ? '<div class="tag">' + esc(tag) + '</div>' : '') + '</div>' +
+      '<div class="wrap fade" id="tjW"></div>';
+    $('tjBk').onclick = function () { tap(); back(); };
+    onScroll();
+    return $('tjW');
+  }
+  function plain() {
+    root.innerHTML = '<div class="wrap fade" id="tjW"></div>';
+    return $('tjW');
+  }
+  function onScroll() {
+    var b = root.querySelector('.bar');
+    if (!b) return;
+    b.classList.toggle('sticky', window.scrollY > 6);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  function go(fn) { STACK.push(fn); paint(); }
+  function back() { if (STACK.length > 1) STACK.pop(); paint(); }
+  function reset(fn) { STACK = [fn]; paint(); }
+  function paint() {
+    var fn = STACK[STACK.length - 1];
+    try { if (TG) { if (TG.BackButton) { if (STACK.length > 1) TG.BackButton.show(); else TG.BackButton.hide(); } } } catch (e) {}
+    window.scrollTo(0, 0);
+    fn();
+  }
+  try { if (TG) { if (TG.BackButton) TG.BackButton.onClick(function () { back(); }); } } catch (e) {}
+
+  /* ─────────── حالت‌های مشترک ─────────── */
+  function loading(w) { (w || root).innerHTML = '<div class="spin"></div>'; }
+  function stateBox(em, title, body, actions) {
+    return '<div class="state"><span class="em">' + em + '</span><b>' + esc(title) + '</b>' + esc(body) + '</div>' + (actions || '');
+  }
+  function emptyBox(title, body) { return stateBox('🍃', title || 'چیزی روی زمین نیست', body || 'هر وقت چیزی تازه بیاید، همین‌جا می‌بینیدش.'); }
+
+  var ERRS = {
+    auth: ['🔐', 'از داخل بات باز کنید', 'این صفحه با هویت تلگرام شما کار می‌کند. از گفت‌وگوی بات مرکز تجربه بازش کنید.'],
+    cb:   ['⏳', 'این دکمه کهنه شده', 'همان کار را از منوی همین بخش دوباره شروع کنید.'],
+    bad:  ['✏️', 'چیزی ناقص ماند', 'یک بار دیگر با همان اطلاعات امتحان کنید.'],
+    notfound: ['🔎', 'پیدا نشد', 'شاید همین حالا جای دیگری بسته یا عوض شده باشد.'],
+    run:  ['⚠️', 'کار نیمه ماند', 'یک لحظه مشکلی پیش آمد. دوباره امتحان کنید؛ اگر باز هم نشد، در گفت‌وگوی بات بنویسید.'],
+    net:  ['📶', 'ارتباط برقرار نشد', 'اینترنت را بررسی کنید و دوباره بزنید.']
+  };
+  function errBox(r, retry) {
+    var code = r ? String(r.error || '') : 'net';
+    if (code === 'role') {
+      var need = r.need || '';
+      var mine = (r.roles || []).join('، ');
+      return '<div class="state"><span class="em">🪪</span><b>این بخش برای نقش دیگری است</b>' +
+        esc('این قسمت برای ' + (need ? '«' + need + '»' : 'نقش دیگری') + ' باز است.') +
+        (mine ? '<div class="note">نقش‌های شما: ' + esc(mine) + '</div>' : '') +
+        '</div><button class="btn ghost" id="tjHome" type="button">برگشت به خانه</button>';
+    }
+    var e = ERRS[code] || ERRS.run;
+    return '<div class="state"><span class="em">' + e[0] + '</span><b>' + esc(e[1]) + '</b>' + esc(e[2]) +
+      (r ? (r.detail ? '<div class="note">' + esc(String(r.detail).slice(0, 180)) + '</div>' : '') : '') +
+      '</div>' + (retry ? '<button class="btn" id="tjRetry" type="button">دوباره</button>' : '') +
+      '<button class="btn ghost" id="tjHome" type="button">برگشت به خانه</button>';
+  }
+  function wireErr(w, retry) {
+    var h = $('tjHome'); if (h) h.onclick = function () { tap(); reset(home); };
+    var rt = $('tjRetry'); if (rt) { if (retry) rt.onclick = function () { tap(); retry(); }; }
+  }
+  function showErr(w, r, retry) { w.innerHTML = errBox(r, !!retry); wireErr(w, retry); }
+
+  /* ─────────── رندرکنندهٔ عمومی out ─────────── */
+  /* هر آیتم out یک کارت است. inline دکمه، keys منوی بخش، edit جایگزینی کارت قبلی. */
+  function renderOut(out, host, sec, opts) {
+    var o = opts || {};
+    var last = null;
+    (out || []).forEach(function (item) {
+      if (item.keys) setMenu(item.keys, sec);
+      var body = safe(item.text);
+      if (!body) { if (!item.photo) return; }
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        (item.photo ? '<im' + 'g class="thumb" src="' + qa(item.photo) + '" alt="">' : '') +
+        '<div class="bd">' + body + '</div>';
+      if (item.inline) {
+        var bt = document.createElement('div');
+        bt.className = 'btns';
+        item.inline.forEach(function (row) {
+          (row || []).forEach(function (b) {
+            if (!b) return;
+            if (b.url) {
+              var a = document.createElement('a');
+              a.className = 'ib' + ((row || []).length === 1 ? ' wide' : '');
+              a.href = b.url; a.target = '_blank'; a.rel = 'noopener';
+              a.textContent = b.text || 'باز کردن';
+              bt.appendChild(a);
+              return;
+            }
+            if (!b.callback_data) return;
+            var el = document.createElement('button');
+            el.type = 'button';
+            el.className = 'ib' + ((row || []).length === 1 ? ' wide' : '');
+            el.textContent = b.text || '···';
+            el.onclick = function () { tap(); press(el, card, b.callback_data, sec, host, o); };
+            bt.appendChild(el);
+          });
+        });
+        if (bt.childNodes.length) card.appendChild(bt);
+      }
+      if (item.edit) {
+        if (o.node) { o.node.parentNode.replaceChild(card, o.node); o.node = card; last = card; return; }
+      }
+      host.appendChild(card);
+      last = card;
+    });
+    if (!last) {
+      if (!o.quiet) {
+        var e = document.createElement('div');
+        e.className = 'fade';
+        e.innerHTML = emptyBox('کاری انجام شد', 'بات پیام تازه‌ای برای این کار نداشت.');
+        host.appendChild(e);
+      }
+    }
+    var sb = $('tjSay');
+    if (sb) {
+      if (last) {
+        if (/(بنویسید|بنویس|بفرستید|بفرست|تایپ کنید|وارد کنید)/.test(last.textContent || '')) sb.classList.add('open');
+      }
+    }
+    return last;
+  }
+
+  function press(btn, card, cb, sec, host, o) {
+    var all = card.querySelectorAll('button.ib');
+    for (var i = 0; i < all.length; i++) all[i].disabled = true;
+    btn.classList.add('on');
+    call(actApi(sec, cb), { cb: cb }).then(function (r) {
+      for (var i = 0; i < all.length; i++) all[i].disabled = false;
+      btn.classList.remove('on');
+      if (!r) return flash(host, null);
+      if (!r.ok) return flash(host, r);
+      buzz('success');
+      renderOut(r.out, host, sec, { node: card });
+      scrollEnd(host);
+    })['catch'](function () {
+      for (var i = 0; i < all.length; i++) all[i].disabled = false;
+      btn.classList.remove('on');
+      flash(host, null);
+    });
+  }
+
+  function flash(host, r) {
+    var d = document.createElement('div');
+    d.className = 'fade';
+    d.innerHTML = errBox(r, null);
+    host.appendChild(d);
+    wireErr(host, null);
+    buzz('error');
+    scrollEnd(host);
+  }
+  function scrollEnd(host) {
+    try { host.lastChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+  }
+
+  /* ─────────── منوی بخش، از keys خود سرور ─────────── */
+  var MENU = null;
+  function setMenu(keys, sec) {
+    if (!MENU) return;
+    var flat = [];
+    (keys || []).forEach(function (row) {
+      (row || []).forEach(function (k) {
+        var t = (typeof k === 'string') ? k : (k ? k.text : '');
+        if (t) flat.push(t);
+      });
+    });
+    if (!flat.length) { MENU.innerHTML = ''; return; }
+    if (!sayApi(sec)) { MENU.innerHTML = ''; return; }
+    MENU.innerHTML = flat.map(function (t, i) {
+      return '<button class="mk" type="button" data-k="' + i + '">' + esc(t) + '</button>';
+    }).join('');
+    MENU.querySelectorAll('[data-k]').forEach(function (b) {
+      b.onclick = function () { tap(); say(sec, flat[+b.getAttribute('data-k')]); };
+    });
+  }
+
+  /* ─────────── صفحهٔ بخش ─────────── */
+  var SEC = { key: '', host: null };
+  function section(pageKey) {
+    var def = PAGES[pageKey];
+    if (!def) return reset(home);
+    SEC.key = pageKey;
+    var w = shell(def.i + ' ' + def.t, '');
+    w.innerHTML =
+      '<div class="menu" id="tjMenu"></div>' +
+      '<div id="tjFeed"></div>' +
+      '<div class="say caps quiet" id="tjCapsBox"><div class="hd" id="tjCapsHd"><span>⋯ کارهای بیشتر</span><i>⌄</i></div>' +
+      '<div class="bx"><div class="btns two" id="tjCaps"></div></div></div>' +
+      (sayApi(pageKey) ? saySlot() : '');
+    MENU = $('tjMenu');
+    SEC.host = $('tjFeed');
+    wireSay(pageKey);
+
+    var caps = CAPS.filter(function (x) { return x.p === pageKey; });
+    var cb = $('tjCaps');
+    var cbox = $('tjCapsBox');
+    if (!caps.length) {
+      cbox.parentNode.removeChild(cbox);
+    } else {
+      $('tjCapsHd').onclick = function () { tap(); cbox.classList.toggle('open'); };
+      if (!def.entry) cbox.classList.add('open');
+      cb.innerHTML = caps.map(function (x, i) {
+        return '<button class="ib wide" type="button" data-c="' + i + '">' + esc(x.l) + '</button>';
+      }).join('');
+      cb.querySelectorAll('[data-c]').forEach(function (b) {
+        b.onclick = function () { tap(); cbox.classList.remove('open'); run(caps[+b.getAttribute('data-c')].a, {}); };
+      });
+    }
+    if (def.entry) run(def.entry, {}, true);
+  }
+
+  /* ─────────── کش کوتاه بخش‌ها ───────────
+     هر درخواست به اپس‌اسکریپت چند ثانیه می‌گیرد؛ این گریزناپذیر است.
+     پس آخرین چیزی که همین آدم در همین بخش دیده بود را فوراً نشان
+     می‌دهیم و تازه‌اش را پشت صحنه می‌گیریم. اگر عوض شده بود، جا
+     عوض می‌کند. اگر نه، آدم اصلاً منتظر نمانده است. */
+  var SEC_TTL = 10 * 60 * 1000;
+  function secKey(api) { return 'tjapp.sec.' + api + '.' + (ME ? ME.chat : '0'); }
+  function secRead(api) {
+    try {
+      var raw = localStorage.getItem(secKey(api));
+      if (!raw) return null;
+      var o = JSON.parse(raw);
+      if (!o) return null;
+      if (Date.now() - (o.at || 0) > SEC_TTL) return null;
+      return o.out || null;
+    } catch (e) { return null; }
+  }
+  function secWrite(api, out) {
+    try { localStorage.setItem(secKey(api), JSON.stringify({ at: Date.now(), out: out })); } catch (e) {}
+  }
+
+  /* هر بخش یک شمارنده دارد. پاسخِ درخواستی که دیگر جاری نیست دور
+     ریخته می‌شود، پس دو بار زدن روی یک دکمه چیزی را قاطی نمی‌کند و
+     چرخنده‌ی یتیم جا نمی‌ماند. */
+  var RUNSEQ = 0;
+
+  function spinBox(note) {
+    return '<div class="spin"></div>' + (note ? '<div class="wait">' + esc(note) + '</div>' : '');
+  }
+
+  function run(api, extra, first) {
+    var host = SEC.host;
+    if (!host) return;
+    var seq = ++RUNSEQ;
+    var cached = first ? secRead(api) : null;
+    var tmp = null;
+
+    if (first) {
+      if (cached) {
+        host.innerHTML = '';
+        renderOut(cached, host, SEC.key, {});
+        var chip = document.createElement('div');
+        chip.className = 'wait'; chip.id = 'tjFresh';
+        chip.appendChild(document.createTextNode('در حال تازه‌کردن…'));
+        host.appendChild(chip);
+      } else {
+        host.innerHTML = spinBox('چند لحظه؛ دارم از سرور می‌گیرم.');
+      }
+    } else {
+      tmp = document.createElement('div');
+      tmp.className = 'spin'; tmp.id = 'tjTmp' + seq;
+      host.appendChild(tmp);
+      scrollEnd(host);
+    }
+
+    function clear() {
+      if (seq !== RUNSEQ) return false;
+      if (first) host.innerHTML = '';
+      else if (tmp) { if (tmp.parentNode) tmp.parentNode.removeChild(tmp); }
+      return true;
+    }
+
+    var done = false;
+    var timer = setTimeout(function () {
+      if (done) return;
+      if (seq !== RUNSEQ) return;
+      if (!clear()) return;
+      done = true;
+      host.innerHTML = stateBox('🐢', 'سرور دیر جواب داد',
+        'گاهی اپس‌اسکریپت کند می‌شود. یک بار دیگر بزنید؛ معمولاً بار دوم سریع است.',
+        '<div class="btns"><button class="ib wide" type="button" id="tjRetry">دوباره امتحان کن</button></div>');
+      var rb = $('tjRetry');
+      if (rb) rb.onclick = function () { tap(); run(api, extra, first); };
+    }, 30000);
+
+    call(api, extra || {}).then(function (r) {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (!clear()) return;
+      if (!r) return flash(host, null);
+      if (!r.ok) return flash(host, r);
+      if (r.out) {
+        if (!r.out.length) {
+          host.innerHTML = emptyBox('اینجا فعلاً خالی است', 'هر وقت چیزی برای این بخش بیاید، همین‌جا می‌بینیدش.');
+          if (first) secWrite(api, r.out);
+          return;
+        }
+        renderOut(r.out, host, SEC.key, {});
+        if (first) secWrite(api, r.out);
+        scrollEnd(host);
+        return;
+      }
+      /* پاسخ‌های قدیمی که out ندارند */
+      legacy(host, api, r);
+    })['catch'](function () {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (!clear()) return;
+      flash(host, null);
+    });
+  }
+
+  function legacy(host, api, r) {
+    var d = document.createElement('div');
+    d.className = 'card';
+    if (api === 'ann') {
+      var list = r.items || r.list || [];
+      d.innerHTML = list.length
+        ? '<div class="nm">اطلاعیه‌ها</div>' + list.map(function (a) {
+            return '<div class="row"><b>' + esc(a.title || a.t || '') + '</b><span>' + esc(a.date || a.d || '') + '</span></div>';
+          }).join('')
+        : emptyBox('اطلاعیه‌ای نیست', 'تازه‌ترین اطلاعیه‌ها همین‌جا می‌آیند.');
+    } else {
+      d.innerHTML = '<div class="bd">' + esc('انجام شد.') + '</div>';
+    }
+    host.appendChild(d);
+  }
+
+  function saySlot() {
+    return '<div class="say quiet" id="tjSay"><div class="hd" id="tjSayHd"><span>✍️ نوشتن پاسخ</span><i>⌄</i></div>' +
+      '<div class="bx"><textarea class="tjin" id="tjSayIn" rows="3" placeholder="هر جا بات منتظر متن است، همین‌جا بنویسید."></textarea>' +
+      '<button class="btn" id="tjSayGo" type="button">فرستادن</button></div></div>';
+  }
+  function wireSay(sec) {
+    var box = $('tjSay');
+    if (!box) return;
+    $('tjSayHd').onclick = function () { tap(); box.classList.toggle('open'); };
+    $('tjSayGo').onclick = function () {
+      var v = $('tjSayIn').value.trim();
+      if (!v) return;
+      tap();
+      $('tjSayIn').value = '';
+      box.classList.remove('open');
+      say(sec, v);
+    };
+  }
+  function say(sec, text) {
+    var a = sayApi(sec);
+    if (!a) return;
+    run(a, { text: text });
+  }
+
+  /* ─────────── خانه ─────────── */
+  /* ─────────── کش محلی راه‌اندازی ───────────
+     اپس‌اسکریپت برای هر درخواست کل فایل بات را می‌خواند؛ حتی یک ping
+     چند ثانیه می‌گیرد. پس: خانه را فوراً از آخرین وضعیت شناخته‌شده
+     می‌کشیم و پاسخ تازه را پشت صحنه می‌گیریم. آدم منتظر نمی‌ماند. */
+  var LS_KEY = 'tjapp.boot.v1';
+  function cacheRead() {
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      if (!raw) return null;
+      var o = JSON.parse(raw);
+      if (!o || !o.me || !o.me.ok) return null;
+      var uid = TG ? (TG.initDataUnsafe ? (TG.initDataUnsafe.user ? TG.initDataUnsafe.user.id : 0) : 0) : 0;
+      if (uid ? String(uid) !== String(o.me.chat) : false) return null;
+      if (Date.now() - (o.at || 0) > 7 * 24 * 3600 * 1000) return null;
+      return o;
+    } catch (e) { return null; }
+  }
+  function cacheWrite(o) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify({ at: Date.now(), me: o.me, cap: o.cap, ver: o.ver })); } catch (e) {}
+  }
+
+  /* رجیستری سرور جای جدول ثابت کلاینت را می‌گیرد. هر قابلیتی که به بات
+     اضافه شود، بدون دست‌زدن به این صفحه اینجا هم پیدا می‌شود. */
+  function applyCap(list) {
+    if (!list || !list.length) return;
+    var skip = { home: 1, book: 1, style: 1, feed: 1, mag: 1, page: 1 };
+    var entries = {};
+    for (var k in PAGES) if (PAGES[k].entry) entries[PAGES[k].entry] = 1;
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var c = list[i];
+      if (!c || !c.page || !c.api) continue;
+      if (skip[c.page]) continue;
+      if (!PAGES[c.page]) continue;
+      if (entries[c.api]) continue;
+      if (/\.(say)$/.test(c.api)) continue;
+      out.push({ p: c.page, a: c.api, l: c.label || c.api });
+    }
+    if (out.length) CAPS = out;
+  }
+
+  function applyBoot(m, fresh) {
+    ME = m.me; VKF = m.vk ? 1 : 0;
+    ROLE = ME.role || (ME.roles || [])[0] || 'مراجع';
+    SRV_VER = m.ver || '';
+    applyCap(m.cap);
+    if (fresh) cacheWrite(m);
+  }
+
+  /* ─────────── v169: صف سردبیر بازبینی علمی (api: rv.list، rv.open، rv.act) ─────────── */
+  function rvTok(s) { return String(s || '').split(/(\s+)/); }
+  function rvDiff(a, b) {
+    var x = rvTok(a), y = rvTok(b), n = x.length, m = y.length, L = [], i, j;
+    for (i = 0; i <= n; i++) { L.push(new Array(m + 1).fill(0)); }
+    for (i = n - 1; i >= 0; i--) { for (j = m - 1; j >= 0; j--) { L[i][j] = x[i] === y[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]); } }
+    var o = ''; i = 0; j = 0;
+    while (i < n || j < m) {
+      var same = false;
+      if (i < n) { if (j < m) { same = x[i] === y[j]; } }
+      if (same) { o += esc(x[i]); i++; j++; }
+      else if (j < m) {
+        if (i >= n || L[i][j + 1] >= L[i + 1][j]) { o += '<ins>' + esc(y[j]) + '</ins>'; j++; }
+        else { o += '<del>' + esc(x[i]) + '</del>'; i++; }
+      } else { o += '<del>' + esc(x[i]) + '</del>'; i++; }
+    }
+    return o.replace(/<\/ins><ins>/g, '').replace(/<\/del><del>/g, '');
+  }
+  /* v169.2: «رسیدم» و «رفتم» (پذیرش گاندی) */
+  function attView() {
+    var w = shell('🕘 حضور امروز');
+    w.innerHTML = '<div class="card"><p class="rvtag">بی هیچ شرطی؛ اگر یادتان رفت، شیفت برنامه‌ریزی‌شده مبناست.</p>' +
+      '<div class="rvbtns"><button class="ib wide" type="button" data-k="in">🟢 رسیدم</button><button class="ib wide" type="button" data-k="out">🔴 رفتم</button></div><div id="tjAtt"></div></div>';
+    w.querySelectorAll('[data-k]').forEach(function (b) {
+      b.onclick = function () {
+        tap(); var o = $('tjAtt'); o.innerHTML = '<div class="spin"></div>';
+        call('att.mark', { kind: b.getAttribute('data-k') }).then(function (r) {
+          if (!r || !r.ok) { showErr(o, r, null); return; }
+          o.innerHTML = '<p class="rvtxt">' + esc(fa(r.msg)) + '</p>';
+        })['catch'](function () { showErr(o, null, null); });
+      };
+    });
+  }
+  /* v169.2: فهرست جلسه‌های امروز گاندی، بی نام مراجع */
+  function gdView() {
+    var w = shell('📋 فهرست امروز گاندی');
+    w.innerHTML = '<div class="spin"></div>';
+    call('gd.day', {}).then(function (r) {
+      if (!r || !r.ok) { showErr(w, r, gdView); return; }
+      if (!r.rows.length) { w.innerHTML = emptyBox('امروز جلسهٔ حضوری نیست', 'در «اشغال هفتگی گاندی» برای امروز جلسه‌ای ثبت نشده است.'); return; }
+      w.innerHTML = r.rows.map(function (x, i) {
+        return '<div class="card gdrow"><div><b>اتاق ' + esc(fa(x.room)) + ' · ساعت ' + esc(fa(x.hour)) + '</b><div class="gdst">' + esc(x.ther) + '</div></div>' +
+          '<div class="rvbtns"><button class="ib gdbtn' + (x.st === 'آمد' ? ' on' : '') + '" type="button" data-i="' + i + '" data-c="1">✅ آمد</button>' +
+          '<button class="ib gdbtn' + (x.st === 'نیامد' ? ' on' : '') + '" type="button" data-i="' + i + '" data-c="0">❌ نیامد</button></div></div>';
+      }).join('');
+      w.querySelectorAll('[data-i]').forEach(function (b) {
+        b.onclick = function () {
+          tap(); var x = r.rows[+b.getAttribute('data-i')], came = b.getAttribute('data-c') === '1';
+          call('gd.mark', { room: x.room, hour: x.hour, came: came }).then(function (q) {
+            if (!q || !q.ok) { showErr(w, q, gdView); return; }
+            x.st = came ? 'آمد' : 'نیامد';
+            b.parentNode.querySelectorAll('.gdbtn').forEach(function (z) { z.classList.toggle('on', z === b); });
+          })['catch'](function () { showErr(w, null, gdView); });
+        };
+      });
+    })['catch'](function () { showErr(w, null, gdView); });
+  }
+  /* v169.2: هاب من (گوگل‌شیت شخصی) */
+  function hubOpen() {
+    call('hub.me', {}).then(function (r) {
+      if (r ? r.url : '') { if (TG) TG.openLink(r.url); else location.href = r.url; return; }
+      var w = shell('📒 هاب من'); w.innerHTML = emptyBox('هاب شما هنوز ساخته نشده است', 'یاسر هاب‌ها را یکی‌یکی می‌سازد.');
+    })['catch'](function () { var w = shell('📒 هاب من'); showErr(w, null, hubOpen); });
+  }
+  /* v169.3: سه عدد و «کار بعدی» خانهٔ تیم (home.me)؛ هر بار خانه باز می‌شود، بی‌سروصدا پر می‌شود */
+  function homeFill() {
+    call('home.me', {}).then(function (r) {
+      var hn = $('tjHn'), nx = $('tjNext');
+      if (!hn || !nx) return;
+      if (!r || !r.ok) { nx.innerHTML = '<p class="rvtag">فهرست کارها الان در دسترس نیست. «کارهای من» را ببینید.</p>'; return; }
+      var bs = hn.querySelectorAll('b');
+      bs[0].textContent = fa(r.today); bs[1].textContent = fa(r.late); bs[2].textContent = fa(r.wait);
+      bs[1].classList.toggle('late', r.late > 0);
+      if (!r.next.length) { nx.innerHTML = '<p class="rvtag">کار بازی روی زمین نیست.</p>'; return; }
+      nx.innerHTML = r.next.map(function (x, i) {
+        return '<button class="nx' + (x.late ? ' late' : '') + '" type="button" data-n="' + i + '">' + (x.pri === 'فوری' ? '<span class="hot">● </span>' : '') + esc(x.title) +
+          '<em>' + esc(x.st) + (x.due ? ' · مهلت ' + esc(fa(x.due)) : '') + (x.late ? ' · معوق' : '') + '</em></button>';
+      }).join('');
+      nx.querySelectorAll('[data-n]').forEach(function (b) {
+        b.onclick = function () {
+          tap(); var x = r.next[+b.getAttribute('data-n')], ln = String(x.link || '');
+          if (/^E-\d+$/.test(x.ref)) return go(function () { rvView(x.ref); });
+          if (/^K-\d+$/.test(x.ref)) return go(function () { section('task'); });
+          if (/^https:\/\/t\.me\//.test(ln)) { if (TG) TG.openTelegramLink(ln); else location.href = ln; return; }
+          hubOpen();
+        };
+      });
+    })['catch'](function () { var nx = $('tjNext'); if (nx) nx.innerHTML = '<p class="rvtag">فهرست کارها الان در دسترس نیست. «کارهای من» را ببینید.</p>'; });
+  }
+  /* v170: صف ارسال مدیریت (فقط ناظر): پیام تازه، باز، بی‌پاسخ */
+  function dqView() {
+    var w = shell('📮 صف ارسال');
+    w.innerHTML = '<div class="spin"></div>';
+    call('dq.list', {}).then(function (r) {
+      if (!r || !r.ok) { showErr(w, r, dqView); return; }
+      var row = function (x) {
+        return '<div class="card"><b>' + esc(x.code) + ' · ' + esc(x.subject) + '</b><div class="gdst">' + esc(x.to) + ' · ' + esc(x.st) +
+          (x.sentAt ? ' · ' + esc(fa(x.sentAt)) : '') + (x.tkSt ? ' · تیکت: ' + esc(x.tkSt) : '') + '</div>' + (x.reply ? '<p class="rvtxt">' + esc(x.reply) + '</p>' : '') + '</div>';
+      };
+      w.innerHTML = '<div class="card"><b>پیام تازه از طرف مدیریت</b>' +
+        '<input id="dqTo" class="inp" placeholder="گیرنده: نقش (مثل مالی) یا نام کامل">' +
+        '<input id="dqSu" class="inp" placeholder="موضوع کوتاه">' +
+        '<textarea id="dqTx" class="inp" rows="4" placeholder="متن پیام"></textarea>' +
+        '<input id="dqLn" class="inp" placeholder="لینک (اختیاری)">' +
+        '<button class="btn" id="dqGo" type="button">بفرست</button><div id="dqMsg"></div></div>' +
+        '<h2>بی‌پاسخ (بیش از ۲۴ ساعت)</h2>' + (r.late.length ? r.late.map(row).join('') : '<p class="rvtag">چیزی نیست.</p>') +
+        '<h2>پیام‌های باز</h2>' + (r.open.length ? r.open.map(row).join('') : '<p class="rvtag">چیزی نیست.</p>');
+      $('dqGo').onclick = function () {
+        tap(); var o = $('dqMsg'); o.innerHTML = '<div class="spin"></div>';
+        call('dq.new', { to: $('dqTo').value, subject: $('dqSu').value, text: $('dqTx').value, link: $('dqLn').value }).then(function (q) {
+          if (!q || !q.ok) { o.innerHTML = '<p class="rvtag">' + esc((q ? q.error || q.msg : '') || 'نشد.') + '</p>'; return; }
+          o.innerHTML = '<p class="rvtxt">' + esc(q.code + ' · ' + q.msg) + '</p>';
+        })['catch'](function () { o.innerHTML = '<p class="rvtag">اتصال برقرار نشد.</p>'; });
+      };
+    })['catch'](function () { showErr(w, null, dqView); });
+  }
+  /* v169: امتیاز من */
+  function ptsView() {
+    var w = shell('⭐ امتیاز من');
+    w.innerHTML = '<div class="spin"></div>';
+    call('pts.me', {}).then(function (r) {
+      if (!r || !r.ok) { showErr(w, r, ptsView); return; }
+      if (!r.items.length) { w.innerHTML = emptyBox('هنوز امتیازی ثبت نشده', 'امتیاز بازبینی، ایده و مقاله بعد از انتشار اینجا می‌آید.'); return; }
+      w.innerHTML = '<div class="card"><b>جمع: ' + esc(fa(r.total)) + '</b></div>' + r.items.map(function (x) {
+        return '<div class="card gdrow"><span>' + esc(x.work) + ' <span class="gdst">' + esc(x.ref) + '</span></span><b>' + esc(fa(x.pts)) + '</b></div>';
+      }).join('');
+    })['catch'](function () { showErr(w, null, ptsView); });
+  }
+  function rvList() {
+    var w = shell('🔬 صف بازبینی علمی');
+    w.innerHTML = '<div class="spin"></div>';
+    call('rv.list', {}).then(function (r) {
+      if (!r || !r.ok) { showErr(w, r, rvList); return; }
+      if (!r.rows.length) { w.innerHTML = emptyBox('صف خالی است', 'بازبینی تازه‌ای منتظر شما نیست.'); return; }
+      w.innerHTML = r.rows.map(function (x, i) {
+        return '<button class="card rvrow" type="button" data-i="' + i + '"><span class="rvst">' + esc(x.st) + (x.late ? ' · <b class="rvlate">' + fa(x.late) + ' روز کاری معوق</b>' : '') + '</span>' +
+          '<b>' + esc(x.code) + ' · ' + esc(x.title) + '</b><span class="sub">بازبین: ' + esc(x.reviewer) + ' · ' + fa(x.on) + ' از ' + fa(x.n) + ' تغییر روشن</span></button>';
+      }).join('');
+      w.querySelectorAll('[data-i]').forEach(function (b) { b.onclick = function () { tap(); var x = r.rows[+b.getAttribute('data-i')]; go(function () { rvView(x.code); }); }; });
+    })['catch'](function () { showErr(w, null, rvList); });
+  }
+  function rvView(code) {
+    var w = shell('🔬 بازبینی ' + code);
+    w.innerHTML = '<div class="spin"></div>';
+    var R = null, CH = [];
+    call('rv.open', { code: code }).then(function (r) {
+      if (!r || !r.ok) { showErr(w, r, function () { rvView(code); }); return; }
+      R = r; CH = r.d.changes; draw();
+    })['catch'](function () { showErr(w, null, function () { rvView(code); }); });
+    function canEd() { return ['در صف سردبیر', 'برگشت از یاسر'].indexOf(R.st) > -1; }
+    function draw() {
+      var d = R.d, h = '';
+      h += '<div class="card"><span class="rvst">' + esc(R.st) + (R.late ? ' · <b class="rvlate">' + fa(R.late) + ' روز کاری معوق</b>' : '') + '</span>' +
+        '<div class="nm"><b>' + esc(d.title) + '</b></div><div class="sub">بازبین: ' + esc(d.reviewer) + ' · ' + esc(d.verdict) + '</div>' +
+        (R.link ? '<a class="rvlink" href="' + qa(R.link) + '" target="_blank" rel="noopener">دیدن مقاله</a> ' : '') + (d.doc ? '<a class="rvlink" href="' + qa(d.doc) + '" target="_blank" rel="noopener">سند بازبین</a>' : '') + '</div>';
+      h += '<div class="card rvraw"><div class="lbl">حرف اصلی بازبین</div>' +
+        (d.raw ? '<div class="rvtxt">' + esc(d.raw) + '</div>' : '') + (d.tr ? '<div class="rvtxt">🎙 ' + esc(d.tr) + '</div>' : '') +
+        (!d.raw ? (!d.tr ? '<div class="sub">بازبین متنی جز سند نفرستاده است.</div>' : '') : '') +
+        (d.voices ? '<button class="btn ghost" type="button" id="rvVo">🎧 شنیدن ' + fa(d.voices) + ' ویس در بات</button>' : '') + '</div>';
+      if (d.qa.length) h += '<div class="card"><div class="lbl">سؤال و جواب با بازبین</div>' + d.qa.map(function (x) { return '<div class="rvtxt">❓ ' + esc(x.q) + (x.a ? '\n💬 ' + esc(x.a) : '\n⏳ منتظر جواب') + '</div>'; }).join('') + '</div>';
+      if (d.ownerNotes.length) h += '<div class="card"><div class="lbl">یادداشت یاسر</div>' + d.ownerNotes.map(function (x) { return '<div class="rvtxt">↩️ ' + esc(x.t) + '</div>'; }).join('') + '</div>';
+      if (d.qc.length) h += '<div class="card"><div class="lbl">چک محتوایی Gemini (عنوان، متا، لینک، لحن)</div><ul class="nx">' + d.qc.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+      if (d.checks.length) h += '<div class="card"><div class="lbl">چک آمادگی</div>' + d.checks.map(function (c) { return '<div class="rvtxt">' + (c.ok ? '🟢 ' : '🔴 ') + esc(c.msg) + '</div>'; }).join('') + '</div>';
+      if (d.notes.length) h += '<div class="card"><div class="lbl">نکته‌های کلی بازبین</div><ul class="nx">' + d.notes.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+      h += '<div class="lbl">' + fa(CH.length) + ' تغییر پیشنهادی</div>';
+      CH.forEach(function (c, i) {
+        var body = c.kind === 'add' ? '<ins>' + esc(c.neu) + '</ins>' : (c.kind === 'del' ? '<del>' + esc(c.old) + '</del>' : rvDiff(c.old, c.neu));
+        h += '<div class="card rvc' + (c.on ? ' on' : '') + (c.rej ? ' rej' : '') + '"><div class="rvtag">#' + fa(c.id) + ' · ' + (c.src === 'doc' ? 'از متن سند بازبین' : 'ساختهٔ Gemini از حرف بازبین؛ با دقت ببینید') + (c.edited ? ' · ویرایش سردبیر' : '') + '</div>' +
+          (c.kind === 'add' ? (c.after ? '<div class="sub">بعد از: «' + esc(String(c.after).slice(0, 90)) + '…»</div>' : '') : '') +
+          '<div class="rvdf">' + body + '</div>' + (c.why ? '<div class="sub">' + esc(c.why) + '</div>' : '') +
+          (canEd() ? '<div class="rvbtns"><button type="button" class="rvb' + (c.on ? ' sel' : '') + '" data-on="' + i + '">✓ تیک</button><button type="button" class="rvb" data-ed="' + i + '">✎ ویرایش</button><button type="button" class="rvb' + (c.rej ? ' sel' : '') + '" data-rj="' + i + '">✕ رد</button></div>' +
+            '<textarea class="rvta" data-cm="' + i + '" placeholder="نظر شما (اختیاری)">' + esc(c.cm || '') + '</textarea>' : (c.cm ? '<div class="sub">نظر: ' + esc(c.cm) + '</div>' : '')) + '</div>';
+      });
+      if (canEd()) {
+        h += '<div class="card"><div class="lbl">نظر کلی سردبیر</div><textarea class="rvta" id="rvNote">' + esc(d.edNote || '') + '</textarea></div>' +
+          '<button class="btn" type="button" id="rvOk">✅ تأیید سردبیری</button>' +
+          '<button class="btn ghost" type="button" id="rvAsk">❓ سؤال از بازبین</button>' +
+          '<button class="btn ghost" type="button" id="rvSave">ذخیره بی تأیید</button>' +
+          '<button class="btn ghost" type="button" id="rvRej">🗑 رد کل بازبینی</button>';
+      }
+      if (R.owner) { if (R.st === 'آمادهٔ انتشار') {
+        h += '<button class="btn" type="button" id="rvPub">✅ انتشار</button><button class="btn ghost" type="button" id="rvBack">↩️ برگشت با یادداشت</button>';
+      } }
+      h += '<div id="rvMsg"></div>';
+      w.innerHTML = h;
+      wire();
+    }
+    function decs() { return CH.map(function (c) { return { id: c.id, on: !!c.on, rej: !!c.rej, neu: c.edited ? c.neu : undefined, cm: c.cm || '' }; }); }
+    function grabCm() { w.querySelectorAll('[data-cm]').forEach(function (t) { CH[+t.getAttribute('data-cm')].cm = t.value; }); }
+    function act(a, extra) {
+      grabCm();
+      var o = extra || {};
+      o.code = code; o.act = a;
+      if (a !== 'publish') { if (a !== 'back') { o.dec = JSON.stringify(decs()); var n = $('rvNote'); if (n) o.comment = n.value; } }
+      var m = $('rvMsg'); if (m) m.innerHTML = '<div class="spin"></div>';
+      return call('rv.act', o).then(function (r) {
+        if (!r || !r.ok) { buzz('error'); if (m) m.innerHTML = '<div class="card rvbad">' + esc((r ? r.error : '') || 'نشد. دوباره امتحان کنید.') + '</div>'; return r; }
+        buzz('success');
+        if (a === 'save') { if (m) m.innerHTML = '<div class="card">' + esc(r.msg || 'ذخیره شد.') + '</div>'; return r; }
+        rvView(code);
+        return r;
+      })['catch'](function () { if (m) m.innerHTML = '<div class="card rvbad">اتصال برقرار نشد. دوباره امتحان کنید.</div>'; });
+    }
+    function wire() {
+      w.querySelectorAll('[data-on]').forEach(function (b) { b.onclick = function () { tap(); var c = CH[+b.getAttribute('data-on')]; grabCm(); c.on = !c.on; if (c.on) c.rej = false; draw(); }; });
+      w.querySelectorAll('[data-rj]').forEach(function (b) { b.onclick = function () { tap(); var c = CH[+b.getAttribute('data-rj')]; grabCm(); c.rej = !c.rej; if (c.rej) c.on = false; draw(); }; });
+      w.querySelectorAll('[data-ed]').forEach(function (b) {
+        b.onclick = function () {
+          tap(); grabCm();
+          var i = +b.getAttribute('data-ed'), c = CH[i], box = b.parentNode.parentNode;
+          if (box.querySelector('.rved')) return;
+          var t = document.createElement('textarea'); t.className = 'rvta rved'; t.value = c.neu || '';
+          var s = document.createElement('button'); s.className = 'btn'; s.type = 'button'; s.textContent = 'نگه داشتن متن تازه';
+          s.onclick = function () { tap(); c.neu = t.value.replace(/\s*[—–]\s*/g, '، '); c.edited = true; c.on = true; c.rej = false; draw(); };
+          box.appendChild(t); box.appendChild(s);
+        };
+      });
+      var vo = $('rvVo'); if (vo) vo.onclick = function () { tap(); act('voice'); };
+      var ok = $('rvOk'); if (ok) ok.onclick = function () { tap(); act('approve'); };
+      var sv = $('rvSave'); if (sv) sv.onclick = function () { tap(); act('save'); };
+      var rj = $('rvRej'); if (rj) rj.onclick = function () { tap(); if (rj.getAttribute('data-sure')) { act('reject'); } else { rj.setAttribute('data-sure', '1'); rj.textContent = 'مطمئنید؟ دوباره بزنید'; } };
+      var ask = $('rvAsk'); if (ask) ask.onclick = function () { tap(); ask2('سؤال از بازبین', 'ask'); };
+      var pb = $('rvPub'); if (pb) pb.onclick = function () { tap(); if (pb.getAttribute('data-sure')) { act('publish'); } else { pb.setAttribute('data-sure', '1'); pb.textContent = 'انتشار روی مقاله؟ دوباره بزنید'; } };
+      var bk = $('rvBack'); if (bk) bk.onclick = function () { tap(); ask2('یادداشت برای سردبیر', 'back'); };
+    }
+    function ask2(title, a) {
+      var m = $('rvMsg'); if (!m) return;
+      m.innerHTML = '<div class="card"><div class="lbl">' + esc(title) + '</div><textarea class="rvta" id="rvQ"></textarea><button class="btn" type="button" id="rvQs">فرستادن</button></div>';
+      $('rvQs').onclick = function () { tap(); var v = $('rvQ').value.trim(); if (v.length < 3) return; act(a, { text: v }); };
+    }
+  }
+
+  function boot() {
+    track('app_open', START);
+    /* بیرون از تلگرام هیچ هویتی نیست، پس هیچ درخواستی هم نمی‌زنیم:
+       یک‌راست نمای آزمایشی. این فقط برای دیدن چیدمان است. */
+    if (PREVIEW) { if (!(TG ? TG.initData : '')) { demo(); return; } }
+    var cached = cacheRead();
+    if (cached) { applyBoot(cached, false); reset(home); STALE = true; }
+    else loading(root);
+
+    call('boot', {}).then(function (m) {
+      if (!m || !m.ok) {
+        if (cached) { STALE = false; freshMark(); return; }
+        if (PREVIEW) { demo(); return; }
+        var w = plain(); showErr(w, m || null, boot); return;
+      }
+      var same = cached ? JSON.stringify(cached.me) === JSON.stringify(m.me) : false;
+      applyBoot(m, true);
+      STALE = false;
+      setTimeout(warmUp, 400);
+      if (!cached) reset(home);
+      else if (!same) { if (STACK.length <= 1) reset(home); else freshMark(); }
+      else freshMark();
+    })['catch'](function () {
+      if (cached) { STALE = false; freshMark(); return; }
+      var w = plain(); showErr(w, null, boot);
+    });
+  }
+
+  /* نمای آزمایشی بیرون از تلگرام: فقط برای دیدن چیدمان، بی‌هیچ داده‌ای
+     از سرور. هر دکمه‌ای اینجا زده شود، پاسخ «از داخل بات باز کنید»
+     می‌گیرد؛ همین درست است. */
+  function demo() {
+    ME = { ok: true, chat: '0', name: 'نمای آزمایشی', display: 'نمای آزمایشی',
+      roles: ['مراجع'], role: 'مراجع', roleLabels: ['مراجع'], links: {}, meeting: null };
+    var AMP = String.fromCharCode(38);
+    var q = (location.search.match(new RegExp('[?' + AMP + ']as=([^' + AMP + ']+)')) || [])[1] || '';
+    if (q === 'team') {
+      ME.roles = ['پذیرش', 'مدرسه', 'ناظر', 'مراجع'];
+      ME.roleLabels = ['پذیرش', 'مدرسه', 'ناظر', 'مراجع'];
+      ME.display = 'نمای آزمایشی تیم';
+    }
+    ROLE = ME.role;
+    STALE = false;
+    reset(home);
+    var w = document.querySelector('#tjapp .wrap');
+    if (w) {
+      var n = document.createElement('div');
+      n.className = 'wait';
+      n.appendChild(document.createTextNode('نمای آزمایشی · بیرون از تلگرام، هیچ داده‌ای واقعی نیست.'));
+      w.insertBefore(n, w.firstChild);
+    }
+  }
+
+  /* پیش‌گرفتن: وقتی آدم دارد خانه را نگاه می‌کند، پاسخ محتمل‌ترین
+     بخش بعدی را بی‌سروصدا می‌گیریم و در کش می‌گذاریم. پس وقتی دکمه
+     را می‌زند، چیزی همان لحظه آنجاست. */
+  var PRE_DONE = {};
+  function prefetch(api) {
+    if (!api) return;
+    if (PRE_DONE[api]) return;
+    PRE_DONE[api] = 1;
+    if (secRead(api)) return;
+    call(api, {}).then(function (r) {
+      if (r ? r.ok : false) { if (r.out) { if (r.out.length) secWrite(api, r.out); } }
+    })['catch'](function () {});
+  }
+
+  function warmUp() {
+    var roles = (ME ? ME.roles : null) || [];
+    var TEAMR = ['پذیرش', 'مدرسه', 'سردبیر', 'مالی', 'ناظر', 'سوپروایزر', 'استاد', 'درمانگر'];
+    for (var i = 0; i < TEAMR.length; i++) {
+      if (roles.indexOf(TEAMR[i]) > -1) { prefetch('dash.me'); return; }
+    }
+  }
+
+  function freshMark() {
+    var el = document.getElementById('tjStale');
+    if (el ? el.parentNode : null) el.parentNode.removeChild(el);
+  }
+
+  function home() {
+var w = plain();
+var roles = (ME.roles || []).slice();
+if (!roles.length) roles = ['مراجع'];
+var initial = (ME.display || ME.name || '🍓').trim().charAt(0);
+
+/* v169.3: آدم تیم (خانهٔ کارمحور)؛ خانهٔ مراجع همان قبلی است */
+var TEAMR = ['پذیرش', 'مدرسه', 'سردبیر', 'مالی', 'ناظر', 'سوپروایزر', 'استاد', 'درمانگر'];
+var isTeam = false;
+for (var ti = 0; ti < TEAMR.length; ti++) { if (roles.indexOf(TEAMR[ti]) > -1) isTeam = true; }
+var h = '<div class="hi"><div class="av">' + esc(initial || '🍓') + '</div><div>' +
+'<div class="nm">' + esc(ME.display || ME.name || 'سلام') + '</div>' +
+'<div class="rl">' + (isTeam ? '<button type="button" class="rlb" data-x="roles">' + esc(fa((ME.roleLabels || roles).length)) + ' نقش · تغییر</button>' : esc((ME.roleLabels || roles).join(' · '))) +
+(STALE ? ' <span id="tjStale" class="stale">در حال تازه‌کردن…</span>' : '') + '</div></div></div>';
+
+/* ───── v169.3: خانهٔ تیم بر پایهٔ کار: سه عدد، «کار بعدی»، کشوی نقش‌ها ───── */
+var mine = [];
+var lead = roles.indexOf('ناظر') > -1 || roles.indexOf('راهبر') > -1;
+var recep = roles.indexOf('پذیرش') > -1;
+
+if (isTeam) {
+ORDER.forEach(function (k) {
+if (k === 'client') return;
+var seen = false;
+for (var r in ROLE_PAGE) { if (ROLE_PAGE[r] === k) { if (roles.indexOf(r) > -1) seen = true; } }
+if (seen) mine.push(k);
+});
+if (ME.links ? ME.links.alumni : false) { if (mine.indexOf('alum') < 0) mine.push('alum'); }
+h += '<div class="hn3" id="tjHn">' +
+'<button type="button" data-x="hub"><b>·</b>امروز</button>' +
+'<button type="button" data-x="hub"><b>·</b>معوق</button>' +
+'<button type="button" data-x="hub"><b>·</b>منتظر تأیید من</button></div>' +
+'<h2>کار بعدی</h2><div id="tjNext"><div class="spin"></div></div>' +
+'<div class="trio">' +
+trio('task', '✅', 'کارهای من') +
+trio('box', '✉️', 'پیام‌ها') +
+'<button type="button" data-x="hub"><span>📒</span>هاب من</button>' +
+'</div>';
+/* کشوی نقش‌ها: هر بخش نقش، داشبورد، پارتنرز، حضور، گاندی، امتیاز */
+var xb = [];
+xb.push('<button class="ib wide" type="button" data-s="dash">🏠 داشبورد من</button>');
+mine.forEach(function (k) { xb.push('<button class="ib wide" type="button" data-s="' + k + '">' + PAGES[k].i + ' ' + esc(PAGES[k].t) + '</button>'); });
+if (lead || recep) if (mine.indexOf('pa') < 0) xb.push('<button class="ib wide" type="button" data-s="pa">🏢 تجربه پارتنرز</button>');
+if (lead) if (mine.indexOf('tnk') < 0) xb.push('<button class="ib wide" type="button" data-s="tnk">💵 تنخواه</button>');
+if (lead) xb.push('<button class="ib wide" type="button" data-s="bc">📣 پیام همگانی</button>');
+if (recep) xb.push('<button class="ib wide" type="button" data-x="att">🕘 رسیدم و رفتم</button>');
+if (recep || lead) xb.push('<button class="ib wide" type="button" data-x="gd">📋 فهرست امروز گاندی</button>');
+xb.push('<button class="ib wide" type="button" data-s="ann">📣 اطلاعیه‌ها</button>');
+xb.push('<button class="ib wide" type="button" data-x="pts">⭐ امتیاز من</button>');
+if (roles.indexOf('ناظر') > -1) xb.push('<button class="ib wide" type="button" data-x="dq">📮 صف ارسال</button>');
+h += '<details class="more" id="tjRoles"><summary><span>نقش‌ها و بخش‌ها · ' + esc(fa((ME.roleLabels || roles).length)) + ' نقش</span><i>⌄</i></summary>' +
+'<div class="rlist">' + esc((ME.roleLabels || roles).join(' · ')) + '</div>' +
+'<div class="btns two drw">' + xb.join('') + '</div></details>';
+}
+
+/* ساختمان پزشکان ونک: فقط برای اعضا و مدیران ساختمان */
+    if (VKF) { h += '<div class="btns two"><button class="ib wide" type="button" data-s="vk">🏢 ساختمان پزشکان ونک</button></div>'; }
+    /* ───── درمان: مهم‌ترین کار مرکز، پررنگ‌ترین کارت ───── */
+h += '<h2>' + (isTeam ? 'برای خودتان' : 'شروع کنیم') + '</h2>';
+if (ME.meeting) {
+h += '<button class="cta" type="button" data-x="meet"><span class="k">🗓 جلسهٔ معارفهٔ شما</span><span class="s">' +
+esc(meetLine(ME.meeting)) + ' · دیدن، تقویم یا لغو</span></button>';
+} else {
+h += '<button class="cta" type="button" data-x="book"><span class="k">🍓 پیدا کردن درمانگر و وقت معارفه</span>' +
+'<span class="s">سه سؤال کوتاه، پیشنهاد با دلیل، رزرو همین‌جا. بیست دقیقه، رایگان، بی‌تعهد.</span></button>';
+}
+h += '<div id="tjPlan"></div>';
+h += '<div class="thhd"><span>همکاران تجربه</span><button type="button" data-x="thers">همه ‹</button></div>' +
+'<div class="thstrip" id="tjStrip">' + [0, 1, 2, 3, 4, 5].map(function () { return '<span class="tha sk"><i></i></span>'; }).join('') + '</div>';
+
+/* ───── رودمپ: در چشم، ولی یک پله پایین‌تر از درمان ───── */
+h += rmCard();
+
+h += '<div class="trio">' +
+trioAct('abroad', '🌍', 'خارج از ایران') +
+trio('client', '🧭', 'مسیر درمان') +
+trioOwn('style', '🧪', 'تست سبک') +
+'</div>';
+
+/* ───── بقیه، جمع و جور، پشت یک کشو ───── */
+var rows = [
+['faq', '❓', 'پرسش‌های پرتکرار', 'جواب سؤال‌های رایج'],
+['services', '🩺', 'خدمات ما', 'فردی، زوج، کودک، روان‌پزشکی'],
+['about', '🍓', 'دربارهٔ تجربه', 'ما که هستیم'],
+['human', '💬', 'صحبت با همکار', 'اگر ترجیح می‌دهید آدم جواب بدهد'],
+['school', '🎓', 'مدرسهٔ تجربه', 'دوره‌های تربیت درمانگر']
+];
+var extra = [];
+OWN.forEach(function (o) {
+if (o.k === 'book') return;
+if (o.k === 'style') return;
+var on = o.r.indexOf('*') > -1;
+if (!on) { for (var i = 0; i < o.r.length; i++) { if (roles.indexOf(o.r[i]) > -1) on = true; } }
+if (!on) return;
+extra.push('<button class="mrow" type="button" data-o="' + o.k + '">' + o.i + ' ' + esc(o.t) + '<em>' + esc(o.s) + '</em></button>');
+});
+if (!isTeam) extra.push('<button class="mrow" type="button" data-s="ann">📣 اطلاعیه‌ها<em>خبرهای رسمی</em></button>');
+/* v157: فرایندهای نسخهٔ ۲ که در بات‌اند، از همین‌جا باز می‌شوند */
+extra.push('<button class="mrow" type="button" data-l="https://t.me/tajrobehlife_bot?start=psybook">💊 نوبت روان‌پزشک<em>در گفت‌وگوی بات</em></button>');
+extra.push('<button class="mrow" type="button" data-l="https://tajrobeh.life/school/events/">📅 رویدادهای مدرسه<em>برنامه‌ها و آرشیو</em></button>');
+if (roles.indexOf('درمانگر') > -1) {
+extra.push('<button class="mrow" type="button" data-l="https://t.me/tajrobehlife_bot?start=off">🏖 مرخصی<em>وقت‌های هفتگی‌ام در این بازه بسته شود</em></button>');
+extra.push('<button class="mrow" type="button" data-l="https://t.me/tajrobehlife_bot?start=voice">🎙 داوطلب غنی‌سازی صفحه‌ها<em>ویس یا بازبینی علمی</em></button>');
+}
+
+h += '<details class="more"><summary><span>بقیهٔ چیزها</span><i>⌄</i></summary>' +
+rows.map(function (r) {
+return '<button class="mrow" type="button" data-c="' + r[0] + '">' + r[1] + ' ' + esc(r[2]) + '<em>' + esc(r[3]) + '</em></button>';
+}).join('') + extra.join('') + '</details>';
+
+h += '<div class="note">هر کاری اینجا شروع شود، همین‌جا هم تمام می‌شود. همهٔ این‌ها در گفت‌وگوی بات هم باز است.</div>';
+w.innerHTML = h;
+w.querySelectorAll('[data-l]').forEach(function (b) { b.onclick = function () { tap(); var u = b.getAttribute('data-l'); if (TG) { if (/t\.me\//.test(u)) { TG.openTelegramLink(u); } else { TG.openLink(u); } } else { location.href = u; } }; });
+
+w.querySelectorAll('[data-s]').forEach(function (b) {
+b.onclick = function () { tap(); var k = b.getAttribute('data-s'); go(function () { section(k); }); };
+});
+w.querySelectorAll('[data-o]').forEach(function (b) {
+b.onclick = function () {
+tap();
+var k = b.getAttribute('data-o');
+if (k === 'book') return go(stepScope);
+if (k === 'style') return go(stepStyle);
+if (k === 'feed') return go(feedView);
+if (k === 'mag') return go(magView);
+if (k === 'page') return go(pqView);
+};
+});
+w.querySelectorAll('[data-c]').forEach(function (b) {
+b.onclick = function () {
+tap();
+var k = b.getAttribute('data-c');
+go(function () { section('client'); run('client.' + k, {}, true); });
+};
+});
+wireX(w);
+fillStrip();
+planFill();
+if (isTeam) homeFill();
+if (START) {
+var sp = START; START = '';
+setTimeout(function () {
+if (sp === 'rm') go(rmView);
+else if (sp === 'book') go(stepScope);
+else if (sp === 'thers') go(gallery);
+else if (sp === 'meet') go(meetView);
+else if (sp === 'plan') go(planView);
+else if (sp.indexOf('rv_') === 0) go(function () { rvView(sp.slice(3)); });
+else if (sp === 'rvq') go(rvList);
+else if (sp === 'att') go(attView);
+else if (sp === 'gd') go(gdView);
+else if (sp === 'pts') go(ptsView);
+else if (sp === 'dq') go(dqView);
+else if (sp === 'hub') hubOpen();
+}, 0);
+}
+
+function cta(key, title, sub, hero, isC) {
+var attr = isC ? 'data-c="' + key + '"' : (key === 'book' ? 'data-o="book"' : 'data-s="' + key + '"');
+return '<button class="cta' + (hero ? '' : ' alt') + '" type="button" ' + attr + '>' +
+'<span class="k">' + title + '</span><span class="s">' + esc(sub) + '</span></button>';
+}
+function trio(key, ic, t) {
+return '<button type="button" data-s="' + key + '"><span>' + ic + '</span>' + esc(t) + '</button>';
+}
+function trioAct(key, ic, t) {
+return '<button type="button" data-c="' + key + '"><span>' + ic + '</span>' + esc(t) + '</button>';
+}
+function trioOwn(key, ic, t) {
+return '<button type="button" data-o="' + key + '"><span>' + ic + '</span>' + esc(t) + '</button>';
+}
+}
+
+  /* ─────────── دکمهٔ اصلی تلگرام، با جایگزین درون صفحه ─────────── */
+  function main(text, fn) {
+    var old = $('tjMain');
+    if (old) old.parentNode.removeChild(old);
+    var shown = false;
+    if (TG) {
+      if (TG.MainButton) {
+        if (!text) TG.MainButton.hide();
+        else {
+          TG.MainButton.setText(text);
+          TG.MainButton.offClick(); TG.MainButton.onClick(fn);
+          TG.MainButton.show();
+          shown = !!(TG.initData ? TG.MainButton.isVisible : false);
+        }
+      }
+    }
+    if (!text) return;
+    if (shown) return;
+    var b = document.createElement('button');
+    b.className = 'btn'; b.id = 'tjMain'; b.type = 'button'; b.textContent = text;
+    b.onclick = function () { fn(); };
+    ($('tjW') || root).appendChild(b);
+  }
+
+  /* ─────────── رزرو جلسهٔ معارفه ─────────── */
+  var TOPICS = [
+['anx', 'اضطراب و استرس', 'تراپی فردی'], ['dep', 'بی‌حوصلگی و افسردگی', 'تراپی فردی'],
+['rel', 'رابطه و زوج', 'زوج‌درمانی'], ['fam', 'خانواده و والدین', 'تراپی فردی'],
+['self', 'خودشناسی و مسیر زندگی', 'تراپی فردی'], ['kid', 'کودک و نوجوان', 'کودک و نوجوان'],
+['psy', 'ارزیابی روان‌پزشکی', 'روان‌پزشکی'], ['oth', 'چیز دیگری', 'تراپی فردی']
+];
+var ZONES = [['de', 'آلمان و اروپا'], ['uk', 'بریتانیا'], ['us', 'شرق آمریکا و کانادا'], ['uw', 'غرب آمریکا و کانادا'], ['ae', 'امارات و خلیج'], ['tr', 'ترکیه']];
+var PREFS = [
+['p1', 'تحلیل عمیقی از مشکلاتم داشته باشد'],
+['p2', 'بیشتر نظر بدهد و راهکار ارائه کند'],
+['p3', 'کوتاه‌مدت باشد و زیر ۶ ماه تمام شود'],
+['p4', 'بیشتر شنونده باشد و درک بالایی داشته باشد'],
+['p5', 'دربارهٔ یک مشکل خاص راهنمایی کند']
+];
+var S = { scope: '', topic: '', topicLabel: '', kind: '', gender: '', zone: 'ir', style: '', pick: null, ther: null };
+var STEPS = 5;
+
+function dots(n) { var h = '<div class="dots">'; for (var i = 0; i < STEPS; i++) h += '<i class="' + (i <= n ? 'on' : '') + '"></i>'; return h + '</div>'; }
+function get(q) { return fetch(API + q).then(function (r) { return r.json(); }); }
+function slotLbl(s) { return esc(s.day) + ' ' + esc(fa(s.date)) + ' · ' + esc(fa(s.time)); }
+
+function stepScope() {
+track('book_start', '');
+var w = shell('🍓 پیدا کردن درمانگر');
+w.innerHTML = dots(0) +
+'<h1>سلام 🍓</h1><p class="sub">چند سؤال کوتاه می‌پرسم، بعد همکارانی را که به شما می‌خورند با وقت آزادشان نشان می‌دهم. کمتر از یک دقیقه.</p>' +
+'<div class="grid one">' +
+'<button class="chip" type="button" data-s="ir">🇮🇷 ایران زندگی می‌کنم</button>' +
+'<button class="chip" type="button" data-s="out">🌍 خارج از ایران زندگی می‌کنم</button></div>';
+w.querySelectorAll('[data-s]').forEach(function (b) {
+b.onclick = function () {
+tap(); S.scope = b.getAttribute('data-s'); S.zone = S.scope === 'ir' ? 'ir' : '';
+if (S.scope === 'ir') stepTopic(); else stepZone();
+};
+});
+main('', null);
+}
+function stepZone() {
+var w = shell('🍓 پیدا کردن درمانگر');
+w.innerHTML = dots(0) + '<h1>کجا؟</h1><p class="sub">تا ساعت‌ها را به وقت خودتان نشان بدهم.</p><div class="grid one">' +
+ZONES.map(function (z) { return '<button class="chip" type="button" data-z="' + z[0] + '">' + esc(z[1]) + '</button>'; }).join('') + '</div>';
+w.querySelectorAll('[data-z]').forEach(function (b) { b.onclick = function () { tap(); S.zone = b.getAttribute('data-z'); stepTopic(); }; });
+}
+function stepTopic() {
+var w = shell('🍓 پیدا کردن درمانگر');
+w.innerHTML = dots(1) + '<h1>الان چی بیشتر اذیتتان می‌کند؟</h1><p class="sub">هر کدام نزدیک‌تر است. بعداً می‌شود عوضش کرد.</p><div class="grid">' +
+TOPICS.map(function (t) { return '<button class="chip' + (S.topic === t[0] ? ' on' : '') + '" type="button" data-t="' + t[0] + '">' + esc(t[1]) + '</button>'; }).join('') + '</div>';
+w.querySelectorAll('[data-t]').forEach(function (b) {
+b.onclick = function () {
+tap(); var k = b.getAttribute('data-t');
+for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i][0] === k) { S.topic = k; S.topicLabel = TOPICS[i][1]; S.kind = TOPICS[i][2]; }
+track('book_topic', k);
+stepGender();
+};
+});
+}
+function stepGender() {
+var w = shell('🍓 پیدا کردن درمانگر');
+w.innerHTML = dots(2) + '<h1>درمانگرتان خانم باشد یا آقا؟</h1><p class="sub">اگر فرقی ندارد، گزینهٔ سوم را بزنید تا همکاران بیشتری ببینید.</p><div class="grid one">' +
+'<button class="chip" type="button" data-g="f">👩 خانم</button><button class="chip" type="button" data-g="m">👨 آقا</button>' +
+'<button class="chip" type="button" data-g="x">🤷 فرقی ندارد</button></div>';
+w.querySelectorAll('[data-g]').forEach(function (b) {
+b.onclick = function () {
+tap(); S.gender = b.getAttribute('data-g'); track('book_gender', S.gender);
+var known = styleKnown();
+if (known !== null) { S.style = known; loadMatch(); } else stepWay();
+};
+});
+}
+/* سبک درمانی از تست سبک، اگر قبلاً داده شده */
+function styleKnown() {
+var p = '';
+try { p = localStorage.getItem('tjapp.style') || ''; } catch (e) {}
+if (!p) return null;
+if (p.indexOf('کاوشگر') > -1) return 'deep';
+if (p.indexOf('فعال') > -1 || p.indexOf('حل') > -1) return 'active';
+return '';
+}
+function stepWay() {
+var w = shell('🍓 پیدا کردن درمانگر');
+w.innerHTML = dots(3) + '<h1>در جلسه بیشتر چه کمکتان می‌کند؟</h1><p class="sub">جواب درست و غلط ندارد. فقط کمک می‌کند همکار مناسب‌تر بالاتر بیاید.</p><div class="grid one">' +
+'<button class="chip" type="button" data-y="active">🧭 کسی که فعال باشد، سؤال بپرسد و راه نشان بدهد</button>' +
+'<button class="chip" type="button" data-y="deep">🌊 کسی که با حوصله گوش بدهد و با هم ریشه‌ها را پیدا کنیم</button>' +
+'<button class="chip" type="button" data-y="">🤷 هنوز نمی‌دانم</button></div>';
+w.querySelectorAll('[data-y]').forEach(function (b) { b.onclick = function () { tap(); S.style = b.getAttribute('data-y'); track('book_way', S.style || '-'); loadMatch(); }; });
+}
+var MT = [];
+function loadMatch() {
+var w = shell('🍓 همکاران پیشنهادی');
+w.innerHTML = dots(4) + '<div class="spin"></div><div class="wait">دارم بین وقت‌های آزاد همکاران می‌گردم…</div>';
+main('', null);
+Promise.all([call('match', { scope: S.scope, zone: S.zone || 'de', topic: S.topic, gender: S.gender, style: S.style }), people()]).then(function (r) {
+var d = r[0];
+if (!d) return showErr(w, null, loadMatch);
+if (!d.ok) return showErr(w, d, loadMatch);
+track('match_view', String((d.list || []).length));
+if (!(d.list || []).length) return noMatch(d);
+MT = [];
+var all = [];
+var h = dots(4) + '<h1>این همکاران به شما می‌خورند</h1><p class="sub">بر اساس جواب‌های شما. هر ساعتی را بزنید؛ پیش از رزرو یک بار تأیید می‌گیرم.</p>';
+if (d.hard) h += '<div class="note">برای «' + esc(d.hard) + '» فقط همکارانی را نشان می‌دهیم که همین کار را می‌کنند.</div><div style="height:12px"></div>';
+if (d.softened) h += '<div class="note">با ترجیح جنسیتی شما وقت آزادی نبود؛ این‌ها نزدیک‌ترین گزینه‌هاست.</div><div style="height:12px"></div>';
+d.list.forEach(function (it) { withPhoto(it.t, r[1]); h += matchCard(it, all); });
+if ((d.others || []).length) {
+h += '<details class="more"><summary><span>همکاران دیگر با وقت آزاد (' + fa(d.others.length) + ')</span><i>⌄</i></summary>' +
+d.others.map(function (it) {
+withPhoto(it.t, r[1]);
+var s = it.slots[0], i = all.length;
+all.push({ s: s, t: it.t });
+return '<div class="orow">' + ph(it.t, 'sm') + '<span class="tx"><b>' + esc(it.t.d) + '</b><small>' + esc(it.t.sp || '') + '</small></span>' +
+'<button class="t" type="button" data-p="' + i + '">' + slotLbl(s) + '</button></div>';
+}).join('') + '</details>';
+}
+h += '<button class="btn ghost" id="tjAgain" type="button">عوض کردن جواب‌ها</button>';
+w.innerHTML = h;
+w.querySelectorAll('[data-p]').forEach(function (b) {
+b.onclick = function () { tap(); var o = all[+b.getAttribute('data-p')]; pickSlot(o.s, o.t, 'match'); };
+});
+w.querySelectorAll('[data-more]').forEach(function (b) {
+b.onclick = function () { tap(); var t = MT[+b.getAttribute('data-more')]; go(function () { therView(t); }); };
+});
+$('tjAgain').onclick = function () { tap(); stepTopic(); };
+})['catch'](function () { showErr(w, null, loadMatch); });
+}
+function matchCard(it, all) {
+var t = it.t, mi = MT.length;
+MT.push(t);
+var h = '<div class="card mc"><div class="tcr">' + ph(t, '') + '<div class="tx"><div class="nm">' + esc(t.d) + '</div>' +
+'<span class="sp">' + esc(t.sp || '') + '</span>' + badges(t, 3) + '</div></div>';
+if ((it.why || []).length) h += '<ul class="why">' + it.why.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+if (t.hl) h += '<p class="ab">«' + esc(t.hl) + '»</p>';
+else if (t.ab2) h += '<p class="ab">' + esc(t.ab2) + '</p>';
+h += '<div class="times">' + it.slots.map(function (s) {
+var i = all.length;
+all.push({ s: s, t: t });
+return '<button class="t" type="button" data-p="' + i + '">' + slotLbl(s) + '</button>';
+}).join('') + '</div>';
+h += '<button class="lnk" type="button" data-more="' + mi + '">بیشتر دربارهٔ ' + esc(first(t.d)) + ' ‹</button></div>';
+return h;
+}
+function noMatch(d) {
+var w = shell('🍓 همکاران پیشنهادی');
+var title = d.hard ? 'الان وقت آزادی برای «' + d.hard + '» نداریم' : 'الان وقت آزاد مناسبی نیست';
+w.innerHTML = dots(4) + stateBox('🌙', title,
+'بن‌بست نیست. بنویسید چه روزها و ساعت‌هایی برایتان خوب است؛ همکاران پذیرش با همین ترجیح‌ها برایتان هماهنگ می‌کنند و در بات خبرتان می‌کنیم.') +
+'<textarea class="tjin" id="tjWhen" rows="3" placeholder="مثلاً عصرهای شنبه و دوشنبه، یا هر روز بعد از ساعت ۱۸"></textarea>' +
+'<button class="btn" id="tjNeed" type="button">بفرستید برای پذیرش</button>' +
+'<button class="btn ghost" id="tjAgain" type="button">عوض کردن جواب‌ها</button>';
+$('tjAgain').onclick = function () { tap(); stepTopic(); };
+$('tjNeed').onclick = function () {
+tap();
+var when = $('tjWhen').value.trim();
+loading(w);
+call('need', { scope: S.scope, zone: S.zone || 'de', topic: S.topic, gender: S.gender, when: when }).then(function (r) {
+if (!r) return showErr(w, null, noMatchAgain);
+if (!r.ok) return showErr(w, r, noMatchAgain);
+buzz('success');
+w.innerHTML = '<div class="ok">🙏</div><h1 class="center">رسید</h1><p class="sub center">همکاران پذیرش با همین ترجیح‌ها هماهنگ می‌کنند و نتیجه را در گفت‌وگوی بات می‌فرستیم.</p>' +
+'<button class="btn" id="tjDone" type="button">برگشت به خانه</button>';
+$('tjDone').onclick = function () { tap(); reset(home); };
+})['catch'](function () { showErr(w, null, noMatchAgain); });
+};
+function noMatchAgain() { noMatch(d); }
+main('', null);
+}
+function pickSlot(s, t, from) {
+S.pick = s; S.ther = t || null; S.from = from || 'match';
+track('slot_pick', t ? (t.sl || '') : '');
+confirmPick();
+}
+function confirmPick() {
+var s = S.pick; if (!s) return;
+var t = S.ther || { d: s.therapist, n: s.therapist };
+var w = shell('🗓 تأیید رزرو');
+w.innerHTML =
+'<h1>تأیید می‌کنید؟</h1><p class="sub">با زدن دکمه، این وقت همان لحظه به نام شما رزرو می‌شود.</p>' +
+'<div class="card"><div class="tcr">' + ph(t, '') + '<div class="tx"><div class="nm">' + esc(t.d || s.therapist) + '</div><span class="sp">' + esc(t.sp || '') + '</span></div></div>' +
+'<div style="height:8px"></div>' +
+'<div class="row"><span>روز</span><b>' + esc(s.day) + ' ' + esc(fa(s.date)) + '</b></div>' +
+'<div class="row"><span>ساعت</span><b>' + esc(fa(s.time)) + ' به وقت شما</b></div>' +
+(S.scope === 'out' ? '<div class="row"><span>به وقت تهران</span><b>' + esc(fa(s.tehran || '')) + '</b></div>' : '') +
+'<div class="row"><span>مدت</span><b>' + fa(15) + ' تا ' + fa(20) + ' دقیقه، آنلاین</b></div></div>' +
+'<div class="note">این جلسه هیچ تعهدی برای شما نمی‌سازد. اگر نتوانستید بیایید، از همین اپ یا در گفت‌وگوی بات لغوش کنید.</div>' +
+'<button class="btn ghost" id="tjBack2" type="button">وقت دیگری می‌خواهم</button>';
+$('tjBack2').onclick = function () { tap(); if (S.from === 'ther') paint(); else loadMatch(); };
+main('تأیید و رزرو', book);
+}
+function gcal(title, dateIso, hhmm, mins, details) {
+var A = String.fromCharCode(38);
+var st = new Date(dateIso + 'T' + hhmm + ':00+03:30');
+var en = new Date(st.getTime() + (mins || 30) * 60000);
+var f = function (d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
+return 'https://calendar.google.com/calendar/render?action=TEMPLATE' + A + 'text=' + encodeURIComponent(title) +
+A + 'dates=' + f(st) + '/' + f(en) + A + 'details=' + encodeURIComponent(details || '') + A + 'ctz=Asia%2FTehran';
+}
+function book() {
+var s = S.pick; if (!s) return;
+track('book_confirm', '');
+if (TG) { if (TG.MainButton) TG.MainButton.showProgress(); }
+call('book', { therapist: s.therapist, dateIso: s.dateIso, hhmm: s.hhmm, scope: S.scope || 'ir', zone: S.zone || 'de', topic: S.topicLabel, kind: S.kind, tk: S.topic })
+.then(function (d) {
+if (TG) { if (TG.MainButton) TG.MainButton.hideProgress(); }
+var w = shell('🗓 رزرو جلسهٔ معارفه');
+if (!d) return showErr(w, null, confirmPick);
+if (!d.ok) {
+if (d.error === 'taken') {
+w.innerHTML = stateBox('⌛', 'این وقت همین حالا رفت', 'چند لحظه پیش به کس دیگری رسید. وقت‌های باقی‌مانده را ببینید.') +
+'<button class="btn" id="tjRetry" type="button">دیدن وقت‌های دیگر</button>';
+$('tjRetry').onclick = function () { tap(); if (S.topic) loadMatch(); else back(); };
+return;
+}
+if (d.error === 'pool') {
+w.innerHTML = stateBox('🧭', 'این همکار «' + (d.need || '') + '» کار نمی‌کند',
+'برای اینکه وقتتان هدر نرود، فقط همکارانی را که همین کار را می‌کنند پیشنهاد می‌دهیم.') +
+'<button class="btn" id="tjRetry" type="button">دیدن همکاران مناسب</button>';
+$('tjRetry').onclick = function () { tap(); loadMatch(); };
+return;
+}
+return showErr(w, d, confirmPick);
+}
+buzz('success');
+ME.meeting = { therapist: d.therapist, dateIso: d.dateIso, hhmm: d.hhmm, meet: d.meet || '' };
+try { localStorage.removeItem(LS_KEY); } catch (e) {}
+bookedView(d);
+main('', null);
+})['catch'](function () {
+if (TG) { if (TG.MainButton) TG.MainButton.hideProgress(); }
+var w = shell('🗓 رزرو جلسهٔ معارفه'); showErr(w, null, confirmPick);
+});
+}
+function bookedView(d) {
+var t = S.ther || findTher(d.therapist) || { d: d.therapist, n: d.therapist };
+var w = shell('🗓 رزرو شد');
+w.innerHTML = '<div class="ok">✓</div><h1 class="center">رزرو شد</h1>' +
+'<p class="sub center">جزئیات و لینک را در گفت‌وگوی بات هم فرستادیم.</p>' +
+'<div class="card"><div class="tcr">' + ph(t, '') + '<div class="tx"><div class="nm">' + esc(t.d || d.therapist) + '</div><span class="sp">' + esc(t.sp || '') + '</span></div></div>' +
+'<div style="height:8px"></div>' +
+'<div class="row"><span>روز</span><b>' + esc(d.day) + ' ' + esc(fa(d.date)) + '</b></div>' +
+'<div class="row"><span>ساعت</span><b>' + esc(fa(d.time)) + '</b></div></div>' +
+'<a class="meet" href="' + qa(gcal('جلسهٔ معارفه با ' + (t.d || d.therapist) + ' · تجربه', d.dateIso, d.hhmm, 30, d.meet || 'https://t.me/tajrobehlife_bot')) + '" target="_blank" rel="noopener">🗓 افزودن به تقویم گوگل</a>' +
+(d.meet ? '<a class="meet" href="' + qa(d.meet) + '" target="_blank" rel="noopener">🔗 لینک جلسه</a>'
+: '<div class="note">لینک جلسه را پیش از موعد همکاران پذیرش برایتان می‌فرستند.</div>') +
+'<div class="card" style="margin-top:14px"><div class="lbl">بعد از معارفه چه می‌شود؟</div><ol class="nx">' +
+'<li>حدود بیست دقیقه با خود درمانگر حرف می‌زنید تا ببینید با هم جور هستید یا نه.</li>' +
+'<li>اگر جور بودید، جلسهٔ اول درمان را از همین اپ یا در گفت‌وگوی بات رزرو می‌کنید.</li>' +
+'<li>اگر حس خوبی نداشتید، بی‌هیچ توضیحی همکار دیگری پیشنهاد می‌دهیم.</li></ol></div>' +
+'<button class="btn" id="tjDone" type="button">برگشت به خانه</button>';
+$('tjDone').onclick = function () { tap(); reset(home); };
+}
+
+/* ─────────── تست سبک درمانی ─────────── */
+  function stepStyle() {
+    var sel = [];
+    draw();
+    function draw() {
+      var w = shell('🧭 تست سبک درمانی من');
+      w.innerHTML = '<h1>تست سبک درمانی من</h1>' +
+        '<p class="sub">هر کسی از تراپی چیز متفاوتی می‌خواهد. هر جمله‌ای که به شما نزدیک است بزنید.</p>' +
+        '<div class="grid one">' +
+        PREFS.map(function (p) { return '<button class="chip' + (sel.indexOf(p[0]) > -1 ? ' on' : '') + '" type="button" data-p="' + p[0] + '">' + esc(p[1]) + '</button>'; }).join('') +
+        '</div><button class="btn" id="tjGo" type="button">نتیجه را ببینم</button>';
+      w.querySelectorAll('[data-p]').forEach(function (b) {
+        b.onclick = function () { tap(); var k = b.getAttribute('data-p'); var i = sel.indexOf(k); if (i > -1) sel.splice(i, 1); else sel.push(k); draw(); };
+      });
+      $('tjGo').onclick = function () { tap(); sendStyle(sel); };
+      main('', null);
+    }
+  }
+  function sendStyle(sel) {
+    var w = shell('🧭 تست سبک درمانی من');
+    loading(w);
+    call('style', { prefs: sel.join(',') }).then(function (r) {
+      if (!r) return showErr(w, null, stepStyle);
+      if (!r.ok) return showErr(w, r, stepStyle); try { localStorage.setItem('tjapp.style', r.profile); } catch (e) {}
+      w.innerHTML = '<div class="ok">🧭</div>' +
+        '<h1 class="center">سبک شما: ' + esc(r.profile) + '</h1>' +
+        '<div class="card"><p class="ab">' + esc(r.p) + '</p>' +
+        (r.li || []).map(function (x) { return '<div class="row"><b>' + esc(x) + '</b></div>'; }).join('') + '</div>' +
+        '<div class="note">' + esc(r.tail || '') + '</div>' +
+        '<button class="btn" id="tjBook" type="button">با همین نتیجه وقت معارفه بگیرم</button>';
+      $('tjBook').onclick = function () { tap(); go(stepScope); };
+      main('', null);
+    })['catch'](function () { showErr(w, null, stepStyle); });
+  }
+
+  /* ─────────── محتوای تجربه ─────────── */
+  function feedView() {
+    var w = shell('📚 محتوای تجربه');
+    loading(w);
+    call('feed', {}).then(function (r) {
+      if (!r) return showErr(w, null, feedView);
+      if (!r.ok) return showErr(w, r, feedView);
+      var it = r.item;
+      w.innerHTML = '<h1>محتوای تجربه</h1>' +
+        (it ? '<div class="card"><div class="nm">' + esc(it.title) + '</div>' +
+              (it.note ? '<p class="ab">' + esc(it.note) + '</p>' : '') +
+              (it.link ? '<a class="meet" href="' + qa(it.link) + '" target="_blank" rel="noopener">خواندن این مطلب</a>' : '') + '</div>'
+            : emptyBox('این هفته مطلبی ثبت نشده', 'تازه‌ترین مطلب همین‌جا می‌آید.')) +
+        '<div class="note">' + (r.on ? 'مطلب تازه در موضوع‌های انتخابی شما فرستاده می‌شود.' : 'تا وقتی خودتان نگویید چیزی فرستاده نمی‌شود.') + '</div>' +
+        '<button class="btn" id="tjPick" type="button">' + (r.on ? 'عوض‌کردن موضوع‌ها' : 'موضوع‌هایم را انتخاب کنم') + '</button>' +
+        (r.on ? '<button class="btn ghost" id="tjOff" type="button">دیگر نفرستید</button>' : '');
+      $('tjPick').onclick = function () { tap(); feedPick(r.topics, r.mine || []); };
+      var off = $('tjOff');
+      if (off) off.onclick = function () { tap(); loading(w); call('feedsave', { topics: '' }).then(feedView)['catch'](function () { showErr(w, null, feedView); }); };
+      main('', null);
+    })['catch'](function () { showErr(w, null, feedView); });
+  }
+  function feedPick(topics, mine) {
+    var sel = (mine || []).slice();
+    draw();
+    function draw() {
+      var w = shell('📚 موضوع‌های من');
+      w.innerHTML = '<h1>چه موضوع‌هایی؟</h1><p class="sub">هر چندتا که جالب است. فقط در همین‌ها یک پیام کوتاه می‌آید.</p><div class="grid">' +
+        (topics || []).map(function (t) { return '<button class="chip' + (sel.indexOf(t.k) > -1 ? ' on' : '') + '" type="button" data-c="' + t.k + '">' + esc(t.label) + '</button>'; }).join('') +
+        '</div><button class="btn" id="tjSave" type="button">ثبت</button>';
+      w.querySelectorAll('[data-c]').forEach(function (b) {
+        b.onclick = function () { tap(); var k = b.getAttribute('data-c'); var i = sel.indexOf(k); if (i > -1) sel.splice(i, 1); else sel.push(k); draw(); };
+      });
+      $('tjSave').onclick = function () {
+        tap(); loading(w);
+        call('feedsave', { topics: sel.join(',') }).then(function () { feedView(); })['catch'](function () { showErr(w, null, feedView); });
+      };
+      main('', null);
+    }
+  }
+
+  /* ─────────── نوشتن برای مجله ─────────── */
+  function magView() {
+    var w = shell('✍️ نوشتن برای مجله');
+    loading(w);
+    call('mag', {}).then(function (r) {
+      if (!r) return showErr(w, null, magView);
+      if (!r.ok) return showErr(w, r, magView);
+      var intro = String(r.intro || '').replace(/^[^\n]*\n+/, '');
+      var h = '<h1>نوشتن برای مجلهٔ تجربه</h1><p class="sub">' + esc(intro).replace(/\n+/g, '<br>') + '</p>';
+      if ((r.mine || []).length) h += '<div class="card"><div class="nm">درخواست‌های شما</div>' +
+        r.mine.map(function (m) { return '<div class="row"><b>' + esc(m.topic) + '</b><span>' + esc(m.status) + (m.pub ? ' · ' + esc(m.pub) : '') + '</span></div>'; }).join('') + '</div>';
+      h += (r.topics || []).length ? '<h2>موضوع‌هایی که الان در دست داریم</h2>' : '<p class="sub">الان موضوع بازی در فهرست نیست، ولی می‌توانید موضوع خودتان را پیشنهاد بدهید.</p>';
+      h += '<div class="grid one">' + (r.topics || []).map(function (t, i) {
+        return '<button class="chip" type="button" data-m="' + i + '">📝 ' + esc(t.title) + (t.angle ? '<small>' + esc(t.angle) + '</small>' : '') + '</button>';
+      }).join('') + '<button class="chip" type="button" data-m="own">💡 موضوع پیشنهادی خودم</button></div>';
+      w.innerHTML = h;
+      w.querySelectorAll('[data-m]').forEach(function (b) {
+        b.onclick = function () { tap(); var k = b.getAttribute('data-m'); magForm(k === 'own' ? null : r.topics[+k]); };
+      });
+      main('', null);
+    })['catch'](function () { showErr(w, null, magView); });
+  }
+  function magForm(t) {
+    var w = shell('✍️ درخواست نوشتن');
+    w.innerHTML = '<h1>' + (t ? esc(t.title) : 'موضوع پیشنهادی شما') + '</h1>' +
+      (t ? '<p class="sub">✅ این موضوع را انتخاب کردید.' + (t.angle ? ' ' + esc(t.angle) : '') + '</p>'
+         : '<input id="tjTopic" class="tjin" placeholder="موضوعی که دوست دارید درباره‌اش بنویسید">') +
+      '<textarea id="tjAbout" class="tjin" rows="5" placeholder="در دو سه خط بنویسید چه کسی هستید و از چه زاویه‌ای می‌خواهید بنویسید. اگر قبلاً جایی نوشته‌اید، لینکش را هم بگذارید."></textarea>' +
+      '<div class="note bad" id="tjErr" hidden></div>' +
+      '<button class="btn" id="tjSend" type="button">ارسال برای سردبیر مجله</button>';
+    function err(m) { var e = $('tjErr'); e.textContent = m; e.hidden = false; }
+    $('tjSend').onclick = function () {
+      tap();
+      var about = $('tjAbout').value.trim();
+      var tp = $('tjTopic');
+      var topic = tp ? tp.value.trim() : '';
+      if (!t) { if (topic.length < 4) return err('موضوع را بنویسید.'); }
+      if (about.length < 15) return err('کمی بیشتر بنویسید؛ دو سه خط کافی است.');
+      loading(w);
+      call('magreq', { code: t ? t.code : 'own', topic: topic, about: about }).then(function (r) {
+        if (!r) return showErr(w, null, magView);
+        if (!r.ok) {
+          if (r.error === 'taken') {
+            w.innerHTML = stateBox('🤝', 'این موضوع همین حالا به نفر دیگری سپرده شد', 'یکی از موضوع‌های باز دیگر را انتخاب کنید.') +
+              '<button class="btn" id="tjRetry" type="button">موضوع دیگری انتخاب کنم</button>';
+            $('tjRetry').onclick = function () { tap(); magView(); };
+            return;
+          }
+          return showErr(w, r, magView);
+        }
+        buzz('success');
+        w.innerHTML = '<div class="ok">✍️</div><h1 class="center">درخواستتان ثبت شد</h1>' +
+          '<p class="sub center">سردبیر مجله درخواست را می‌خواند و نتیجه را در بات خبر می‌دهیم. شمارهٔ پیگیری را همین حالا در بات فرستادیم.</p>' +
+          '<button class="btn" id="tjDone" type="button">برگشت به خانه</button>';
+        $('tjDone').onclick = function () { tap(); reset(home); };
+        main('', null);
+      })['catch'](function () { showErr(w, null, magView); });
+    };
+    main('', null);
+  }
+
+  /* ─────────── صفحهٔ من در سایت (پرسش‌نامهٔ پروفایل) ─────────── */
+  var PQ = null;
+  function pqView() {
+    var w = shell('🪪 صفحهٔ من در سایت');
+    loading(w);
+    main('', null);
+    call('pq', {}).then(function (r) {
+      if (!r) return showErr(w, null, pqView);
+      if (!r.ok) {
+        if (r.error === 'noid') {
+          w.innerHTML = stateBox('🪪', 'هنوز در فهرست پیدایتان نکردم',
+            'اسم شما در فهرست درمانگرها، استادها یا سوپروایزرهای تجربه نیست. اول در بات وصل شوید، بعد همین را دوباره باز کنید.');
+          return;
+        }
+        return showErr(w, r, pqView);
+      }
+      PQ = r;
+      pqList();
+    })['catch'](function () { showErr(w, null, pqView); });
+  }
+  function pqList() {
+    var r = PQ;
+    var w = shell('🪪 صفحهٔ من در سایت', fa(r.pct) + '٪');
+    var h = '<h1>صفحهٔ شما در سایت تجربه</h1>' +
+      '<p class="sub">هر پاسخ همان لحظه ذخیره می‌شود. هرچه کامل‌تر باشد، مراجع راحت‌تر پیدایتان می‌کند. تیم تجربه قبل از انتشار همه را می‌خواند.</p>' +
+      (r.page ? '<div class="card"><div class="nm">🌐 صفحهٔ شما در سایت منتشر شده است</div>' +
+        '<p class="ab">تغییرهایی که اینجا بدهید، بعد از بازبینی روی همین صفحه می‌نشیند.</p>' +
+        '<a class="meet" href="' + qa(r.page) + '" target="_blank" rel="noopener">دیدن صفحهٔ من</a>' +
+        '<a class="meet" href="https://t.me/share/url?url=' + encodeURIComponent(r.page) + '" target="_blank" rel="noopener">فرستادن لینک برای دیگران</a></div>' : '') +
+      '<div class="card"><div class="nm">تکمیل پروفایل: ' + fa(r.pct) + '٪</div>' +
+      '<div class="bar2"><i style="width:' + Math.max(4, r.pct) + '%"></i></div></div>' +
+      '<div class="grid one">' + r.qs.map(function (q, i) {
+        var mark = q.has ? '✅' : (q.skip ? '⏭' : '▫️');
+        var sub = q.has ? (q.val.length > 70 ? q.val.slice(0, 70) + '…' : q.val) : (q.skip ? 'رد شده' : 'خالی');
+        return '<button class="chip" type="button" data-q="' + i + '">' + mark + ' ' + esc(q.l) + '<small>' + esc(sub) + '</small></button>';
+      }).join('') + '</div>' +
+      '<button class="btn ghost" id="tjGuide" type="button">نمونهٔ صفحهٔ درمانگر</button>';
+    w.innerHTML = h;
+    w.querySelectorAll('[data-q]').forEach(function (b) { b.onclick = function () { tap(); pqEdit(PQ.qs[+b.getAttribute('data-q')]); }; });
+    $('tjGuide').onclick = function () {
+      tap();
+      var g = shell('🪪 نمونهٔ صفحهٔ درمانگر');
+      g.innerHTML = '<im' + 'g src="' + qa(PQ.guide) + '" alt="نمونهٔ صفحهٔ درمانگر در سایت تجربه" style="width:100%;border-radius:16px">' +
+        '<button class="btn ghost" id="tjBack3" type="button">بازگشت</button>';
+      $('tjBack3').onclick = function () { tap(); pqList(); };
+      $('tjBk').onclick = function () { tap(); pqList(); };
+      main('', null);
+    };
+    main('تمام شد، برای بازبینی بفرستید', pqDone);
+  }
+  function pqEdit(q) {
+    var sel = q.t === 'multi' ? (q.val ? q.val.split('، ') : []) : (q.val ? [q.val] : []);
+    var w = shell('🪪 ' + q.l);
+    var body = '';
+    if (q.t === 'text' || q.t === 'year') body = '<input id="tjV" class="tjin" value="' + qa(q.val) + '"' + (q.t === 'year' ? ' inputmode="numeric" placeholder="مثلاً ۱۳۹۸"' : '') + '>';
+    else if (q.t === 'long') body = '<textarea id="tjV" class="tjin" rows="7">' + esc(q.val) + '</textarea>';
+    else if (q.t === 'choice' || q.t === 'multi') {
+      body = '<div class="grid one">' + q.o.map(function (o, i) {
+        return '<button class="chip' + (sel.indexOf(o) > -1 ? ' on' : '') + '" type="button" data-o="' + i + '">' + esc(o) + '</button>';
+      }).join('') + '</div>';
+      if (q.t === 'multi' ? q.x : false) body += '<input id="tjX" class="tjin" placeholder="اگر در فهرست نیست، اینجا بنویسید (با ویرگول جدا کنید)" value="' +
+        qa(sel.filter(function (v) { return q.o.indexOf(v) < 0; }).join('، ')) + '">';
+    }
+    else if (q.t === 'photo') body = '<input id="tjF" type="file" accept="image/*" class="tjin">' +
+      '<im' + 'g id="tjP" alt="" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:50%;margin:14px auto">';
+    else if (q.t === 'file') body = '<input id="tjF" type="file" accept=".pdf,.doc,.docx" class="tjin">' +
+      '<input id="tjV" class="tjin" placeholder="یا لینک رزومه را بنویسید" value="' + (q.val === 'رسید' ? '' : qa(q.val)) + '">';
+    else if (q.t === 'voice') body = '<p class="note">ویس را در همان گفت‌وگوی بات بفرستید: «🪪 صفحهٔ من در سایت» را بزنید؛ وقتی به این سؤال رسیدید، ویس را ضبط کنید.</p>';
+    w.innerHTML = '<h1>' + esc(q.l) + '</h1><p class="sub">' + esc(q.a).replace(/\n/g, '<br>') + '</p>' +
+      (q.has ? '<p class="note">پاسخ فعلی ذخیره شده است؛ اگر عوضش کنید، جایگزین می‌شود.</p>' : '') + body +
+      '<div class="note bad" id="tjErr" hidden></div>' +
+      (q.t === 'voice' ? '' : '<button class="btn" id="tjSave" type="button">ذخیره</button>') +
+      (q.req ? '' : '<button class="btn ghost" id="tjSkip" type="button">رد شدن</button>');
+    $('tjBk').onclick = function () { tap(); pqList(); };
+    function err(m) { var e = $('tjErr'); e.textContent = m; e.hidden = false; }
+    w.querySelectorAll('[data-o]').forEach(function (b) {
+      b.onclick = function () {
+        tap();
+        var o = q.o[+b.getAttribute('data-o')];
+        if (q.t === 'multi') { var i = sel.indexOf(o); if (i > -1) sel.splice(i, 1); else sel.push(o); b.classList.toggle('on'); }
+        else { w.querySelectorAll('[data-o]').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); sel = [o]; }
+      };
+    });
+    var fileB64 = '', fileName = '', fileMime = '';
+    var f = $('tjF');
+    if (f) f.onchange = function () {
+      var file = f.files[0];
+      if (!file) return;
+      if (q.t === 'photo') {
+        pqImg(file, function (b64) { fileB64 = b64; var p = $('tjP'); p.src = 'data:image/jpeg;base64,' + b64; p.style.display = 'block'; },
+          function () { err('این عکس خوانده نشد. یک عکس دیگر امتحان کنید.'); });
+      } else {
+        if (file.size > 10 * 1024 * 1024) return err('فایل بزرگ‌تر از ۱۰ مگابایت است.');
+        var rd = new FileReader();
+        rd.onload = function () { fileB64 = String(rd.result).split(',')[1]; fileName = file.name; fileMime = file.type; };
+        rd.readAsDataURL(file);
+      }
+    };
+    function lock(on) { w.querySelectorAll('button').forEach(function (b) { b.disabled = on; }); }
+    function send(o) {
+      lock(true);
+      call(o.api, o).then(function (r) {
+        if (!r) { lock(false); return err('ذخیره نشد. دوباره امتحان کنید.'); }
+        if (!r.ok) { lock(false); return err(r.msg || 'ذخیره نشد. دوباره امتحان کنید.'); }
+        pqView();
+      })['catch'](function () { lock(false); err('ارتباط برقرار نشد. دوباره امتحان کنید.'); });
+    }
+    var sv = $('tjSave');
+    if (sv) sv.onclick = function () {
+      tap();
+      var o = { api: 'pqsave', k: q.k };
+      if (q.t === 'photo') { if (!fileB64) return err('اول عکس را انتخاب کنید.'); o.b64 = fileB64; }
+      else if (q.t === 'file') {
+        if (fileB64) { o.b64 = fileB64; o.name = fileName; o.mime = fileMime; }
+        else o.v = $('tjV').value.trim();
+      }
+      else if (q.t === 'choice' || q.t === 'multi') {
+        var picks = sel.filter(function (v) { return q.o.indexOf(v) > -1; });
+        var xi = $('tjX');
+        if (xi) xi.value.split(/\s*[،,]\s*/).forEach(function (v) { v = v.trim(); if (v.length > 1) { if (picks.indexOf(v) < 0) picks.push(v.slice(0, 60)); } });
+        o.v = picks.join('، ');
+      }
+      else o.v = $('tjV').value.trim();
+      send(o);
+    };
+    var skb = $('tjSkip');
+    if (skb) skb.onclick = function () { tap(); send({ api: 'pqsave', k: q.k, skip: 1 }); };
+    main('', null);
+  }
+  function pqImg(file, ok, bad) {
+    var rd = new FileReader();
+    rd.onload = function () {
+      var im = new Image();
+      im.onload = function () {
+        var s = Math.min(1, 1600 / Math.max(im.width, im.height));
+        var c = document.createElement('canvas');
+        c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        ok(c.toDataURL('image/jpeg', 0.88).split(',')[1]);
+      };
+      im.onerror = bad;
+      im.src = rd.result;
+    };
+    rd.onerror = bad;
+    rd.readAsDataURL(file);
+  }
+  function pqDone() {
+    var w = shell('🪪 صفحهٔ من در سایت');
+    loading(w);
+    main('', null);
+    call('pqdone', {}).then(function (r) {
+      if (!r) return showErr(w, null, pqView);
+      if (!r.ok) return showErr(w, r, pqView);
+      buzz('success');
+      w.innerHTML = '<div class="ok">🙏</div><h1 class="center">پاسخ‌ها رسید</h1>' +
+        '<p class="sub center">پروفایل شما ' + fa(r.pct) + '٪ کامل است. تیم تجربه همه را می‌خواند و کارت شما را در سایت به‌روز می‌کند؛ وقتی منتشر شد، در بات خبرتان می‌کنیم.</p>' +
+        '<button class="btn" id="tjDone" type="button">برگشت به خانه</button>';
+      $('tjDone').onclick = function () { tap(); reset(home); };
+    })['catch'](function () { showErr(w, null, pqView); });
+  }
+
+  /* ─────────── v115: رویدادهای قیف (بی‌صدا، بی‌معطلی) ─────────── */
+var EVQ = [];
+function track(e, d) {
+try {
+EVQ.push([String(e), String(d == null ? '' : d).slice(0, 60), Date.now()]);
+if (window.dataLayer) window.dataLayer.push({ event: 'tj_app', tj_e: String(e), tj_d: String(d == null ? '' : d) });
+if (window.clarity) window.clarity('event', 'app_' + String(e));
+if (EVQ.length >= 12) evFlush();
+} catch (x) {}
+}
+function evFlush() {
+if (!EVQ.length) return;
+if (!(TG ? TG.initData : '')) { EVQ = []; return; }
+var body = JSON.stringify({ api: 'ev', initData: TG.initData, list: EVQ.splice(0, 40) });
+try { if (navigator.sendBeacon) { if (navigator.sendBeacon(API, new Blob([body], { type: 'text/plain' }))) return; } } catch (x) {}
+try { fetch(API, { method: 'POST', body: body, keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch (y) {}
+}
+setInterval(evFlush, 15000);
+document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') evFlush(); });
+var START = '';
+try { START = String((TG ? (TG.initDataUnsafe ? TG.initDataUnsafe.start_param : '') : '') || ''); } catch (e) {}
+/* v169: دکمهٔ web_app بات با ?rv=E-… باز می‌کند؛ لینک t.me با startapp=rv_E-… */
+try { var rvQ = new URLSearchParams(location.search).get('rv'); if (rvQ) START = 'rv_' + rvQ; } catch (e) {}
+
+/* ─────────── عکس همکاران از صفحه‌های تیم سایت (همین دامنه، بی‌سرور) ─────────── */
+function nrm(s) { return String(s || '').replace(/[‌‏\s]/g, '').replace(/ي/g, 'ی').replace(/ك/g, 'ک').replace(/ئ/g, 'ی').trim(); }
+function dec(s) { var t = document.createElement('textarea'); t.innerHTML = String(s || ''); return t.value; }
+function first(n) { return String(n || '').replace(/\s+/g, ' ').trim(); }
+var PPL = null;
+function people() {
+if (PPL) return Promise.resolve(PPL);
+try {
+var o = JSON.parse(localStorage.getItem('tjapp.ppl') || 'null');
+if (o ? (Date.now() - o.at < 24 * 3600000) : false) { PPL = o.p; return Promise.resolve(PPL); }
+} catch (e) {}
+var A = String.fromCharCode(38);
+return fetch('/wp-json/wp/v2/tj_person?per_page=100' + A + '_fields=slug,title,link,_links,_embedded' + A + '_embed=wp:featuredmedia', { credentials: 'omit' })
+.then(function (r) { return r.json(); })
+.then(function (arr) {
+var p = { bySlug: {}, byName: {}, list: [] };
+(arr || []).forEach(function (x) {
+var m = null;
+try { m = x._embedded['wp:featuredmedia'][0]; } catch (e) {}
+var sz = m ? ((m.media_details || {}).sizes || {}) : {};
+var o = { slug: x.slug, name: dec((x.title || {}).rendered || ''), link: x.link,
+img: sz.thumbnail ? sz.thumbnail.source_url : (m ? m.source_url : ''),
+big: sz.medium ? sz.medium.source_url : (m ? m.source_url : '') };
+p.bySlug[o.slug] = o; p.byName[nrm(o.name)] = o;
+if (o.img) p.list.push(o);
+});
+PPL = p;
+try { localStorage.setItem('tjapp.ppl', JSON.stringify({ at: Date.now(), p: p })); } catch (e) {}
+return p;
+})['catch'](function () { return { bySlug: {}, byName: {}, list: [] }; });
+}
+function withPhoto(t, ppl) {
+if (!t || !ppl) return t;
+var p = (t.sl ? ppl.bySlug[t.sl] : null) || ppl.byName[nrm(t.d)] || ppl.byName[nrm(t.n)];
+if (p) { t.img = p.img; t.big = p.big; if (!t.pg) t.pgs = p.link; }
+return t;
+}
+function ph(t, cls) {
+var img = t ? (cls === 'big' ? (t.big || t.img) : (t.img || t.big)) : '';
+return '<span class="ph' + (cls ? ' ' + cls : '') + '"' + (img ? ' style="background-image:url(' + qa(img) + ')"' : '') + '>' +
+(img ? '' : esc(String((t ? (t.d || t.n) : '') || '·').charAt(0))) + '</span>';
+}
+function badges(t, max) {
+var b = [];
+if (t.cp) b.push(['زوج‌درمانی', 1]);
+if ((t.pl || []).indexOf('kid') > -1) b.push(['کودک و نوجوان', 1]);
+if ((t.pl || []).indexOf('fam') > -1) b.push(['خانواده', 0]);
+if (t.ab) b.push(['خارج از ایران', 0]);
+if (t.ip) b.push(['حضوری' + (t.ct ? ' · ' + t.ct : ''), 0]);
+if (t.yr) b.push([fa(t.yr) + ' سال تجربه', 0]);
+if (t.lg) { if (t.lg !== 'فارسی') b.push([t.lg, 0]); }
+b = b.slice(0, max || 6);
+return b.length ? '<div class="bdg">' + b.map(function (x) { return '<span' + (x[1] ? ' class="r"' : '') + '>' + esc(x[0]) + '</span>'; }).join('') + '</div>' : '';
+}
+function meetLine(mt) {
+if (!mt) return '';
+var d = new Date(mt.dateIso + 'T' + mt.hhmm + ':00+03:30');
+var s = '';
+try { s = d.toLocaleString('fa-IR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }); } catch (e) { s = fa(mt.dateIso + ' ' + mt.hhmm); }
+return (mt.therapist ? mt.therapist + ' · ' : '') + s;
+}
+function wireX(w) {
+w.querySelectorAll('[data-x]').forEach(function (b) {
+b.onclick = function () {
+tap();
+var k = b.getAttribute('data-x');
+if (k === 'book') return go(stepScope);
+if (k === 'meet') return go(meetView);
+if (k === 'thers') return go(gallery);
+if (k === 'rm') return go(rmView);
+if (k === 'att') return go(attView);
+if (k === 'gd') return go(gdView);
+if (k === 'hub') return hubOpen();
+if (k === 'pts') return go(ptsView);
+if (k === 'dq') return go(dqView);
+if (k === 'roles') { var d = $('tjRoles'); if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
+};
+});
+}
+function fillStrip() {
+var el = $('tjStrip');
+if (!el) return;
+people().then(function (p) {
+el = $('tjStrip');
+if (!el) return;
+var l = p.list.slice(0, 12);
+if (!l.length) { el.style.display = 'none'; return; }
+el.innerHTML = l.map(function (o) {
+return '<button class="tha" type="button" data-sl="' + qa(o.slug) + '"><i style="background-image:url(' + qa(o.img) + ')"></i><b>' + esc(first(o.name)) + '</b></button>';
+}).join('') + '<button class="tha all" type="button" data-x="thers"><i>＋</i>همه</button>';
+wireX(el);
+el.querySelectorAll('[data-sl]').forEach(function (b) {
+b.onclick = function () { tap(); var sl = b.getAttribute('data-sl'); go(function () { therBySlug(sl); }); };
+});
+});
+}
+
+/* ─────────── درمانگرها: فهرست، کارت، وقت ─────────── */
+var EDGE = 'https://tajrobeh-edge.yaserderakhshan.workers.dev';
+function edgeThers() {
+return fetch(EDGE + '/thers', { credentials: 'omit' }).then(function (r) { return r.json(); })
+.then(function (d) { return (d ? d.ok : false) ? d : call('thers', {}); })['catch'](function () { return call('thers', {}); });
+}
+var THERS = null;
+function thersLoad() {
+if (THERS) return Promise.resolve(THERS);
+try {
+var o = JSON.parse(localStorage.getItem('tjapp.thers') || 'null');
+if (o ? (Date.now() - o.at < 30 * 60000) : false) { THERS = o.list; return Promise.resolve(THERS); }
+} catch (e) {}
+return Promise.all([edgeThers(), people()]).then(function (r) {
+var d = r[0];
+if (!d) throw null;
+if (!d.ok) throw d;
+var list = (d.list || []).map(function (t) { return withPhoto(t, r[1]); });
+THERS = list;
+try { localStorage.setItem('tjapp.thers', JSON.stringify({ at: Date.now(), list: list })); } catch (e) {}
+return list;
+});
+}
+function findTher(name) {
+if (!THERS) return null;
+for (var i = 0; i < THERS.length; i++) if (nrm(THERS[i].n) === nrm(name)) return THERS[i];
+return null;
+}
+function therBySlug(sl) {
+var w = shell('👤 همکار تجربه');
+w.innerHTML = '<div class="spin"></div>';
+thersLoad().then(function (list) {
+for (var i = 0; i < list.length; i++) if (list[i].sl === sl || (list[i].pgs ? list[i].pgs.indexOf('/' + sl + '/') > -1 : false)) return therView(list[i]);
+var p = PPL ? PPL.bySlug[sl] : null;
+if (p) return therView({ n: p.name, d: p.name, img: p.img, big: p.big, pgs: p.link });
+showErr(w, { error: 'notfound' }, null);
+})['catch'](function (r) { showErr(w, r || null, function () { therBySlug(sl); }); });
+}
+var GF = 'all';
+function gallery() {
+track('gallery_open', '');
+var w = shell('👥 همکاران تجربه');
+var F = [['all', 'همه'], ['f', 'خانم'], ['m', 'آقا'], ['cp', 'زوج‌درمانی'], ['kid', 'کودک و نوجوان'], ['ab', 'خارج از ایران'], ['ip', 'حضوری']];
+w.innerHTML = '<p class="sub">عکس، رویکرد و شیوهٔ کار همکاران. کارت هر کدام را باز کنید تا وقت معارفه‌اش را ببینید.</p>' +
+'<div class="roles" id="tjF">' + F.map(function (f) { return '<button class="rc' + (GF === f[0] ? ' on' : '') + '" type="button" data-f="' + f[0] + '">' + esc(f[1]) + '</button>'; }).join('') + '</div>' +
+'<div id="tjG"><div class="spin"></div></div>';
+var LIST = [];
+w.querySelectorAll('[data-f]').forEach(function (b) {
+b.onclick = function () {
+tap(); GF = b.getAttribute('data-f');
+w.querySelectorAll('[data-f]').forEach(function (x) { x.classList.toggle('on', x === b); });
+draw();
+};
+});
+thersLoad().then(function (list) { LIST = list; draw(); })['catch'](function (r) { showErr($('tjG'), r || null, gallery); });
+function keep(t) {
+if (GF === 'all') return true;
+if (GF === 'f' || GF === 'm') return t.g === GF;
+if (GF === 'cp') return !!t.cp;
+if (GF === 'kid') return (t.pl || []).indexOf('kid') > -1;
+if (GF === 'ab') return !!t.ab;
+if (GF === 'ip') return !!t.ip;
+return true;
+}
+function draw() {
+var g = $('tjG');
+if (!g) return;
+var l = LIST.filter(keep);
+l.sort(function (a, b) { return (b.img ? 1 : 0) - (a.img ? 1 : 0); });
+g.innerHTML = l.length ? l.map(function (t, i) {
+return '<button class="tcard" type="button" data-th="' + i + '">' + ph(t, '') + '<span class="tx"><span class="nm">' + esc(t.d) + '</span>' +
+'<span class="sp">' + esc(t.sp || '') + '</span>' + badges(t, 3) + '</span></button>';
+}).join('') : emptyBox('با این فیلتر کسی پیدا نشد', 'فیلتر دیگری را امتحان کنید.');
+g.querySelectorAll('[data-th]').forEach(function (b) {
+b.onclick = function () { tap(); var t = l[+b.getAttribute('data-th')]; go(function () { therView(t); }); };
+});
+}
+}
+function therView(t) {
+track('ther_view', t.sl || '');
+var w = shell('👤 ' + t.d);
+var h = '<div class="thero">' + ph(t, 'big') + '<div><div class="nm">' + esc(t.d) + '</div>' +
+(t.tt ? '<span class="sp">' + esc(t.tt) + '</span>' : '') +
+(t.sp ? '<span class="sp">' + esc(t.sp) + '</span>' : '') + badges(t, 6) + '</div></div>';
+if (t.hl) h += '<blockquote class="hlq">' + esc(t.hl) + '</blockquote>';
+if (t.fs) h += '<div class="card"><div class="lbl">جلسهٔ اول با من</div><div class="bd">' + esc(t.fs) + '</div></div>';
+if (t.mt) h += '<details class="more"><summary><span>روش کار</span><i>⌄</i></summary><div class="pad">' + esc(t.mt) + '</div></details>';
+else if (t.ab2) h += '<div class="card"><div class="bd">' + esc(t.ab2) + '</div></div>';
+if (t.fc) h += '<div class="lbl">موضوع‌های اصلی کار</div><div class="bdg" style="margin-bottom:12px">' +
+String(t.fc).split(/\s*[،,]\s*/).filter(String).slice(0, 8).map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</div>';
+if (t.gr) h += '<div class="lbl">آشنایی ویژه، در کنار کار با همهٔ مراجعان</div><div class="bdg" style="margin-bottom:12px">' +
+String(t.gr).split(/\s*[،,]\s*/).filter(String).slice(0, 6).map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</div>';
+if (t.n) {
+h += '<h2>وقت‌های معارفه با ' + esc(first(t.d)) + '</h2>' +
+'<div class="roles" id="tjSc"><button class="rc' + (S.scope === 'out' ? '' : ' on') + '" type="button" data-sc="ir">در ایران هستم</button>' +
+ZONES.map(function (z) { return '<button class="rc' + (S.scope === 'out' ? (S.zone === z[0] ? ' on' : '') : '') + '" type="button" data-sc="' + z[0] + '">' + esc(z[1]) + '</button>'; }).join('') +
+'</div><div id="tjTs"><div class="spin"></div></div>';
+}
+if (t.pg || t.pgs) h += '<a class="meet" href="' + qa(t.pg || t.pgs) + '" target="_blank" rel="noopener">🌐 صفحهٔ کامل در سایت</a>';
+w.innerHTML = h;
+if (!t.n) return;
+w.querySelectorAll('[data-sc]').forEach(function (b) {
+b.onclick = function () {
+tap();
+var k = b.getAttribute('data-sc');
+if (k === 'ir') { S.scope = 'ir'; S.zone = 'ir'; } else { S.scope = 'out'; S.zone = k; }
+w.querySelectorAll('[data-sc]').forEach(function (x) { x.classList.toggle('on', x === b); });
+slots();
+};
+});
+slots();
+function slots() {
+var box = $('tjTs');
+if (!box) return;
+if (!S.topic) {
+box.innerHTML = '<p class="lbl">برای اینکه وقت درست را نشان بدهم: موضوع جلسه چیست؟</p><div class="grid">' +
+TOPICS.map(function (x) { return '<button class="chip" type="button" data-tp="' + x[0] + '">' + esc(x[1]) + '</button>'; }).join('') + '</div>';
+box.querySelectorAll('[data-tp]').forEach(function (b) {
+b.onclick = function () {
+tap(); var k = b.getAttribute('data-tp');
+for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i][0] === k) { S.topic = k; S.topicLabel = TOPICS[i][1]; S.kind = TOPICS[i][2]; }
+track('ther_topic', k); slots();
+};
+});
+return;
+}
+box.innerHTML = '<div class="spin"></div>';
+call('slots', { therapist: t.n, scope: S.scope || 'ir', zone: S.zone || 'de', topic: S.topic }).then(function (d) {
+box = $('tjTs');
+if (!box) return;
+if (!d) return showErr(box, null, slots);
+if (!d.ok) return showErr(box, d, slots);
+var chg = '<button class="lnk" id="tjTpC" type="button">موضوع: ' + esc(S.topicLabel || '') + ' · عوض کردن</button>';
+function wireChg() { var c = $('tjTpC'); if (c) c.onclick = function () { tap(); S.topic = ''; slots(); }; }
+if (d.nopool) {
+track('ther_nopool', t.sl || '');
+box.innerHTML = '<div class="note">' + esc(first(t.d)) + ' جلسهٔ «' + esc(d.hard || S.topicLabel) + '» نمی‌گیرند. برای اینکه وقتتان هدر نرود، همکارانی را پیشنهاد می‌دهیم که همین کار را می‌کنند.</div>' +
+'<button class="btn" id="tjToMatch" type="button">دیدن همکاران مناسب</button>' + chg;
+$('tjToMatch').onclick = function () { tap(); if (!S.scope) { S.scope = 'ir'; S.zone = 'ir'; } go(loadMatch); };
+wireChg();
+return;
+}
+track('ther_slots', String((d.slots || []).length));
+var list = d.slots || [];
+if (!list.length) {
+box.innerHTML = '<div class="note">الان وقت آزاد معارفه با ' + esc(first(t.d)) + ' در این بازه نیست. اگر می‌خواهید فقط با ایشان باشد، به پذیرش بگویید تا هماهنگ کند.</div>' +
+'<button class="btn ghost" id="tjAskT" type="button">پذیرش با همین همکار هماهنگ کند</button>' + chg;
+wireChg();
+$('tjAskT').onclick = function () {
+tap(); box.innerHTML = '<div class="spin"></div>';
+call('need', { scope: S.scope || 'ir', zone: S.zone || 'de', topic: S.topic, therapist: t.n }).then(function (r) {
+box.innerHTML = (r ? r.ok : false) ? '<div class="note">رسید. پذیرش هماهنگ می‌کند و در بات خبرتان می‌کنیم.</div>' : errBox(r, null);
+})['catch'](function () { box.innerHTML = errBox(null, null); });
+};
+return;
+}
+box.innerHTML = '<div class="times">' + list.map(function (s, i) { return '<button class="t" type="button" data-i="' + i + '">' + slotLbl(s) + '</button>'; }).join('') + '</div>' + chg;
+wireChg();
+box.querySelectorAll('[data-i]').forEach(function (b) {
+b.onclick = function () { tap(); pickSlot(list[+b.getAttribute('data-i')], t, 'ther'); };
+});
+})['catch'](function () { box = $('tjTs'); if (box) showErr(box, null, slots); });
+}
+}
+
+/* ─────────── جلسهٔ معارفهٔ من: تقویم، لغو، و قدم بعد ─────────── */
+/* ───── v118 برنامهٔ من: همهٔ قرارهای مراجع با تقویم، به وقت محلی و تهران ───── */
+var PLAN = null;
+function planCss() {
+if (document.getElementById('tjPlanCss')) return;
+var st = document.createElement('style');
+st.id = 'tjPlanCss';
+st.textContent =
+'#tjapp .pl{border:1px solid var(--tj-line);border-radius:18px;padding:14px 14px 12px;margin:12px 0;background:var(--tj-bg)}' +
+'#tjapp .pl.big{border-color:var(--tj-red);box-shadow:0 6px 18px rgba(200,63,73,.12)}' +
+'#tjapp .pl-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}' +
+'#tjapp .pl-ic{font-size:22px}' +
+'#tjapp .pl-left{font-size:12px;padding:3px 10px;border-radius:999px;background:#faeced;color:var(--tj-red)}' +
+'#tjapp .pl-left.now{background:var(--tj-red);color:#fefefe;animation:tjpl 1.2s ease-in-out infinite alternate}' +
+'@keyframes tjpl{from{opacity:.7}to{opacity:1}}' +
+'#tjapp .pl-t{font-size:15px;margin-bottom:4px}' +
+'#tjapp .pl-w{font-size:13px;color:var(--tj-soft);line-height:1.8}' +
+'#tjapp .pl-b{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}' +
+'#tjapp .pl-go,#tjapp .pl-a{font:inherit;font-size:13px;padding:8px 12px;border-radius:12px;text-decoration:none;border:1px solid var(--tj-line);background:transparent;color:inherit;cursor:pointer}' +
+'#tjapp .pl-go{background:#222;color:#fefefe;border-color:#222}' +
+'#tjapp .pl-ok{font-size:12px;color:#2e7d32;margin-top:8px}' +
+'#tjapp .pl-all{display:block;width:100%;font:inherit;font-size:13px;background:none;border:0;color:var(--tj-red);text-align:start;padding:0 4px 8px;cursor:pointer}' +
+'#tjapp .pl-in{width:100%;box-sizing:border-box;font:inherit;padding:10px 12px;border-radius:12px;border:1px solid var(--tj-line);margin:10px 0 8px;background:#fefefe;color:#222}';
+document.head.appendChild(st);
+}
+function plTz() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } }
+function plWhen(iso) {
+var d = new Date(iso), loc = '', teh = '', tz = plTz();
+try { loc = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(d); }
+catch (e) { loc = d.toLocaleString(); }
+if (tz ? tz !== 'Asia/Tehran' : false) {
+try { teh = new Intl.DateTimeFormat('fa-IR', { timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit' }).format(d); } catch (e) {}
+}
+return { loc: loc, teh: teh };
+}
+function plLeft(iso) {
+var t = new Date(iso), m = Math.round((t.getTime() - Date.now()) / 60000);
+if (m < -60) return { t: 'گذشت', now: false };
+if (m <= 15) return { t: 'همین حالا', now: true };
+if (m < 60) return { t: fa(m) + ' دقیقهٔ دیگر', now: false };
+var a = new Date(); a.setHours(0, 0, 0, 0);
+var b = new Date(t.getTime()); b.setHours(0, 0, 0, 0);
+var dd = Math.round((b - a) / 86400000);
+if (dd === 0) return { t: 'امروز', now: false };
+if (dd === 1) return { t: 'فردا', now: false };
+return { t: fa(dd) + ' روز دیگر', now: false };
+}
+function plCard(e, big) {
+var w = plWhen(e.iso), lf = plLeft(e.iso), go = '';
+if (e.link) go = '<a class="pl-go" href="' + qa(e.link) + '" target="_blank" rel="noopener">' + (e.kind === 'kanape' ? '🛋 صفحهٔ ایستگاه' : '🔗 ورود به جلسه') + '</a>';
+return '<div class="pl' + (big ? ' big' : '') + '">' +
+'<div class="pl-top"><span class="pl-ic">' + e.icon + '</span><span class="pl-left' + (lf.now ? ' now' : '') + '">' + esc(lf.t) + '</span></div>' +
+'<div class="pl-t">' + esc(e.title) + '</div>' +
+'<div class="pl-w">' + esc(w.loc) + (w.teh ? ' · تهران ' + esc(w.teh) : '') + (e.weekly ? ' · هر هفته' : '') + '</div>' +
+'<div class="pl-b">' + go +
+'<a class="pl-a" href="' + qa(e.gcal) + '" target="_blank" rel="noopener">🗓 تقویم گوگل</a>' +
+'<button class="pl-a" type="button" data-ics="' + e.i + '">📎 تقویم گوشی</button>' +
+(e.kind === 'intro' ? '<button class="pl-a" type="button" data-plm="1">جزئیات یا لغو</button>' : '') +
+'</div>' + (e.synced ? '<div class="pl-ok">✓ این قرار در تقویم مرکز ثبت است و اگر ایمیل داده باشید، دعوتش برایتان رفته.</div>' : '') + '</div>';
+}
+function wirePlan(root) {
+root.querySelectorAll('[data-ics]').forEach(function (b) {
+b.onclick = function () {
+tap();
+b.disabled = true; b.textContent = 'در حال فرستادن…';
+track('plan_ics', '');
+call('plan.ics', { i: Number(b.getAttribute('data-ics')) }).then(function (r) {
+b.disabled = false;
+b.textContent = (r ? r.ok : false) ? '✓ فایل در گفت‌وگوی بات است' : 'دوباره امتحان کنید';
+})['catch'](function () { b.disabled = false; b.textContent = 'دوباره امتحان کنید'; });
+};
+});
+root.querySelectorAll('[data-plm]').forEach(function (b) { b.onclick = function () { tap(); go(meetView); }; });
+root.querySelectorAll('[data-pl]').forEach(function (b) { b.onclick = function () { tap(); go(planView); }; });
+root.querySelectorAll('a.pl-go, a.pl-a').forEach(function (a) { a.addEventListener('click', function () { track('plan_link', a.className); }); });
+}
+function planFill() {
+var box = $('tjPlan');
+if (!box) return;
+planCss();
+call('plan', {}).then(function (r) {
+if (!(r ? r.ok : false)) { box.innerHTML = ''; return; }
+if (!(r.events ? r.events.length : 0)) { box.innerHTML = ''; return; }
+PLAN = r;
+var old = document.querySelector('#tjapp [data-x="meet"]');
+if (old ? old.parentNode : null) old.parentNode.removeChild(old);
+box.innerHTML = '<div class="thhd"><span>برنامهٔ من</span><button type="button" data-pl="all">همه ‹</button></div>' +
+plCard(r.events[0], true) +
+(r.events.length > 1 ? '<button class="pl-all" type="button" data-pl="all">' + fa(r.events.length - 1) + ' قرار دیگر در برنامه ‹</button>' : '');
+wirePlan(box);
+})['catch'](function () { box.innerHTML = ''; });
+}
+function planView() {
+track('plan_view', '');
+planCss();
+var w = shell('🗓 برنامهٔ من');
+loading(w);
+call('plan', {}).then(function (r) {
+if (!r) return showErr(w, null, planView);
+if (!r.ok) return showErr(w, r, planView);
+PLAN = r;
+var tz = plTz(), out = tz ? tz !== 'Asia/Tehran' : false;
+var h = '<div class="note">همهٔ قرارهای شما با تجربه، به وقت ' +
+(out ? 'محل زندگی شما (' + esc(tz.split('/').pop().replace(/_/g, ' ')) + ') و کنارش وقت تهران' : 'تهران') +
+'. هر کدام را با یک ضربه به تقویم‌تان اضافه کنید.</div>';
+if (!r.events.length) {
+h += emptyBox('فعلاً قراری نیست', 'وقت معارفه، جلسه‌های درمان و قرار تماشای کاناپه همه اینجا جمع می‌شوند.') +
+'<button class="btn" id="tjPlBook" type="button">پیدا کردن درمانگر و وقت معارفه</button>';
+} else {
+h += r.events.map(function (e, k) { return plCard(e, k === 0); }).join('');
+}
+h += '<div class="pl"><div class="pl-t">📬 دعوت خودکار تقویم</div><div class="pl-w">' +
+(r.email ? 'دعوت جلسه‌ها به ' + esc(r.email) + ' می‌رود. برای عوض کردن، ایمیل تازه بنویسید.'
+: 'ایمیل‌تان را بدهید تا هر جلسه خودش در تقویم گوگل یا اپل شما بنشیند و اگر جابه‌جا شد، تقویم هم خودش به‌روز شود.') +
+'</div><input class="pl-in" id="tjPlEm" type="email" inputmode="email" dir="ltr" placeholder="name@example.com">' +
+'<button class="btn" id="tjPlEmB" type="button">ثبت ایمیل</button></div>';
+if (!r.events.some(function (e) { return e.kind === 'kanape'; })) {
+h += '<button class="cta alt" type="button" id="tjPlKn"><span class="k">🛋 کاناپه: فیلم با نگاه روانکاوانه</span>' +
+'<span class="s">قرار تماشایتان را بگذارید تا اینجا و در تقویم‌تان بنشیند.</span></button>';
+}
+w.innerHTML = h;
+wirePlan(w);
+var bk = $('tjPlBook'); if (bk) bk.onclick = function () { tap(); go(stepScope); };
+var kn = $('tjPlKn'); if (kn) kn.onclick = function () { tap(); track('plan_kanape', ''); go(rmView); };
+var eb = $('tjPlEmB');
+eb.onclick = function () {
+tap();
+var v = String($('tjPlEm').value || '').trim();
+if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { eb.textContent = 'این ایمیل درست نیست'; return; }
+eb.disabled = true; eb.textContent = 'در حال ثبت…';
+call('plan.email', { email: v }).then(function (x) {
+eb.disabled = false;
+eb.textContent = (x ? x.ok : false) ? '✓ ثبت شد. دعوت‌ها از این به بعد به ایمیل‌تان می‌رود' : 'ثبت نشد، دوباره امتحان کنید';
+if (x ? x.ok : false) track('plan_email', '');
+})['catch'](function () { eb.disabled = false; eb.textContent = 'ثبت نشد، دوباره امتحان کنید'; });
+};
+})['catch'](function () { showErr(w, null, planView); });
+}
+
+function meetView() {
+track('meet_view', '');
+var mt = ME.meeting;
+var w = shell('🗓 جلسهٔ معارفهٔ من');
+if (!mt) {
+w.innerHTML = emptyBox('جلسه‌ای رزرو نشده', 'هر وقت آماده بودید، همکار مناسب و وقت معارفه را همین‌جا پیدا کنید.') +
+'<button class="btn" id="tjBk2" type="button">پیدا کردن درمانگر</button>';
+$('tjBk2').onclick = function () { tap(); go(stepScope); };
+return;
+}
+var at = new Date(mt.dateIso + 'T' + mt.hhmm + ':00+03:30');
+var past = Date.now() > at.getTime() + 25 * 60000;
+draw(findTher(mt.therapist));
+thersLoad().then(function () { var t = findTher(mt.therapist); if (t) draw(t); })['catch'](function () {});
+function draw(t0) {
+var t = t0 || { d: mt.therapist, n: mt.therapist };
+var h = '<div class="card"><div class="tcr">' + ph(t, '') + '<div class="tx"><div class="nm">' + esc(t.d) + '</div><span class="sp">' + esc(t.sp || '') + '</span></div></div>' +
+'<div style="height:8px"></div><div class="row"><span>زمان</span><b>' + esc(meetLine({ dateIso: mt.dateIso, hhmm: mt.hhmm })) + '</b></div>' +
+'<div class="row"><span>به وقت تهران</span><b>' + esc(fa(mt.hhmm)) + '</b></div></div>';
+if (!past) {
+h += (mt.meet ? '<a class="meet" href="' + qa(mt.meet) + '" target="_blank" rel="noopener">🔗 لینک جلسه</a>' : '<div class="note">لینک جلسه را پیش از موعد همکاران پذیرش می‌فرستند.</div>') +
+'<a class="meet" href="' + qa(gcal('جلسهٔ معارفه با ' + t.d + ' · تجربه', mt.dateIso, mt.hhmm, 30, mt.meet || 'https://t.me/tajrobehlife_bot')) + '" target="_blank" rel="noopener">🗓 افزودن به تقویم گوگل</a>' +
+'<button class="btn ghost" id="tjCancel" type="button">نمی‌توانم بیایم، لغو کن</button>';
+} else {
+h += '<div class="card"><div class="lbl">معارفه چطور بود؟</div><div class="bd">اگر با ' + esc(first(t.d)) + ' حس خوبی داشتید، قدم بعد جلسهٔ اول درمان است. اگر نه، همکار دیگری پیشنهاد می‌دهیم؛ بی‌هیچ توضیحی.</div></div>' +
+'<button class="btn" id="tjFirst" type="button">رزرو جلسهٔ اول درمان با ' + esc(first(t.d)) + '</button>' +
+'<button class="btn ghost" id="tjOther" type="button">می‌خواهم با همکار دیگری آشنا شوم</button>';
+}
+w.innerHTML = h;
+var c = $('tjCancel');
+if (c) c.onclick = function () {
+tap();
+if (c.getAttribute('data-sure') !== '1') { c.setAttribute('data-sure', '1'); c.textContent = 'مطمئنید؟ برای لغو دوباره بزنید'; return; }
+loading(w);
+call('client.meetcancel', {}).then(function (r) {
+if (!r) return showErr(w, null, meetView);
+if (!r.ok) return showErr(w, r, meetView);
+track('meet_cancel', '');
+ME.meeting = null;
+try { localStorage.removeItem(LS_KEY); } catch (e) {}
+w.innerHTML = stateBox('🙏', 'لغو شد', 'وقت برای کس دیگری آزاد شد. هر وقت خواستید، دوباره از همین‌جا وقت بگیرید.') +
+'<button class="btn" id="tjDone" type="button">برگشت به خانه</button>';
+$('tjDone').onclick = function () { tap(); reset(home); };
+})['catch'](function () { showErr(w, null, meetView); });
+};
+var f = $('tjFirst');
+if (f) f.onclick = function () { tap(); track('first_session', ''); go(function () { section('client'); run('client.session', {}, true); }); };
+var o = $('tjOther');
+if (o) o.onclick = function () { tap(); track('first_other', ''); go(stepScope); };
+}
+}
+
+/* ─────────── رودمپ کاناپه، کامل در مینی‌اپ ─────────── */
+var RM_IMG = '/wp-content/uploads/2026/09/tjl-ju-cta.webp';
+var RM = null, RMUI = { plan: false, cons: '' };
+function rmCache() { try { var o = JSON.parse(localStorage.getItem('tjapp.rm') || 'null'); return o ? o.d : null; } catch (e) { return null; } }
+function rmSave(d) { try { localStorage.setItem('tjapp.rm', JSON.stringify({ at: Date.now(), d: d })); } catch (e) {} }
+function rmCard() {
+var c = rmCache(), s;
+if (c ? c.me : null) {
+if (c.me.watch === 'دیدم') s = 'دیدید. نوبت ورق‌های تحلیل و یک خط از خودتان است';
+else if (c.me.dueText) s = 'قرار تماشای شما: ' + c.me.dueText;
+else s = 'ایستگاه این هفته: فیلم دعوت (The Invite)';
+} else s = 'ایستگاه این هفته: فیلم دعوت. رایگان، فقط ویس، با ریتم خودتان';
+return '<button class="rmcard" type="button" data-x="rm"><im' + 'g class="im" src="' + RM_IMG + '" alt="" loading="lazy">' +
+'<span class="tx"><span class="k">🛋 رودمپ کاناپه<i class="live">زنده</i></span><span class="s">' + esc(s) + '</span></span><span class="go">‹</span></button>';
+}
+function rmView() {
+track('rm_open', 'kanape');
+var w = shell('🛋 رودمپ کاناپه');
+var c = rmCache();
+if (c) { RM = c; rmDraw(); } else w.innerHTML = '<div class="spin"></div>';
+call('rm', { rm: 'kanape' }).then(function (d) {
+if (!d) { if (!c) showErr(w, null, rmView); return; }
+if (!d.ok) { if (!c) showErr(w, d, rmView); return; }
+RM = d; rmSave(d); rmDraw();
+})['catch'](function () { if (!c) showErr(w, null, rmView); });
+}
+function rmLock(on) { var w = $('tjW'); if (!w) return; w.querySelectorAll('button').forEach(function (b) { b.disabled = on; }); }
+function rmAct(act, extra, quiet) {
+var o = extra || {};
+o.rm = 'kanape'; o.act = act;
+if (!quiet) rmLock(true);
+return call('rm.act', o).then(function (d) {
+rmLock(false);
+if (!d) { if (!quiet) flash($('tjW'), null); return null; }
+if (!d.ok) { if (!quiet) { if (d.error !== 'short') flash($('tjW'), d); } return d; }
+RM = d; rmSave(d);
+if (!quiet) { buzz('success'); rmDraw(); }
+return d;
+})['catch'](function () { rmLock(false); if (!quiet) flash($('tjW'), null); return null; });
+}
+function kpi(l, n) { return '<div class="kpi"><b>' + fa(n || 0) + '</b>' + esc(l) + '</div>'; }
+function rmDraw() {
+var d = RM, w = $('tjW');
+if (!d || !w) return;
+var A = d.app || {}, me = d.me;
+var h = '<div class="rmhero"><im' + 'g class="im" src="' + qa(A.img || RM_IMG) + '" alt="">' +
+'<div><div class="t1">' + esc(d.name) + '<i class="live">زنده</i></div>' +
+'<div class="t2">فیلم و سریال با نگاه روانکاوانه. رایگان، فقط ویس، با ریتم خودتان.</div>' +
+'<span class="pill">ایستگاه این هفته · ' + esc(d.st.t) + ' (' + esc(d.st.lat) + ')</span></div></div>';
+if (!me) {
+h += '<div class="card"><div class="bd">هر هفته یک فیلم یا سریال. پیش از تماشا یک ویس کوتاه و بی‌اسپویل می‌شنوید، بعد از تماشا ورق‌ها و ویس تحلیل می‌رسد، و اگر خواستید یک خط از آنچه در شما تکان خورد می‌نویسید.</div></div>' +
+'<button class="btn" id="rmJoin" type="button">' + (d.left ? 'دوباره سوار کاناپه شوم' : 'سوار کاناپه شوم') + '</button>' +
+'<p class="wait">راهبر شخصیت‌های فیلم را تحلیل می‌کند، نه شما را. این تراپی نیست.</p>';
+w.innerHTML = h;
+$('rmJoin').onclick = function () { tap(); rmAct('join'); };
+return;
+}
+var seen = me.watch === 'دیدم';
+var planned = !seen ? !!me.dueText : false;
+var preDone = false;
+try { preDone = localStorage.getItem('tjapp.rmpre') === '1'; } catch (e) {}
+h += '<div class="stp' + (preDone ? ' done' : ' now') + '"><span class="n">' + (preDone ? '✓' : '۱') + '</span><h3>🎧 پیش از تماشا</h3>' +
+'<p class="ab">دو دقیقه، بی‌اسپویل. راهبر می‌گوید فیلم را چطور ببینید.</p>' +
+(A.pre ? '<aud' + 'io class="aud" id="rmPre" controls preload="none" src="' + qa(A.pre) + '"></aud' + 'io>' : '') + '</div>';
+h += '<div class="stp' + (seen ? ' done' : (preDone ? ' now' : '')) + '"><span class="n">' + (seen ? '✓' : '۲') + '</span><h3>🍿 تماشا</h3>';
+if (seen) h += '<p class="ab">دیدید. حالا ورق‌ها باز شده‌اند.</p>';
+else if (planned ? !RMUI.plan : false) {
+h += '<p class="ab">قرار شما: <b>' + esc(me.dueText) + '</b>. همان موقع در بات هم سراغتان می‌آیم.</p>' +
+'<div class="btns"><a class="ib wide" href="' + qa(me.cal) + '" target="_blank" rel="noopener">🗓 افزودن به تقویم گوگل</a>' +
+'<button class="ib" type="button" data-a="ics">📎 فایل تقویم در بات</button><button class="ib" type="button" data-a="seen">✅ دیدم</button></div>' +
+'<button class="lnk" type="button" data-a="replan">عوض کردن قرار</button>';
+} else if (RMUI.plan) {
+h += '<p class="ab">کی می‌بینید؟ با قرار گذاشتن جا نمی‌مانید.</p><div class="btns">' +
+[['0', 'امشب'], ['1', 'فردا شب'], ['3', 'سه روز دیگر'], ['w', 'آخر هفته']].map(function (x) { return '<button class="ib" type="button" data-t="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>';
+} else {
+h += '<p class="ab">فیلم «' + esc(d.st.t) + '» را دیده‌اید؟</p><div class="btns"><button class="ib" type="button" data-a="seen">✅ دیده‌ام</button><button class="ib" type="button" data-a="will">🍿 می‌روم ببینم</button></div>';
+}
+h += '</div>';
+h += '<div class="stp' + (seen ? ' now' : '') + '"><span class="n">۳</span><h3>🃏 ورق‌های تحلیل</h3>' +
+'<div class="deck" id="rmDeck"></div><p class="wait" id="rmSay"></p>' +
+'<div class="btns">' + (A.more ? '<a class="ib" href="' + qa(A.more) + '" target="_blank" rel="noopener">پست کامل</a>' : '') +
+(A.reel ? '<a class="ib" href="' + qa(A.reel) + '" target="_blank" rel="noopener">ریل تحلیل</a>' : '') + '</div></div>';
+h += '<div class="stp' + (seen ? (me.refl ? ' done' : '') : '') + '"><span class="n">' + (me.refl ? '✓' : '۴') + '</span><h3>✍️ یک خط از خودتان</h3>' +
+(me.refl ? '<p class="ab">نوشتهٔ شما رسید. ممنون.</p>' : '<p class="ab">چه چیزی از فیلم در شما تکان خورد؟ بدون اجازهٔ خودتان جایی منتشر نمی‌شود.</p>') +
+'<textarea class="tjin" id="rmTxt" rows="3" placeholder="یک یا دو جمله کافی است"></textarea>' +
+'<div class="cons">' + [['a', 'ناشناس روی صفحه بیاید'], ['n', 'با اسمم بیاید'], ['x', 'منتشر نشود']].map(function (x) {
+return '<button class="rc' + (RMUI.cons === x[0] ? ' on' : '') + '" type="button" data-c="' + x[0] + '">' + x[1] + '</button>';
+}).join('') + '</div><div class="note bad" id="rmErr" hidden></div>' +
+'<button class="btn" id="rmSend" type="button">فرستادن</button></div>';
+h += '<a class="meet" href="' + qa(d.url) + '" target="_blank" rel="noopener">🗺 نقشهٔ کامل کاناپه روی سایت</a>' +
+'<p class="wait">راهبر شخصیت‌های فیلم را تحلیل می‌کند، نه شما را. این تراپی نیست.</p>';
+if (d.stats) {
+var s = d.stats, src = Object.keys(s.src || {}).map(function (k) { return k + ' ' + fa(s.src[k]); }).join(' · ');
+h += '<div class="card" style="margin-top:14px"><div class="lbl">📊 میز راهبر</div><div class="kpis">' +
+kpi('همراه فعال', s.active) + kpi('تازه در ۷ روز', s.new7) + kpi('فعال در ۷ روز', s.act7) + kpi('دیده‌اند', s.seen) +
+kpi('قرار گذاشته‌اند', s.plan) + kpi('ویس را شنیده‌اند', s.pre) + kpi('بازتاب', s.refl) + kpi('با اجازهٔ انتشار', s.pub) +
+'</div>' + (src ? '<p class="wait">منبع‌ها: ' + esc(src) + '</p>' : '') + '<p class="wait">سری روزانه در هاب آمار، تب «رودمپ · آمار روزانه».</p></div>';
+}
+h += '<div class="center"><button class="lnk" type="button" data-a="off">دیگر پیامی از کاناپه نفرستید</button></div>';
+w.innerHTML = h;
+w.querySelectorAll('[data-a]').forEach(function (b) {
+b.onclick = function () {
+tap();
+var a = b.getAttribute('data-a');
+if (a === 'will') { RMUI.plan = true; rmAct('will'); return; }
+if (a === 'replan') { RMUI.plan = true; rmDraw(); return; }
+if (a === 'ics') { rmAct('ics', { arg: String(me.due) }, true); b.textContent = '📎 در بات فرستادم'; return; }
+if (a === 'off') {
+if (b.getAttribute('data-sure') !== '1') { b.setAttribute('data-sure', '1'); b.textContent = 'مطمئنید؟ دوباره بزنید'; return; }
+rmAct('off').then(function () { RM = null; try { localStorage.removeItem('tjapp.rm'); } catch (e) {} rmView(); });
+return;
+}
+rmAct(a);
+};
+});
+w.querySelectorAll('[data-t]').forEach(function (b) {
+b.onclick = function () { tap(); RMUI.plan = false; rmAct('t', { arg: b.getAttribute('data-t') }); };
+});
+w.querySelectorAll('[data-c]').forEach(function (b) {
+b.onclick = function () { tap(); RMUI.cons = b.getAttribute('data-c'); w.querySelectorAll('[data-c]').forEach(function (x) { x.classList.toggle('on', x === b); }); };
+});
+$('rmSend').onclick = function () {
+tap();
+var txt = $('rmTxt').value.trim(), e = $('rmErr');
+if (txt.length < 8) { e.textContent = 'کمی بیشتر بنویسید؛ یک جملهٔ کامل کافی است.'; e.hidden = false; return; }
+if (!RMUI.cons) { e.textContent = 'بگویید روی صفحه بیاید یا نه.'; e.hidden = false; return; }
+rmAct('w', { text: txt, consent: RMUI.cons });
+};
+var au = $('rmPre');
+if (au) au.addEventListener('play', function () {
+if (preDone) return;
+preDone = true;
+try { localStorage.setItem('tjapp.rmpre', '1'); } catch (x) {}
+rmAct('pre', {}, true);
+}, { once: true });
+rmDeck(A.deck || [], seen);
+}
+function rmDeck(cards, seen) {
+var box = $('rmDeck');
+if (!box) return;
+var cur = 0, told = false;
+paintDeck();
+function paintDeck() {
+var say = $('rmSay');
+if (cur >= cards.length) {
+box.innerHTML = '<button class="ib wide" type="button" id="rmAgain">↺ از اول</button>';
+$('rmAgain').onclick = function () { tap(); cur = 0; paintDeck(); };
+if (say) say.textContent = 'تمام شد. پست کامل و ریل را هم ببینید.';
+if (!told) { told = true; rmAct('deck', { arg: String(cards.length) }, true); }
+return;
+}
+var html = '';
+for (var i = cards.length - 1; i >= cur; i--) {
+var c = cards[i], off = i - cur, lock = c.sp ? !seen : false;
+html += '<div class="cd' + (lock ? ' lock' : '') + '" data-i="' + i + '" data-l="این ورق تحلیل دارد؛ بعد از دیدن فیلم باز می‌شود" style="z-index:' + (50 - off) + ';transform:translateY(' + (off * 7) + 'px) rotate(' + (off ? (off % 2 ? -3 : 3) : 0) + 'deg);background-image:url(' + qa(c.src) + ')"></div>';
+}
+box.innerHTML = html;
+if (say) say.textContent = (cards[cur].say || '') + ' · ' + fa(cur + 1) + ' از ' + fa(cards.length);
+var top = box.querySelector('[data-i="' + cur + '"]');
+if (top) top.onclick = function () {
+var c0 = cards[cur];
+if (c0.sp ? !seen : false) { buzz('warning'); if (say) say.textContent = 'این ورق بعد از دیدن فیلم باز می‌شود. اگر دیده‌اید، «دیده‌ام» را بزنید.'; return; }
+tap(); top.classList.add('fly');
+setTimeout(function () { cur++; paintDeck(); }, 300);
+};
+}
+}
+
+/* ─────────── بیرون از تلگرام ─────────── */
+  function outside() {
+    var w = plain();
+    w.innerHTML = '<h1>مینی‌اپ مرکز تجربه زندگی</h1>' +
+      '<p class="sub">این صفحه داخل تلگرام و از طریق بات مرکز تجربه زندگی باز می‌شود. با زدن دکمهٔ زیر به بات می‌روید.</p>' +
+      '<a class="btn" style="text-decoration:none;text-align:center" href="https://t.me/tajrobehlife_bot">باز کردن بات مرکز تجربه</a>';
+  }
+
+  try { if (TG) { TG.ready(); TG.expand(); } } catch (e) {}
+  if (TG ? TG.initData : false) boot();
+  else if (PREVIEW) boot();
+  else outside();
+})();
+</script>
+<!-- /wp:html -->

@@ -1,0 +1,624 @@
+<!-- wp:html -->
+<style>
+/* == tj2: home-v2 draft (v4) == */
+.tj2{font-family:var(--tj-font);color:var(--tj-soft);direction:rtl;font-size:17px;line-height:1.9;--tj-tint:#faeced;--tj-tint-2:#fdf4f4;--tj-red-400:#d9737a;--tj-yellow:#f2c14e;--w:1180px;overflow-x:clip}
+.tj2 *,.tj2 *::before,.tj2 *::after{box-sizing:border-box}
+.tj2,.tj2 *{overflow-wrap:normal;word-break:normal}
+.tj2 h1,.tj2 h2,.tj2 h3,.tj2 h4{color:var(--tj-ink);margin:0;line-height:1.55;font-weight:700;text-wrap:balance}
+.tj2 p{margin:0}
+.tj2 a{color:inherit;text-decoration:none}
+.tj2 img{max-width:100%;height:auto;display:block}
+.tj2 button{font-family:inherit}
+.tj2 .wrap{max-width:var(--w);margin-inline:auto;padding-inline:24px}
+.tj2 section{padding-block:clamp(48px,6vw,88px)}
+.tj2 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tj-red);background:var(--tj-tint);padding:5px 13px;border-radius:999px;margin-bottom:12px}
+.tj2 .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tj-red)}
+.tj2 .h2{font-size:clamp(23px,3vw,36px);margin-bottom:10px}
+.tj2 .lede{font-size:clamp(15.5px,1.3vw,18px);color:var(--tj-soft);max-width:62ch;line-height:2}
+.tj2 .center{text-align:center}.tj2 .center .lede{margin-inline:auto}
+.tj2 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 24px;border-radius:var(--tj-r-btn);font-size:16px;font-weight:600;border:1.5px solid transparent;transition:.18s ease;white-space:nowrap;cursor:pointer;line-height:1.4}
+.tj2 .btn-brand{background:var(--tj-red);color:#fff}
+.tj2 .btn-brand:hover{background:var(--tj-red-600);box-shadow:0 8px 20px -8px rgba(200,63,73,.5);color:#fff}
+.tj2 .btn-ghost{background:#fff;color:var(--tj-ink-2);border-color:var(--tj-line)}
+.tj2 .btn-ghost:hover{border-color:var(--tj-red-400);color:var(--tj-red-600);background:var(--tj-tint)}
+.tj2 .btn svg{width:14px;height:14px;flex:none}
+.tj2 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.tj2 .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.tj2 .rv{opacity:1;transform:none;transition:none}}
+.tj2 .hs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 14px;scrollbar-width:none;scroll-behavior:smooth}
+.tj2 .hs::-webkit-scrollbar{display:none}
+.tj2 .hs>*{scroll-snap-align:start;flex:0 0 auto}
+.tj2 .arrows{display:flex;gap:8px}
+.tj2 .arrows button{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--tj-line);background:#fff;color:var(--tj-ink);cursor:pointer;display:grid;place-items:center;transition:.15s}
+.tj2 .arrows button:hover{border-color:var(--tj-red);color:var(--tj-red)}
+.tj2 .arrows svg{width:16px;height:16px}
+.tj2 .head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
+.tj2 .hero{padding-block:clamp(36px,5vw,72px) clamp(36px,5vw,64px);background:#fff}
+.tj2 .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px;align-items:center}
+.tj2 .hero h1{font-size:clamp(28px,3.4vw,44px);line-height:1.5;margin:14px 0 16px;max-width:22ch}
+.tj2 .hero h1 em{font-style:normal;color:var(--tj-red)}
+.tj2 .hero .lede{margin:0 0 24px;max-width:56ch}
+.tj2 .ctas{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.tj2 .hero .art{display:flex;align-items:center;justify-content:center}
+.tj2 .hero .art img{width:100%;max-width:440px;height:auto;object-fit:contain}
+.tj2 .nums{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:30px;padding-top:22px;border-top:1px solid var(--tj-line)}
+.tj2 .nums div{display:flex;align-items:baseline;gap:7px}
+.tj2 .nums b{font-size:24px;font-weight:800;color:var(--tj-red);line-height:1;font-variant-numeric:tabular-nums}
+.tj2 .nums span{font-size:13px;color:var(--tj-mut)}
+.tj2 .eco{background:var(--tj-sunk)}
+.tj2 .eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:34px}
+.tj2 .eco-card{border:1px solid var(--tj-line);border-radius:20px;padding:0 0 22px;background:#fff;transition:.2s;display:flex;flex-direction:column;overflow:hidden}
+.tj2 .eco-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px);box-shadow:0 16px 34px -20px rgba(14,14,14,.3)}
+.tj2 .eco-card .pic{height:190px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;padding:16px 16px 0;border-bottom:1px solid var(--tj-line);background:#fff}
+.tj2 .eco-card .pic img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom}
+.tj2 .eco-card .n{font-size:12.5px;color:var(--tj-red);font-weight:700;margin:16px 22px 4px}
+.tj2 .eco-card h3{font-size:18px;margin:0 22px 8px}
+.tj2 .eco-card p{font-size:14px;line-height:1.9;color:var(--tj-soft);margin:0 22px 12px;flex:1}
+.tj2 .eco-card .go{font-size:13.5px;color:var(--tj-ink);font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 22px}
+.tj2 .eco-card .go svg{width:12px;height:12px}
+.tj2 .tl{background:#fff;overflow:hidden}
+.tj2 .tl-line{height:2px;background:var(--tj-line);margin-top:22px}
+.tj2 .tl-track{padding-top:34px}
+.tj2 .tl-item{width:250px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:20px 18px;position:relative}
+.tj2 .tl-item::before{content:"";position:absolute;top:-22px;right:22px;width:14px;height:14px;border-radius:50%;background:var(--tj-red);border:3px solid #fff;box-shadow:0 0 0 1px var(--tj-line)}
+.tj2 .tl-item .y{font-size:13px;color:var(--tj-red);font-weight:700}
+.tj2 .tl-item h3{font-size:16.5px;margin:6px 0 8px}
+.tj2 .tl-item p{font-size:13.5px;color:var(--tj-soft);line-height:1.85}
+.tj2 .tl-item.now{background:var(--tj-red);border-color:var(--tj-red)}
+.tj2 .tl-item.now h3,.tj2 .tl-item.now p{color:#fff}
+.tj2 .tl-item.now .y{color:#ffd6d9}
+.tj2 .tl-item.now::before{background:#fff;border-color:var(--tj-red)}
+.tj2 .svc{background:var(--tj-sunk)}
+.tj2 .svc-list{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-top:30px;background:#fff;border:1px solid var(--tj-line);border-radius:20px;padding:8px 28px}
+.tj2 .svc-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--tj-line);transition:.15s}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:0}
+.tj2 .svc-row img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .svc-row b{display:block;font-size:16px;color:var(--tj-ink)}
+.tj2 .svc-row span{display:block;font-size:13px;color:var(--tj-mut);line-height:1.7}
+.tj2 .svc-row svg{width:16px;height:16px;flex:none;margin-inline-start:auto;color:var(--tj-line);transition:.15s}
+.tj2 .svc-row:hover b{color:var(--tj-red)}
+.tj2 .svc-row:hover svg{color:var(--tj-red);transform:translateX(-4px)}
+.tj2 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
+.tj2 .chip{font-size:13.5px;padding:7px 14px;border-radius:999px;border:1px solid var(--tj-line);background:#fff;color:var(--tj-soft);transition:.15s;cursor:pointer;line-height:1.6}
+.tj2 .chip:hover,.tj2 .chip.on{border-color:var(--tj-red);color:var(--tj-red);background:var(--tj-tint)}
+.tj2 .chips .lbl{font-size:13px;color:var(--tj-mut);align-self:center;margin-inline-end:4px;flex:none;white-space:nowrap}
+.tj2 .how{background:#fff}
+.tj2 .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px;counter-reset:st}
+.tj2 .how-step{background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:24px 20px;position:relative}
+.tj2 .how-step::before{counter-increment:st;content:counter(st,persian);position:absolute;top:-14px;right:18px;width:30px;height:30px;border-radius:50%;background:var(--tj-red);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+.tj2 .how-step img{width:48px;height:48px;object-fit:contain;margin-bottom:10px}
+.tj2 .how-step h3{font-size:16.5px;margin-bottom:6px}
+.tj2 .how-step p{font-size:14px;line-height:1.9}
+.tj2 .how-note{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:center;font-size:14px;color:var(--tj-mut)}
+.tj2 .how-note span{display:inline-flex;align-items:center;gap:7px}
+.tj2 .how-note svg{width:16px;height:16px;color:var(--tj-red)}
+.tj2 .th{background:var(--tj-sunk)}
+.tj2 .thc{width:150px;border:1px solid var(--tj-line);border-radius:16px;padding:12px 10px 14px;text-align:center;background:#fff;transition:.18s;position:relative}
+.tj2 .thc:hover{border-color:var(--tj-red-400);box-shadow:0 10px 26px -16px rgba(14,14,14,.3)}
+.tj2 .thc.hide{display:none}
+.tj2 .thc img.ph{width:92px;height:92px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid var(--tj-sunk)}
+.tj2 .thc b{display:block;font-size:14px;color:var(--tj-ink);line-height:1.5;font-weight:700}
+.tj2 .thc .sp{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px;line-height:1.6;min-height:2.6em}
+.tj2 .thc .yr{display:inline-block;font-size:11.5px;color:var(--tj-red);background:var(--tj-tint);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .vf{position:absolute;top:10px;left:10px;width:18px;height:18px}
+.tj2 .thc .pen{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--tj-ink);background:var(--tj-yellow);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .pen svg{width:10px;height:10px}
+.tj2 .thc.more{background:var(--tj-tint);border-color:var(--tj-red-400);display:flex;flex-direction:column;justify-content:center;gap:6px}
+.tj2 .thc.more b{color:var(--tj-red);font-size:26px}
+.tj2 .thc.more span{font-size:13px;color:var(--tj-ink-2)}
+.tj2 .thc.more .btn{margin:8px auto 0;min-height:36px;font-size:13px;padding:6px 14px}
+.tj2 .dots{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.tj2 .dots i{width:6px;height:6px;border-radius:50%;background:var(--tj-line);transition:.2s}
+.tj2 .dots i.on{width:18px;border-radius:3px;background:var(--tj-red)}
+.tj2 .std{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+.tj2 .std>div{display:flex;gap:12px;align-items:center;border:1px solid var(--tj-line);border-radius:14px;padding:14px 16px;background:#fff}
+.tj2 .std img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .std b{display:block;font-size:14.5px;color:var(--tj-ink)}
+.tj2 .std span{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .sup{background:#fff}
+.tj2 .supc{width:230px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:16px;display:flex;gap:12px;align-items:center;transition:.2s}
+.tj2 .supc:hover{border-color:var(--tj-red-400);transform:translateY(-3px);background:#fff}
+.tj2 .supc img{width:64px;height:76px;border-radius:12px;object-fit:cover;flex:none}
+.tj2 .supc b{display:block;color:var(--tj-ink);font-size:14.5px;line-height:1.5}
+.tj2 .supc .ap{display:block;font-size:12.5px;color:var(--tj-red);margin-top:3px}
+.tj2 .sup .hs{margin-top:28px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center}
+.tj2 .school p.lede{margin-bottom:22px}
+.tj2 .path div{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#fff;border:1px solid var(--tj-line);border-radius:14px;margin-bottom:8px;font-size:15px;color:var(--tj-ink)}
+.tj2 .path div i{width:30px;height:30px;border-radius:50%;background:var(--tj-tint);color:var(--tj-red);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px;flex:none}
+.tj2 .path div:last-child{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .path div:last-child i{background:#fff}
+.tj2 .path small{display:block;font-size:12.5px;color:var(--tj-mut)}
+.tj2 .path div:last-child small{color:#ffd6d9}
+.tj2 .cities{background:#fff}
+.tj2 .map{position:relative;background:var(--tj-sunk);border-radius:24px;padding:22px;overflow:hidden;margin:30px auto 0;max-width:640px}
+.tj2 .map svg{width:100%;height:auto;display:block}
+.tj2 .map .land{fill:#fff;stroke:var(--tj-ink);stroke-width:1.5;stroke-linejoin:round}
+.tj2 .map text{font-family:var(--tj-font);font-size:15px;fill:var(--tj-ink);font-weight:700}
+.tj2 .map text.sea{fill:var(--tj-mut);font-weight:500;font-size:13px}
+.tj2 .map .pin{transform-box:fill-box;transform-origin:50% 100%;animation:tjbob 3.2s ease-in-out infinite}
+.tj2 .map .pin.d1{animation-delay:-.7s}.tj2 .map .pin.d2{animation-delay:-1.4s}.tj2 .map .pin.d3{animation-delay:-2.1s}.tj2 .map .pin.d4{animation-delay:-2.8s}
+@keyframes tjbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+.tj2 .map .shadow{fill:rgba(14,14,14,.14)}
+.tj2 .map .de{position:absolute;left:22px;top:22px;bottom:auto;background:#fff;border:1px solid var(--tj-line);border-radius:14px;padding:8px 12px;font-size:13px;color:var(--tj-ink);display:flex;gap:10px;align-items:center}
+.tj2 .map .de img{width:22px;height:22px}
+.tj2 .map .de small{display:block;color:var(--tj-mut);font-size:11.5px}
+.tj2 .dia{background:#fff}
+.tj2 .dia .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.tj2 .clocks{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;background:var(--tj-sunk);padding:14px;border-radius:22px;position:relative}
+.tj2 .clocks .live{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tj-mut);padding:0 4px 2px}
+.tj2 .clocks .live i{width:8px;height:8px;border-radius:50%;background:#3fb26a;animation:tjpulse 1.6s infinite}
+@keyframes tjpulse{0%{box-shadow:0 0 0 0 rgba(63,178,106,.5)}70%{box-shadow:0 0 0 7px rgba(63,178,106,0)}100%{box-shadow:0 0 0 0 rgba(63,178,106,0)}}
+.tj2 .clock{background:#fff;border:1px solid var(--tj-line);border-radius:16px;padding:12px 14px;transition:.2s}
+.tj2 .clock .c{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .clock .t{display:block;font-size:26px;font-weight:800;color:var(--tj-ink);direction:ltr;text-align:right;font-variant-numeric:tabular-nums;line-height:1.2}
+.tj2 .clock .t small{font-size:14px;font-weight:600;color:var(--tj-mut)}
+.tj2 .clock .s{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px}
+.tj2 .clock.on{border-color:var(--tj-red-400);background:var(--tj-tint)}
+.tj2 .clock.on .s{color:var(--tj-red-600);font-weight:600}
+.tj2 .dia ul{list-style:none;padding:0;margin:18px 0 24px;display:grid;gap:10px}
+.tj2 .dia li{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;color:var(--tj-ink-2)}
+.tj2 .dia li::before{content:"";width:22px;height:22px;flex:none;border-radius:50%;background:var(--tj-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c83f49' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L20 7'/></svg>") center/12px no-repeat;margin-top:3px}
+.tj2 .dia .orbit{width:110px;margin-bottom:6px}
+.tj2 .mag{background:var(--tj-sunk)}
+.tj2 .mag-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:14px;margin-top:28px}
+.tj2 .art-card{background:#fff;border:1px solid var(--tj-line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:.2s}
+.tj2 .art-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .art-card img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.tj2 .art-card .b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tj2 .art-card .k{font-size:12px;color:var(--tj-red);font-weight:700}
+.tj2 .art-card h3{font-size:15px;line-height:1.6}
+.tj2 .art-card p{font-size:13px;color:var(--tj-mut);line-height:1.8;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .art-card.big img{aspect-ratio:16/9}
+.tj2 .art-card.big h3{font-size:19px}
+.tj2 .today{margin-top:16px;background:#fff;border:1px dashed var(--tj-red-400);border-radius:16px;padding:14px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.tj2 .today .k{font-size:12.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .today a{font-weight:600;color:var(--tj-ink)}
+.tj2 .today a:hover{color:var(--tj-red)}
+.tj2 .today .cnt{margin-inline-start:auto;font-size:13px;color:var(--tj-mut)}
+.tj2 .ig{background:#fff;overflow:hidden}
+.tj2 .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:38px;padding:10px 0 16px}
+.tj2 .pola{background:#fff;border:1px solid var(--tj-line);border-radius:6px;padding:12px 12px 16px;box-shadow:0 18px 40px -22px rgba(14,14,14,.35);transition:.25s;position:relative;display:block}
+.tj2 .pola:nth-child(1){transform:rotate(-2deg)}
+.tj2 .pola:nth-child(2){transform:rotate(1.2deg) translateY(10px)}
+.tj2 .pola:nth-child(3){transform:rotate(-1deg)}
+.tj2 .pola:hover{transform:rotate(0) translateY(-6px);z-index:2;border-color:var(--tj-red-400)}
+.tj2 .pola .shot{aspect-ratio:4/5;overflow:hidden;border-radius:3px;background:var(--tj-sunk)}
+.tj2 .pola .shot img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.tj2 .pola:hover .shot img{transform:scale(1.03)}
+.tj2 .pola .cap{font-size:13.5px;color:var(--tj-ink-2);line-height:1.8;margin:12px 4px 10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .pola .who{display:flex;align-items:center;gap:10px;margin:0 4px}
+.tj2 .pola .who img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--tj-tint)}
+.tj2 .pola .who b{display:block;font-size:13px;color:var(--tj-ink);direction:ltr;text-align:right}
+.tj2 .pola .who small{display:block;font-size:11.5px;color:var(--tj-mut)}
+.tj2 .pola .who .f{margin-inline-start:auto;font-size:11.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .pola .tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-2deg);width:70px;height:20px;background:rgba(242,193,78,.6);border-radius:2px}
+.tj2 .org{background:var(--tj-sunk)}
+.tj2 .org .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center}
+.tj2 .org .logos{display:flex;gap:28px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.tj2 .org .logos img{height:34px;width:auto;opacity:.9}
+.tj2 .faq{background:#fff}
+.tj2 .faq-list{max-width:820px;margin:26px auto 0;display:grid;gap:10px}
+.tj2 details{border:1px solid var(--tj-line);border-radius:14px;background:#fff;padding:0 20px;transition:border-color .2s,background .2s}
+.tj2 details[open]{border-color:var(--tj-red-400);background:var(--tj-tint-2)}
+.tj2 summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:700;color:var(--tj-ink);font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;outline:none}
+.tj2 summary:focus{outline:none}
+.tj2 summary:focus-visible{outline:2px solid var(--tj-red-400);outline-offset:6px;border-radius:8px}
+.tj2 summary::-webkit-details-marker{display:none}
+.tj2 summary::after{content:"";width:9px;height:9px;border-inline-start:2px solid var(--tj-red);border-block-end:2px solid var(--tj-red);transform:rotate(-45deg);transition:transform .25s;flex:none;margin-inline-start:6px}
+.tj2 details[open] summary::after{transform:rotate(45deg)}
+.tj2 details .ans{overflow:hidden}
+.tj2 details p{padding:0 0 18px;font-size:15px;line-height:1.95;color:var(--tj-soft)}
+.tj2 details p a{color:var(--tj-red);font-weight:600}
+.tj2 .berry{background:var(--tj-tint);text-align:center}
+.tj2 .berry img{width:100px;margin:0 auto 16px;animation:tjfloat2 5s ease-in-out infinite}
+@keyframes tjfloat2{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(4deg) translateY(-6px)}}
+.tj2 .berry .h2{font-size:clamp(23px,3vw,34px)}
+.tj2 .berry .lede{margin:10px auto 24px}
+.tj2 .berry .ctas{justify-content:center}
+.tj2 .berry .small{font-size:13px;color:var(--tj-mut);margin-top:14px}
+.wp-block-post-content>.tj2.alignfull{max-width:none;width:auto}
+@media (max-width:1024px){
+.tj2 .eco-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .how-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .std{grid-template-columns:repeat(2,1fr)}
+.tj2 .mag-grid{grid-template-columns:1fr 1fr}
+.tj2 .art-card.big{grid-column:1/-1}
+.tj2 .ig-grid{gap:18px}
+.tj2 .school .wrap{grid-template-columns:1fr}
+.tj2 .org .wrap{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+.tj2{font-size:16px}
+.tj2 section{padding-block:40px}
+.tj2 .hero{padding-block:16px 32px}
+.tj2 .hero .wrap{grid-template-columns:1fr;gap:6px}
+.tj2 .hero .art{order:-1;justify-content:center}
+.tj2 .hero .art img{max-width:190px}
+.tj2 .hero h1{font-size:26px;margin:8px 0 12px}
+.tj2 .hero .lede{font-size:15px;margin-bottom:18px}
+.tj2 .ctas .btn{flex:1;min-height:44px;font-size:15px;padding:8px 14px}
+.tj2 .nums{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:22px;padding-top:18px}
+.tj2 .nums b{font-size:20px}.tj2 .nums span{font-size:12px}
+.tj2 .eco-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}
+.tj2 .eco-grid::-webkit-scrollbar{display:none}
+.tj2 .eco-card{flex:0 0 78%;scroll-snap-align:start}
+.tj2 .eco-card .pic{height:140px}
+.tj2 .tl-item{width:220px}
+.tj2 .svc-list{grid-template-columns:1fr;gap:0;padding:4px 16px}
+.tj2 .svc-row{padding:12px 0;gap:12px}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:1px solid var(--tj-line)}
+.tj2 .svc-row:last-child{border-bottom:0}
+.tj2 .svc-row img{width:32px;height:32px}
+.tj2 .svc-row b{font-size:15px}.tj2 .svc-row span{font-size:12.5px}
+.tj2 .chips{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
+.tj2 .chips::-webkit-scrollbar{display:none}
+.tj2 .chip{white-space:nowrap;flex:none}
+.tj2 .how-grid{grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.tj2 .how-step{padding:20px 12px 14px}
+.tj2 .how-step img{width:36px;height:36px}
+.tj2 .how-step h3{font-size:14.5px}
+.tj2 .how-step p{font-size:12.5px;line-height:1.75}
+.tj2 .how-note{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;text-align:right}
+.tj2 .thc{width:138px}
+.tj2 .std{grid-template-columns:1fr 1fr;gap:8px}
+.tj2 .std>div{flex-direction:column;text-align:center;gap:6px;padding:12px 8px}
+.tj2 .std b{font-size:13px}.tj2 .std span{font-size:11.5px}
+.tj2 .supc{width:200px}
+.tj2 .map{padding:12px;border-radius:18px}
+.tj2 .map text{font-size:18px}.tj2 .map text.sea{font-size:15px}
+.tj2 .map .de{left:10px;top:10px;bottom:auto;padding:6px 10px;font-size:12px}
+.tj2 .dia .wrap{grid-template-columns:1fr;gap:22px}
+.tj2 .clocks{grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.tj2 .clock{padding:10px}.tj2 .clock .t{font-size:19px}.tj2 .clock .t small{font-size:11px}.tj2 .clock .s{font-size:10.5px}
+.tj2 .mag-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:20px}
+.tj2 .mag-grid::-webkit-scrollbar{display:none}
+.tj2 .art-card{flex:0 0 76%;scroll-snap-align:start}
+.tj2 .art-card.big img{aspect-ratio:16/10}
+.tj2 .art-card.big h3{font-size:15px}
+.tj2 .today .cnt{display:none}
+.tj2 .ig-grid{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 6px 16px;scrollbar-width:none}
+.tj2 .ig-grid::-webkit-scrollbar{display:none}
+.tj2 .pola{flex:0 0 76%;scroll-snap-align:center}
+.tj2 .pola:nth-child(n){transform:none}
+.tj2 .org .logos{gap:18px}.tj2 .org .logos img{height:26px}
+.tj2 .berry .ctas .btn{flex:1 1 100%}
+.tj2 .arrows{display:none}
+}
+.tj2 .map{max-width:620px}
+.tj2 .map .mi{position:relative}
+.tj2 .map .mi svg{width:100%;height:auto;display:block}
+.tj2 .map .mp{--pin:20px;position:absolute;transform:translate(-50%,calc(-1 * var(--pin)));text-align:center;line-height:1.2;pointer-events:none;width:max-content}
+.tj2 .map .mp img{display:block;margin:0 auto 2px;width:var(--pin);height:var(--pin);object-fit:contain;animation:tjbob 3.2s ease-in-out infinite;transform-origin:50% 100%}
+.tj2 .map .mp b{display:block;font-size:13.5px;font-weight:700;color:var(--tj-ink);text-shadow:0 0 6px var(--tj-sunk),0 0 2px var(--tj-sunk)}
+.tj2 .map .mp.big{--pin:30px}
+.tj2 .map .mp.big b{font-size:15px}
+.tj2 .map .mp.up{display:flex;flex-direction:column-reverse;transform:translate(-50%,calc(-1 * var(--pin) - 1.3em))}
+.tj2 .map .mp.up img{margin:2px auto 0}
+.tj2 .map .mp.lw b{position:absolute;right:calc(100% + 4px);top:calc(var(--pin) - 1.2em)}
+.tj2 .map .mp.d1 img{animation-delay:-.7s}
+.tj2 .map .mp.d2 img{animation-delay:-1.4s}
+.tj2 .map .mp.d3 img{animation-delay:-2.1s}
+.tj2 .map .mp.d4 img{animation-delay:-2.8s}
+.tj2 .map .sea{position:absolute;transform:translate(-50%,-50%);font-size:12.5px;color:var(--tj-mut);white-space:nowrap;pointer-events:none}
+.tj2 .clock.on{border-color:#bfe0cb;background:#f3faf5}
+.tj2 .clock.on .s{color:#2e8b57;font-weight:600}
+.tj2 .thc .loc{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--tj-soft);background:var(--tj-sunk);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .loc svg{width:11px;height:11px;flex:none;color:var(--tj-mut)}
+.tj2 .thc .sp{min-height:3.1em}
+.tj2 .thc .sch{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:#fff;background:var(--tj-red);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .sch svg{width:10px;height:10px}
+.tj2 .thc .pen{top:auto;bottom:8px;right:8px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:block}
+.tj2 .axes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.tj2 .axes>div{background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:20px 20px 22px;transition:.2s}
+.tj2 .axes>div:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .axes i{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--tj-tint);color:var(--tj-red);margin-bottom:12px}
+.tj2 .axes i svg{width:20px;height:20px}
+.tj2 .axes b{display:block;font-size:16px;color:var(--tj-ink);margin-bottom:6px}
+.tj2 .axes p{font-size:14px;color:var(--tj-soft);line-height:1.9;margin:0}
+.tj2 .ring{margin-top:14px;background:var(--tj-ink);color:#fff;border-radius:18px;padding:18px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tj2 .ring b{font-size:22px;color:#fff;white-space:nowrap}
+.tj2 .ring span{font-size:14.5px;color:rgba(255,255,255,.72);line-height:1.9;flex:1;min-width:220px}
+.tj2 .ring .dot{width:9px;height:9px;border-radius:50%;background:var(--tj-yellow);flex:none;min-width:0}
+.tj2 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:34px;position:relative}
+.tj2 .steps::before{content:"";position:absolute;top:19px;right:10%;left:10%;height:2px;background:var(--tj-line)}
+.tj2 .steps>div{text-align:center;padding:0 8px;position:relative}
+.tj2 .steps i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid var(--tj-red-400);color:var(--tj-red);font-style:normal;font-weight:800;font-size:14px;margin:0 auto 12px;position:relative;z-index:1}
+.tj2 .steps>div:last-child i{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .steps b{display:block;font-size:14.5px;color:var(--tj-ink);margin-bottom:4px}
+.tj2 .steps span{display:block;font-size:12.5px;color:var(--tj-mut);line-height:1.8}
+.tj2 .school .ctas{justify-content:center;margin-top:30px}
+.tj2 .org .logos img{height:30px}
+.tj2 .org .logos img.dk{height:26px}
+@media (max-width:1024px){
+.tj2 .axes{grid-template-columns:1fr}
+.tj2 .steps{grid-template-columns:1fr 1fr 1fr;gap:22px 0}
+.tj2 .steps::before{display:none}
+}
+@media (max-width:760px){
+.tj2 .map .mp b{font-size:11.5px}
+.tj2 .map .mp.big b{font-size:12.5px}
+.tj2 .map .mp{--pin:15px}
+.tj2 .map .mp.big{--pin:22px}
+.tj2 .map .sea{font-size:10.5px}
+.tj2 .steps{grid-template-columns:1fr 1fr;gap:20px 0}
+.tj2 .ring{padding:16px 18px;gap:10px}
+.tj2 .ring b{font-size:18px}
+}
+.tj2 .sup{background:var(--tj-tint-2)}
+.tj2 .supc{background:#fff;width:250px;padding:18px}
+.tj2 .supc:hover{background:#fff}
+.tj2 .supc img{width:76px;height:92px;border-radius:14px}
+.tj2 .supc b{font-size:15px}
+.tj2 .school .wrap{display:grid}
+.tj2 .school{background:#fff}
+.tj2 .path div{background:var(--tj-sunk)}
+.tj2 .thc .meta{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px;min-height:24px}
+.tj2 .thc .loc,.tj2 .thc .sch,.tj2 .thc .pen{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;margin:0;line-height:1.7;font-weight:600;top:auto;right:auto;bottom:auto}
+.tj2 .thc .loc{background:var(--tj-sunk);color:var(--tj-soft);font-weight:500}
+.tj2 .thc .sch{background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .thc .pen{background:#fdf3d6;color:#6b4f00}
+.tj2 .thc .loc svg,.tj2 .thc .sch svg,.tj2 .thc .pen svg{width:11px;height:11px}
+
+.tj2 .thc .mnt{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;line-height:1.7;font-weight:700;color:var(--tj-red);background:var(--tj-tint);border:1px solid var(--tj-red-400);margin:0}
+.tj2 .thc .mnt svg{width:11px;height:11px;flex:none}
+
+.tj2 .supc .supmag{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;color:var(--tj-red-600);text-decoration:none;border-bottom:1px solid var(--tj-red-400)}
+
+/* == tjbot booking block (از صفحه‌های /team/) == */
+@keyframes tjpb{from{height:8px}to{height:44px}}
+@keyframes tjpw{from{height:4px}to{height:16px}}
+
+.tj2 .tjp-bk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);max-width:980px;margin:30px auto 0;background:#fff;border:1px solid var(--tj-line);border-radius:28px;overflow:hidden;text-align:right;box-shadow:0 30px 60px -48px rgba(14,14,14,.45)}
+
+.tj2 .tjp-bk-copy{padding:38px 40px 32px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+
+.tj2 .tjp-bk-fast{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--tj-ink);background:var(--tj-yellow);padding:5px 13px 5px 15px;border-radius:999px}
+
+.tj2 .tjp-bk-fast svg{width:13px;height:13px}
+
+.tj2 .tjp-bk-copy h3{font-size:clamp(22px,2.3vw,27px);line-height:1.55;margin:16px 0 20px;color:var(--tj-ink)}
+
+.tj2 .tjp-bk-steps{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:0;width:100%}
+
+.tj2 .tjp-bk-steps li{position:relative;display:flex;align-items:center;gap:12px;font-size:15px;color:var(--tj-ink);line-height:1.7;padding:6px 0}
+
+.tj2 .tjp-bk-steps b{position:relative;z-index:1;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:13.5px;background:var(--tj-tint);color:var(--tj-red-600)}
+
+.tj2 .tjp-bk-steps li:not(:last-child)::after{content:"";position:absolute;inset-inline-start:14px;top:34px;height:calc(100% - 26px);border-inline-start:2px dotted var(--tj-red-400);opacity:.5}
+
+.tj2 .tjp-bk-steps li:last-child b{background:var(--tj-red);color:#fff}
+
+.tj2 .tjp-bk-go{width:100%;justify-content:center;padding-block:15px;font-size:16px}
+
+.tj2 .tjp-bk-facts{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-wrap:wrap;gap:6px 18px}
+
+.tj2 .tjp-bk-facts li{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--tj-soft)}
+
+.tj2 .tjp-bk-facts svg{width:15px;height:15px;color:var(--tj-mut)}
+
+.tj2 .tjp-bk-demo{position:relative;background:var(--tj-ink);display:grid;place-items:center;padding:36px 30px;overflow:hidden;isolation:isolate}
+
+.tj2 .tjp-bk-demo::before{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.12) 1.2px,transparent 1.4px) 0 0/18px 18px;z-index:-1}
+
+.tj2 .tjp-bk-demo::after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:var(--tj-red);filter:blur(80px);opacity:.5;top:-110px;inset-inline-end:-90px;z-index:-1}
+
+.tj2 .tjp-chat{width:100%;max-width:330px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:26px;padding:14px 14px 18px;display:flex;flex-direction:column;gap:9px;box-shadow:0 30px 50px -30px rgba(0,0,0,.6)}
+
+.tj2 .tjp-chat-top{display:flex;align-items:center;gap:10px;padding:2px 4px 11px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:4px}
+
+.tj2 .tjp-chat-top .av{width:36px;height:36px;border-radius:50%;background:var(--tj-red);color:#fff;display:grid;place-items:center;flex:none}
+
+.tj2 .tjp-chat-top .av svg{width:17px;height:17px}
+
+.tj2 .tjp-chat-top b{display:block;font-size:13.5px;color:#fff;line-height:1.5}
+
+.tj2 .tjp-chat-top small{display:block;font-size:11.5px;color:rgba(255,255,255,.55);line-height:1.5}
+
+.tj2 .tjp-chat .bb{margin:0;align-self:flex-start;max-width:90%;background:#fff;color:var(--tj-ink);font-size:13.5px;line-height:1.8;padding:8px 13px;border-radius:16px 16px 5px 16px}
+
+.tj2 .tjp-chat .ok{display:inline-flex;align-items:center;gap:6px;background:var(--tj-yellow);font-weight:700}
+
+.tj2 .tjp-chat .ok svg{width:15px;height:15px;stroke-width:2.6}
+
+.tj2 .tjp-chat .ch{display:flex;gap:6px}
+
+.tj2 .tjp-chat .ch span{flex:1;text-align:center;font-size:12.5px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:11px;padding:7px 4px;line-height:1.6}
+
+.tj2 .tjp-chat .m1{animation:tjpA1 9s infinite both}
+.tj2 .tjp-chat .m2{animation:tjpA2 9s infinite both}
+.tj2 .tjp-chat .m3{animation:tjpA3 9s infinite both}
+
+.tj2 .tjp-chat .m4{animation:tjpA4 9s infinite both}
+.tj2 .tjp-chat .m5{animation:tjpA5 9s infinite both}
+
+.tj2 .tjp-chat .o1{animation:tjpO1 9s infinite both}
+.tj2 .tjp-chat .o2{animation:tjpO2 9s infinite both}
+@keyframes tjpA1{0%,3%{opacity:0;transform:translateY(8px)}8%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes tjpA2{0%,11%{opacity:0;transform:translateY(8px)}16%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes tjpA3{0%,29%{opacity:0;transform:translateY(8px)}34%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes tjpA4{0%,37%{opacity:0;transform:translateY(8px)}42%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes tjpA5{0%,55%{opacity:0;transform:translateY(8px) scale(.96)}61%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes tjpO1{0%,20%{background:transparent;border-color:rgba(255,255,255,.28);transform:none}22%{transform:scale(.92)}25%,100%{background:var(--tj-red);border-color:var(--tj-red);transform:none}}
+@keyframes tjpO2{0%,46%{background:transparent;border-color:rgba(255,255,255,.28);transform:none}48%{transform:scale(.92)}51%,100%{background:var(--tj-red);border-color:var(--tj-red);transform:none}}
+@media (prefers-reduced-motion:reduce){.tj2 .tjp-chat *{animation:none!important}.tj2 .tjp-chat .on{background:var(--tj-red);border-color:var(--tj-red)}}
+@keyframes tjpld{50%{opacity:.55}}
+@media (max-width:760px){
+.tj2 .tjp-hero .wrap{grid-template-columns:1fr;gap:18px}
+.tj2 .tjp-portrait{order:-1}
+.tj2 .tjp-portrait{width:210px;margin-top:10px}
+.tj2 .tjp-portrait::after{width:48px;height:48px;inset-inline-end:-10px}
+.tj2 .tjp-listen{inset-inline-start:-10px;bottom:14px;font-size:12px;padding:7px 12px 7px 10px}
+.tj2 .tjp-hero h1{font-size:30px;margin-top:10px}
+.tj2 .tjp-hero .copy{text-align:center}
+.tj2 .tjp-crumb,.tj2 .tjp-roles,.tj2 .tjp-facts,.tj2 .tjp-badges{justify-content:center}
+.tj2 .tjp-quote{padding-inline-start:0;padding-top:22px;text-align:center}
+.tj2 .tjp-quote::before{inset-inline-start:50%;transform:translateX(50%);top:-10px}
+.tj2 .tjp-two{grid-template-columns:1fr;gap:20px}
+.tj2 .tjp-bk{grid-template-columns:1fr;border-radius:22px}
+.tj2 .tjp-bk-copy{padding:26px 20px 24px}
+.tj2 .tjp-bk-demo{padding:26px 16px}
+.tj2 .tjp-call summary{flex-direction:column;align-items:stretch;text-align:center;padding:14px 16px}
+.tj2 .tjp-call-b{padding:0 14px 16px}
+.tj2 .tjp-cv-b{grid-template-columns:1fr;padding:4px 16px 16px}
+.tj2 .tjp-cv summary,.tj2 .tjp-cv-link{padding:12px 14px}
+.tj2 .tjp-mag{grid-template-columns:1fr}
+.tj2 .tjp-mi img,.tj2 .tjp-mi-ph{width:92px;height:68px}
+.tj2 .tjp-topics>div{grid-template-columns:1fr;gap:6px}
+.tj2 .tjp-prose p{text-align:right;font-size:16px}
+.tj2 .tjp-kv{grid-template-columns:repeat(2,minmax(0,1fr));border-radius:20px}
+.tj2 .tjp-kv-c{padding:14px 16px}
+.tj2 .tjp-kv-c+.tjp-kv-c{border-inline-start:0;border-top:1px solid var(--tj-line)}
+.tj2 .tjp-kv-c.is-apx{grid-column:1/-1}
+.tj2 .tjp-kv-c.is-apx~.tjp-kv-c:nth-child(odd){border-inline-start:1px solid var(--tj-line)}
+.tj2 .tjp-kv:not(:has(.is-apx)) .tjp-kv-c:nth-child(even){border-inline-start:1px solid var(--tj-line)}
+.tj2 .tjp-apx-in{padding:16px}
+.tj2 .tjp-first{padding:26px 18px 18px}
+.tj2 .tjp-supbox{grid-template-columns:1fr;padding:26px 20px}
+.tj2 .tjp-bookbox{grid-template-columns:1fr;padding:22px 16px;gap:16px}
+.tj2.tjp-edu .tjp-portrait::before{inset:12px -12px -12px 12px}
+}
+/* == اصلاح‌های صفحه == */
+main.tj-page{margin-block-start:0}.wp-block-post-content>.tj2.alignfull{margin-top:0}
+.tj2 #book{background:var(--tj-sunk)}
+.tj2 .hero .art{display:block;text-align:center;min-width:0}
+.tj2 .hero .art img{display:block;margin:0 auto;width:auto;height:auto;max-width:min(100%,440px);max-height:560px;object-fit:contain}
+@media (max-width:760px){.tj2 .hero .art img{max-width:190px;max-height:300px}}
+
+/* == متن غنی داخل آکاردئون == */
+.tj2 details .ans ul{margin:0 0 18px;padding-inline-start:22px;font-size:15px;line-height:1.95;color:var(--tj-soft)}
+.tj2 details .ans li{margin-bottom:7px}
+.tj2 details .ans h3{font-size:16px;margin:2px 0 8px;color:var(--tj-ink);font-weight:700}
+.tj2 details .ans a{color:var(--tj-red);font-weight:600}
+.tj2 details .ans b{color:var(--tj-ink)}
+.tj2 details .ans ul.ltr{direction:ltr;text-align:left;padding-inline-start:0;padding-left:22px}
+.tj2 details .ans ul.ltr li{font-size:13.5px;color:var(--tj-mut)}
+
+
+/* == هیروی افقی: روی موبایل بزرگ‌تر تا صحنه خوانا بماند == */
+@media (max-width:760px){.tj2 .hero .art img{max-width:min(100%,270px);max-height:240px}}
+</style>
+<div class="tj2 alignfull" id="tj2">
+<section class="hero" id="hero"><div class="wrap"><div class="copy"><span class="eyebrow">خدمات کلینیک تجربه</span><h1>زوج‌درمانی آنلاین و حضوری؛ <em>شنیدن آنچه در رابطه</em> ناگفته مانده است</h1><p class="lede">بیشتر روابط عاطفی در یک روز دچار بحران نمی‌شوند. فاصله‌ها معمولاً آرام و تدریجی شکل می‌گیرند؛ از گفت‌وگوهایی که ناتمام می‌مانند، دلخوری‌هایی که گفته نمی‌شوند، سوءتفاهم‌هایی که تکرار می‌شوند و احساساتی که به‌مرور جای خود را به سکوت می‌دهند.</p><div class="ctas"><a class="btn btn-brand" href="/get-therapy/">شروع زوج‌درمانی</a><a class="btn btn-ghost" href="#guide">قبلش این‌ها را بخوانید</a></div></div><div class="art"><img src="/wp-content/uploads/2026/09/tjl-cut-bend.webp" alt="فاصله‌ی عاطفی در رابطه؛ زوج‌درمانی در مرکز تجربه زندگی" width="712" height="544" fetchpriority="high" decoding="async" loading="eager"></div></div></section>
+<section class="how" id="signs"><div class="wrap"><div class="center rv"><span class="eyebrow">نشانه‌ها</span><h2 class="h2">کِی وقتش رسیده که به زوج‌درمانگر مراجعه کنیم؟</h2><p class="lede">مرحله‌ی بحران یا تصمیم برای جدایی، مرحله‌ای نیست که منتظرش بمانیم و بعد زوج‌درمانی را به عنوان آخرین سنگر شروع کنیم. این نشانه‌ها لزوماً به معنای پایان رابطه نیستند، اما نشان می‌دهند رابطه به توجه جدی‌تری نیاز دارد.</p></div><div class="how-note rv"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"></path></svg>سردی و فاصله‌ی عاطفی</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"></path></svg>خشم‌های پنهان و حل‌نشده</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"></path></svg>سکوت‌های طولانی و فرساینده</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"></path></svg>احساس بی‌اهمیت بودن در رابطه</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"></path></svg>کاهش میل به گفت‌وگو</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"></path></svg>افزایش انتقاد، سرزنش یا تحقیر</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"></path></svg>از بین رفتن اعتماد</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"></path></svg>تکرار تعارض‌های قدیمی</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"></path></svg>احساس تنهایی در رابطه</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l5 5L20 7"></path></svg>دشواری در تصمیم‌های مهم زندگی</span></div><div class="center" style="margin-top:26px"><a class="btn btn-brand" href="/get-therapy/">درخواست زوج‌درمانی</a></div></div></section>
+<section class="school" id="howstart"><div class="wrap"><div class="rv"><span class="eyebrow">چطور شروع می‌شود</span><h2 class="h2">پنج قدم تا اولین جلسه‌ی زوج‌درمانی</h2><p class="lede">شروع درمان معمولاً بسیار ساده‌تر از چیزی است که تصور می‌شود. این فرایند به گونه‌ای طراحی شده است که زوج‌ها بتوانند با آگاهی و آرامش وارد مسیر درمان شوند.</p><div class="ctas"><a class="btn btn-brand" href="/get-therapy/">تکمیل فرم ارزیابی</a><a class="btn btn-ghost" href="/therapy/premarital-counseling/">پیش از ازدواج هستید؟</a></div></div><div class="path rv"><div><i>۱</i><span>تکمیل فرم ارزیابی اولیه<small>چند سؤال کوتاه درباره‌ی رابطه و آنچه اذیتتان می‌کند</small></span></div><div><i>۲</i><span>بررسی نیازهای رابطه توسط تیم تخصصی<small>متخصص مچ‌میکینگ پاسخ‌ها را بازبینی می‌کند</small></span></div><div><i>۳</i><span>معرفی درمانگر مناسب<small>با پروفایل کامل، رویکرد و سابقه</small></span></div><div><i>۴</i><span>تعیین زمان جلسات<small>هماهنگ با برنامه‌ی هر دو نفر</small></span></div><div><i>۵</i><span>آغاز درمان، حضوری یا آنلاین<small>با حفظ محرمانگی و استانداردهای حرفه‌ای</small></span></div></div></div></section>
+<section class="faq" id="guide"><div class="wrap"><div class="center rv"><span class="eyebrow">راهنمای کامل</span><h2 class="h2">هر آنچه درباره‌ی زوج‌درمانی باید بدانید</h2><p class="lede">این بخش‌ها را تیم بالینی مرکز تجربه زندگی نوشته و درمانگر بالینی تأیید کرده است.</p></div><div class="faq-list rv"><details><summary>رابطه‌ها ناگهان سرد نمی‌شوند</summary><div class="ans"><p>بسیاری از زوج‌ها زمانی به زوج درمانی فکر می‌کنند که احساس می‌کنند رابطه‌شان دیگر شبیه گذشته نیست. صمیمیت کاهش یافته، بحث‌ها تکراری شده‌اند یا هر دو نفر با وجود حضور در کنار یکدیگر، احساس تنهایی می‌کنند. زوج درمانی فضایی فراهم می‌کند تا آنچه در رابطه گم شده، دوباره دیده شود.</p><p>در مرکز تجربه زندگی، خدمات زوج درمانی در تهران با هدف کمک به بازسازی ارتباط، افزایش صمیمیت و ایجاد گفت‌وگویی سازنده میان زوجین ارائه می‌شود.</p></div></details>
+<details><summary>زوج درمانی چیست؟</summary><div class="ans"><p>زوج درمانی نوعی روان‌درمانی تخصصی است که بر رابطه میان دو نفر تمرکز دارد. در این فرآیند، درمانگر تلاش نمی‌کند مشخص کند کدام طرف درست می‌گوید یا چه کسی مقصر است؛ تمرکز اصلی بر شناخت الگوهای ارتباطی، تعارض‌های تکرارشونده و موانعی است که رابطه را تحت تأثیر گذاشته‌اند.</p><p>برخلاف تصور همه، زوج درمانی تنها برای زوج‌هایی نیست که در آستانه جدایی قرار دارند. بسیاری از افراد برای بهبود کیفیت رابطه، افزایش صمیمیت، آمادگی برای مراحل جدید زندگی یا جلوگیری از عمیق‌شدن مشکلات از خدمات زوج درمانی بهره می‌برند.</p><p>زوج درمانی فرصتی است برای شنیدن، شنیده شدن و بازسازی رابطه‌ای که شاید زیر فشار زندگی روزمره، بخشی از پویایی خود را از دست داده باشد.</p></div></details>
+<details><summary>چه زمانی مراجعه به زوج درمانگر ضروری می‌شود؟</summary><div class="ans"><p>گاهی زوج‌ها مدت زیادی را با مشکلاتی سر می‌کنند که کم‌کم به بخشی از رابطه تبدیل می‌شود. اما برخی نشانه‌ها می‌توانند گویای این باشند که زمان دریافت کمک تخصصی فرا رسیده است.</p><p>اگر موارد زیر در رابطه شما تکرار می‌شوند، مراجعه به زوج درمانگر می‌تواند مفید باشد:</p><ul>
+<li>مشاجره‌های مکرر و حل‌نشده</li>
+<li>کاهش صمیمیت عاطفی</li>
+<li>احساس درک نشدن</li>
+<li>فاصله گرفتن از یکدیگر</li>
+<li>مشکلات اعتمادی</li>
+<li>خیانت عاطفی یا جنسی</li>
+<li>اختلاف در تربیت فرزندان</li>
+<li>مشکلات جنسی و زناشویی</li>
+<li>دشواری در تصمیم‌گیری‌های مهم زندگی</li>
+<li>احساس تنهایی در رابطه</li>
+</ul><p>هرچه این مشکلات زودتر مورد توجه قرار گیرند، احتمال ترمیم رابطه بیشتر خواهد بود.</p></div></details>
+<details><summary>چرا بعضی تعارض‌ها بارها تکرار می‌شوند؟</summary><div class="ans"><p>یکی از تجربه‌های مشترک بسیاری از زوج‌ها این است که احساس می‌کنند بارها درباره یک موضوع صحبت کرده‌اند، اما نتیجه همیشه یکسان بوده است.</p><p>ممکن است موضوع بحث تغییر کند؛ گاهی پول، گاهی خانواده، گاهی فرزند یا زمان با هم بودن. اما احساس نهایی مشابه باقی می‌ماند: خشم، ناامیدی، فاصله یا سکوت.</p><p>در بسیاری از موارد، چیزی که تکرار می‌شود صرفاً موضوع اختلاف نیست؛ بلکه الگوی رابطه است. زوج درمانی کمک می‌کند این الگوهای پنهان دیده شوند؛ الگوهایی که گاهی سال‌ها در رابطه حضور داشته‌اند و بدون آنکه شناخته شوند، تعارض‌ها را بازتولید می‌کنند.</p></div></details>
+<details><summary>نشانه‌هایی که مراجعه به مرکز زوج درمانی را ضروری می‌کند</summary><div class="ans"><p>برخی نشانه‌ها هشدار می‌دهند که رابطه نیازمند توجه جدی‌تر است:</p><ul>
+<li>سردی و فاصله عاطفی</li>
+<li>خشم‌های پنهان و حل‌نشده</li>
+<li>سکوت‌های طولانی و فرساینده</li>
+<li>احساس بی‌اهمیت بودن در رابطه</li>
+<li>کاهش میل به گفت‌وگو</li>
+<li>افزایش انتقاد، سرزنش یا تحقیر</li>
+<li>از بین رفتن اعتماد</li>
+<li>تکرار تعارض‌های قدیمی</li>
+</ul><p>این نشانه‌ها لزوماً به معنای پایان رابطه نیستند، اما می‌توانند نشان دهند که رابطه برای ادامه مسیر به حمایت و بازنگری نیاز دارد.</p></div></details>
+<details><summary>انواع خدمات زوج درمانی در مرکز تجربه زندگی</summary><div class="ans"><p>هر رابطه ویژگی‌ها و پیچیدگی‌های خاص خود را دارد. به همین دلیل، خدمات زوج درمانی در مرکز تجربه زندگی متناسب با شرایط هر زوج طراحی می‌شود.</p><p>زمینه‌های رایج مراجعه شامل:</p><ul>
+<li>حل تعارض‌های زوجی</li>
+<li>بهبود ارتباط و گفت‌وگو</li>
+<li>بازسازی اعتماد پس از خیانت</li>
+<li>درمان مشکلات عاطفی و صمیمیت</li>
+<li>زوج درمانی پیش از ازدواج</li>
+<li>درمان مشکلات جنسی و زناشویی</li>
+<li>مدیریت بحران‌های زندگی مشترک</li>
+<li>کمک به تصمیم‌گیری درباره ادامه رابطه</li>
+</ul><p>پس از ارزیابی اولیه، مسیر درمان متناسب با نیازهای واقعی زوج طراحی می‌شود.</p></div></details>
+<details><summary>نقش هر یک از زوجین در فرایند زوج درمانی</summary><div class="ans"><p>زوج درمانی زمانی بیشترین اثربخشی را دارد که هر دو نفر آمادگی نگاه کردن به سهم خود در رابطه را داشته باشند.</p><p>هدف درمان پیدا کردن مقصر نیست. رابطه معمولاً محصول تعامل دو نفر است و تغییر پایدار زمانی رخ می‌دهد که هر دو نفر بتوانند الگوهای رفتاری، واکنش‌ها و نیازهای خود را بهتر بشناسند.</p><p>در جلسات زوج درمانی، افراد یاد می‌گیرند چگونه به جای دفاع، حمله یا سکوت، درباره تجربه‌های خود صحبت کنند و مسئولیت نقش خود را در رابطه بپذیرند.</p></div></details>
+<details><summary>بهترین رویکرد زوج درمانی چگونه انتخاب می‌شود؟</summary><div class="ans"><p>هیچ رویکرد درمانی واحدی برای همه زوج‌ها مناسب نیست.</p><p>انتخاب روش درمان به عوامل مختلفی بستگی دارد:</p><ul>
+<li>نوع و شدت تعارض</li>
+<li>مدت زمان رابطه</li>
+<li>اهداف زوجین</li>
+<li>سابقه مشکلات رابطه</li>
+<li>ویژگی‌های شخصیتی هر دو نفر</li>
+</ul><p>در مرکز تجربه زندگی، انتخاب درمانگر و رویکرد درمانی پس از ارزیابی اولیه انجام می‌شود تا مسیر درمان با نیازهای واقعی زوج هماهنگ باشد.</p><p>این فرایند به زوج‌ها کمک می‌کند با اطمینان بیشتری وارد درمان شوند و بدانند جلسات بر اساس شرایط منحصر به فرد آن‌ها طراحی شده است.</p></div></details>
+<details><summary>زوج درمانی آنلاین یا حضوری</summary><div class="ans"><p>یکی از پرسش‌های رایج زوج‌ها انتخاب میان جلسات آنلاین و حضوری است.</p><h3>زوج درمانی آنلاین</h3><p>زوج درمانی آنلاین برای افرادی مناسب است که:</p><ul>
+<li>محدودیت زمانی دارند</li>
+<li>در شهرهای مختلف زندگی می‌کنند</li>
+<li>خارج از کشور هستند</li>
+<li>دسترسی آسان‌تری به جلسات آنلاین دارند</li>
+</ul><h3>زوج درمانی حضوری</h3><p>زوج درمانی حضوری می‌تواند برای افرادی مناسب باشد که:</p><ul>
+<li>ارتباط چهره‌به‌چهره را ترجیح می‌دهند</li>
+<li>احساس می‌کنند در فضای حضوری راحت‌تر صحبت می‌کنند</li>
+<li>امکان مراجعه منظم به مرکز را دارند</li>
+</ul><p>در مرکز تجربه زندگی هر دو شیوه با رعایت استانداردهای حرفه‌ای و حفظ محرمانگی ارائه می‌شود.</p></div></details>
+<details><summary>چرا انتخاب مرکز زوج درمانی معتبر اهمیت دارد؟</summary><div class="ans"><p>موفقیت زوج درمانی تنها به انگیزه زوجین وابسته نیست. تخصص درمانگر، فضای درمانی و کیفیت فرایند درمان نیز نقش مهمی در نتیجه دارند.</p><p>یک مرکز معتبر باید بتواند فضایی امن و بدون قضاوت ایجاد کند؛ فضایی که هر دو نفر احساس کنند می‌توانند آزادانه درباره مسائل خود صحبت کنند.</p><p>در مرکز تجربه زندگی تلاش می‌شود درمان بر پایه احترام، تخصص، محرمانگی و توجه به تجربه هر دو نفر شکل بگیرد تا امکان گفت‌وگویی واقعی و سازنده فراهم شود.</p></div></details>
+<details><summary>چگونه از خدمات زوج درمانی در مرکز تجربه زندگی استفاده کنیم؟</summary><div class="ans"><p>شروع درمان معمولاً بسیار ساده‌تر از چیزی است که تصور می‌شود.</p><p>مراحل دریافت خدمات شامل:</p><ul>
+<li>تکمیل فرم ارزیابی اولیه</li>
+<li>بررسی نیازهای رابطه توسط تیم تخصصی</li>
+<li>معرفی درمانگر مناسب</li>
+<li>تعیین زمان جلسات</li>
+<li>آغاز فرایند درمان به صورت حضوری یا آنلاین</li>
+</ul><p>این فرایند به گونه‌ای طراحی شده است که زوج‌ها بتوانند با آگاهی و آرامش وارد مسیر درمان شوند.</p></div></details>
+<details><summary>زوج درمانی؛ فرصتی برای شنیدن آنچه در رابطه ناگفته مانده است</summary><div class="ans"><p>بسیاری از مشکلات رابطه از جایی آغاز می‌شوند که دو نفر دیگر نمی‌توانند یکدیگر را بشنوند. گاهی پشت خشم، سکوت، فاصله یا ناامیدی، نیازهایی وجود دارند که هرگز فرصت بیان پیدا نکرده‌اند.</p><p>زوج درمانی فضایی است برای مکث کردن، فهمیدن و بازسازی رابطه؛ نه از طریق سرزنش یا اجبار، بلکه از مسیر گفت‌وگو، آگاهی و شناخت عمیق‌تر.</p><p>اگر احساس می‌کنید رابطه شما نیاز به توجه، ترمیم یا بازنگری دارد، خدمات زوج درمانی مرکز تجربه زندگی می‌تواند فرصتی برای آغاز این مسیر باشد.</p></div></details></div></div></section>
+<section class="th" id="therapists"><div class="wrap"><div class="head rv"><div><span class="eyebrow">درمانگران زوج</span><h2 class="h2">با چه کسی کار می‌کنید؟</h2><p class="lede">این درمانگران در مرکز تجربه زندگی کار با زوج‌ها را انجام می‌دهند؛ با رویکردهای هیجان‌مدار، سیستمی و خانواده، طرحواره‌درمانی و تحلیلی. انتخاب نهایی پس از ارزیابی اولیه و متناسب با نوع و شدت تعارض، اهداف شما و ویژگی‌های هر دو نفر انجام می‌شود.</p></div><div class="arrows" data-for="thTrack"><button type="button" aria-label="قبلی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"></path></svg></button><button type="button" aria-label="بعدی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></button></div></div><div class="hs" id="thTrack"><div class="thc" data-tags="eft cbt"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th2-aylin-shahabi.webp" alt="آیلین شهابی" width="92" height="92" loading="lazy"><b>آیلین شهابی</b><span class="sp">زوج‌درمانی و مشاوره‌ی پیش از ازدواج · دکتری مشاوره</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span></span></div>
+<div class="thc" data-tags="eft cbt"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-12.webp" alt="بهار ایروانی" width="92" height="92" loading="lazy"><b>بهار ایروانی</b><span class="sp">هیجان‌مدار (EFT) و سیستمی و خانواده</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span><span class="mnt" title="منتور دورهٔ درمان هیجان‌مدار (EFT) مدرسه تجربه"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.5l2.2 5.3 5.3 2.2-5.3 2.2-2.2 5.3-2.2-5.3L4.5 11l5.3-2.2L12 3.5Z"></path></svg>منتور</span></span></div>
+<div class="thc" data-tags="eft"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th2-m6inn-1.webp" alt="غزاله حضراتی" width="92" height="92" loading="lazy"><b>غزاله حضراتی</b><span class="sp">هیجان‌مدار (EFT) و سیستمی و خانواده</span><span class="meta"><span class="loc">تهران</span></span></div>
+<div class="thc" data-tags="eft schema cbt"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-19.webp" alt="متینه مهدی‌زاده" width="92" height="92" loading="lazy"><b>متینه مهدی‌زاده</b><span class="sp">هیجان‌مدار (EFT)</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span></span></div>
+<div class="thc" data-tags="cbt"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th2-saeideh-karamzadeh.webp" alt="سعیده کرم‌زاده" width="92" height="92" loading="lazy"><b>سعیده کرم‌زاده</b><span class="sp">CBT و مشاوره‌ی پیش از ازدواج</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span></span></div>
+<div class="thc" data-tags="cbt schema"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-18.webp" alt="علی صالحی" width="92" height="92" loading="lazy"><b>علی صالحی</b><span class="sp">طرحواره‌درمانی و CBT</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span></span></div>
+<div class="thc" data-tags="lacan classic"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-10.webp" alt="سها هاشمی" width="92" height="92" loading="lazy"><b>سها هاشمی</b><span class="sp">لکانی، روانکاوی کلاسیک و روان‌درمانی تحلیلی</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span></span></div>
+<a class="thc more" href="/team/"><b>۱۵۰+</b><span>تراپیست دیگر در تجربه</span><span class="btn btn-brand">همه را ببینید</span></a></div><div class="dots" id="thDots"></div><div class="std rv">
+<div><img src="/wp-content/uploads/2026/09/tjl-crit-science.webp" alt="معیار اول: مصاحبه‌ی علمی تراپیست" loading="lazy"><div><b>مصاحبه‌ی علمی</b><span>سنجش دانش نظری و بالینی</span></div></div>
+<div><img src="/wp-content/uploads/2026/09/tjl-crit-roleplay.webp" alt="معیار دوم: شبیه‌سازی جلسه" loading="lazy"><div><b>شبیه‌سازی جلسه</b><span>مصاحبه‌ی عملی (Role Playing)</span></div></div>
+<div><img src="/wp-content/uploads/2026/09/tjl-crit-personal.webp" alt="معیار سوم: درمان شخصی تراپیست" loading="lazy"><div><b>درمان شخصی تراپیست</b><span>تجربه‌ی بلندمدت روی کاناپه</span></div></div>
+<div><img src="/wp-content/uploads/2026/09/tjl-crit-supervision.webp" alt="معیار چهارم: نظارت بالینی مداوم" loading="lazy"><div><b>نظارت بالینی مداوم</b><span>سوپرویژن متناسب با رویکرد</span></div></div>
+</div></div></section>
+<section id="book"><div class="wrap"><div class="center rv"><span class="eyebrow">بات تجربه در تلگرام</span><h2 class="h2">وقت معارفه را همان‌جا بگیرید</h2><p class="lede">اگر ترجیح می‌دهید به‌جای فرم در تلگرام پیش بروید، بات تجربه روز و ساعت آزاد زوج‌درمانگرها را نشانتان می‌دهد و رزرو را همان لحظه تأیید می‌کند.</p></div><div class="tjp-bk rv"><div class="tjp-bk-copy"><span class="tjp-bk-fast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" fill="currentColor" stroke="none"></path></svg>سریع‌ترین راه</span><h3>سه ضربه تا وقت معارفه</h3><ol class="tjp-bk-steps"><li><b>۱</b>روز را انتخاب کنید</li><li><b>۲</b>ساعت را بزنید</li><li><b>۳</b>تأیید رزرو همان لحظه می‌رسد</li></ol><a class="btn btn-brand tjp-bk-go" href="https://t.me/tajrobehlife_bot" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 3.5 2.5 11l6.5 2.2L11 20l3.2-4.2 5.3 4 2-16.3Z"></path><path d="m9 13.2 7.5-5.7"></path></svg>انتخاب وقت در تلگرام</a><ul class="tjp-bk-facts"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>حدود بیست دقیقه</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>رایگان</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>بدون ثبت‌نام</li></ul></div><div class="tjp-bk-demo" aria-hidden="true"><div class="tjp-chat"><div class="tjp-chat-top"><span class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 3.5 2.5 11l6.5 2.2L11 20l3.2-4.2 5.3 4 2-16.3Z"></path><path d="m9 13.2 7.5-5.7"></path></svg></span><span><b>بات تجربه</b><small>معمولاً در چند ثانیه پاسخ می‌دهد</small></span></div><p class="bb m1">کدام روز برای معارفه بهتان می‌خورد؟</p><div class="ch m2"><span>شنبه</span><span class="on o1">دوشنبه</span><span>چهارشنبه</span></div><p class="bb m3">این ساعت‌ها آزاد است:</p><div class="ch m4"><span>۱۰:۰۰</span><span class="on o2">۱۶:۲۰</span><span>۱۸:۴۰</span></div><p class="bb ok m5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>رزرو شد · دوشنبه، ساعت ۱۶:۲۰</p></div></div></div></div></section>
+<section class="faq" id="faq"><div class="wrap"><div class="center rv"><span class="eyebrow">پرسش‌های پرتکرار</span><h2 class="h2">سؤال‌های رایج درباره‌ی زوج‌درمانی آنلاین و حضوری</h2></div><div class="faq-list rv"><details><summary>چه زمانی باید به زوج‌درمانگر مراجعه کنیم؟</summary><div class="ans"><p>مرحله‌ی بحران و یا تصمیم برای جدایی، مرحله‌ای نیست که منتظر آن بمانیم و بعد زوج‌درمانی را به عنوان آخرین سنگر شروع کنیم. تکرار یک تعارض بدون اینکه نتیجه‌ای حاصل شود، کاهش صمیمیت، احساس شنیده‌نشدن، فاصله‌ی عاطفی، مشکلات اعتماد یا ناتوانی در گفت‌وگو درباره‌ی موضوعات مهم، می‌توانند نشانه‌هایی باشند از اینکه نیاز است به زوج‌درمانگر مراجعه کنیم.</p></div></details>
+<details><summary>آیا زوج‌درمانی واقعاً می‌تواند رابطه را بهتر کند؟</summary><div class="ans"><p>زوج‌درمانی می‌تواند به بسیاری از زوج‌ها در بهبود ارتباط، مدیریت تعارض، بازسازی اعتماد و افزایش کیفیت رابطه کمک کند. اثربخشی درمان به عواملی مانند نوع مشکل، شرایط رابطه، رویکرد درمانی، تخصص درمانگر و میزان مشارکت زوجین بستگی دارد.</p><p>با این حال، هدف زوج‌درمانی همیشه حفظ رابطه به هر قیمت نیست. گاهی درمان به زوج‌ها کمک می‌کند تا رابطه‌ی خود را ترمیم کنند و گاهی امکان می‌دهد با آگاهی بیشتری درباره‌ی ادامه‌ی رابطه یا مسیر پیش‌رو تصمیم بگیرند.</p></div></details>
+<details><summary>در اولین جلسه‌ی زوج‌درمانی چه اتفاقی می‌افتد؟</summary><div class="ans"><p>جلسه‌ی اول معمولاً فرصتی برای شناخت رابطه، بررسی مسئله‌ی اصلی و مشخص کردن انتظارات زوجین از درمان است. درمانگر تلاش می‌کند بفهمد تعارض‌ها چگونه شکل می‌گیرند، هر یک از زوجین چه تجربه‌ای از رابطه دارند و چه چیزی باعث شده به دنبال کمک تخصصی باشند.</p></div></details>
+<details><summary>اگر یکی از زوجین برای زوج‌درمانی همکاری نکند، چه باید کرد؟</summary><div class="ans"><p>این وضعیت نسبتاً رایج است. گاهی یکی از زوجین تصور می‌کند مشکل فقط مربوط به طرف مقابل است، گاهی از قضاوت شدن می‌ترسد و گاهی هنوز ضرورت مراجعه به درمانگر را احساس نمی‌کند.</p><p>در حالت ایده‌آل، زوج‌درمانی با مشارکت هر دو نفر انجام می‌شود؛ اما اگر یکی از افراد فعلاً حاضر به شرکت نباشد، مراجعه‌ی فردی طرف دیگر می‌تواند فرصتی برای بررسی الگوهای رابطه، نیازها، مرزها و شیوه‌ی واکنش همان فرد باشد. این کار الزاماً به معنای پذیرش مسئولیت تمام مشکلات رابطه نیست، بلکه می‌تواند به روشن‌تر شدن وضعیت و تصمیم‌گیری آگاهانه‌تر همان فرد کمک کند.</p></div></details>
+<details><summary>زوج‌درمانی حضوری بهتر است یا آنلاین؟</summary><div class="ans"><p>هیچ پاسخ یکسانی برای درمان همه‌ی زوج‌ها وجود ندارد. انتخاب بین جلسات حضوری و آنلاین به شرایط زوج، دسترسی، برنامه‌ی زمانی و ترجیح آن‌ها بستگی دارد.</p><p>زوج‌درمانی آنلاین می‌تواند گزینه‌ی مناسبی برای زوج‌هایی باشد که محدودیت زمانی یا مکانی دارند و هر دو شاغل‌اند و هماهنگی برنامه‌هایشان دشوار است. در مقابل، برخی زوج‌ها ارتباط چهره‌به‌چهره و حضور فیزیکی در فضای درمان را ترجیح می‌دهند. در هر دو حالت، آنچه اهمیت بیشتری دارد ایجاد فضای امن، حضور منظم و مشارکت واقعی زوجین در فرایند درمان است.</p></div></details><details><summary>زوج‌درمانی آنلاین چطور برگزار می‌شود؟</summary><div class="ans"><p>اگر در یک خانه‌اید، کنار هم و جلوی یک دوربین می‌نشینید تا درمانگر چهرهٔ هر دو را ببیند. اگر در دو شهر یا دو کشور زندگی می‌کنید، هر کدام از دستگاه خودتان وصل می‌شوید. جایی را انتخاب کنید که فرزندان یا بقیهٔ خانواده صدای جلسه را نشنوند. زوج‌های <a href="/persian-therapy/">ساکن خارج از ایران</a> هم با همین روش با درمانگر فارسی‌زبان کار می‌کنند.</p></div></details><details><summary>زوج‌درمانی برای چه موقعیت‌هایی است؟</summary><div class="ans"><p>برای تعارض‌های تکراری و سکوت‌های طولانی، بعد از <a href="/help/خیانت/">خیانت</a>، در آستانهٔ <a href="/help/طلاق-و-جدایی/">طلاق و جدایی</a>، برای فشارهای <a href="/help/زوج-درمانی-مهاجرت/">بعد از مهاجرت</a> و برای مسائل نزدیکی و رابطهٔ جنسی که گاهی با <a href="/therapy/sex-therapy/">سکس‌تراپی</a> همراه می‌شود. اگر هنوز ازدواج نکرده‌اید، <a href="/therapy/premarital-counseling/">مشاورهٔ پیش از ازدواج</a> مسیر جدای خودش را دارد.</p></div></details></div></div></section>
+<section class="svc" id="more"><div class="wrap"><div class="center rv"><span class="eyebrow">شاید این‌ها را هم بخواهید</span><h2 class="h2">خدمات دیگر کلینیک تجربه</h2></div><div class="svc-list rv"><a class="svc-row" href="/therapy/individual-therapy/"><img src="/wp-content/uploads/2026/09/tjl-svc-individual.png" alt="تراپی فردی" width="82" height="82" loading="lazy"><div><b>تراپی فردی</b><span>افسردگی، اضطراب، روابط، خودشناسی</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<a class="svc-row" href="/therapy/child-therapy/"><img src="/wp-content/uploads/2026/09/tjl-svc-child.png" alt="کودک و نوجوان" width="82" height="82" loading="lazy"><div><b>کودک و نوجوان</b><span>بازی‌درمانی و درمان تحلیلی کودک</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<a class="svc-row" href="/therapy/psychiatry/"><img src="/wp-content/uploads/2026/09/tjl-svc-psychiatry.png" alt="روان‌پزشکی" width="82" height="82" loading="lazy"><div><b>روان‌پزشکی</b><span>ویزیت و دارودرمانی، کنار تراپی</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<a class="svc-row" href="/therapy/group-therapy/"><img src="/wp-content/uploads/2026/09/tjl-svc-group.png" alt="گروه‌درمانی" width="82" height="82" loading="lazy"><div><b>گروه‌درمانی</b><span>دیدن خود در رابطه با دیگران</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<a class="svc-row" href="/therapy/premarital-counseling/"><img src="/wp-content/uploads/2026/09/tjl-svc-premarital.png" alt="مشاوره‌ی پیش از ازدواج" width="82" height="82" loading="lazy"><div><b>مشاوره‌ی پیش از ازدواج</b><span>پیش از تصمیم، نه بعد از آن</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<a class="svc-row" href="/therapy/sex-therapy/"><img src="/wp-content/uploads/2026/09/tjl-sc-i1.png" alt="سکس‌تراپی" width="157" height="156" loading="lazy"><div><b>سکس‌تراپی</b><span>صمیمیت و سلامت جنسی در رابطه</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a></div><div class="chips rv"><span class="lbl">بیشتر:</span><a class="chip" href="/approaches/psychoanalysis/">روانکاوی</a><a class="chip" href="/approaches/psychodynamic-therapy/">روان‌درمانی تحلیلی</a><a class="chip" href="/persian-therapy/">خارج از ایران</a><a class="chip" href="/approaches/">همه‌ی رویکردها</a></div></div></section>
+<section class="berry" id="berry"><div class="wrap rv"><img src="/wp-content/uploads/2026/09/tjl-berry.png" alt="" width="378" height="308" loading="lazy"><h2 class="h2">فرصتی برای مکث کردن، فهمیدن و بازسازی</h2><p class="lede">بسیاری از مشکلات رابطه از جایی آغاز می‌شوند که دو نفر دیگر نمی‌توانند حرف‌های همدیگر را بشنوند. زوج‌درمانی فضایی است برای مکث کردن؛ نه از راه تحمیل تغییر، بلکه از راه فهم آنچه میان شما می‌گذرد.</p><div class="ctas"><a class="btn btn-brand" href="/get-therapy/">شروع زوج‌درمانی</a><a class="btn btn-ghost" href="/contact-us/">سؤال دارم</a></div></div></section>
+</div>
+<script>
+(function(){
+var root=document.getElementById('tj2'); if(!root) return;
+var fa=function(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+var fmt=function(n){return fa(n.toLocaleString('en-US')).replace(/,/g,'،');};
+var rv=root.querySelectorAll('.rv');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -6% 0px'});rv.forEach(function(el){io.observe(el);});}else{rv.forEach(function(el){el.classList.add('in');});}
+var cs=root.querySelectorAll('[data-count]');
+function runCount(el){var end=+el.getAttribute('data-count'),suf=el.getAttribute('data-suffix')||'',t0=null,dur=1400;function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);el.textContent=fmt(Math.round(end*p))+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+/* شمارش متحرک اعداد حذف شد (پرش چیدمان) */
+root.querySelectorAll('.arrows[data-for]').forEach(function(a){var tr=document.getElementById(a.getAttribute('data-for'));if(!tr)return;var b=a.querySelectorAll('button');b[0].addEventListener('click',function(){tr.scrollBy({left:tr.clientWidth*0.8,behavior:'smooth'});});b[1].addEventListener('click',function(){tr.scrollBy({left:-tr.clientWidth*0.8,behavior:'smooth'});});});
+var thTrack=document.getElementById('thTrack'),dots=document.getElementById('thDots');
+function buildDots(){if(!thTrack||!dots)return;var pages=Math.max(1,Math.ceil(thTrack.scrollWidth/thTrack.clientWidth));dots.innerHTML='';if(pages>10){dots.style.display='none';return;}dots.style.display='';for(var i=0;i<pages;i++){dots.appendChild(document.createElement('i'));}updDots();}
+function updDots(){if(!thTrack||!dots)return;var max=thTrack.scrollWidth-thTrack.clientWidth,p=max>0?Math.abs(thTrack.scrollLeft)/max:0,n=dots.children.length,idx=Math.round(p*(n-1));for(var i=0;i<n;i++)dots.children[i].classList.toggle('on',i===idx);}
+if(thTrack){buildDots();thTrack.addEventListener('scroll',updDots,{passive:true});window.addEventListener('resize',buildDots);}
+var filt=document.getElementById('thFilter');
+if(filt){if(thTrack){filt.addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;filt.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});b.classList.add('on');var tag=b.getAttribute('data-tag');thTrack.querySelectorAll('.thc:not(.more)').forEach(function(c){var tags=(c.getAttribute('data-tags')||'').split(' ');var hide=(tag==='all')?false:(tags.indexOf(tag)<0);c.classList.toggle('hide',hide);});thTrack.scrollTo({left:0});buildDots();});}}
+function parts(tz){try{var f=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});var o={};f.formatToParts(new Date()).forEach(function(p){o[p.type]=p.value;});return {h:+o.hour%24,m:+o.minute,s:+o.second};}catch(e){return null;}}
+function tick(){root.querySelectorAll('.clock').forEach(function(c){var p=parts(c.getAttribute('data-tz'));if(!p)return;var t=c.querySelector('.t');var hm=fa(('0'+p.h).slice(-2))+':'+fa(('0'+p.m).slice(-2));var sm=t.querySelector('small');if(!sm){t.textContent='';t.appendChild(document.createTextNode(hm));sm=document.createElement('small');t.appendChild(sm);}else{t.firstChild.nodeValue=hm;}sm.textContent=':'+fa(('0'+p.s).slice(-2));var good=(p.h>=8)?(p.h<23):false;c.classList.toggle('on',good);c.querySelector('.s').textContent=good?'ساعت مناسب جلسه':'وقت استراحت؛ تراپیست برای ساعت شما هست';});}
+tick();setInterval(tick,1000);
+root.querySelectorAll('details').forEach(function(d){var s=d.querySelector('summary'),a=d.querySelector('.ans');if(!s||!a)return;s.addEventListener('click',function(e){e.preventDefault();if(d.hasAttribute('data-anim'))return;d.setAttribute('data-anim','1');if(d.open){var h=a.offsetHeight;a.style.height=h+'px';a.style.transition='height .3s ease';requestAnimationFrame(function(){a.style.height='0px';});setTimeout(function(){d.open=false;a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},300);}else{d.open=true;var h2=a.offsetHeight;a.style.height='0px';a.style.transition='height .32s ease';requestAnimationFrame(function(){a.style.height=h2+'px';});setTimeout(function(){a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},330);}});});
+var arts=[['/mag/زندگی-نامه-ژاک-لکان/','زندگی‌نامه‌ی ژاک لکان'],['/mag/زندگینامه-زیگموند-فروید/','زندگی‌نامه‌ی زیگموند فروید'],['/mag/چگونه-روان-درمانگر-انتخاب-کنیم؟/','چگونه روان‌درمانگر انتخاب کنیم؟'],['/mag/ردفلگهای-تراپیست-و-اهمیت-اصول-حرفه/','ردفلگ‌های تراپیست و اصول حرفه‌ای در اتاق تراپی'],['/mag/سوپرویژن-چیست-و-چرا-مهم-است؟/','سوپرویژن چیست و چرا مهم است؟'],['/mag/رواندرمانی-تحلیلی/','روان‌درمانی تحلیلی چیست؟'],['/mag/زندگینامه-دونالد-وینیکات/','زندگی‌نامه‌ی دونالد وینیکات'],['/mag/مهاجرت-از-دیدگاه-روانکاوی/','مهاجرت از دیدگاه روانکاوی'],['/mag/افسانههای-رایج-درباره-روانکاوی/','افسانه‌های رایج درباره‌ی روانکاوی'],['/mag/اتاق-تراپی-رازها-و-رمزها/','اتاق تراپی: رازها و رمزها'],['/mag/گروهدرمانی-چیست؟/','گروه‌درمانی چیست؟'],['/mag/سلامت-روان-در-مهاجرت/','سلامت روان در مهاجرت؛ چرا به روانشناس هم‌زبان نیاز داریم؟'],['/mag/زندگینامه-کارن-هورنای/','زندگی‌نامه‌ی کارن هورنای'],['/mag/سمپتوم-چیست-تعریف-نشانه-در-روانکاوی/','سمپتوم چیست؟']];
+var tl=document.getElementById('todayLink');if(tl){var day=Math.floor(Date.now()/86400000),a=arts[day%arts.length];tl.href=a[0];tl.textContent=a[1];}
+})();
+
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"MedicalWebPage","@id":"https://tajrobeh.life/therapy/couple-therapy/#page","name":"زوج‌درمانی در مرکز تجربه زندگی","inLanguage":"fa-IR"},{"@type":"Service","name":"زوج‌درمانی","serviceType":"زوج‌درمانی","provider":{"@type":"MedicalClinic","name":"مرکز تجربه زندگی","url":"https://tajrobeh.life/"},"url":"https://tajrobeh.life/therapy/couple-therapy/"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"چه زمانی باید به زوج‌درمانگر مراجعه کنیم؟","acceptedAnswer":{"@type":"Answer","text":"تکرار یک تعارض بدون نتیجه، کاهش صمیمیت، احساس شنیده‌نشدن، فاصله‌ی عاطفی، مشکلات اعتماد یا ناتوانی در گفت‌وگو درباره‌ی موضوعات مهم می‌توانند نشانه‌های نیاز به زوج‌درمانی باشند."}},{"@type":"Question","name":"آیا زوج‌درمانی واقعاً می‌تواند رابطه را بهتر کند؟","acceptedAnswer":{"@type":"Answer","text":"زوج‌درمانی می‌تواند در بهبود ارتباط، مدیریت تعارض، بازسازی اعتماد و افزایش کیفیت رابطه کمک کند. هدف آن همیشه حفظ رابطه به هر قیمت نیست."}},{"@type":"Question","name":"در اولین جلسه‌ی زوج‌درمانی چه اتفاقی می‌افتد؟","acceptedAnswer":{"@type":"Answer","text":"جلسه‌ی اول فرصتی برای شناخت رابطه، بررسی مسئله‌ی اصلی و مشخص کردن انتظارات زوجین از درمان است."}},{"@type":"Question","name":"اگر یکی از زوجین همکاری نکند چه باید کرد؟","acceptedAnswer":{"@type":"Answer","text":"مراجعه‌ی فردی طرف دیگر می‌تواند فرصتی برای بررسی الگوهای رابطه، نیازها، مرزها و شیوه‌ی واکنش همان فرد باشد."}},{"@type":"Question","name":"زوج‌درمانی حضوری بهتر است یا آنلاین؟","acceptedAnswer":{"@type":"Answer","text":"هیچ پاسخ یکسانی وجود ندارد؛ انتخاب به شرایط زوج، دسترسی، برنامه‌ی زمانی و ترجیح آن‌ها بستگی دارد."}},{"@type":"Question","name":"زوج‌درمانی آنلاین چطور برگزار می‌شود؟","acceptedAnswer":{"@type":"Answer","text":"اگر در یک خانه‌اید، کنار هم و جلوی یک دوربین می‌نشینید تا درمانگر چهرهٔ هر دو را ببیند. اگر در دو شهر یا دو کشور زندگی می‌کنید، هر کدام از دستگاه خودتان وصل می‌شوید. جایی را انتخاب کنید که فرزندان یا بقیهٔ خانواده صدای جلسه را نشنوند. زوج‌های ساکن خارج از ایران هم با همین روش با درمانگر فارسی‌زبان کار می‌کنند."}},{"@type":"Question","name":"زوج‌درمانی برای چه موقعیت‌هایی است؟","acceptedAnswer":{"@type":"Answer","text":"برای تعارض‌های تکراری و سکوت‌های طولانی، بعد از خیانت، در آستانهٔ طلاق و جدایی، برای فشارهای بعد از مهاجرت و برای مسائل نزدیکی و رابطهٔ جنسی که گاهی با سکس‌تراپی همراه می‌شود. اگر هنوز ازدواج نکرده‌اید، مشاورهٔ پیش از ازدواج مسیر جدای خودش را دارد."}}]}]}</script>
+<!-- /wp:html -->

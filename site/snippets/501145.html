@@ -1,0 +1,184 @@
+<!-- Tajrobeh — دکمه‌ی سراسری ارتباط (تلفن پذیرش / بات تلگرام / ورود سریع) -->
+<div class="tj-fab-root" id="tjFabRoot">
+  <div class="tj-fab-backdrop" id="tjFabBackdrop"></div>
+
+  <div class="tj-fab-menu">
+    <p class="tj-fab-menu-title">چطور کمک‌تون کنیم؟</p>
+
+    <a class="tj-fab-item tj-fab-item--start" href="/get-therapy/">
+      <span class="tj-fab-item-icon tj-fab-item-icon--start">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+      </span>
+      <span class="tj-fab-item-text">
+        <span class="tj-fab-item-label">شروع تراپی</span>
+        <span class="tj-fab-item-status">چند سؤال کوتاه، پاسخ همان روز</span>
+      </span>
+    </a>
+
+    <a class="tj-fab-item" href="tel:+982191008867">
+      <span class="tj-fab-item-icon tj-fab-item-icon--tel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>
+      </span>
+      <span class="tj-fab-item-text">
+        <span class="tj-fab-item-label">تماس با پذیرش: ۰۲۱۹۱۰۰۸۸۶۷</span>
+        <span class="tj-fab-item-status" data-tj-hours="9.5-20.5" data-tj-days="0-3" data-tj-label="داخلی ۱۳۰ · شنبه تا چهارشنبه ۹:۳۰ تا ۲۰:۳۰"></span>
+      </span>
+    </a>
+
+    <a class="tj-fab-item" href="https://t.me/tajrobehlife_bot" target="_blank" rel="noopener">
+      <span class="tj-fab-item-icon tj-fab-item-icon--tg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
+      </span>
+      <span class="tj-fab-item-text">
+        <span class="tj-fab-item-label">ربات تجربه در تلگرام</span>
+        <span class="tj-fab-item-status is-online">همیشه در دسترس</span>
+      </span>
+    </a>
+
+    <a class="tj-fab-item" href="https://tajrobeh.life/login" rel="nofollow">
+      <span class="tj-fab-item-icon tj-fab-item-icon--login">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      </span>
+      <span class="tj-fab-item-text">
+        <span class="tj-fab-item-label">ورود سریع به پلتفرم</span>
+      </span>
+    </a>
+  </div>
+
+  <button class="tj-fab-btn" id="tjFabBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="راه‌های ارتباط با تجربه">
+    <svg class="tj-fab-icon tj-fab-icon--chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+    <svg class="tj-fab-icon tj-fab-icon--close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  </button>
+</div>
+
+<style>
+  #tjFabRoot{
+    position: fixed;
+    inset-inline-end: 18px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    z-index: 9999;
+    font-family: 'Anjoman Max','Vazirmatn',system-ui,sans-serif;
+    direction: rtl;
+  }
+  #tjFabRoot *{ box-sizing: border-box; }
+  .tj-fab-backdrop{ position: fixed; inset: 0; background: rgba(14,14,14,.28); opacity: 0; pointer-events: none; transition: opacity .18s ease; }
+  #tjFabRoot.is-open .tj-fab-backdrop{ opacity: 1; pointer-events: auto; }
+  .tj-fab-btn{
+    width: 56px; height: 56px; border-radius: 999px; border: none; cursor: pointer;
+    background: #c83f49; color: #fefefe;
+    box-shadow: 0 2px 8px -2px rgba(34,34,34,.10), 0 10px 22px -8px rgba(200,63,73,.55);
+    display: flex; align-items: center; justify-content: center; position: relative;
+    transition: transform .15s ease;
+  }
+  .tj-fab-btn:active{ transform: scale(.94); }
+  .tj-fab-icon{ width: 24px; height: 24px; position: absolute; transition: opacity .15s ease, transform .15s ease; }
+  .tj-fab-icon--close{ opacity: 0; transform: rotate(-45deg) scale(.6); }
+  #tjFabRoot.is-open .tj-fab-icon--chat{ opacity: 0; transform: rotate(45deg) scale(.6); }
+  #tjFabRoot.is-open .tj-fab-icon--close{ opacity: 1; transform: rotate(0) scale(1); }
+  .tj-fab-menu{
+    position: absolute; inset-inline-end: 0; bottom: calc(100% + 12px); width: 264px;
+    background: #fefefe; border: 1px solid #dfdfe2; border-radius: 14px;
+    box-shadow: 0 2px 8px -2px rgba(34,34,34,.10), 0 20px 40px -16px rgba(14,14,14,.35);
+    padding: 8px; opacity: 0; pointer-events: none;
+    transform: translateY(6px) scale(.97); transform-origin: bottom left;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  #tjFabRoot.is-open .tj-fab-menu{ opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+  .tj-fab-menu-title{ margin: 4px 8px 6px; font-size: 12px; color: #676768; }
+  .tj-fab-item{ display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 8px; border-radius: 10px; text-decoration: none; color: #0e0e0e; }
+  .tj-fab-item:hover{ background: #f5f5f8; }
+  .tj-fab-item-icon{ flex: none; width: 34px; height: 34px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: #fefefe; }
+  .tj-fab-item-icon svg{ width: 17px; height: 17px; }
+  .tj-fab-item-icon--tel{ background: #c83f49; }
+  .tj-fab-item-icon--wa{ background: #4caf7d; }
+  .tj-fab-item-icon--tg{ background: #3aabc4; }
+  .tj-fab-item-icon--login{ background: #222222; }
+  .tj-fab-item-text{ display: flex; flex-direction: column; gap: 1px; }
+  .tj-fab-item-label{ font-size: 14px; }
+  .tj-fab-item-status{ font-size: 11px; color: #676768; }
+  .tj-fab-item-status.is-online::before,
+  .tj-fab-item-status.is-offline::before{ content:""; display:inline-block; width:6px; height:6px; border-radius:50%; margin-inline-end:5px; }
+  .tj-fab-item-status.is-online::before{ background:#67aa82; }
+  .tj-fab-item-status.is-offline::before{ background:#aeaeb0; }
+  @media (max-width:480px){ #tjFabRoot{ inset-inline-end:14px; bottom:calc(14px + env(safe-area-inset-bottom)); } }
+  @media (prefers-reduced-motion: reduce){
+    .tj-fab-btn, .tj-fab-icon, .tj-fab-menu, .tj-fab-backdrop{ transition: none; }
+  }
+
+  /* tj-fab v2 (۴ مهر ۱۴۰۵): در موبایل منو به شکل پنل پایین صفحه باز می‌شود؛ با کشیدن به پایین بسته می‌شود. */
+  .tj-fab-item-icon--start{ background: #c83f49; }
+  .tj-fab-item-icon--tel{ background: #222222; }
+  .tj-fab-item-icon--login{ background: #676768; }
+  @media (max-width:640px){
+    .tj-fab-backdrop{ background: rgba(14,14,14,.4); }
+    .tj-fab-menu{
+      position: fixed; inset-inline: 0; bottom: 0; width: auto; max-width: none;
+      border: 0; border-top: 1px solid #dfdfe2; border-radius: 22px 22px 0 0;
+      padding: 8px 14px calc(16px + env(safe-area-inset-bottom));
+      opacity: 1; transform: translateY(105%); transform-origin: bottom center;
+      transition: transform .32s cubic-bezier(.2,.8,.2,1);
+      box-shadow: 0 -18px 40px -22px rgba(14,14,14,.4);
+      touch-action: pan-x;
+    }
+    #tjFabRoot.is-open .tj-fab-menu{ transform: translateY(0); }
+    .tj-fab-menu::before{ content:""; display:block; width:42px; height:4px; border-radius:4px; background:#dfdfe2; margin:4px auto 12px; }
+    .tj-fab-menu-title{ margin: 0 6px 8px; font-size: 13px; }
+    .tj-fab-item{ min-height: 60px; padding: 8px 6px; gap: 14px; border-radius: 12px; }
+    .tj-fab-item + .tj-fab-item{ border-top: 1px solid #f0f0f3; border-radius: 0; }
+    .tj-fab-item-icon{ width: 42px; height: 42px; }
+    .tj-fab-item-icon svg{ width: 19px; height: 19px; }
+    .tj-fab-item-label{ font-size: 15px; }
+    .tj-fab-item-status{ font-size: 12px; }
+    .tj-fab-btn{ transition: transform .15s ease, opacity .15s ease; }
+    #tjFabRoot.is-open .tj-fab-btn{ opacity: 0; pointer-events: none; transform: scale(.8); }
+  }
+</style>
+
+<script>
+(function(){
+  var root = document.getElementById('tjFabRoot');
+  var btn = document.getElementById('tjFabBtn');
+  var backdrop = document.getElementById('tjFabBackdrop');
+  if (!root || !btn) return;
+
+  function setOpen(open){
+    root.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  btn.addEventListener('click', function(){ setOpen(!root.classList.contains('is-open')); });
+  if (backdrop) backdrop.addEventListener('click', function(){ setOpen(false); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') setOpen(false); });
+
+  // ساعت پاسخگویی هر کانال از data-tj-hours (ساعت شروع-پایان) و data-tj-days (روز هفته، ۰=شنبه) به‌وقت تهران
+  var fa=function(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+  var hm=function(h){var H=Math.floor(h),M=Math.round((h-H)*60);return fa(H)+':'+fa((M<10?'0':'')+M);};
+  root.querySelectorAll('[data-tj-hours]').forEach(function(el){
+    try {
+      var rng=el.getAttribute('data-tj-hours').split('-').map(parseFloat);
+      var days=(el.getAttribute('data-tj-days')||'0-6').split('-').map(Number);
+      var t=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tehran'}));
+      var hour=t.getHours()+t.getMinutes()/60;
+      var d=(t.getDay()+1)%7; // ۰=شنبه
+      var open=d>=days[0]&&d<=days[1]&&hour>=rng[0]&&hour<rng[1];
+      var label=el.getAttribute('data-tj-label');
+      el.textContent=open?('پاسخگو تا '+hm(rng[1])):(label||'بیرون از ساعت پاسخگویی');
+      el.classList.add(open?'is-online':'is-offline');
+    } catch(e){ el.textContent=el.getAttribute('data-tj-label')||''; }
+  });
+
+  // tj-fab v2: پنل پایین در موبایل، قفل اسکرول، کشیدن برای بستن، و نبودن «شروع تراپی» در خود صفحهٔ شروع تراپی
+  var menu = root.querySelector('.tj-fab-menu');
+  if (location.pathname.indexOf('/get-therapy') === 0) { var stItem = root.querySelector('.tj-fab-item--start'); if (stItem) stItem.style.display = 'none'; }
+  var mq = window.matchMedia ? window.matchMedia('(max-width:640px)') : { matches: false };
+  new MutationObserver(function(){
+    var o = root.classList.contains('is-open');
+    document.documentElement.style.overflow = o ? (mq.matches ? 'hidden' : '') : '';
+  }).observe(root, { attributes: true, attributeFilter: ['class'] });
+  var y0 = null, dy = 0;
+  if (menu) {
+    menu.addEventListener('touchstart', function(e){ if (!mq.matches) return; y0 = e.touches[0].clientY; dy = 0; menu.style.transition = 'none'; }, { passive: true });
+    menu.addEventListener('touchmove', function(e){ if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); menu.style.transform = 'translateY(' + dy + 'px)'; }, { passive: true });
+    menu.addEventListener('touchend', function(){ if (y0 === null) return; menu.style.transition = ''; menu.style.transform = ''; if (dy > 70) setOpen(false); y0 = null; });
+  }
+})();
+</script>

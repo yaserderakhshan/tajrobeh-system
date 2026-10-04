@@ -1,0 +1,680 @@
+<!-- wp:html -->
+<style>
+/* == tj2: home-v2 draft (v4) == */
+.tj2{font-family:var(--tj-font);color:var(--tj-soft);direction:rtl;font-size:17px;line-height:1.9;--tj-tint:#faeced;--tj-tint-2:#fdf4f4;--tj-red-400:#d9737a;--tj-yellow:#f2c14e;--w:1180px;overflow-x:clip}
+.tj2 *,.tj2 *::before,.tj2 *::after{box-sizing:border-box}
+.tj2,.tj2 *{overflow-wrap:normal;word-break:normal}
+.tj2 h1,.tj2 h2,.tj2 h3,.tj2 h4{color:var(--tj-ink);margin:0;line-height:1.55;font-weight:700;text-wrap:balance}
+.tj2 p{margin:0}
+.tj2 a{color:inherit;text-decoration:none}
+.tj2 img{max-width:100%;height:auto;display:block}
+.tj2 button{font-family:inherit}
+.tj2 .wrap{max-width:var(--w);margin-inline:auto;padding-inline:24px}
+.tj2 section{padding-block:clamp(48px,6vw,88px)}
+.tj2 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tj-red);background:var(--tj-tint);padding:5px 13px;border-radius:999px;margin-bottom:12px}
+.tj2 .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tj-red)}
+.tj2 .h2{font-size:clamp(23px,3vw,36px);margin-bottom:10px}
+.tj2 .lede{font-size:clamp(15.5px,1.3vw,18px);color:var(--tj-soft);max-width:62ch;line-height:2}
+.tj2 .center{text-align:center}.tj2 .center .lede{margin-inline:auto}
+.tj2 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 24px;border-radius:var(--tj-r-btn);font-size:16px;font-weight:600;border:1.5px solid transparent;transition:.18s ease;white-space:nowrap;cursor:pointer;line-height:1.4}
+.tj2 .btn-brand{background:var(--tj-red);color:#fff}
+.tj2 .btn-brand:hover{background:var(--tj-red-600);box-shadow:0 8px 20px -8px rgba(200,63,73,.5);color:#fff}
+.tj2 .btn-ghost{background:#fff;color:var(--tj-ink-2);border-color:var(--tj-line)}
+.tj2 .btn-ghost:hover{border-color:var(--tj-red-400);color:var(--tj-red-600);background:var(--tj-tint)}
+.tj2 .btn svg{width:14px;height:14px;flex:none}
+.tj2 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.tj2 .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.tj2 .rv{opacity:1;transform:none;transition:none}}
+.tj2 .hs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 14px;scrollbar-width:none;scroll-behavior:smooth}
+.tj2 .hs::-webkit-scrollbar{display:none}
+.tj2 .hs>*{scroll-snap-align:start;flex:0 0 auto}
+.tj2 .arrows{display:flex;gap:8px}
+.tj2 .arrows button{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--tj-line);background:#fff;color:var(--tj-ink);cursor:pointer;display:grid;place-items:center;transition:.15s}
+.tj2 .arrows button:hover{border-color:var(--tj-red);color:var(--tj-red)}
+.tj2 .arrows svg{width:16px;height:16px}
+.tj2 .head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
+.tj2 .hero{padding-block:clamp(36px,5vw,72px) clamp(36px,5vw,64px);background:#fff}
+.tj2 .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px;align-items:center}
+.tj2 .hero h1{font-size:clamp(28px,3.4vw,44px);line-height:1.5;margin:14px 0 16px;max-width:22ch}
+.tj2 .hero h1 em{font-style:normal;color:var(--tj-red)}
+.tj2 .hero .lede{margin:0 0 24px;max-width:56ch}
+.tj2 .ctas{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.tj2 .hero .art{display:flex;align-items:center;justify-content:center}
+.tj2 .hero .art img{width:100%;max-width:440px;height:auto;object-fit:contain}
+.tj2 .nums{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:30px;padding-top:22px;border-top:1px solid var(--tj-line)}
+.tj2 .nums div{display:flex;align-items:baseline;gap:7px}
+.tj2 .nums b{font-size:24px;font-weight:800;color:var(--tj-red);line-height:1;font-variant-numeric:tabular-nums}
+.tj2 .nums span{font-size:13px;color:var(--tj-mut)}
+.tj2 .eco{background:var(--tj-sunk)}
+.tj2 .eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:34px}
+.tj2 .eco-card{border:1px solid var(--tj-line);border-radius:20px;padding:0 0 22px;background:#fff;transition:.2s;display:flex;flex-direction:column;overflow:hidden}
+.tj2 .eco-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px);box-shadow:0 16px 34px -20px rgba(14,14,14,.3)}
+.tj2 .eco-card .pic{height:190px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;padding:16px 16px 0;border-bottom:1px solid var(--tj-line);background:#fff}
+.tj2 .eco-card .pic img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom}
+.tj2 .eco-card .n{font-size:12.5px;color:var(--tj-red);font-weight:700;margin:16px 22px 4px}
+.tj2 .eco-card h3{font-size:18px;margin:0 22px 8px}
+.tj2 .eco-card p{font-size:14px;line-height:1.9;color:var(--tj-soft);margin:0 22px 12px;flex:1}
+.tj2 .eco-card .go{font-size:13.5px;color:var(--tj-ink);font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 22px}
+.tj2 .eco-card .go svg{width:12px;height:12px}
+.tj2 .tl{background:#fff;overflow:hidden}
+.tj2 .tl-line{height:2px;background:var(--tj-line);margin-top:22px}
+.tj2 .tl-track{padding-top:34px}
+.tj2 .tl-item{width:250px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:20px 18px;position:relative}
+.tj2 .tl-item::before{content:"";position:absolute;top:-22px;right:22px;width:14px;height:14px;border-radius:50%;background:var(--tj-red);border:3px solid #fff;box-shadow:0 0 0 1px var(--tj-line)}
+.tj2 .tl-item .y{font-size:13px;color:var(--tj-red);font-weight:700}
+.tj2 .tl-item h3{font-size:16.5px;margin:6px 0 8px}
+.tj2 .tl-item p{font-size:13.5px;color:var(--tj-soft);line-height:1.85}
+.tj2 .tl-item.now{background:var(--tj-red);border-color:var(--tj-red)}
+.tj2 .tl-item.now h3,.tj2 .tl-item.now p{color:#fff}
+.tj2 .tl-item.now .y{color:#ffd6d9}
+.tj2 .tl-item.now::before{background:#fff;border-color:var(--tj-red)}
+.tj2 .svc{background:var(--tj-sunk)}
+.tj2 .svc-list{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-top:30px;background:#fff;border:1px solid var(--tj-line);border-radius:20px;padding:8px 28px}
+.tj2 .svc-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--tj-line);transition:.15s}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:0}
+.tj2 .svc-row img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .svc-row b{display:block;font-size:16px;color:var(--tj-ink)}
+.tj2 .svc-row span{display:block;font-size:13px;color:var(--tj-mut);line-height:1.7}
+.tj2 .svc-row svg{width:16px;height:16px;flex:none;margin-inline-start:auto;color:var(--tj-line);transition:.15s}
+.tj2 .svc-row:hover b{color:var(--tj-red)}
+.tj2 .svc-row:hover svg{color:var(--tj-red);transform:translateX(-4px)}
+.tj2 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
+.tj2 .chip{font-size:13.5px;padding:7px 14px;border-radius:999px;border:1px solid var(--tj-line);background:#fff;color:var(--tj-soft);transition:.15s;cursor:pointer;line-height:1.6}
+.tj2 .chip:hover,.tj2 .chip.on{border-color:var(--tj-red);color:var(--tj-red);background:var(--tj-tint)}
+.tj2 .chips .lbl{font-size:13px;color:var(--tj-mut);align-self:center;margin-inline-end:4px;flex:none;white-space:nowrap}
+.tj2 .how{background:#fff}
+.tj2 .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px;counter-reset:st}
+.tj2 .how-step{background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:24px 20px;position:relative}
+.tj2 .how-step::before{counter-increment:st;content:counter(st,persian);position:absolute;top:-14px;right:18px;width:30px;height:30px;border-radius:50%;background:var(--tj-red);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+.tj2 .how-step img{width:48px;height:48px;object-fit:contain;margin-bottom:10px}
+.tj2 .how-step h3{font-size:16.5px;margin-bottom:6px}
+.tj2 .how-step p{font-size:14px;line-height:1.9}
+.tj2 .how-note{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:center;font-size:14px;color:var(--tj-mut)}
+.tj2 .how-note span{display:inline-flex;align-items:center;gap:7px}
+.tj2 .how-note svg{width:16px;height:16px;color:var(--tj-red)}
+.tj2 .th{background:var(--tj-sunk)}
+.tj2 .thc{width:150px;border:1px solid var(--tj-line);border-radius:16px;padding:12px 10px 14px;text-align:center;background:#fff;transition:.18s;position:relative}
+.tj2 .thc:hover{border-color:var(--tj-red-400);box-shadow:0 10px 26px -16px rgba(14,14,14,.3)}
+.tj2 .thc.hide{display:none}
+.tj2 .thc img.ph{width:92px;height:92px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid var(--tj-sunk)}
+.tj2 .thc b{display:block;font-size:14px;color:var(--tj-ink);line-height:1.5;font-weight:700}
+.tj2 .thc .sp{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px;line-height:1.6;min-height:2.6em}
+.tj2 .thc .yr{display:inline-block;font-size:11.5px;color:var(--tj-red);background:var(--tj-tint);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .vf{position:absolute;top:10px;left:10px;width:18px;height:18px}
+.tj2 .thc .pen{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--tj-ink);background:var(--tj-yellow);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .pen svg{width:10px;height:10px}
+.tj2 .thc.more{background:var(--tj-tint);border-color:var(--tj-red-400);display:flex;flex-direction:column;justify-content:center;gap:6px}
+.tj2 .thc.more b{color:var(--tj-red);font-size:26px}
+.tj2 .thc.more span{font-size:13px;color:var(--tj-ink-2)}
+.tj2 .thc.more .btn{margin:8px auto 0;min-height:36px;font-size:13px;padding:6px 14px}
+.tj2 .dots{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.tj2 .dots i{width:6px;height:6px;border-radius:50%;background:var(--tj-line);transition:.2s}
+.tj2 .dots i.on{width:18px;border-radius:3px;background:var(--tj-red)}
+.tj2 .std{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+.tj2 .std>div{display:flex;gap:12px;align-items:center;border:1px solid var(--tj-line);border-radius:14px;padding:14px 16px;background:#fff}
+.tj2 .std img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .std b{display:block;font-size:14.5px;color:var(--tj-ink)}
+.tj2 .std span{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .sup{background:#fff}
+.tj2 .supc{width:230px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:16px;display:flex;gap:12px;align-items:center;transition:.2s}
+.tj2 .supc:hover{border-color:var(--tj-red-400);transform:translateY(-3px);background:#fff}
+.tj2 .supc img{width:64px;height:76px;border-radius:12px;object-fit:cover;flex:none}
+.tj2 .supc b{display:block;color:var(--tj-ink);font-size:14.5px;line-height:1.5}
+.tj2 .supc .ap{display:block;font-size:12.5px;color:var(--tj-red);margin-top:3px}
+.tj2 .sup .hs{margin-top:28px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center}
+.tj2 .school p.lede{margin-bottom:22px}
+.tj2 .path div{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#fff;border:1px solid var(--tj-line);border-radius:14px;margin-bottom:8px;font-size:15px;color:var(--tj-ink)}
+.tj2 .path div i{width:30px;height:30px;border-radius:50%;background:var(--tj-tint);color:var(--tj-red);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px;flex:none}
+.tj2 .path div:last-child{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .path div:last-child i{background:#fff}
+.tj2 .path small{display:block;font-size:12.5px;color:var(--tj-mut)}
+.tj2 .path div:last-child small{color:#ffd6d9}
+.tj2 .cities{background:#fff}
+.tj2 .map{position:relative;background:var(--tj-sunk);border-radius:24px;padding:22px;overflow:hidden;margin:30px auto 0;max-width:640px}
+.tj2 .map svg{width:100%;height:auto;display:block}
+.tj2 .map .land{fill:#fff;stroke:var(--tj-ink);stroke-width:1.5;stroke-linejoin:round}
+.tj2 .map text{font-family:var(--tj-font);font-size:15px;fill:var(--tj-ink);font-weight:700}
+.tj2 .map text.sea{fill:var(--tj-mut);font-weight:500;font-size:13px}
+.tj2 .map .pin{transform-box:fill-box;transform-origin:50% 100%;animation:tjbob 3.2s ease-in-out infinite}
+.tj2 .map .pin.d1{animation-delay:-.7s}.tj2 .map .pin.d2{animation-delay:-1.4s}.tj2 .map .pin.d3{animation-delay:-2.1s}.tj2 .map .pin.d4{animation-delay:-2.8s}
+@keyframes tjbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+.tj2 .map .shadow{fill:rgba(14,14,14,.14)}
+.tj2 .map .de{position:absolute;left:22px;top:22px;bottom:auto;background:#fff;border:1px solid var(--tj-line);border-radius:14px;padding:8px 12px;font-size:13px;color:var(--tj-ink);display:flex;gap:10px;align-items:center}
+.tj2 .map .de img{width:22px;height:22px}
+.tj2 .map .de small{display:block;color:var(--tj-mut);font-size:11.5px}
+.tj2 .dia{background:#fff}
+.tj2 .dia .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.tj2 .clocks{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;background:var(--tj-sunk);padding:14px;border-radius:22px;position:relative}
+.tj2 .clocks .live{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tj-mut);padding:0 4px 2px}
+.tj2 .clocks .live i{width:8px;height:8px;border-radius:50%;background:#3fb26a;animation:tjpulse 1.6s infinite}
+@keyframes tjpulse{0%{box-shadow:0 0 0 0 rgba(63,178,106,.5)}70%{box-shadow:0 0 0 7px rgba(63,178,106,0)}100%{box-shadow:0 0 0 0 rgba(63,178,106,0)}}
+.tj2 .clock{background:#fff;border:1px solid var(--tj-line);border-radius:16px;padding:12px 14px;transition:.2s}
+.tj2 .clock .c{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .clock .t{display:block;font-size:26px;font-weight:800;color:var(--tj-ink);direction:ltr;text-align:right;font-variant-numeric:tabular-nums;line-height:1.2}
+.tj2 .clock .t small{font-size:14px;font-weight:600;color:var(--tj-mut)}
+.tj2 .clock .s{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px}
+.tj2 .clock.on{border-color:var(--tj-red-400);background:var(--tj-tint)}
+.tj2 .clock.on .s{color:var(--tj-red-600);font-weight:600}
+.tj2 .dia ul{list-style:none;padding:0;margin:18px 0 24px;display:grid;gap:10px}
+.tj2 .dia li{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;color:var(--tj-ink-2)}
+.tj2 .dia li::before{content:"";width:22px;height:22px;flex:none;border-radius:50%;background:var(--tj-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c83f49' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L20 7'/></svg>") center/12px no-repeat;margin-top:3px}
+.tj2 .dia .orbit{width:110px;margin-bottom:6px}
+.tj2 .mag{background:var(--tj-sunk)}
+.tj2 .mag-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:14px;margin-top:28px}
+.tj2 .art-card{background:#fff;border:1px solid var(--tj-line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:.2s}
+.tj2 .art-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .art-card img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.tj2 .art-card .b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tj2 .art-card .k{font-size:12px;color:var(--tj-red);font-weight:700}
+.tj2 .art-card h3{font-size:15px;line-height:1.6}
+.tj2 .art-card p{font-size:13px;color:var(--tj-mut);line-height:1.8;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .art-card.big img{aspect-ratio:16/9}
+.tj2 .art-card.big h3{font-size:19px}
+.tj2 .today{margin-top:16px;background:#fff;border:1px dashed var(--tj-red-400);border-radius:16px;padding:14px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.tj2 .today .k{font-size:12.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .today a{font-weight:600;color:var(--tj-ink)}
+.tj2 .today a:hover{color:var(--tj-red)}
+.tj2 .today .cnt{margin-inline-start:auto;font-size:13px;color:var(--tj-mut)}
+.tj2 .ig{background:#fff;overflow:hidden}
+.tj2 .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:38px;padding:10px 0 16px}
+.tj2 .pola{background:#fff;border:1px solid var(--tj-line);border-radius:6px;padding:12px 12px 16px;box-shadow:0 18px 40px -22px rgba(14,14,14,.35);transition:.25s;position:relative;display:block}
+.tj2 .pola:nth-child(1){transform:rotate(-2deg)}
+.tj2 .pola:nth-child(2){transform:rotate(1.2deg) translateY(10px)}
+.tj2 .pola:nth-child(3){transform:rotate(-1deg)}
+.tj2 .pola:hover{transform:rotate(0) translateY(-6px);z-index:2;border-color:var(--tj-red-400)}
+.tj2 .pola .shot{aspect-ratio:4/5;overflow:hidden;border-radius:3px;background:var(--tj-sunk)}
+.tj2 .pola .shot img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.tj2 .pola:hover .shot img{transform:scale(1.03)}
+.tj2 .pola .cap{font-size:13.5px;color:var(--tj-ink-2);line-height:1.8;margin:12px 4px 10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .pola .who{display:flex;align-items:center;gap:10px;margin:0 4px}
+.tj2 .pola .who img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--tj-tint)}
+.tj2 .pola .who b{display:block;font-size:13px;color:var(--tj-ink);direction:ltr;text-align:right}
+.tj2 .pola .who small{display:block;font-size:11.5px;color:var(--tj-mut)}
+.tj2 .pola .who .f{margin-inline-start:auto;font-size:11.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .pola .tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-2deg);width:70px;height:20px;background:rgba(242,193,78,.6);border-radius:2px}
+.tj2 .org{background:var(--tj-sunk)}
+.tj2 .org .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center}
+.tj2 .org .logos{display:flex;gap:28px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.tj2 .org .logos img{height:34px;width:auto;opacity:.9}
+.tj2 .faq{background:#fff}
+.tj2 .faq-list{max-width:820px;margin:26px auto 0;display:grid;gap:10px}
+.tj2 details{border:1px solid var(--tj-line);border-radius:14px;background:#fff;padding:0 20px;transition:border-color .2s,background .2s}
+.tj2 details[open]{border-color:var(--tj-red-400);background:var(--tj-tint-2)}
+.tj2 summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:700;color:var(--tj-ink);font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;outline:none}
+.tj2 summary:focus{outline:none}
+.tj2 summary:focus-visible{outline:2px solid var(--tj-red-400);outline-offset:6px;border-radius:8px}
+.tj2 summary::-webkit-details-marker{display:none}
+.tj2 summary::after{content:"";width:9px;height:9px;border-inline-start:2px solid var(--tj-red);border-block-end:2px solid var(--tj-red);transform:rotate(-45deg);transition:transform .25s;flex:none;margin-inline-start:6px}
+.tj2 details[open] summary::after{transform:rotate(45deg)}
+.tj2 details .ans{overflow:hidden}
+.tj2 details p{padding:0 0 18px;font-size:15px;line-height:1.95;color:var(--tj-soft)}
+.tj2 details p a{color:var(--tj-red);font-weight:600}
+.tj2 .berry{background:var(--tj-tint);text-align:center}
+.tj2 .berry img{width:100px;margin:0 auto 16px;animation:tjfloat2 5s ease-in-out infinite}
+@keyframes tjfloat2{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(4deg) translateY(-6px)}}
+.tj2 .berry .h2{font-size:clamp(23px,3vw,34px)}
+.tj2 .berry .lede{margin:10px auto 24px}
+.tj2 .berry .ctas{justify-content:center}
+.tj2 .berry .small{font-size:13px;color:var(--tj-mut);margin-top:14px}
+.wp-block-post-content>.tj2.alignfull{max-width:none;width:auto}
+@media (max-width:1024px){
+.tj2 .eco-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .how-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .std{grid-template-columns:repeat(2,1fr)}
+.tj2 .mag-grid{grid-template-columns:1fr 1fr}
+.tj2 .art-card.big{grid-column:1/-1}
+.tj2 .ig-grid{gap:18px}
+.tj2 .school .wrap{grid-template-columns:1fr}
+.tj2 .org .wrap{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+.tj2{font-size:16px}
+.tj2 section{padding-block:40px}
+.tj2 .hero{padding-block:16px 32px}
+.tj2 .hero .wrap{grid-template-columns:1fr;gap:6px}
+.tj2 .hero .art{order:-1;justify-content:center}
+.tj2 .hero .art img{max-width:190px}
+.tj2 .hero h1{font-size:26px;margin:8px 0 12px}
+.tj2 .hero .lede{font-size:15px;margin-bottom:18px}
+.tj2 .ctas .btn{flex:1;min-height:44px;font-size:15px;padding:8px 14px}
+.tj2 .nums{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:22px;padding-top:18px}
+.tj2 .nums b{font-size:20px}.tj2 .nums span{font-size:12px}
+.tj2 .eco-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}
+.tj2 .eco-grid::-webkit-scrollbar{display:none}
+.tj2 .eco-card{flex:0 0 78%;scroll-snap-align:start}
+.tj2 .eco-card .pic{height:140px}
+.tj2 .tl-item{width:220px}
+.tj2 .svc-list{grid-template-columns:1fr;gap:0;padding:4px 16px}
+.tj2 .svc-row{padding:12px 0;gap:12px}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:1px solid var(--tj-line)}
+.tj2 .svc-row:last-child{border-bottom:0}
+.tj2 .svc-row img{width:32px;height:32px}
+.tj2 .svc-row b{font-size:15px}.tj2 .svc-row span{font-size:12.5px}
+.tj2 .chips{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
+.tj2 .chips::-webkit-scrollbar{display:none}
+.tj2 .chip{white-space:nowrap;flex:none}
+.tj2 .how-grid{grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.tj2 .how-step{padding:20px 12px 14px}
+.tj2 .how-step img{width:36px;height:36px}
+.tj2 .how-step h3{font-size:14.5px}
+.tj2 .how-step p{font-size:12.5px;line-height:1.75}
+.tj2 .how-note{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;text-align:right}
+.tj2 .thc{width:138px}
+.tj2 .std{grid-template-columns:1fr 1fr;gap:8px}
+.tj2 .std>div{flex-direction:column;text-align:center;gap:6px;padding:12px 8px}
+.tj2 .std b{font-size:13px}.tj2 .std span{font-size:11.5px}
+.tj2 .supc{width:200px}
+.tj2 .map{padding:12px;border-radius:18px}
+.tj2 .map text{font-size:18px}.tj2 .map text.sea{font-size:15px}
+.tj2 .map .de{left:10px;top:10px;bottom:auto;padding:6px 10px;font-size:12px}
+.tj2 .dia .wrap{grid-template-columns:1fr;gap:22px}
+.tj2 .clocks{grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.tj2 .clock{padding:10px}.tj2 .clock .t{font-size:19px}.tj2 .clock .t small{font-size:11px}.tj2 .clock .s{font-size:10.5px}
+.tj2 .mag-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:20px}
+.tj2 .mag-grid::-webkit-scrollbar{display:none}
+.tj2 .art-card{flex:0 0 76%;scroll-snap-align:start}
+.tj2 .art-card.big img{aspect-ratio:16/10}
+.tj2 .art-card.big h3{font-size:15px}
+.tj2 .today .cnt{display:none}
+.tj2 .ig-grid{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 6px 16px;scrollbar-width:none}
+.tj2 .ig-grid::-webkit-scrollbar{display:none}
+.tj2 .pola{flex:0 0 76%;scroll-snap-align:center}
+.tj2 .pola:nth-child(n){transform:none}
+.tj2 .org .logos{gap:18px}.tj2 .org .logos img{height:26px}
+.tj2 .berry .ctas .btn{flex:1 1 100%}
+.tj2 .arrows{display:none}
+}
+.tj2 .map{max-width:620px}
+.tj2 .map .mi{position:relative}
+.tj2 .map .mi svg{width:100%;height:auto;display:block}
+.tj2 .map .mp{--pin:20px;position:absolute;transform:translate(-50%,calc(-1 * var(--pin)));text-align:center;line-height:1.2;pointer-events:none;width:max-content}
+.tj2 .map .mp img{display:block;margin:0 auto 2px;width:var(--pin);height:var(--pin);object-fit:contain;animation:tjbob 3.2s ease-in-out infinite;transform-origin:50% 100%}
+.tj2 .map .mp b{display:block;font-size:13.5px;font-weight:700;color:var(--tj-ink);text-shadow:0 0 6px var(--tj-sunk),0 0 2px var(--tj-sunk)}
+.tj2 .map .mp.big{--pin:30px}
+.tj2 .map .mp.big b{font-size:15px}
+.tj2 .map .mp.up{display:flex;flex-direction:column-reverse;transform:translate(-50%,calc(-1 * var(--pin) - 1.3em))}
+.tj2 .map .mp.up img{margin:2px auto 0}
+.tj2 .map .mp.lw b{position:absolute;right:calc(100% + 4px);top:calc(var(--pin) - 1.2em)}
+.tj2 .map .mp.d1 img{animation-delay:-.7s}
+.tj2 .map .mp.d2 img{animation-delay:-1.4s}
+.tj2 .map .mp.d3 img{animation-delay:-2.1s}
+.tj2 .map .mp.d4 img{animation-delay:-2.8s}
+.tj2 .map .sea{position:absolute;transform:translate(-50%,-50%);font-size:12.5px;color:var(--tj-mut);white-space:nowrap;pointer-events:none}
+.tj2 .clock.on{border-color:#bfe0cb;background:#f3faf5}
+.tj2 .clock.on .s{color:#2e8b57;font-weight:600}
+.tj2 .thc .loc{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--tj-soft);background:var(--tj-sunk);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .loc svg{width:11px;height:11px;flex:none;color:var(--tj-mut)}
+.tj2 .thc .sp{min-height:3.1em}
+.tj2 .thc .sch{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:#fff;background:var(--tj-red);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .sch svg{width:10px;height:10px}
+.tj2 .thc .pen{top:auto;bottom:8px;right:8px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:block}
+.tj2 .axes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.tj2 .axes>div{background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:20px 20px 22px;transition:.2s}
+.tj2 .axes>div:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .axes i{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--tj-tint);color:var(--tj-red);margin-bottom:12px}
+.tj2 .axes i svg{width:20px;height:20px}
+.tj2 .axes b{display:block;font-size:16px;color:var(--tj-ink);margin-bottom:6px}
+.tj2 .axes p{font-size:14px;color:var(--tj-soft);line-height:1.9;margin:0}
+.tj2 .ring{margin-top:14px;background:var(--tj-ink);color:#fff;border-radius:18px;padding:18px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tj2 .ring b{font-size:22px;color:#fff;white-space:nowrap}
+.tj2 .ring span{font-size:14.5px;color:rgba(255,255,255,.72);line-height:1.9;flex:1;min-width:220px}
+.tj2 .ring .dot{width:9px;height:9px;border-radius:50%;background:var(--tj-yellow);flex:none;min-width:0}
+.tj2 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:34px;position:relative}
+.tj2 .steps::before{content:"";position:absolute;top:19px;right:10%;left:10%;height:2px;background:var(--tj-line)}
+.tj2 .steps>div{text-align:center;padding:0 8px;position:relative}
+.tj2 .steps i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid var(--tj-red-400);color:var(--tj-red);font-style:normal;font-weight:800;font-size:14px;margin:0 auto 12px;position:relative;z-index:1}
+.tj2 .steps>div:last-child i{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .steps b{display:block;font-size:14.5px;color:var(--tj-ink);margin-bottom:4px}
+.tj2 .steps span{display:block;font-size:12.5px;color:var(--tj-mut);line-height:1.8}
+.tj2 .school .ctas{justify-content:center;margin-top:30px}
+.tj2 .org .logos img{height:30px}
+.tj2 .org .logos img.dk{height:26px}
+@media (max-width:1024px){
+.tj2 .axes{grid-template-columns:1fr}
+.tj2 .steps{grid-template-columns:1fr 1fr 1fr;gap:22px 0}
+.tj2 .steps::before{display:none}
+}
+@media (max-width:760px){
+.tj2 .map .mp b{font-size:11.5px}
+.tj2 .map .mp.big b{font-size:12.5px}
+.tj2 .map .mp{--pin:15px}
+.tj2 .map .mp.big{--pin:22px}
+.tj2 .map .sea{font-size:10.5px}
+.tj2 .steps{grid-template-columns:1fr 1fr;gap:20px 0}
+.tj2 .ring{padding:16px 18px;gap:10px}
+.tj2 .ring b{font-size:18px}
+}
+.tj2 .sup{background:var(--tj-tint-2)}
+.tj2 .supc{background:#fff;width:250px;padding:18px}
+.tj2 .supc:hover{background:#fff}
+.tj2 .supc img{width:76px;height:92px;border-radius:14px}
+.tj2 .supc b{font-size:15px}
+.tj2 .school .wrap{display:grid}
+.tj2 .school{background:#fff}
+.tj2 .path div{background:var(--tj-sunk)}
+.tj2 .thc .meta{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px;min-height:24px}
+.tj2 .thc .loc,.tj2 .thc .sch,.tj2 .thc .pen{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;margin:0;line-height:1.7;font-weight:600;top:auto;right:auto;bottom:auto}
+.tj2 .thc .loc{background:var(--tj-sunk);color:var(--tj-soft);font-weight:500}
+.tj2 .thc .sch{background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .thc .pen{background:#fdf3d6;color:#6b4f00}
+.tj2 .thc .loc svg,.tj2 .thc .sch svg,.tj2 .thc .pen svg{width:11px;height:11px}
+
+.tj2 .thc .mnt{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;line-height:1.7;font-weight:700;color:var(--tj-red);background:var(--tj-tint);border:1px solid var(--tj-red-400);margin:0}
+.tj2 .thc .mnt svg{width:11px;height:11px;flex:none}
+.tj2 .head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
+.tj2 .fac{background:#fff}
+.tj2 .fac .supc .role{display:block;font-size:12px;color:var(--tj-mut);margin-top:3px;line-height:1.6}
+.tj2 .fac .hs{margin-top:28px}
+.tj2 .reg{background:var(--tj-sunk)}
+.tj2 .reg .wrap{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:40px;align-items:start}
+.tj2 .formbox{background:#fff;border:1px solid var(--tj-line);border-radius:22px;padding:26px}
+.tj2 .formbox .ff-el-group{margin-bottom:14px}
+.tj2 .formbox .ff-el-input--label label{font-size:14px;color:var(--tj-ink);font-weight:600}
+.tj2 .formbox input,.tj2 .formbox select,.tj2 .formbox textarea{font-family:inherit!important;border-radius:12px!important;border:1.5px solid var(--tj-line)!important;padding:12px 14px!important;font-size:15px!important;background:#fff!important;color:var(--tj-ink)!important}
+.tj2 .formbox .ff-btn-submit{background:var(--tj-red)!important;color:#fff!important;border-radius:999px!important;padding:12px 28px!important;font-family:inherit!important;font-weight:700!important;border:0!important;font-size:16px!important;min-height:46px}
+.tj2 .checks{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:10px}
+.tj2 .checks li{display:flex;gap:10px;font-size:15px;color:var(--tj-ink-2);line-height:1.9}
+.tj2 .checks li::before{content:"";width:22px;height:22px;flex:none;border-radius:50%;background:var(--tj-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c83f49' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L20 7'/></svg>") center/12px no-repeat;margin-top:5px}
+@media (max-width:1024px){.tj2 .crs-grid{grid-template-columns:1fr}.tj2 .kv{grid-template-columns:1fr 1fr}.tj2 .pillars,.tj2 .changes{grid-template-columns:1fr}.tj2 .reg .wrap{grid-template-columns:1fr}}
+.tj2 .fac .supc{width:300px}
+.tj2 .fac .supc .ap{font-size:12px;line-height:1.6}
+@media (max-width:760px){.tj2 .fac .supc{width:250px}}
+.tj2 .apply.reg .wrap{align-items:start}
+.tj2 .fac .hs.few .supc{width:380px}
+.tj2 .checks li{display:block;position:relative;padding-inline-start:32px}
+.tj2 .checks li::before{position:absolute;inset-inline-start:0;top:0}
+.tj2 .formbox fieldset{grid-template-columns:minmax(0,1fr)!important;column-gap:0!important}
+.tj2 .formbox fieldset>*{grid-column:1/-1!important}
+.tj2 .formbox .ff-text-left,.tj2 .formbox .ff_submit_btn_wrapper{text-align:right!important}
+
+/* == community page == */
+.tj2 .hero .art .dwrap{position:relative;display:inline-block;width:min(100%,470px)}
+.tj2 .hero .art .dwrap>img.dbase{display:block;width:100%;height:auto;max-width:100%;max-height:none;margin:0}
+.tj2 .hero .art .dwrap>img.seed{position:absolute;height:auto;margin:0;max-width:none;max-height:none;will-change:transform;animation:tj-drift var(--d,7s) ease-in-out var(--dl,0s) infinite alternate}
+@keyframes tj-drift{from{transform:translate(0,0) rotate(0deg)}to{transform:translate(var(--tx,-5px),var(--ty,-4px)) rotate(var(--rt,-1.2deg))}}
+.tj2 .hero .art .dwrap>img.s1{left:13.699%;top:20.262%;width:9.638%;--tx:-27px;--ty:-19px;--rt:-3.2deg;--d:5s;--dl:-.15s}
+.tj2 .hero .art .dwrap>img.s2{left:24.853%;top:27.567%;width:5.773%;--tx:-26px;--ty:-18px;--rt:3deg;--d:5s;--dl:0s}
+.tj2 .hero .art .dwrap>img.s3{left:39.041%;top:19.228%;width:11.399%;--tx:-25.5px;--ty:-18px;--rt:-2.6deg;--d:5s;--dl:-.05s}
+.tj2 .hero .art .dwrap>img.s4{left:32.339%;top:24.259%;width:5.822%;--tx:-26px;--ty:-18px;--rt:3.4deg;--d:5s;--dl:0s}
+.tj2 .hero .art .dwrap>img.s5{left:72.505%;top:7.03%;width:3.718%;--tx:-22px;--ty:-15px;--rt:-5deg;--d:4.2s;--dl:-1.1s}
+.tj2 .hero .art .dwrap>img.s6{left:76.761%;top:9.855%;width:2.25%;--tx:-21.5px;--ty:-15px;--rt:5.5deg;--d:4.2s;--dl:-1.1s}
+.tj2 .hero .art .dwrap>img.s7{left:79.648%;top:8.615%;width:2.25%;--tx:-22px;--ty:-14.5px;--rt:-5.5deg;--d:4.2s;--dl:-1.15s}
+@media (prefers-reduced-motion: reduce){.tj2 .hero .art .dwrap>img.seed{animation:none}}
+.tj2 .ev-grid .pola:nth-child(4){transform:rotate(1.5deg)}
+.tj2 .ev-grid .pola:nth-child(5){transform:rotate(-1.6deg) translateY(10px)}
+.tj2 .ev-grid .pola:nth-child(6){transform:rotate(.9deg)}
+.tj2 .ev-grid .pola:hover{transform:rotate(0) translateY(-6px)}
+.tj2 .ev-grid .pola .who b{direction:rtl;text-align:start}
+.tj2 .ev-grid .pola .cap{-webkit-line-clamp:3;min-height:4.6em}
+.tj2 .evnote{margin-top:28px;text-align:center;font-size:14px;color:var(--tj-mut)}
+.tj2 .evnote a{color:var(--tj-red);font-weight:700}
+.tj2 .mnt-row{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:34px}
+.tj2 .mnt-row .thc{width:196px}
+.tj2 .thc .ph.mono{display:grid;place-items:center;width:92px;height:92px;border-radius:50%;margin:0 auto 10px;background:var(--tj-tint);color:var(--tj-red);border:3px solid var(--tj-sunk);font-size:23px;font-weight:700;letter-spacing:2px}
+.tj2 .fac-row{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:34px}
+.tj2 .fac .fac-row .supc{width:290px}
+.tj2 .reg .checks li a{color:var(--tj-red);font-weight:700}
+@media (max-width:760px){.tj2 .fac .fac-row .supc{width:100%;max-width:330px}.tj2 .mnt-row .thc{width:calc(50% - 8px);max-width:180px}}
+
+.tj2 .supc .supmag{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;color:var(--tj-red-600);text-decoration:none;border-bottom:1px solid var(--tj-red-400)}
+/* CJ-START */
+/* == بلوک کامیونیتی، اولویت با بات == */
+.tj2 .reg .wrap.cjwrap,.tj2 .com .wrap.cjwrap,.tj2 .wrap.cjwrap{display:block}
+.tj2 .cjb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);max-width:980px;margin:26px auto 0;background:#fff;border:1px solid var(--tj-line);border-radius:28px;overflow:hidden;text-align:right;box-shadow:0 30px 60px -48px rgba(14,14,14,.45)}
+.tj2 .cjb-copy{padding:38px 40px 32px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.tj2 .cjb-fast{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--tj-ink);background:var(--tj-yellow,#f2c14e);padding:5px 13px 5px 15px;border-radius:999px}
+.tj2 .cjb-fast svg{width:13px;height:13px}
+.tj2 .cjb-copy h3{font-size:clamp(21px,2.2vw,26px);line-height:1.55;margin:16px 0 20px;color:var(--tj-ink)}
+.tj2 .cjb-steps{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:0;width:100%}
+.tj2 .cjb-steps li{position:relative;display:flex;align-items:center;gap:12px;font-size:15px;color:var(--tj-ink);line-height:1.7;padding:6px 0}
+.tj2 .cjb-steps b{position:relative;z-index:1;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:13.5px;background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .cjb-steps li:not(:last-child)::after{content:"";position:absolute;inset-inline-start:14px;top:34px;height:calc(100% - 26px);border-inline-start:2px dotted var(--tj-red-400);opacity:.5}
+.tj2 .cjb-steps li:last-child b{background:var(--tj-red);color:#fff}
+.tj2 .cjb-go{width:100%;justify-content:center;padding-block:15px;font-size:16px}
+.tj2 .cjb-facts{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-wrap:wrap;gap:6px 18px}
+.tj2 .cjb-facts li{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--tj-soft)}
+.tj2 .cjb-facts svg{width:15px;height:15px;color:var(--tj-mut);flex:none}
+.tj2 .cjb-demo{position:relative;background:var(--tj-ink);display:grid;place-items:center;padding:36px 30px;overflow:hidden;isolation:isolate}
+.tj2 .cjb-demo::before{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.12) 1.2px,transparent 1.4px) 0 0/18px 18px;z-index:-1}
+.tj2 .cjb-demo::after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:var(--tj-red);filter:blur(80px);opacity:.5;top:-110px;inset-inline-end:-90px;z-index:-1}
+.tj2 .cjb-chat{width:100%;max-width:330px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:26px;padding:14px 14px 18px;display:flex;flex-direction:column;gap:9px;box-shadow:0 30px 50px -30px rgba(0,0,0,.6)}
+.tj2 .cjb-top{display:flex;align-items:center;gap:10px;padding:2px 4px 11px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:4px}
+.tj2 .cjb-top .av{width:36px;height:36px;border-radius:50%;background:var(--tj-red);color:#fff;display:grid;place-items:center;flex:none}
+.tj2 .cjb-top .av svg{width:17px;height:17px}
+.tj2 .cjb-top b{display:block;font-size:13.5px;color:#fff;line-height:1.5}
+.tj2 .cjb-top small{display:block;font-size:11.5px;color:rgba(255,255,255,.55);line-height:1.5}
+.tj2 .cjb-chat p{margin:0}
+.tj2 .cjb-chat .bb{align-self:flex-start;max-width:93%;background:#fff;color:var(--tj-ink);font-size:13.5px;line-height:1.8;padding:8px 13px;border-radius:16px 16px 5px 16px}
+.tj2 .cjb-chat .me{align-self:flex-end;max-width:93%;background:var(--tj-red);color:#fff;font-size:13.5px;line-height:1.8;padding:8px 13px;border-radius:16px 16px 16px 5px}
+.tj2 .cjb-chat .ok{display:inline-flex;align-items:center;gap:6px;background:var(--tj-yellow,#f2c14e);color:var(--tj-ink);font-weight:700}
+.tj2 .cjb-chat .ok svg{width:15px;height:15px;stroke-width:2.6;flex:none}
+.tj2 .cjb-chat .m1{animation:cjbA1 10s infinite both}
+.tj2 .cjb-chat .m2{animation:cjbA2 10s infinite both}
+.tj2 .cjb-chat .m3{animation:cjbA3 10s infinite both}
+.tj2 .cjb-chat .m4{animation:cjbA4 10s infinite both}
+@keyframes cjbA1{0%,3%{opacity:0;transform:translateY(8px)}8%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes cjbA2{0%,16%{opacity:0;transform:translateY(8px)}21%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes cjbA3{0%,34%{opacity:0;transform:translateY(8px)}39%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes cjbA4{0%,56%{opacity:0;transform:translateY(8px) scale(.96)}62%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.tj2 .cjb-chat *{animation:none!important;opacity:1!important;transform:none!important}}
+/* فرم، حالت ثانویه */
+.tj2 .cjalt{max-width:980px;margin:14px auto 0;background:#fff;border:1px solid var(--tj-line);border-radius:20px;text-align:right;overflow:hidden}
+.tj2 .cjalt summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 18px 15px 22px;font-size:14.5px;color:var(--tj-soft)}
+.tj2 .cjalt summary::-webkit-details-marker{display:none}
+.tj2 .cjalt summary::after{display:none}
+.tj2 .cjalt summary b{font-size:13.5px;color:var(--tj-ink);border:1px solid var(--tj-ink);border-radius:999px;padding:6px 18px;flex:0 0 auto;transition:.15s}
+.tj2 .cjalt summary:hover b,.tj2 .cjalt[open] summary b{background:var(--tj-ink);color:#fff}
+.tj2 .cjalt .abody{padding:0 22px 22px;border-top:1px solid var(--tj-line)}
+.tj2 .cjalt .anote{font-size:13px;color:var(--tj-mut);line-height:1.9;margin:14px 0 6px}
+.tj2 .cjalt fieldset{grid-template-columns:minmax(0,1fr)!important}
+/* کارت‌های عضویت */
+.tj2 .cjp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:980px;margin:22px auto 0}
+.tj2 .cjp>div,.tj2 .cjp>a{display:block;background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:18px 18px 16px;text-decoration:none;transition:.15s}
+.tj2 .cjp>a:hover{border-color:var(--tj-red-400);background:var(--tj-sunk)}
+.tj2 .cjp .ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--tj-tint);color:var(--tj-red);margin-bottom:12px}
+.tj2 .cjp .ic svg{width:19px;height:19px}
+.tj2 .cjp b{display:block;font-size:14.5px;color:var(--tj-ink);line-height:1.7;margin-bottom:4px}
+.tj2 .cjp span{display:block;font-size:12.8px;color:var(--tj-soft);line-height:1.85}
+.tj2 .cjp .go{display:block;font-size:12.5px;color:var(--tj-red);margin-top:8px}
+/* خط رایگان */
+.tj2 .cjfoot{max-width:980px;margin:22px auto 0;display:flex;align-items:center;justify-content:center;gap:18px}
+.tj2 .cjfoot img{display:block;width:140px;height:auto;max-width:140px;max-height:none;margin:0;flex:none}
+.tj2 .cjft{max-width:620px}
+.tj2 .cjfree{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--tj-red-600);background:#fff;border:1px solid var(--tj-red-400);border-radius:999px;padding:6px 15px}
+.tj2 .cjft p{margin:10px 0 0;font-size:13.5px;color:var(--tj-soft);line-height:1.95}
+.tj2 .cjlinks{max-width:980px;margin:16px auto 0;display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
+.tj2 .cjlinks a{display:inline-flex;align-items:center;font-size:13px;color:var(--tj-red);border:1px solid var(--tj-red-400);background:#fff;border-radius:999px;padding:7px 16px;text-decoration:none;transition:.15s}
+.tj2 .cjlinks a:hover{background:var(--tj-tint)}
+@media (max-width:1024px){.tj2 .cjp{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){
+.tj2 .cjb{grid-template-columns:1fr;border-radius:22px}
+.tj2 .cjb-copy{padding:26px 20px 24px}
+.tj2 .cjb-demo{padding:26px 16px}
+.tj2 .cjp{grid-template-columns:1fr}
+.tj2 .cjalt summary{flex-wrap:wrap;gap:10px;padding:14px 16px}
+.tj2 .cjfoot{flex-direction:column;text-align:center;gap:12px}.tj2 .cjfoot img{width:120px;max-width:120px}
+}
+/* CJ-END */
+</style>
+<div class="tj2 alignfull" id="tj2">
+<section class="hero" id="hero">
+<div class="wrap">
+<div class="copy">
+<span class="eyebrow">عضویت رایگان برای دانشجویان روان‌شناسی</span>
+<h1>کامیونیتی تجربه؛ <em>جایی برای دانشجویانی</em> که نمی‌خواهند تنها یاد بگیرند</h1>
+<p class="lede">کامیونیتی، درِ باز مدرسه‌ی تجربه زندگی است. اینجا با آرامش آموزش می‌بینید، اگر خواستید برای خودتان تراپی می‌گیرید، استادان مدرسه را از نزدیک می‌بینید و کنار دانشجوهای دیگر می‌نشینید. عضویت رایگان است و شما را به هیچ دوره‌ای متعهد نمی‌کند.</p>
+<div class="ctas">
+<a class="btn btn-brand" href="#join">عضویت رایگان</a>
+<a class="btn btn-ghost" href="#events">برنامه‌هایی که برگزار کرده‌ایم</a>
+</div>
+</div>
+<div class="art"><div class="dwrap">
+<img class="dbase" src="/wp-content/uploads/2026/09/tjl-cut-dandelion-base.webp" fetchpriority="high" decoding="async" alt="دست‌هایی که قاصدک را رها می‌کنند و توت‌فرنگی‌ها در باد می‌روند" width="2044" height="1451" loading="eager">
+<img class="seed s1" src="/wp-content/uploads/2026/09/tjl-cut-seed-1.webp" alt="" aria-hidden="true" width="197" height="309" loading="eager" decoding="async">
+<img class="seed s2" src="/wp-content/uploads/2026/09/tjl-cut-seed-2.webp" alt="" aria-hidden="true" width="118" height="125" loading="eager" decoding="async">
+<img class="seed s3" src="/wp-content/uploads/2026/09/tjl-cut-seed-3.webp" alt="" aria-hidden="true" width="233" height="128" loading="eager" decoding="async">
+<img class="seed s4" src="/wp-content/uploads/2026/09/tjl-cut-seed-4.webp" alt="" aria-hidden="true" width="119" height="90" loading="eager" decoding="async">
+<img class="seed s5" src="/wp-content/uploads/2026/09/tjl-cut-seed-5.webp" alt="" aria-hidden="true" width="76" height="119" loading="eager" decoding="async">
+<img class="seed s6" src="/wp-content/uploads/2026/09/tjl-cut-seed-6.webp" alt="" aria-hidden="true" width="46" height="49" loading="eager" decoding="async">
+<img class="seed s7" src="/wp-content/uploads/2026/09/tjl-cut-seed-7.webp" alt="" aria-hidden="true" width="46" height="35" loading="eager" decoding="async">
+</div></div>
+</div>
+</section>
+
+<section class="school" id="inside">
+<div class="wrap">
+<div class="rv">
+<span class="eyebrow">داخل کامیونیتی</span>
+<h2 class="h2">پنج چیزی که با عضویت به شما می‌رسد</h2>
+<p class="lede">کامیونیتی برای سال‌هایی ساخته شده که هنوز دانشجویید و نمی‌دانید از کجا شروع کنید. لازم نیست دانشجوی دوره‌های ما باشید؛ کافی است در این رشته درس بخوانید یا تازه کارتان را شروع کرده باشید.</p>
+<div class="ctas"><a class="btn btn-brand" href="#join">عضویت رایگان</a><a class="btn btn-ghost" href="/school/">مدرسه‌ی تجربه زندگی</a></div>
+</div>
+<div class="path rv">
+<div><i>۱</i><span>با آرامش آموزش ببینید<small>ژورنال کلاب و جلسه‌های باز مدرسه، بدون امتحان و بدون فشار</small></span></div>
+<div><i>۲</i><span>برای خودتان تراپی بگیرید<small>اعضای کامیونیتی برای دریافت تراپی از کلینیک تجربه تخفیف دارند</small></span></div>
+<div><i>۳</i><span>کنار دانشجوهای دیگر بنشینید<small>رویدادهای عمومی، گفت‌وگو و همان دلگرمی که تنها یاد گرفتن ندارد</small></span></div>
+<div><i>۴</i><span>استادان را از نزدیک ببینید<small>همان کسانی که در کلینیک تجربه سوپرویژن می‌کنند، در همین جلسات حرف می‌زنند</small></span></div>
+<div><i>۵</i><span>از منتورها کمک بگیرید<small>دانش‌آموخته‌های مدرسه که امروز تراپیست کلینیک‌اند و همین مسیر را رفته‌اند</small></span></div>
+</div>
+</div>
+</section>
+
+<section class="ig" id="events">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">آنچه برگزار کرده‌ایم</span><h2 class="h2">برنامه‌های عمومی مدرسه، از ۱۴۰۴ تا امروز</h2><p class="lede">این‌ها نمونه‌ای از جلسه‌های عمومی است که پیش از این برگزار شده و اعضای کامیونیتی در آن‌ها نشسته‌اند. هر کارت به گزارش همان برنامه در اینستاگرام مدرسه می‌رسد. برنامه‌های تازه و آرشیو کامل در <a href="/school/events/">صفحهٔ رویدادهای مدرسه</a> است.</p></div>
+<div class="ig-grid ev-grid">
+<a class="pola rv" href="https://www.instagram.com/reel/DSFpD4_ETTn/" target="_blank" rel="noopener"><span class="tape"></span><div class="shot"><img src="/wp-content/uploads/2026/09/tjl-com-batajrobeh.webp" alt="پوستر رویداد با تجربه" width="640" height="800" loading="lazy"></div><p class="cap">دور هم نشستیم، از رویاهایمان گفتیم، با هنر با هم حرف زدیم و روانکاوی را به تجربه درآوردیم.</p><div class="who"><div><b>رویداد با/تجربه</b><small>آذر ۱۴۰۴ · حضوری</small></div><span class="f">گزارش برنامه</span></div></a>
+<a class="pola rv" href="https://www.instagram.com/p/DSDOwi9AhBr/" target="_blank" rel="noopener"><span class="tape"></span><div class="shot"><img src="/wp-content/uploads/2026/09/tjl-com-journalclub.webp" alt="پوستر جلسه‌ی ژورنال کلاب" width="640" height="800" loading="lazy"></div><p class="cap">مقاله‌ی روز، بخشی از یک کتاب یا هر موضوع مرتبط با روانکاوی؛ ارائه و بحث با حضور متخصصان.</p><div class="who"><div><b>ژورنال کلاب</b><small>آذر ۱۴۰۴ · دوره‌ای</small></div><span class="f">گزارش برنامه</span></div></a>
+<a class="pola rv" href="https://www.instagram.com/reel/DRzozNhAuf4/" target="_blank" rel="noopener"><span class="tape"></span><div class="shot"><img src="/wp-content/uploads/2026/09/tjl-com-makaremi.webp" alt="پوستر رویداد رونمایی کتاب" width="640" height="800" loading="lazy"></div><p class="cap">در رونمایی «یک روانکاو لکانی چگونه کار می‌کند؟» دکتر حسن مکارمی از لکان، فروید، حافظ و روان انسان گفت.</p><div class="who"><div><b>رونمایی کتاب با دکتر مکارمی</b><small>آذر ۱۴۰۴ · یک‌باره</small></div><span class="f">گزارش برنامه</span></div></a>
+<a class="pola rv" href="https://www.instagram.com/p/DL0EqH_CNtc/" target="_blank" rel="noopener"><span class="tape"></span><div class="shot"><img src="/wp-content/uploads/2026/09/tjl-com-enteghal2.webp" alt="پوستر پنل انتقال تجربه دو" width="640" height="800" loading="lazy"></div><p class="cap">از دردهای پنهان جنگ گفتیم؛ از تجربه‌ی تراپیست‌هایی که نه فقط گوش دادند، خودشان هم زیر بار رنج خم شدند.</p><div class="who"><div><b>انتقال تجربه ۲</b><small>تیر ۱۴۰۴ · پنل</small></div><span class="f">گزارش برنامه</span></div></a>
+<a class="pola rv" href="https://www.instagram.com/reel/DJmiMp9Iurd/" target="_blank" rel="noopener"><span class="tape"></span><div class="shot"><img src="/wp-content/uploads/2026/09/tjl-com-student.webp" alt="پوستر روایت دانشجویان" width="640" height="800" loading="lazy"></div><p class="cap">یکی از دانشجویان دوره‌ی بالینی از مسیر خودش می‌گوید: کلاس، خواندن متن اصلی، ژورنال کلاب و تراپی همزمان.</p><div class="who"><div><b>روایت یک دانشجو</b><small>اردیبهشت ۱۴۰۴ · ویدیو</small></div><span class="f">تماشای روایت</span></div></a>
+<a class="pola rv" href="https://www.instagram.com/p/DJR7ymhIm1I/" target="_blank" rel="noopener"><span class="tape"></span><div class="shot"><img src="/wp-content/uploads/2026/09/tjl-com-enteghal1.webp" alt="پوستر پنل انتقال تجربه" width="640" height="800" loading="lazy"></div><p class="cap">قصه‌ی روانکاوها را شنیدیم، نه مراجعان؛ روانکاوها از مسیر روانکاو شدن خودشان تداعی کردند.</p><div class="who"><div><b>پنل انتقال تجربه</b><small>اردیبهشت ۱۴۰۴ · پنل</small></div><span class="f">گزارش برنامه</span></div></a>
+</div>
+<p class="evnote rv">تاریخ برنامه‌های تازه را در <a href="https://www.instagram.com/tajrobeh_school/" target="_blank" rel="noopener">اینستاگرام مدرسه</a> و در بات تلگرام تجربه اعلام می‌کنیم.</p>
+</div>
+</section>
+
+<section class="th" id="mentors">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">منتورهای مدرسه</span><h2 class="h2">کسانی که همین مسیر را رفته‌اند و حالا کنار شما می‌نشینند</h2><p class="lede">منتورها درمانگرهای کلینیک تجربه‌اند و بیشترشان دانش‌آموختهٔ خود مدرسه‌اند؛ دورهٔ EFT هم منتور خودش را دارد. کارشان این است که در حلقه‌ها و برنامه‌های عمومی، سؤال‌های ابتدای راه را از کسی بشنوند که چند سال پیش خودش همان‌ها را می‌پرسید.</p></div>
+<div class="mnt-row rv">
+<div class="thc"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-02.webp" alt="سیامک صفری" width="92" height="92" loading="lazy"><b>سیامک صفری</b><span class="sp">روان‌درمانی تحلیلی، روانکاوی کلاسیک و لکانی</span><span class="meta"><span class="loc">تهران</span><span class="mnt" title="منتور حلقه‌های مدرسه تجربه"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.5l2.2 5.3 5.3 2.2-5.3 2.2-2.2 5.3-2.2-5.3L4.5 11l5.3-2.2L12 3.5Z"/></svg>منتور</span></span></div>
+<div class="thc"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-12.webp" alt="بهار ایروانی" width="92" height="92" loading="lazy"><b>بهار ایروانی</b><span class="sp">هیجان‌مدار (EFT) و سیستمی و خانواده</span><span class="meta"><span class="loc">تهران</span><span class="mnt" title="منتور دورهٔ درمان هیجان‌مدار (EFT) مدرسه تجربه"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.5l2.2 5.3 5.3 2.2-5.3 2.2-2.2 5.3-2.2-5.3L4.5 11l5.3-2.2L12 3.5Z"></path></svg>منتور EFT</span></span></div>
+<div class="thc"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th2-nazanin-barati.webp" alt="دکتر نازنین براتی" width="92" height="92" loading="lazy"><b>دکتر نازنین براتی</b><span class="sp">روانکاوی کلاسیک فرویدی و لکانی · پزشک</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>مشهد</span><span class="mnt" title="منتور حلقه‌های مدرسه تجربه"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.5l2.2 5.3 5.3 2.2-5.3 2.2-2.2 5.3-2.2-5.3L4.5 11l5.3-2.2L12 3.5Z"/></svg>منتور</span></span></div>
+</div>
+</div>
+</section>
+
+<section class="fac" id="faculty">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">استادان مدرسه</span><h2 class="h2">در جلسه‌های عمومی، همین‌ها حرف می‌زنند</h2><p class="lede">استادان مدرسه همان سوپروایزرهای کلینیک تجربه‌اند. یکی از دلایل ساختن کامیونیتی این بود که پیش از هر تصمیمی، آموزش بالینی واقعی را از نزدیک ببینید.</p></div>
+<div class="fac-row rv">
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-03.webp" alt="دکتر زهرا قنبری" width="400" height="472" loading="lazy"><div><b>دکتر زهرا قنبری</b><span class="ap">روانکاو و سوپروایزر · کلاسیک فرویدی</span><span class="tjbs"><a class="supmag" href="https://www.instagram.com/reel/C-m5_TjNb5U/" target="_blank" rel="noopener">تماشای ویدیو</a></span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-04.webp" alt="دکتر نرگس شریف‌زاده" width="400" height="472" loading="lazy"><div><b>دکتر نرگس شریف‌زاده</b><span class="ap">روانپزشک و روان‌درمانگر تحلیلی · لکانی</span><span class="tjbs"><a class="supmag" href="https://www.instagram.com/reel/DBtf1HKgh3b/" target="_blank" rel="noopener">تماشای ویدیو</a></span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-11.webp" alt="شهره فراهانی" width="400" height="472" loading="lazy"><div><b>شهره فراهانی</b><span class="ap">روانکاو و سوپروایزر · رویکرد مدرن</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-01.webp" alt="پریس تنظیفی" width="400" height="472" loading="lazy"><div><b>پریس تنظیفی</b><span class="ap">روانکاو لکانی و سوپروایزر · ارائهٔ ژورنال کلاب و رونمایی کتاب مدرسه</span><span class="tjbs"><a class="supmag" href="https://www.instagram.com/reel/DCW-PqfsDqg/" target="_blank" rel="noopener">تماشای ویدیو</a></span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-05.webp" alt="دکتر عدنان ثابت" width="400" height="472" loading="lazy"><div><b>دکتر عدنان ثابت</b><span class="ap">سوپروایزر · کلاسیک و لکانی</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-06.webp" alt="دکتر مصطفی طوبایی" width="400" height="472" loading="lazy"><div><b>دکتر مصطفی طوبایی</b><span class="ap">مدرس و سوپروایزر هیجان‌مدار</span></div></div>
+<div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-muyia.webp" alt="دکتر پیمان طاهری" width="400" height="472" loading="lazy"><div><b>دکتر پیمان طاهری</b><span class="ap">روان‌شناس بالینی · هیجان‌مدار</span></div></div>
+</div>
+<p class="evnote rv">فهرست کامل استادان و شاخه‌ها در <a href="/school/">صفحه‌ی مدرسه‌ی تجربه زندگی</a> است.</p>
+</div>
+</section>
+
+<section class="reg" id="join">
+<div class="wrap cjwrap">
+<div class="center rv">
+<span class="eyebrow">عضویت</span>
+<h2 class="h2">عضویت در کامیونیتی تجربه</h2>
+<p class="lede">سریع‌ترین راه، بات تلگرام تجربه است. برنامه‌های عمومی مدرسه همان‌جا اعلام می‌شود و ثبت‌نام هم از همان‌جاست.</p>
+</div>
+<div class="cjb rv">
+<div class="cjb-copy">
+<span class="cjb-fast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" fill="currentColor" stroke="none"/></svg>سریع‌ترین راه</span>
+<h3>دو سؤال کوتاه تا عضویت</h3>
+<ol class="cjb-steps"><li><b>۱</b>دکمه را بزنید تا بات باز شود</li><li><b>۲</b>نام، بعد رشته و دانشگاهتان را بنویسید</li><li><b>۳</b>عضویتتان همان لحظه ثبت می‌شود</li></ol>
+<a class="btn btn-brand cjb-go" href="https://t.me/tajrobehlife_bot?start=comm" target="_blank" rel="noopener" data-tjl="comm-bot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 3.5 2.5 11l6.5 2.2L11 20l3.2-4.2 5.3 4 2-16.3Z"/><path d="m9 13.2 7.5-5.7"/></svg>عضویت در بات تلگرام</a>
+<ul class="cjb-facts"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>کمتر از یک دقیقه</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg>رایگان</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>بدون شرط ثبت‌نام در دوره‌ها</li></ul>
+</div>
+<div class="cjb-demo" aria-hidden="true"><div class="cjb-chat">
+<div class="cjb-top"><span class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 3.5 2.5 11l6.5 2.2L11 20l3.2-4.2 5.3 4 2-16.3Z"/><path d="m9 13.2 7.5-5.7"/></svg></span><span><b>بات تجربه</b><small>معمولاً در چند ثانیه پاسخ می‌دهد</small></span></div>
+<p class="bb m1">عضویت رایگان است و هیچ تعهدی ندارد. فقط دو سؤال کوتاه.</p>
+<p class="bb m2">رشته و دانشگاهتان چیست؟</p>
+<p class="me m3">روان‌شناسی بالینی، دانشگاه تهران</p>
+<p class="bb ok m4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>عضو کامیونیتی تجربه شدید</p>
+</div></div>
+</div>
+<details class="cjalt rv">
+<summary><span>ترجیح می‌دهید همین‌جا فرم پر کنید؟</span><b>فرم عضویت</b></summary>
+<div class="abody"><p class="anote">همین فرم هم شما را عضو می‌کند و خبر برنامه‌ها به شما می‌رسد. اگر تلگرام ندارید، از این راه بیایید.</p>[fluentform id="8"]</div>
+</details>
+<div class="cjp rv">
+<div><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Z"/><path d="M9 7.5h6M9 11h4"/></svg></span><b>ژورنال کلاب باز</b><span>مقالهٔ روز، بحث گروهی، با حضور استادان مدرسه؛ آنلاین و رایگان برای اعضا</span></div>
+<div><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16.5 5.6a3 3 0 0 1 .5 5.9"/><path d="M18.2 14.6A5.5 5.5 0 0 1 21 19.4"/></svg></span><b>جلسات باز مدرسه</b><span>بعضی جلسات کیس‌خوانی، تحلیل فیلم و نشست‌های معرفی رویکردها</span></div>
+<div><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg></span><b>خبر دوره‌ها و رویدادها</b><span>فراخوان دوره‌ها، حلقه‌های تازه و کارگاه‌ها پیش از انتشار عمومی</span></div>
+<a href="/how-to-become-a-therapist/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V4.5"/><path d="M6 5h11l-2.6 3.4L17 12H6"/></svg></span><b>مسیر درمانگر شدن</b><span>منتورهای مدرسه، دانش‌آموخته‌هایی که امروز تراپیست کلینیک‌اند، همین مسیر را رفته‌اند</span><span class="go">چطور درمانگر شویم؟</span></a>
+</div>
+<div class="cjfoot rv">
+<img src="/wp-content/uploads/2026/09/tjl-cut-phone.webp" alt="" width="1279" height="917" loading="lazy" decoding="async">
+<div class="cjft"><span class="cjfree">عضویت رایگان است</span><p>لازم نیست دانشجوی دوره‌های تجربه باشید؛ کافی است در روان‌شناسی یا مشاوره درس بخوانید یا تازه کارتان را شروع کرده باشید. اعضای کامیونیتی برای دریافت تراپی از کلینیک تجربه تخفیف دارند.</p></div>
+</div>
+<div class="cjlinks rv"><a href="/school/associations/">همکاری با انجمن‌های علمی</a><a href="/school/mentoring/">منتورینگ مدرسه</a><a href="/school/alumni/">دانش‌آموختگان مدرسه</a><a href="/school/">مدرسهٔ تجربه زندگی</a><a href="/tests/">تست‌های رایگان تجربه</a></div>
+</div>
+</section>
+
+<section class="faq" id="faq">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">پرسش‌های پرتکرار</span><h2 class="h2">پیش از عضویت، این‌ها را بدانید</h2></div>
+<div class="faq-list rv">
+<details><summary>عضویت در کامیونیتی هزینه دارد؟</summary><div class="ans"><p>خیر. عضویت رایگان است و به ثبت‌نام در دوره‌های مدرسه ربطی ندارد. کامیونیتی برای دانشجویان روان‌شناسی و مشاوره ساخته شده تا پیش از هر تصمیمی، از نزدیک ببینند آموزش بالینی واقعی چه شکلی است.</p></div></details>
+<details><summary>باید دانشجوی دوره‌های مدرسه باشم؟</summary><div class="ans"><p>نه. اتفاقاً کامیونیتی برای کسانی است که هنوز وارد هیچ دوره‌ای نشده‌اند. اگر دانشجوی یکی از حلقه‌های مدرسه باشید، از قبل به برنامه‌های حلقه‌ی خودتان دسترسی دارید.</p></div></details>
+<details><summary>برنامه‌ها آنلاین است یا حضوری؟</summary><div class="ans"><p>هر دو. ژورنال کلاب و بیشتر نشست‌ها آنلاین برگزار می‌شود و رویدادهایی مثل با/تجربه و رونمایی کتاب حضوری بوده است. تاریخ و شکل هر برنامه پیش از برگزاری در بات تلگرام و اینستاگرام مدرسه اعلام می‌شود.</p></div></details>
+<details><summary>اگر بخواهم خودم تراپی بگیرم چه؟</summary><div class="ans"><p>اعضای کامیونیتی برای دریافت تراپی از کلینیک تجربه تخفیف دارند. تراپی شخصی برای کسی که می‌خواهد روزی تراپیست شود بخشی از آموزش است، نه چیزی جدا از آن. از <a href="/get-therapy/">صفحه‌ی شروع تراپی</a> می‌توانید قدم اول را بردارید.</p></div></details>
+<details><summary>منتور چه فرقی با استاد دارد؟</summary><div class="ans"><p>استادان مدرسه سوپروایزرهای کلینیک‌اند و درس می‌دهند. منتورها دانش‌آموخته‌های خود مدرسه‌اند که چند سال جلوتر از شما هستند؛ سراغ آن‌ها می‌روید برای سؤال‌هایی که پرسیدنشان از استاد سخت است.</p></div></details>
+<details><summary>عضویت مرا وارد دوره‌ای می‌کند؟</summary><div class="ans"><p>نه. برای دوره‌ها فرم پیش‌ثبت‌نام جداگانه‌ای هست و شرایط ورود بررسی می‌شود. اگر نمی‌دانید مسیر از کجا شروع می‌شود، <a href="/how-to-become-a-therapist/">راهنمای درمانگر شدن</a> را بخوانید.</p></div></details>
+</div>
+</div>
+</section>
+
+<section class="berry" id="berry">
+<div class="wrap rv">
+<img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" width="120" height="120" loading="lazy">
+<h2 class="h2">تنها یاد گرفتن، طولانی‌ترین راه است</h2>
+<p class="lede">اسمتان را بگذارید تا برنامه‌ی بعدی را زودتر از بقیه بدانید. عضویت رایگان است و هر وقت خواستید می‌توانید بیرون بیایید.</p>
+<div class="ctas"><a class="btn btn-brand" href="#join">عضویت رایگان</a><a class="btn btn-ghost" href="/how-to-become-a-therapist/">چطور درمانگر شویم؟</a></div>
+</div>
+</section>
+
+</div>
+<script>
+(function(){
+var root=document.getElementById('tj2'); if(!root) return;
+var fa=function(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+var fmt=function(n){return fa(n.toLocaleString('en-US')).replace(/,/g,'،');};
+var rv=root.querySelectorAll('.rv');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -6% 0px'});rv.forEach(function(el){io.observe(el);});}else{rv.forEach(function(el){el.classList.add('in');});}
+var cs=root.querySelectorAll('[data-count]');
+function runCount(el){var end=+el.getAttribute('data-count'),suf=el.getAttribute('data-suffix')||'',t0=null,dur=1400;function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);el.textContent=fmt(Math.round(end*p))+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+/* شمارش متحرک اعداد حذف شد (پرش چیدمان) */
+root.querySelectorAll('.arrows[data-for]').forEach(function(a){var tr=document.getElementById(a.getAttribute('data-for'));if(!tr)return;var b=a.querySelectorAll('button');b[0].addEventListener('click',function(){tr.scrollBy({left:tr.clientWidth*0.8,behavior:'smooth'});});b[1].addEventListener('click',function(){tr.scrollBy({left:-tr.clientWidth*0.8,behavior:'smooth'});});});
+var thTrack=document.getElementById('thTrack'),dots=document.getElementById('thDots');
+function buildDots(){if(!thTrack||!dots)return;var pages=Math.max(1,Math.ceil(thTrack.scrollWidth/thTrack.clientWidth));dots.innerHTML='';if(pages>10){dots.style.display='none';return;}dots.style.display='';for(var i=0;i<pages;i++){dots.appendChild(document.createElement('i'));}updDots();}
+function updDots(){if(!thTrack||!dots)return;var max=thTrack.scrollWidth-thTrack.clientWidth,p=max>0?Math.abs(thTrack.scrollLeft)/max:0,n=dots.children.length,idx=Math.round(p*(n-1));for(var i=0;i<n;i++)dots.children[i].classList.toggle('on',i===idx);}
+if(thTrack){buildDots();thTrack.addEventListener('scroll',updDots,{passive:true});window.addEventListener('resize',buildDots);}
+var filt=document.getElementById('thFilter');
+if(filt){if(thTrack){filt.addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;filt.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});b.classList.add('on');var tag=b.getAttribute('data-tag');thTrack.querySelectorAll('.thc:not(.more)').forEach(function(c){var tags=(c.getAttribute('data-tags')||'').split(' ');var hide=(tag==='all')?false:(tags.indexOf(tag)<0);c.classList.toggle('hide',hide);});thTrack.scrollTo({left:0});buildDots();});}}
+function parts(tz){try{var f=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});var o={};f.formatToParts(new Date()).forEach(function(p){o[p.type]=p.value;});return {h:+o.hour%24,m:+o.minute,s:+o.second};}catch(e){return null;}}
+function tick(){root.querySelectorAll('.clock').forEach(function(c){var p=parts(c.getAttribute('data-tz'));if(!p)return;var t=c.querySelector('.t');var hm=fa(('0'+p.h).slice(-2))+':'+fa(('0'+p.m).slice(-2));var sm=t.querySelector('small');if(!sm){t.textContent='';t.appendChild(document.createTextNode(hm));sm=document.createElement('small');t.appendChild(sm);}else{t.firstChild.nodeValue=hm;}sm.textContent=':'+fa(('0'+p.s).slice(-2));var good=(p.h>=8)?(p.h<23):false;c.classList.toggle('on',good);c.querySelector('.s').textContent=good?'ساعت مناسب جلسه':'وقت استراحت؛ تراپیست برای ساعت شما هست';});}
+tick();setInterval(tick,1000);
+root.querySelectorAll('details').forEach(function(d){var s=d.querySelector('summary'),a=d.querySelector('.ans');if(!s||!a)return;s.addEventListener('click',function(e){e.preventDefault();if(d.hasAttribute('data-anim'))return;d.setAttribute('data-anim','1');if(d.open){var h=a.offsetHeight;a.style.height=h+'px';a.style.transition='height .3s ease';requestAnimationFrame(function(){a.style.height='0px';});setTimeout(function(){d.open=false;a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},300);}else{d.open=true;var h2=a.offsetHeight;a.style.height='0px';a.style.transition='height .32s ease';requestAnimationFrame(function(){a.style.height=h2+'px';});setTimeout(function(){a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},330);}});});
+var arts=[['/mag/زندگی-نامه-ژاک-لکان/','زندگی‌نامه‌ی ژاک لکان'],['/mag/زندگینامه-زیگموند-فروید/','زندگی‌نامه‌ی زیگموند فروید'],['/mag/چگونه-روان-درمانگر-انتخاب-کنیم؟/','چگونه روان‌درمانگر انتخاب کنیم؟'],['/mag/ردفلگهای-تراپیست-و-اهمیت-اصول-حرفه/','ردفلگ‌های تراپیست و اصول حرفه‌ای در اتاق تراپی'],['/mag/سوپرویژن-چیست-و-چرا-مهم-است؟/','سوپرویژن چیست و چرا مهم است؟'],['/mag/رواندرمانی-تحلیلی/','روان‌درمانی تحلیلی چیست؟'],['/mag/زندگینامه-دونالد-وینیکات/','زندگی‌نامه‌ی دونالد وینیکات'],['/mag/مهاجرت-از-دیدگاه-روانکاوی/','مهاجرت از دیدگاه روانکاوی'],['/mag/افسانههای-رایج-درباره-روانکاوی/','افسانه‌های رایج درباره‌ی روانکاوی'],['/mag/اتاق-تراپی-رازها-و-رمزها/','اتاق تراپی: رازها و رمزها'],['/mag/گروهدرمانی-چیست؟/','گروه‌درمانی چیست؟'],['/mag/سلامت-روان-در-مهاجرت/','سلامت روان در مهاجرت؛ چرا به روانشناس هم‌زبان نیاز داریم؟'],['/mag/زندگینامه-کارن-هورنای/','زندگی‌نامه‌ی کارن هورنای'],['/mag/سمپتوم-چیست-تعریف-نشانه-در-روانکاوی/','سمپتوم چیست؟']];
+var tl=document.getElementById('todayLink');if(tl){var day=Math.floor(Date.now()/86400000),a=arts[day%arts.length];tl.href=a[0];tl.textContent=a[1];}
+})();
+
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"عضویت در کامیونیتی هزینه دارد؟","acceptedAnswer":{"@type":"Answer","text":"خیر. عضویت رایگان است و به ثبت‌نام در دوره‌های مدرسه ربطی ندارد. کامیونیتی برای دانشجویان روان‌شناسی و مشاوره ساخته شده تا پیش از هر تصمیمی، از نزدیک ببینند آموزش بالینی واقعی چه شکلی است."}},{"@type":"Question","name":"باید دانشجوی دوره‌های مدرسه باشم؟","acceptedAnswer":{"@type":"Answer","text":"نه. کامیونیتی برای کسانی است که هنوز وارد هیچ دوره‌ای نشده‌اند. اگر دانشجوی یکی از حلقه‌های مدرسه باشید، از قبل به برنامه‌های حلقه‌ی خودتان دسترسی دارید."}},{"@type":"Question","name":"برنامه‌ها آنلاین است یا حضوری؟","acceptedAnswer":{"@type":"Answer","text":"هر دو. ژورنال کلاب و بیشتر نشست‌ها آنلاین برگزار می‌شود و رویدادهایی مثل با/تجربه و رونمایی کتاب حضوری بوده است. تاریخ و شکل هر برنامه پیش از برگزاری در بات تلگرام و اینستاگرام مدرسه اعلام می‌شود."}},{"@type":"Question","name":"اگر بخواهم خودم تراپی بگیرم چه؟","acceptedAnswer":{"@type":"Answer","text":"اعضای کامیونیتی برای دریافت تراپی از کلینیک تجربه تخفیف دارند. تراپی شخصی برای کسی که می‌خواهد روزی تراپیست شود بخشی از آموزش است، نه چیزی جدا از آن."}},{"@type":"Question","name":"منتور چه فرقی با استاد دارد؟","acceptedAnswer":{"@type":"Answer","text":"استادان مدرسه سوپروایزرهای کلینیک‌اند و درس می‌دهند. منتورها دانش‌آموخته‌های خود مدرسه‌اند که چند سال جلوتر از شما هستند؛ سراغ آن‌ها می‌روید برای سؤال‌هایی که پرسیدنشان از استاد سخت است."}},{"@type":"Question","name":"عضویت مرا وارد دوره‌ای می‌کند؟","acceptedAnswer":{"@type":"Answer","text":"نه. برای دوره‌ها فرم پیش‌ثبت‌نام جداگانه‌ای هست و شرایط ورود بررسی می‌شود."}}]}]}</script>
+<!-- /wp:html -->

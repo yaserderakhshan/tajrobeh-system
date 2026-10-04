@@ -1,0 +1,1207 @@
+<!-- wp:html -->
+<style id="tjmapfix">.tj2 .map .mp.lw b{position:absolute;right:calc(100% + 2px);bottom:0;white-space:nowrap}.tj2 .map .mp.up b{position:absolute;left:calc(100% + 1px);bottom:78%;white-space:nowrap}@media (max-width:760px){html body .tj2 .map div.de{position:static;margin:10px auto 0;width:max-content}}</style>
+
+<style>
+/* == tj2: home-v2 draft (v4) == */
+.tj2{font-family:var(--tj-font);color:var(--tj-soft);direction:rtl;font-size:17px;line-height:1.9;--tj-tint:#faeced;--tj-tint-2:#fdf4f4;--tj-red-400:#d9737a;--tj-yellow:#f2c14e;--w:1180px;overflow-x:clip}
+.tj2 *,.tj2 *::before,.tj2 *::after{box-sizing:border-box}
+.tj2,.tj2 *{overflow-wrap:normal;word-break:normal}
+.tj2 h1,.tj2 h2,.tj2 h3,.tj2 h4{color:var(--tj-ink);margin:0;line-height:1.55;font-weight:700;text-wrap:balance}
+.tj2 p{margin:0}
+.tj2 a{color:inherit;text-decoration:none}
+.tj2 img{max-width:100%;height:auto;display:block}
+.tj2 button{font-family:inherit}
+.tj2 .wrap{max-width:var(--w);margin-inline:auto;padding-inline:24px}
+.tj2 section{padding-block:clamp(48px,6vw,88px)}
+.tj2 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tj-red);background:var(--tj-tint);padding:5px 13px;border-radius:999px;margin-bottom:12px}
+.tj2 .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tj-red)}
+.tj2 .h2{font-size:clamp(23px,3vw,36px);margin-bottom:10px}
+.tj2 .lede{font-size:clamp(15.5px,1.3vw,18px);color:var(--tj-soft);max-width:62ch;line-height:2}
+.tj2 .center{text-align:center}.tj2 .center .lede{margin-inline:auto}
+.tj2 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 24px;border-radius:var(--tj-r-btn);font-size:16px;font-weight:600;border:1.5px solid transparent;transition:.18s ease;white-space:nowrap;cursor:pointer;line-height:1.4}
+.tj2 .btn-brand{background:var(--tj-red);color:#fff}
+.tj2 .btn-brand:hover{background:var(--tj-red-600);box-shadow:0 8px 20px -8px rgba(200,63,73,.5);color:#fff}
+.tj2 .btn-ghost{background:#fff;color:var(--tj-ink-2);border-color:var(--tj-line)}
+.tj2 .btn-ghost:hover{border-color:var(--tj-red-400);color:var(--tj-red-600);background:var(--tj-tint)}
+.tj2 .btn svg{width:14px;height:14px;flex:none}
+.tj2 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.tj2 .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.tj2 .rv{opacity:1;transform:none;transition:none}}
+.tj2 .hs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 14px;scrollbar-width:none;scroll-behavior:smooth}
+.tj2 .hs::-webkit-scrollbar{display:none}
+.tj2 .hs>*{scroll-snap-align:start;flex:0 0 auto}
+.tj2 .arrows{display:flex;gap:8px}
+.tj2 .arrows button{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--tj-line);background:#fff;color:var(--tj-ink);cursor:pointer;display:grid;place-items:center;transition:.15s}
+.tj2 .arrows button:hover{border-color:var(--tj-red);color:var(--tj-red)}
+.tj2 .arrows svg{width:16px;height:16px}
+.tj2 .head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
+.tj2 .hero{padding-block:clamp(36px,5vw,72px) clamp(36px,5vw,64px);background:#fff}
+.tj2 .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px;align-items:center}
+.tj2 .hero h1{font-size:clamp(28px,3.4vw,44px);line-height:1.5;margin:14px 0 16px;max-width:22ch}
+.tj2 .hero h1 em{font-style:normal;color:var(--tj-red)}
+.tj2 .hero .lede{margin:0 0 24px;max-width:56ch}
+.tj2 .ctas{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.tj2 .hero .art{display:flex;align-items:center;justify-content:center}
+.tj2 .hero .art img{width:100%;max-width:440px;height:auto;object-fit:contain}
+.tj2 .nums{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:30px;padding-top:22px;border-top:1px solid var(--tj-line)}
+.tj2 .nums div{display:flex;align-items:baseline;gap:7px}
+.tj2 .nums b{font-size:24px;font-weight:800;color:var(--tj-red);line-height:1;font-variant-numeric:tabular-nums}
+.tj2 .nums span{font-size:13px;color:var(--tj-mut)}
+.tj2 .eco{background:var(--tj-sunk)}
+.tj2 .eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:34px}
+.tj2 .eco-card{border:1px solid var(--tj-line);border-radius:20px;padding:0 0 22px;background:#fff;transition:.2s;display:flex;flex-direction:column;overflow:hidden}
+.tj2 .eco-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px);box-shadow:0 16px 34px -20px rgba(14,14,14,.3)}
+.tj2 .eco-card .pic{height:190px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;padding:16px 16px 0;border-bottom:1px solid var(--tj-line);background:#fff}
+.tj2 .eco-card .pic img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom}
+.tj2 .eco-card .n{font-size:12.5px;color:var(--tj-red);font-weight:700;margin:16px 22px 4px}
+.tj2 .eco-card h3{font-size:18px;margin:0 22px 8px}
+.tj2 .eco-card p{font-size:14px;line-height:1.9;color:var(--tj-soft);margin:0 22px 12px;flex:1}
+.tj2 .eco-card .go{font-size:13.5px;color:var(--tj-ink);font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 22px}
+.tj2 .eco-card .go svg{width:12px;height:12px}
+.tj2 .tl{background:#fff;overflow:hidden}
+.tj2 .tl-line{height:2px;background:var(--tj-line);margin-top:22px}
+.tj2 .tl-track{padding-top:34px}
+.tj2 .tl-item{width:250px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:20px 18px;position:relative}
+.tj2 .tl-item::before{content:"";position:absolute;top:-22px;right:22px;width:14px;height:14px;border-radius:50%;background:var(--tj-red);border:3px solid #fff;box-shadow:0 0 0 1px var(--tj-line)}
+.tj2 .tl-item .y{font-size:13px;color:var(--tj-red);font-weight:700}
+.tj2 .tl-item h3{font-size:16.5px;margin:6px 0 8px}
+.tj2 .tl-item p{font-size:13.5px;color:var(--tj-soft);line-height:1.85}
+.tj2 .tl-item.now{background:var(--tj-red);border-color:var(--tj-red)}
+.tj2 .tl-item.now h3,.tj2 .tl-item.now p{color:#fff}
+.tj2 .tl-item.now .y{color:#ffd6d9}
+.tj2 .tl-item.now::before{background:#fff;border-color:var(--tj-red)}
+.tj2 .svc{background:var(--tj-sunk)}
+.tj2 .svc-list{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-top:30px;background:#fff;border:1px solid var(--tj-line);border-radius:20px;padding:8px 28px}
+.tj2 .svc-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--tj-line);transition:.15s}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:0}
+.tj2 .svc-row img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .svc-row b{display:block;font-size:16px;color:var(--tj-ink)}
+.tj2 .svc-row span{display:block;font-size:13px;color:var(--tj-mut);line-height:1.7}
+.tj2 .svc-row svg{width:16px;height:16px;flex:none;margin-inline-start:auto;color:var(--tj-line);transition:.15s}
+.tj2 .svc-row:hover b{color:var(--tj-red)}
+.tj2 .svc-row:hover svg{color:var(--tj-red);transform:translateX(-4px)}
+.tj2 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
+.tj2 .chip{font-size:13.5px;padding:7px 14px;border-radius:999px;border:1px solid var(--tj-line);background:#fff;color:var(--tj-soft);transition:.15s;cursor:pointer;line-height:1.6}
+.tj2 .chip:hover,.tj2 .chip.on{border-color:var(--tj-red);color:var(--tj-red);background:var(--tj-tint)}
+.tj2 .chips .lbl{font-size:13px;color:var(--tj-mut);align-self:center;margin-inline-end:4px;flex:none;white-space:nowrap}
+.tj2 .how{background:#fff}
+.tj2 .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px;counter-reset:st}
+.tj2 .how-step{background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:24px 20px;position:relative}
+.tj2 .how-step::before{counter-increment:st;content:counter(st,persian);position:absolute;top:-14px;right:18px;width:30px;height:30px;border-radius:50%;background:var(--tj-red);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+.tj2 .how-step img{width:48px;height:48px;object-fit:contain;margin-bottom:10px}
+.tj2 .how-step h3{font-size:16.5px;margin-bottom:6px}
+.tj2 .how-step p{font-size:14px;line-height:1.9}
+.tj2 .how-note{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:center;font-size:14px;color:var(--tj-mut)}
+.tj2 .how-note span{display:inline-flex;align-items:center;gap:7px}
+.tj2 .how-note svg{width:16px;height:16px;color:var(--tj-red)}
+.tj2 .th{background:var(--tj-sunk)}
+.tj2 .thc{width:150px;border:1px solid var(--tj-line);border-radius:16px;padding:12px 10px 14px;text-align:center;background:#fff;transition:.18s;position:relative}
+.tj2 .thc:hover{border-color:var(--tj-red-400);box-shadow:0 10px 26px -16px rgba(14,14,14,.3)}
+.tj2 .thc.hide{display:none}
+.tj2 .thc img.ph{width:92px;height:92px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid var(--tj-sunk)}
+.tj2 .thc b{display:block;font-size:14px;color:var(--tj-ink);line-height:1.5;font-weight:700}
+.tj2 .thc .sp{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px;line-height:1.6;min-height:2.6em}
+.tj2 .thc .yr{display:inline-block;font-size:11.5px;color:var(--tj-red);background:var(--tj-tint);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .vf{position:absolute;top:10px;left:10px;width:18px;height:18px}
+.tj2 .thc .pen{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--tj-ink);background:var(--tj-yellow);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .pen svg{width:10px;height:10px}
+.tj2 .thc.more{background:var(--tj-tint);border-color:var(--tj-red-400);display:flex;flex-direction:column;justify-content:center;gap:6px}
+.tj2 .thc.more b{color:var(--tj-red);font-size:26px}
+.tj2 .thc.more span{font-size:13px;color:var(--tj-ink-2)}
+.tj2 .thc.more .btn{margin:8px auto 0;min-height:36px;font-size:13px;padding:6px 14px}
+.tj2 .dots{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.tj2 .dots i{width:6px;height:6px;border-radius:50%;background:var(--tj-line);transition:.2s}
+.tj2 .dots i.on{width:18px;border-radius:3px;background:var(--tj-red)}
+.tj2 .std{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+.tj2 .std>div{display:flex;gap:12px;align-items:center;border:1px solid var(--tj-line);border-radius:14px;padding:14px 16px;background:#fff}
+.tj2 .std img{width:40px;height:40px;object-fit:contain;flex:none}
+.tj2 .std b{display:block;font-size:14.5px;color:var(--tj-ink)}
+.tj2 .std span{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .sup{background:#fff}
+.tj2 .supc{width:230px;background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:16px;display:flex;gap:12px;align-items:center;transition:.2s}
+.tj2 .supc:hover{border-color:var(--tj-red-400);transform:translateY(-3px);background:#fff}
+.tj2 .supc img{width:64px;height:76px;border-radius:12px;object-fit:cover;flex:none}
+.tj2 .supc b{display:block;color:var(--tj-ink);font-size:14.5px;line-height:1.5}
+.tj2 .supc .ap{display:block;font-size:12.5px;color:var(--tj-red);margin-top:3px}
+.tj2 .sup .hs{margin-top:28px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center}
+.tj2 .school p.lede{margin-bottom:22px}
+.tj2 .path div{display:flex;align-items:center;gap:14px;padding:12px 16px;background:#fff;border:1px solid var(--tj-line);border-radius:14px;margin-bottom:8px;font-size:15px;color:var(--tj-ink)}
+.tj2 .path div i{width:30px;height:30px;border-radius:50%;background:var(--tj-tint);color:var(--tj-red);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px;flex:none}
+.tj2 .path div:last-child{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .path div:last-child i{background:#fff}
+.tj2 .path small{display:block;font-size:12.5px;color:var(--tj-mut)}
+.tj2 .path div:last-child small{color:#ffd6d9}
+.tj2 .cities{background:#fff}
+.tj2 .map{position:relative;background:var(--tj-sunk);border-radius:24px;padding:22px;overflow:hidden;margin:30px auto 0;max-width:640px}
+.tj2 .map svg{width:100%;height:auto;display:block}
+.tj2 .map .land{fill:#fff;stroke:var(--tj-ink);stroke-width:1.5;stroke-linejoin:round}
+.tj2 .map text{font-family:var(--tj-font);font-size:15px;fill:var(--tj-ink);font-weight:700}
+.tj2 .map text.sea{fill:var(--tj-mut);font-weight:500;font-size:13px}
+.tj2 .map .pin{transform-box:fill-box;transform-origin:50% 100%;animation:tjbob 3.2s ease-in-out infinite}
+.tj2 .map .pin.d1{animation-delay:-.7s}.tj2 .map .pin.d2{animation-delay:-1.4s}.tj2 .map .pin.d3{animation-delay:-2.1s}.tj2 .map .pin.d4{animation-delay:-2.8s}
+@keyframes tjbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+.tj2 .map .shadow{fill:rgba(14,14,14,.14)}
+.tj2 .map .de{position:absolute;left:22px;top:22px;bottom:auto;background:#fff;border:1px solid var(--tj-line);border-radius:14px;padding:8px 12px;font-size:13px;color:var(--tj-ink);display:flex;gap:10px;align-items:center}
+.tj2 .map .de img{width:22px;height:22px}
+.tj2 .map .de small{display:block;color:var(--tj-mut);font-size:11.5px}
+.tj2 .dia{background:#fff}
+.tj2 .dia .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.tj2 .clocks{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;background:var(--tj-sunk);padding:14px;border-radius:22px;position:relative}
+.tj2 .clocks .live{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tj-mut);padding:0 4px 2px}
+.tj2 .clocks .live i{width:8px;height:8px;border-radius:50%;background:#3fb26a;animation:tjpulse 1.6s infinite}
+@keyframes tjpulse{0%{box-shadow:0 0 0 0 rgba(63,178,106,.5)}70%{box-shadow:0 0 0 7px rgba(63,178,106,0)}100%{box-shadow:0 0 0 0 rgba(63,178,106,0)}}
+.tj2 .clock{background:#fff;border:1px solid var(--tj-line);border-radius:16px;padding:12px 14px;transition:.2s}
+.tj2 .clock .c{font-size:12.5px;color:var(--tj-mut)}
+.tj2 .clock .t{display:block;font-size:26px;font-weight:800;color:var(--tj-ink);direction:ltr;text-align:right;font-variant-numeric:tabular-nums;line-height:1.2}
+.tj2 .clock .t small{font-size:14px;font-weight:600;color:var(--tj-mut)}
+.tj2 .clock .s{display:block;font-size:12px;color:var(--tj-mut);margin-top:4px}
+.tj2 .clock.on{border-color:var(--tj-red-400);background:var(--tj-tint)}
+.tj2 .clock.on .s{color:var(--tj-red-600);font-weight:600}
+.tj2 .dia ul{list-style:none;padding:0;margin:18px 0 24px;display:grid;gap:10px}
+.tj2 .dia li{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;color:var(--tj-ink-2)}
+.tj2 .dia li::before{content:"";width:22px;height:22px;flex:none;border-radius:50%;background:var(--tj-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c83f49' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L20 7'/></svg>") center/12px no-repeat;margin-top:3px}
+.tj2 .dia .orbit{width:110px;margin-bottom:6px}
+.tj2 .mag{background:var(--tj-sunk)}
+.tj2 .mag-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:14px;margin-top:28px}
+.tj2 .art-card{background:#fff;border:1px solid var(--tj-line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:.2s}
+.tj2 .art-card:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .art-card img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.tj2 .art-card .b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tj2 .art-card .k{font-size:12px;color:var(--tj-red);font-weight:700}
+.tj2 .art-card h3{font-size:15px;line-height:1.6}
+.tj2 .art-card p{font-size:13px;color:var(--tj-mut);line-height:1.8;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .art-card.big img{aspect-ratio:16/9}
+.tj2 .art-card.big h3{font-size:19px}
+.tj2 .today{margin-top:16px;background:#fff;border:1px dashed var(--tj-red-400);border-radius:16px;padding:14px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.tj2 .today .k{font-size:12.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .today a{font-weight:600;color:var(--tj-ink)}
+.tj2 .today a:hover{color:var(--tj-red)}
+.tj2 .today .cnt{margin-inline-start:auto;font-size:13px;color:var(--tj-mut)}
+.tj2 .ig{background:#fff;overflow:hidden}
+.tj2 .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:38px;padding:10px 0 16px}
+.tj2 .pola{background:#fff;border:1px solid var(--tj-line);border-radius:6px;padding:12px 12px 16px;box-shadow:0 18px 40px -22px rgba(14,14,14,.35);transition:.25s;position:relative;display:block}
+.tj2 .pola:nth-child(1){transform:rotate(-2deg)}
+.tj2 .pola:nth-child(2){transform:rotate(1.2deg) translateY(10px)}
+.tj2 .pola:nth-child(3){transform:rotate(-1deg)}
+.tj2 .pola:hover{transform:rotate(0) translateY(-6px);z-index:2;border-color:var(--tj-red-400)}
+.tj2 .pola .shot{aspect-ratio:4/5;overflow:hidden;border-radius:3px;background:var(--tj-sunk)}
+.tj2 .pola .shot img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.tj2 .pola:hover .shot img{transform:scale(1.03)}
+.tj2 .pola .cap{font-size:13.5px;color:var(--tj-ink-2);line-height:1.8;margin:12px 4px 10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .pola .who{display:flex;align-items:center;gap:10px;margin:0 4px}
+.tj2 .pola .who img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--tj-tint)}
+.tj2 .pola .who b{display:block;font-size:13px;color:var(--tj-ink);direction:ltr;text-align:right}
+.tj2 .pola .who small{display:block;font-size:11.5px;color:var(--tj-mut)}
+.tj2 .pola .who .f{margin-inline-start:auto;font-size:11.5px;color:var(--tj-red);font-weight:700;white-space:nowrap}
+.tj2 .pola .tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-2deg);width:70px;height:20px;background:rgba(242,193,78,.6);border-radius:2px}
+.tj2 .org{background:var(--tj-sunk)}
+.tj2 .org .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center}
+.tj2 .org .logos{display:flex;gap:28px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.tj2 .org .logos img{height:34px;width:auto;opacity:.9}
+.tj2 .faq{background:#fff}
+.tj2 .faq-list{max-width:820px;margin:26px auto 0;display:grid;gap:10px}
+.tj2 details{border:1px solid var(--tj-line);border-radius:14px;background:#fff;padding:0 20px;transition:border-color .2s,background .2s}
+.tj2 details[open]{border-color:var(--tj-red-400);background:var(--tj-tint-2)}
+.tj2 summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:700;color:var(--tj-ink);font-size:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;outline:none}
+.tj2 summary:focus{outline:none}
+.tj2 summary:focus-visible{outline:2px solid var(--tj-red-400);outline-offset:6px;border-radius:8px}
+.tj2 summary::-webkit-details-marker{display:none}
+.tj2 summary::after{content:"";width:9px;height:9px;border-inline-start:2px solid var(--tj-red);border-block-end:2px solid var(--tj-red);transform:rotate(-45deg);transition:transform .25s;flex:none;margin-inline-start:6px}
+.tj2 details[open] summary::after{transform:rotate(45deg)}
+.tj2 details .ans{overflow:hidden}
+.tj2 details p{padding:0 0 18px;font-size:15px;line-height:1.95;color:var(--tj-soft)}
+.tj2 details p a{color:var(--tj-red);font-weight:600}
+.tj2 .berry{background:var(--tj-tint);text-align:center}
+.tj2 .berry img{width:100px;margin:0 auto 16px;animation:tjfloat2 5s ease-in-out infinite}
+@keyframes tjfloat2{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(4deg) translateY(-6px)}}
+.tj2 .berry .h2{font-size:clamp(23px,3vw,34px)}
+.tj2 .berry .lede{margin:10px auto 24px}
+.tj2 .berry .ctas{justify-content:center}
+.tj2 .berry .small{font-size:13px;color:var(--tj-mut);margin-top:14px}
+.wp-block-post-content>.tj2.alignfull{max-width:none;width:auto}
+@media (max-width:1024px){
+.tj2 .eco-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .how-grid{grid-template-columns:repeat(2,1fr)}
+.tj2 .std{grid-template-columns:repeat(2,1fr)}
+.tj2 .mag-grid{grid-template-columns:1fr 1fr}
+.tj2 .art-card.big{grid-column:1/-1}
+.tj2 .ig-grid{gap:18px}
+.tj2 .school .wrap{grid-template-columns:1fr}
+.tj2 .org .wrap{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+.tj2{font-size:16px}
+.tj2 section{padding-block:40px}
+.tj2 .hero{padding-block:16px 32px}
+.tj2 .hero .wrap{grid-template-columns:1fr;gap:6px}
+.tj2 .hero .art{order:-1;justify-content:center}
+.tj2 .hero .art img{max-width:190px}
+.tj2 .hero h1{font-size:26px;margin:8px 0 12px}
+.tj2 .hero .lede{font-size:15px;margin-bottom:18px}
+.tj2 .ctas .btn{flex:1;min-height:44px;font-size:15px;padding:8px 14px}
+.tj2 .nums{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:22px;padding-top:18px}
+.tj2 .nums b{font-size:20px}.tj2 .nums span{font-size:12px}
+.tj2 .eco-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:22px}
+.tj2 .eco-grid::-webkit-scrollbar{display:none}
+.tj2 .eco-card{flex:0 0 78%;scroll-snap-align:start}
+.tj2 .eco-card .pic{height:140px}
+.tj2 .tl-item{width:220px}
+.tj2 .svc-list{grid-template-columns:1fr;gap:0;padding:4px 16px}
+.tj2 .svc-row{padding:12px 0;gap:12px}
+.tj2 .svc-row:nth-last-child(-n+2){border-bottom:1px solid var(--tj-line)}
+.tj2 .svc-row:last-child{border-bottom:0}
+.tj2 .svc-row img{width:32px;height:32px}
+.tj2 .svc-row b{font-size:15px}.tj2 .svc-row span{font-size:12.5px}
+.tj2 .chips{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
+.tj2 .chips::-webkit-scrollbar{display:none}
+.tj2 .chip{white-space:nowrap;flex:none}
+.tj2 .how-grid{grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.tj2 .how-step{padding:20px 12px 14px}
+.tj2 .how-step img{width:36px;height:36px}
+.tj2 .how-step h3{font-size:14.5px}
+.tj2 .how-step p{font-size:12.5px;line-height:1.75}
+.tj2 .how-note{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;text-align:right}
+.tj2 .thc{width:138px}
+.tj2 .std{grid-template-columns:1fr 1fr;gap:8px}
+.tj2 .std>div{flex-direction:column;text-align:center;gap:6px;padding:12px 8px}
+.tj2 .std b{font-size:13px}.tj2 .std span{font-size:11.5px}
+.tj2 .supc{width:200px}
+.tj2 .map{padding:12px;border-radius:18px}
+.tj2 .map text{font-size:18px}.tj2 .map text.sea{font-size:15px}
+.tj2 .map .de{left:10px;top:10px;bottom:auto;padding:6px 10px;font-size:12px}
+.tj2 .dia .wrap{grid-template-columns:1fr;gap:22px}
+.tj2 .clocks{grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.tj2 .clock{padding:10px}.tj2 .clock .t{font-size:19px}.tj2 .clock .t small{font-size:11px}.tj2 .clock .s{font-size:10.5px}
+.tj2 .mag-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;margin-top:20px}
+.tj2 .mag-grid::-webkit-scrollbar{display:none}
+.tj2 .art-card{flex:0 0 76%;scroll-snap-align:start}
+.tj2 .art-card.big img{aspect-ratio:16/10}
+.tj2 .art-card.big h3{font-size:15px}
+.tj2 .today .cnt{display:none}
+.tj2 .ig-grid{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 6px 16px;scrollbar-width:none}
+.tj2 .ig-grid::-webkit-scrollbar{display:none}
+.tj2 .pola{flex:0 0 76%;scroll-snap-align:center}
+.tj2 .pola:nth-child(n){transform:none}
+.tj2 .org .logos{gap:18px}.tj2 .org .logos img{height:26px}
+.tj2 .berry .ctas .btn{flex:1 1 100%}
+.tj2 .arrows{display:none}
+}
+.tj2 .map{max-width:620px}
+.tj2 .map .mi{position:relative}
+.tj2 .map .mi svg{width:100%;height:auto;display:block}
+.tj2 .map .mp{--pin:20px;position:absolute;transform:translate(-50%,calc(-1 * var(--pin)));text-align:center;line-height:1.2;pointer-events:none;width:max-content}
+.tj2 .map .mp img{display:block;margin:0 auto 2px;width:var(--pin);height:var(--pin);object-fit:contain;animation:tjbob 3.2s ease-in-out infinite;transform-origin:50% 100%}
+.tj2 .map .mp b{display:block;font-size:13.5px;font-weight:700;color:var(--tj-ink);text-shadow:0 0 6px var(--tj-sunk),0 0 2px var(--tj-sunk)}
+.tj2 .map .mp.big{--pin:30px}
+.tj2 .map .mp.big b{font-size:15px}
+.tj2 .map .mp.up{display:flex;flex-direction:column-reverse;transform:translate(-50%,calc(-1 * var(--pin) - 1.3em))}
+.tj2 .map .mp.up img{margin:2px auto 0}
+.tj2 .map .mp.lw b{position:absolute;right:calc(100% + 4px);top:calc(var(--pin) - 1.2em)}
+.tj2 .map .mp.d1 img{animation-delay:-.7s}
+.tj2 .map .mp.d2 img{animation-delay:-1.4s}
+.tj2 .map .mp.d3 img{animation-delay:-2.1s}
+.tj2 .map .mp.d4 img{animation-delay:-2.8s}
+.tj2 .map .sea{position:absolute;transform:translate(-50%,-50%);font-size:12.5px;color:var(--tj-mut);white-space:nowrap;pointer-events:none}
+.tj2 .clock.on{border-color:#bfe0cb;background:#f3faf5}
+.tj2 .clock.on .s{color:#2e8b57;font-weight:600}
+.tj2 .thc .loc{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--tj-soft);background:var(--tj-sunk);padding:2px 9px;border-radius:999px;margin-top:8px}
+.tj2 .thc .loc svg{width:11px;height:11px;flex:none;color:var(--tj-mut)}
+.tj2 .thc .sp{min-height:3.1em}
+.tj2 .thc .sch{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:#fff;background:var(--tj-red);padding:2px 7px;border-radius:999px;font-weight:700}
+.tj2 .thc .sch svg{width:10px;height:10px}
+.tj2 .thc .pen{top:auto;bottom:8px;right:8px}
+.tj2 .school{background:var(--tj-tint-2)}
+.tj2 .school .wrap{display:block}
+.tj2 .axes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.tj2 .axes>div{background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:20px 20px 22px;transition:.2s}
+.tj2 .axes>div:hover{border-color:var(--tj-red-400);transform:translateY(-3px)}
+.tj2 .axes i{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--tj-tint);color:var(--tj-red);margin-bottom:12px}
+.tj2 .axes i svg{width:20px;height:20px}
+.tj2 .axes b{display:block;font-size:16px;color:var(--tj-ink);margin-bottom:6px}
+.tj2 .axes p{font-size:14px;color:var(--tj-soft);line-height:1.9;margin:0}
+.tj2 .ring{margin-top:14px;background:var(--tj-ink);color:#fff;border-radius:18px;padding:18px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tj2 .ring b{font-size:22px;color:#fff;white-space:nowrap}
+.tj2 .ring span{font-size:14.5px;color:rgba(255,255,255,.72);line-height:1.9;flex:1;min-width:220px}
+.tj2 .ring .dot{width:9px;height:9px;border-radius:50%;background:var(--tj-yellow);flex:none;min-width:0}
+.tj2 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:34px;position:relative}
+.tj2 .steps::before{content:"";position:absolute;top:19px;right:10%;left:10%;height:2px;background:var(--tj-line)}
+.tj2 .steps>div{text-align:center;padding:0 8px;position:relative}
+.tj2 .steps i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid var(--tj-red-400);color:var(--tj-red);font-style:normal;font-weight:800;font-size:14px;margin:0 auto 12px;position:relative;z-index:1}
+.tj2 .steps>div:last-child i{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .steps b{display:block;font-size:14.5px;color:var(--tj-ink);margin-bottom:4px}
+.tj2 .steps span{display:block;font-size:12.5px;color:var(--tj-mut);line-height:1.8}
+.tj2 .school .ctas{justify-content:center;margin-top:30px}
+.tj2 .org .logos img{height:30px}
+.tj2 .org .logos img.dk{height:26px}
+@media (max-width:1024px){
+.tj2 .axes{grid-template-columns:1fr}
+.tj2 .steps{grid-template-columns:1fr 1fr 1fr;gap:22px 0}
+.tj2 .steps::before{display:none}
+}
+@media (max-width:760px){
+.tj2 .map .mp b{font-size:11.5px}
+.tj2 .map .mp.big b{font-size:12.5px}
+.tj2 .map .mp{--pin:15px}
+.tj2 .map .mp.big{--pin:22px}
+.tj2 .map .sea{font-size:10.5px}
+.tj2 .steps{grid-template-columns:1fr 1fr;gap:20px 0}
+.tj2 .ring{padding:16px 18px;gap:10px}
+.tj2 .ring b{font-size:18px}
+}
+.tj2 .sup{background:var(--tj-tint-2)}
+.tj2 .supc{background:#fff;width:250px;padding:18px}
+.tj2 .supc:hover{background:#fff}
+.tj2 .supc img{width:76px;height:92px;border-radius:14px}
+.tj2 .supc b{font-size:15px}
+.tj2 .school .wrap{display:grid}
+.tj2 .school{background:#fff}
+.tj2 .path div{background:var(--tj-sunk)}
+.tj2 .thc .meta{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px;min-height:24px}
+.tj2 .thc .loc,.tj2 .thc .sch,.tj2 .thc .pen{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;margin:0;line-height:1.7;font-weight:600;top:auto;right:auto;bottom:auto}
+.tj2 .thc .loc{background:var(--tj-sunk);color:var(--tj-soft);font-weight:500}
+.tj2 .thc .sch{background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .thc .pen{background:#fdf3d6;color:#6b4f00}
+.tj2 .thc .loc svg,.tj2 .thc .sch svg,.tj2 .thc .pen svg{width:11px;height:11px}
+
+.tj2 .thc .mnt{position:static;display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;line-height:1.7;font-weight:700;color:var(--tj-red);background:var(--tj-tint);border:1px solid var(--tj-red-400);margin:0}
+.tj2 .thc .mnt svg{width:11px;height:11px;flex:none}
+
+.tj2 .supc .supmag{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;color:var(--tj-red-600);text-decoration:none;border-bottom:1px solid var(--tj-red-400)}
+
+/* == هیرو: نسخه‌ی ۲x و شناوری توت‌فرنگی‌ها == */
+.tj2 .hero .art .dwrap{position:relative;display:inline-block;width:min(100%,440px)}
+.tj2 .hero .art .dwrap>img.dbase{display:block;width:100%;height:auto;max-width:100%;max-height:none;margin:0}
+.tj2 .hero .art .dwrap>img.seed{position:absolute;height:auto;margin:0;max-width:none;max-height:none;will-change:transform;animation:tj-drift var(--d,7s) ease-in-out var(--dl,0s) infinite alternate}
+@keyframes tj-drift{from{transform:translate(0,0) rotate(0deg)}to{transform:translate(var(--tx,-5px),var(--ty,-4px)) rotate(var(--rt,-1.2deg))}}
+.tj2 .hero .art .dwrap>img.s1{left:84.271%;top:15.286%;width:3.750%;--tx:-11px;--ty:-9px;--rt:-4deg;--d:3.7s;--dl:0s}
+.tj2 .hero .art .dwrap>img.s2{left:60.313%;top:16.864%;width:3.542%;--tx:11px;--ty:-9px;--rt:4deg;--d:4.7s;--dl:-2.1s}
+.tj2 .hero .art .dwrap>img.s3{left:70.938%;top:20.710%;width:3.333%;--tx:-11px;--ty:-9px;--rt:-4deg;--d:5.1s;--dl:-4.3s}
+.tj2 .hero .art .dwrap>img.s4{left:61.563%;top:28.205%;width:3.333%;--tx:11px;--ty:-9px;--rt:4deg;--d:4.1s;--dl:-1.2s}
+.tj2 .hero .art .dwrap>img.s5{left:78.958%;top:30.473%;width:4.271%;--tx:-11px;--ty:-9px;--rt:-4deg;--d:4.4s;--dl:-5.6s}
+.tj2 .hero .art .dwrap>img.s6{left:82.708%;top:39.349%;width:3.750%;--tx:11px;--ty:-9px;--rt:4deg;--d:4.9s;--dl:-3.4s}
+@media (prefers-reduced-motion:reduce){.tj2 .hero .art .dwrap>img.seed{animation:none}}
+@media (max-width:760px){.tj2 .hero .art .dwrap{width:min(100%,200px)}.tj2 .hero .art .dwrap>img.seed{--tx:-6px;--ty:-5px}}
+/* == سکشن «از کجا شروع کنم؟» == */
+.tj2 .start .eco-grid{grid-template-columns:repeat(3,1fr)}
+.tj2 .start .eco-card{cursor:default}
+.tj2 .start .eco-card .pic{height:150px}
+.tj2 .start .eco-card .pic img{max-height:120px}
+.tj2 .start .eco-card p{flex:1}
+.tj2 .start .acts{display:flex;align-items:center;gap:14px;margin:4px 22px 0;flex-wrap:wrap}
+.tj2 .start .acts .btn{min-height:42px;padding:8px 18px;font-size:14.5px}
+.tj2 .start .acts .lnk{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:600;color:var(--tj-red);text-decoration:none}
+.tj2 .start .acts .lnk svg{width:12px;height:12px}
+.tj2 .start .acts .lnk:hover{text-decoration:underline;text-underline-offset:4px}
+@media (max-width:1024px){.tj2 .start .eco-grid{grid-template-columns:repeat(3,1fr);gap:12px}.tj2 .start .eco-card h3{font-size:16.5px}}
+@media (max-width:760px){
+.tj2 .start .eco-grid{display:grid;grid-template-columns:1fr;gap:12px;overflow:visible;padding:0;margin-top:20px}
+.tj2 .start .eco-card{flex:none;display:grid;grid-template-columns:68px 1fr;column-gap:14px;padding:16px;align-items:start;border-radius:16px}
+.tj2 .start .eco-card .pic{grid-row:1/5;height:68px;width:68px;padding:8px;border:0;border-radius:14px;background:var(--tj-sunk);align-items:center}
+.tj2 .start .eco-card .pic img{height:100%;max-height:52px;width:auto}
+.tj2 .start .eco-card .n{margin:0 0 2px}
+.tj2 .start .eco-card h3{margin:0 0 6px;font-size:16px}
+.tj2 .start .eco-card p{margin:0 0 10px;font-size:13.5px;line-height:1.8}
+.tj2 .start .acts{margin:0;gap:12px}
+.tj2 .start .acts .btn{min-height:40px;padding:6px 14px;font-size:13.5px}
+}
+
+/* == نوار بات تلگرام == */
+.tj2 .botbar{background:var(--tj-tint);border-block:1px solid var(--tj-line)}
+.tj2 .botbar .wrap{display:flex;align-items:center;gap:14px;padding-block:10px;flex-wrap:wrap}
+.tj2 .botbar img{width:54px;height:54px;object-fit:contain;flex:none;animation:tj-bob 2.8s ease-in-out infinite}
+@keyframes tj-bob{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(6deg) translateY(-3px)}}
+.tj2 .botbar p{margin:0;font-size:14.5px;color:var(--tj-soft);flex:1;line-height:1.7;min-width:220px}
+.tj2 .botbar p b{color:var(--tj-ink)}
+.tj2 .botbar>.wrap>a{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--tj-red);white-space:nowrap;border:1.5px solid var(--tj-red-400);border-radius:999px;padding:7px 14px;background:#fff;transition:.15s}
+.tj2 .botbar>.wrap>a:hover{background:var(--tj-red);color:#fff;border-color:var(--tj-red)}
+.tj2 .botbar>.wrap>a svg{width:12px;height:12px}
+@media (prefers-reduced-motion:reduce){.tj2 .botbar img{animation:none}}
+@media (max-width:760px){.tj2 .botbar .wrap{gap:10px;padding-block:10px}.tj2 .botbar img{width:40px;height:40px}.tj2 .botbar p{font-size:13.5px;min-width:0}.tj2 .botbar>.wrap>a{flex:1 1 100%;justify-content:center;padding:9px 14px}}
+/* == هیئت علمی و سوپروایزرها (تامنیل کوچک) == */
+.tj2 .sup .head .btn{flex:none}
+.tj2 .fac-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:28px}
+.tj2 .fg{background:var(--tj-sunk);border:1px solid var(--tj-line);border-radius:18px;padding:16px 18px}
+.tj2 .fg.board{grid-column:1/-1;background:#fff}
+.tj2 .fg.board .ppl{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tj2 .fg h3{font-size:14px;color:var(--tj-red);font-weight:700;margin:0 0 10px}
+.tj2 .ppl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px}
+.tj2 .fg.mentors{grid-column:1/-1}
+.tj2 .fg.mentors .ppl{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tj2 .pp{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:12px;color:var(--tj-ink);min-width:0;transition:.15s}
+.tj2 .pp:hover{background:#fff}
+.tj2 .fg.board .pp:hover{background:var(--tj-sunk)}
+.tj2 .pp img,.tj2 .pp .mono{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none;border:2px solid #fff;box-shadow:0 0 0 1px var(--tj-line)}
+.tj2 .pp .mono{display:grid;place-items:center;background:var(--tj-tint);color:var(--tj-red);font-weight:800;font-size:13px}
+.tj2 .pp>span{min-width:0}
+.tj2 .pp b{display:block;font-size:14px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tj2 .pp small{display:block;font-size:12px;color:var(--tj-mut);line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tj2 .pp:hover b{color:var(--tj-red)}
+@media (max-width:1024px){.tj2 .fg.board .ppl,.tj2 .fg.mentors .ppl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){
+.tj2 .fac-grid{grid-template-columns:1fr;gap:10px;margin-top:20px}
+.tj2 .fg{padding:12px 12px}
+.tj2 .ppl,.tj2 .fg.board .ppl,.tj2 .fg.mentors .ppl{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 6px}
+.tj2 .pp{gap:8px;padding:5px 4px}
+.tj2 .pp img,.tj2 .pp .mono{width:38px;height:38px}
+.tj2 .pp b{font-size:13px}
+.tj2 .pp small{font-size:11px}
+}
+/* == مدرسه: دپارتمان‌ها == */
+.tj2 .school .wrap{align-items:start}
+.tj2 .ladder{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 20px}
+.tj2 .ladder span{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--tj-ink);background:#fff;border:1px solid var(--tj-line);border-radius:999px;padding:5px 12px}
+.tj2 .ladder span:not(:last-child)::after{content:"←";color:var(--tj-red);font-weight:800;margin-inline-start:2px}
+.tj2 .schlinks{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:16px}
+.tj2 .schlinks a{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:600;color:var(--tj-red)}
+.tj2 .schlinks a svg{width:12px;height:12px}
+.tj2 .schlinks a:hover{text-decoration:underline;text-underline-offset:4px}
+.tj2 .depts{display:grid;gap:10px}
+.tj2 .dept{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;background:#fff;border:1px solid var(--tj-line);border-radius:16px;padding:14px 16px;color:var(--tj-ink);transition:.18s}
+.tj2 .dept:hover{border-color:var(--tj-red-400);transform:translateY(-2px);box-shadow:0 14px 30px -20px rgba(14,14,14,.3)}
+.tj2 .dept .code{grid-row:1/3;font-family:inherit;font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--tj-red);background:var(--tj-tint);border-radius:10px;padding:8px 10px;direction:ltr;min-width:64px;text-align:center}
+.tj2 .dept b{font-size:16px}
+.tj2 .dept small{font-size:12.5px;color:var(--tj-mut);line-height:1.7}
+.tj2 .dept.soon{opacity:.75}
+.tj2 .dept.soon .code{background:var(--tj-sunk);color:var(--tj-mut)}
+@media (max-width:760px){.tj2 .school .wrap{gap:20px}.tj2 .dept{padding:12px 14px}.tj2 .dept .code{min-width:56px;font-size:11px}.tj2 .dept b{font-size:15px}}
+
+/* == اصلاح موبایل: هیئت علمی، نوار بات == */
+.tj2 #supervisors{background:#fff}
+@media (max-width:760px){
+.tj2 .pp b{white-space:normal;overflow:visible;text-overflow:clip;font-size:13px;line-height:1.4}
+.tj2 .pp small{display:none}
+.tj2 .fg.board .pp small{display:block;white-space:normal;overflow:visible;font-size:11px;line-height:1.4}
+.tj2 .pp{align-items:center;padding:4px 2px}
+.tj2 .botbar .more{display:none}
+.tj2 .botbar .wrap{flex-wrap:nowrap;gap:10px;padding-block:8px}
+.tj2 .botbar img{width:36px;height:36px}
+.tj2 .botbar p{font-size:13px;line-height:1.5}
+.tj2 .botbar p b{font-weight:600}
+.tj2 .botbar>.wrap>a{flex:none;padding:6px 10px;font-size:12.5px}
+}
+
+/* == اصلاح موبایل: نقشه و کارت مجله == */
+@media (max-width:760px){
+.tj2 .map .de{top:auto;bottom:10px;left:10px}
+.tj2 .art-card,.tj2 .art-card.big{flex:0 0 86%;flex-direction:row;align-items:stretch}
+.tj2 .art-card img,.tj2 .art-card.big img{width:96px;min-width:96px;height:auto;aspect-ratio:auto;object-fit:cover}
+.tj2 .art-card .b{padding:12px 12px 12px}
+.tj2 .art-card h3,.tj2 .art-card.big h3{font-size:14px}
+.tj2 .art-card p{-webkit-line-clamp:2}
+}
+
+/* == هیئت علمی: سه ستون دپارتمان == */
+@media (min-width:1025px){.tj2 .fac-grid{grid-template-columns:2fr 1fr 1fr}.tj2 .fg:nth-child(3) .ppl,.tj2 .fg:nth-child(4) .ppl{grid-template-columns:1fr}}
+
+/* == نوار بات: مدل آرام (بدون تکان) == */
+.tj2 .botbar img{animation:none!important;width:30px;height:30px}
+.tj2 .botbar .dot{width:9px;height:9px;border-radius:50%;background:#2fa36b;flex:none;box-shadow:0 0 0 0 rgba(47,163,107,.45);animation:tj-pulse 2.4s ease-out infinite}
+@keyframes tj-pulse{0%{box-shadow:0 0 0 0 rgba(47,163,107,.45)}70%{box-shadow:0 0 0 8px rgba(47,163,107,0)}100%{box-shadow:0 0 0 0 rgba(47,163,107,0)}}
+@media (prefers-reduced-motion:reduce){.tj2 .botbar .dot{animation:none}}
+@media (max-width:760px){.tj2 .botbar img{width:26px;height:26px}.tj2 .botbar .wrap{gap:8px}}
+/* == کارت تراپیست: فشرده و سبک == */
+.tj2 .thc{width:132px;padding:10px 8px 12px;border-radius:14px}
+.tj2 .thc img.ph{width:64px;height:64px;margin:0 auto 8px;border-width:2px}
+.tj2 .thc b{font-size:13.5px;line-height:1.45}
+.tj2 .thc .sp{font-size:11.5px;line-height:1.55;min-height:2.4em;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .thc .meta{gap:4px;margin-top:6px;min-height:20px}
+.tj2 .thc .loc,.tj2 .thc .sch,.tj2 .thc .pen,.tj2 .thc .mnt{font-size:10.5px;padding:1px 7px;line-height:1.6}
+.tj2 .thc .vf{width:15px;height:15px;top:8px;left:8px}
+.tj2 .thc.more{width:132px}
+.tj2 .thc.more b{font-size:22px}
+.tj2 .thc.more span{font-size:12.5px}
+.tj2 .thc.more .btn{min-height:32px;font-size:12.5px;padding:4px 12px}
+.tj2 .th .hs{gap:10px}
+@media (max-width:760px){.tj2 .thc,.tj2 .thc.more{width:120px;padding:10px 6px 10px}.tj2 .thc img.ph{width:56px;height:56px}.tj2 .thc b{font-size:12.5px}.tj2 .thc .sp{font-size:11px}}
+/* == FAQ هم‌زبان با کارت‌ها == */
+.tj2 .faq-list{gap:8px;margin-top:22px}
+.tj2 details{background:var(--tj-sunk);border-radius:16px;padding:0 18px}
+.tj2 details[open]{background:#fff;border-color:var(--tj-red-400);box-shadow:0 14px 30px -24px rgba(14,14,14,.3)}
+.tj2 summary{font-size:15.5px;padding:14px 0}
+.tj2 summary::after{width:8px;height:8px}
+.tj2 details p{font-size:14.5px;line-height:1.9;padding-bottom:16px}
+@media (max-width:760px){.tj2 details{padding:0 14px}.tj2 summary{font-size:14.5px;padding:13px 0}.tj2 details p{font-size:13.5px}}
+/* == موبایل: فشرده‌تر == */
+@media (max-width:760px){
+.tj2 section{padding-block:32px}
+.tj2 .h2{margin-bottom:8px}
+.tj2 .lede{font-size:14.5px;line-height:1.85}
+.tj2 .how-grid{gap:10px;margin-top:22px}
+.tj2 .how-step{padding:20px 14px 16px}
+.tj2 .how-step p{font-size:13px;line-height:1.75}
+.tj2 .tl-item{width:220px;padding:16px 14px}
+.tj2 .sup .head .btn{width:100%}
+}
+
+/* == چهار معیار: فشرده روی موبایل == */
+@media (max-width:760px){.tj2 .std>div{flex-direction:row;text-align:start;align-items:center;gap:10px;padding:10px 12px}.tj2 .std>div img{width:32px;height:32px;margin:0;flex:none}.tj2 .std>div b{font-size:13px}.tj2 .std>div span{font-size:11.5px;line-height:1.5}}
+</style>
+<style>
+/* == tj-home v3.0 (مهر ۱۴۰۵) · لایهٔ صفحهٔ اصلی روی استایل home-v2؛ فقط زیر .tj2.v3 == */
+main.tj-page{margin-block-start:0}.wp-block-post-content>.tj2.alignfull{margin-top:0}
+.tj2.v3 section{padding-block:clamp(44px,6vw,80px)}
+.tj2.v3 .center .h2{margin-bottom:6px}
+.tj2.v3 svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* هیرو */
+.tj2.v3 .v3h{padding-block:clamp(28px,4.5vw,56px) 0;background:#fff}
+.tj2.v3 .v3h>.wrap:first-child{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(20px,4vw,56px);align-items:center}
+.tj2.v3 .v3h .copy{min-width:0}
+.tj2.v3 .v3h h1{font-size:clamp(28px,3vw,38px);line-height:1.5;color:var(--tj-ink);margin:14px 0 12px;font-weight:800;max-width:none}
+.tj2.v3 .v3h h1 em{font-style:normal;color:var(--tj-red)}
+.tj2.v3 .v3h .lede{font-size:clamp(15px,1.4vw,17px);max-width:56ch;margin:0 0 18px}
+.tj2.v3 .v3h .art{min-width:0;text-align:center}
+.tj2.v3 .v3h .art img{max-width:100%;height:auto}
+.tj2.v3 .ring{display:inline-flex;align-items:center;gap:8px;margin:0;padding:5px 12px;border:1px solid var(--tj-red-400);border-radius:999px;background:#fff;color:var(--tj-red);font-size:13px;line-height:1.6}
+.tj2.v3 .ring span{flex:none;color:inherit;font-size:13px}
+.tj2.v3 .ring .dot{width:7px;height:7px;border-radius:50%;background:var(--tj-red)}
+
+/* جعبهٔ پرسش (الگوی Command Search از 21st، بازنویسی با توکن‌های tj2) */
+.tj2.v3 .ask{position:relative;max-width:560px;z-index:5}
+.tj2.v3 .ask-f{display:flex;align-items:center;gap:10px;height:54px;padding-inline:16px 10px;border:1.5px solid var(--tj-line);border-radius:16px;background:#fff;box-shadow:0 6px 22px rgba(14,14,14,.06);transition:border-color .2s,box-shadow .2s;cursor:text}
+.tj2.v3 .ask-f:focus-within{border-color:var(--tj-red-400);box-shadow:0 0 0 4px var(--tj-tint)}
+.tj2.v3 .ask-f svg{width:20px;height:20px;flex:none;color:var(--tj-mut)}
+.tj2.v3 .ask-f input{flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;font:inherit;font-size:16px;color:var(--tj-ink);padding:0;-webkit-appearance:none;appearance:none}
+.tj2.v3 .ask-f input::placeholder{color:var(--tj-mut);opacity:1}
+.tj2.v3 .ask-f input::-webkit-search-cancel-button{display:none}
+.tj2.v3 .ask-pop{position:absolute;inset-inline:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--tj-line);border-radius:16px;box-shadow:0 18px 40px rgba(14,14,14,.12);padding:6px;max-height:min(60vh,420px);overflow:auto}
+.tj2.v3 .ask-pop[hidden]{display:none}
+.tj2.v3 .ask-pop ul{list-style:none;margin:0;padding:0}
+.tj2.v3 .ask-pop li a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:var(--tj-ink);text-decoration:none;line-height:1.5}
+.tj2.v3 .ask-pop li a small{display:block;color:var(--tj-mut);font-size:12.5px}
+.tj2.v3 .ask-pop li a .g{margin-inline-start:auto;flex:none;font-size:11.5px;color:var(--tj-red);background:var(--tj-tint);border-radius:999px;padding:1px 9px}
+.tj2.v3 .ask-pop li a:hover,.tj2.v3 .ask-pop li a.on{background:var(--tj-sunk)}
+.tj2.v3 .ask-pop .emp{padding:10px;color:var(--tj-mut);font-size:14px}
+.tj2.v3 .ask-all{display:block;margin-top:4px;padding:9px 10px;border-top:1px solid var(--tj-line);color:var(--tj-red);font-size:14px;text-decoration:none}
+
+/* چیپ‌های نیاز */
+.tj2.v3 .needs{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:14px 0 20px;max-width:600px}
+.tj2.v3 .needs .lbl{font-size:13px;color:var(--tj-mut);margin-inline-end:2px}
+.tj2.v3 .need{display:inline-block;padding:4px 12px;border:1px solid var(--tj-line);border-radius:999px;font-size:13.5px;line-height:1.8;color:var(--tj-soft);background:#fff;text-decoration:none;transition:border-color .2s,color .2s,background .2s}
+.tj2.v3 .need:hover{border-color:var(--tj-red-400);color:var(--tj-red);background:var(--tj-tint)}
+.tj2.v3 .v3h .ctas{display:flex;flex-wrap:wrap;gap:10px;margin:0}
+.tj2.v3 .back{margin:12px 0 0;font-size:13.5px;color:var(--tj-mut)}
+.tj2.v3 .back a{color:var(--tj-ink);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--tj-line)}
+
+/* اعداد */
+.tj2.v3 .v3h .nums{list-style:none;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 18px;margin:clamp(24px,4vw,44px) 0 0;padding:16px 0;border-block:1px solid var(--tj-line)}
+.tj2.v3 .v3h .nums li{display:flex;align-items:baseline;gap:6px;margin:0}
+.tj2.v3 .v3h .nums b{font-size:clamp(18px,2vw,24px);color:var(--tj-ink);font-weight:800}
+.tj2.v3 .v3h .nums span{font-size:13px;color:var(--tj-mut)}
+
+/* مسیرها: تب سگمنتی (الگوی Segmented Tabs از 21st) */
+.tj2.v3 .paths{background:var(--tj-sunk)}
+.tj2.v3 .seg{position:relative;display:flex;gap:4px;width:max-content;max-width:100%;margin:18px auto 22px;padding:5px;border-radius:999px;background:#fff;border:1px solid var(--tj-line);overflow-x:auto;scrollbar-width:none}
+.tj2.v3 .seg::-webkit-scrollbar{display:none}
+.tj2.v3 .seg button{position:relative;z-index:1;flex:none;border:0;background:transparent;font:inherit;font-size:14.5px;line-height:1.6;padding:8px 16px;border-radius:999px;color:var(--tj-soft);cursor:pointer;transition:color .25s;white-space:nowrap}
+.tj2.v3 .seg button[aria-selected="true"]{color:#fff}
+.tj2.v3 .seg button:focus-visible{outline:2px solid var(--tj-red-400);outline-offset:2px}
+.tj2.v3 .seg-ink{position:absolute;z-index:0;top:5px;bottom:5px;left:0;width:0;border-radius:999px;background:var(--tj-ink);transition:left .35s cubic-bezier(.3,.7,.2,1),width .35s cubic-bezier(.3,.7,.2,1)}
+.tj2.v3:not(.js) .seg{display:none}
+.tj2.v3.js .pan{display:none}
+.tj2.v3.js .pan.on{display:block;animation:tjv3in .35s ease}
+@keyframes tjv3in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tj2.v3 .pan+.pan{margin-top:28px}
+.tj2.v3.js .pan+.pan{margin-top:0}
+.tj2.v3 .pan-l{max-width:760px;margin:0 auto 18px;text-align:center;font-size:15.5px;line-height:1.95}
+.tj2.v3 .clk{margin:-8px auto 16px;text-align:center;font-size:13px;color:var(--tj-mut);min-height:1.9em}
+.tj2.v3 .clk b{color:var(--tj-ink);font-weight:600}
+.tj2.v3 .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tj2.v3 .tile{display:grid;grid-template-columns:44px minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;align-items:center;padding:14px 16px;background:#fff;border:1px solid var(--tj-line);border-radius:16px;text-decoration:none;color:var(--tj-soft);transition:border-color .2s,transform .2s,box-shadow .2s;min-width:0}
+.tj2.v3 .tile:hover{border-color:var(--tj-red-400);transform:translateY(-2px);box-shadow:0 10px 24px rgba(14,14,14,.06)}
+.tj2.v3 .tile img{grid-row:1/3;width:44px;height:44px;object-fit:contain}
+.tj2.v3 .tile b{display:block;color:var(--tj-ink);font-size:15.5px;line-height:1.6;font-weight:700}
+.tj2.v3 .tile small{display:block;font-size:13px;line-height:1.7;color:var(--tj-mut)}
+.tj2.v3 .tile.hot{border-color:var(--tj-red-400);background:var(--tj-tint-2)}
+.tj2.v3 .tile.hot b{color:var(--tj-red)}
+.tj2.v3 .tile[dir="ltr"]{text-align:left}
+.tj2.v3 .minis{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 6px;margin-top:16px}
+.tj2.v3 .minis .lbl{font-size:13px;color:var(--tj-mut);margin-inline-end:4px}
+.tj2.v3 .minis a{font-size:13px;line-height:1.8;padding:2px 11px;border-radius:999px;background:#fff;border:1px solid var(--tj-line);color:var(--tj-soft);text-decoration:none}
+.tj2.v3 .minis a:hover{color:var(--tj-red);border-color:var(--tj-red-400)}
+
+/* این روزها */
+.tj2.v3 .now{padding-block:clamp(28px,4vw,44px)}
+.tj2.v3 .now-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.tj2.v3 .now-h h2{font-size:18px;color:var(--tj-ink);margin:0;font-weight:700}
+.tj2.v3 .now-dot{width:8px;height:8px;border-radius:50%;background:var(--tj-red);box-shadow:0 0 0 0 rgba(200,63,73,.5);animation:tjv3pulse 2.4s infinite}
+@keyframes tjv3pulse{0%{box-shadow:0 0 0 0 rgba(200,63,73,.45)}70%{box-shadow:0 0 0 9px rgba(200,63,73,0)}100%{box-shadow:0 0 0 0 rgba(200,63,73,0)}}
+.tj2.v3 .now-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;scrollbar-width:thin}
+.tj2.v3 .nw{scroll-snap-align:start;display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--tj-line);border-radius:14px;background:#fff;text-decoration:none;min-width:0;transition:border-color .2s}
+.tj2.v3 .nw:hover{border-color:var(--tj-red-400)}
+.tj2.v3 .nw img{width:48px;height:48px;flex:none;border-radius:10px;object-fit:cover;background:var(--tj-sunk)}
+.tj2.v3 .nw span{display:block;min-width:0}
+.tj2.v3 .nw em{display:block;font-style:normal;font-size:11.5px;color:var(--tj-red);line-height:1.6}
+.tj2.v3 .nw b{display:block;font-size:13.5px;line-height:1.7;color:var(--tj-ink);font-weight:600}
+.tj2.v3 .nw.gone{display:none}
+
+/* آدم‌ها: مارکی آواتار (الگوی Testimonials Marquee از 21st) */
+.tj2.v3 .people{overflow:hidden}
+.tj2.v3 .crit{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:10px 0 0}
+.tj2.v3 .crit span{font-size:12.5px;padding:2px 10px;border-radius:999px;background:var(--tj-tint);color:var(--tj-red)}
+.tj2.v3 .mq{margin:22px 0 8px;display:grid;gap:10px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.tj2.v3 .mq-row{overflow:hidden}
+.tj2.v3 .mq-track{display:flex;gap:10px;width:max-content}
+.tj2.v3 .mq.go .mq-track{animation:tjv3mq var(--d,70s) linear infinite}
+.tj2.v3 .mq.go .rev .mq-track{animation-direction:reverse}
+.tj2.v3 .mq:hover .mq-track,.tj2.v3 .mq:focus-within .mq-track{animation-play-state:paused}
+@keyframes tjv3mq{from{transform:translateX(0)}to{transform:translateX(50%)}}
+.tj2.v3 .p3{flex:none;display:flex;align-items:center;gap:9px;padding:6px 14px 6px 6px;padding-inline:6px 14px;border:1px solid var(--tj-line);border-radius:999px;background:#fff;text-decoration:none;transition:border-color .2s}
+.tj2.v3 .p3:hover{border-color:var(--tj-red-400)}
+.tj2.v3 .p3 img{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none;background:var(--tj-sunk)}
+.tj2.v3 .p3 span{display:block;line-height:1.5}
+.tj2.v3 .p3 b{display:block;font-size:13.5px;color:var(--tj-ink);font-weight:600;white-space:nowrap}
+.tj2.v3 .p3 small{display:block;font-size:11.5px;color:var(--tj-mut);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.tj2.v3 .mq.go .mq-track{animation:none}.tj2.v3 .mq-row{overflow-x:auto}.tj2.v3 .now-dot{animation:none}}
+.tj2.v3 .fac{display:flex;align-items:center;gap:14px;max-width:760px;margin:18px auto 0;padding:12px 16px;border:1px solid var(--tj-line);border-radius:18px;background:var(--tj-sunk);text-decoration:none;color:var(--tj-soft);transition:border-color .2s}
+.tj2.v3 .fac:hover{border-color:var(--tj-red-400)}
+.tj2.v3 .fac .stack{display:flex;flex:none}
+.tj2.v3 .fac .stack img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #fff;margin-inline-start:-10px;background:#fff;filter:grayscale(1);transition:filter .3s}
+.tj2.v3 .fac .stack img:first-child{margin-inline-start:0}
+.tj2.v3 .fac:hover .stack img{filter:none}
+.tj2.v3 .fac-t{min-width:0;flex:1}
+.tj2.v3 .fac-t b{display:block;color:var(--tj-ink);font-size:15px}
+.tj2.v3 .fac-t small{display:block;font-size:12.5px;line-height:1.7;color:var(--tj-mut)}
+.tj2.v3 .fac>svg{width:18px;height:18px;flex:none;color:var(--tj-red)}
+.tj2.v3 .people .ctas,.tj2.v3 .flow .ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:22px}
+
+/* چهار قدم */
+.tj2.v3 .flow{background:var(--tj-sunk)}
+.tj2.v3 .flow .steps{margin-top:24px}
+.tj2.v3 .promise{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;margin:22px 0 0;padding:0}
+.tj2.v3 .promise li{position:relative;padding-inline-start:20px;font-size:14px;color:var(--tj-soft);margin:0}
+.tj2.v3 .promise li::before{content:"✓";position:absolute;inset-inline-start:0;top:0;color:var(--tj-red);font-weight:700}
+
+/* اکوسیستم: فهرست سبک + نوار اعتماد سازمانی */
+.tj2.v3 .ix{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));margin-top:24px;border-block:1px solid var(--tj-line)}
+.tj2.v3 .ix a{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:18px 10px;text-decoration:none;color:var(--tj-soft);border-inline-start:1px solid var(--tj-line);transition:background .2s;min-width:0}
+.tj2.v3 .ix a:first-child{border-inline-start:0}
+.tj2.v3 .ix a:hover{background:var(--tj-tint-2)}
+.tj2.v3 .ix img{width:34px;height:34px;object-fit:contain;margin-bottom:6px;transition:transform .25s}
+.tj2.v3 .ix a:hover img{transform:translateY(-3px)}
+.tj2.v3 .ix b{display:block;font-size:14.5px;line-height:1.6;color:var(--tj-ink);font-weight:700}
+.tj2.v3 .ix small{display:block;font-size:12px;line-height:1.7;color:var(--tj-mut)}
+.tj2.v3 .trust{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px 18px;margin-top:22px;text-decoration:none;color:var(--tj-mut)}
+.tj2.v3 .trust-t{font-size:13px}
+.tj2.v3 .trust .lg{display:flex;align-items:center;gap:16px}
+.tj2.v3 .trust .lg img{height:22px;width:auto;filter:grayscale(1);opacity:.65;mix-blend-mode:multiply;transition:filter .3s,opacity .3s}
+.tj2.v3 .trust:hover .lg img{filter:none;opacity:1}
+.tj2.v3 .trust-go{font-size:13px;color:var(--tj-red);border-bottom:1px solid var(--tj-red-400)}
+
+@media (max-width:1024px){
+.tj2.v3 .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tj2.v3 .ix{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tj2.v3 .ix a:nth-child(4){border-inline-start:0}
+.tj2.v3 .ix a:nth-child(n+4){border-top:1px solid var(--tj-line)}
+}
+@media (max-width:760px){
+.tj2.v3 section{padding-block:40px}
+.tj2.v3 .v3h{padding-top:18px}
+.tj2.v3 .v3h>.wrap:first-child{grid-template-columns:minmax(0,1fr);gap:0}
+.tj2.v3 .v3h .art{display:none}
+.tj2.v3 .v3h h1{font-size:26px;line-height:1.55;margin:12px 0 8px}
+.tj2.v3 .v3h .lede{font-size:15px;line-height:1.9;margin-bottom:14px}
+.tj2.v3 .ask-f{height:50px;border-radius:14px}
+.tj2.v3 .needs{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:none;margin-block:12px 16px}
+.tj2.v3 .needs::-webkit-scrollbar{display:none}
+.tj2.v3 .needs .lbl{flex:none}
+.tj2.v3 .need{flex:none}
+.tj2.v3 .v3h .ctas .btn{flex:1 1 0;justify-content:center;text-align:center;min-width:0}
+.tj2.v3 .v3h .nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));justify-content:stretch;gap:10px 8px;margin-top:22px}
+.tj2.v3 .v3h .nums li{flex-direction:column;align-items:center;gap:0;text-align:center}
+.tj2.v3 .v3h .nums li:nth-child(n+4){grid-column:span 1}
+.tj2.v3 .v3h .nums span{font-size:12px}
+.tj2.v3 .seg{width:auto;margin-inline:-16px;border-radius:0;border-inline:0;padding-inline:12px;justify-content:flex-start}
+.tj2.v3 .seg button{font-size:14px;padding:7px 13px}
+.tj2.v3 .pan-l{font-size:14.5px;text-align:start}
+.tj2.v3 .clk{text-align:start}
+.tj2.v3 .tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tj2.v3 .tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px}
+.tj2.v3 .tile img{width:34px;height:34px;margin-bottom:2px}
+.tj2.v3 .tile b{font-size:14.5px;line-height:1.55}
+.tj2.v3 .tile small{font-size:12px;line-height:1.65}
+.tj2.v3 .tile[dir="ltr"]{align-items:flex-end}
+.tj2.v3 .minis{justify-content:flex-start}
+.tj2.v3 .now-row{grid-auto-columns:78%;margin-inline:-16px;padding-inline:16px}
+.tj2.v3 .fac{flex-direction:column;align-items:flex-start;gap:8px}
+.tj2.v3 .fac .stack img{width:32px;height:32px}
+.tj2.v3 .fac .stack img:nth-child(n+8){display:none}
+.tj2.v3 .fac>svg{display:none}
+.tj2.v3 .people .ctas .btn,.tj2.v3 .flow .ctas .btn{flex:1 1 100%;justify-content:center}
+.tj2.v3 .ix{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tj2.v3 .ix a{padding:14px 8px;border-inline-start:0;border-top:1px solid var(--tj-line)}
+.tj2.v3 .ix a:nth-child(-n+2){border-top:0}
+.tj2.v3 .ix a:nth-child(even){border-inline-start:1px solid var(--tj-line)}
+.tj2.v3 .trust{flex-direction:column;gap:10px}
+.tj2.v3 .trust .lg img{height:20px}
+}
+</style>
+<div class="tj2 alignfull v3" id="tj2" data-home-ver="3.0">
+<!-- tj-home v3.0 · مهر ۱۴۰۵ · برگشت: revision پیش از v3 برگهٔ 503465 -->
+
+<section class="hero v3h" id="hero">
+<div class="wrap">
+<div class="copy">
+<p class="ring"><span class="dot"></span><span>از تابستان ۱۳۹۸، ساخته‌شده به دست تراپیست‌ها</span></p>
+<h1>تراپی آنلاین و حضوری به فارسی، با تراپیست‌هایی که <em>خودشان هم سوپرویژن می‌شوند</em></h1>
+<p class="lede">کلینیک تجربه در تهران و پنج شهر دیگر، مدرسه‌ای که تراپیست تربیت می‌کند و تراپیست‌هایی از ایران تا آلمان و کانادا. معارفهٔ اول با خودِ تراپیست و رایگان است.</p>
+
+<div class="ask" id="ask" role="search">
+<label class="ask-f" for="askIn">
+<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+<input id="askIn" type="search" enterkeyhint="go" autocomplete="off" aria-label="دنبال چه هستید؟" aria-controls="askList" aria-expanded="false" placeholder="دنبال چه هستید؟ مثلاً اضطراب، زوج‌درمانی یا دورهٔ EFT">
+</label>
+<div class="ask-pop" id="askPop" hidden><ul id="askList" role="listbox" aria-label="پیشنهادها"></ul><a class="ask-all" id="askAll" href="/?s=">جست‌وجو در کل سایت و مجله</a></div>
+</div>
+
+<div class="needs" aria-label="شروع از آنچه اذیتتان می‌کند">
+<span class="lbl">یا از همین‌جا شروع کنید:</span>
+<a class="need" data-need="anx" href="/get-therapy/?need=anx">اضطراب و فکرهای تکراری</a>
+<a class="need" data-need="rel" href="/get-therapy/?need=rel">رابطه و زوج</a>
+<a class="need" data-need="dep" href="/get-therapy/?need=dep">بی‌حالی و افسردگی</a>
+<a class="need" data-need="self" href="/get-therapy/?need=self">خودشناسی</a>
+<a class="need" data-need="fam" href="/get-therapy/?need=fam">خانواده</a>
+<a class="need" data-need="grief" href="/get-therapy/?need=grief">سوگ و فقدان</a>
+<a class="need" data-need="child" href="/get-therapy/?need=child">کودک و نوجوان</a>
+<a class="need" data-need="unsure" href="/get-therapy/?need=unsure">هنوز نمی‌دانم</a>
+</div>
+
+<div class="ctas">
+<a class="btn btn-brand" href="/get-therapy/">شروع تراپی</a>
+<a class="btn btn-ghost" href="/persian-therapy/">خارج از ایران هستید؟</a>
+</div>
+<p class="back">مراجع تجربه هستید؟ <a href="/login" rel="nofollow">ورود به حساب</a></p>
+</div>
+<div class="art"><div class="dwrap">
+<img class="dbase" src="/wp-content/uploads/2026/09/tjl-hero-left-2x-base.webp" fetchpriority="high" decoding="async" alt="زنی روی کاناپه‌ی سبز در جلسه‌ی تراپی مرکز تجربه زندگی" width="960" height="1014" loading="eager">
+<img class="seed s1" src="/wp-content/uploads/2026/09/tjl-hero-left-berry-1.webp" alt="" aria-hidden="true" width="36" height="45" loading="eager" decoding="async">
+<img class="seed s2" src="/wp-content/uploads/2026/09/tjl-hero-left-berry-2.webp" alt="" aria-hidden="true" width="34" height="45" loading="eager" decoding="async">
+<img class="seed s3" src="/wp-content/uploads/2026/09/tjl-hero-left-berry-3.webp" alt="" aria-hidden="true" width="32" height="49" loading="eager" decoding="async">
+<img class="seed s4" src="/wp-content/uploads/2026/09/tjl-hero-left-berry-4.webp" alt="" aria-hidden="true" width="32" height="42" loading="eager" decoding="async">
+<img class="seed s5" src="/wp-content/uploads/2026/09/tjl-hero-left-berry-5.webp" alt="" aria-hidden="true" width="41" height="48" loading="eager" decoding="async">
+<img class="seed s6" src="/wp-content/uploads/2026/09/tjl-hero-left-berry-6.webp" alt="" aria-hidden="true" width="36" height="45" loading="eager" decoding="async">
+</div></div>
+</div>
+<div class="wrap"><ul class="nums" aria-label="تجربه در چند عدد">
+<li><b>۱۰۰٬۰۰۰+</b><span>جلسه</span></li>
+<li><b>۱۵۰+</b><span>تراپیست تأییدشده</span></li>
+<li><b>۱۲+</b><span>سوپروایزر</span></li>
+<li><b>۶</b><span>شهر حضوری</span></li>
+<li><b>۵</b><span>کشور</span></li>
+</ul></div>
+</section>
+
+<section class="paths" id="paths">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">راه خودتان</span><h2 class="h2">هر کس از یک در وارد می‌شود</h2></div>
+<div class="seg" role="tablist" aria-label="مسیرها">
+<span class="seg-ink" aria-hidden="true"></span>
+<button type="button" role="tab" id="t-me" aria-controls="p-me" aria-selected="true" data-tab="me">تراپی برای خودم</button>
+<button type="button" role="tab" id="t-ab" aria-controls="p-ab" aria-selected="false" data-tab="ab">خارج از ایرانم</button>
+<button type="button" role="tab" id="t-pro" aria-controls="p-pro" aria-selected="false" data-tab="pro">دانشجو یا درمانگرم</button>
+<button type="button" role="tab" id="t-org" aria-controls="p-org" aria-selected="false" data-tab="org">سازمان یا مرکز درمانی</button>
+</div>
+
+<div class="pan" id="p-me" role="tabpanel" aria-labelledby="t-me">
+<p class="pan-l">هزینهٔ هر جلسهٔ تراپی برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست بستگی دارد. جلسهٔ معارفه رایگان است و تراپیست را هر وقت خواستید بدون هزینه عوض می‌کنید.</p>
+<div class="tiles">
+<a class="tile hot" href="/get-therapy/"><img src="/wp-content/uploads/2026/09/tjl-icon-match.webp" alt="" width="150" height="152" loading="lazy"><b>شروع تراپی</b><small>سه سؤال کوتاه، پیشنهاد تراپیست و معارفهٔ رایگان</small></a>
+<a class="tile" href="/help/"><img src="/wp-content/uploads/2026/09/tjl-svc-individual.webp" alt="" width="96" height="96" loading="lazy"><b>با چه چیزی درگیرید؟</b><small>اضطراب، نشخوار فکری، اهمال‌کاری، سوگ و خیانت</small></a>
+<a class="tile" href="/tests/"><img src="/wp-content/uploads/2026/09/tjl-icon-standards.webp" alt="" width="150" height="152" loading="lazy"><b>تست‌های رایگان</b><small>بدون ثبت‌نام و بدون شماره تلفن، با تفسیر</small></a>
+<a class="tile" href="/partners/"><img src="/wp-content/uploads/2026/09/tjl-cut-armchair.webp" alt="" width="136" height="148" loading="lazy"><b>جلسهٔ حضوری</b><small>تهران، کرج، اصفهان، مشهد، نور و آلمان</small></a>
+<a class="tile" href="/team/"><img src="/wp-content/uploads/2026/09/tjl-icon-design.webp" alt="" width="150" height="151" loading="lazy"><b>تراپیست‌ها</b><small>پروفایل، رویکرد، شهر و مقاله‌های هر تراپیست</small></a>
+<a class="tile" href="/approaches/"><img src="/wp-content/uploads/2026/09/tjl-icon-book.webp" alt="" width="168" height="168" loading="lazy"><b>رویکردهای درمانی</b><small>روانکاوی، روان‌درمانی تحلیلی و گروه‌درمانی تحلیلی</small></a>
+</div>
+<div class="minis"><span class="lbl">خدمات:</span>
+<a href="/therapy/individual-therapy/">تراپی فردی</a><a href="/therapy/couple-therapy/">زوج‌درمانی</a><a href="/therapy/child-therapy/">کودک</a><a href="/therapy/teen-therapy/">نوجوان</a><a href="/therapy/psychiatry/">روان‌پزشکی</a><a href="/therapy/group-therapy/">گروه‌درمانی</a><a href="/therapy/premarital-counseling/">پیش از ازدواج</a><a href="/therapy/elderly-therapy/">سالمندان</a><a href="/therapy/sex-therapy/">سکس‌تراپی</a><a href="/therapy/">همهٔ خدمات</a>
+</div>
+</div>
+
+<div class="pan" id="p-ab" role="tabpanel" aria-labelledby="t-ab">
+<p class="pan-l">تراپیست‌های تجربه در آلمان، انگلیس، آمریکا، کانادا و استرالیا هم هستند. هزینهٔ هر جلسه برای فارسی‌زبانان خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه است و پرداخت با استرایپ یا پی‌پال انجام می‌شود.</p>
+<p class="clk" id="clk" aria-live="off"></p>
+<div class="tiles">
+<a class="tile hot" href="/persian-therapy/"><img src="/wp-content/uploads/2026/09/tjl-persian-orbit.webp" alt="" width="120" height="120" loading="lazy"><b>تراپی فارسی‌زبان آنلاین</b><small>معارفهٔ رایگان با خودِ تراپیست، در ساعت شما</small></a>
+<a class="tile" href="/persian-therapy/students/"><img src="/wp-content/uploads/2026/09/tjl-icon-cap.webp" alt="" width="168" height="168" loading="lazy"><b>دانشجوی خارج از ایران</b><small>جلسه با قیمت دانشجویی</small></a>
+<a class="tile" href="/guide/"><img src="/wp-content/uploads/2026/09/tjl-cut-calendar.webp" alt="" width="328" height="304" loading="lazy"><b>راهنماهای عملی</b><small>نوبت بیمه در آلمان و بازپرداخت هزینه</small></a>
+<a class="tile" href="/help/سوگ-مهاجرت/"><img src="/wp-content/uploads/2026/09/tjl-cut-bend.webp" alt="" width="712" height="544" loading="lazy"><b>سختی‌های مهاجرت</b><small>سوگ، تنهایی، اضطراب و رابطه بعد از مهاجرت</small></a>
+<a class="tile" href="/persian-therapy/en/" lang="en" dir="ltr"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" width="120" height="120" loading="lazy"><b>In English</b><small>Persian speaking therapist online</small></a>
+</div>
+<div class="minis"><span class="lbl">کشورها و شهرها:</span>
+<a href="/persian-therapy/germany/">آلمان</a><a href="/persian-therapy/germany/berlin/">برلین</a><a href="/persian-therapy/germany/hamburg/">هامبورگ</a><a href="/persian-therapy/germany/munich/">مونیخ</a><a href="/persian-therapy/canada/">کانادا</a><a href="/persian-therapy/canada/toronto/">تورنتو</a><a href="/persian-therapy/canada/vancouver/">ونکوور</a><a href="/persian-therapy/canada/montreal/">مونترال</a><a href="/persian-therapy/usa/">آمریکا</a><a href="/persian-therapy/uk/">انگلیس</a><a href="/persian-therapy/turkey/">ترکیه</a><a href="/persian-therapy/turkey/istanbul/">استانبول</a><a href="/persian-therapy/netherlands/">هلند</a><a href="/persian-therapy/sweden/">سوئد</a><a href="/persian-therapy/australia/">استرالیا</a>
+</div>
+</div>
+
+<div class="pan" id="p-pro" role="tabpanel" aria-labelledby="t-pro">
+<p class="pan-l">مدرسهٔ تجربه یک مسیر است، نه چند کارگاه: خواندن متون اصلی با استادان، درمان شخصی، سوپرویژن، منتور و در پایان مصاحبهٔ درمانگری و کار در کلینیک تجربه.</p>
+<div class="tiles">
+<a class="tile hot" href="/school/"><img src="/wp-content/uploads/2026/09/tjl-icon-cap.webp" alt="" width="168" height="168" loading="lazy"><b>مدرسهٔ تجربه</b><small>دوره‌ها، استادان و مسیر ورود به کلینیک</small></a>
+<a class="tile" href="/school/events/"><img src="/wp-content/uploads/2026/09/tjl-cut-calendar.webp" alt="" width="328" height="304" loading="lazy"><b>تقویم مدرسه</b><small>کیس‌خوانی فروید، ژورنال کلاب و سوپرویژن گروهی</small></a>
+<a class="tile" href="/school/community/"><img src="/wp-content/uploads/2026/09/tjl-cut-runner.webp" alt="" width="542" height="452" loading="lazy"><b>کامیونیتی رایگان</b><small>جمع دانشجوهای روان‌شناسی و برنامه‌های باز</small></a>
+<a class="tile" href="/how-to-become-a-therapist/"><img src="/wp-content/uploads/2026/09/tjl-cut-path.webp" alt="" width="1335" height="1259" loading="lazy"><b>چطور درمانگر شویم؟</b><small>کارورزی، سوپرویژن، انتخاب رویکرد و درمان فردی</small></a>
+<a class="tile" href="/joinus/"><img src="/wp-content/uploads/2026/09/tjl-icon-standards.webp" alt="" width="150" height="152" loading="lazy"><b>همکاری با کلینیک</b><small>چهار مرحلهٔ پذیرش تراپیست در تجربه</small></a>
+<a class="tile" href="/roadmap/psychology-migration/"><img src="/wp-content/uploads/2026/09/tjl-cut-hourglass.webp" alt="" width="280" height="400" loading="lazy"><b>رودمپ مهاجرت روان‌شناسان</b><small>آلمان، اتریش و نیوزیلند</small></a>
+</div>
+<div class="minis"><span class="lbl">دوره‌ها و صفحه‌ها:</span>
+<a href="/school/eft/">دورهٔ EFT</a><a href="/school/clinical-experience/">تجربهٔ بالینی</a><a href="/school/modern-psychoanalysis/">روانکاوی مدرن</a><a href="/school/psychoanalysis-training/">آموزش روانکاوی</a><a href="/school/eft-training/">آموزش درمان هیجان‌مدار</a><a href="/school/faculty/">هیئت علمی</a><a href="/therapy/supervision/">سوپرویژن</a><a href="/tests/clinical-readiness/">تست آمادگی کار بالینی</a><a href="/school/associations/">انجمن‌های علمی</a><a href="/editorial/">نوشتن در مجله</a>
+</div>
+</div>
+
+<div class="pan" id="p-org" role="tabpanel" aria-labelledby="t-org">
+<p class="pan-l">در تجربه سازمانی، سازمان فقط استفادهٔ کلی را می‌بیند؛ نه نام تراپیست، نه موضوع جلسه. اگر اتاق درمان دارید، می‌توانید پارتنر حضوری تجربه در شهر خودتان شوید.</p>
+<div class="tiles">
+<a class="tile hot" href="/enterprise/"><img src="/wp-content/uploads/2026/09/tjl-icon-standards.webp" alt="" width="150" height="152" loading="lazy"><b>تجربه سازمانی</b><small>برای شرکت، مدرسه، مهدکودک و دانشگاه</small></a>
+<a class="tile" href="/partners/rules/"><img src="/wp-content/uploads/2026/09/tjl-cut-armchair.webp" alt="" width="136" height="148" loading="lazy"><b>پارتنر حضوری شوید</b><small>اصول همکاری فضاهای درمان با تجربه</small></a>
+<a class="tile" href="/report/"><img src="/wp-content/uploads/2026/09/tjl-icon-book.webp" alt="" width="168" height="168" loading="lazy"><b>گزارش سالانهٔ ۱۴۰۴</b><small>چه کسانی و چرا به روان‌درمانی می‌آیند</small></a>
+<a class="tile" href="/contact-us/"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" width="120" height="120" loading="lazy"><b>تماس با پذیرش</b><small>پاسخ همان روز</small></a>
+</div>
+</div>
+</div>
+</section>
+
+<section class="now" id="now" aria-labelledby="nowH">
+<div class="wrap">
+<div class="now-h"><h2 id="nowH">این روزها در تجربه</h2><span class="now-dot" aria-hidden="true"></span></div>
+<div class="now-row">
+<a class="nw" href="/school/eft/" data-until="2026-10-07"><img src="/wp-content/uploads/2026/09/tjl-sup-06.webp" alt="" width="120" height="120" loading="lazy"><span><em>مدرسه · تا ۱۵ مهر</em><b>ثبت‌نام حلقهٔ اول دورهٔ درمان هیجان‌مدار (EFT)</b></span></a>
+<a class="nw" href="/roadmap/kanape/"><img src="/wp-content/uploads/2026/09/tjl-kanape-invite-1.webp" alt="" width="720" height="900" loading="lazy"><span><em>کاناپه · رایگان</em><b>هر هفته یک فیلم یا سریال، با نگاه روانکاوانه</b></span></a>
+<a class="nw" href="/report/"><img src="/wp-content/uploads/2026/09/tjl-icon-book.webp" alt="" width="168" height="168" loading="lazy"><span><em>گزارش سالانهٔ ۱۴۰۴</em><b>از نزدیک به ۹ هزار فرم پذیرش: چه کسانی به تراپی می‌آیند</b></span></a>
+<a class="nw" href="/school/events/"><img src="/wp-content/uploads/2026/09/tjl-cut-calendar.webp" alt="" width="328" height="304" loading="lazy"><span><em>تقویم مدرسه</em><b>کیس‌خوانی فروید، ژورنال کلاب و سوپرویژن گروهی</b></span></a>
+<a class="nw" href="/app/"><img src="/wp-content/uploads/2026/09/tjl-cut-phone.webp" alt="" width="1279" height="917" loading="lazy"><span><em>مینی‌اپ تجربه</em><b>رزرو جلسهٔ معارفه از داخل تلگرام</b></span></a>
+<a class="nw" id="todayV3" href="/mag/"><img src="/wp-content/uploads/2026/09/tjl-magritte.webp" alt="" width="738" height="933" loading="lazy"><span><em>مجله · پیشنهاد امروز</em><b>یک مقاله از ۲۶۷ مقالهٔ تألیفی</b></span></a>
+</div>
+</div>
+</section>
+
+<section class="people" id="therapists">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">آدم‌های تجربه</span><h2 class="h2">۱۵۰+ تراپیست که پیوسته آموزش می‌بینند و سوپرویژن می‌شوند</h2>
+<p class="crit"><span>مصاحبهٔ علمی</span><span>جلسهٔ شبیه‌سازی</span><span>درمان شخصی</span><span>سوپرویژن مداوم</span></p></div>
+</div>
+<div class="mq" id="mq">
+<div class="mq-row"><div class="mq-track">
+<a class="p3" href="/team/siamak-safari/"><img src="/wp-content/uploads/2026/09/tjl-team-4c2a58e7-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>سیامک صفری</b><small>روانکاوی کلاسیک و لکانی</small></span></a>
+<a class="p3" href="/team/sara-derakhshan/"><img src="/wp-content/uploads/2026/09/tjl-team-3a5a82af-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>سارا درخشان</b><small>روانکاوی مدرن و کلاسیک</small></span></a>
+<a class="p3" href="/team/erfan-amirbeigi/"><img src="/wp-content/uploads/2026/09/tjl-team-774c013c-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>عرفان امیربیگی</b><small>روانکاوی مدرن و کلاسیک</small></span></a>
+<a class="p3" href="/team/paris-tanzifi/"><img src="/wp-content/uploads/2026/09/tjl-team-7568c166-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>پریس تنظیفی</b><small>روانکاوی لکانی و کلاسیک</small></span></a>
+<a class="p3" href="/team/arman-dashti/"><img src="/wp-content/uploads/2026/09/tjl-team-6b012f3a-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>آرمان دشتی</b><small>روانکاوی مدرن و رابطه‌ای</small></span></a>
+<a class="p3" href="/team/fatemeh-baberi/"><img src="/wp-content/uploads/2026/09/tjl-team-a99c960d-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>فاطمه بابری</b><small>روان‌درمانی تحلیلی و لکانی</small></span></a>
+<a class="p3" href="/team/simin-ghrbani/"><img src="/wp-content/uploads/2026/09/tjl-team-7842036d-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>سیمین قربانی</b><small>روابط ابژه، فردی و کودک</small></span></a>
+<a class="p3" href="/team/mahdyeh-atrifard/"><img src="/wp-content/uploads/2026/09/tjl-team-e0e88cd6-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>دکتر مهدیه عطری‌فرد</b><small>CBT و طرحواره‌درمانی</small></span></a>
+<a class="p3" href="/team/ghazaleh-hazrati/"><img src="/wp-content/uploads/2026/09/tjl-team-f297621e-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>غزاله حضراتی</b><small>هیجان‌مدار (EFT) و خانواده</small></span></a>
+<a class="p3" href="/team/maryam-rahimi/"><img src="/wp-content/uploads/2026/09/tjl-team-3208ca3c-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>مریم رحیمی</b><small>روانکاوی کلاسیک و لکانی</small></span></a>
+<a class="p3" href="/team/darya-navidi/"><img src="/wp-content/uploads/2026/09/tjl-team-0b0d06ba-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>دریا نویدی</b><small>روابط ابژه</small></span></a>
+<a class="p3" href="/team/mahshid-baratzadeh/"><img src="/wp-content/uploads/2026/09/tjl-team-ac66fc96-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>مهشید برات‌زاده</b><small>روانکاوی و روان‌درمانی تحلیلی</small></span></a>
+<a class="p3" href="/team/sepideh-raeisi/"><img src="/wp-content/uploads/2026/09/tjl-team-d8cbafd8-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>سپیده رئیسی</b><small>روان‌درمانی معطوف به انتقال</small></span></a>
+<a class="p3" href="/team/hasan-pirzad/"><img src="/wp-content/uploads/2026/09/tjl-team-03456fc3-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>حسن پیرزاد</b><small>هیجان‌مدار (EFT) و خانواده</small></span></a>
+<a class="p3" href="/team/maryam-foroutan-heidari/"><img src="/wp-content/uploads/2026/09/tjl-team-4b8f6285-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>مریم فروتن</b><small>کودک، نوجوان و خانواده</small></span></a>
+<a class="p3" href="/team/soha-hashemi/"><img src="/wp-content/uploads/2026/09/tjl-team-3fa7f6a3-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>سها هاشمی</b><small>لکانی و روان‌درمانی تحلیلی</small></span></a>
+<a class="p3" href="/team/kamran-derakhshan/"><img src="/wp-content/uploads/2026/09/tjl-team-9b01d835-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>دکتر محمدکامران درخشان</b><small>روان‌پزشک، طب روان‌تنی</small></span></a>
+</div></div>
+<div class="mq-row rev"><div class="mq-track">
+<a class="p3" href="/team/mohammadreza-shabanzadeh/"><img src="/wp-content/uploads/2026/09/tjl-team-792f887d-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>محمدرضا شعبان‌زاده</b><small>روانکاوی و روان‌درمانی تحلیلی</small></span></a>
+<a class="p3" href="/team/shirin-firouz-dehghan/"><img src="/wp-content/uploads/2026/09/tjl-team-5cefdcb6-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>شیرین فیروز دهقان</b><small>طرحواره‌درمانی، CBT و ACT</small></span></a>
+<a class="p3" href="/team/amir-abdollahpour/"><img src="/wp-content/uploads/2026/09/tjl-team-83fb544f-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>امیر عبدالله‌پور</b><small>TFP و روانکاوی مدرن</small></span></a>
+<a class="p3" href="/team/hanieh-behnam-sadeghi/"><img src="/wp-content/uploads/2026/09/tjl-team-933dd2bb-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>حانیه بهنام</b><small>روانکاوی مدرن و رابطه‌ای</small></span></a>
+<a class="p3" href="/team/zahra-naderi/"><img src="/wp-content/uploads/2026/09/tjl-team-20a9781b-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>زهرا نادری</b><small>CBT و طرحواره‌درمانی</small></span></a>
+<a class="p3" href="/team/salomh-soznchi/"><img src="/wp-content/uploads/2026/09/tjl-team-480dc573-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>سالومه سوزنچی</b><small>روابط ابژه</small></span></a>
+<a class="p3" href="/team/marziyeh-ramezani/"><img src="/wp-content/uploads/2026/09/tjl-team-65362f7e-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>مرضیه رمضانی</b><small>هیجان‌مدار (EFT)</small></span></a>
+<a class="p3" href="/team/zahra-arab/"><img src="/wp-content/uploads/2026/09/tjl-team-f323f31a-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>زهرا عرب</b><small>روان‌درمانی تحلیلی و لکانی</small></span></a>
+<a class="p3" href="/team/shahla-kashiha/"><img src="/wp-content/uploads/2026/09/tjl-team-3bf4d2a6-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>شهلا کاشیها</b><small>روانکاوی کلاسیک و روابط ابژه</small></span></a>
+<a class="p3" href="/team/mehdi-heydari/"><img src="/wp-content/uploads/2026/09/tjl-team-3ddd1fb2-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>مهدی حیدری</b><small>CBT و طرحواره‌درمانی</small></span></a>
+<a class="p3" href="/team/maryam-jalilian/"><img src="/wp-content/uploads/2026/09/tjl-team-9594c85a-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>مریم جلیلیان</b><small>روابط ابژه و زوج‌درمانی</small></span></a>
+<a class="p3" href="/team/zahra-sadeghinia/"><img src="/wp-content/uploads/2026/09/tjl-team-13a28c0b-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>زهرا صادقی‌نیا</b><small>روان‌درمانی تحلیلی</small></span></a>
+<a class="p3" href="/team/shamim-asgari/"><img src="/wp-content/uploads/2026/09/tjl-team-edf8efeb-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>شمیم عسگری</b><small>طرحواره‌درمانی و CBT</small></span></a>
+<a class="p3" href="/team/farnaz-masoumizadeh/"><img src="/wp-content/uploads/2026/09/tjl-team-5f1c7562-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>فرناز معصومی‌زاده</b><small>روابط ابژه و تحلیلی</small></span></a>
+<a class="p3" href="/team/samane-soltanabadi/"><img src="/wp-content/uploads/2026/09/tjl-team-1ab298d9-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>سمانه سلطان آبادی</b><small>روانکاوی کلاسیک و تحلیلی</small></span></a>
+<a class="p3" href="/team/shadi-golestani/"><img src="/wp-content/uploads/2026/09/tjl-team-edb988e6-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>شادی گلستانی</b><small>روان‌درمانی تحلیلی و روابط ابژه</small></span></a>
+<a class="p3" href="/team/farzaneh-daliri/"><img src="/wp-content/uploads/2026/09/tjl-team-fbaa839d-1-150x150.webp" alt="" width="40" height="40" loading="lazy"><span><b>فرزانه دلیری</b><small>روانکاوی لکانی</small></span></a>
+</div></div>
+</div>
+<div class="wrap">
+<a class="fac" href="/school/faculty/">
+<span class="stack"><img src="/wp-content/uploads/2026/09/tjl-sup-03.webp" alt="" width="36" height="36" loading="lazy"><img src="/wp-content/uploads/2026/09/tjl-sup-04.webp" alt="" width="36" height="36" loading="lazy"><img src="/wp-content/uploads/2026/09/tjl-sup-11.webp" alt="" width="36" height="36" loading="lazy"><img src="/wp-content/uploads/2026/09/ELC-SCHOOL-Mr.MojtabaAleseyedan.webp" alt="" width="36" height="36" loading="lazy"><img src="/wp-content/uploads/2026/09/tjl-sup-12.webp" alt="" width="36" height="36" loading="lazy"><img src="/wp-content/uploads/2026/09/tjl-sup-05.webp" alt="" width="36" height="36" loading="lazy"><img src="/wp-content/uploads/2026/09/tjl-sup-01.webp" alt="" width="36" height="36" loading="lazy"><img src="/wp-content/uploads/2026/09/tjl-sup-06.webp" alt="" width="36" height="36" loading="lazy"><img src="/wp-content/uploads/2026/09/tjl-sup-07.webp" alt="" width="36" height="36" loading="lazy"></span>
+<span class="fac-t"><b>سوپروایزرها و هیئت علمی</b><small>دکتر زهرا قنبری، دکتر نرگس شریف‌زاده، شهره فراهانی و همکارانشان پشت هر جلسه‌اند</small></span>
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+</a>
+<div class="ctas center"><a class="btn btn-brand" href="/get-therapy/">پیشنهاد تراپیست برای من</a><a class="btn btn-ghost" href="/team/">همهٔ تراپیست‌ها</a></div>
+</div>
+</section>
+
+<section class="flow" id="how">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">چطور شروع می‌شود</span><h2 class="h2">چهار قدم تا اولین جلسه</h2>
+<p class="lede">پاسخ‌های شما را هوش مصنوعی مرتب می‌کند و متخصص ارجاع کلینیک بازبینی؛ بعد خودتان از میان پیشنهادها انتخاب می‌کنید.</p></div>
+<div class="steps">
+<div><i>۱</i><b>چند سؤال کوتاه</b><span>آنچه اذیتتان می‌کند و ترجیح‌هایتان: جنسیت تراپیست، آنلاین یا حضوری.</span></div>
+<div><i>۲</i><b>پیشنهاد تراپیست</b><span>چند تراپیست هماهنگ با شما، با پروفایل، رویکرد و نزدیک‌ترین وقت معارفه.</span></div>
+<div><i>۳</i><b>معارفهٔ رایگان</b><span>جلسه‌ای کوتاه با خودِ تراپیست تا ببینید ارتباطتان شکل می‌گیرد یا نه.</span></div>
+<div><i>۴</i><b>شروع تراپی</b><span>جلسهٔ اول پیش از جلسه پرداخت می‌شود و جلسه‌های بعدی تا پایان همان ماه.</span></div>
+</div>
+<ul class="promise">
+<li>تغییر تراپیست در هر زمان، بدون هزینه</li>
+<li>پوشش بیمه با ارائهٔ اسناد رسمی</li>
+<li>پذیرش فارسی‌زبان، پاسخ همان روز</li>
+</ul>
+<div class="ctas center"><a class="btn btn-brand" href="/get-therapy/">تراپیست مناسب خودم را پیدا کنم</a></div>
+</div>
+</section>
+
+<section class="eco3" id="eco">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">اکوسیستم تجربه</span><h2 class="h2">یک اکوسیستم، نه یک اپ رزرو</h2></div>
+<div class="ix">
+<a href="/partners/"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" width="120" height="120" loading="lazy"><b>حضوری در ۶ شهر</b><small>تهران، کرج، اصفهان، مشهد، نور و آلمان</small></a>
+<a href="/school/"><img src="/wp-content/uploads/2026/09/tjl-icon-cap.webp" alt="" width="168" height="168" loading="lazy"><b>مدرسهٔ تجربه</b><small>از ۱۴۰۰، حلقهٔ پانزدهم در جریان</small></a>
+<a href="/mag/"><img src="/wp-content/uploads/2026/09/tjl-icon-book.webp" alt="" width="168" height="168" loading="lazy"><b>مجلهٔ تجربه</b><small>۲۶۷ مقاله به قلم تراپیست‌ها</small></a>
+<a href="/tests/"><img src="/wp-content/uploads/2026/09/tjl-icon-standards.webp" alt="" width="150" height="152" loading="lazy"><b>تست‌های رایگان</b><small>بدون ثبت‌نام، با تفسیر</small></a>
+<a href="/roadmap/kanape/"><img src="/wp-content/uploads/2026/09/tjl-cut-armchair.webp" alt="" width="136" height="148" loading="lazy"><b>کاناپه</b><small>فیلم و سریال، با نگاه روانکاوانه</small></a>
+<a href="/report/"><img src="/wp-content/uploads/2026/09/tjl-icon-match.webp" alt="" width="150" height="152" loading="lazy"><b>گزارش سالانه</b><small>از نزدیک به ۹ هزار فرم پذیرش</small></a>
+</div>
+<a class="trust" href="/enterprise/">
+<span class="trust-t">سازمان‌هایی که سلامت روان کارکنانشان را به تجربه سپرده‌اند</span>
+<span class="lg"><img src="/wp-content/uploads/2026/09/tjl-logo-sarmayedanesh.png" alt="دیجی‌کالا" width="438" height="129" loading="lazy"><img src="/wp-content/uploads/2026/09/tjl-logo-technolife.png" alt="تکنولایف" width="345" height="129" loading="lazy"><img src="/wp-content/uploads/2026/09/tjl-logo-digikala.png" alt="کارگزاری سرمایه و دانش" width="309" height="129" loading="lazy"></span>
+<span class="trust-go">تجربه سازمانی</span>
+</a>
+</div>
+</section>
+
+<section class="faq" id="faq">
+<div class="wrap">
+<div class="center rv"><span class="eyebrow">پرسش‌های پرتکرار</span><h2 class="h2">پیش از شروع، این‌ها را بدانید</h2></div>
+<div class="faq-list rv">
+<details><summary>تجربه با یک سایت رزرو وقت تراپی چه فرقی دارد؟</summary><div class="ans"><p>در سایت رزرو، شما فهرستی از اسم‌ها می‌بینید و خودتان حدس می‌زنید. در تجربه، هر تراپیست پیش از ورود مصاحبه‌ی علمی و شبیه‌سازی جلسه می‌دهد، خودش در درمان شخصی بوده و بعد از ورود زیر نظارت بالینی سوپروایزر کار می‌کند. پشت پلتفرم یک کلینیک واقعی از سال ۱۳۹۸، یک مدرسه‌ی تربیت تراپیست و یک تیم پذیرش هست که هر روز پاسخ می‌دهد.</p></div></details>
+<details><summary>جلسه‌ی معارفه چیست و واقعاً رایگان است؟</summary><div class="ans"><p>بله. معارفه یک جلسه‌ی کوتاه با خودِ تراپیست (نه پذیرش) است تا ببینید ارتباطتان شکل می‌گیرد یا نه. هزینه‌ای ندارد و بعد از آن اگر خواستید، تراپی شروع می‌شود؛ اگر نخواستید، تراپیست دیگری معرفی می‌شود.</p></div></details>
+<details><summary>هزینه‌ی جلسات چقدر است و چطور پرداخت می‌شود؟</summary><div class="ans"><p>هزینه‌ی هر جلسه‌ی تراپی برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست و نوع خدمت بستگی دارد؛ عدد دقیق پیش از شروع به شما گفته می‌شود. برای فارسی‌زبانان ساکن خارج از ایران، ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسه‌ی معارفه در هر دو حالت رایگان است. جلسه‌ی اول پیش از جلسه پرداخت می‌شود و جلسات بعدی تا پایان همان ماه. داخل ایران با درگاه بانکی و تومان، خارج از ایران با یورو و دلار (استرایپ و پی‌پال). هزینه‌ها با ارائه‌ی اسناد رسمی می‌تواند از بیمه‌ی شما پوشش داده شود.</p></div></details>
+<details><summary>اگر با تراپیستم راحت نبودم چه؟</summary><div class="ans"><p>در هر مرحله می‌توانید تراپیست‌تان را عوض کنید، بدون هزینه‌ی اضافه. تیم پذیرش با توجه به بازخورد شما پیشنهاد تازه می‌دهد.</p></div></details>
+<details><summary>خارج از ایران هستم؛ می‌توانم از تجربه استفاده کنم؟</summary><div class="ans"><p>بله. تراپیست‌هایی داریم که در آلمان، انگلیس، آمریکا، کانادا و استرالیا مقیم‌اند و ساعت کاری‌شان با منطقه‌ی شما هماهنگ است. معارفه رایگان است، پرداخت با یورو و دلار انجام می‌شود و در آلمان پارتنر حضوری هم داریم. جزئیات در <a href="/persian-therapy/">صفحه‌ی ویژه‌ی فارسی‌زبانان خارج از ایران</a>.</p></div></details>
+<details><summary>جلسات حضوری فقط در تهران است؟</summary><div class="ans"><p>کلینیک خودمان در میدان ونک تهران است. با تجربه پارتنرز در مشهد، اصفهان، کرج، نور و آلمان هم می‌توانید حضوری ببینید. جلسات می‌توانند ترکیبی باشند: بعضی حضوری، بعضی آنلاین.</p></div></details>
+<details><summary>من درمانگرم؛ چطور به تجربه بپیوندم؟</summary><div class="ans"><p>پذیرش تراپیست چهار مرحله دارد: مصاحبه‌ی علمی، جلسه‌ی شبیه‌سازی، درمان شخصی و سوپرویژن مداوم. اگر دانش‌آموخته‌ی مدرسه‌ی تجربه باشید مسیر کوتاه‌تر است. از <a href="/joinus/">صفحه‌ی تراپیست‌ها</a> شروع کنید.</p></div></details>
+</div>
+</div>
+</section>
+
+<section class="berry" id="berry">
+<div class="wrap rv">
+<img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" loading="lazy">
+<h2 class="h2">یه توت‌فرنگی ما رو نجات داد!</h2>
+<p class="lede">این جمله از «طعم گیلاس» کیارستمی آمده؛ جایی که یک توت ساده معنای زندگی را برگرداند. ما هم توت‌فرنگی را نماد تجربه کردیم: تراپی برای ما همان توت‌فرنگی است؛ کوچک، شیرین و نجات‌بخش.</p>
+<div class="ctas"><a class="btn btn-brand" href="/get-therapy/">شروع قدم اول</a><a class="btn btn-ghost" href="https://t.me/tajrobehlife_bot?start=home_berry" target="_blank" rel="noopener">سؤال دارم، در تلگرام</a></div>
+</div>
+</section>
+
+</div>
+
+<script>
+(function(){
+var root=document.getElementById('tj2'); if(!root) return;
+var fa=function(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+var fmt=function(n){return fa(n.toLocaleString('en-US')).replace(/,/g,'،');};
+var rv=root.querySelectorAll('.rv');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -6% 0px'});rv.forEach(function(el){io.observe(el);});}else{rv.forEach(function(el){el.classList.add('in');});}
+var cs=root.querySelectorAll('[data-count]');
+function runCount(el){var end=+el.getAttribute('data-count'),suf=el.getAttribute('data-suffix')||'',t0=null,dur=1400;function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);el.textContent=fmt(Math.round(end*p))+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+/* شمارش متحرک اعداد حذف شد (پرش چیدمان) */
+root.querySelectorAll('.arrows[data-for]').forEach(function(a){var tr=document.getElementById(a.getAttribute('data-for'));if(!tr)return;var b=a.querySelectorAll('button');b[0].addEventListener('click',function(){tr.scrollBy({left:tr.clientWidth*0.8,behavior:'smooth'});});b[1].addEventListener('click',function(){tr.scrollBy({left:-tr.clientWidth*0.8,behavior:'smooth'});});});
+var thTrack=document.getElementById('thTrack'),dots=document.getElementById('thDots');
+function buildDots(){if(!thTrack||!dots)return;var pages=Math.max(1,Math.ceil(thTrack.scrollWidth/thTrack.clientWidth));dots.innerHTML='';if(pages>10){dots.style.display='none';return;}dots.style.display='';for(var i=0;i<pages;i++){dots.appendChild(document.createElement('i'));}updDots();}
+function updDots(){if(!thTrack||!dots)return;var max=thTrack.scrollWidth-thTrack.clientWidth,p=max>0?Math.abs(thTrack.scrollLeft)/max:0,n=dots.children.length,idx=Math.round(p*(n-1));for(var i=0;i<n;i++)dots.children[i].classList.toggle('on',i===idx);}
+if(thTrack){buildDots();thTrack.addEventListener('scroll',updDots,{passive:true});window.addEventListener('resize',buildDots);}
+var filt=document.getElementById('thFilter');
+if(filt){if(thTrack){filt.addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;filt.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});b.classList.add('on');var tag=b.getAttribute('data-tag');thTrack.querySelectorAll('.thc:not(.more)').forEach(function(c){var tags=(c.getAttribute('data-tags')||'').split(' ');var hide=(tag==='all')?false:(tags.indexOf(tag)<0);c.classList.toggle('hide',hide);});thTrack.scrollTo({left:0});buildDots();});}}
+function parts(tz){try{var f=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});var o={};f.formatToParts(new Date()).forEach(function(p){o[p.type]=p.value;});return {h:+o.hour%24,m:+o.minute,s:+o.second};}catch(e){return null;}}
+function tick(){root.querySelectorAll('.clock').forEach(function(c){var p=parts(c.getAttribute('data-tz'));if(!p)return;var t=c.querySelector('.t');var hm=fa(('0'+p.h).slice(-2))+':'+fa(('0'+p.m).slice(-2));var sm=t.querySelector('small');if(!sm){t.textContent='';t.appendChild(document.createTextNode(hm));sm=document.createElement('small');t.appendChild(sm);}else{t.firstChild.nodeValue=hm;}sm.textContent=':'+fa(('0'+p.s).slice(-2));var good=(p.h>=8)?(p.h<23):false;c.classList.toggle('on',good);c.querySelector('.s').textContent=good?'ساعت مناسب جلسه':'وقت استراحت؛ تراپیست برای ساعت شما هست';});}
+tick();setInterval(tick,1000);
+root.querySelectorAll('details').forEach(function(d){var s=d.querySelector('summary'),a=d.querySelector('.ans');if(!s||!a)return;s.addEventListener('click',function(e){e.preventDefault();if(d.hasAttribute('data-anim'))return;d.setAttribute('data-anim','1');if(d.open){var h=a.offsetHeight;a.style.height=h+'px';a.style.transition='height .3s ease';requestAnimationFrame(function(){a.style.height='0px';});setTimeout(function(){d.open=false;a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},300);}else{d.open=true;var h2=a.offsetHeight;a.style.height='0px';a.style.transition='height .32s ease';requestAnimationFrame(function(){a.style.height=h2+'px';});setTimeout(function(){a.style.height='';a.style.transition='';d.removeAttribute('data-anim');},330);}});});
+var arts=[['/mag/زندگی-نامه-ژاک-لکان/','زندگی‌نامه‌ی ژاک لکان'],['/mag/زندگینامه-زیگموند-فروید/','زندگی‌نامه‌ی زیگموند فروید'],['/mag/چگونه-روان-درمانگر-انتخاب-کنیم؟/','چگونه روان‌درمانگر انتخاب کنیم؟'],['/mag/ردفلگهای-تراپیست-و-اهمیت-اصول-حرفه/','ردفلگ‌های تراپیست و اصول حرفه‌ای در اتاق تراپی'],['/mag/سوپرویژن-چیست-و-چرا-مهم-است؟/','سوپرویژن چیست و چرا مهم است؟'],['/mag/رواندرمانی-تحلیلی/','روان‌درمانی تحلیلی چیست؟'],['/mag/زندگینامه-دونالد-وینیکات/','زندگی‌نامه‌ی دونالد وینیکات'],['/mag/مهاجرت-از-دیدگاه-روانکاوی/','مهاجرت از دیدگاه روانکاوی'],['/mag/افسانههای-رایج-درباره-روانکاوی/','افسانه‌های رایج درباره‌ی روانکاوی'],['/mag/اتاق-تراپی-رازها-و-رمزها/','اتاق تراپی: رازها و رمزها'],['/mag/گروهدرمانی-چیست؟/','گروه‌درمانی چیست؟'],['/mag/سلامت-روان-در-مهاجرت/','سلامت روان در مهاجرت؛ چرا به روانشناس هم‌زبان نیاز داریم؟'],['/mag/زندگینامه-کارن-هورنای/','زندگی‌نامه‌ی کارن هورنای'],['/mag/سمپتوم-چیست-تعریف-نشانه-در-روانکاوی/','سمپتوم چیست؟']];
+var tl=document.getElementById('todayLink');if(tl){var day=Math.floor(Date.now()/86400000),a=arts[day%arts.length];tl.href=a[0];tl.textContent=a[1];}
+})();
+
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"MedicalBusiness","@id":"https://tajrobeh.life/#organization","name":"مرکز تجربه زندگی","alternateName":["تجربه","Tajrobeh"],"url":"https://tajrobeh.life/","foundingDate":"2019","priceRange":"۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان · ۲۵ تا ۳۵ یورو","currenciesAccepted":"IRR, EUR, USD","paymentAccepted":"درگاه بانکی ایران, Stripe, PayPal","knowsLanguage":["fa","en"],"availableLanguage":["fa","en"],"medicalSpecialty":["Psychiatric","PublicHealth"],"hasOfferCatalog":{"@type":"OfferCatalog","name":"خدمات مرکز تجربه زندگی","itemListElement":[{"@type":"Offer","priceCurrency":"IRR","price":"0","description":"رایگان","url":"https://tajrobeh.life/get-therapy/","itemOffered":{"@type":"Service","name":"جلسه‌ی معارفه","provider":{"@id":"https://tajrobeh.life/#organization"}}},{"@type":"Offer","priceCurrency":"IRR","priceSpecification":{"@type":"PriceSpecification","priceCurrency":"IRR","minPrice":"15000000","maxPrice":"30000000"},"description":"۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان","url":"https://tajrobeh.life/therapy/individual-therapy/","itemOffered":{"@type":"Service","name":"تراپی فردی","provider":{"@id":"https://tajrobeh.life/#organization"}}},{"@type":"Offer","priceCurrency":"IRR","priceSpecification":{"@type":"PriceSpecification","priceCurrency":"IRR","minPrice":"15000000"},"description":"از ۱٬۵۰۰٬۰۰۰ تومان","url":"https://tajrobeh.life/therapy/couple-therapy/","itemOffered":{"@type":"Service","name":"زوج‌درمانی","provider":{"@id":"https://tajrobeh.life/#organization"}}},{"@type":"Offer","priceCurrency":"EUR","price":"25","description":"۲۵ تا ۳۵ یورو","url":"https://tajrobeh.life/persian-therapy/","itemOffered":{"@type":"Service","name":"تراپی فارسی برای ساکنان خارج از ایران","provider":{"@id":"https://tajrobeh.life/#organization"}}}]},"telephone":"+982191008867","email":"reception@tajrobeh.life","address":{"@type":"PostalAddress","streetAddress":"میدان ونک، کوچه بیستم گاندی، پلاک ۱۶، واحد ۹","addressLocality":"تهران","addressCountry":"IR"},"areaServed":[{"@type":"Country","name":"Iran"},{"@type":"Country","name":"Germany"},{"@type":"Country","name":"United Kingdom"},{"@type":"Country","name":"United States"},{"@type":"Country","name":"Canada"}],"sameAs":["https://instagram.com/tajrobeh.life","https://instagram.com/experientiallifecenter","https://instagram.com/tajrobeh_school","https://t.me/tajrobeh_life","https://t.me/tajrobehlife_bot","https://x.com/tajrobeh_life"],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Saturday","Sunday","Monday","Tuesday","Wednesday"],"opens":"09:30","closes":"20:30"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"تجربه با یک سایت رزرو وقت تراپی چه فرقی دارد؟","acceptedAnswer":{"@type":"Answer","text":"در تجربه هر تراپیست پیش از ورود مصاحبه‌ی علمی و شبیه‌سازی جلسه می‌دهد، خودش در درمان شخصی بوده و زیر نظارت بالینی سوپروایزر کار می‌کند. پشت پلتفرم یک کلینیک واقعی از سال ۱۳۹۸، مدرسه‌ی تربیت تراپیست و تیم پذیرش هست."}},{"@type":"Question","name":"جلسه‌ی معارفه چیست و رایگان است؟","acceptedAnswer":{"@type":"Answer","text":"معارفه یک جلسه‌ی کوتاه رایگان با خودِ تراپیست است تا ببینید ارتباطتان شکل می‌گیرد یا نه."}},{"@type":"Question","name":"هزینه‌ی جلسات چقدر است و چطور پرداخت می‌شود؟","acceptedAnswer":{"@type":"Answer","text":"هزینه‌ی هر جلسه برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست و نوع خدمت بستگی دارد. برای ساکنان خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسه‌ی معارفه رایگان است. جلسه‌ی اول پیش‌پرداخت و جلسات بعدی تا پایان همان ماه. داخل ایران با تومان و خارج از ایران با یورو و دلار (استرایپ و پی‌پال). با اسناد رسمی قابل ارائه به بیمه."}},{"@type":"Question","name":"اگر با تراپیستم راحت نبودم چه؟","acceptedAnswer":{"@type":"Answer","text":"در هر مرحله می‌توانید تراپیست‌تان را بدون هزینه‌ی اضافه تغییر دهید."}},{"@type":"Question","name":"خارج از ایران هستم؛ می‌توانم از تجربه استفاده کنم؟","acceptedAnswer":{"@type":"Answer","text":"بله. تراپیست‌های مقیم آلمان، انگلیس، آمریکا و کانادا، معارفه‌ی رایگان، پرداخت یورویی و دلاری و پارتنر حضوری در آلمان."}},{"@type":"Question","name":"جلسات حضوری فقط در تهران است؟","acceptedAnswer":{"@type":"Answer","text":"کلینیک تجربه در میدان ونک تهران است و با تجربه پارتنرز در مشهد، اصفهان، کرج، نور و آلمان هم جلسه‌ی حضوری ممکن است."}}]}]}</script>
+<script>
+(function(){
+var root=document.getElementById('tj2');
+if(!root) return;
+if(!root.classList.contains('v3')) return;
+root.classList.add('js');
+var VER=root.getAttribute('data-home-ver')||'3';
+function ev(n,p){p=p||{};p.home_ver=VER;try{if(window.gtag){window.gtag('event',n,p);}}catch(e){}try{if(window.clarity){window.clarity('event',n);}}catch(e){}}
+try{if(window.gtag){window.gtag('set',{home_ver:VER});}}catch(e){}
+try{if(window.clarity){window.clarity('set','home_ver',VER);}}catch(e){}
+var fa=function(s){return String(s).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
+var abroad=false;if(tz){if(tz!=='Asia/Tehran'){abroad=true;}}
+
+/* ۱. تب‌های مسیر */
+var seg=root.querySelector('.seg'),ink=root.querySelector('.seg-ink');
+var tabs=seg?[].slice.call(seg.querySelectorAll('button[role=tab]')):[];
+function place(b){if(!ink){return;}if(!b){return;}ink.style.width=b.offsetWidth+'px';ink.style.left=b.offsetLeft+'px';}
+function pick(key,user){var hit=null;tabs.forEach(function(b){var on=b.getAttribute('data-tab')===key;b.setAttribute('aria-selected',on?'true':'false');b.tabIndex=on?0:-1;var p=document.getElementById(b.getAttribute('aria-controls'));if(p){p.classList.toggle('on',on);}if(on){hit=b;}});
+ if(hit){place(hit);if(user){try{localStorage.setItem('tjv3tab',key);}catch(e){}ev('home_tab',{tab:key});var r=hit.getBoundingClientRect(),s=seg.getBoundingClientRect();if(r.left<s.left){seg.scrollBy({left:r.left-s.left-12,behavior:'smooth'});}else{if(r.right>s.right){seg.scrollBy({left:r.right-s.right+12,behavior:'smooth'});}}}}}
+if(tabs.length){var start='me';var saved=null;try{saved=localStorage.getItem('tjv3tab');}catch(e){}
+ if(saved){start=saved;}else{if(abroad){start='ab';}}
+ if(!seg.querySelector('[data-tab="'+start+'"]')){start='me';}
+ pick(start,false);
+ tabs.forEach(function(b,i){b.addEventListener('click',function(){pick(b.getAttribute('data-tab'),true);});
+  b.addEventListener('keydown',function(e){var k=e.key,n=-1;if(k==='ArrowLeft'){n=i+1;}if(k==='ArrowRight'){n=i-1;}if(k==='Home'){n=0;}if(k==='End'){n=tabs.length-1;}if(n<0){return;}if(n>=tabs.length){n=0;}e.preventDefault();tabs[n].focus();pick(tabs[n].getAttribute('data-tab'),true);});});
+ var rz;window.addEventListener('resize',function(){clearTimeout(rz);rz=setTimeout(function(){place(seg.querySelector('[aria-selected=true]'));},120);});
+  if(document.fonts){document.fonts.ready.then(function(){place(seg.querySelector('[aria-selected=true]'));});}
+}
+
+/* ۲. ساعت شهرها در تب خارج از ایران */
+var clk=document.getElementById('clk');
+var cities=[['تهران','Asia/Tehran'],['برلین','Europe/Berlin'],['لندن','Europe/London'],['تورنتو','America/Toronto'],['لس‌آنجلس','America/Los_Angeles']];
+function hm(z){try{var f=new Intl.DateTimeFormat('en-GB',{timeZone:z,hour:'2-digit',minute:'2-digit',hour12:false});return fa(f.format(new Date()));}catch(e){return '';}}
+function tick(){if(!clk){return;}clk.textContent='';var t=document.createElement('span');t.textContent='ساعت الان: ';clk.appendChild(t);cities.forEach(function(c,i){if(i){clk.appendChild(document.createTextNode(' · '));}clk.appendChild(document.createTextNode(c[0]+' '));var b=document.createElement('b');b.textContent=hm(c[1]);clk.appendChild(b);});}
+tick();setInterval(tick,30000);
+
+/* ۳. «این روزها»: کارت تاریخ‌گذشته خودکار پنهان می‌شود */
+var now=new Date();
+root.querySelectorAll('[data-until]').forEach(function(a){var u=new Date(a.getAttribute('data-until')+'T23:59:59+03:30');if(now>u){a.classList.add('gone');}});
+var arts=[['/mag/زندگی-نامه-ژاک-لکان/','زندگی‌نامهٔ ژاک لکان'],['/mag/زندگینامه-زیگموند-فروید/','زندگی‌نامهٔ زیگموند فروید'],['/mag/چگونه-روان-درمانگر-انتخاب-کنیم؟/','چگونه روان‌درمانگر انتخاب کنیم؟'],['/mag/ردفلگهای-تراپیست-و-اهمیت-اصول-حرفه/','ردفلگ‌های تراپیست و اصول حرفه‌ای'],['/mag/سوپرویژن-چیست-و-چرا-مهم-است؟/','سوپرویژن چیست و چرا مهم است؟'],['/mag/رواندرمانی-تحلیلی/','روان‌درمانی تحلیلی چیست؟'],['/mag/زندگینامه-دونالد-وینیکات/','زندگی‌نامهٔ دونالد وینیکات'],['/mag/مهاجرت-از-دیدگاه-روانکاوی/','مهاجرت از دیدگاه روانکاوی'],['/mag/افسانههای-رایج-درباره-روانکاوی/','افسانه‌های رایج دربارهٔ روانکاوی'],['/mag/اتاق-تراپی-رازها-و-رمزها/','اتاق تراپی: رازها و رمزها'],['/mag/گروهدرمانی-چیست؟/','گروه‌درمانی چیست؟'],['/mag/سلامت-روان-در-مهاجرت/','سلامت روان در مهاجرت'],['/mag/زندگینامه-کارن-هورنای/','زندگی‌نامهٔ کارن هورنای'],['/mag/سمپتوم-چیست-تعریف-نشانه-در-روانکاوی/','سمپتوم چیست؟']];
+var td=document.getElementById('todayV3');
+if(td){var a=arts[Math.floor(Date.now()/86400000)%arts.length];td.href=a[0];var tb=td.querySelector('b');if(tb){tb.textContent=a[1];}}
+
+/* ۴. مارکی آدم‌ها: نسخهٔ تکراری فقط برای حلقه، پنهان از صفحه‌خوان و خزنده */
+var mq=document.getElementById('mq');
+var still=false;try{still=window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
+if(mq){if(!still){mq.querySelectorAll('.mq-track').forEach(function(t){var kids=[].slice.call(t.children);kids.forEach(function(k){var c=k.cloneNode(true);c.setAttribute('aria-hidden','true');c.tabIndex=-1;c.removeAttribute('href');c.setAttribute('role','presentation');t.appendChild(c);});var w=t.scrollWidth/2;t.style.setProperty('--d',Math.max(40,Math.round(w/38))+'s');});mq.classList.add('go');}}
+
+/* ۵. جعبهٔ پرسش */
+var IX=[
+['شروع تراپی','/get-therapy/','تراپی','درخواست رزرو معارفه مشاوره روانشناس تراپیست آنلاین جلسه شروع'],
+['اضطراب و فکرهای تکراری','/get-therapy/?need=anx','شروع','اضطراب استرس نگرانی پنیک وسواس فکر'],
+['رابطه و زوج','/get-therapy/?need=rel','شروع','رابطه زوج همسر ازدواج دعوا عشق'],
+['بی‌حالی و افسردگی','/get-therapy/?need=dep','شروع','افسردگی غم بی‌حالی بی‌انگیزگی ناامیدی'],
+['سوگ و فقدان','/get-therapy/?need=grief','شروع','سوگ فقدان مرگ عزا از دست دادن'],
+['کودک و نوجوان','/get-therapy/?need=child','شروع','کودک بچه نوجوان فرزند'],
+['با چه چیزی درگیرید؟','/help/','راهنما','مشکل مسئله نمی‌دانم'],
+['اضطراب','/help/اضطراب/','راهنما','اضطراب نگرانی استرس'],
+['افسردگی','/help/افسردگی/','راهنما','افسردگی غمگینی'],
+['نشخوار فکری','/help/نشخوار-فکری/','راهنما','نشخوار فکر تکراری overthinking'],
+['اهمال‌کاری','/help/اهمال-کاری/','راهنما','اهمال تعویق تنبلی'],
+['خیانت','/help/خیانت/','راهنما','خیانت بی‌وفایی'],
+['طلاق و جدایی','/help/طلاق-و-جدایی/','راهنما','طلاق جدایی کات'],
+['بی‌خوابی','/help/بی-خوابی/','راهنما','بی‌خوابی خواب'],
+['اضطراب اجتماعی','/help/اضطراب-اجتماعی/','راهنما','خجالت اجتماعی'],
+['سوگ','/help/سوگ/','راهنما','سوگ داغ'],
+['عزت نفس','/help/عزت-نفس/','راهنما','عزت نفس اعتماد به نفس'],
+['تراپی فردی','/therapy/individual-therapy/','خدمت','فردی روان‌درمانی مشاوره'],
+['زوج‌درمانی','/therapy/couple-therapy/','خدمت','زوج زن و شوهر رابطه'],
+['تراپی کودک','/therapy/child-therapy/','خدمت','کودک بازی‌درمانی بچه'],
+['تراپی نوجوان','/therapy/teen-therapy/','خدمت','نوجوان'],
+['روان‌پزشکی','/therapy/psychiatry/','خدمت','روانپزشک دارو ویزیت'],
+['گروه‌درمانی','/therapy/group-therapy/','خدمت','گروه'],
+['مشاورهٔ پیش از ازدواج','/therapy/premarital-counseling/','خدمت','ازدواج پیش'],
+['تراپی سالمندان','/therapy/elderly-therapy/','خدمت','سالمند'],
+['سکس‌تراپی','/therapy/sex-therapy/','خدمت','جنسی سکس'],
+['سوپرویژن','/therapy/supervision/','خدمت','سوپروایزر سوپرویژن نظارت'],
+['روانکاوی','/approaches/psychoanalysis/','رویکرد','روانکاوی فروید لکان'],
+['روان‌درمانی روان‌تحلیلی','/approaches/psychodynamic-therapy/','رویکرد','سایکودینامیک تحلیلی'],
+['گروه‌درمانی تحلیلی','/approaches/group-analytic-psychotherapy/','رویکرد','فولکس بیون گروه'],
+['تراپیست‌های تجربه','/team/','آدم‌ها','تراپیست درمانگر روانشناس تیم'],
+['هیئت علمی و سوپروایزرها','/school/faculty/','آدم‌ها','استاد سوپروایزر قنبری'],
+['کلینیک تجربه در تهران','/کلینیک-روانکاوی-تهران/','حضوری','تهران ونک گاندی کلینیک حضوری'],
+['تجربه پارتنرز: حضوری در شهرها','/partners/','حضوری','حضوری شهر پارتنر'],
+['حضوری در کرج','/partners/karaj/','حضوری','کرج'],
+['حضوری در اصفهان','/partners/isfahan/','حضوری','اصفهان'],
+['حضوری در مشهد','/partners/mashhad/','حضوری','مشهد'],
+['حضوری در نور مازندران','/partners/nur/','حضوری','نور مازندران شمال'],
+['تراپی فارسی‌زبان خارج از ایران','/persian-therapy/','خارج','خارج مهاجر ایرانی فارسی‌زبان یورو'],
+['روانشناس ایرانی در آلمان','/persian-therapy/germany/','خارج','آلمان'],
+['روانشناس ایرانی در برلین','/persian-therapy/germany/berlin/','خارج','برلین'],
+['روانشناس ایرانی در هامبورگ','/persian-therapy/germany/hamburg/','خارج','هامبورگ'],
+['روانشناس ایرانی در مونیخ','/persian-therapy/germany/munich/','خارج','مونیخ'],
+['روانشناس ایرانی در کانادا','/persian-therapy/canada/','خارج','کانادا'],
+['روانشناس ایرانی در تورنتو','/persian-therapy/canada/toronto/','خارج','تورنتو'],
+['روانشناس ایرانی در ونکوور','/persian-therapy/canada/vancouver/','خارج','ونکوور'],
+['روانشناس ایرانی در مونترال','/persian-therapy/canada/montreal/','خارج','مونترال'],
+['روانشناس ایرانی در آمریکا','/persian-therapy/usa/','خارج','آمریکا'],
+['روانشناس ایرانی در انگلیس','/persian-therapy/uk/','خارج','انگلیس لندن بریتانیا'],
+['روانشناس ایرانی در ترکیه','/persian-therapy/turkey/','خارج','ترکیه'],
+['روانشناس ایرانی در استانبول','/persian-therapy/turkey/istanbul/','خارج','استانبول'],
+['روانشناس ایرانی در هلند','/persian-therapy/netherlands/','خارج','هلند'],
+['روانشناس ایرانی در سوئد','/persian-therapy/sweden/','خارج','سوئد'],
+['روانشناس ایرانی در استرالیا','/persian-therapy/australia/','خارج','استرالیا'],
+['تراپی برای دانشجوهای خارج از ایران','/persian-therapy/students/','خارج','دانشجو تخفیف'],
+['Persian speaking therapist','/persian-therapy/en/','English','english therapist persian farsi'],
+['سختی‌های مهاجرت','/help/سوگ-مهاجرت/','خارج','مهاجرت سوگ تنهایی غربت'],
+['اضطراب مهاجرت','/help/اضطراب-مهاجرت/','خارج','مهاجرت اضطراب'],
+['تنهایی بعد از مهاجرت','/help/تنهایی-مهاجرت/','خارج','تنهایی غربت'],
+['زوج‌درمانی بعد از مهاجرت','/help/زوج-درمانی-مهاجرت/','خارج','زوج مهاجرت'],
+['فرزندپروری در مهاجرت','/help/فرزندپروری-مهاجرت/','خارج','فرزند بچه مهاجرت'],
+['راهنماهای عملی خارج از ایران','/guide/','خارج','بیمه نوبت بازپرداخت'],
+['نوبت روان‌درمانی در آلمان','/guide/therapieplatz-deutschland/','خارج','therapieplatz بیمه آلمان'],
+['بازپرداخت هزینهٔ روان‌درمانی در آلمان','/guide/kostenerstattung/','خارج','kostenerstattung بازپرداخت'],
+['تست‌های رایگان','/tests/','تست','تست آزمون پرسشنامه رایگان'],
+['تست سبک درمانی من','/tests/therapy-style/','تست','سبک درمانی'],
+['نیمرخ نیاز من','/tests/need-profile/','تست','نیاز'],
+['چرا تراپی قبلی من جواب نداد','/tests/why-therapy-failed/','تست','جواب نداد قبلی'],
+['تست آمادگی کار بالینی','/tests/clinical-readiness/','تست','دانشجو بالینی آمادگی'],
+['مدرسهٔ تجربه','/school/','مدرسه','مدرسه آموزش دوره کلاس'],
+['دورهٔ درمان هیجان‌مدار (EFT)','/school/eft/','مدرسه','eft هیجان‌مدار'],
+['دورهٔ تجربهٔ بالینی','/school/clinical-experience/','مدرسه','بالینی روانکاوی دوره'],
+['دورهٔ روانکاوی مدرن','/school/modern-psychoanalysis/','مدرسه','مدرن'],
+['آموزش روانکاوی','/school/psychoanalysis-training/','مدرسه','آموزش روانکاوی'],
+['تقویم مدرسه','/school/events/','مدرسه','رویداد تقویم ژورنال کلاب کیس‌خوانی وبینار'],
+['کامیونیتی رایگان دانشجوها','/school/community/','مدرسه','کامیونیتی دانشجو رایگان'],
+['چطور درمانگر شویم؟','/how-to-become-a-therapist/','مدرسه','درمانگر شدن کارورزی'],
+['همکاری با انجمن‌های علمی','/school/associations/','مدرسه','انجمن'],
+['همکاری با کلینیک تجربه','/joinus/','همکاری','استخدام همکاری تراپیست پیوستن'],
+['رودمپ مهاجرت روان‌شناسان','/roadmap/psychology-migration/','رودمپ','مهاجرت روانشناس آلمان اتریش نیوزیلند'],
+['کاناپه: فیلم و سریال','/roadmap/kanape/','رودمپ','فیلم سریال کاناپه'],
+['تحلیل روانکاوانهٔ فیلم و سریال','/تحلیل-روانکاوانه-فیلم/','مجله','فیلم سریال تحلیل'],
+['مجلهٔ تجربه','/mag/','مجله','مقاله مجله'],
+['چهره‌های روانکاوی','/چهره-های-روانکاوی/','مجله','فروید لکان کلاین وینیکات'],
+['مفاهیم روانکاوی','/مفاهیم-روانکاوی/','مجله','مفهوم ناخودآگاه'],
+['تجربه سازمانی','/enterprise/','سازمان','سازمان شرکت کارکنان hr'],
+['پارتنر حضوری شوید','/partners/rules/','سازمان','مطب فضا اتاق پارتنر'],
+['گزارش سالانهٔ ۱۴۰۴','/report/','درباره','گزارش آمار'],
+['درباره تجربه','/about-us/','درباره','درباره داستان'],
+['تماس با پذیرش','/contact-us/','درباره','تماس تلفن پذیرش آدرس'],
+['مینی‌اپ تجربه','/app/','درباره','اپ مینی‌اپ تلگرام'],
+['ورود به حساب','/login','درباره','ورود لاگین حساب پنل']
+];
+function nz(s){return String(s||'').toLowerCase().replace(/[ي]/g,'ی').replace(/[ك]/g,'ک').replace(/[ۀة]/g,'ه').replace(/[أإآ]/g,'ا').replace(/[‌‏ً-ٟ]/g,'').replace(/[ـ]/g,'').replace(/\s+/g,' ').trim();}
+IX.forEach(function(r){r.push(nz(r[0]+' '+r[3]));});
+var inp=document.getElementById('askIn'),pop=document.getElementById('askPop'),list=document.getElementById('askList'),all=document.getElementById('askAll');
+var cur=-1,res=[];
+function draw(q){list.textContent='';cur=-1;var n=nz(q);if(!n){pop.hidden=true;inp.setAttribute('aria-expanded','false');return;}
+ var toks=n.split(' ');res=[];
+ IX.forEach(function(r){var sc=0,ok=true;toks.forEach(function(t){if(!t){return;}var i=r[4].indexOf(t);if(i<0){ok=false;}else{sc+=(i===0)?3:1;if(nz(r[0]).indexOf(t)>-1){sc+=2;}}});if(ok){res.push([sc,r]);}});
+ res.sort(function(x,y){return y[0]-x[0];});res=res.slice(0,7).map(function(x){return x[1];});
+ if(!res.length){var li=document.createElement('li');li.className='emp';li.textContent='در صفحه‌های اصلی پیدا نشد؛ در کل سایت و مجله بگردید.';list.appendChild(li);}
+ res.forEach(function(r,i){var li=document.createElement('li');var a=document.createElement('a');a.href=r[1];a.setAttribute('role','option');a.id='askO'+i;var t=document.createElement('span');t.textContent=r[0];var g=document.createElement('span');g.className='g';g.textContent=r[2];a.appendChild(t);a.appendChild(g);a.addEventListener('click',function(){ev('home_ask',{found:1,dest:r[1],pos:i+1});});li.appendChild(a);list.appendChild(li);});
+ all.href='/?s='+encodeURIComponent(q);pop.hidden=false;inp.setAttribute('aria-expanded','true');}
+function mark(i){var as=list.querySelectorAll('a');as.forEach(function(a,j){a.classList.toggle('on',j===i);});cur=i;if(as[i]){inp.setAttribute('aria-activedescendant',as[i].id);}}
+if(inp){
+ inp.addEventListener('input',function(){stopType();draw(inp.value);});
+ inp.addEventListener('focus',function(){stopType();if(inp.value){draw(inp.value);}});
+ inp.addEventListener('keydown',function(e){var as=list.querySelectorAll('a');
+  if(e.key==='ArrowDown'){e.preventDefault();if(as.length){mark((cur+1)%as.length);}}
+  if(e.key==='ArrowUp'){e.preventDefault();if(as.length){mark(cur<=0?as.length-1:cur-1);}}
+  if(e.key==='Escape'){pop.hidden=true;inp.setAttribute('aria-expanded','false');}
+  if(e.key==='Enter'){e.preventDefault();var go=as[cur<0?0:cur];if(go){ev('home_ask',{found:1,dest:go.getAttribute('href'),pos:(cur<0?0:cur)+1});location.href=go.href;}else{if(inp.value.trim()){ev('home_ask',{found:0});location.href=all.href;}}}});
+ all.addEventListener('click',function(){ev('home_ask',{found:0});});
+ document.addEventListener('click',function(e){if(!e.target.closest('#ask')){pop.hidden=true;inp.setAttribute('aria-expanded','false');}});
+ document.addEventListener('keydown',function(e){if(e.key==='/'){var tg=e.target.tagName;if(tg!=='INPUT'){if(tg!=='TEXTAREA'){e.preventDefault();inp.focus();}}}});
+}
+
+/* ۶. placeholder تایپ‌شونده (فقط تا وقتی کاربر تعامل نکرده) */
+var samples=['این روزها اضطراب رهایم نمی‌کند','رابطه‌مان گیر کرده است','تراپیست فارسی‌زبان در برلین','دورهٔ EFT کی شروع می‌شود؟','جلسهٔ حضوری در اصفهان','دانشجوی روان‌شناسی‌ام'];
+var base=inp?inp.getAttribute('placeholder'):'',ti=null,si=0,ci=0,del=false,typing=!!inp;
+function stopType(){if(!typing){return;}typing=false;clearTimeout(ti);inp.setAttribute('placeholder',base);}
+function step(){if(!typing){return;}var s=samples[si];if(!del){ci++;inp.setAttribute('placeholder',s.slice(0,ci));if(ci>=s.length){del=true;ti=setTimeout(step,1600);return;}ti=setTimeout(step,70);}else{ci--;inp.setAttribute('placeholder',s.slice(0,ci)||' ');if(ci<=0){del=false;si=(si+1)%samples.length;ti=setTimeout(step,350);return;}ti=setTimeout(step,28);}}
+if(inp){if(!still){ti=setTimeout(step,2200);}}
+
+/* ۷. رهگیری سبک */
+root.addEventListener('click',function(e){var a=e.target.closest('a');if(!a){return;}var s=a.closest('section');var sec=s?(s.id||'x'):'x';
+ if(a.classList.contains('need')){ev('home_need',{need:a.getAttribute('data-need')});}
+ ev('home_v3_click',{sec:sec,dest:a.getAttribute('href')||''});});
+ev('home_view',{abroad:abroad?1:0});
+})();
+</script>
+<!-- /wp:html -->

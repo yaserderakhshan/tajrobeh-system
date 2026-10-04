@@ -1,0 +1,50 @@
+<script>
+(function(){
+  var LABEL = {
+    tj_need:  { k:'نیمرخ نیاز',              v:{ 'deep':'ریشه‌یاب','deep-anxious':'ریشه‌یاب زیر فشار فکر','symptom':'علامت‌محور','early':'در آغاز راه' } },
+    tj_style: { k:'سبک درمانی',              v:{ 'explorer':'کاوشگر','active-analyst':'تحلیل‌گر فعال','problem-solver':'حل‌مسئله','unclear':'ترکیبی' } },
+    tj_why:   { k:'دلیل توقف تراپی قبلی',   v:{ 'mismatch':'سبک درمانگر جور نبود','rapport':'رابطه شکل نگرفت','dose':'زودتر از موعد تمام شد','cost':'مانع بیرونی','unclear':'روشن نیست' } }
+  };
+
+  function testText(){
+    var found = '';
+    try {
+      var q = new URLSearchParams(location.search);
+      Object.keys(LABEL).forEach(function(key){
+        var raw = q.get(key);
+        if (!raw) { return; }
+        var m = LABEL[key];
+        found = m.k + ': ' + (m.v[raw] || raw);
+      });
+      if (found) { try { sessionStorage.setItem('tjTest', found); } catch(e) {} return found; }
+      return sessionStorage.getItem('tjTest') || '';
+    } catch(e) { return found; }
+  }
+
+  function fillTest(){
+    var txt = testText();
+    if (!txt) { return; }
+    document.querySelectorAll('form.frm-fluent-form textarea[name="note"]').forEach(function(t){
+      if (t.value) { return; }
+      if (t.getAttribute('data-tj-test')) { return; }
+      t.value = 'از تست سایت آمده‌ام. ' + txt + '.';
+      t.setAttribute('data-tj-test', '1');
+    });
+  }
+
+  function fill(){
+    var tz = '';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch(e) {}
+    var off = -(new Date().getTimezoneOffset())/60;
+    var val = tz + ' (UTC' + (off >= 0 ? '+' : '') + off + ')';
+    document.querySelectorAll('form.frm-fluent-form input[name="timezone"]').forEach(function(i){
+      if (!i.value) i.value = val;
+    });
+    fillTest();
+  }
+
+  if (document.readyState !== 'loading') fill();
+  else document.addEventListener('DOMContentLoaded', fill);
+  setTimeout(fill, 1500);
+})();
+</script>

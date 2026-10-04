@@ -1,0 +1,47 @@
+# رمزها و تنظیمات محلی
+.env
+.env.*
+!.env.example
+
+# فایل‌های داده
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.xlsm
+*.ods
+
+# فونت‌ها مجوز تجاری دارند و در مخزن عمومی نمی‌آیند (مخزن خصوصی Tajrobeh-knowledge)
+*.woff
+*.woff2
+*.ttf
+*.otf
+docs/brand/fonts/
+docs/brand/fonts.css
+
+# وابستگی‌ها و خروجی ساخت
+node_modules/
+dist/
+build/
+.cache/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# سیستم‌عامل و ویرایشگر
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+
+# اسکیل‌های پروژه همه کامیت می‌شوند
+!.claude/skills/**
+
+# کلید یک‌بارمصرف دیپلوی خودکار؛ فقط در اجرای GitHub Actions ساخته می‌شود
+bot/ci_key.gs
+
+# فایل صفحهٔ مینی‌اپ در پروژهٔ Apps Script؛ گردش کار دیپلوی از site/pages/503886-app.html می‌سازد (یک منبع)
+bot/app_page.html
+bot/app_page.gs

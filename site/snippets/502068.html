@@ -1,0 +1,39 @@
+<!-- پیش‌بارگذاری فونت انجمن مکس تا متن زودتر با فونت خودش رندر شود -->
+<link rel="preload" href="https://tajrobeh.life/wp-content/uploads/fonts/anjoman-max-regular.woff2" as="font" type="font/woff2" crossorigin>
+<!-- تأیید مالکیت گوگل سرچ کنسول — همان مقدار پراپرتی tajrobeh.life -->
+<meta name="google-site-verification" content="6JdswsPsNzWquNaakZByj5KVVy8nOH-PVY1ob6EEGvs" />
+
+<!-- Google Tag Manager + Google Analytics 4 — بارگذاری با تأخیر تا بعد از رندر صفحه -->
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-149WHJVT4Y', {
+  allow_google_signals: false,
+  allow_ad_personalization_signals: false
+});
+(function(w, d){
+  var done = false;
+  function load(){
+    if (done) { return; }
+    done = true;
+    w.dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
+    var a = d.createElement('script');
+    a.async = true;
+    a.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-KCML5ZP4';
+    d.head.appendChild(a);
+    var b = d.createElement('script');
+    b.async = true;
+    b.src = 'https://www.googletagmanager.com/gtag/js?id=G-149WHJVT4Y';
+    d.head.appendChild(b);
+  }
+  var evs = ['scroll', 'mousemove', 'touchstart', 'keydown', 'pointerdown'];
+  function once(){
+    for (var i = 0; i < evs.length; i++) { w.removeEventListener(evs[i], once, true); }
+    load();
+  }
+  for (var i = 0; i < evs.length; i++) { w.addEventListener(evs[i], once, {capture: true, passive: true}); }
+  if (d.readyState === 'complete') { setTimeout(load, 1200); }
+  else { w.addEventListener('load', function(){ setTimeout(load, 1200); }); }
+})(window, document);
+</script>
