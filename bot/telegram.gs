@@ -18002,9 +18002,9 @@ function tgSchool2Tests() {
   ok('حلقهٔ فعال داریم', rs.some(function (r) { return r.status === 'فعال'; }));
   ok('تب عضویت دانشجو هست', !!tgSchSS_().getSheetByName(TG_SCH_T_MEM));
   ok('تب درخواست عضویت هست', !!tgSchSS_().getSheetByName(TG_SCH_T_REQ));
-  ok('سارا سپهری دو عضویت دارد',
-     tgSchRows_(TG_SCH_T_MEM, TG_SCH_MEM_HEAD, 14).filter(function (r) {
-       return String(r[1]).trim() === 'سارا سپهری'; }).length === 2);
+  /* v170.14: بی نام واقعی؛ دست‌کم یک نفر دو عضویت جدا دارد (ادغام نمی‌شود) */
+  ok('یک نفر دو عضویت جدا دارد', (function () { var c = {}; return tgSchRows_(TG_SCH_T_MEM, TG_SCH_MEM_HEAD, 14).some(function (r) {
+       var k = String(r[1]).trim(); if (!k) return false; c[k] = (c[k] || 0) + 1; return c[k] >= 2; }); })());
   ok('مسئول مدرسه chat_id دارد', tgSchoolOwners_().length > 0);
   ok('متن‌ها خط تیره ندارند', [T_SJ_ROLE, T_SJ_SENT, T_SJ_OKMSG, T_COMM_INTRO, T_COMM_OK].every(function (t) {
      return t.indexOf('—') < 0; }));
