@@ -9042,6 +9042,8 @@ const TG_SECTION_WORDS = [
 function tgSection_(src, note) {
   const s = String(src || '');
   const parts = s.split('›');
+  /* v170.16: «کمپین › C-004 › <نوع>» لید مراجع است و کشیک پذیرش باید خبر بگیرد (tgDutyClinic_) */
+  if (parts.length > 1 && String(parts[0]).trim() === 'کمپین') return 'پذیرش';
   if (parts.length > 1) {
     const sec = String(parts[1]).trim();
     if (sec) return sec;

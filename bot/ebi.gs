@@ -825,7 +825,7 @@ function ebiCodeTests() {
     ok('بدنهٔ ebi-join: نوع، نام، شماره، src', jb.body.kind === 'therapist' && jb.body.name === 'سارا نمونه' && jb.body.src === 'bot' && /0000003/.test(jb.body.phone));
     ok('منبع لید بعدی: کمپین › C-004 › therapist', ebiLeadPrefill_({ source: 'Telegram bot', note: 'chat_id: 6003' }).source === 'کمپین › C-004 › therapist');
     ok('منبع لید دیگران دست نمی‌خورد', ebiLeadPrefill_({ source: 'Telegram bot', note: 'chat_id: 6999' }).source === 'Telegram bot' && ebiLeadPrefill_({ source: 'سایت › پذیرش › فرم', note: 'chat_id: 6003' }).source === 'سایت › پذیرش › فرم');
-    ok('tgSection_ منبع کمپین را می‌شناسد', tgSection_('کمپین › C-004 › night', '') === 'C-004');
+    ok('tgSection_ لید کمپین را لید پذیرش می‌داند (کشیک خبر می‌گیرد)', tgSection_('کمپین › C-004 › night', '') === 'پذیرش' && tgDutyClinic_({ src: 'کمپین › C-004 › night', memo: '' }) === true && tgSection_('سایت › مدرسه › فرم', '') === 'مدرسه');
     TG_OUTBOX = [];
     ok('انصراف وسط ثبت‌نام', P(6005, '/start ebi-night') && P(6005, '↩️ انصراف') === true && !tgGetVal_('ebij', 6005));
     ok('دستور وسط ثبت‌نام حالت را می‌بندد و مسیر عادی می‌رود', P(6006, '/start ebi-crisis') && P(6006, '/menu') === false && !tgGetVal_('ebij', 6006));
