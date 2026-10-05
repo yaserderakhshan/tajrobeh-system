@@ -27,7 +27,9 @@ export function owners(prs) {
   return o;
 }
 /* خطای PR من، یا خالی */
-export function checkPr(me, prs, mainVer) {
+export function checkPr(me, prs, mainVer, botChanged = true) {
+  /* ۱۳ مهر ۱۴۰۵: PRی که کد بات را عوض نمی‌کند (سند، روند) شمارهٔ تازه نمی‌خواهد و چیزی رزرو نمی‌کند */
+  if (!botChanged && me.version === mainVer) return '';
   if (!parseVer(me.version)) return `شمارهٔ نسخه «${me.version}» درست نیست`;
   if (mainVer && parseVer(mainVer) && cmpVer(me.version, mainVer) <= 0) return `${me.version} از نسخهٔ main (${mainVer}) بالاتر نیست`;
   const o = owners(prs)[me.version];
@@ -53,6 +55,7 @@ export function versionSelfTest() {
   t('شاخهٔ خودش با چند PR پشت‌سرهم ← قبول', checkPr(P(100, 'claude/b', 40, 'v170.6'), prs, 'v170.5') === '');
   t('رزرو از توضیح خوانده می‌شود', JSON.stringify(bodyClaims('سلام\nرزرو نسخه: v170.6، v171.0 و v171.1.2')) === '["v170.6","v171.0","v171.1.2"]');
   t('شمارهٔ آزاد بعدی', nextFree(prs, 'v170.2') === 'v170.7');
+  t('PR بی تغییر کد بات با شمارهٔ main ← قبول؛ با تغییر کد ← مردود', checkPr(P(101, 'claude/d', 50, 'v170.2'), prs, 'v170.2', false) === '' && /بالاتر نیست/.test(checkPr(P(101, 'claude/d', 50, 'v170.2'), prs, 'v170.2', true)));
   t('ترتیب نسخه‌ها', cmpVer('v171.0', 'v170.12') > 0 && cmpVer('v169.2.2', 'v169.2') > 0);
   return bad;
 }
@@ -65,6 +68,14 @@ async function api(path) {
   }
   const repo = process.env.GITHUB_REPOSITORY || 'yaserderakhshan/tajrobeh-system';
   return JSON.parse(execSync(`gh api 'repos/${repo}${path}'`, { encoding: 'utf8', maxBuffer: 1 << 26 }));
+}
+/* آیا این PR کد بات را عوض می‌کند؟ (همان قاعدهٔ گام «شمارهٔ نسخه و CHANGELOG» در bot-check.yml) */
+function botChanged() {
+  const base = process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : 'origin/main';
+  try {
+    const ch = execSync(`git diff --name-only ${base}...HEAD`, { encoding: 'utf8' });
+    return ch.split('\n').some((f) => /^bot\/(.*\.gs|\.clasp\.json|appsscript\.json)$/.test(f));
+  } catch (e) { return true; }
 }
 async function verAt(ref) { try { const c = await api(`/contents/bot/version.gs?ref=${encodeURIComponent(ref)}`); return verOf(Buffer.from(c.content, 'base64').toString('utf8')); } catch (e) { return ''; } }
 async function openPrs() {
@@ -87,7 +98,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   } else if (cmd === 'check') {
     const n = Number(process.env.PR_NUMBER), me = prs.find((p) => p.number === n) || { number: n, branch: process.env.HEAD_REF || '', created_at: new Date().toISOString(), body: '' };
     me.version = verOf(readFileSync('bot/version.gs', 'utf8'));
-    const err = checkPr(me, prs.filter((p) => p.number !== n).concat([me]), mainVer);
+    const err = checkPr(me, prs.filter((p) => p.number !== n).concat([me]), mainVer, botChanged());
     if (err) { console.log(`::error::رزرو نسخه: ${err}`); process.exit(1); }
     console.log(`${me.version} برای این PR آزاد است (main: ${mainVer}).`);
   }
