@@ -66,6 +66,7 @@ curl -sL -H 'Content-Type: text/plain' \
 | `gem_seo` | `post_id` | `seo_title`، `meta`، `focus_keyword`، `gate`، `status` (سطر در تب «بستهٔ سئو» هاب محتوا) | بله |
 | `gem_seo_batch` | `n` (۱ تا ۳) | `results[]`، `quota_left` | بله |
 | `stats_post` | `post_id` | `starts` (ورود با `mg-<id>`)، `starts_by_variant`، `clicks`، `digest_sends`، `channel_posts` | نه |
+| `ebi_check` (v170.15) | `text` (یک مورد فهرست عمومی و بی‌نام کمپین C-004، حداکثر ۶۰۰ نویسه) | `verdict` («ok» یا «review») و `reason`. ok فقط برای «چیز درخشان» کوتاه، مهربان و بی‌خطر؛ نام یا تماس، نشانهٔ حال بد، توهین، جنسی، تبلیغ، سیاست یا هر تردیدی ← review. خطای جمنای ← review. سقف روزانه `ebi_daily_cap` و سقف ساعتی جدا `ebi_hourly_max` | نه (dry_run می‌پذیرد) |
 | `key_rotate` | چیزی لازم نیست | `hash` (هش کوتاه)، `file` | بله |
 
 ### شکل ورودی‌ها

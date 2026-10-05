@@ -416,6 +416,8 @@ var PB_ACTIONS = {
   stats_post: function (p) { return pbStatsPost_(p.post_id); },
   key_rotate: function (p, dry) { return dry ? { ok: true, data: { would: 'کلید تازه ساخته و در همان فایل درایو نوشته می‌شود' } } : { ok: true, data: pbKeyMake_() }; }
 };
+/* v170.15: اکشنی که سقف ساعتی جدا دارد: [سطل، کلید تنظیم، پیش‌فرض]. بقیه همان سقف «api_hourly_max» */
+var PB_RATE_BUCKET = {};
 var PB_WRITE = ['channel_post', 'channel_edit', 'queue_cancel', 'mag_register', 'digest_send', 'notify_editor', 'send', 'calendar_add', 'gem_seo', 'gem_seo_batch', 'key_rotate'];
 
 /* body: {api: 1, key, action, dry_run?, ...پارامترها}. پاسخ همیشه {ok, data, error} */
@@ -429,7 +431,8 @@ function pbGateway_(b) {
       if (pbRate_('bad', 30)) pbLog_(action, b, 'رد شد: کلید نادرست', '');
       return { ok: false, data: null, error: 'unauthorized' };
     }
-    if (!pbRate_('ok', pbCfgN_('api_hourly_max', 30))) { pbLog_(action, b, 'رد شد: سقف فراخوانی در ساعت', ''); return { ok: false, data: null, error: 'rate_limited' }; }
+    var rb = PB_RATE_BUCKET[action] || ['ok', 'api_hourly_max', 30];
+    if (!pbRate_(rb[0], pbCfgN_(rb[1], rb[2]))) { pbLog_(action, b, 'رد شد: سقف فراخوانی در ساعت', ''); return { ok: false, data: null, error: 'rate_limited' }; }
     var fn = PB_ACTIONS[action];
     if (!fn) { pbLog_(action, b, 'اکشن ناشناخته', ''); return { ok: false, data: null, error: 'unknown_action' }; }
     var dryv = b.dry_run !== undefined ? b.dry_run : b.dry;   /* v170.1: «dry» هم پذیرفته می‌شود */
@@ -471,7 +474,8 @@ function pbStatus_() {
     version: typeof TG_CODE_VERSION === 'string' ? TG_CODE_VERSION : '',
     errors: errs,
     queue: { pending: q.length, next: next ? pbFmt_(next) : null },
-    gemini: { used_today: Number(pbProp_('PB_GEM:' + day) || 0), cap: pbCfgN_('gem_daily_cap', 40), last_error: pbProp_('PB_GEM_ERR') || null },
+    gemini: { used_today: Number(pbProp_('PB_GEM:' + day) || 0), cap: pbCfgN_('gem_daily_cap', 40), last_error: pbProp_('PB_GEM_ERR') || null,
+      ebi_today: Number(pbProp_('EBI_GEM:' + day) || 0), ebi_cap: pbCfgN_('ebi_daily_cap', 300), ebi_tokens: (function () { try { return JSON.parse(pbProp_('EBI_TOK:' + day) || '{}'); } catch (e) { return {}; } })() },
     webapp: webapp
   } };
 }
@@ -1501,7 +1505,7 @@ function pbTests() {
     /* سقف فراخوانی */
     var rl = null; for (var i = 0; i < 40; i++) { rl = gw({ action: 'status' }); if (!rl.ok) break; }
     ok('سقف ۳۰ فراخوانی در ساعت', rl.ok === false && rl.error === 'rate_limited');
-    ok('همهٔ اکشن‌های نوشتنی dry_run دارند', PB_WRITE.every(function (a) { return typeof PB_ACTIONS[a] === 'function'; }) && Object.keys(PB_ACTIONS).length === 15);
+    ok('همهٔ اکشن‌های نوشتنی dry_run دارند', PB_WRITE.every(function (a) { return typeof PB_ACTIONS[a] === 'function'; }) && Object.keys(PB_ACTIONS).length === 16 && typeof PB_ACTIONS.ebi_check === 'function');
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK;
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ درگاه انتشار درست است'));
