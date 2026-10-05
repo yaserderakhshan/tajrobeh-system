@@ -198,10 +198,10 @@ function handleWebForm_(body) {
 
   // v140: شماره‌ای که از قبل لید دارد سطر تازه نمی‌سازد؛ همان پرونده یادداشت و اقدام بعدی می‌گیرد (و اگر بسته بود باز می‌شود)
   var dupRow = -1;
-  if (!schoolForm && phone) {
-    try { if (typeof tgLeadByPhone_ === 'function') dupRow = tgLeadByPhone_(phone); } catch (eDup) { dupRow = -1; }
+  if (!schoolForm && (phone || email)) {
+    try { if (typeof tgLeadByPhone_ === 'function') dupRow = tgLeadByPhone_(phone, email); } catch (eDup) { dupRow = -1; }   /* v170.18: با ایمیل هم */
     if (dupRow >= 2 && typeof tgLeadFormAgain_ === 'function') {
-      try { tgLeadFormAgain_(dupRow, { src: src, msg: msg, page: page, email: email, pref: pref }); }
+      try { tgLeadFormAgain_(dupRow, { src: src, msg: msg, page: page, email: email, pref: pref, phone: phone, name: name }); }
       catch (eAg) { logError_('tgLeadFormAgain_: ' + eAg, null); dupRow = -1; }
       if (dupRow >= 2 && lf && !(typeof TG_DRY !== 'undefined' && TG_DRY)) { try { v1689WebWrite_(tgSS_().getSheetByName(TG_LEADS), dupRow, lf); } catch (eLf) { logError_('v1689WebWrite_: ' + eLf, null); } }
     } else dupRow = -1;
