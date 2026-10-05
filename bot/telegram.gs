@@ -5319,17 +5319,13 @@ function tgScaleColumns() {
 // سطر لید با همین شماره (ده رقم آخر). از پایین می‌گردد تا تازه‌ترین سطر برگردد
 function tgLeadByPhone_(p, email) {
   if (TG_DRY) return TG_DRY_LEADROW || (email && TG_MEM['leadbyemail'] && TG_MEM['leadbyemail'][String(email).toLowerCase()]) || -1;
-  const d = tgLatinDigits_(p).replace(/\D/g, '');
   const sh = tgSS_().getSheetByName(TG_LEADS);
   const last = sh.getLastRow();
   if (last < 2) return -1;
-  if (d.length >= 10) {
-    const tail = d.slice(-10);
+  const tail = phoneKey_(p);   /* v170.19 */
+  if (tail) {
     const ph = sh.getRange(2, 6, last - 1, 1).getValues();
-    for (var i = ph.length - 1; i >= 0; i--) {
-      const x = tgLatinDigits_(String(ph[i][0])).replace(/\D/g, '');
-      if (x.length >= 10 && x.slice(-10) === tail) return i + 2;
-    }
+    for (var i = ph.length - 1; i >= 0; i--) if (phoneKey_(ph[i][0]) === tail) return i + 2;
   }
   /* v170.18: با شماره پیدا نشد (مثلاً شمارهٔ خارجی بی‌کد کشور)، با ایمیل در یادداشت یا ستون «ایمیل» */
   const em = String(email || '').trim().toLowerCase();
@@ -6439,7 +6435,7 @@ function tgIsCrisis_(text) {
 }
 
 function tgRegion_(phone) {
-  const p = tgLatinDigits_(phone).replace(/[^\d]/g, '');
+  const p = phoneDigits_(phone);
   if (!p) return '';
   if (p.indexOf('0098') === 0) return 'داخل ایران';
   if (p.indexOf('98') === 0 && p.length >= 12) return 'داخل ایران';
@@ -18488,10 +18484,7 @@ function tgDiagChatIds() {
 var TG_C_WPHONE = 21;   // U شمارهٔ کاری (اختیاری)
 var TG_C_CONN   = 25;   // Y وضعیت اتصال
 
-function tgPhoneKey_(v) {
-  var d = tgLatinDigits_(String(v == null ? '' : v)).replace(/\D/g, '');
-  return d.length >= 10 ? d.slice(-10) : '';
-}
+function tgPhoneKey_(v) { return phoneKey_(v); }   /* v170.19: یک پیاده‌سازی در Code.gs */
 
 function tgSameName_(a, b) {
   var x = tgNorm_(a), y = tgNorm_(b);
@@ -22494,6 +22487,11 @@ function tgLead2Tests() {
     ok('v170.18: لید جلوتر (معارفه رزرو شد) ریست نمی‌شود، فقط اقدام بعدی', fb2 && fb2.changes['وضعیت'] === undefined && fb2.changes['آخرین تماس'] === undefined && /درخواست دوباره/.test(fb2.changes['اقدام بعدی']) && !(TG_MEM['dutypend'] || []).length);
     ok('v170.18: شمارهٔ کامل‌تر', tgPhoneBetter_('2025550123', '+12025550123') && tgPhoneBetter_('', '09120000000') && !tgPhoneBetter_('+12025550123', '2025550123') && !tgPhoneBetter_('09120000000', '09350000000') && tgPhoneBetter_('9120000000', '09120000000'));   // pii:ok ساختگی
     ok('v170.18: جست‌وجو با ایمیل وقتی شماره پیدا نشد', (function () { var k = TG_DRY_LEADROW; TG_DRY_LEADROW = null; TG_MEM['leadbyemail'] = { 'x@example.invalid': 9 }; var r = tgLeadByPhone_('123', 'X@example.invalid'); TG_DRY_LEADROW = k; return r === 9; })());   // pii:ok ساختگی
+    /* v170.19: یک تابع منطقه و یک کلید شماره */
+    ok('v170.19: region_ حذف شد؛ ۰۷ انگلیس و افغانستان خارج از ایران', typeof region_ === 'undefined' && tgRegion_('07911123456') === 'خارج از ایران' && tgRegion_('0799744687') === 'خارج از ایران');   // pii:ok ساختگی
+    ok('v170.19: شکل‌های شمارهٔ ایران داخل ایران', ['09120000000', '9120000000', '989120000000', '+98 912 000 0000', '00989120000000', '۰۹۱۲۰۰۰۰۰۰۰'].every(function (x) { return tgRegion_(x) === 'داخل ایران'; }));   // pii:ok ساختگی
+    ok('v170.19: کلید شماره یکی است', phoneKey_('+98 ۹۱۲ 000 0000') === '9120000000' && tgPhoneKey_('09120000000') === '9120000000' && phoneKey_('123') === '' &&   // pii:ok ساختگی
+      tgWaDigits_('+1 (202) 555-0123') === '12025550123' && cmDigits_('۰۹۱۲') === '0912' && digits_('٠٩١٢') === '0912');   // pii:ok ساختگی
     TG_DRY_LEAD = mk(); TG_DRY_LEAD.status = 'در پیگیری'; TG_DRY_LEAD.touched = true; TG_OUTBOX = []; TG_MEM['dutypend'] = [];
     tgUpdateLead_(7, {}, { kind: 'تراپی فردی', topic: '' }, 4242, '', '09120000000');   // pii:ok ساختگی
     var fu = TG_OUTBOX.filter(function (o) { return o.kind === 'lead-update'; });
@@ -22710,9 +22708,7 @@ function tgWaReady_() {
   return !!(c.t && c.id);
 }
 
-function tgWaDigits_(p) {
-  return tgLatinDigits_(String(p || '')).replace(/\D/g, '');
-}
+function tgWaDigits_(p) { return phoneDigits_(p); }   /* v170.19 */
 
 // خروجی: شناسهٔ پیام در صورت موفقیت، رشتهٔ خالی در صورت شکست
 function tgWaSend_(to, text) {
@@ -22821,7 +22817,7 @@ function tgWaNewLead_(from, nm, text, when, ours) {
       fmtDate_(when), fmtTime_(when),
       'WhatsApp ' + ours,
       nm, 'WhatsApp', "'" + from,
-      region_(from), text,
+      tgRegion_(from), text,
       'جدید', '', '', '', ''
     ]);
     const sh = tgSS_().getSheetByName(TG_LEADS);
