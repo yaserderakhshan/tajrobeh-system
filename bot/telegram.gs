@@ -5203,7 +5203,18 @@ function tgAppendLead_(o, isRetry) {
   try {
     const sh = tgSS_().getSheetByName(TG_LEADS);
     if (!sh) { tgErr_('تب ' + TG_LEADS + ' پیدا نشد'); if (!isRetry) tgLeadRetryPush_(o); return false; }
-    const now = new Date();
+    const now = o.when ? new Date(o.when) : new Date();
+    /* v170.20: تنها نویسندهٔ سطر تازهٔ «لیدها» (بات، فرم سایت، واتس‌اپ، مدل لید). ستون شناخته‌شده‌ای که هنوز نیست ساخته می‌شود؛
+       شماره همیشه متن نوشته می‌شود تا صفر اول نیفتد؛ کد لید همان لحظه زیر همان قفل. خروجی: شمارهٔ سطر. */
+    var ph = String(o.phone == null ? '' : o.phone);
+    if (/^[0-9+]/.test(ph)) ph = "'" + ph;
+    if (o.extra) {
+      var miss = Object.keys(o.extra).filter(function (k) { return TG_LEAD_FIELDS.indexOf(k) > -1 && o.extra[k] !== '' && o.extra[k] != null; });
+      var have = tgScaleCols_(sh), made = false;
+      miss.forEach(function (k) { if (!have[k]) { tgLeadCol_(k); made = true; } });
+      if (made) { TG_SCALE_COLS_ = null; try { CacheService.getScriptCache().remove('scols'); } catch (eC) {} }
+    }
+    var row = 0;
     /* v166.13: نوشتن سطر و ستون‌های اسکیل زیر یک قفل؛ پیش از این getLastRow() جدا گرفته می‌شد و اگر فرم سایت یا
        واتس‌اپ همان لحظه سطری می‌افزود، پاسخ‌های بالینی این مراجع روی سطر آدم دیگری می‌نشست. */
     tgLeadRowLock_(function () {
@@ -5211,16 +5222,18 @@ function tgAppendLead_(o, isRetry) {
         Utilities.formatDate(now, TG_TZ, 'yyyy-MM-dd'),
         Utilities.formatDate(now, TG_TZ, 'H:mm'),
         o.source || 'Telegram bot',
-        o.name || '', o.channel || 'تلگرام', o.phone || '', o.region || '',
-        o.firstText || '', o.status || 'جدید', '', '', '', o.note || '',
+        o.name || '', o.channel || 'تلگرام', ph, o.region || '',
+        o.firstText || '', o.status || 'جدید', o.owner || '', '', '', o.note || '',
         o.kind || '', o.topic || ''
       ]));
-      if (o.extra) tgWriteExtras_(sh, sh.getLastRow(), o.extra);
-      try { if (typeof lmOnAppend_ === 'function') lmOnAppend_(sh, sh.getLastRow(), o); } catch (eLm) {}   /* v170.2: نوع لید و مهلت ۲۴ ساعت */
+      row = sh.getLastRow();
+      if (o.extra) tgWriteExtras_(sh, row, o.extra);
+      try { if (typeof lmOnAppend_ === 'function') lmOnAppend_(sh, row, o); } catch (eLm) {}   /* v170.2: نوع لید و مهلت ۲۴ ساعت */
+      try { tgLeadCode_(row); } catch (eCode) { tgErr_('tgAppendLead_ کد لید', eCode); }
     });
     const mm = String(o.note || '').match(/chat_id: (\d+)/);
     if (mm) CacheService.getScriptCache().remove('lr' + mm[1]);
-    return true;
+    return row || true;
   } catch (e) {
     tgErr_('tgAppendLead_: ' + e);
     if (!isRetry) tgLeadRetryPush_(o);
@@ -22487,6 +22500,11 @@ function tgLead2Tests() {
     ok('v170.18: لید جلوتر (معارفه رزرو شد) ریست نمی‌شود، فقط اقدام بعدی', fb2 && fb2.changes['وضعیت'] === undefined && fb2.changes['آخرین تماس'] === undefined && /درخواست دوباره/.test(fb2.changes['اقدام بعدی']) && !(TG_MEM['dutypend'] || []).length);
     ok('v170.18: شمارهٔ کامل‌تر', tgPhoneBetter_('2025550123', '+12025550123') && tgPhoneBetter_('', '09120000000') && !tgPhoneBetter_('+12025550123', '2025550123') && !tgPhoneBetter_('09120000000', '09350000000') && tgPhoneBetter_('9120000000', '09120000000'));   // pii:ok ساختگی
     ok('v170.18: جست‌وجو با ایمیل وقتی شماره پیدا نشد', (function () { var k = TG_DRY_LEADROW; TG_DRY_LEADROW = null; TG_MEM['leadbyemail'] = { 'x@example.invalid': 9 }; var r = tgLeadByPhone_('123', 'X@example.invalid'); TG_DRY_LEADROW = k; return r === 9; })());   // pii:ok ساختگی
+    /* v170.20: یک نویسنده؛ لید سایت از tgAppendLead_ می‌گذرد و اقدام بعدی می‌گیرد */
+    TG_OUTBOX = [];
+    handleWebForm_({ name: 'مراجع ساختگی', mobile: '09120000077', source: 'سایت › پذیرش › شروع تراپی', note: 'سلام', form_title: 'شروع تراپی' });   // pii:ok ساختگی
+    var wl = TG_OUTBOX.filter(function (x) { return x.kind === 'lead'; })[0];
+    ok('v170.20: فرم سایت از نویسندهٔ واحد: کانال، منطقه و اقدام بعدی', !!wl && wl.o.channel === 'فرم سایت' && wl.o.region === 'داخل ایران' && !!(wl.o.extra && wl.o.extra['اقدام بعدی']), JSON.stringify(wl && wl.o).slice(0, 200));
     /* v170.19: یک تابع منطقه و یک کلید شماره */
     ok('v170.19: region_ حذف شد؛ ۰۷ انگلیس و افغانستان خارج از ایران', typeof region_ === 'undefined' && tgRegion_('07911123456') === 'خارج از ایران' && tgRegion_('0799744687') === 'خارج از ایران');   // pii:ok ساختگی
     ok('v170.19: شکل‌های شمارهٔ ایران داخل ایران', ['09120000000', '9120000000', '989120000000', '+98 912 000 0000', '00989120000000', '۰۹۱۲۰۰۰۰۰۰۰'].every(function (x) { return tgRegion_(x) === 'داخل ایران'; }));   // pii:ok ساختگی
@@ -22813,18 +22831,10 @@ function tgWaNewLead_(from, nm, text, when, ours) {
   try { lock.waitLock(20000); } catch (e) { return -1; }
   TG_LOCK_HELD = true;   /* v166.13: tgLeadCode_ قفل را رها نکند */
   try {
-    appendRow_(TAB_LEADS, [
-      fmtDate_(when), fmtTime_(when),
-      'WhatsApp ' + ours,
-      nm, 'WhatsApp', "'" + from,
-      tgRegion_(from), text,
-      'جدید', '', '', '', ''
-    ]);
-    const sh = tgSS_().getSheetByName(TG_LEADS);
-    const row = sh.getLastRow();
-    try { sh.getRange(row, tgLeadCol_('کانال ترجیحی')).setValue(TG_WA_CH); } catch (e) {}
-    tgLeadCode_(row);
-    return row;
+    /* v170.20: از همان نویسندهٔ واحد (tgAppendLead_)، تا قلاب‌های نوع لید، مهلت و اقدام بعدی اجرا شوند */
+    var row = tgAppendLead_({ when: when, source: 'WhatsApp ' + ours, name: nm, channel: 'WhatsApp', phone: '+' + from, region: tgRegion_(from),
+      firstText: text, status: 'جدید', extra: { 'کانال ترجیحی': TG_WA_CH } });
+    return typeof row === 'number' ? row : -1;
   } finally {
     TG_LOCK_HELD = false;
     try { lock.releaseLock(); } catch (e) {}

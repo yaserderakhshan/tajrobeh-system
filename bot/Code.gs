@@ -222,19 +222,14 @@ function handleWebForm_(body) {
       (email ? 'ایمیل: ' + email + ' · ' : '') + 'صفحه: ' + page
     ];
     /* v166.29.1: حالت خشک (آزمون دود) و نگهبان نشت تست؛ هیچ سطر واقعی نوشته نمی‌شود */
-    if (typeof TG_DRY !== 'undefined' && TG_DRY) { TG_OUTBOX.push({ kind: 'lead', o: { source: src, channel: 'فرم سایت', name: name, phone: phone, country: lf ? lf.ctry : '', heard: lf ? lf.heard : '' } }); return; }
-    if (typeof tgTestLeak_ === 'function' && tgTestLeak_('فرم سایت')) return;
-    var writeLead = function () {
-      var shL = tgSS_().getSheetByName(TG_LEADS);
-      shL.appendRow(tgCellRow_(rowL));
-      var rwL = shL.getLastRow();
-      try {
-        if (pref) shL.getRange(rwL, tgLeadCol_('کانال ترجیحی')).setValue(pref);
-        if (lf) v1689WebWrite_(shL, rwL, lf);
-        tgLeadCode_(rwL);
-      } catch (eLead) { logError_('چرخهٔ لید: ' + eLead, null); }
-    };
-    if (typeof tgLeadRowLock_ === 'function') tgLeadRowLock_(writeLead); else writeLead();
+    /* v170.20: از نویسندهٔ واحد (tgAppendLead_)؛ قلاب‌های نوع لید، مهلت و اقدام بعدی برای لید سایت هم اجرا می‌شود */
+    var ex = {};
+    if (pref) ex['کانال ترجیحی'] = pref;
+    var rwL = tgAppendLead_({ source: src, name: name, channel: 'فرم سایت', phone: phone, region: tgRegion_(phone), firstText: msg,
+      status: 'جدید', note: rowL[12], extra: ex, country: lf ? lf.ctry : '', heard: lf ? lf.heard : '' });
+    if (typeof TG_DRY !== 'undefined' && TG_DRY) return;   /* v166.29.1: حالت خشک (آزمون دود)؛ سطری نوشته نشد */
+    if (typeof rwL === 'number' && lf) { try { v1689WebWrite_(tgSS_().getSheetByName(TG_LEADS), rwL, lf); } catch (eLf) { logError_('v1689WebWrite_: ' + eLf, null); } }
+    if (rwL === false) logError_('لید سایت نوشته نشد؛ در صف تکرار', null);
   }
 
   // فرم‌های مدرسه در هاب مدرسه هم می‌نشینند تا مسئول مدرسه همه‌چیز را یک‌جا ببیند. لید سر جایش می‌ماند.
