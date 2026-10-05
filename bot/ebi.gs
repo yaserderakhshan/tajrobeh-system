@@ -465,6 +465,9 @@ function ebiHourly_() {
   if (!ebiLeads_().length) return;   /* تا کلید «راهبران C-004» در تنظیمات نیامده، کمپین در بات خاموش است */
   var day = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd'), hour = Number(Utilities.formatDate(new Date(), TG_TZ, 'H'));
   if (pbProp_('EBI_SETUP') !== '17016') {
+    /* تا اسنیپت سایت جواب ندهد (فهرست افراد)، راه‌اندازی و اعلام «آماده» عقب می‌افتد؛ ساعت بعد دوباره */
+    var probe = ebiWp_('GET', 'ebi-people');
+    if (!probe || !probe.ok) return;
     pbProp_('EBI_SETUP', '17016');
     var rep = ebiSetup_();
     var bot = tgBotName_();
@@ -608,6 +611,9 @@ function ebiCodeTests() {
     var su = ebiSetup_();
     var st = TG_MEM['pb:' + PB_T_START].map(function (r) { return r['کد']; });
     ok('راه‌اندازی: کدها در «کدهای start»، تب ویس‌ها و آینه', EBI_FIXED_CODES.every(function (k) { return st.indexOf(k) > -1; }) && st.indexOf('ebi<id>-<6hex>') > -1 && /۲|2 نفر/.test(su), su);
+    TG_MEM['stkp:x'] = 1;
+    ok('کار ساعتی: بی جواب سایت، اعلام «آماده» نمی‌رود', (function () { var f = TG_MEM['ebi:wp']; TG_MEM['ebi:wp'] = function () { return { ok: false, _code: 404 }; }; TG_MEM['notify'] = []; ebiHourly_(); TG_MEM['ebi:wp'] = f; return !TG_MEM['notify'].length && pbProp_('EBI_SETUP') !== '17016'; })());
+    ok('کار ساعتی: با جواب سایت، یک بار اعلام به هر دو راهبر', (function () { TG_MEM['notify'] = []; ebiHourly_(); ebiHourly_(); return TG_MEM['notify'].filter(function (x) { return /بات آماده شد/.test(x.text); }).length === 2 && pbProp_('EBI_SETUP') === '17016'; })());
     ok('راه‌اندازی دوباره ردیف تکراری نمی‌سازد', (function () { var n = TG_MEM['pb:' + PB_T_START].length; ebiSetup_(); return TG_MEM['pb:' + PB_T_START].length === n; })());
   } catch (err) { fail++; out.push('❌ خطا: ' + (err.message || err) + ' ' + String(err.stack || '').split('\n').slice(1, 3).join(' ')); }
   TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg;
