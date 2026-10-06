@@ -64,7 +64,8 @@ export async function hookProblems(wp, php, rule = { where: 'قلاب‌های �
     if (r.json.status && r.json.status !== 'publish') { notes.push(`نوشتهٔ ${h.p} منتشر نیست؛ قلابش روی مجله نمی‌آید`); continue; }
     const text = normText(r.json.content?.raw ?? r.json.content?.rendered ?? '');
     checked++;
-    if (!text.includes(normText(h.q))) {
+    const want = normText(h.q).replace(/[.!?؟…،,]+$/, '');   /* پایان جمله در مقاله ممکن است «،» یا «؛» باشد */
+    if (!text.includes(want)) {
       /* نزدیک‌ترین جملهٔ همان مقاله (متن منتشرشدهٔ عمومی) برای اصلاح قلاب */
       const words = new Set(normText(h.q).split(' ').filter((w) => w.length > 2));
       let best = '', score = 0;
