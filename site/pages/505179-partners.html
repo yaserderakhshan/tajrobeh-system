@@ -1076,7 +1076,6 @@ body.pxbar-on #tjFabRoot{transform:translateY(-66px);transition:transform .25s}
 </div>
 <script>
 (function(){
-  var API = "https://script.google.com/macros/s/AKfycbxD-DYhZ9LFjwB9az_DpMprzF_ItJkdad_DutMGPk1qY3ksBb45aMHYZBsXTCepYhsC8Q/exec";
   var root = document.getElementById("tjvote");
   if (!root) return;
   var grid = root.querySelector(".vgrid"), top = root.querySelector(".vtop"), msg = root.querySelector(".vmsg");
@@ -1100,7 +1099,7 @@ body.pxbar-on #tjFabRoot{transform:translateY(-66px);transition:transform .25s}
     }).join("") : "";
   }
   function load(){
-    fetch(API + "?api=city.list&t=" + Date.now()).then(function(r){ return r.json(); })
+    fetch("/wp-json/tj/v1/data?k=cities&t=" + Date.now()).then(function(r){ return r.json(); })
       .then(function(d){ if (d && d.ok) draw(d); })
       .catch(function(){ msg.textContent = "فهرست شهرها الان نیامد. کمی بعد دوباره امتحان کنید."; });
   }
@@ -1108,7 +1107,7 @@ body.pxbar-on #tjFabRoot{transform:translateY(-66px);transition:transform .25s}
     if (busy || !city) return;
     if (mine[city]) { msg.innerHTML = "رأی شما برای <b>" + esc(city) + "</b> قبلاً ثبت شده است."; return; }
     busy = true; msg.textContent = "در حال ثبت…";
-    fetch(API + "?api=city.vote&city=" + encodeURIComponent(city)).then(function(r){ return r.json(); })
+    fetch("/wp-json/tj/v1/lead", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ intent: "vote", city: city, page: location.pathname }) }).then(function(r){ return r.json(); })
       .then(function(d){
         busy = false;
         if (!d || !d.ok) { msg.textContent = "ثبت نشد. یک بار دیگر امتحان کنید."; return; }

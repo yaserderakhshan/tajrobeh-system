@@ -75,6 +75,11 @@ add_action('rest_api_init', function () {
         }
         if (wp_json_encode(get_option('tj_offers_last')) !== wp_json_encode($clean)) { update_option('tj_offers_last', $clean, false); $changed = true; }
       }
+      /* درگاه‌های ورودی، بند ۱ (بات v170.35): فهرست پارتنرها و شهرهای رأی برای /wp-json/tj/v1/data (501143)، تا مرورگر مستقیم
+         به Apps Script نزند؛ و کلید ردپا (توکن لینک بات). نبودن کلید یعنی دست نزن. */
+      if (is_array($b) && isset($b['partners']) && is_array($b['partners'])) { update_option('tj_push_partners', $b['partners'], false); }
+      if (is_array($b) && isset($b['cities']) && is_array($b['cities'])) { update_option('tj_push_cities', $b['cities'], false); }
+      if (is_array($b) && isset($b['track'])) { $t = (int) !empty($b['track']); if ((int) get_option('tj_push_track', 0) !== $t) { update_option('tj_push_track', $t, true); $changed = true; } }
       if ($changed) { if (function_exists('wpo_cache_flush')) { wpo_cache_flush(); } }
       return array('ok' => true, 'saved' => $n);
     }

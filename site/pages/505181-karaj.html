@@ -1335,7 +1335,7 @@ body.pxbar-on #tjFabRoot{transform:translateY(-66px);transition:transform .25s}
     var url = p.url || ('/partners/' + cityEn + '/' + p.slug + '/');
     return '<article class="spc"><h3>' + esc(p.name || p.code) + '</h3>' + (p.intro ? '<p>' + esc(String(p.intro).slice(0, 220)) + '</p>' : '') + (meta ? '<div class="spm">' + meta + '</div>' : '') + '<div class="spa"><a class="pri" href="' + esc(url) + '">صفحهٔ این فضا</a></div></article>';
   }
-  fetch('https://script.google.com/macros/s/AKfycbxD-DYhZ9LFjwB9az_DpMprzF_ItJkdad_DutMGPk1qY3ksBb45aMHYZBsXTCepYhsC8Q/exec?api=partners').then(function(r){ return r.json(); }).then(function(d){
+  fetch('/wp-json/tj/v1/data?k=partners').then(function(r){ return r.json(); }).then(function(d){
     var list = (d.partners || []).filter(function(p){ return p.cityEn === cityEn; });
     if (list.length < 2) return;
     box.innerHTML = list.map(card).join('');

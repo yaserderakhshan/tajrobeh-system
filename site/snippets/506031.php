@@ -172,6 +172,8 @@ add_action('rest_api_init', function(){
     $code = 'ebi'.$id.'-'.substr(tj_ebi_sig('p|'.$id),0,6);
     update_post_meta($id,'tj_start',$code);
     $GLOBALS['tj_ebi_join_new'] = $id;
+    /* درگاه‌های ورودی، بند ۱: ثبت‌نام کمپین هم از درگاه یکتای ورود به بات می‌رود (لید با منبع «کمپین › C-004 › <نوع>»، بات v170.35) */
+    if (function_exists('tj_lead_submit')) { $nt = $f; unset($nt['ref']); tj_lead_submit(array('line'=>'کمپین','campaign'=>'C-004','intent'=>$kind,'form'=>'ثبت‌نام کمپین · '.$kinds[$kind],'name'=>$name,'phone'=>$phone,'msg'=>implode(' · ', $nt),'page'=>(string)wp_get_referer())); }
     return new WP_REST_Response(array('ok'=>true,'start'=>$code),200);
   }));
   /* bot: link a chat_id to a person (start=ebi<id>-<sig>) and read lists */
