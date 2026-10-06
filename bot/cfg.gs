@@ -24,12 +24,13 @@ var CFG_NOTE = {
   TG_RELAY_BASE: 'نشانی رلهٔ وبهوک کلادفلر بی رمز (v170.23، اختیاری؛ فقط برای tgSwitchRelay و tgRelayTidy)',
   CM_FIX_HINTS: 'پیشنهادهای پیش‌نمایش اصلاح کامنت‌ها: {"کد لید": "badnum" | "notclient" | "later:21" | "self:7"} (JSON، اختیاری؛ v170.22.2؛ با «اوکی» اعمال نمی‌شوند)',
   CM_FIX_SKIP: 'کد لیدهایی که در پیش‌نمایش اصلاح کامنت‌ها طبق بررسی دست نمی‌خورند: ["کد لید", …] (JSON، اختیاری؛ v170.23.1)',
+  TG_CONTRACT_VER: 'نسخهٔ قرارداد همکاری برای ستون «پشتوانهٔ انتشار» پروفایل‌ها، مثل «۱» (v170.23.6؛ با امضای الکترونیک نسخهٔ تازه به‌روز می‌شود)',
   TG_ROUTE: 'جدول مسیریابی منتظرها: {"تیکت" | "باگ" | دستهٔ کار | "پیش‌فرض": "کلید TG_NAMES"} (JSON، اختیاری؛ v170.23.5؛ بی آن: مدیر عملیات ops)',
   CM_FIX_FORCE: 'دور دوم اصلاح کامنت‌ها: لیدهایی که با وجود قاعدهٔ «فقط مهاجرت» به این وضعیت برمی‌گردند: {"کد لید": "وضعیت"} (JSON، اختیاری؛ v170.23.4)',
   CM_FIX_CALL: 'کد لیدهای وضعیت مبهم برای کار «بررسی تلفنی وضعیت» پذیرش: ["کد لید", …] (JSON، اختیاری؛ v170.23.4)'
 };
 /* کلیدهایی که خالی بودنشان مجاز است (جایگزین دارند) */
-var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE'];
+var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER'];
 /* v170.9: کلیدهای لازمی که در Property خالی‌اند (فقط نام). روی دیپلوی آزمایشی سنجیده می‌شود؛ هر کدام خالی = انتشار متوقف */
 function cfgMissing_() {
   var o = cfgPropGet_();
