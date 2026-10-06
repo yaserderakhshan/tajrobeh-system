@@ -35,7 +35,8 @@
     "ci.gs",
     "sitesec.gs",
     "sec.gs",
-    "version.gs"
+    "version.gs",
+    "sitepub.gs"
   ],
   "htmlExtensions": [
     ".html"

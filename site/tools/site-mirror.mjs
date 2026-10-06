@@ -10,7 +10,8 @@
 // یعنی آن فایل نوشته نمی‌شود و فقط شناسه و نوع در خلاصه می‌آید. اطلاعات شخصی (pii-scan با PII_NAMES) هم همین‌طور.
 import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
-import { SITE, ROOT, hash, lf, loadEnv, log, warn, fail, summary, output, maskSecrets, pageFiles, readJson, report, wpClient, dirMarkerProblems } from './site-lib.mjs';
+import { SITE, ROOT, hash, lf, loadEnv, log, warn, fail, summary, output, maskSecrets, pageFiles, readJson, report, wpClient } from './site-lib.mjs';
+import { loadContracts, contractProblems, hookProblems } from './contracts.mjs';
 import { scanLine } from './secrets.mjs';
 import { piiLine } from '../../.github/scripts/pii-scan.mjs';
 
@@ -245,9 +246,6 @@ async function main() {
   for (const p of pidx) if (p.status === 'publish' && !published.has(p.id)) notes.push(`برگهٔ ${p.id} در مخزن منتشرشده است ولی در سایت نه (پیش‌نویس، خصوصی یا حذف)؛ فایلش دست نخورد.`);
   if (pidxDirty) { put(pidxPath, J(pidx.sort((a, b) => b.id - a.id))); if (!changed.includes('pages-index.json')) changed.push('pages-index.json'); }
 
-  /* نگهبان (۱۴ مهر ۱۴۰۵): نشانگرهای دایرکتوری در برگه‌هایی که بات می‌نویسد. برگهٔ خوانده‌نشده با فایل مخزن (همان زنده) سنجیده می‌شود. */
-  const files2 = pageFiles();
-  const markerBad = dirMarkerProblems((id) => liveHtml[id] !== undefined ? liveHtml[id] : (files2.get(id) ? readFileSync(join(SITE, 'pages', files2.get(id)), 'utf8') : null));
 
   /* Yoast خام (از پل) فقط برای برگه‌های منتشرشده */
   if (S._yoast) {
@@ -282,6 +280,28 @@ async function main() {
       put(p, raw); (repo === null ? added : changed).push(`${route}/${t.slug}`);
     }
   }
+
+  /* ---------- نگهبان قرارداد صفحه‌ها (site/contracts.json) ----------
+     بعد از آینه: فایل‌های مخزن همان سایت زنده‌اند؛ برگه‌ای که خوانده شد ولی نوشته نشد (ردشده) با متن زنده‌اش سنجیده می‌شود.
+     قلاب‌های عینی مجله در متن خود مقاله (فقط GET). مشکل‌ها گام آخر گردش کار را قرمز می‌کنند (بعد از کامیت آینه، تا آینه نایستد). */
+  const markerBad = [];
+  try {
+    const C = loadContracts(), files2 = pageFiles();
+    const idOf = (f) => { const m = String(f).match(/^site\/pages\/(\d+)-/); return m ? Number(m[1]) : null; };
+    const readF = (f) => {
+      const id = idOf(f);
+      if (id !== null && liveHtml[id] !== undefined) return liveHtml[id];
+      if (id !== null) return files2.get(id) ? readFileSync(join(SITE, 'pages', files2.get(id)), 'utf8') : null;
+      try { return readFileSync(join(ROOT, f), 'utf8'); } catch { return null; }
+    };
+    markerBad.push(...contractProblems(C, readF));
+    const hr = C.rules.find((r) => r.kind === 'hooks');
+    if (hr) {
+      const h = await hookProblems(wp, readF(hr.file) || '', hr);
+      markerBad.push(...h.problems); h.notes.forEach((x) => notes.push(x));
+      notes.push(`قلاب‌های مجله: ${h.checked} مقاله سنجیده شد`);
+    }
+  } catch (e) { warn(`نگهبان قرارداد صفحه‌ها اجرا نشد: ${e.message}`); markerBad.push(`نگهبان قرارداد صفحه‌ها اجرا نشد (${e.message})`); }
 
   /* ---------- ۴. وضعیت پل و خبر ۲۴ ساعته ---------- */
   const now = Date.now(), today = new Date().toISOString().slice(0, 10);
