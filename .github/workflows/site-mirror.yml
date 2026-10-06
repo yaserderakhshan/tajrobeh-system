@@ -19,6 +19,7 @@ on:
 permissions:
   contents: write   # فقط کامیت آینه روی main (و پاک کردن شاخهٔ قدیمی site-sync/live)
   actions: read     # قفل مشترک با site-deploy
+  pull-requests: read   # شاخهٔ revert/bot-* بی PR باز
 
 jobs:
   mirror:
@@ -49,6 +50,21 @@ jobs:
           if git ls-remote --exit-code origin refs/heads/site-sync/live > /dev/null; then
             git push origin --delete site-sync/live && echo "شاخهٔ site-sync/live پاک شد."
           fi
+
+      # v170.22.1: شاخهٔ برگشت خودکار بات (revert/bot-*) که PR باز ندارد و بیش از دو ساعت مانده، دیگر لازم نیست
+      # (از ۱۴ مهر PR معکوس خودش ساخته و مرج می‌شود و شاخه‌اش پاک). main، archive/main-old و bot-live-snapshot هرگز.
+      - name: پاک کردن شاخه‌های بی‌کار revert/bot-*
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch -q origin '+refs/heads/revert/bot-*:refs/remotes/origin/revert/bot-*' 2>/dev/null || exit 0
+          for ref in $(git for-each-ref --format='%(refname:strip=3)' 'refs/remotes/origin/revert/bot-*'); do
+            case "$ref" in revert/bot-*) ;; *) continue ;; esac
+            age=$(( $(date +%s) - $(git log -1 --format=%ct "origin/$ref") ))
+            [ "$age" -lt 7200 ] && continue
+            n=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$ref" --state open --json number --jq length 2>/dev/null || echo 1)
+            if [ "$n" = "0" ]; then git push -q origin --delete "$ref" && echo "شاخهٔ $ref پاک شد."; fi
+          done
 
       - name: آینه
         id: mirror

@@ -1596,11 +1596,32 @@ var TG_SUITES = [
 ];
 
 /* v166.8.1: مجموعهٔ «اصلی» روی دادهٔ واقعی از سقف ۶ دقیقهٔ هر اجرای Apps Script بیشتر شد (دیپلوی Version 174 دو بار
-   وسطش قطع شد). حالا سه بخش است: سناریوی شمارهٔ i در بخش i mod 3 اجرا می‌شود؛ بررسی‌های کوتاه بیرون از run() فقط در بخش ۱. */
+   وسطش قطع شد) و سه بخش شد؛ بررسی‌های کوتاه بیرون از run() فقط در بخش ۱ شمرده می‌شوند.
+   v170.22.1 (۱۴ مهر، دیپلوی v170.22 دو بار در «اصلی ۱ از ۳» به سقف خورد): تقسیم بر اساس زمان واقعی هر سناریو.
+   هر سناریو زمانش را در Property «TG_TEST_STIMES» ({هش عنوان: ثانیه}) می‌گذارد؛ bot-tests.mjs آن را در
+   .github/scripts/bot-test-times.json (پنج اجرای اخیر) نگه می‌دارد و bot-parts.mjs پیش از هر دور سناریوها را در n تکهٔ زیر
+   بودجه می‌چیند و با start می‌فرستد (Property «TG_TEST_PARTS» = {n، a: {هش: تکه}}). ciScope_ همان n تکه را در TG_SUITES می‌گذارد.
+   بی نقشه (یا سناریوی تازه‌ای که در نقشه نیست): باقی‌ماندهٔ شماره بر n. */
 var TG_RUN_PART = null;
-function tgRunTests1() { TG_RUN_PART = { i: 0, of: 3 }; try { return tgRunTests(); } finally { TG_RUN_PART = null; } }
-function tgRunTests2() { TG_RUN_PART = { i: 1, of: 3 }; try { return tgRunTests(); } finally { TG_RUN_PART = null; } }
-function tgRunTests3() { TG_RUN_PART = { i: 2, of: 3 }; try { return tgRunTests(); } finally { TG_RUN_PART = null; } }
+var TG_RUN_MAX = 12;
+function tgTestHash_(s) { var h = 5381; s = String(s); for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+function tgRunPartsPlan_() {
+  try { var o = JSON.parse(PropertiesService.getScriptProperties().getProperty('TG_TEST_PARTS') || 'null'); if (o && o.n >= 1 && o.n <= TG_RUN_MAX) return { n: Number(o.n), a: o.a || {} }; } catch (e) {}
+  return { n: 3, a: {} };
+}
+function tgRunPart_(k) { var p = tgRunPartsPlan_(); if (k > p.n) return { pass: 1, fail: 0, text: '' }; TG_RUN_PART = { i: k - 1, of: p.n, a: p.a }; try { return tgRunTests(); } finally { TG_RUN_PART = null; } }
+function tgRunTests1() { return tgRunPart_(1); }
+function tgRunTests2() { return tgRunPart_(2); }
+function tgRunTests3() { return tgRunPart_(3); }
+function tgRunTests4() { return tgRunPart_(4); }
+function tgRunTests5() { return tgRunPart_(5); }
+function tgRunTests6() { return tgRunPart_(6); }
+function tgRunTests7() { return tgRunPart_(7); }
+function tgRunTests8() { return tgRunPart_(8); }
+function tgRunTests9() { return tgRunPart_(9); }
+function tgRunTests10() { return tgRunPart_(10); }
+function tgRunTests11() { return tgRunPart_(11); }
+function tgRunTests12() { return tgRunPart_(12); }
 
 
 
@@ -6980,9 +7001,13 @@ function tgRunTests() {
   const rBad = [];
   const part = TG_RUN_PART;
 
+  const STIMES = {};
   function run(title, updates, expects) {
     const myIdx = runIdx++;
-    if (part && myIdx % part.of !== part.i) return;
+    const th = tgTestHash_(title);
+    const pa = part && part.a && part.a[th] !== undefined && Number(part.a[th]) < part.of ? Number(part.a[th]) : (part ? myIdx % part.of : -1);
+    if (part && pa !== part.i) return;
+    const tr0 = Date.now();
     /* v166.22: نام تستی که در حال اجراست؛ اگر اجرا وسط آن قطع شود، لاگ دیپلوی همین را نشان می‌دهد */
     try { PropertiesService.getScriptProperties().setProperty('TG_TEST_SUB', JSON.stringify({ n: title, t: Date.now() })); } catch (eSub) {}
     TG_OUTBOX = []; TG_MEM = {};
@@ -7000,6 +7025,7 @@ function tgRunTests() {
       log.push('❌ ' + title + '\n   مشکل: ' + bad.join(' | ') + '\n   خروجی: ' + all.slice(0, 300).replace(/\n/g, ' / '));
       rBad.push(log[log.length - 1]);
     } else { pass++; rPass++; log.push('✅ ' + title); }
+    STIMES[th] = Math.round((Date.now() - tr0) / 100) / 10;
   }
 
   const P = function (text) {
@@ -7191,6 +7217,13 @@ function tgRunTests() {
   TG_DRY_THER = null;
 
   TG_DRY = false;
+  /* v170.22.1: زمان هر سناریو برای تقسیم بعدی (فقط هش عنوان و ثانیه) */
+  try {
+    var SP = PropertiesService.getScriptProperties(), cur = {};
+    try { cur = JSON.parse(SP.getProperty('TG_TEST_STIMES') || '{}') || {}; } catch (eT0) {}
+    Object.keys(STIMES).forEach(function (k) { cur[k] = STIMES[k]; });
+    SP.setProperty('TG_TEST_STIMES', JSON.stringify(cur));
+  } catch (eT) {}
   Logger.log(log.join('\n') + '\n\nنتیجه: ' + pass + ' قبول · ' + fail + ' مردود');
   /* بخش‌های ۲ و ۳ فقط سناریوهای خودشان را گزارش می‌کنند؛ بررسی‌های بیرون از run() در بخش ۱ شمرده می‌شوند */
   if (part && part.i > 0) return { pass: rPass, fail: rFail, text: rBad.join('\n').slice(0, 1500) };
@@ -21295,6 +21328,7 @@ function tgLeadSet_(row, changes, actor, channel, why) {
     const before = col <= rowNow.length ? rowNow[col - 1] : cell.getValue();
     const after = changes[k];
     if (String(before).trim() === String(after).trim()) continue;
+    if (k === 'شمار بی‌پاسخ') { try { cell.setNumberFormat('0'); } catch (eNf) {} }   /* v170.22.2: صفر با قالب تاریخ «۱۸۹۹» دیده می‌شد */
     cell.setValue(after);
     done.push({ what: k, from: before, to: after });
   }

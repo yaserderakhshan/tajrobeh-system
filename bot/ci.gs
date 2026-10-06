@@ -39,7 +39,7 @@ function ciRoute_(body) {
     } else {
       var op = String(body.ci);
       if (op === 'ping') out = { ok: true, build: ciGlobal_('CI_BUILD') || '', version: ciGlobal_('TG_CODE_VERSION') || '' };
-      else if (op === 'start') out = ciStart_(body.only);
+      else if (op === 'start') out = ciStart_(body.only, body.parts);
       else if (op === 'status') out = ciStatus_();
       else if (op === 'kick') out = ciKick_();
       else if (op === 'resume') out = ciResume_();
@@ -127,9 +127,9 @@ function ciHealth_() {
 
 /* ---------- اجرای یک‌باره (v166.20) ---------- */
 /* فقط این توابع؛ هر کدام با تأیید یاسر به این فهرست می‌آید. خروجی‌شان نباید اطلاعات شخصی داشته باشد (فقط شمارش). */
-var CI_ONCE_ALLOW = ['tgApResumePrivatize', 'tgErrScrub', 'tgChatCellAudit', 'tgErrMarkFixed', 'tgSchNameFix', 'tgNdPurge', 'pbSetup', 'tgV168Hygiene', 'tgV168NextFill', 'tgV168QueueSetup', 'tgV168RefSetup', 'tgV168ModeSplit', 'tgV168VocabMigrate', 'tgV1689Setup', 'tgV16810Ticks', 'tgV169Setup', 'tgV1691Triggers', 'tgV1692Setup', 'tgV170Seed', 'tgV1701SendDry', 'tgV1702Plan', 'tgV1708Cfg', 'tgV1709CfgTab', 'tgV17013Setup', 'tgV17013Capped', 'tgV17013LmPlan', 'tgV17021CmFixPreview'];
+var CI_ONCE_ALLOW = ['tgApResumePrivatize', 'tgErrScrub', 'tgChatCellAudit', 'tgErrMarkFixed', 'tgSchNameFix', 'tgNdPurge', 'pbSetup', 'tgV168Hygiene', 'tgV168NextFill', 'tgV168QueueSetup', 'tgV168RefSetup', 'tgV168ModeSplit', 'tgV168VocabMigrate', 'tgV1689Setup', 'tgV16810Ticks', 'tgV169Setup', 'tgV1691Triggers', 'tgV1692Setup', 'tgV170Seed', 'tgV1701SendDry', 'tgV1702Plan', 'tgV1708Cfg', 'tgV1709CfgTab', 'tgV17013Setup', 'tgV17013Capped', 'tgV17013LmPlan', 'tgV17021CmFixPreview', 'tgV170222CmFix'];
 /* v166.22: این‌ها بعد از هر انتشار سبز خودکار یک بار اجرا می‌شوند (اگر قبلاً اجرا نشده‌اند)؛ هر کدام باید در CI_ONCE_ALLOW هم باشد */
-var CI_ONCE_AUTO = ['tgErrScrub', 'tgChatCellAudit', 'tgErrMarkFixed', 'tgSchNameFix', 'tgNdPurge', 'pbSetup', 'tgV168Hygiene', 'tgV168NextFill', 'tgV168QueueSetup', 'tgV168RefSetup', 'tgV168ModeSplit', 'tgV168VocabMigrate', 'tgV1689Setup', 'tgV16810Ticks', 'tgV169Setup', 'tgV1691Triggers', 'tgV1692Setup', 'tgV170Seed', 'tgV1701SendDry', 'tgV1702Plan', 'tgV1708Cfg', 'tgV1709CfgTab', 'tgV17013Setup', 'tgV17013Capped', 'tgV17013LmPlan', 'tgV17021CmFixPreview'];
+var CI_ONCE_AUTO = ['tgErrScrub', 'tgChatCellAudit', 'tgErrMarkFixed', 'tgSchNameFix', 'tgNdPurge', 'pbSetup', 'tgV168Hygiene', 'tgV168NextFill', 'tgV168QueueSetup', 'tgV168RefSetup', 'tgV168ModeSplit', 'tgV168VocabMigrate', 'tgV1689Setup', 'tgV16810Ticks', 'tgV169Setup', 'tgV1691Triggers', 'tgV1692Setup', 'tgV170Seed', 'tgV1701SendDry', 'tgV1702Plan', 'tgV1708Cfg', 'tgV1709CfgTab', 'tgV17013Setup', 'tgV17013Capped', 'tgV17013LmPlan', 'tgV17021CmFixPreview', 'tgV170222CmFix'];
 function ciOnceAuto_() {
   var out = [];
   for (var i = 0; i < CI_ONCE_AUTO.length; i++) {
@@ -329,10 +329,14 @@ function ciTriggersOff_() {
   }
 }
 
-function ciStart_(only) {
+function ciStart_(only, parts) {
   ciTriggersOff_();
   tgRunReset();
   var P = PropertiesService.getScriptProperties(), all = TG_SUITES.length;
+  /* v170.22.1: نقشهٔ تکه‌های «اصلی» بر اساس زمان واقعی (bot-parts.mjs)؛ نادرست یا خالی = سه تکهٔ پیش‌فرض */
+  var pl = ciPartsClean_(parts);
+  if (pl) P.setProperty('TG_TEST_PARTS', JSON.stringify(pl)); else P.deleteProperty('TG_TEST_PARTS');
+  P.deleteProperty('TG_TEST_STIMES');
   /* v170.16.2: دور محدود (فقط مجموعه‌های مربوط به تغییر)؛ بی only یعنی دور کامل */
   if (only && only.length) P.setProperty(CI_ONLY_PROP, JSON.stringify({ at: Date.now(), fns: only.map(String).slice(0, 300) }));
   else P.deleteProperty(CI_ONLY_PROP);
@@ -356,10 +360,26 @@ function ciScope_() {
   ciScope_.done = true;
   var o = null;
   try { o = JSON.parse(PropertiesService.getScriptProperties().getProperty(CI_ONLY_PROP) || 'null'); } catch (e) {}
-  var keep = ciScopePick_(TG_SUITES, o, Date.now());
-  if (!keep) return;
+  var keep = ciMainParts_(ciScopePick_(TG_SUITES, o, Date.now()) || TG_SUITES.slice(), tgRunPartsPlan_().n);
   TG_SUITES.length = 0;
   keep.forEach(function (s) { TG_SUITES.push(s); });
+}
+/* v170.22.1: تکه‌های «اصلی» (هر tgRunTestsN) جای خودشان n تکه می‌شوند */
+function ciMainParts_(suites, n) {
+  var at = -1, out = [];
+  suites.forEach(function (s) { if (/^tgRunTests\d+$/.test(s[1])) { if (at < 0) at = out.length; } else out.push(s); });
+  if (at < 0) return out;
+  var parts = [];
+  for (var k = 1; k <= n; k++) parts.push(['اصلی ' + tgFa_(k) + ' از ' + tgFa_(n), 'tgRunTests' + k]);
+  return out.slice(0, at).concat(parts, out.slice(at));
+}
+function ciPartsClean_(p) {
+  if (!p || typeof p !== 'object') return null;
+  var n = Math.floor(Number(p.n));
+  if (!(n >= 1 && n <= TG_RUN_MAX)) return null;
+  var a = {};
+  Object.keys(p.a || {}).slice(0, 400).forEach(function (k) { var v = Math.floor(Number(p.a[k])); if (/^[0-9a-z]{1,8}$/.test(k) && v >= 0 && v < n) a[k] = v; });
+  return { n: n, a: a };
 }
 
 /* ادامهٔ زنجیرهٔ مرده. اگر مجموعهٔ در حال اجرا (TG_TEST_BEAT) بیش از سقف اجرای Apps Script بی‌خبر مانده، یعنی اجرا
@@ -440,6 +460,8 @@ function ciStatus_() {
   s.chain = Number(p.getProperty('TG_TEST_CHAIN') || 0);
   try { var bt = JSON.parse(p.getProperty('TG_TEST_BEAT') || 'null'); if (bt && bt.run === runId) s.current = { name: bt.name, secs: Math.round((Date.now() - bt.t) / 1000) }; } catch (e) {}
   try { var sb = JSON.parse(p.getProperty('TG_TEST_SUB') || 'null'); if (sb && s.current && sb.t >= Date.now() - s.current.secs * 1000 - 1000) s.current.sub = sb.n + ' (' + Math.round((Date.now() - sb.t) / 1000) + 'ث)'; } catch (e) {}   /* v166.22 */
+  try { s.stimes = JSON.parse(p.getProperty('TG_TEST_STIMES') || '{}'); } catch (e) {}   /* v170.22.1 */
+  try { s.parts = tgRunPartsPlan_().n; } catch (e) {}
   return s;
 }
 
@@ -457,6 +479,13 @@ function ciTests() {
   var SU = [['الف', 'aTests'], ['ب', 'bTests'], ['پ', 'cTests']];
   var pk = ciScopePick_(SU, { at: now, fns: ['cTests', 'aTests', 'zTests'] }, now + 1000);
   ok('دور محدود فقط مجموعه‌های فرستاده‌شده را به همان ترتیب TG_SUITES دارد', pk && pk.length === 2 && pk[0][1] === 'aTests' && pk[1][1] === 'cTests');
+  /* v170.22.1: تکه‌های «اصلی» بر اساس زمان */
+  var mp = ciMainParts_([['الف', 'aTests'], ['اصلی ۱ از ۳', 'tgRunTests1'], ['اصلی ۲ از ۳', 'tgRunTests2'], ['ب', 'bTests']], 5);
+  ok('v170.22.1: سه تکهٔ «اصلی» جای خودشان پنج تکه می‌شوند', mp.length === 7 && mp[1][1] === 'tgRunTests1' && mp[5][1] === 'tgRunTests5' && mp[6][1] === 'bTests' && mp[5][0] === 'اصلی ۵ از ۵');
+  ok('v170.22.1: بی «اصلی» چیزی اضافه نمی‌شود', ciMainParts_([['الف', 'aTests']], 4).length === 1);
+  var pc = ciPartsClean_({ n: 4, a: { abc: 3, xyz: 9, 'bad key!': 1 } });
+  ok('v170.22.1: نقشهٔ تکه‌ها پاک‌سازی می‌شود (تکهٔ بیرون از n و کلید نادرست دور ریخته)', pc && pc.n === 4 && pc.a.abc === 3 && !('xyz' in pc.a) && Object.keys(pc.a).length === 1 && ciPartsClean_({ n: 40 }) === null && ciPartsClean_(null) === null);
+  ok('v170.22.1: هش عنوان سناریو با bot-parts.mjs یکی است', tgTestHash_('شمارهٔ +۹۸') === '1lyrw5p' && tgTestHash_('') === '45h');
   ok('فهرست کهنه (بیش از ۴ ساعت)، خالی یا بی‌مجموعهٔ آشنا یعنی دور کامل', ciScopePick_(SU, { at: now, fns: ['aTests'] }, now + 5 * 3600000) === null && ciScopePick_(SU, null, now) === null && ciScopePick_(SU, { at: now, fns: ['zTests'] }, now) === null);
   ok('بدون ci_key.gs هیچ کلیدی پذیرفته نمی‌شود', ciKeyOk_(k, null, null, now) === false);
   ok('کلید کوتاه رد می‌شود', ciKeyOk_('abc', ciSha256Hex_('abc'), now + 1, now) === false);

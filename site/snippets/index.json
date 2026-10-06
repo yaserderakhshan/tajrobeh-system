@@ -457,5 +457,15 @@
   "location": "frontend_only",
   "loc": "frontend_only",
   "active": true
+ },
+ {
+  "id": 506044,
+  "file": "506044.php",
+  "title": "Tajrobeh · عکس کپسول‌های آدم‌های تجربه از صفحهٔ تیم (p3 avatar sync v1)",
+  "type": "php",
+  "location": "frontend_only",
+  "loc": "frontend_only",
+  "active": true,
+  "adopt": "comments"
  }
 ]

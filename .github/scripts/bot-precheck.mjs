@@ -18,6 +18,7 @@ import { pageGs, pageSha, PAGE } from './page-gs.mjs';
 import { lockSelfTest } from './bot-lock.mjs';
 import { versionSelfTest } from './bot-version.mjs';
 import { suitesSelfTest } from './bot-suites.mjs';
+import { partsSelfTest, check as partsCheck, loadTimes, mainTitles, plan as partsPlan } from './bot-parts.mjs';
 import { prevSelfTest } from './bot-prev-test.mjs';
 import vm from 'node:vm';
 
@@ -185,6 +186,24 @@ try {
   for (const b of lockSelfTest()) problems.push('قفل انتشار: ' + b);
   for (const b of versionSelfTest()) problems.push('رزرو نسخه: ' + b);
   for (const b of suitesSelfTest()) problems.push('انتخاب مجموعه‌های روز (v170.16.2): ' + b);
+  // v170.22.1: تقسیم «اصلی» بر اساس زمان واقعی؛ زمان ثبت‌شدهٔ هر تکه یا مجموعه بیش از ۴ دقیقه = هشدار (نه توقف)
+  for (const b of partsSelfTest()) problems.push('تقسیم آزمون‌ها بر اساس زمان (v170.22.1): ' + b);
+  {
+    const titles = mainTitles(readFileSync(join(BOT, 'telegram.gs'), 'utf8')), times = loadTimes(), pl = partsPlan(titles, times);
+    console.log(`تقسیم «اصلی»: ${titles.length} سناریو در ${pl.n} تکه · بار تخمینی (ثانیه): ${pl.load.join('، ')}`);
+    for (const w of partsCheck(times, titles)) console.log(`::warning::زمان آزمون: ${w}`);
+    // همان نقشه روی کد واقعی: هر سناریو دقیقاً در یک تکه، و ciScope_ همان تعداد تکه را می‌سازد
+    const g = loadBot(BOT);
+    g.run(`PropertiesService.getScriptProperties().setProperty('TG_TEST_PARTS', ${JSON.stringify(JSON.stringify({ n: pl.n, a: pl.a }))}); TG_RUN_PART = null;`);
+    let sum = 0, cnt = 0;
+    for (let k = 1; k <= pl.n; k++) { const r = g.run(`tgRunTests${k}()`); sum += (r.pass || 0) + (r.fail || 0); cnt++; }
+    const tm = JSON.parse(g.run(`PropertiesService.getScriptProperties().getProperty('TG_TEST_STIMES') || '{}'`));
+    const scen = Object.keys(tm).length;
+    if (scen !== titles.length) problems.push(`تقسیم آزمون‌ها: با نقشهٔ ${pl.n} تکه ${scen} سناریو از ${titles.length} زمان ثبت کرد (هر سناریو باید دقیقاً یک بار اجرا شود)`);
+    const sc = g.run(`(function () { ciScope_.done = false; ciScope_(); return TG_SUITES.filter(function (s) { return /^tgRunTests\\d+$/.test(s[1]); }).length; })()`);
+    if (sc !== pl.n) problems.push(`تقسیم آزمون‌ها: ciScope_ ${sc} تکه ساخت، نقشه ${pl.n} تکه دارد`);
+    else console.log(`تقسیم «اصلی» روی کد: ${cnt} تکه، ${scen} سناریو، هر کدام یک بار.`);
+  }
   for (const b of prevSelfTest()) problems.push('پشتوانهٔ برگشت: ' + b);
 } catch (e) { problems.push('قفل انتشار و رزرو نسخه: ' + (e && e.message)); }
 
