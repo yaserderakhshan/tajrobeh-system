@@ -515,8 +515,8 @@
    "modified": "2026-09-14T20:17:57"
   },
   "page:294": {
-   "hash": "1fee3b45bd195173",
-   "modified": "2026-10-04T09:22:08"
+   "hash": "780bee6e4b716550",
+   "modified": "2026-10-06T17:49:52"
   },
   "page:293": {
    "hash": "65adfc7d24506ecc",
@@ -797,9 +797,9 @@
   },
   "snippet:504064": {
    "hash": "b09cbe28578cdca8",
-   "modified": "2026-10-03 20:50:33",
+   "modified": "2026-10-06 17:50:11",
    "active": true,
-   "live": "b09cbe28578cdca8"
+   "live": "00ffe1ae2ff11772"
   },
   "snippet:504059": {
    "hash": "62d97bee2b28ec9a",
@@ -1355,5 +1355,5 @@
    "active": true
   }
  },
- "mirrored_at": "2026-10-06T16:42:21.786Z"
+ "mirrored_at": "2026-10-06T18:10:07.399Z"
 }
