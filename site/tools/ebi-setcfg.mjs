@@ -33,12 +33,20 @@ if (s1.status === 404) bad('مسیر /tj/v1/ebi-ops روی سایت نیست؛ �
 if (!s1.ok || !s1.json || !s1.json.ok) bad(`setcfg نشد: HTTP ${s1.status}`);
 log(`setcfg: ${s1.json.mods} راهبر ثبت شد`);
 
+/* از ۱۴ مهر: سرور سایت جواب Apps Script را نمی‌خواند؛ «رسید» (۳۰۲ به echo) یعنی درخواست به بات رسید و اجرا شد */
+const how = (j) => (j && j.ok ? (j.received ? 'رسید' : 'ok') : 'خطا: ' + ((j && j.error) || '?'));
 const s2 = await wp.post('/wp-json/tj/v1/ebi-ops', { do: 'status' });
 const okStatus = !!(s2.json && s2.json.ok);
-log(`status: ${okStatus ? 'سایت به بات وصل است' : 'سایت به بات وصل نشد'} · نسخهٔ بات: ${(s2.json && s2.json.version) || '?'}`);
+log(`status: ${how(s2.json)}`);
 const s3 = await wp.post('/wp-json/tj/v1/ebi-ops', { do: 'test' });
 const okTest = !!(s3.json && s3.json.ok);
-log(`test (فرستادن آزمایشی به راهبر اول، بی پیام واقعی): ${okTest ? 'ok' : 'خطا: ' + ((s3.json && s3.json.error) || 'HTTP ' + s3.status)}`);
+log(`test (فرستادن آزمایشی به راهبر اول، بی پیام واقعی): ${how(s3.json)}`);
+let rc = '';
+if (process.env.RECHECK === 'true') {
+  const s4 = await wp.post('/wp-json/tj/v1/ebi-ops', { do: 'recheck' });
+  rc = s4.json && s4.json.ok ? `${s4.json.n} مورد دوباره به بات رفت` : `نشد (HTTP ${s4.status})`;
+  log(`سنجش دوبارهٔ موردهای دستی‌مانده: ${rc}`);
+}
 
-summary(`## setcfg اسنیپت ابی\n\n- راهبران: ${mods.length}\n- setcfg: ✅\n- status: ${okStatus ? '✅' : '❌'}\n- test: ${okTest ? '✅' : '❌'}`);
+summary(`## setcfg اسنیپت ابی\n\n- راهبران: ${mods.length}\n- setcfg: ✅\n- status: ${okStatus ? '✅' : '❌'}\n- test: ${okTest ? '✅' : '❌'}${rc ? `\n- سنجش دوباره: ${rc}` : ''}`);
 if (!okStatus || !okTest) process.exit(1);
