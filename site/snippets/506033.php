@@ -1,7 +1,9 @@
-/* Tajrobeh · پلی‌لیست ابی · ویجت کوچک سراسری (tjeb v1، ۱۴ مهر ۱۴۰۵)
+/* Tajrobeh · پلی‌لیست ابی · ویجت کوچک سراسری (tjeb v1.1، ۱۴ مهر ۱۴۰۵)
+   v1.1 (قرارداد صفحه‌ها، site/contracts.json): جای ویجت در هوم و مدرسه فقط نشانگر ثابت <!-- tj:slot:ebi --> است، نه id بخش‌های طراحی.
+   بی نشانگر (یا بیش از یکی) ویجت آن برگه نمی‌نشیند؛ site-check و site-mirror همان را قرمز می‌کنند.
    یک کارت جمع‌وجور که فهرست جمعی ابی را زنده نشان می‌دهد (شماره و آخرین موردها، چرخشی) و همان‌جا می‌شود یک مورد اضافه کرد.
    ثبت از همان مسیر صفحهٔ اصلی پلی‌لیست است: POST /wp-json/tj/v1/ebi-list (در انتظار بازبینی، بی‌نام، با src برای شمارش).
-   جاها: هوم پیش از #faq (کارت ابی در ریل #now هم هست، پس پایین‌تر) · مدرسه (294) پیش از #community · انتهای هر مقالهٔ مجله · شورت‌کد [tj_ebi_mini place="x"] برای هر جای دیگر.
+   جاها: هوم و مدرسه (294) سر نشانگر tj:slot:ebi · انتهای هر مقالهٔ مجله · شورت‌کد [tj_ebi_mini place="x"] برای هر جای دیگر.
    نام فرستنده‌ها هیچ‌جا در ویجت نمی‌آید. لینک‌ها UTM کمپین c-004 دارند. */
 if (!function_exists('tj_ebi_mini_html')) {
   function tj_ebi_mini_html($place) {
@@ -35,20 +37,18 @@ if (!function_exists('tj_ebi_mini_html')) {
     $h .= '</aside>';
     return $h;
   }
-  function tj_ebi_mini_before($c, $needle, $place) {
-    $i = strpos($c, $needle);
-    if ($i === false) return $c;
-    $s = strrpos(substr($c, 0, $i), '<section');
-    if ($s === false) return $c;
-    return substr($c, 0, $s) . '<div class="tjeb-wrap tjeb-at-' . $place . '">' . tj_ebi_mini_html($place) . '</div>' . substr($c, $s);
+  function tj_ebi_mini_at($c, $place) {
+    $mk = '<!-- tj:slot:ebi -->';
+    if (substr_count($c, $mk) !== 1) return $c;
+    return str_replace($mk, '<div class="tjeb-wrap tjeb-at-' . $place . '">' . tj_ebi_mini_html($place) . '</div>', $c);
   }
 }
 add_shortcode('tj_ebi_mini', function ($a) { $a = shortcode_atts(array('place' => 'site'), $a); return tj_ebi_mini_html($a['place']); });
 add_filter('the_content', function ($c) {
   if (is_admin() || !in_the_loop() || !is_main_query()) return $c;
   if (strpos($c, 'class="tjeb"') !== false) return $c;
-  if (is_front_page()) return tj_ebi_mini_before($c, 'id="faq"', 'home');
-  if (is_page(294)) return tj_ebi_mini_before($c, 'id="community"', 'school');
+  if (is_front_page()) return tj_ebi_mini_at($c, 'home');
+  if (is_page(294)) return tj_ebi_mini_at($c, 'school');
   if (is_singular('post')) return $c . '<div class="tjeb-wrap tjeb-at-mag">' . tj_ebi_mini_html('mag') . '</div>';
   return $c;
 }, 30);

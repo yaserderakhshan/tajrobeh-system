@@ -15,7 +15,7 @@
  */
 
 if (!defined('TJP_VER')) {
-    define('TJP_VER', '1.4');
+    define('TJP_VER', '1.5');
     define('TJP_SLUG', 'team');
     define('TJP_HOME_ID', 503465);
 }
@@ -253,8 +253,10 @@ function tjp_url_by_user($uid) {
     return $q ? get_permalink($q[0]) : '';
 }
 
-/* سبک و اسکریپت پایه از صفحهٔ اصلی (کش ۱۲ ساعته، با تاریخ ویرایش هوم) */
+/* سبک و اسکریپت پایهٔ صفحه‌های تیم. v1.5 (قرارداد صفحه‌ها): از اسنیپت مستقل tj2-team-assets، نه از محتوای هوم.
+   تا آن اسنیپت فعال نشده، همان خواندن قبلی از هوم (کش ۱۲ ساعته، با تاریخ ویرایش هوم) می‌ماند. */
 function tjp_home_assets() {
+    if (function_exists('tj2_team_assets')) { $a = tj2_team_assets(); return array('mod' => 'tj2-' . $a['ver'], 'style' => $a['style'], 'script' => $a['script']); }
     $mod = get_post_field('post_modified_gmt', TJP_HOME_ID);
     $c = get_transient('tjp_home_assets');
     if (is_array($c) && isset($c['mod']) && $c['mod'] === $mod) return $c;

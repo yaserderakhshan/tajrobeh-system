@@ -1,0 +1,67 @@
+{
+ "about": "قرارداد صفحه‌ها: هر برگه یا قالبی که کدی (اسنیپت، بات) به ساختارش تکیه دارد، نشانگر ثابتش را اینجا دارد. site-check (هر PR) و site-mirror (سایت زنده، هر ساعت) هر بار می‌سنجند و با «breaks» قرمز می‌شوند. بازطراحی این برگه‌ها بدون نگه داشتن نشانگر ممنوع است. شرح: docs/site/OPS.md.",
+ "rules": [
+  {
+   "id": "dir-home", "risk": "high",
+   "file": "site/pages/503465-home-v2.html", "where": "برگهٔ ۵۰۳۴۶۵ (صفحهٔ اصلی)",
+   "marker": "<!-- tj:dir:home -->", "count": 1,
+   "users": [{ "file": "site/snippets/504064.php", "needle": "<!-- tj:dir:home -->", "what": "کارت تازهٔ پروفایل از بات (tjd_insert_card)" }],
+   "breaks": "انتشار پروفایل از بات می‌شکند"
+  },
+  {
+   "id": "dir-school", "risk": "high",
+   "file": "site/pages/294-school.html", "where": "برگهٔ ۲۹۴ (مدرسه)",
+   "marker": "<!-- tj:dir:school -->", "count": 1,
+   "users": [{ "file": "site/snippets/504064.php", "needle": "<!-- tj:dir:school -->", "what": "کارت تازهٔ پروفایل از بات در اسلایدر مدرسه" }],
+   "breaks": "انتشار پروفایل از بات می‌شکند"
+  },
+  {
+   "id": "ebi-slot-home", "risk": "high",
+   "file": "site/pages/503465-home-v2.html", "where": "برگهٔ ۵۰۳۴۶۵ (صفحهٔ اصلی)",
+   "marker": "<!-- tj:slot:ebi -->", "count": 1,
+   "users": [{ "file": "site/snippets/506033.php", "needle": "<!-- tj:slot:ebi -->", "what": "ویجت کوچک پلی‌لیست ابی" }],
+   "breaks": "ویجت ابی در صفحهٔ اصلی بی‌صدا ناپدید می‌شود"
+  },
+  {
+   "id": "ebi-slot-school", "risk": "high",
+   "file": "site/pages/294-school.html", "where": "برگهٔ ۲۹۴ (مدرسه)",
+   "marker": "<!-- tj:slot:ebi -->", "count": 1,
+   "users": [{ "file": "site/snippets/506033.php", "needle": "<!-- tj:slot:ebi -->", "what": "ویجت کوچک پلی‌لیست ابی" }],
+   "breaks": "ویجت ابی در مدرسه بی‌صدا ناپدید می‌شود"
+  },
+  {
+   "id": "events-data", "risk": "high",
+   "file": "site/pages/505409-events.html", "where": "برگهٔ ۵۰۵۴۰۹ (رویدادها)",
+   "marker": "<script type=\"application/json\" id=\"evData\">", "count": 1,
+   "users": [
+    { "file": "site/snippets/503540.php", "needle": "id=\"evData\"", "what": "تقویم و رویدادهای مجله" },
+    { "file": "site/snippets/505452.php", "needle": "evData", "what": "رویدادها در اسنیپت ۵۰۵۴۵۲" },
+    { "file": "site/snippets/505599.php", "needle": "evData", "what": "رویدادها در اسنیپت ۵۰۵۵۹۹" }
+   ],
+   "breaks": "رویدادها در مجله و جاهای دیگر بی‌صدا خالی می‌شوند"
+  },
+  {
+   "id": "mag-tjm", "risk": "high",
+   "file": "site/templates/page-mag.html", "where": "قالب page-mag (مجله)",
+   "marker": "\"className\":\"tjm\"", "count": 1,
+   "users": [{ "file": "site/snippets/503540.php", "needle": "'tjm' !== $cls", "what": "صفحهٔ اصلی مجله (جای گروه main.tjm)" }],
+   "breaks": "صفحهٔ اصلی مجله به قالب خام برمی‌گردد"
+  },
+  {
+   "id": "therapists-anchor", "risk": "high",
+   "file": "site/pages/503465-home-v2.html", "where": "برگهٔ ۵۰۳۴۶۵ (صفحهٔ اصلی)",
+   "marker": "id=\"therapists\"", "count": 1,
+   "users": [{ "file": "site/snippets/504048.php", "needle": "/#therapists", "what": "دکمهٔ «درمانگران تجربه» در کارت نویسندهٔ مجله" }],
+   "breaks": "دکمهٔ «درمانگران تجربه» به بالای صفحهٔ اصلی می‌پرد، نه فهرست درمانگران"
+  },
+  {
+   "id": "mag-hooks", "risk": "high", "kind": "hooks",
+   "file": "site/snippets/503540.php", "where": "قلاب‌های هیروی مجله (tj_mag_hooks در 503540)",
+   "users": [{ "file": "site/snippets/503540.php", "needle": "function tj_mag_hooks", "what": "جملهٔ عینی هر مقاله در هیروی مجله" }],
+   "breaks": "جملهٔ قلاب دیگر در متن مقاله نیست؛ مجله جمله‌ای نشان می‌دهد که نویسنده ننوشته"
+  }
+ ],
+ "removed": [
+  { "id": "team-assets", "was": "504078 tjp_home_assets اولین <style> و <script> صفحهٔ اصلی را می‌خواند", "now": "اسنیپت مستقل tj2-team-assets (tj2_team_assets)؛ تا فعال شدنش همان خواندن قبلی" }
+ ]
+}
