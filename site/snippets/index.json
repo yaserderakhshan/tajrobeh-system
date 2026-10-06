@@ -430,5 +430,14 @@
   "location": "اجرا همه جا",
   "loc": "everywhere",
   "active": true
+ },
+ {
+  "id": null,
+  "file": "ebi-ops.php",
+  "title": "Tajrobeh · پلی‌لیست ابی · عملیات",
+  "type": "php",
+  "location": "اجرا همه جا",
+  "loc": "everywhere",
+  "active": true
  }
 ]
