@@ -23,6 +23,7 @@ export function guard(dir) {
       const [, name, val] = m;
       if (!/(^TAB_|_TAB$|_RTAB$|_REQ$|_LOG$)/.test(name)) continue;
       if (!WORD.test(val) && !WORD.test(name)) continue;
+      if (/پیش‌نمایش|رد پا|شاخص/.test(val)) continue;   /* پیش‌نمایش اصلاح داده و گزارش ورودی نیستند */
       if (!allowed.has(name)) bad.push(`${f}: ${name} = '${val}'`);
     }
   }

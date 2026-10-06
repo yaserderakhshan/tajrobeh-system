@@ -6899,6 +6899,7 @@ function tgWatchdog(e) {
   try { if (typeof aiRetryTick_ === 'function') aiRetryTick_(); } catch (eAr) { tgErr_('aiRetryTick_', eAr); }   /* v170.23.7: ویس‌های بی‌متن */
   try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
   try { if (typeof ps2FixMaybe_ === 'function') ps2FixMaybe_(); } catch (eP2) { tgErr_('ps2FixMaybe_', eP2); }
+  try { if (typeof afxHourly_ === 'function') afxHourly_(); } catch (eAx) { tgErr_('afxHourly_', eAx); }   /* v170.29: تماس اول لید، یادآوری پروفایل */
   try { if (typeof inbTick_ === 'function') inbTick_(); } catch (eIb) { tgErr_('inbTick_', eIb); }   /* v170.28: صندوق یکتا (همگام‌سازی، مهلت، ارجاع، گزارش هفتگی) */
   try { if (typeof ps3Tick_ === 'function') ps3Tick_(); } catch (eP3) { tgErr_('ps3Tick_', eP3); }   /* v170.23.9: یادآوری ویزیت و فرم بعد از ویزیت */
   try { if (typeof ktbRouteMaybe_ === 'function') ktbRouteMaybe_(); } catch (eKr) { tgErr_('ktbRouteMaybe_', eKr); }   /* v170.16: کمپین C-004 */
@@ -14613,6 +14614,7 @@ function tgPqArchive_(id, name, key) {
 
 function tgPqArchiveSafe_(id, name, key) {
   try { tgPqArchive_(id, name, key); } catch (e) { tgErr_('tgPqArchive_ ' + name + ' ' + key + ': ' + e); }
+  if (key === 'resume' && typeof afxCvNow_ === 'function') { try { afxCvNow_(id); } catch (eCv) { tgErr_('afxCvNow_', eCv); } }   /* v170.29: رزومهٔ سبک همان لحظه */
 }
 
 /* یک بار بعد از دادن دسترسی درایو: همهٔ فایل‌های قبلی را بایگانی می‌کند */
