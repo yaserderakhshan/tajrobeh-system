@@ -1769,6 +1769,7 @@ function tgRunReset() {
 }
 
 function tgRun() {
+  if (typeof ciScope_ === 'function') ciScope_();   /* v170.16.2: دور محدود انتشار روز */
   var p = PropertiesService.getScriptProperties();
   var at = Number(p.getProperty('TG_TEST_AT') || 0);
   var runId = p.getProperty('TG_TEST_RUN') || '';
@@ -2438,6 +2439,8 @@ function tgPrivate_(m) {
   if (typeof tnkRoute_ === 'function' && tnkRoute_(m, chat, name, uname)) return;
   // تجربه پارتنرز v137 (partners.gs): دکمهٔ میز، لینک‌های دعوت، ویزاردها و متن آزاد میز پارتنر
   if (typeof ptRoute_ === 'function' && ptRoute_(m, chat, name, uname)) return;
+  /* v170.16: کمپین C-004 (ebi.gs): کدهای ebi، نام و شماره، نوشتن مورد فهرست و ویس، پیش از tgOnPhone_ و کلیدواژه‌ها */
+  if (typeof ebiRoute_ === 'function' && ebiRoute_(m, chat, name, uname)) return;
   if (m.text && /^\/start(@\w+)?\s+psy(dr)?-/.test(m.text) && typeof tgPsyJoin_ === 'function' && tgPsyJoin_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;
   if (m.text && /^\/start(@\w+)?\s+(psybook|off|voice|psycard)$/.test(m.text)) { var sp0 = m.text.replace(/^\/start(@\w+)?\s+/, '').trim(); if (sp0 === 'psybook') tgPsyBookStart_(chat); else if (sp0 === 'off') tgOffStart_(chat); else if (sp0 === 'voice') tgEnVolunteerStart_(chat); else tgPsyCardStart_(chat); return; }   /* v159: کدهای شروع مینی‌اپ */
   if (m.text && /^\/start(@\w+)?\s+evp-/.test(m.text) && tgEvPresenterJoin_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;
@@ -4475,6 +4478,7 @@ function tgOnCallback_(cq) {
   // هاب ساختمان ونک (building.gs)
   if (typeof VK_CUR !== 'undefined') VK_CUR = String(chat);
   if (data.indexOf('vk:') === 0 && typeof vkCb_ === 'function') return vkCb_(cq, data.slice(3), chat, name, uname);
+  if (data.indexOf('ebi:') === 0 && typeof ebiCb_ === 'function') return ebiCb_(cq, chat, data, name, uname);   /* v170.16: کمپین C-004 */
   try { tgMyRoles_(chat, cq.from && cq.from.username); } catch (e) {}
 
   if (tgV1Cb_(chat, data, name, uname)) return;
@@ -5197,6 +5201,7 @@ function tgClearBooking_(chat) {
 /* v166.12: true/false برمی‌گرداند. اگر نوشتن شکست خورد، لید در TG_LEAD_RETRY می‌ماند و tgLeadRetry_ (از tgDutyTick) دوباره می‌نویسد. */
 function tgAppendLead_(o, isRetry) {
   if (!isRetry && typeof igLeadPrefill_ === 'function') o = igLeadPrefill_(o);   /* v168: منبع اینستاگرام و فیلدهای پیش‌پر */
+  if (!isRetry && typeof ebiLeadPrefill_ === 'function') o = ebiLeadPrefill_(o);   /* v170.16: منبع «کمپین › C-004 › <نوع>» */
   if (!isRetry && typeof v168NewLeadNext_ === 'function') o = v168NewLeadNext_(o);   /* v168 فاز ۲: لید تازه همان لحظه تکلیف دارد */
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'lead', o: o }); return true; }
   if (tgTestLeak_('لید تازه')) return false;
@@ -6849,6 +6854,7 @@ function tgWatchdog(e) {
   /* v169.1: کارهای هفتگی و ساعتی که تریگر جدا داشتند. اگر کار هفتگی سنگین (tgTherWeekly، تا ۲۶۶ ثانیه) همین ساعت رفت،
      بقیهٔ کارهای این ساعت به ساعت بعد می‌رود تا اجرای واچ‌داگ از سقف ۶ دقیقه نگذرد. */
   try { if (typeof v1691Hourly_ === 'function') v1691Hourly_(e); } catch (eH) { tgErr_('v1691Hourly_', eH); }
+  try { if (typeof ebiHourly_ === 'function') ebiHourly_(); } catch (eEb) { tgErr_('ebiHourly_', eEb); }   /* v170.16: کمپین C-004 */
   try { if (typeof v1691Weekly_ === 'function' && v1691Weekly_(e)) return; } catch (eW) { tgErr_('v1691Weekly_', eW); }
   // ستون‌های تاریخ شمسی خودشان پر می‌شوند؛ کسی نباید دستی اجرا کند
   try { tgFillJalali_(false); } catch (e) { tgErr_('tgFillJalali_: ' + e); }
@@ -9099,6 +9105,8 @@ const TG_SECTION_WORDS = [
 function tgSection_(src, note) {
   const s = String(src || '');
   const parts = s.split('›');
+  /* v170.16: «کمپین › C-004 › <نوع>» لید مراجع است و کشیک پذیرش باید خبر بگیرد (tgDutyClinic_) */
+  if (parts.length > 1 && String(parts[0]).trim() === 'کمپین') return 'پذیرش';
   if (parts.length > 1) {
     const sec = String(parts[1]).trim();
     if (sec) return sec;
@@ -12339,6 +12347,7 @@ function tgEvRows_() {
     if (!String(v[i][1] || '').trim()) continue;
     if (String(v[i][7] || '').trim() !== 'باز') continue;
     if (v[i][2] instanceof Date && v[i][2] < today) continue;
+    if (String(v[i][4] || '').trim() === 'شب تجربه') continue;   /* v170.17: شب‌های کمپین C-004 رویداد مدرسه نیستند */
     out.push({
       id: String(v[i][0] || v[i][1]).trim(), title: String(v[i][1]).trim(), date: v[i][2],
       time: String(v[i][3] || ''), kind: String(v[i][4] || ''), cap: Number(v[i][5] || 0),
@@ -12518,6 +12527,7 @@ function tgStartLabel_(code) {
   try { var sl = typeof pbStartLabel_ === 'function' ? pbStartLabel_(code) : ''; if (sl) return sl; } catch (e) {}   /* v167: تب «کدهای start» */
   if (TG_START_MAP[code]) return TG_START_MAP[code];
   if (/^c_/.test(code) && typeof v17013OfLabel_ === 'function') { var ol = v17013OfLabel_(code); if (ol) return ol; }   /* v170.13 */
+  if (/^ebi/.test(code) && typeof ebiStartLabel_ === 'function') { var el = ebiStartLabel_(code); if (el) return el; }   /* v170.16 */
   if (code.indexOf('ig_') === 0 && typeof igLabel_ === 'function') { var il = igLabel_(code); if (il) return il; }   /* v168 */
   if (code.indexOf('mag_') === 0) return 'مجله › ' + code.slice(4);
   if (code.indexOf('mg-') === 0) return 'مجله › ' + tgArtName_(code);
@@ -20029,7 +20039,7 @@ function tgEvContribText_(chat, name, uname, text) {
 }
 /* API عمومی صفحهٔ سایت: فهرست رویدادها (بی‌نام مراجع، بی‌chat) */
 function tgApiEvents_(p) {
-  var L = tgEvAll_().filter(function (o) { return o['وضعیت'] !== 'پیش‌نویس' && o['وضعیت'] !== 'بسته'; });
+  var L = tgEvAll_().filter(function (o) { return o['وضعیت'] !== 'پیش‌نویس' && o['وضعیت'] !== 'بسته' && !(typeof ebiIsNightEv_ === 'function' && ebiIsNightEv_(o)); });   /* v170.17: بی شب‌های کمپین */
   var out = L.map(function (o) {
     return { code: o.code, title: o.title, topic: o['موضوع'] || '', date: o['تاریخ'] instanceof Date ? tgJDateFull_(o['تاریخ'], TG_TZ) : String(o['تاریخ'] || ''),
       dateIso: o['تاریخ'] instanceof Date ? Utilities.formatDate(o['تاریخ'], TG_TZ, 'yyyy-MM-dd') : '', time: o['ساعت'] || '', kind: o['نوع'] || '',
@@ -34219,8 +34229,7 @@ var TG_CP_WP_PUSH = 'https://tajrobeh.life/wp-json/tj/v1/camp-push';
 function tgCpPush_(why) {
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'cppush', why: why || '' }); return 'dry'; }
   try {
-    var sec = PropertiesService.getScriptProperties().getProperty('CP_WP_SECRET');
-    if (!sec) return 'بدون رمز';
+    if (!ssCampHas_()) return 'بدون رمز';   /* v170.16.1: رمز فعلی و تازه در sitesec.gs (ssCampFetch_) */
     TG_CP_MEMO = null;
     var camps = tgCpCamps_().map(function (c) { return tgCpApi_({ code: c.code, nocache: 1 }); });
     var offers = []; try { if (typeof v17013OfPayload_ === 'function') offers = v17013OfPayload_(); } catch (eOf) { tgErr_('v17013OfPayload_', eOf); }   /* v170.13: آفرهای مراجعان */
@@ -34229,8 +34238,7 @@ function tgCpPush_(why) {
     var sig = tgHash_(JSON.stringify(camps.map(function (c) { var x = {}; for (var k in c) if (k !== 't') x[k] = c[k]; return x; })) + JSON.stringify(offers));
     var lastAt = Number(P.getProperty('CP_PUSH_AT') || 0);
     if (sig === P.getProperty('CP_PUSH_H') && (why === 'تیک' ? Date.now() - lastAt < 60 * 60000 : Date.now() - lastAt < 2 * 60000)) return 'بی‌تغییر';
-    var r = UrlFetchApp.fetch(TG_CP_WP_PUSH, { method: 'post', contentType: 'application/json',
-      headers: { 'x-tj-secret': sec }, payload: JSON.stringify({ camps: camps, offers: offers, why: why || '' }), muteHttpExceptions: true });
+    var r = ssCampFetch_(TG_CP_WP_PUSH, { camps: camps, offers: offers, why: why || '' });
     var out = r.getResponseCode() + ' ' + String(r.getContentText()).slice(0, 120);
     if (r.getResponseCode() === 200) { P.setProperty('CP_PUSH_H', sig); P.setProperty('CP_PUSH_AT', String(Date.now())); }
     if (r.getResponseCode() !== 200) tgErr_('tgCpPush_: ' + out);
@@ -34245,16 +34253,14 @@ var TG_TH_WP_PUSH = 'https://tajrobeh.life/wp-json/tj/v1/thers-push';
 function tgThPush_() {
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'thpush' }); return 'dry'; }
   var P = PropertiesService.getScriptProperties();
-  var sec = P.getProperty('CP_WP_SECRET');
-  if (!sec) return 'بدون رمز';
+  if (!ssCampHas_()) return 'بدون رمز';   /* v170.16.1 */
   var now = Date.now(), lastAt = Number(P.getProperty('TH_PUSH_AT') || 0), miss = Number(P.getProperty('TH_PUSH_404') || 0);
   if (miss && now - miss < 6 * 3600000) return 'بی‌تغییر';
   var pub = tgApiThPub_();
   if (!pub || !pub.list || !pub.list.length) return 'فهرست خالی';
   var sig = tgHash_(JSON.stringify(pub.list));
   if (!tgThPushDue_(sig, P.getProperty('TH_PUSH_H'), now, lastAt)) return 'بی‌تغییر';
-  var r = UrlFetchApp.fetch(TG_TH_WP_PUSH, { method: 'post', contentType: 'application/json',
-    headers: { 'x-tj-secret': sec }, payload: JSON.stringify({ at: pub.at, list: pub.list }), muteHttpExceptions: true });
+  var r = ssCampFetch_(TG_TH_WP_PUSH, { at: pub.at, list: pub.list });
   var code = r.getResponseCode();
   if (code === 200) { P.setProperty('TH_PUSH_H', sig); P.setProperty('TH_PUSH_AT', String(now)); P.deleteProperty('TH_PUSH_404'); return '200'; }
   if (code === 404) { P.setProperty('TH_PUSH_404', String(now)); return '۴۰۴ (اسنیپت سایت هنوز منتشر نشده)'; }
