@@ -21324,6 +21324,7 @@ function tgLeadSet_(row, changes, actor, channel, why) {
     const before = col <= rowNow.length ? rowNow[col - 1] : cell.getValue();
     const after = changes[k];
     if (String(before).trim() === String(after).trim()) continue;
+    if (k === 'شمار بی‌پاسخ') { try { cell.setNumberFormat('0'); } catch (eNf) {} }   /* v170.22.2: صفر با قالب تاریخ «۱۸۹۹» دیده می‌شد */
     cell.setValue(after);
     done.push({ what: k, from: before, to: after });
   }
