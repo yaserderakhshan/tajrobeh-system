@@ -2489,6 +2489,9 @@ function tgPrivate_(m) {
   if (typeof mcRoute_ === 'function' && mcRoute_(chat, m)) return;
   /* v165: حساب نویسندهٔ وردپرس، خودسرویس (author.gs) */
   if (typeof tgAuRoute_ === 'function' && tgAuRoute_(chat, m)) return;
+  /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ (migrate.gs): start=v2mig، شمارهٔ مراجع، «مراجعان من»، پاسخ همکار نسخهٔ ۲ */
+  if (typeof migRoute_ === 'function' && migRoute_(chat, m)) return;
+  if (m.text && typeof migOwnerCmd_ === 'function' && migOwnerCmd_(chat, String(m.text).trim())) return;
 
   if (m.contact && m.contact.phone_number) {
     // v164: وسط اتصال درمانگر، شماره یعنی تأیید هویت (نه لید تازه، دام ۱۲)
@@ -2697,7 +2700,7 @@ function tgPrivate_(m) {
     if (typeof tgGtStart_ === 'function' && tgGtStart_(chat, arg, name, uname)) return;
     if (arg && arg !== 'group') return tgLinkTherapist_(chat, arg);
     const meT = tgWhoTherapist_(chat);
-    if (meT) return tgSend_(chat, T_THER_MENU, tgTherMenu_());
+    if (meT) { tgSend_(chat, T_THER_MENU, tgTherMenu_()); if (typeof migTherNudge_ === 'function') migTherNudge_(chat); return; }
     return tgWelcome_(chat);
   }
 
@@ -4508,6 +4511,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('vx:') === 0 && typeof vxOnCb_ === 'function') return vxOnCb_(chat, data, cq, name, uname);   /* v166: موتور صدا */
   if (data.indexOf('dq:') === 0 && typeof dqCb_ === 'function') return dqCb_(chat, data);   /* v170: صف ارسال */
   if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);
+  if (data.indexOf('mig:') === 0 && typeof migCb_ === 'function') return migCb_(chat, data);   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ */
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
   if (data.indexOf('cm:') === 0 && typeof cmCb_ === 'function') return cmCb_(chat, data);     /* v170.2: کامنت‌های هاب (پرسش ترجیح) */
@@ -5971,7 +5975,7 @@ function tgTherMenu_() {
       [{ text: TG_MAG_BTN }, { text: MC_BTN }],
       [TG_DASH_BTN, TG_TSK_BTN],
       [TG_BOX_BTN]
-    ].concat(tgRoleRow_()),
+    ].concat(typeof migMenuRow_ === 'function' ? migMenuRow_() : []).concat(tgRoleRow_()),
     resize_keyboard: true
   };
 }
@@ -6888,7 +6892,9 @@ function tgWatchdog(e) {
      بقیهٔ کارهای این ساعت به ساعت بعد می‌رود تا اجرای واچ‌داگ از سقف ۶ دقیقه نگذرد. */
   try { if (typeof v1691Hourly_ === 'function') v1691Hourly_(e); } catch (eH) { tgErr_('v1691Hourly_', eH); }
   try { if (typeof ebiHourly_ === 'function') ebiHourly_(); } catch (eEb) { tgErr_('ebiHourly_', eEb); }
-  try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
+  try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }
+  try { if (typeof migSetupTick_ === 'function') migSetupTick_(); } catch (eMs) { tgErr_('migSetupTick_', eMs); }
+  try { if (typeof migTick_ === 'function') migTick_(); } catch (eMg) { tgErr_('migTick_', eMg); }   /* v170.23.6.3: یادآوری، گزارش ۲۱ و پرسش موج مهاجرت */   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
   try { if (typeof ktbRouteMaybe_ === 'function') ktbRouteMaybe_(); } catch (eKr) { tgErr_('ktbRouteMaybe_', eKr); }   /* v170.16: کمپین C-004 */
   try { if (typeof v1691Weekly_ === 'function' && v1691Weekly_(e)) return; } catch (eW) { tgErr_('v1691Weekly_', eW); }
   // ستون‌های تاریخ شمسی خودشان پر می‌شوند؛ کسی نباید دستی اجرا کند
