@@ -1,5 +1,9 @@
 <script>
-/* Tajrobeh — لایه رویدادها. تا وقتی gtag لود نشده هیچ درخواستی نمی‌زند. */
+/* Tajrobeh: لایه رویدادها. تا وقتی gtag لود نشده هیچ درخواستی نمی‌زند.
+   ۱۴ مهر ۱۴۰۵ (درگاه‌های ورودی، بند ۵): طرح رویداد مشترک با هاب آمار (بات v170.36، تب «رویدادهای قیف»):
+   cta_click ← lead_created ← intro_booked ← intro_done ← therapy_started. دو تای اول از سایت، سه تای بعد از بات.
+   cta_click برای هر دکمهٔ data-cta، هر لینک بات (با کد start) و هر لینک /get-therapy/. lead_created برای همهٔ فرم‌ها
+   (خط از site/cta-registry.json). /login کنار رفت (cta_start_request دیگر نیست). */
 (function(){
   function ev(name, params){ try{ if(window.gtag) gtag("event", name, params||{}); }catch(e){} }
   window.tjTrack = ev;
@@ -16,11 +20,18 @@
     return "other";
   }
   var KIND=pageKind();
+  /* خط هر فرم فلوئنت؛ همان site/cta-registry.json */
+  var FORM_LINE={"3":"org","5":"pz","7":"pz","9":"pz","10":"pz","6":"sch","8":"sch","11":"sch","15":"sch","16":"sch","17":"sch","12":"rm","13":"rm","14":"co"};
   document.addEventListener("click", function(e){
-    var a=e.target.closest && e.target.closest("a"); if(!a) return;
-    var href=a.getAttribute("href")||"";
-    var label=(a.textContent||"").trim().slice(0,60);
-    if(href.indexOf("tajrobeh.life/login")>-1){ ev("cta_start_request",{page_kind:KIND, link_text:label, page_path:location.pathname}); return; }
+    var a=e.target.closest && e.target.closest("a");
+    var d=e.target.closest && e.target.closest("[data-cta]");
+    var cta=d?(d.getAttribute("data-cta")||""):"";
+    var href=a?(a.getAttribute("href")||""):"";
+    var m=href.match(/t\.me\/tajrobehlife_bot\?start=([A-Za-z0-9_\-]+)/);
+    if(cta||m||href.indexOf("/get-therapy/")>-1){
+      ev("cta_click",{cta:cta, start_code:m?m[1].split("__")[0]:"", channel:m?"bot":(href.indexOf("/get-therapy/")>-1?"get_therapy":"site"), page_kind:KIND, page_path:location.pathname});
+    }
+    if(!a) return;
     if(href.indexOf("wa.me")>-1){ ev("whatsapp_click",{page_kind:KIND, page_path:location.pathname}); return; }
     if(href.indexOf("tel:")===0){ ev("phone_click",{page_kind:KIND}); return; }
     if(href.indexOf("mailto:")===0){ ev("email_click",{page_kind:KIND}); return; }
@@ -40,12 +51,17 @@
     }
     window.addEventListener("scroll", onScroll, {passive:true});
   }
-  /* ارسال فرم‌های فلوئنت */
+  /* لید: فرم‌های فلوئنت، و هر فرمی که از /wp-json/tj/v1/lead می‌رود (window.tjLead) */
+  function lead(line, form){
+    var now=Date.now(); if(window.__tjLeadAt){ if(now-window.__tjLeadAt<4000){ return; } } window.__tjLeadAt=now;
+    var p={form_id:String(form||""), lead_line:line||"other", page_kind:KIND, page_path:location.pathname};
+    ev("lead_created", p);
+    ev("generate_lead", p);
+  }
+  window.tjLead = lead;
   document.addEventListener("fluentform_submission_success", function(e){
     var id=""; try{ id=(e.detail&&e.detail.form&&e.detail.form.id)||""; }catch(err){}
-    var now=Date.now(); if(window.__tjLeadAt){ if(now-window.__tjLeadAt<4000){ return; } } window.__tjLeadAt=now;
-    var lm={"6":"school","8":"school","11":"school","3":"b2b","7":"therapy","5":"therapy","9":"therapy","10":"contact"};
-    ev("generate_lead",{form_id:String(id), lead_line:(lm[String(id)]||"other"), page_kind:KIND, page_path:location.pathname});
+    lead(FORM_LINE[String(id)]||"other", id);
   });
   /* باز شدن کشوهای پرسش‌های پرتکرار */
   document.addEventListener("toggle", function(e){
