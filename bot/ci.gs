@@ -39,7 +39,7 @@ function ciRoute_(body) {
     } else {
       var op = String(body.ci);
       if (op === 'ping') out = { ok: true, build: ciGlobal_('CI_BUILD') || '', version: ciGlobal_('TG_CODE_VERSION') || '' };
-      else if (op === 'start') out = ciStart_();
+      else if (op === 'start') out = ciStart_(body.only);
       else if (op === 'status') out = ciStatus_();
       else if (op === 'kick') out = ciKick_();
       else if (op === 'resume') out = ciResume_();
@@ -329,12 +329,37 @@ function ciTriggersOff_() {
   }
 }
 
-function ciStart_() {
+function ciStart_(only) {
   ciTriggersOff_();
   tgRunReset();
+  var P = PropertiesService.getScriptProperties(), all = TG_SUITES.length;
+  /* v170.16.2: دور محدود (فقط مجموعه‌های مربوط به تغییر)؛ بی only یعنی دور کامل */
+  if (only && only.length) P.setProperty(CI_ONLY_PROP, JSON.stringify({ at: Date.now(), fns: only.map(String).slice(0, 300) }));
+  else P.deleteProperty(CI_ONLY_PROP);
+  ciScope_.done = false; ciScope_();
   ScriptApp.newTrigger('tgRun').timeBased().after(1000).create();
-  PropertiesService.getScriptProperties().setProperty('CI_TEST_START', String(Date.now()));
-  return { ok: true, suites: TG_SUITES.length };
+  P.setProperty('CI_TEST_START', String(Date.now()));
+  return { ok: true, suites: TG_SUITES.length, all: all };
+}
+
+/* v170.16.2 (سهمیهٔ روزانهٔ Apps Script، تصمیم یاسر): آزمون کامل روی Apps Script فقط شب. در انتشار روز bot-tests.mjs
+   فهرست مجموعه‌های مربوط را می‌فرستد و این دور فقط همان‌ها را دارد. فهرست تا ۴ ساعت معتبر است. TG_SUITES در هر اجرا
+   (tgRun، status، kick) همین‌جا کوتاه می‌شود تا شمارش و پایان دور با همان فهرست باشد. */
+var CI_ONLY_PROP = 'TG_TEST_ONLY';
+function ciScopePick_(suites, o, now) {
+  if (!o || !o.fns || !o.fns.length || now - Number(o.at || 0) > 4 * 3600000) return null;
+  var keep = suites.filter(function (s) { return o.fns.indexOf(s[1]) > -1; });
+  return keep.length ? keep : null;
+}
+function ciScope_() {
+  if (ciScope_.done) return;
+  ciScope_.done = true;
+  var o = null;
+  try { o = JSON.parse(PropertiesService.getScriptProperties().getProperty(CI_ONLY_PROP) || 'null'); } catch (e) {}
+  var keep = ciScopePick_(TG_SUITES, o, Date.now());
+  if (!keep) return;
+  TG_SUITES.length = 0;
+  keep.forEach(function (s) { TG_SUITES.push(s); });
 }
 
 /* ادامهٔ زنجیرهٔ مرده. اگر مجموعهٔ در حال اجرا (TG_TEST_BEAT) بیش از سقف اجرای Apps Script بی‌خبر مانده، یعنی اجرا
@@ -342,6 +367,7 @@ function ciStart_() {
    بار دوم مردود ثبت می‌شود و دور از مجموعهٔ بعدی ادامه پیدا می‌کند. */
 function ciKick_(now) {
   if (now === undefined) now = Date.now();
+  ciScope_();
   var p = PropertiesService.getScriptProperties();
   var runId = p.getProperty('TG_TEST_RUN') || '';
   if (!runId) return { ok: false, error: 'no run' };
@@ -398,6 +424,7 @@ function ciSummarize_(rows, runId, total, running) {
 }
 
 function ciStatus_() {
+  ciScope_();
   var p = PropertiesService.getScriptProperties();
   var runId = p.getProperty('TG_TEST_RUN') || '';
   var start = Number(p.getProperty('CI_TEST_START') || 0);
@@ -426,6 +453,11 @@ function ciTests() {
   ok('کلید درست پذیرفته می‌شود', ciKeyOk_(k, h, now + 1, now) === true);
   ok('کلید غلط رد می‌شود', ciKeyOk_(k.replace('a1', 'ff'), h, now + 1, now) === false);
   ok('کلید منقضی رد می‌شود', ciKeyOk_(k, h, now, now) === false);
+  /* v170.16.2: دور محدود */
+  var SU = [['الف', 'aTests'], ['ب', 'bTests'], ['پ', 'cTests']];
+  var pk = ciScopePick_(SU, { at: now, fns: ['cTests', 'aTests', 'zTests'] }, now + 1000);
+  ok('دور محدود فقط مجموعه‌های فرستاده‌شده را به همان ترتیب TG_SUITES دارد', pk && pk.length === 2 && pk[0][1] === 'aTests' && pk[1][1] === 'cTests');
+  ok('فهرست کهنه (بیش از ۴ ساعت)، خالی یا بی‌مجموعهٔ آشنا یعنی دور کامل', ciScopePick_(SU, { at: now, fns: ['aTests'] }, now + 5 * 3600000) === null && ciScopePick_(SU, null, now) === null && ciScopePick_(SU, { at: now, fns: ['zTests'] }, now) === null);
   ok('بدون ci_key.gs هیچ کلیدی پذیرفته نمی‌شود', ciKeyOk_(k, null, null, now) === false);
   ok('کلید کوتاه رد می‌شود', ciKeyOk_('abc', ciSha256Hex_('abc'), now + 1, now) === false);
   ok('کلید خالی رد می‌شود', ciKeyOk_('', h, now + 1, now) === false);

@@ -1769,6 +1769,7 @@ function tgRunReset() {
 }
 
 function tgRun() {
+  if (typeof ciScope_ === 'function') ciScope_();   /* v170.16.2: دور محدود انتشار روز */
   var p = PropertiesService.getScriptProperties();
   var at = Number(p.getProperty('TG_TEST_AT') || 0);
   var runId = p.getProperty('TG_TEST_RUN') || '';
