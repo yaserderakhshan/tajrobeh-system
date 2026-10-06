@@ -107,7 +107,7 @@ function rvTranscribe_(blob) {
     var t = vxNoDash_(String(o.text || '').trim());
     if (t) return t;
   } catch (e) { vxErr_('rvTranscribe_', e); }
-  return mcTranscribe_(blob);   /* اگر Gemini نشد، همان Groq قبلی */
+  return mcTranscribe_(blob);   /* اگر نشد، مسیر عمومی Gemini (ai.gs) */
 }
 /* همهٔ ویس‌های بازبین (شناسه‌های درایو در «فایل درایو» سطر مشارکت) */
 function rvVoiceIds_(m) {
