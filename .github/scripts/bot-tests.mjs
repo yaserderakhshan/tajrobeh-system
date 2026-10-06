@@ -5,6 +5,7 @@
 //    یا مجموعه‌ای جا مانده باشد، یا مجموعه‌ای هیچ چیزی نسنجیده باشد (۰ قبول و ۰ مردود).
 import { appendFileSync, readFileSync } from 'node:fs';
 import { scope } from './bot-suites.mjs';
+import { plan as partsPlan, merge as partsMerge, loadTimes, saveTimes, mainTitles, check as partsCheck } from './bot-parts.mjs';
 
 const EXEC = process.env.BOT_EXEC_URL;
 const KEY = readFileSync(`${process.env.RUNNER_TEMP}/ci_key`, 'utf8').trim();   // کلید یک‌بارمصرف گام قبل
@@ -47,10 +48,13 @@ async function call(op) {
   return r;
 }
 
-async function callStart(only) {
+async function callStart(only, parts) {
   let r;
+  const body = { ci: 'start', k: KEY };
+  if (only) body.only = only;
+  if (parts) body.parts = { n: parts.n, a: parts.a };   /* v170.22.1: تکه‌های «اصلی» بر اساس زمان واقعی */
   for (let i = 0; i < 5; i++) {
-    r = await fetch(EXEC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(only ? { ci: 'start', k: KEY, only } : { ci: 'start', k: KEY }), redirect: 'follow' })
+    r = await fetch(EXEC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), redirect: 'follow' })
       .then(async (res) => { const t = await res.text(); try { const j = JSON.parse(t); return j && j.error === 'key' ? { ...j, transient: true } : j; } catch { return { ok: false, transient: true, error: `HTTP ${res.status}` }; } })
       .catch((e) => ({ ok: false, transient: true, error: String(e) }));
     if (!r.transient) return r;
@@ -126,7 +130,12 @@ if (process.env.TEST_SCOPE !== 'full') {
 }
 console.log(only ? `دور محدود: ${why}\n${only.join(' ')}` : `آزمون کامل: ${why}`);
 summary(only ? `- دور محدود روی Apps Script (${why}). آزمون کامل محلی پیش از این سبز شد؛ آزمون کامل Apps Script شب اجرا می‌شود.` : `- آزمون کامل روی Apps Script (${why})`);
-const st = await callStart(only);
+// v170.22.1: «اصلی» به تکه‌های زیر ۳ دقیقه بر اساس زمان واقعی هر سناریو در پنج اجرای اخیر (bot-parts.mjs)
+const TITLES = mainTitles(readFileSync(new URL('../../bot/telegram.gs', import.meta.url), 'utf8'));
+const TIMES = loadTimes();
+const PLAN = partsPlan(TITLES, TIMES);
+console.log(`تقسیم «اصلی»: ${TITLES.length} سناریو در ${PLAN.n} تکه · بار تخمینی (ثانیه): ${PLAN.load.join('، ')}`);
+const st = await callStart(only, PLAN);
 if (!st.ok) fail(`شروع تست‌ها نشد: ${st.error}`);
 if (only && st.all && st.suites === st.all) console.log('::warning::این نسخه دور محدود را نمی‌شناسد یا فهرست خالی شد؛ دور کامل اجرا می‌شود.');
 console.log(`تست‌ها شروع شد: ${st.suites} مجموعه${st.all ? ` از ${st.all}` : ''}.`);
@@ -146,7 +155,7 @@ for (;;) {
   if (now() - lastMove > STALL_MIN * 60 * 1000) {
     if (kicks >= MAX_KICKS) fail(`زنجیرهٔ تست ${STALL_MIN} دقیقه پیش نرفت و ${MAX_KICKS} بار ادامه دادن هم فایده نداشت`);
     kicks++;
-    const k = s.run ? await call('kick') : await callStart(only);
+    const k = s.run ? await call('kick') : await callStart(only, PLAN);
     if (!k.ok) kicks--;   // خطای گذرای شبکه ادامه حساب نمی‌شود
     console.log(`زنجیره پیش نمی‌رفت؛ ادامهٔ دوباره (${kicks}): ${JSON.stringify(k)}`);
     lastMove = now();
@@ -159,6 +168,13 @@ for (;;) {
 for (const x of s.suites) if (!x.pass && !x.fail) { x.fail = 1; x.text = x.text || 'این مجموعه هیچ چیزی نسنجید (۰ قبول و ۰ مردود)'; s.fail++; }
 if (s.count < s.total) { s.suites.push({ name: `${s.total - s.count} مجموعهٔ جامانده`, pass: 0, fail: s.total - s.count, secs: 0, text: 'نتیجهٔ این مجموعه‌ها در تب «تست‌ها» نیامد' }); s.fail += s.total - s.count; }
 const bad = s.suites.filter((x) => x.fail > 0);
+// v170.22.1: زمان‌های این دور برای تقسیم بعدی (گردش کار دیپلوی فایل را با [skip ci] روی main می‌گذارد)
+try {
+  const next = partsMerge(TIMES, { ...s, plan: PLAN }, TITLES);
+  saveTimes(next);
+  for (const w of partsCheck(next, TITLES)) console.log(`::warning::${w}`);
+  console.log(`زمان‌ها: ${Object.keys(s.stimes || {}).length} سناریو ثبت شد${s.parts ? ` · تکه‌های این دور: ${s.parts}` : ''}.`);
+} catch (e) { console.log(`::warning::زمان‌های آزمون ذخیره نشد: ${String(e).slice(0, 160)}`); }
 const head = `بات ${LABEL} · Version ${VERSION} · دور ${s.run}: ${s.count} مجموعه · ${s.pass} قبول · ${s.fail} مردود`;
 console.log(head);
 for (const x of s.suites) console.log(`${x.fail ? '❌' : '✅'} ${x.name}: ${x.pass} قبول · ${x.fail} مردود · ${x.secs}ث`);

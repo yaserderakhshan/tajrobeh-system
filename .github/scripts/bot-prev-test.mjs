@@ -74,7 +74,7 @@ export function prevSelfTest() {
     t('گام «وضعیت فعلی»: پشتوانه از prev-ref با پشتیبان و فایل بازبینی', /PREV_REF=\$\(cd "\$GITHUB_WORKSPACE" && bash \.github\/scripts\/bot-prev\.sh prev-ref "\$PREV_REF" \/tmp\/remote \/tmp\/live_backup bot\/\.live-reviewed\)/.test(prev));
     t('برگشت به live برچسب bot-live را جابه‌جا نمی‌کند', /if \[ "\$PREV_REF" != "live" \]; then\s+git tag -f bot-live "\$PREV_REF"/.test(wf));
     t('برچسب bot-live فقط بعد از پایش سبز', wf.indexOf('bot-monitor.mjs watch') > -1 && wf.indexOf('git tag -f bot-live HEAD') > wf.indexOf('bot-monitor.mjs watch'));
-    t('PR معکوس گردش کارها را برنمی‌گرداند', /git diff --binary "\$BEFORE" HEAD -- \. ':\(exclude\)\.github\/workflows'/.test(wf));
+    t('PR معکوس فقط کد بات و دفترهایش را برمی‌گرداند (نه گردش کارها و نه کار سایت؛ v170.22.1)', /git diff --binary "\$BEFORE" HEAD -- bot CHANGELOG\.md docs\/bot > \/tmp\/rev\.patch/.test(wf));
     // prev-ref روی مخزن آزمایشی
     const pr = join(T, 'prrepo'); mkdirSync(join(pr, 'bot'), { recursive: true });
     const g3 = (...a) => execFileSync('git', a, { cwd: pr, encoding: 'utf8' });
