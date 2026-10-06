@@ -75,14 +75,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.7`
+نسخهٔ کد: `v170.23.10`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۲ | ۳۳ |
-| `telegram.gs` | ۳۷۷۲۹ | ۲۰۴۰ |
+| `telegram.gs` | ۳۷۷۲۶ | ۲۰۴۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -116,6 +116,7 @@
 | `kartable.gs` | ۴۴۷ | ۳۴ |
 | `ai.gs` | ۲۱۱ | ۱۵ |
 | `migrate.gs` | ۵۵۱ | ۵۵ |
+| `sesslen.gs` | ۲۶۲ | ۲۶ |
 
 ### کارهای زمان‌دار
 
@@ -238,7 +239,7 @@
 | `TG_STAT_TAB` | «آمار روزانهٔ بات» | `telegram.gs` |
 | `TG_SUP_TAB` | «درخواست سوپرویژن» | `telegram.gs` |
 | `TG_TEST_TAB` | «تست‌ها» | `telegram.gs` |
-| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` |
+| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` `sesslen.gs` |
 | `TG_TK_TAB` | «پیام‌های درمانگران» | `telegram.gs` `kartable.gs` |
 | `TG_TSK_TAB` | «کارها» | `telegram.gs` |
 | `TG_USERS_TAB` | «کاربران بات» | `telegram.gs` `ebi.gs` |
@@ -369,6 +370,7 @@
 | کارتابل تأیید یاسر (v170.23.5) | `ktbTests` |
 | جمنای به‌جای گروک (v170.23.7) | `aiTests` |
 | مهاجرت مراجعان به نسخهٔ ۲ (v170.23.6.3) | `migTests` |
+| طول جلسهٔ قابل ویرایش (v170.23.10) | `tgLenTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
