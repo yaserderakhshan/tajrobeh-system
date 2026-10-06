@@ -23,10 +23,11 @@ var CFG_NOTE = {
   TG_INP_MIG68: 'دادهٔ مهاجرت v68 ساعت‌های حضوری (JSON، اختیاری؛ اجرا شده)', PT_M0924: 'گیرنده‌های پیام یک‌بارهٔ ۲ مهر پارتنرها (JSON، اختیاری؛ فرستاده شده)',
   TG_RELAY_BASE: 'نشانی رلهٔ وبهوک کلادفلر بی رمز (v170.23، اختیاری؛ فقط برای tgSwitchRelay و tgRelayTidy)',
   CM_FIX_HINTS: 'پیشنهادهای پیش‌نمایش اصلاح کامنت‌ها: {"کد لید": "badnum" | "notclient" | "later:21" | "self:7"} (JSON، اختیاری؛ v170.22.2؛ با «اوکی» اعمال نمی‌شوند)',
+  GH_REPO: 'مالک/نام مخزن گیت‌هاب برای دکمهٔ ادغام اصلاح‌های شبانه (v170.23.7)',
   CM_FIX_SKIP: 'کد لیدهایی که در پیش‌نمایش اصلاح کامنت‌ها طبق بررسی دست نمی‌خورند: ["کد لید", …] (JSON، اختیاری؛ v170.23.1)'
 };
 /* کلیدهایی که خالی بودنشان مجاز است (جایگزین دارند) */
-var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP'];
+var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'GH_REPO'];
 /* v170.9: کلیدهای لازمی که در Property خالی‌اند (فقط نام). روی دیپلوی آزمایشی سنجیده می‌شود؛ هر کدام خالی = انتشار متوقف */
 function cfgMissing_() {
   var o = cfgPropGet_();

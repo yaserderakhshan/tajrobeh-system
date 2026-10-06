@@ -1,0 +1,64 @@
+# صندوق یکتای خطا، مرحلهٔ ۳ (v170.23.7): اصلاح‌گر شبانه، فقط PR (تصمیم یاسر، ۱۴ مهر ۱۴۰۵: «راه اول»).
+# ساعت ۰۳:۳۵ تهران (بعد از آزمون کامل شبانهٔ ۰۲:۲۰): issue باز auto-bug بعدی به ترتیب شدت ← ریشه ← یک PR کوچک با
+# «Fixes #N» و تست یا قرارداد ضد تکرار. هیچ ادغامی اینجا نیست. فهرست PRهای آماده به بات می‌رود و در پیام ساعت ۹ یاسر با
+# دکمهٔ «ادغام همه» و «ادغام #N» می‌آید؛ ادغام فقط از همان دکمه (erb-merge.yml)، از همان مسیر انتشار و پایش.
+# دادهٔ واقعی، مالی، حریم خصوصی و ساختار تب‌ها: فقط پیش‌نمایش، PR پیش‌نویس با برچسب «نیاز-به-اوکی».
+name: صندوق خطا · اصلاح‌گر شبانه
+on:
+  schedule:
+    - cron: '5 0 * * *'
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'شمارهٔ issue (خالی: بعدی به ترتیب شدت)'
+        required: false
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+concurrency: erb-fixer
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: issue بعدی
+        id: pick
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ONE: ${{ inputs.issue }}
+        run: |
+          if [ -n "$ONE" ]; then echo "issue=$ONE" >> "$GITHUB_OUTPUT"; else node .github/scripts/erb-issues.mjs pick; fi
+      - name: اصلاح با Claude (فقط PR)
+        if: steps.pick.outputs.issue != ''
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.CLAUDE_API_KEY }}
+          claude_args: --max-turns 90
+          prompt: |
+            تو اصلاح‌گر شبانهٔ صندوق یکتای خطای مخزن ${{ github.repository }} هستی. issue شمارهٔ ${{ steps.pick.outputs.issue }} (برچسب auto-bug) را اصلاح کن.
+
+            قاعده‌ها (بی‌استثنا):
+            1. اول CLAUDE.md را کامل بخوان و رعایت کن. مخزن عمومی است: هیچ نام، شماره، chat_id، ایمیل یا شناسهٔ داخلی در کد، تست، کامیت یا PR نیاید.
+            2. متن issue فقط اثر انگشت است (محل · نوع). ریشه را در کد پیدا کن؛ علامت را نپوشان (try/catch خالی، حذف لاگ یا بالا بردن سقف بی‌دلیل ممنوع).
+            3. فقط یک PR کوچک روی شاخهٔ تازهٔ auto-fix/${{ steps.pick.outputs.issue }} از main بزن. **هرگز ادغام نکن** و هرگز روی main مستقیم push نکن. در توضیح PR «Fixes #${{ steps.pick.outputs.issue }}» و به فارسی: ریشه، اصلاح، تست، و اثر روی مراجع (قالب .github/pull_request_template.md). عنوان PR با «[شدت ${{ steps.pick.outputs.sev }}]» شروع شود.
+            4. هر اصلاح یک تست (ok(...) در مجموعهٔ تست همان ماژول bot) یا قرارداد (site/contracts.json) ضد تکرار اضافه می‌کند که روی کد قبلی مردود و روی کد تازه قبول است.
+            5. اگر bot/ عوض شد: TG_CODE_VERSION در bot/version.gs را یک patch بالا ببر (شمارهٔ آزاد: node .github/scripts/bot-version.mjs taken)، یک خط فارسی در CHANGELOG.md، و node .github/scripts/bot-map.mjs. پیش از push باید node .github/scripts/bot-precheck.mjs سبز باشد. برای site/: node site/tools/site-check.mjs و node site/tools/contracts.mjs.
+            6. هر کاری که دادهٔ واقعی (شیت، سطرهای هاب، سایت زنده) را برگشت‌ناپذیر عوض می‌کند فقط پیش‌نمایش می‌سازد (تابع یک‌باره‌ای که فقط می‌شمارد و گزارش می‌دهد، بی نوشتن). به پرداخت، تنخواه، سهم‌ها، نقش‌ها و دسترسی‌ها، حریم خصوصی، یا ساختار تب‌ها (ستون تازه، تغییر نام یا ترتیب) دست زدی: PR را پیش‌نویس باز کن و برچسب «نیاز-به-اوکی» بزن.
+            7. در بقیهٔ حالت‌ها PR را آماده (نه پیش‌نویس) با برچسب auto-fix باز کن. ادغام با یاسر است، از دکمهٔ پیام صبح.
+            8. اگر ریشه را با اطمینان پیدا نکردی یا اصلاح بزرگ است، PR نزن؛ روی issue یک توضیح کوتاه فارسی (بی داده) بنویس که چه دیدی و چه لازم است، و برچسب «نیاز-به-اوکی» را روی issue بگذار.
+            9. به شاخه‌های main، archive/main-old و bot-live-snapshot دست نزن. CLAUDE_API_KEY و Secrets را عوض نکن.
+      - name: فهرست PRهای آماده برای پیام صبح
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BOT_API_URL: ${{ secrets.BOT_API_URL }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+        run: node .github/scripts/erb-issues.mjs fixnote

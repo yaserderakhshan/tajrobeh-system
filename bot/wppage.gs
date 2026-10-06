@@ -124,6 +124,9 @@ function wpPageProps_(props) {
       sec.push(PB_KEY2_PROP);
     }
   }
+  /* v170.23.7: توکن کم‌دسترس GitHub (فقط اجرای Actions) برای دکمهٔ «ادغام» اصلاح‌های شبانه؛ مقدار برنمی‌گردد */
+  var gt = props && props.GH_DISPATCH_TOKEN;
+  if (typeof gt === 'string' && gt.trim().length >= 20) { if (!wpPageDry_()) PropertiesService.getScriptProperties().setProperty('GH_DISPATCH_TOKEN', gt.trim()); else TG_MEM['wpp:prop:GH_DISPATCH_TOKEN'] = gt.trim(); sec.push('GH_DISPATCH_TOKEN'); }
   var flag = wpPageFlag_(props);
   return { ok: set.length === WP_PAGE_PROPS.length, set: set, sec: sec, flag: flag };
 }

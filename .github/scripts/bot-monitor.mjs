@@ -54,7 +54,7 @@ const healthLine = (hl) => {
     ` · کش سایت ${st.src || st.http || st.error || '?'} سن ${st.age ?? '-'}ث (${st.n ?? '-'} نفر) · کمپین ${hl.push.campMin ?? '-'}د · رویدادها ${hl.evFlushMin ?? '-'}د`;
 };
 
-// v170.23.4: لاگ گردش کار این مخزن عمومی است؛ شناسهٔ شیت، درایو و تقویم (رشتهٔ بلند بی‌فاصله) در خروجی یک‌باره‌ها پوشانده می‌شود
+// v170.23.5: لاگ گردش کار این مخزن عمومی است؛ شناسهٔ شیت، درایو و تقویم (رشتهٔ بلند بی‌فاصله) در خروجی یک‌باره‌ها پوشانده می‌شود
 export const maskIds = (s) => String(s ?? '').replace(/[A-Za-z0-9_-]{25,}/g, '<شناسه>').replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, '<ایمیل>');
 const keyOf = (r) => `${r.where}|${String(r.msg).replace(/#/g, '').replace(/\s+/g, ' ').trim()}`;
 
@@ -124,7 +124,7 @@ if (mode === 'props') {
   // v169.4: سکرت‌های وردپرس به Script Properties (ci.gs → wpPageProps_). مقدارها هرگز چاپ نمی‌شوند؛ فقط نام کلیدهای ثبت‌شده.
   const props = { WP_BOT_USER: process.env.WP_BOT_USER || '', WP_BOT_APP_PASSWORD: process.env.WP_BOT_APP_PASSWORD || '' };
   // v170.4: رمزهای مشترک با سایت (CP_WP_SECRET، SITE_LEAD_SECRET)؛ فقط اگر در GitHub Secrets هست
-  for (const k of ['CP_WP_SECRET', 'SITE_LEAD_SECRET', 'BOT_API_KEY']) if (process.env[k]) props[k] = process.env[k];   // v170.16.1: کلید دوم درگاه
+  for (const k of ['CP_WP_SECRET', 'SITE_LEAD_SECRET', 'BOT_API_KEY', 'GH_DISPATCH_TOKEN']) if (process.env[k]) props[k] = process.env[k];   // v170.23.7: توکن دکمهٔ ادغام   // v170.16.1: کلید دوم درگاه
   if (process.env.SITE_SIG_ENFORCE === '0' || process.env.SITE_SIG_ENFORCE === '1') props.SITE_SIG_ENFORCE = process.env.SITE_SIG_ENFORCE;   // v170.9: متغیر GitHub، نه رمز
   if (!Object.values(props).some(Boolean)) { console.log('::warning::هیچ سکرتی برای ثبت نیست.'); process.exit(0); }
   const r = await call({ ci: 'props', props });
@@ -177,7 +177,8 @@ if (!first.ok) {
   output('monitor', 'unavailable');
   process.exit(0);
 }
-const base = new Set(first.rows.filter((r) => r.t < T0).map(keyOf));
+// v170.23.5: صندوق یکتای خطا یک ردیف برای هر اثر انگشت دارد؛ «first» اولین بار است (سطر قدیمی بی first: همان t)
+const base = new Set(first.rows.filter((r) => (r.first ?? r.t) < T0).map(keyOf));
 
 // خلاصهٔ ۲۴ ساعت پیش از انتشار
 const day = first.rows.filter((r) => r.t >= T0 - DAY && r.t < T0);

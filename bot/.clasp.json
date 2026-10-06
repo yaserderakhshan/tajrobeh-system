@@ -36,7 +36,8 @@
     "sitesec.gs",
     "sec.gs",
     "version.gs",
-    "sitepub.gs"
+    "sitepub.gs",
+    "errbox.gs"
   ],
   "htmlExtensions": [
     ".html"
