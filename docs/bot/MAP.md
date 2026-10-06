@@ -75,14 +75,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.4`
+نسخهٔ کد: `v170.23.5`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۲ | ۳۳ |
-| `telegram.gs` | ۳۷۶۸۴ | ۲۰۳۶ |
+| `telegram.gs` | ۳۷۶۸۹ | ۲۰۳۶ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -103,7 +103,7 @@
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۱۰۳۶ | ۶۵ |
 | `dq.gs` | ۵۹۳ | ۴۹ |
-| `cfg.gs` | ۱۵۶ | ۱۴ |
+| `cfg.gs` | ۱۵۷ | ۱۴ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -113,6 +113,7 @@
 | `sec.gs` | ۱۰۵ | ۱ |
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
+| `kartable.gs` | ۳۳۸ | ۲۸ |
 
 ### کارهای زمان‌دار
 
@@ -156,6 +157,7 @@
 | `HUB_QUEUES` | «صف‌ها» | `ops.gs` |
 | `HUB_REPORT` | «گزارش من» | `ops.gs` |
 | `HUB_TODAY` | «امروز» | `ops.gs` |
+| `KTB_RT_TAB` | «مسیریابی منتظرها · پیش‌نمایش» | `kartable.gs` |
 | `LM_DASH` | «داشبورد لید» | `leadmodel.gs` |
 | `OPS_LISTS_TAB` | «فهرست‌ها» | `ops.gs` |
 | `OPS_REG_TAB` | «هاب‌ها» | `ops.gs` |
@@ -168,7 +170,7 @@
 | `TG_ANN_TAB` | «اطلاعیه‌ها» | `telegram.gs` |
 | `TG_APM_TAB` | «جذب تراپیست» | `telegram.gs` |
 | `TG_BOX_TAB` | «صندوق پیام» | `telegram.gs` |
-| `TG_BUG_TAB` | «باگ و پیشنهاد» | `telegram.gs` |
+| `TG_BUG_TAB` | «باگ و پیشنهاد» | `telegram.gs` `kartable.gs` |
 | `TG_CFG_TAB` | «تنظیمات» | `telegram.gs` |
 | `TG_COLL_TAB` | «تماس همکاران» | `telegram.gs` |
 | `TG_CRM_TAB` | «🧭 CRM لیدها» | `telegram.gs` `v168.gs` |
@@ -234,7 +236,7 @@
 | `TG_SUP_TAB` | «درخواست سوپرویژن» | `telegram.gs` |
 | `TG_TEST_TAB` | «تست‌ها» | `telegram.gs` |
 | `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` |
-| `TG_TK_TAB` | «پیام‌های درمانگران» | `telegram.gs` |
+| `TG_TK_TAB` | «پیام‌های درمانگران» | `telegram.gs` `kartable.gs` |
 | `TG_TSK_TAB` | «کارها» | `telegram.gs` |
 | `TG_USERS_TAB` | «کاربران بات» | `telegram.gs` `ebi.gs` |
 | `TG_UTM_TAB` | «سئو · لینک‌های UTM» | `telegram.gs` |
@@ -361,6 +363,7 @@
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |
 | امنیت ورودی‌ها (v170.9) | `secTests` |
 | نتیجهٔ انتشار سایت و تلاش دوباره (v170.23.3) | `splTests` |
+| کارتابل تأیید یاسر (v170.23.5) | `ktbTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
