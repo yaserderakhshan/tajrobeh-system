@@ -14791,8 +14791,9 @@ function tgPrPlan_(r) {
   var hits = [];
   var siteErr = '';
   try { hits = tgDir_('find', { names: names }).hits || []; } catch (e) { siteErr = String(e.message || e); }
-  var home = hits.filter(function (h) { return h.kind === 'thc' && Number(h.page) === TG_PR_HOME; })[0] || null;
-  var anyThc = hits.filter(function (h) { return h.kind === 'thc'; })[0] || null;
+  /* v170.23.2: صفحهٔ اصلی از بازطراحی نوار a.p3 دارد (اسنیپت 504064 v1.1، نوع «p3»)؛ کارت p3 همان کارت صفحهٔ اصلی است */
+  var home = hits.filter(function (h) { return (h.kind === 'thc' || h.kind === 'p3') && Number(h.page) === TG_PR_HOME; })[0] || null;
+  var anyThc = hits.filter(function (h) { return h.kind === 'thc' || h.kind === 'p3'; })[0] || null;
   var sup = hits.filter(function (h) { return h.kind === 'supc'; })[0] || null;
   var cur = (home || anyThc || sup || {}).f || {};
   var alum = !!(ther && /^حلقه/.test(ther.alum) && ther.alum.indexOf('احتمالی') < 0);
@@ -15151,7 +15152,19 @@ function tgPrWho_(chat) {
   return 'ناظر';
 }
 
-function tgPrPublish_(chat, r) {
+/* v170.23.2: نشانگر خطای اسنیپت 504064 ← متن روشن برای ناظر */
+function tgPrErrText_(e) {
+  var x = String(e || '');
+  if (/marker missing|anchor not found/.test(x)) return 'نشانگر دایرکتوری در این برگه نیست (برگه بازطراحی شده و نشانگر نمانده)';
+  if (/no team page/.test(x)) return 'صفحهٔ تیم این نفر هنوز ساخته نشده؛ کارت بی‌لینک گذاشته نشد' + ' (اجازهٔ انتشار صفحهٔ شخصی را لازم دارد)';
+  if (/no photo/.test(x)) return 'برای کارت تازه عکس نیست';
+  if (/no sp/.test(x)) return 'برای کارت تازه خط رویکرد نیست';
+  if (/save verify failed/.test(x)) return 'برگه همان لحظه عوض شده بود؛ ذخیره برگشت خورد';
+  return x;
+}
+/* opts: {quiet: پیام به خود عضو نه، keepPage: صفحهٔ شخصی موجود دوباره فرستاده نشود (بازنشر جامانده‌ها)} */
+function tgPrPublish_(chat, r, opts) {
+  opts = opts || {};
   var p = tgPrPlan_(r), v = r.v;
   if (p.blocked) return tgSend_(chat, '⛔ ' + tgEsc_(v.name) + ' گفته فعلاً فقط برای تیم. چیزی منتشر نشد.');
   if (!p.canPublish) return tgSend_(chat, 'چیزی برای انتشار نیست' + (p.siteErr ? ': ' + tgEsc_(p.siteErr) : '') + '.');
@@ -15160,6 +15173,11 @@ function tgPrPublish_(chat, r) {
     try { b64 = tgPrPhotoB64_(p.fid); } catch (e) { return tgSend_(chat, 'عکس از تلگرام گرفته نشد: ' + tgEsc_(String(e.message || e))); }
   }
   var res = { pages: [], errors: [] };
+  /* v170.23.2: اول صفحهٔ شخصی (کارت تازهٔ صفحهٔ اصلی لینک /team/ لازم دارد)، بعد کارت */
+  var page = '', pageErr = '', put = {}, hadPage = String(v.page || '').trim();
+  if (p.pageOk && !opts.dry && !(opts.keepPage && hadPage)) {
+    try { var pg = tgPrPage_(p, b64); page = pg.url; put = pg.put; } catch (e) { pageErr = String(e.message || e); }
+  } else if ((opts.keepPage || opts.dry) && hadPage) page = hadPage;
   if (p.card) {
     var f = { sp: p.sp, city: p.isT ? p.city : '' };
     if (v.site_name) f.name = v.site_name;
@@ -15168,12 +15186,11 @@ function tgPrPublish_(chat, r) {
     var data = { names: [v.name, p.name].concat(v.site_name ? [v.site_name] : []), display: p.name, kind: p.kind, f: f,
                  create: p.create, slug: 'm' + p.h, crop: tgPrCrop_(v) || {}, supc_photo: p.isES ? 1 : 0, supc_sp: (p.isES && !p.isT && v.site_sp) ? 1 : 0 };
     if (b64) data.photo = b64;
+    if (page || hadPage) data.team = page || hadPage;
+    if (opts.dry) data.dry = 1;
     try { res = tgDir_('publish', data); } catch (e) { return tgSend_(chat, '❌ انتشار نشد: ' + tgEsc_(String(e.message || e))); if (tgImgErrText_()) tgSend_(chat, '🖼 ' + tgEsc_(tgImgErrText_())); }
   }
-  var page = '', pageErr = '', put = {}, hadPage = String(v.page || '').trim();
-  if (p.pageOk) {
-    try { var pg = tgPrPage_(p, b64); page = pg.url; put = pg.put; } catch (e) { pageErr = String(e.message || e); }
-  }
+  if (opts.dry) return res;
   var pages = res.pages || [], errs = res.errors || [];
   var labels = { photo: 'عکس', sp: 'رویکرد', city: 'شهر', name: 'نام', tags: 'تگ‌ها', 'new': 'کارت تازه' };
   var lines = pages.filter(function (x) { return x.saved; }).map(function (x) {
@@ -15191,12 +15208,17 @@ function tgPrPublish_(chat, r) {
       if (tr) sh.getRange(tr, tgTherCol_('عکس در سایت')).setValue('هست');
     } catch (e) { tgErr_('AK: ' + e); }
   }
+  /* v170.23.2: هر برگه‌ای که ماند، با نامش و دلیل روشن؛ بقیه که نشستند همان بالا */
+  var pgName = function (id) { return Number(id) === TG_PR_HOME ? 'صفحهٔ اصلی' : (Number(id) === 294 ? 'صفحهٔ مدرسه' : 'برگهٔ ' + id); };
+  var errLines = errs.map(function (e) { return '• 🏚 ' + pgName(e.page) + ' ماند: ' + tgEsc_(tgPrErrText_(e.error)); });
   var msg = (ok ? '✅ <b>روی سایت نشست</b> · ' : '⚠️ <b>انتشار کامل نشد</b> · ') + tgEsc_(p.name) + '\n' +
             (lines.length ? lines.join('\n') : (p.card ? 'کارت‌ها همان بود که هست.' : 'کارت سایت ندارد.')) +
             (page ? '\n🌐 صفحهٔ شخصی: <a href="' + tgEsc_(page) + '">' + tgEsc_(tgPrUrl_(page)) + '</a>' : '') +
             (pageErr ? '\n\nصفحهٔ شخصی ساخته نشد: ' + tgEsc_(pageErr) : '') +
-            (errs.length ? '\n\nخطا: ' + tgEsc_(errs.map(function (e) { return (e.page || '') + ' ' + (e.error || ''); }).join(' · ')) : '');
+            (errLines.length ? '\n\n' + errLines.join('\n') : '');
   var nkb = [[{ text: '⏭ پروفایل بعدی', callback_data: 'pr:nx:' + r.row + ':' + p.h }]];
+  if (errs.length || pageErr) nkb.unshift([{ text: '🔁 دوباره امتحان کن', callback_data: 'pr:rt:' + r.row + ':' + p.h }]);
+  if (opts.quiet) return { res: res, ok: ok, errs: errs, page: page, pageErr: pageErr, name: p.name };
   if (page) nkb.unshift([{ text: '🌐 دیدن صفحهٔ ' + tgPrCut_(p.name, 24), url: page }]);
   tgSend_(chat, msg, { inline_keyboard: nkb });
   if (ok && v.chat) {
@@ -15209,6 +15231,98 @@ function tgPrPublish_(chat, r) {
   }
   return res;
 }
+
+/* ───── v170.23.2: پروفایل‌هایی که روی صفحهٔ اصلی جا ماندند ─────
+   تا ۱۴ مهر هر کارت تازهٔ صفحهٔ اصلی با «anchor not found» می‌شکست (بازطراحی نوار a.p3). از «پروفایل سایت»: درمانگری که منتشر شده
+   (review دارد)، رضایتش «فقط برای تیم» نیست و find نشان می‌دهد در صفحهٔ اصلی کارت ندارد. پاسخ بازبینی‌نشده (tgPrNeeds_) بی‌اجازه نمی‌رود. */
+function tgPrDirStuck_() {
+  var out = [];
+  tgPrAll_().forEach(function (r) {
+    var v = r.v;
+    if (!/T/.test(String(v.roles || '')) || !String(v.review || '').trim()) return;
+    if (String(v.consent || '').indexOf('فقط برای تیم') > -1 || /نمی‌رود/.test(String(v.status || ''))) return;
+    var p; try { p = tgPrPlan_(r); } catch (e) { return; }
+    if (p.siteErr || !p.create) return;
+    out.push({ r: r, p: p, pend: tgPrNeeds_(v) });
+  });
+  return out;
+}
+/* یک‌بارهٔ خودکار بعد از انتشار: انتشار آزمایشی (dry) روی یک پروفایل واقعی؛ اگر کارت تازهٔ صفحهٔ اصلی درست نشست، همهٔ جامانده‌ها یک‌جا.
+   فهرست نام‌ها فقط در پیام خصوصی به مالک؛ خروجی (لاگ عمومی دیپلوی) فقط شمار. */
+function tgV170232DirRetry() {
+  var all = tgPrDirStuck_(), owner = String(TG_OWNER_CHAT);
+  var go = all.filter(function (x) { return !x.pend && x.p.card; });
+  var nocard = all.filter(function (x) { return !x.pend && !x.p.card; }), pend = all.filter(function (x) { return x.pend; });
+  if (!go.length) return 'جامانده روی صفحهٔ اصلی: ' + all.length + ' · قابل بازنشر: 0 · بی عکس یا رویکرد: ' + nocard.length + ' · منتظر بازبینی: ' + pend.length;
+  var t = go.filter(function (x) { return String(x.r.v.page || '').trim(); })[0] || go[0];
+  var dr = tgPrPublish_(owner, t.r, { dry: 1, quiet: 1, keepPage: 1 }) || {};
+  var homeNew = (dr.pages || []).some(function (pg) { return Number(pg.page) === TG_PR_HOME && (pg.changes || []).some(function (c) { return (c.done || []).indexOf('new') > -1; }); });
+  var dErr = (dr.errors || []).filter(function (e) { return Number(e.page) === TG_PR_HOME; });
+  if (!homeNew || dErr.length) {
+    try { tgNotify_(owner, TG_NK.report, '⚠️ <b>بازنشر کارت‌های جامانده انجام نشد</b>\nانتشار آزمایشی روی ' + tgEsc_(t.p.name) + ' در صفحهٔ اصلی ننشست: ' + tgEsc_(dErr.map(function (e) { return tgPrErrText_(e.error); }).join('، ') || 'کارت تازه ساخته نشد'), { ref: 'v170.23.2' }); } catch (eN) {}
+    return 'جامانده روی صفحهٔ اصلی: ' + all.length + ' · انتشار آزمایشی: ناموفق (' + (dErr.map(function (e) { return e.error; }).join('، ') || 'بی کارت تازه') + ') · بازنشر انجام نشد';
+  }
+  var okN = [], bad = [];
+  go.forEach(function (x) {
+    var o = tgPrPublish_(owner, x.r, { quiet: 1, keepPage: 1 }) || {};
+    if (o.ok) okN.push(o.name || x.p.name);
+    else bad.push((o.name || x.p.name) + ': ' + ((o.errs || []).map(function (e) { return tgPrErrText_(e.error); }).join('، ') || o.pageErr || 'خطا'));
+  });
+  try {
+    tgNotify_(owner, TG_NK.report, '🏠 <b>کارت‌های جامانده روی صفحهٔ اصلی</b> (v170.23.2)\nانتشار آزمایشی روی ' + tgEsc_(t.p.name) + ': سبز.\n' +
+      '✅ نشست (' + tgFa_(okN.length) + '): ' + tgEsc_(okN.join('، ') || 'هیچ') +
+      (bad.length ? '\n⚠️ ماند (' + tgFa_(bad.length) + '):\n' + bad.map(function (b) { return '• ' + tgEsc_(b); }).join('\n') : '') +
+      (nocard.length ? '\n📷 بی عکس یا رویکرد، کارت ساخته نمی‌شود: ' + tgEsc_(nocard.map(function (x) { return x.p.name; }).join('، ')) : '') +
+      (pend.length ? '\n🔎 پاسخ بازبینی‌نشده دارند، بازنشر نشد تا بازبینی شوند: ' + tgEsc_(pend.map(function (x) { return x.p.name; }).join('، ')) : ''), { ref: 'v170.23.2' });
+  } catch (eN2) {}
+  return 'جامانده روی صفحهٔ اصلی: ' + all.length + ' · انتشار آزمایشی: سبز · نشست: ' + okN.length + ' · ماند: ' + bad.length + ' · بی عکس یا رویکرد: ' + nocard.length + ' · منتظر بازبینی: ' + pend.length;
+}
+
+function tgDirP3Tests() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX };
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = { watch: ['700'] };
+  var dirs = function (op) { return TG_OUTBOX.filter(function (x) { return x.kind === 'dir' && x.op === op; }); };
+  var said = function () { return TG_OUTBOX.filter(function (x) { return x.kind === 'msg'; }).map(function (x) { return x.text + ' ' + JSON.stringify(x.markup || ''); }).join('\n'); };
+  try {
+    TG_MEM['pqrows'] = { 'ther:نمونه الف': { id: 'ther:نمونه الف', name: 'نمونه الف', roles: 'T', chat: '901', photo: 'tg:photo:F1', city: 'تهران', approach: 'روابط ابژه', consent: 'بله', review: 'x · y', rstamp: '9', stamp: '5' } };
+    var r = tgPrAll_()[0];
+    TG_MEM['dirres'] = { find: { ok: true, hits: [{ kind: 'p3', page: TG_PR_HOME, f: { name: 'نمونه الف', sp: 'روابط ابژه', photo: '/a.webp' } }] } };
+    ok('کارت p3 صفحهٔ اصلی «هست» حساب می‌شود (کارت تکراری ساخته نمی‌شود)', tgPrPlan_(r).create === false);
+    TG_MEM['dirres'] = { find: { ok: true, hits: [] }, person: { ok: true, url: 'https://tajrobeh.life/team/sample-a/' },
+      publish: { ok: true, pages: [{ page: 294, title: 'مدرسه', url: 'https://tajrobeh.life/school/', saved: true, changes: [{ kind: 'thc', done: ['new'] }] }], errors: [{ page: TG_PR_HOME, error: 'marker missing: tj:dir:home' }] } };
+    TG_OUTBOX = [];
+    tgPrPublish_(700, r);
+    var seq = TG_OUTBOX.filter(function (x) { return x.kind === 'dir' && (x.op === 'person' || x.op === 'publish'); }).map(function (x) { return x.op; });
+    ok('اول صفحهٔ تیم، بعد کارت؛ کارت لینک صفحهٔ تیم را دارد', seq.join(',') === 'person,publish' && dirs('publish')[0].data.team === 'https://tajrobeh.life/team/sample-a/', seq.join(','));
+    var t = said();
+    ok('صفحهٔ اصلی ماند: نام برگه و دلیل روشن، بقیه نشست', /صفحهٔ اصلی ماند/.test(t) && /نشانگر دایرکتوری/.test(t) && /مدرسه/.test(t) && /انتشار کامل نشد/.test(t), t.slice(0, 200));
+    ok('دکمهٔ «دوباره امتحان کن»', t.indexOf('pr:rt:' + r.row + ':') > -1);
+    ok('بی صفحهٔ تیم: دلیل روشن', /صفحهٔ تیم این نفر هنوز ساخته نشده/.test(tgPrErrText_('no team page')) && /نشانگر/.test(tgPrErrText_('anchor not found')));
+    /* «دوباره امتحان کن» همان انتشار است */
+    TG_MEM['dirres'].publish = { ok: true, pages: [{ page: TG_PR_HOME, title: 'خانه', url: 'https://tajrobeh.life/', saved: true, changes: [{ kind: 'p3', done: ['new'] }] }], errors: [] };
+    TG_OUTBOX = [];
+    tgPrCb_({ id: '', data: 'x', message: { chat: { id: 700 }, message_id: 1 }, from: { id: 700 } }, 'rt:' + r.row + ':' + tgPrH_(r.v.id));
+    ok('دوباره امتحان کن ← انتشار و «روی سایت نشست»', dirs('publish').length === 1 && /روی سایت نشست/.test(said()));
+    /* جامانده‌ها: آزمایشی اول، بعد بازنشر بی پیام به عضو */
+    TG_MEM['pqrows']['ther:نمونه الف'].page = 'https://tajrobeh.life/team/sample-a/';
+    TG_MEM['pqrows']['ther:نمونه ب'] = { id: 'ther:نمونه ب', name: 'نمونه ب', roles: 'T', chat: '902', photo: 'tg:photo:F2', approach: 'لکانی', consent: 'بله', review: 'x', rstamp: '1', stamp: '9', method: 'm' };
+    TG_MEM['dirres'].find = { ok: true, hits: [] };
+    var st = tgPrDirStuck_();
+    ok('جامانده: منتشرشده بی کارت صفحهٔ اصلی، با پاسخ بازبینی‌نشده جدا', st.length === 2 && st.filter(function (x) { return x.pend; }).length === 1);
+    TG_OUTBOX = [];
+    var o = tgV170232DirRetry();
+    var pubs = dirs('publish');
+    ok('بازنشر: اول آزمایشی (dry) روی یک پروفایل واقعی، بعد واقعی', pubs.length === 2 && pubs[0].data.dry === 1 && !pubs[1].data.dry && /آزمایشی: سبز · نشست: 1/.test(o), o);
+    ok('بازنشر: به خود عضو پیام نمی‌رود؛ منتظر بازبینی بازنشر نشد', !TG_OUTBOX.some(function (x) { return x.kind === 'msg' && (x.chat === '901' || x.chat === '902'); }) && /منتظر بازبینی: 1/.test(o));
+    TG_MEM['dirres'].publish = { ok: true, pages: [], errors: [{ page: TG_PR_HOME, error: 'no team page' }] };
+    TG_OUTBOX = [];
+    ok('آزمایشی ناموفق ← هیچ بازنشر واقعی', /ناموفق/.test(tgV170232DirRetry()) && dirs('publish').length === 1);
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'tgDirP3Tests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دایرکتوری صفحهٔ اصلی p3 (v170.23.2)', 'tgDirP3Tests']); } catch (eDp) {}
 
 /* ───── صفحهٔ شخصی: /team/<نام>/ (اسنیپت 504078 از راه op=person) ───── */
 var TG_PR_PAGE = ['title', 'degree', 'since', 'langs', 'ages', 'mode', 'focus', 'groups', 'headline', 'method', 'first', 'trainings', 'supervision', 'personal',
@@ -15323,7 +15437,7 @@ function tgPrCb_(cq, arg) {
   var v = r.v;
 
   if (act === 'sh') return tgPrShow_(chat, r.row, cq.message.photo ? 0 : msgId);
-  if (act === 'pub') return tgPrPublish_(chat, r);
+  if (act === 'pub' || act === 'rt') return tgPrPublish_(chat, r);   /* rt: «دوباره امتحان کن» (v170.23.2) */
   if (act === 'rv' || act === 'no') {
     tgPqPut_(v.id, { review: tgPqNow_() + ' · ' + tgPrWho_(chat), rstamp: String(Date.now()), notified: String(tgPrStamp_(v)),
                      status: act === 'no' ? 'روی سایت نمی‌رود (تصمیم تیم)' : 'بازبینی شد' });

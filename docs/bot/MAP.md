@@ -74,14 +74,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.1`
+نسخهٔ کد: `v170.23.2`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۲ | ۳۳ |
-| `telegram.gs` | ۳۷۵۵۳ | ۲۰۳۲ |
+| `telegram.gs` | ۳۷۶۶۷ | ۲۰۳۶ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -342,6 +342,7 @@
 | اصلی ۱ از ۳ | `tgRunTests1` |
 | اصلی ۲ از ۳ | `tgRunTests2` |
 | اصلی ۳ از ۳ | `tgRunTests3` |
+| دایرکتوری صفحهٔ اصلی p3 (v170.23.2) | `tgDirP3Tests` |
 | دادهٔ دکمه (v170.9.2) | `tgCbTests` |
 | مینی‌اپ ۲ | `tgApp2Tests` |
 | نسخهٔ ۱۱۶ | `tgV116Tests` |
