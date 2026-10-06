@@ -4507,7 +4507,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('vx:') === 0 && typeof vxOnCb_ === 'function') return vxOnCb_(chat, data, cq, name, uname);   /* v166: موتور صدا */
   if (data.indexOf('dq:') === 0 && typeof dqCb_ === 'function') return dqCb_(chat, data);   /* v170: صف ارسال */
   if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);
-  if (data.indexOf('erb:') === 0 && typeof erbCb_ === 'function') return erbCb_(chat, data);   /* v170.23.4: صندوق خطا */   /* v170.2: درخواست متوقف */
+  if (data.indexOf('erb:') === 0 && typeof erbCb_ === 'function') return erbCb_(chat, data);   /* v170.23.5: صندوق خطا */   /* v170.2: درخواست متوقف */
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
   if (data.indexOf('cm:') === 0 && typeof cmCb_ === 'function') return cmCb_(chat, data);     /* v170.2: کامنت‌های هاب (پرسش ترجیح) */
   if (data.indexOf('rv:t:') === 0 && typeof rvToggleCb_ === 'function') return rvToggleCb_(chat, data);   /* v169: بازبینی علمی */
@@ -6889,7 +6889,7 @@ function tgWatchdog(e) {
   try { if (typeof v1691Weekly_ === 'function' && v1691Weekly_(e)) return; } catch (eW) { tgErr_('v1691Weekly_', eW); }
   // ستون‌های تاریخ شمسی خودشان پر می‌شوند؛ کسی نباید دستی اجرا کند
   try { tgFillJalali_(false); } catch (e) { tgErr_('tgFillJalali_: ' + e); }
-  try { if (typeof erbHourly_ === 'function') erbHourly_(); else tgErrDigest_(); } catch (eEd) {}   /* v170.23.4: گزارش صندوق خطا و پل سایت */
+  try { if (typeof erbHourly_ === 'function') erbHourly_(); else tgErrDigest_(); } catch (eEd) {}   /* v170.23.5: گزارش صندوق خطا و پل سایت */
   try { tgQueueFlush_(); } catch (eQf) {}
   /* v168 فاز ۲: لید باز بی اقدام بعدی (فرم سایت و هر جای دیگر)، ساعتی یک بار */
   /* v168.10 (سهمیه، تأیید یاسر): جاروهای v168 هر سه ساعت، نه هر ساعت (v16810SweepDue_ با Script Property، نه کش) */
@@ -10066,7 +10066,7 @@ function tgDayWin_() {
   } catch (e) { tgErr_('tgDay_ bugs: ' + e); }
 
   // خطاها
-  try {   /* v170.23.4: صندوق یکتای خطا، فقط مسیر فرم سایت (منبع «سایت») */
+  try {   /* v170.23.5: صندوق یکتای خطا، فقط مسیر فرم سایت (منبع «سایت») */
     if (typeof erbRows_ === 'function') erbRows_().forEach(function (x) { if (x.src === 'سایت' && x.first >= d.from.getTime()) d.errs++; });
   } catch (e) {}
 
@@ -18790,7 +18790,7 @@ function tgErr_(where, err, ref) {
   else msg = (err && err.stack) ? String(err.message || err) : String(err);
   w = tgSecretMask_(w); msg = tgSecretMask_(msg); if (ref) ref = tgSecretMask_(ref);
   try { console.error((w ? w + ': ' : '') + msg + (ref ? ' [' + ref + ']' : '')); } catch (e0) {}
-  /* v170.23.4: صندوق یکتای خطا (errbox.gs، تب «خطاها»ی هاب تجربه). تب قدیمی هاب پیام دیگر نوشته نمی‌شود. */
+  /* v170.23.5: صندوق یکتای خطا (errbox.gs، تب «خطاها»ی هاب تجربه). تب قدیمی هاب پیام دیگر نوشته نمی‌شود. */
   var xid = '';
   try { if (typeof erbFromErr_ === 'function') xid = erbFromErr_(w, msg); } catch (eX) {}
   if (TG_DRY) { (TG_MEM['errs'] = TG_MEM['errs'] || []).push({ where: w, msg: msg, ref: ref || '' }); return 'E-dry'; }

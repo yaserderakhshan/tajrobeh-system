@@ -1,5 +1,5 @@
 /**
- * errbox.gs · v170.23.4 · ۱۴ مهر ۱۴۰۵ · صندوق یکتای خطا: «خطا ← برنامه ← اصلاح ← شاهد» (تصمیم یاسر)
+ * errbox.gs · v170.23.5 · ۱۴ مهر ۱۴۰۵ · صندوق یکتای خطا: «خطا ← برنامه ← اصلاح ← شاهد» (تصمیم یاسر)
  *
  * مرحلهٔ ۱ (دیدن): همهٔ مسیرهای خطا به یک تب «خطاها» در هاب تجربه می‌ریزند (جای «Errors»):
  *   tgErr_ (همهٔ خطاهای بات) · logError_ (فرم سایت؛ فرم تستی دیگر خطا نیست) · نتیجهٔ نیمه یا شکست کار بات ← سایت
@@ -229,9 +229,9 @@ function erbCiRows_(since) {
     return { t: e.last, first: e.first, where: p > 0 ? e.fp.slice(0, p) : e.fp, msg: p > 0 ? e.fp.slice(p + 3) : '', n: e.n, src: e.src };
   });
 }
-/* یک‌بارهٔ خودکار v170.23.4: ردیف‌های هفت روز اخیر «خطاها»ی هاب پیام و «Errors» هاب تجربه به صندوق می‌آیند تا پایش انتشار
+/* یک‌بارهٔ خودکار v170.23.5: ردیف‌های هفت روز اخیر «خطاها»ی هاب پیام و «Errors» هاب تجربه به صندوق می‌آیند تا پایش انتشار
    خطای قدیمی را تازه نداند. دو تب قدیمی دست نمی‌خورند و دیگر نوشته نمی‌شوند. خروجی فقط شمار. */
-function tgV170234ErrBox() {
+function tgV170235ErrBox() {
   var since = Date.now() - 7 * 86400000, n = 0, m = 0;
   try {
     var sh = tgErrSheet_(), last = sh ? sh.getLastRow() : 0;
@@ -332,4 +332,4 @@ function erbTests() {
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; }
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
-try { if (TG_SUITES.every(function (s) { return s[1] !== 'erbTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['صندوق یکتای خطا (v170.23.4)', 'erbTests']); } catch (eErb) {}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'erbTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['صندوق یکتای خطا (v170.23.5)', 'erbTests']); } catch (eErb) {}
