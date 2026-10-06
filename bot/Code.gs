@@ -89,6 +89,11 @@ function doPost(e) {
     } else if (body.kind === 'wp_sec') {
       /* v170.12: هشدار ورود مدیر و کد ورود دومرحله‌ای از وردپرس؛ فقط با امضای درست (sitesec.gs) */
       if (typeof wpSecIn_ === 'function') wpSecIn_(e, raw, body);
+    } else if (body.kind === 'lead') {
+      /* v170.35: قرارداد یکسان ورود از /wp-json/tj/v1/lead سایت (intake2.gs)؛ همان امضای ورودی سایت */
+      if (typeof ssGate_ === 'function' && !ssGate_(e, raw)) return okJson_();
+      if (typeof ssClean_ === 'function') body = ssClean_(body);
+      if (typeof itk2LeadIn_ === 'function') itk2LeadIn_(body);
     } else if (body.kind === 'click') {
       // کلیک روی واتساپ / تلگرام / تلفن در سایت
       if (typeof ssGate_ === 'function' && !ssGate_(e, raw)) return okJson_();   /* v170.9 (از PR #73): امضای ورودی سایت */
@@ -104,7 +109,8 @@ function doPost(e) {
     } else {
       if (typeof ssGate_ === 'function' && !ssGate_(e, raw)) return okJson_();   /* v170.9 (از PR #73): امضای ورودی سایت */
       if (typeof ssClean_ === 'function') body = ssClean_(body);
-      handleWebForm_(body);
+      if (typeof itk2CtxOf_ === 'function') ITK_CTX = itk2CtxOf_(body);   /* v170.35: ردپای فرم (cta، صفحه، UTM، بازدید) */
+      try { handleWebForm_(body); } finally { if (typeof itk2CtxOf_ === 'function') ITK_CTX = null; }
     }
   } catch (err) {
     logError_(err, e);
@@ -262,6 +268,8 @@ function handleContactClick_(body) {
   var page    = String(body.page || '').slice(0, 200);
   var src     = String(body.source || '').slice(0, 200);
   var ref     = String(body.ref || '').slice(0, 60);
+  if (body.tok && typeof itk2Click_ === 'function') itk2Click_(body);   /* v170.35: ردپای ورود با توکن لینک بات */
+  try { if (typeof fnlEv_ === 'function' && body.channel) fnlEv_('cta_click', { src: String(body.source || '').slice(0, 120), page: body.page_url || body.page || '', cta: body.cta || '', vid: body.vid || '', start: body.code || '', utm: typeof itk2Utm_ === 'function' ? itk2Utm_(body.utm) : '' }); } catch (eF) {}   /* v170.36 */
   if (!channel) return;
   if (ref && seenRecently_('click:' + ref)) return;
   /* v170.14: سایت بخش را می‌فرستد (نام در کد سایت نیست)؛ نام مسئول همان قبلی، از TG_NAMES */
