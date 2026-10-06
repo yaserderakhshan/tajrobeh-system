@@ -1,10 +1,10 @@
 /* ══════════════════════════════════════════════════════════════════════
    v162.gs · ۶ مهر ۱۴۰۵
-   ۱) رویدادهای مدرسه یکپارچه: تعریف از بات (ترانه، کاوه، ناظر) ← سطر هاب مدرسه با کد EV
+   ۱) رویدادهای مدرسه یکپارچه: تعریف از بات (مسئول مدرسه، مدیر مدرسه، ناظر) ← سطر هاب مدرسه با کد EV
       ← رویداد گوگل‌کلندر ← صفحهٔ سایت (API عمومی) ← خبر به کامیونیتی ← بازخورد متنی و صوتی حاضران
       با اجازهٔ انتشار و تأیید مدرسه ← نمایش روی صفحهٔ رویداد
    ۲) جذب تراپیست برای مسئول پذیرش: صف در منوی پذیرش، شماره و ایمیل و تلگرام روی کارت،
-      رزومه در درایو با لینک، تب کاری «جذب تراپیست» با فهرست کشویی و بازگشت ویرایش به منبع، کار برای ژیلا
+      رزومه در درایو با لینک، تب کاری «جذب تراپیست» با فهرست کشویی و بازگشت ویرایش به منبع، کار برای مسئول پذیرش
    ۳) تکرار وقت‌ها: هر هفته، یک هفته در میان، هر سه هفته، ماهی یک بار (وقت‌های هفتگی و ساعت‌های حضوری)
       و ثبت ساعت حضوری درمانگر مستقیم از بات پذیرش
    ۴) بررسی برنامهٔ حضوری بی‌وابستگی به کش (رفع «این بررسی قبلاً بسته شده است»)
@@ -353,7 +353,7 @@ var TG_EVF_ST = { wait: 'منتظر اجازه', rev: 'در انتظار تأی�
 var TG_EVF_PERM = { n: 'با نام', a: 'بی‌نام', x: 'منتشر نشود' };
 var TG_EV_SITE = 'https://tajrobeh.life/school/events/';
 
-/* چه کسی رویداد تعریف می‌کند: ناظر، مسئول مدرسه، سردبیر (کاوه) */
+/* چه کسی رویداد تعریف می‌کند: ناظر، مسئول مدرسه، سردبیر (سردبیر) */
 function tgEvCan_(chat) {
   if (tgEvIsSchool_(chat)) return true;
   try { var ids = TG_DRY ? (TG_MEM['watchids'] || []) : tgWatchIds_(); for (var i = 0; i < ids.length; i++) if (String(ids[i]) === String(chat)) return true; } catch (e) {}
@@ -698,7 +698,7 @@ function tgV162Tests() {
   TG_DRY_THER = keepTher;
 
   /* بررسی حضوری بی‌کش */
-  TG_MEM['desk'] = [{ name: 'ژیلا', role: 'مسئول پذیرش', chat: '77' }];
+  TG_MEM['desk'] = [{ name: 'پذیرشی', role: 'مسئول پذیرش', chat: '77' }];
   TG_OUTBOX = [];
   tgInpChkCb_('77', 'ok');
   ok('بی‌حالت و بی‌آرگومان: پیام بسته با راهنما', said('77').indexOf('قبلاً بسته') > -1 && said('77').indexOf('درخواست‌های حضوری') > -1);
@@ -707,7 +707,7 @@ function tgV162Tests() {
   ok('با آرگومان دکمه، بی‌کش هم کار می‌کند', said('77').indexOf('قبلاً بسته') < 0);
 
   /* پذیرش: ثبت ساعت حضوری */
-  TG_MEM['deskwho'] = { name: 'ژیلا', role: 'مسئول پذیرش', chat: '77' };
+  TG_MEM['deskwho'] = { name: 'پذیرشی', role: 'مسئول پذیرش', chat: '77' };
   TG_MEM['inp'] = { places: [{ id: 'gandhi', city: 'تهران', name: 'کلینیک', kind: '', area: 'ونک', status: 'فعال', ord: 1 }], hours: [], rooms: [] };
   TG_OUTBOX = [];
   tgSetVal_('inpd', '77', JSON.stringify({ pid: 'gandhi', s: 'hrs', who: 'درمانگر آزمون', day: 'دوشنبه' }));
@@ -723,13 +723,13 @@ function tgV162Tests() {
   TG_OUTBOX = [];
   var url = tgApResumeToDrive_('A-009');
   ok('رزومه به درایو و لینکش در ستون', url.indexOf('drive.google.com') > -1 && TG_OUTBOX.some(function (x) { return x.kind === 'apset' && x.col === tgApCol_('لینک رزومه'); }));
-  TG_MEM['tasks'] = []; TG_MEM['desk'] = [{ name: 'ژیلا', role: 'مسئول پذیرش', chat: '77' }, { name: 'شیدا', role: 'پذیرش', chat: '78' }];
+  TG_MEM['tasks'] = []; TG_MEM['desk'] = [{ name: 'پذیرشی', role: 'مسئول پذیرش', chat: '77' }, { name: 'کشیکی', role: 'پذیرش', chat: '78' }];
   tgApTaskLead_(TG_MEM['approw'], 'تماس اول با متقاضی A-009', 1);
   ok('کار فقط برای مسئول پذیرش', TG_MEM['tasks'].length === 1 && TG_MEM['tasks'][0].chat === '77');
   ok('کیبورد کارت اقدام بعدی دارد', JSON.stringify(tgApKb_(TG_MEM['approw'])).indexOf('ap:nx:A-009') > -1);
 
   /* رویداد تازه */
-  TG_MEM['watchids'] = ['1']; TG_MEM['people'] = [{ row: 2, id: 'P-1', name: 'کاوه', user: 'e', chat: '104', roles: ['سردبیر'], status: 'فعال' }];
+  TG_MEM['watchids'] = ['1']; TG_MEM['people'] = [{ row: 2, id: 'P-1', name: 'مدیری', user: 'e', chat: '104', roles: ['سردبیر'], status: 'فعال' }];
   TG_MEM['person'] = TG_MEM['people'][0]; TG_MEM['evall'] = [];
   ok('سردبیر می‌تواند رویداد تعریف کند', tgEvCan_('104') === true);
   TG_MEM['person'] = null;
@@ -737,23 +737,23 @@ function tgV162Tests() {
   TG_MEM['person'] = TG_MEM['people'][0];
   TG_OUTBOX = [];
   var cq = { message: { chat: { id: '104' } }, from: { id: 104 } };
-  tgEvnText_('104', 'کاوه', TG_EVN_BTN);
-  tgEvnText_('104', 'کاوه', 'ژورنال کلاب «فروید و وینیکات»');
-  tgOnEvn_(cq, 'k:0', 'کاوه');
-  ok('تاریخ گذشته رد می‌شود', tgEvnText_('104', 'کاوه', '۱۳۹۹/۰۱/۰۱') === true && tgEvnGet_('104').s === 'date');
-  tgEvnText_('104', 'کاوه', '۱۴۰۶/۰۱/۲۰');
-  tgEvnText_('104', 'کاوه', '۱۸:۳۰');
-  tgOnEvn_(cq, 'm:90', 'کاوه');
-  tgOnEvn_(cq, 'a:0', 'کاوه');
-  tgEvnText_('104', 'کاوه', 'https://meet.google.com/abc-defg-hij');
-  tgEvnText_('104', 'کاوه', 'دکتر کیومرث نوین');
-  tgEvnText_('104', 'کاوه', 'خوانش مقالهٔ وینیکات دربارهٔ ابژهٔ انتقالی.');
+  tgEvnText_('104', 'مدیری', TG_EVN_BTN);
+  tgEvnText_('104', 'مدیری', 'ژورنال کلاب «فروید و وینیکات»');
+  tgOnEvn_(cq, 'k:0', 'مدیری');
+  ok('تاریخ گذشته رد می‌شود', tgEvnText_('104', 'مدیری', '۱۳۹۹/۰۱/۰۱') === true && tgEvnGet_('104').s === 'date');
+  tgEvnText_('104', 'مدیری', '۱۴۰۶/۰۱/۲۰');
+  tgEvnText_('104', 'مدیری', '۱۸:۳۰');
+  tgOnEvn_(cq, 'm:90', 'مدیری');
+  tgOnEvn_(cq, 'a:0', 'مدیری');
+  tgEvnText_('104', 'مدیری', 'https://meet.google.com/abc-defg-hij');
+  tgEvnText_('104', 'مدیری', 'دکتر استادی نمونه‌نو');
+  tgEvnText_('104', 'مدیری', 'خوانش مقالهٔ وینیکات دربارهٔ ابژهٔ انتقالی.');
   ok('کارت تأیید پیش از ثبت', said('104').indexOf('evn:ok') > -1 && said('104').indexOf('رایگان') > -1);
   TG_OUTBOX = [];
-  tgOnEvn_(cq, 'ok', 'کاوه');
+  tgOnEvn_(cq, 'ok', 'مدیری');
   var ne = TG_OUTBOX.filter(function (x) { return x.kind === 'evnew'; })[0];
   var H = tgEvHeadAll_();
-  ok('سطر رویداد با کد EV و ستون‌های تازه', ne && /^EV-\d+$/.test(ne.code) && ne.row[H.indexOf('دسترسی')] === 'رایگان و آزاد برای همه' && ne.row[H.indexOf('مدت (دقیقه)')] === 90 && ne.row[H.indexOf('ارائه‌دهنده')] === 'دکتر کیومرث نوین');
+  ok('سطر رویداد با کد EV و ستون‌های تازه', ne && /^EV-\d+$/.test(ne.code) && ne.row[H.indexOf('دسترسی')] === 'رایگان و آزاد برای همه' && ne.row[H.indexOf('مدت (دقیقه)')] === 90 && ne.row[H.indexOf('ارائه‌دهنده')] === 'دکتر استادی نمونه‌نو');
   ok('پیام ثبت با لینک بازخورد و دکمهٔ خبر کامیونیتی', said('104').indexOf('evf-' + ne.code) > -1 && said('104').indexOf('evn:bc:' + ne.code) > -1);
   ok('ناظر خبردار شد', TG_MEM['notify'].some(function (n) { return n.chat === '1' && n.text.indexOf(ne.code) > -1; }));
 
@@ -771,11 +771,11 @@ function tgV162Tests() {
   ok('لینک بازخورد', tgEvfJoin_('700', 'evf-' + ne.code) === true && tgGetVal_('evf', '700') === ne.code);
   ok('متن بازخورد ثبت و اجازه پرسیده شد', tgEvfInput_('700', { text: 'جلسهٔ خیلی خوبی بود، ممنون از ارائه.' }, 'سارا') === true && TG_MEM['evf'].length === 1 && said('700').indexOf('evf:p:') > -1);
   var fid = TG_MEM['evf'][0]['کد'];
-  TG_MEM['person'] = null; TG_MEM['people'].push({ row: 3, id: 'P-2', name: 'ترانه', user: 'l', chat: '500', roles: ['مدرسه'], status: 'فعال' });
+  TG_MEM['person'] = null; TG_MEM['people'].push({ row: 3, id: 'P-2', name: 'مدرسه‌ای', user: 'l', chat: '500', roles: ['مدرسه'], status: 'فعال' });
   TG_MEM['notify'] = [];
   tgOnEvf_({ message: { chat: { id: '700' } }, from: { id: 700 } }, 'p:' + fid + ':a');
   ok('اجازهٔ بی‌نام و خبر به مدرسه با دکمهٔ تأیید', TG_MEM['evf'][0]['اجازهٔ انتشار'] === 'بی‌نام' && TG_MEM['notify'].some(function (n) { return n.chat === '500' && n.text.indexOf('بازخورد تازه') > -1; }));
-  TG_MEM['person'] = { row: 3, name: 'ترانه', roles: ['مدرسه'] };
+  TG_MEM['person'] = { row: 3, name: 'مدرسه‌ای', roles: ['مدرسه'] };
   tgOnEvf_({ message: { chat: { id: '500' } }, from: { id: 500 } }, 'ok:' + fid);
   ok('تأیید مدرسه: منتشر شود', TG_MEM['evf'][0]['وضعیت'] === TG_EVF_ST.pub);
   var api = tgApiEvents162_({});

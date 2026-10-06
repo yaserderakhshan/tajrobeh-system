@@ -148,8 +148,8 @@ function tgCpReconStats(code) {
 
 /* ==================== v101 · صف کارها ====================
    «کارهایی که ما از تیم می‌خواهیم». تا امروز این‌ها در گفت‌وگوهای
-   پراکنده می‌ماند و گم می‌شد: «به ترانه گفتیم همهٔ استادها به بات
-   بپیوندند» جایی ثبت نبود، پس نه ترانه یادش می‌ماند نه ما می‌دانستیم
+   پراکنده می‌ماند و گم می‌شد: «به مسئول مدرسه گفتیم همهٔ استادها به بات
+   بپیوندند» جایی ثبت نبود، پس نه مسئول مدرسه یادش می‌ماند نه ما می‌دانستیم
    کجای کار است. حالا هر خواسته یک ردیف است با مسئول، مهلت و وضعیت؛
    در بات به شکل تسک دیده می‌شود و رد پایش در همان هاب تیم می‌ماند.
    ======================================================== */
@@ -1171,8 +1171,8 @@ function tgV1Tests() {
   ok('عدد نداشته «—» می‌شود', tgDashLine_('x', null).indexOf('—') > -1);
   ok('عدد صفر «—» نمی‌شود', tgDashLine_('x', 0).indexOf('—') < 0);
 
-  var ct = tgBoxCardText_({ from: TG_BOX_FROM_THEM, name: 'ترانه', at: '۱۴۰۵', last: 'سلام' });
-  ok('پیام طرف با نام خودش نشان داده می‌شود', ct.indexOf('ترانه') > -1);
+  var ct = tgBoxCardText_({ from: TG_BOX_FROM_THEM, name: 'مدرسه‌ای', at: '۱۴۰۵', last: 'سلام' });
+  ok('پیام طرف با نام خودش نشان داده می‌شود', ct.indexOf('مدرسه‌ای') > -1);
   var cu = tgBoxCardText_({ from: TG_BOX_FROM_US, at: '۱۴۰۵', last: 'سلام' });
   ok('پیام ما با نام تجربه نشان داده می‌شود', cu.indexOf('تجربه') > -1);
 
@@ -3739,7 +3739,7 @@ function tgDeskRoute_(chat, who, text) {
   }
 
   if (tgAssignCmd_(chat, who, text) === true) return;
-  // کارت لید با کد: «L-1042» یا «لید 0912…» یا «لید ژیلا»
+  // کارت لید با کد: «L-1042» یا «لید 0912…» یا «لید مسئول پذیرش»
   if (/^L-?\d{3,6}$/i.test(tgLatinDigits_(text))) { tgLeadFindSend_(chat, text); return; }
   if (/^لید\s+\S/.test(text)) { tgLeadFindSend_(chat, text.replace(/^لید\s+/, '')); return; }
   if (tgFinSch_(chat, who.name, text, tgDeskMenu_) === true) return;
@@ -3829,7 +3829,7 @@ function tgPoolSeed_(tierText, status) {
   return TG_POOL_PRI[2];                            // دادهٔ کم
 }
 
-// تب «استخرها» را می‌سازد یا تازه می‌کند؛ انتخاب‌های ژیلا دست‌نخورده می‌ماند
+// تب «استخرها» را می‌سازد یا تازه می‌کند؛ انتخاب‌های مسئول پذیرش دست‌نخورده می‌ماند
 function tgBuildPools() {
   const ss = tgSS_();
   const src = ss.getSheetByName(TG_THER);
@@ -3841,7 +3841,7 @@ function tgBuildPools() {
   const fresh = !sh;
   if (fresh) sh = ss.insertSheet(TG_POOLS_TAB);
 
-  // انتخاب‌های قبلی ژیلا را نگه دار
+  // انتخاب‌های قبلی مسئول پذیرش را نگه دار
   const keep = {};
   if (!fresh && sh.getLastRow() >= 4) {
     const old = sh.getRange(4, 1, sh.getLastRow() - 3, sh.getLastColumn()).getValues();
@@ -3971,7 +3971,7 @@ function tgPoolFilter_(slots, chat, over) {
     if (distinct(ok) >= 2) cand = ok;
   }
 
-  // ۳) اولویت ژیلا: اول صف اول، و اگر کم بود ردهٔ بعدی هم اضافه شود
+  // ۳) اولویت مسئول پذیرش: اول صف اول، و اگر کم بود ردهٔ بعدی هم اضافه شود
   if (pool) {
     for (var p = 1; p <= 3; p++) {
       const tier = cand.filter(function (s) { const r = rec(s); return r && r[pool] && r[pool] <= p; });
@@ -6498,7 +6498,7 @@ function tgCbTests() {
     ok('دادهٔ خالی دیده و گزارش می‌شود', TG_BTN_BAD.length === 1, TG_BTN_BAD.join(' | '));
     /* مسیر واقعی: هشدار ارجاع با همکاران هم‌استخر که نام بلند دارند */
     TG_OUTBOX = []; TG_BTN_BAD = [];
-    tgReferWarn_(5, 'L-1234', longName, { label: 'زوج', alts: [longName, 'ژیلا'] });
+    tgReferWarn_(5, 'L-1234', longName, { label: 'زوج', alts: [longName, 'پذیرشی'] });
     var kb = TG_OUTBOX[TG_OUTBOX.length - 1].markup.inline_keyboard;
     ok('هشدار ارجاع: همهٔ دکمه‌ها ≤ ۶۴ بایت', TG_BTN_BAD.length === 0 && kb.every(function (r) { return r.every(function (b) { return tgCbBytes_(b.callback_data) <= 64; }); }), TG_BTN_BAD.join(' | '));
     ok('هشدار ارجاع: دکمهٔ «بفرست» نام کامل را بی بریدن نگه می‌دارد', tgCbResolve_(kb[kb.length - 2][0].callback_data) === 'rf:f:L-1234:' + longName);
@@ -7085,9 +7085,9 @@ function tgRunTests() {
   (function () {
     const mk = function (o) { return o; };
     const list = [
-      mk({ row: 2, name: 'الف', src: 'بات', note: '', owner: 'ژیلا', age: 200, status: 'جدید', touched: false, idle: 200, stage: 'first', urgent: false, abroad: false, booked: false }),
-      mk({ row: 3, name: 'ب', src: 'سایت', note: '', owner: 'ژیلا', age: 9000, status: 'در جریان', touched: true, idle: 100, stage: 'live', urgent: false, abroad: false, booked: false }),
-      mk({ row: 4, name: 'ج', src: 'سایت', note: '', owner: 'شیدا', age: 20000, status: 'در جریان', touched: true, idle: 7000, stage: 'stale', urgent: false, abroad: false, booked: false })
+      mk({ row: 2, name: 'الف', src: 'بات', note: '', owner: 'پذیرشی', age: 200, status: 'جدید', touched: false, idle: 200, stage: 'first', urgent: false, abroad: false, booked: false }),
+      mk({ row: 3, name: 'ب', src: 'سایت', note: '', owner: 'پذیرشی', age: 9000, status: 'در جریان', touched: true, idle: 100, stage: 'live', urgent: false, abroad: false, booked: false }),
+      mk({ row: 4, name: 'ج', src: 'سایت', note: '', owner: 'کشیکی', age: 20000, status: 'در جریان', touched: true, idle: 7000, stage: 'stale', urgent: false, abroad: false, booked: false })
     ];
     const b = tgLeadBuckets_(list);
     if (b.first.length === 1 && b.live.length === 1 && b.stale.length === 1 && b.all.length === 3) {
@@ -8002,10 +8002,13 @@ function tgTrigList() {
 
 
 // رلهٔ تازه را تست می‌کند و اگر سالم بود وبهوک را روی آن می‌برد
+/* v170.23: نشانی رله (که نام حساب را دارد) در کد نیست؛ از کلید TG_RELAY_BASE تنظیمات خصوصی */
+var TG_RELAY_BASE = cfg_('TG_RELAY_BASE', '');
 function tgSwitchRelay() {
   const props = PropertiesService.getScriptProperties();
   const secret = props.getProperty('TG_HOOK_SECRET') || '';
-  const base = 'https://tajrobeh-relay.yaserderakhshan.workers.dev';
+  const base = String(TG_RELAY_BASE || '').replace(/\/+$/, '');
+  if (!base) { Logger.log('⛔ کلید TG_RELAY_BASE در «تنظیمات خصوصی بات» خالی است.'); return; }
   const url = base + (secret ? '?t=' + secret : '');
   const out = [];
 
@@ -8042,7 +8045,8 @@ function tgSwitchRelay() {
 
 function tgRelayTidy() {
   const props = PropertiesService.getScriptProperties();
-  props.setProperty('TG_RELAY_URL', 'https://tajrobeh-relay.yaserderakhshan.workers.dev');
+  if (!TG_RELAY_BASE) { Logger.log('⛔ کلید TG_RELAY_BASE در «تنظیمات خصوصی بات» خالی است.'); return; }
+  props.setProperty('TG_RELAY_URL', String(TG_RELAY_BASE).replace(/\/+$/, ''));
   tgUseWebhook();
   Utilities.sleep(2000);
   const info = tgApi_('getWebhookInfo', {});
@@ -8959,7 +8963,7 @@ function tgFinSchTests() {
   step('انتخاب موضوع مالی', '💰 تسویه و پرداخت', 'بفرمایید');
   step('متن کوتاه', 'ok', 'کمی بیشتر');
   step('ثبت مالی', 'دربارهٔ تسویهٔ مرداد سوال داشتم', 'شمارهٔ پیگیری');
-  step('بدون اسم کوچک', '💳 مالی', '!ترانه');
+  step('بدون اسم کوچک', '💳 مالی', '!مدرسه‌ای');
   TG_MEM = {};
   step('باز شدن مدرسه', '🎓 مدرسه', 'Tajrobeh_school');
   step('سوپرویژن', '🧭 سوپرویژن', 'بفرمایید');
@@ -9648,7 +9652,7 @@ function tgWhoWatch_(chat, username) {
 
 /* گیرنده‌های گزارش روزانه، هر کدام با دامنهٔ خودش */
 /* دامنهٔ گزارش یک نفر را ست می‌کند. مثال:
-     tgScopeSet('یلدا', 'به‌جز مدرسه')
+     tgScopeSet('مسئول روان‌پزشکی', 'به‌جز مدرسه')
      tgScopeSet('یاسر', 'همه')                                            */
 function tgScopeSet(name, scope) {
   const sh = tgPeopleSheet_();
@@ -13419,7 +13423,7 @@ function tgMagTests() {
     ok('متن‌ها خط تیره ندارند', [T_MAG_INTRO, T_MAG_ABOUT, T_MAG_OWN, T_MAG_REJECT, T_MAG_DELIVER_OK, T_EDU_ASK,
       T_EDU_NONE, T_EDU_OK, T_EDU_NOPHONE, T_CIRCLE_789].every(function (t) { return t.indexOf('—') < 0; }));
     ok('متن نویسنده اسم کوچک ندارد', [T_MAG_INTRO, T_MAG_REJECT, T_MAG_DELIVER_OK, T_MAG_OWN].every(function (t) {
-      return t.indexOf('کاوه') < 0 && t.indexOf('ترانه') < 0; }));
+      return t.indexOf('مدیری') < 0 && t.indexOf('مدرسه‌ای') < 0; }));
   } catch (e) { ok('خطای اجرا: ' + e, false); }
   TG_DRY = wasDry;
   Logger.log(out.join('\n'));
@@ -16557,48 +16561,48 @@ function tgInpTests() {
               { p: 'gandhi', room: '۶', kind: 'کودک', days: 'شنبه تا دوشنبه', from: '9', to: '22', status: 'فعال' },
               { p: 'gandhi', room: '۷', kind: 'بزرگسال', days: 'همه', from: '9', to: '22', status: 'غیرفعال' }],
       hours: [
-      { p: 'gandhi', who: 'کاظم‌پور', day: 'شنبه', from: '9', to: '15', room: '۲', open: 'دارد' },
-      { p: 'gandhi', who: 'سپهری', day: 'شنبه', from: '17', to: '22', room: '2', open: 'دارد' },
-      { p: 'gandhi', who: 'کاظم‌پور', day: 'شنبه', from: '14', to: '18', room: '۶ (کودک)', open: 'دارد' },
-      { p: 'gandhi', who: 'ستاره‌ای', day: 'یکشنبه', from: '9', to: '18:30', room: '۶ (کودک)', open: 'دارد' },
-      { p: 'gandhi', who: 'کوهیار', day: 'یکشنبه', from: '18:30', to: '20:30', room: '۶', open: 'دارد' },
-      { p: 'gandhi', who: 'نوری‌پور', day: 'دوشنبه', from: '', to: '', room: '۲', open: 'دارد', chk: 'ساعت نامشخص' },
-      { p: 'gandhi', who: 'امیرآرا', day: 'دوشنبه', from: '10', to: '14', room: '۲', open: 'دارد' },
-      { p: 'gandhi', who: 'کیانی', day: 'دوشنبه', from: '12', to: '16', room: '۲', open: 'دارد' }] };
+      { p: 'gandhi', who: 'نمونه‌کاف', day: 'شنبه', from: '9', to: '15', room: '۲', open: 'دارد' },
+      { p: 'gandhi', who: 'نمونه‌زاده', day: 'شنبه', from: '17', to: '22', room: '2', open: 'دارد' },
+      { p: 'gandhi', who: 'نمونه‌کاف', day: 'شنبه', from: '14', to: '18', room: '۶ (کودک)', open: 'دارد' },
+      { p: 'gandhi', who: 'نمونه‌سین', day: 'یکشنبه', from: '9', to: '18:30', room: '۶ (کودک)', open: 'دارد' },
+      { p: 'gandhi', who: 'نمونه‌کوه', day: 'یکشنبه', from: '18:30', to: '20:30', room: '۶', open: 'دارد' },
+      { p: 'gandhi', who: 'نمونه‌نون', day: 'دوشنبه', from: '', to: '', room: '۲', open: 'دارد', chk: 'ساعت نامشخص' },
+      { p: 'gandhi', who: 'آرانمونه', day: 'دوشنبه', from: '10', to: '14', room: '۲', open: 'دارد' },
+      { p: 'gandhi', who: 'نمونه‌کی', day: 'دوشنبه', from: '12', to: '16', room: '۲', open: 'دارد' }] };
     var cap = tgInpCap_('gandhi');
     var c2 = cap.cells.filter(function (x) { return x.day === 'شنبه' && x.room === '2'; })[0];
     ok('ظرفیت: اتاق غیرفعال حساب نمی‌شود و روزها درست باز می‌شود', cap.cells.length === 7 + 3 && !cap.cells.some(function (x) { return x.room === '7'; }));
     ok('ظرفیت: ساعت پر و خالی اتاق', c2.cap === 13 && c2.used === 11 && c2.free.length === 1 && c2.free[0][0] === 15 && c2.free[0][1] === 17);
     var c6 = cap.cells.filter(function (x) { return x.day === 'یکشنبه' && x.room === '6'; })[0];
     ok('ظرفیت: نیم‌ساعت‌ها و «۶ (کودک)» همان اتاق ۶', Math.abs(c6.used - 11.5) < 0.01 && c6.free.length === 1 && Math.abs(c6.free[0][0] - 20.5) < 0.01);
-    ok('تداخل: یک نفر دو اتاق همزمان', cap.clash.some(function (t) { return t.indexOf('کاظم‌پور هم در اتاق ۲') > -1 && t.indexOf('اتاق ۶ (۱۴ تا ۱۸)') > -1; }));
-    ok('تداخل: دو نفر یک اتاق همزمان', cap.clash.some(function (t) { return t.indexOf('امیرآرا') > -1 && t.indexOf('کیانی') > -1; }));
-    ok('بی‌ساعت‌ها به مراجع نشان داده نمی‌شوند', !tgInpHours_('gandhi').some(function (h) { return h.who === 'نوری‌پور'; }));
+    ok('تداخل: یک نفر دو اتاق همزمان', cap.clash.some(function (t) { return t.indexOf('نمونه‌کاف هم در اتاق ۲') > -1 && t.indexOf('اتاق ۶ (۱۴ تا ۱۸)') > -1; }));
+    ok('تداخل: دو نفر یک اتاق همزمان', cap.clash.some(function (t) { return t.indexOf('آرانمونه') > -1 && t.indexOf('نمونه‌کی') > -1; }));
+    ok('بی‌ساعت‌ها به مراجع نشان داده نمی‌شوند', !tgInpHours_('gandhi').some(function (h) { return h.who === 'نمونه‌نون'; }));
     ok('اشغال بر پایهٔ ظرفیت', cap.tot.cap === 13 * 7 + 13 * 3 && cap.parts.length === 3);
     var rows = tgInpCapRows_();
     ok('تب ظرفیت: خلاصه، تداخل و جدول', rows[0][1] === 'کل هفته' && rows.some(function (r) { return r[1] === '⚠️ تداخل'; }) && rows.some(function (r) { return r[0] === 'مکان'; }));
     var r2 = rows.filter(function (r) { return r[1] === 'شنبه' && r[2] === '۲'; })[0];
-    ok('تب ظرفیت: بازهٔ خالی و پیشنهاد پرکردن کنار همان بازه', r2 && r2[7] === '۱۵ تا ۱۷' && r2[8].indexOf('کاظم‌پور') > -1 && r2[8].indexOf('سپهری') > -1);
+    ok('تب ظرفیت: بازهٔ خالی و پیشنهاد پرکردن کنار همان بازه', r2 && r2[7] === '۱۵ تا ۱۷' && r2[8].indexOf('نمونه‌کاف') > -1 && r2[8].indexOf('نمونه‌زاده') > -1);
     var tx = tgInpCheckText_('gandhi');
-    ok('پیام بررسی: فهرست شماره‌دار از خود هاب', tx.indexOf('۱. امیرآرا: دوشنبه اتاق ۲ ۱۰ تا ۱۴') > -1 && tx.indexOf('ساعت در جدول نیست') > -1 && tx.indexOf('۱۸:۳۰ تا ۲۰:۳۰') > -1);
+    ok('پیام بررسی: فهرست شماره‌دار از خود هاب', tx.indexOf('۱. آرانمونه: دوشنبه اتاق ۲ ۱۰ تا ۱۴') > -1 && tx.indexOf('ساعت در جدول نیست') > -1 && tx.indexOf('۱۸:۳۰ تا ۲۰:۳۰') > -1);
     ok('پیام بررسی: سؤال‌ها از روی داده (تداخل، بی‌ساعت، اتاق‌ها)', tx.indexOf('کدام درست است؟') > -1 && tx.indexOf('ساعت ردیف ۷') > -1 && tx.indexOf('۶ (کودک)') > -1 && tx.indexOf('—') < 0);
-    TG_OUTBOX = []; TG_MEM['desk'] = [{ name: 'ژیلا', chat: '77' }]; TG_MEM['watch'] = ['99'];
-    var pre = tgInpCheckSend('gandhi', 'ژیلا', false);
-    ok('پیش‌نمایش چیزی نمی‌فرستد', pre.to === 'ژیلا' && !TG_OUTBOX.length && !tgGetVal_('inpchk', '77'));
-    var sent = tgInpCheckSend('gandhi', 'ژیلا', true);
-    ok('فرستادن: به ژیلا با دو دکمه و بررسی باز', TG_OUTBOX.length === 1 && TG_OUTBOX[0].chat === '77' && said().indexOf('ic:ok') > -1 && tgGetVal_('inpchk', '77') === 'gandhi|2' && TG_MEM['inpmark'] === 'gandhi:>در انتظار تأیید');
+    TG_OUTBOX = []; TG_MEM['desk'] = [{ name: 'پذیرشی', chat: '77' }]; TG_MEM['watch'] = ['99'];
+    var pre = tgInpCheckSend('gandhi', 'پذیرشی', false);
+    ok('پیش‌نمایش چیزی نمی‌فرستد', pre.to === 'پذیرشی' && !TG_OUTBOX.length && !tgGetVal_('inpchk', '77'));
+    var sent = tgInpCheckSend('gandhi', 'پذیرشی', true);
+    ok('فرستادن: به پذیرشی با دو دکمه و بررسی باز', TG_OUTBOX.length === 1 && TG_OUTBOX[0].chat === '77' && said().indexOf('ic:ok') > -1 && tgGetVal_('inpchk', '77') === 'gandhi|2' && TG_MEM['inpmark'] === 'gandhi:>در انتظار تأیید');
     TG_OUTBOX = [];
-    ok('پاسخ متنی مسئول ثبت و به یاسر خبر داده می‌شود', tgInpChkText_('77', '۴. نوری‌پور ۹ تا ۱۲') === true && TG_MEM['inplog']['2:6'].indexOf('نوری‌پور') > -1 && TG_OUTBOX.some(function (x) { return x.chat === '99'; }) && TG_OUTBOX.some(function (x) { return x.chat === '77' && x.text.indexOf('ثبت شد') > -1; }));
+    ok('پاسخ متنی مسئول ثبت و به یاسر خبر داده می‌شود', tgInpChkText_('77', '۴. نمونه‌نون ۹ تا ۱۲') === true && TG_MEM['inplog']['2:6'].indexOf('نمونه‌نون') > -1 && TG_OUTBOX.some(function (x) { return x.chat === '99'; }) && TG_OUTBOX.some(function (x) { return x.chat === '77' && x.text.indexOf('ثبت شد') > -1; }));
     ok('دیگران و دستورها گرفته نمی‌شوند', tgInpChkText_('55', 'سلام') === false && tgInpChkText_('77', '/start') === false);
     TG_OUTBOX = []; tgInpChkCb_('77', 'done');
     ok('تمام شد: بررسی بسته و به یاسر خبر', !tgGetVal_('inpchk', '77') && TG_MEM['inplog']['2:4'].indexOf('اصلاحات') > -1 && TG_OUTBOX.some(function (x) { return x.chat === '99'; }));
-    TG_OUTBOX = []; tgInpCheckSend('gandhi', 'ژیلا', true); tgInpChkCb_('77', 'ok');
+    TG_OUTBOX = []; tgInpCheckSend('gandhi', 'پذیرشی', true); tgInpChkCb_('77', 'ok');
     ok('همه درست است: ردیف‌های منتظر تأیید می‌شوند', TG_MEM['inpmark'] === 'gandhi:در انتظار تأیید>تأیید شد' && TG_MEM['inplog']['2:4'].indexOf('تأیید') > -1);
     TG_OUTBOX = []; tgInpChkCb_('77', 'ok');
     ok('دکمهٔ کهنه: پیام مؤدبانه', said().indexOf('بسته شده') > -1);
     ok('روزها: «شنبه تا دوشنبه» و «همه»', tgInpDaysOf_('شنبه تا دوشنبه').length === 3 && tgInpDaysOf_('همه روزها').length === 7 && tgInpDaysOf_('یکشنبه، سه شنبه').join() === 'یکشنبه,سه‌شنبه');
     /* v70: حضوری من، درخواست با تأیید پذیرش، انتظار، تقاضا، قوانین، گزارش */
-    TG_MEM = { desk: [{ name: 'ژیلا', chat: '77' }], watch: ['99'], now: Date.UTC(2026, 8, 12, 6, 0) };
+    TG_MEM = { desk: [{ name: 'پذیرشی', chat: '77' }], watch: ['99'], now: Date.UTC(2026, 8, 12, 6, 0) };
     TG_MEM['inp'] = { places: [{ id: 'gandhi', city: 'تهران', name: 'کلینیک تجربه', area: 'ونک', status: 'فعال', ord: 1 }],
       rooms: [{ p: 'gandhi', room: '۲', kind: 'بزرگسال', days: 'همه روزها', from: '9', to: '22', status: 'فعال' },
               { p: 'gandhi', room: '۳', kind: 'بزرگسال', days: 'همه روزها', from: '9', to: '22', status: 'فعال' },
@@ -16606,7 +16610,7 @@ function tgInpTests() {
       hours: [
       { p: 'gandhi', who: 'مینا ساحلی زاده', day: 'شنبه', from: '9', to: '15', room: '۲', open: 'دارد' },
       { p: 'gandhi', who: 'مینا ساحلی زاده', day: 'یکشنبه', from: '17', to: '22', room: '۳', open: 'دارد', me: 'تأیید شد' },
-      { p: 'gandhi', who: 'سارا سپهری', day: 'شنبه', from: '17', to: '22', room: '۲', open: 'دارد' },
+      { p: 'gandhi', who: 'سارا نمونه‌زاده', day: 'شنبه', from: '17', to: '22', room: '۲', open: 'دارد' },
       { p: 'gandhi', who: 'سها هاشمی', day: 'شنبه', from: '9', to: '22', room: '۳', open: 'دارد' }] };
     var keepTher = TG_DRY_THER; TG_DRY_THER = { name: 'مینا ساحلی‌زاده' };
     TG_OUTBOX = []; tgInpMine_(1, TG_DRY_THER);
@@ -16638,10 +16642,10 @@ function tgInpTests() {
     ok('تأیید تغییر: همان ردیف عوض می‌شود', H2[2] === 'سه‌شنبه' && H2[3] === '10' && H2[4] === '12' && H2[8] === 'اصلاح شد');
     TG_OUTBOX = []; tgInpQCb_(1, 'del:0');
     TG_MEM['tab:' + TG_INP_HOURS].push(['gandhi', 'مینا ساحلی زاده', 'شنبه', '9', '15', '۲', 'دارد', '', '', '', '']);
-    tgInpDemand_('درمانگر', 'gandhi', '', 'صبح', 'زهرا نوری‌پور', 'می‌خواهد اتاق بگیرد');
+    tgInpDemand_('درمانگر', 'gandhi', '', 'صبح', 'زهرا نمونه‌نون', 'می‌خواهد اتاق بگیرد');
     var qd = TG_MEM['tab:' + TG_INP_REQ].slice(-1)[0];
     TG_OUTBOX = []; tgInpVCb_('77', 'y:' + qd[0]);
-    ok('حذف: ردیف پاک و فهرست انتظار همان بازه پیشنهاد می‌شود', qd[5] === 'حذف' && TG_MEM['tab:' + TG_INP_HOURS].length === 1 && said().indexOf('زهرا نوری‌پور') > -1);
+    ok('حذف: ردیف پاک و فهرست انتظار همان بازه پیشنهاد می‌شود', qd[5] === 'حذف' && TG_MEM['tab:' + TG_INP_HOURS].length === 1 && said().indexOf('زهرا نمونه‌نون') > -1);
     TG_OUTBOX = []; tgInpQCb_(1, 'of:0');
     var qo = TG_MEM['tab:' + TG_INP_REQ].slice(-1)[0];
     ok('یک نوبت نمی‌آید: درخواست با تاریخ و هشدار نزدیک بودن', qo[5] === 'یک نوبت نمی‌آید' && qo[11] === 'شنبه آینده' && qo[12].indexOf('کمتر از ۷۲') > -1);
@@ -17126,7 +17130,7 @@ function tgPayTests() {
   var was = TG_DRY; TG_DRY = true; TG_OUTBOX = []; TG_MEM = {};
   function said() { return TG_OUTBOX.map(function (x) { return (x.text || '') + ' ' + JSON.stringify(x.markup || ''); }).join('\n'); }
   try {
-    TG_MEM = { desk: [{ name: 'ژیلا', chat: '77' }], watch: ['99'], rate: { eur: 0.86, src: 'test' }, now: Date.UTC(2026, 8, 12, 6, 0), http: {} };
+    TG_MEM = { desk: [{ name: 'پذیرشی', chat: '77' }], watch: ['99'], rate: { eur: 0.86, src: 'test' }, now: Date.UTC(2026, 8, 12, 6, 0), http: {} };
     /* v170.9: آدرس‌ها و سهم پیش‌فرض واقعی از TG_CFG می‌آیند؛ تست روی دیپلوی آزمایشی هم باید با مقدار ساختگی خودش اجرا شود */
     TG_MEM['fin:set'] = [['addr_tron', 'TFAKEtronReceiveAddress0000000000', ''], ['addr_bsc', '0xFAKE000000000000000000000000000000000BSC', ''], ['default_share_pct', '50', '']];
     TG_MEM['fin:price'] = [['سیمین آرامش', '60', '70', ''], ['بی‌قیمت', '', '', '']];
@@ -17140,7 +17144,7 @@ function tgPayTests() {
     tgPayCb_('77', 'q:2'); TG_OUTBOX = [];
     ok('اسم مراجع', tgPayNewText_('77', 'مراجع الف') === true);
     var inv = TG_MEM['fin:inv'];
-    ok('فاکتور در دفتر مالی با لینک', inv.length === 1 && inv[0][TG_PC.eur - 1] === '120.00' && inv[0][TG_PC.th - 1] === 'سیمین آرامش' && inv[0][TG_PC.by - 1] === 'ژیلا' && said().indexOf('start=pay_' + inv[0][0]) > -1 && !tgGetVal_('payn', '77'));
+    ok('فاکتور در دفتر مالی با لینک', inv.length === 1 && inv[0][TG_PC.eur - 1] === '120.00' && inv[0][TG_PC.th - 1] === 'سیمین آرامش' && inv[0][TG_PC.by - 1] === 'پذیرشی' && said().indexOf('start=pay_' + inv[0][0]) > -1 && !tgGetVal_('payn', '77'));
     var id = inv[0][0];
     TG_OUTBOX = []; tgPayOpen_('500', id);
     ok('مراجع: انتخاب شبکه', said().indexOf('py:n:' + id + ':TRON') > -1 && said().indexOf('py:n:' + id + ':BSC') > -1 && TG_MEM['fin:inv'][0][TG_PC.clc - 1] === '500');
@@ -18114,7 +18118,7 @@ function tgSchLeadsPlan_() {
   return out;
 }
 
-/* v141: فیلتر پایهٔ تب لیدها (مسئول ≠ کاوه/ترانه/مالی) حذف سطرهای پنهان را بی‌صدا رد می‌کند؛
+/* v141: فیلتر پایهٔ تب لیدها (مسئول ≠ مدیر مدرسه/مسئول مدرسه/مالی) حذف سطرهای پنهان را بی‌صدا رد می‌کند؛
    قبل از حذف برداشته و بعد عیناً برگردانده می‌شود */
 function tgLeadsFilterOff_(sh) {
   var f = sh.getFilter();
@@ -18289,10 +18293,10 @@ function tgSchBorderTests() {
     ok('v143: نام تب و نقشهٔ کارتابل', TG_SCH_T_REQ === 'لیدهای مدرسه' && TG_SCH_T_REQ_OLD === 'درخواست عضویت' && TG_SCH_DESK_ACT.length === 8 && TG_SCH_DESK_ACT.every(function (p) { return TG_SCH_STAGES.indexOf(p[0]) > -1 && p[1].indexOf('—') < 0; }) && TG_SCH_VIEW_WORK.indexOf(13) > -1 && TG_SCH_VIEW_HIDE.indexOf(13) < 0 && TG_SCH_VIEW_HIDE.indexOf(18) < 0);
     ok('v146: نقشهٔ فهرست تب‌ها', (function () { var mp = tgSchHubUxMap_(); return mp.length === 6 && mp[0].tab === TG_SCH_T_MEM && mp.every(function (m) { var ok2 = true; for (var h in m.lists) ok2 = ok2 && m.lists[h].join(' ').indexOf('—') < 0; return ok2 && m.colors.every(function (c) { return c[0].indexOf('{r}') > -1; }); }); })());
     ok('v145: فهرست‌های کدها', (function () { var c = tgSchCodeCols_(); return c.length === 12 && c[0][1] === TG_SCH_ST && c[1][1] === TG_SCH_STAGES && c.every(function (x) { return x[1].join(' ').indexOf('—') < 0; }) && TG_SCH_WATCH[21] === 'نتیجهٔ آخرین تماس' && TG_SCH_DATE_COLS[20] === 1; })());
-    ok('v143: راهنما بخش ترانه دارد', TG_SCH_GUIDE_ROWS.some(function (r) { return r[0] === '👩‍💼 ' + tgNm_('school') + ' روزانه چه می‌کند'; }) && TG_SCH_GUIDE_ROWS.every(function (r) { return r.join(' ').indexOf('—') < 0; }));
+    ok('v143: راهنما بخش مدرسه‌ای دارد', TG_SCH_GUIDE_ROWS.some(function (r) { return r[0] === '👩‍💼 ' + tgNm_('school') + ' روزانه چه می‌کند'; }) && TG_SCH_GUIDE_ROWS.every(function (r) { return r.join(' ').indexOf('—') < 0; }));
     ok('راهنمای مدرسه بی‌خط‌تیره', TG_SCH_GUIDE_ROWS.every(function (r) { return r.join(' ').indexOf('—') < 0; }));
     /* فرم دوباره */
-    TG_MEM['people'] = [{ name: 'ترانه', chat: '555', roles: ['مدرسه'] }];
+    TG_MEM['people'] = [{ name: 'مدرسه‌ای', chat: '555', roles: ['مدرسه'] }];
     TG_DRY_SLEAD = { row: 5, id: 'د-144', code: 'S-1144', name: 'سوگل', status: 'بسته', closed: true };
     var r = tgSchFormAgain_(5, { name: 'مراجع نمونه', phone: '09370000000', email: 'a@b.c', msg: 'دوره: EFT', src: 'سایت › مدرسه › پیش‌ثبت‌نام دوره' });
     ok('کد لید مدرسه برمی‌گردد', r === 'S-1144');
@@ -18351,12 +18355,12 @@ function tgSchUnifyTests() {
 
     /* یک نفر × یک کمپین = یک سطر */
     TG_MEM['cp:' + TG_SCH_T_REQ] = [];
-    TG_MEM['cp:' + TG_CP_TAB] = [{ 'کد کمپین': 'EFT-1', 'دوره': 'درمان هیجان‌مدار (EFT)', 'کد دوره': 'EFT', 'حلقه': '۱', 'وضعیت': 'ثبت‌نام باز', 'مسئول پیگیری': 'ترانه پارسا' }];
+    TG_MEM['cp:' + TG_CP_TAB] = [{ 'کد کمپین': 'EFT-1', 'دوره': 'درمان هیجان‌مدار (EFT)', 'کد دوره': 'EFT', 'حلقه': '۱', 'وضعیت': 'ثبت‌نام باز', 'مسئول پیگیری': 'مدرسه‌ای نمونه‌فر' }];
     TG_DRY_SLEAD = null;
     var r1 = tgSchLeadEnsure_({ chat: 901, name: 'سارا نمونه', phone: '09121234567', camp: 'EFT-1', stage: 'ثبت‌نام وبینار', web: 'ثبت‌نام', src: 'web_EFT-1_ig' });
     ok('ثبت‌نام وبینار سطر می‌سازد', r1.created && TG_MEM['cp:' + TG_SCH_T_REQ].length === 1);
     var row1 = TG_MEM['cp:' + TG_SCH_T_REQ][0];
-    ok('سطر: وضعیت باز، مرحلهٔ وبینار، وبینار ثبت‌نام، مسئول از کمپین', row1['وضعیت'] === 'باز' && row1['مرحلهٔ قیف'] === 'ثبت‌نام وبینار' && row1['وبینار'] === 'ثبت‌نام' && row1['مسئول پیگیری'] === 'ترانه پارسا');
+    ok('سطر: وضعیت باز، مرحلهٔ وبینار، وبینار ثبت‌نام، مسئول از کمپین', row1['وضعیت'] === 'باز' && row1['مرحلهٔ قیف'] === 'ثبت‌نام وبینار' && row1['وبینار'] === 'ثبت‌نام' && row1['مسئول پیگیری'] === 'مدرسه‌ای نمونه‌فر');
     ok('رویداد «لید تازه» ثبت شد', TG_OUTBOX.some(function (o) { return o.kind === 'schev' && o.o.what === 'لید تازه'; }));
     TG_DRY_SLEAD = { row: 2, id: row1['شناسهٔ درخواست'], code: 'S-2001', name: 'سارا نمونه', status: 'باز', stage: 'ثبت‌نام وبینار', chat: '901', phone: '09121234567', camp: 'EFT-1', closed: false, web: 'ثبت‌نام' };
     TG_OUTBOX = [];
@@ -18379,7 +18383,7 @@ function tgSchUnifyTests() {
 
     /* دکمه‌های کارت */
     TG_DRY_SLEAD = { row: 2, id: 'د-2', code: 'S-2001', name: 'سارا', status: 'باز', stage: 'حاضر در وبینار', chat: '901', camp: 'EFT-1', closed: false };
-    TG_MEM['schowner'] = { name: 'ترانه', chat: '777' };
+    TG_MEM['schowner'] = { name: 'مدرسه‌ای', chat: '777' };
     TG_DRY_SLROW = 2;
     var cb = function (d) { return { id: '1', data: d, from: { id: 777, username: 'fake_school' }, message: { message_id: 9, chat: { id: 777 } } }; };
     TG_OUTBOX = [];
@@ -18426,7 +18430,7 @@ function tgDiagChatIds() {
 
 /* ═══════════ پل هویت: «افراد» ◂▸ «درمانگران» (v81) ═══════════
    ریشهٔ باگ: بات نقش درمانگر را فقط از روی chat_id ستون W تب «درمانگران» می‌شناخت.
-   کسی مثل سارا سپهری که chat_id اش در تب «افراد» ثبت بود ولی هیچ‌وقت با لینک
+   کسی مثل یک درمانگر که chat_id اش در تب «افراد» ثبت بود ولی هیچ‌وقت با لینک
    اختصاصی درمانگر وارد بات نشده بود، درمانگر دیده نمی‌شد. و برعکس، ۲۲ درمانگری که
    به بات وصل‌اند اصلاً سطری در «افراد» نداشتند، پس هیچ نقش دیگری برایشان دیده نمی‌شد.
    از این نسخه دو تب از روی نام و شمارهٔ تماس به هم پل می‌خورند و پیوند دائمی می‌شود. */
@@ -19307,7 +19311,7 @@ function tgNotifyTests() {
 
 /* ==================================================================
    v150 · پایپ‌لاین مطالب (فصل ۱۰ سند): گوگل‌داک خودکار، مهلت پیشنهادی نویسنده،
-   بازبینی و برگشت، چک‌لیست انتشار (کاوه)، دکمهٔ انتشار (یاسر)، لینک در پروفایل نویسنده
+   بازبینی و برگشت، چک‌لیست انتشار (سردبیر)، دکمهٔ انتشار (یاسر)، لینک در پروفایل نویسنده
    ================================================================== */
 var TG_MAG_HEAD2 = ['گوگل‌داک', 'پوشهٔ درایو', 'چک‌لیست', 'مهلت پیشنهادی نویسنده'];
 var TG_MAG_ST2 = { fix: 'بازگشت برای اصلاح', wait2: 'منتظر انتشار' };
@@ -19504,7 +19508,7 @@ function tgMagV150Tests() {
 }
 
 /* ==================================================================
-   v151 · روان‌پزشکی (فصل ۱۳ سند): دو دفتر (تجربه، دکتر سپهری)، حساب هر نوبت دست مسئول روان‌پزشکی،
+   v151 · روان‌پزشکی (فصل ۱۳ سند): دو دفتر (تجربه، روان‌پزشک)، حساب هر نوبت دست مسئول روان‌پزشکی،
    پرداخت کارت‌به‌کارت با رسید و تأیید، «+ روان‌پزشکی» روی کارت لید، نوبت روان‌پزشک برای مراجع،
    وقت هفتگی از طرف روان‌پزشک، لینک دعوت روان‌پزشک
    ================================================================== */
@@ -19710,7 +19714,7 @@ function tgPsyWeeklyStep_(chat, act, val) {
   }
   return null;
 }
-/* لینک دعوت روان‌پزشک: start=psy-<tok> (تجربه) یا start=psydr-<tok> (دکتر سپهری) */
+/* لینک دعوت روان‌پزشک: start=psy-<tok> (تجربه) یا start=psydr-<tok> (روان‌پزشک) */
 function tgPsyTok_(k) { return tgHash_('psy|' + k + '|' + String(TG_OWNER_CHAT)); }
 function tgPsyInviteLinks_(chat) {
   if (!tgPsyIsHead_(chat)) return tgSend_(chat, 'این لینک‌ها دست مسئول روان‌پزشکی است.');
@@ -19790,25 +19794,25 @@ function tgPsyTests() {
   function ok(label, cond) { if (cond) { pass++; text.push('✅ ' + label); } else { fail++; text.push('❌ ' + label); } }
   var keepDry = TG_DRY; TG_DRY = true;
   TG_OUTBOX = []; TG_MEM['psyappt'] = []; TG_MEM['psypay'] = []; TG_MEM['notify'] = []; TG_MEM['tasks'] = []; TG_MEM['policy'] = {}; TG_MEM['capdry'] = {}; TG_MEM['quiet'] = false; TG_MEM['pev'] = [];
-  TG_MEM['people'] = [{ row: 2, id: 'P-1', name: 'یلدا', user: 'sh', chat: '200', roles: ['پذیرش', 'روان‌پزشکی'], status: 'فعال', phone: '' }];
-  TG_MEM['cfg'] = { PSY_DIRECT_NAME: 'دکتر کیان سپهری', PSY_DR_CARD: '' };
-  TG_MEM['poolmap'] = {}; TG_MEM['poolmap'][tgNorm_('دکتر کیان سپهری')] = { psy: 1 }; TG_MEM['poolmap'][tgNorm_('دکتر فرزین‌مهر')] = { psy: 2 }; TG_MEM['poolmap'][tgNorm_('درمانگر عادی')] = { ind: 1 }; TG_MEM['psynames'] = ['دکتر کیان سپهری', 'دکتر فرزین‌مهر'];
+  TG_MEM['people'] = [{ row: 2, id: 'P-1', name: 'روان‌یار', user: 'sh', chat: '200', roles: ['پذیرش', 'روان‌پزشکی'], status: 'فعال', phone: '' }];
+  TG_MEM['cfg'] = { PSY_DIRECT_NAME: 'دکتر پزشکی نمونه‌زاده', PSY_DR_CARD: '' };
+  TG_MEM['poolmap'] = {}; TG_MEM['poolmap'][tgNorm_('دکتر پزشکی نمونه‌زاده')] = { psy: 1 }; TG_MEM['poolmap'][tgNorm_('دکتر نمونه‌مهر')] = { psy: 2 }; TG_MEM['poolmap'][tgNorm_('درمانگر عادی')] = { ind: 1 }; TG_MEM['psynames'] = ['دکتر پزشکی نمونه‌زاده', 'دکتر نمونه‌مهر'];
   ok('متن‌ها و سرستون‌ها بی‌خط‌تیره', (TG_PSY_H_APPT.join(' ') + TG_PSY_H_PAY.join(' ') + TG_PSY_BTN_BOOK).indexOf('—') < 0);
-  ok('تسویهٔ مستقیم فقط با نام تنظیمات', tgPsyIsDirect_('دکتر کیان سپهری') && !tgPsyIsDirect_('دکتر فرزین‌مهر'));
+  ok('تسویهٔ مستقیم فقط با نام تنظیمات', tgPsyIsDirect_('دکتر پزشکی نمونه‌زاده') && !tgPsyIsDirect_('دکتر نمونه‌مهر'));
   ok('مسئول روان‌پزشکی از نقش', tgPsyIsHead_('200') && !tgPsyIsHead_('201'));
-  var a = tgPsyOnBook_('300', { therapist: 'دکتر کیان سپهری', dateIso: '2026-10-01', hhmm: '10:00' }, { name: 'مراجع تست' }, 5);
-  ok('نوبت دکتر سپهری → حساب دکتر و درخواست رسید', a && a.acc === TG_PSY_ACC.dr && tgGetVal_('psyrc', '300') === a.code);
+  var a = tgPsyOnBook_('300', { therapist: 'دکتر پزشکی نمونه‌زاده', dateIso: '2026-10-01', hhmm: '10:00' }, { name: 'مراجع تست' }, 5);
+  ok('نوبت دکتر نمونه‌زاده → حساب دکتر و درخواست رسید', a && a.acc === TG_PSY_ACC.dr && tgGetVal_('psyrc', '300') === a.code);
   ok('به مسئول اعلان کار رفت', TG_MEM['notify'].some(function (n) { return n.chat === '200' && n.ref === a.code; }));
-  var b = tgPsyOnBook_('301', { therapist: 'دکتر فرزین‌مهر', dateIso: '2026-10-02', hhmm: '11:00' }, { name: 'مراجع دو' }, 6);
-  ok('نوبت فرزین‌مهر → حساب تجربه، بی‌رسید', b.acc === TG_PSY_ACC.tj && !tgGetVal_('psyrc', '301'));
+  var b = tgPsyOnBook_('301', { therapist: 'دکتر نمونه‌مهر', dateIso: '2026-10-02', hhmm: '11:00' }, { name: 'مراجع دو' }, 6);
+  ok('نوبت نمونه‌مهر → حساب تجربه، بی‌رسید', b.acc === TG_PSY_ACC.tj && !tgGetVal_('psyrc', '301'));
   ok('درمانگر غیرروان‌پزشک نادیده', tgPsyOnBook_('302', { therapist: 'درمانگر عادی' }, {}, 7) === null);
   tgPsyAccSwitch_('200', b.code);
-  ok('مسئول حساب را به دکتر سپهری زد و رسید خواسته شد', TG_MEM['psyappt'][1][7] === TG_PSY_ACC.dr && tgGetVal_('psyrc', '301') === b.code);
+  ok('مسئول حساب را به دکتر نمونه‌زاده زد و رسید خواسته شد', TG_MEM['psyappt'][1][7] === TG_PSY_ACC.dr && tgGetVal_('psyrc', '301') === b.code);
   ok('غیرمسئول نمی‌تواند حساب را عوض کند', (tgPsyAccSwitch_('999', b.code), TG_MEM['psyappt'][1][7] === TG_PSY_ACC.dr));
   ok('رسید مراجع ثبت و در انتظار تأیید', tgPsyReceipt_('300', { photo: [{ file_id: 'F1' }], caption: '۵۰۰۰۰۰' }) === true && TG_MEM['psypay'].length === 1 && TG_MEM['psypay'][0][7] === TG_PSY_PAY_ST.wait && TG_MEM['psypay'][0][5] === '۵۰۰۰۰۰');
   var pc = TG_MEM['psypay'][0][0];
-  tgPsyPayDecide_('200', pc, true, 'یلدا');
-  ok('تأیید پرداخت توسط مسئول', TG_MEM['psypay'][0][7] === TG_PSY_PAY_ST.ok && TG_MEM['psypay'][0][8] === 'یلدا');
+  tgPsyPayDecide_('200', pc, true, 'روان‌یار');
+  ok('تأیید پرداخت توسط مسئول', TG_MEM['psypay'][0][7] === TG_PSY_PAY_ST.ok && TG_MEM['psypay'][0][8] === 'روان‌یار');
   ok('رویدادها ثبت شد', (TG_MEM['pev'] || []).length >= 2);
   ok('لینک دعوت با توکن غلط رد می‌شود', tgPsyJoin_('400', 'u', 'کسی', 'psy-zzz') === true && !(TG_MEM['people'] || []).some(function (p) { return p.name === 'کسی'; }));
   ok('لینک دعوت درست فرد می‌سازد و کار به مسئول', tgPsyJoin_('401', 'dr', 'دکتر تازه', 'psy-' + tgPsyTok_('tj')) === true && (TG_MEM['people'] || []).some(function (p) { return p.name === 'دکتر تازه'; }) && TG_MEM['tasks'].some(function (t) { return t.chat === '200' && t.title.indexOf('دکتر تازه') > -1; }));
@@ -19886,7 +19890,7 @@ function tgEvSaveFile_(o, fid, label) {
 }
 function tgEvTok_(code) { return tgHash_('ev|' + code + '|' + String(TG_OWNER_CHAT)); }
 function tgEvIsSchool_(chat) { return String(chat) === String(TG_OWNER_CHAT) || tgSchoolOwners_().some(function (o) { return tgChatIn_(o.chat, chat); }); }
-/* ترانه: لینک ارائه‌دهنده برای یک رویداد */
+/* مسئول مدرسه: لینک ارائه‌دهنده برای یک رویداد */
 function tgEvLinkAsk_(chat) {
   if (!tgEvIsSchool_(chat)) return tgSend_(chat, 'این دکمه برای مسئول مدرسه است.');
   var L = tgEvAll_().filter(function (o) { return o['مرحله'] !== TG_EV_STAGE.arc && o['وضعیت'] !== 'بسته'; }).slice(0, 8);
@@ -20006,7 +20010,7 @@ function tgEvV152Tests() {
   function ok(label, cond) { if (cond) { pass++; text.push('✅ ' + label); } else { fail++; text.push('❌ ' + label); } }
   var keepDry = TG_DRY; TG_DRY = true;
   TG_OUTBOX = []; TG_MEM['pev'] = []; TG_MEM['tasks'] = []; TG_MEM['notify'] = []; TG_MEM['policy'] = {}; TG_MEM['capdry'] = {}; TG_MEM['quiet'] = false; TG_MEM['magreqs'] = [];
-  TG_MEM['people'] = [{ row: 2, id: 'P-9', name: 'ترانه', user: 'l', chat: '500', roles: ['مدرسه'], status: 'فعال' }];
+  TG_MEM['people'] = [{ row: 2, id: 'P-9', name: 'مدرسه‌ای', user: 'l', chat: '500', roles: ['مدرسه'], status: 'فعال' }];
   var ev = { row: 2, code: 'EV-2001', title: 'ژورنال کلاب مهر', 'کد': 'EV-2001', 'عنوان': 'ژورنال کلاب مهر', 'وضعیت': 'باز', 'مرحله': '', 'اجازهٔ انتشار ضبط': '' };
   TG_MEM['evall'] = [ev];
   ok('سرستون‌ها و مرحله‌ها بی‌خط‌تیره', (TG_EV_HEAD2.join(' ') + TG_EV_PERM.join(' ')).indexOf('—') < 0 && tgEvCol_('اسلاگ') === 22);
@@ -20223,8 +20227,8 @@ function tgEnTests() {
   function ok(label, cond) { if (cond) { pass++; text.push('✅ ' + label); } else { fail++; text.push('❌ ' + label); } }
   var keepDry = TG_DRY; TG_DRY = true;
   TG_OUTBOX = []; TG_MEM['enrows'] = []; TG_MEM['tasks'] = []; TG_MEM['notify'] = []; TG_MEM['policy'] = {}; TG_MEM['capdry'] = {}; TG_MEM['quiet'] = false; TG_MEM['pev'] = [];
-  TG_MEM['people'] = [{ row: 2, id: 'P-2', name: 'کاوه', user: 'e', chat: '20', roles: ['سردبیر'], status: 'فعال' }];
-  TG_MEM['mageditors'] = [{ name: 'کاوه', chat: '20', user: 'e' }];
+  TG_MEM['people'] = [{ row: 2, id: 'P-2', name: 'مدیری', user: 'e', chat: '20', roles: ['سردبیر'], status: 'فعال' }];
+  TG_MEM['mageditors'] = [{ name: 'مدیری', chat: '20', user: 'e' }];
   TG_MEM['entherapists'] = [{ name: 'سارا زوج‌درمانگر', chat: '30', status: 'فعال' }, { name: 'علی فردی', chat: '31', status: 'فعال' }];
   TG_MEM['enpages'] = [{ page: 'https://tajrobeh.life/couples-therapy/', title: 'زوج‌درمانی', tags: ['زوج'] }];
   ok('سرستون‌ها و وضعیت‌ها بی‌خط‌تیره', (TG_EN_HEAD.join(' ') + TG_EN_WANT.join(' ')).indexOf('—') < 0 && TG_EN_HEAD.length === 16);
@@ -20457,7 +20461,7 @@ function tgV154Tests() {
   TG_OUTBOX = []; TG_MEM['notify'] = []; TG_MEM['tasks'] = []; TG_MEM['policy'] = {}; TG_MEM['capdry'] = {}; TG_MEM['quiet'] = false; TG_MEM['pev'] = []; TG_MEM['offrows'] = []; TG_MEM['offhits'] = [];
   TG_MEM['people'] = []; TG_MEM['poolmap'] = {}; TG_MEM['poolmap'][tgNorm_('زوج‌درمانگر')] = { rel: 1 };
   TG_MEM['sessrows'] = [{ row: 7, name: 'زوج‌درمانگر', dateIso: '2026-10-05', hhmm: '18:00', len: 50, client: 'الف', chat: '40', status: 'رزرو شده', weekly: 'بله', ev: '' }];
-  TG_MEM['desk'] = [{ name: 'ژیلا', chat: '900' }];
+  TG_MEM['desk'] = [{ name: 'پذیرشی', chat: '900' }];
   ok('سرستون‌های تازهٔ جلسه بی‌خط‌تیره', TG_SESS_HEAD2.join(' ').indexOf('—') < 0 && tgSessHeadMem_().indexOf('chat همراه') > -1);
   tgSetVal_('qt', '40', 'rel');
   ok('پیشنهاد لینک همراه برای زوج', tgCoupleOffer_('40', { therapist: 'زوج‌درمانگر' }, 7) === true && TG_MEM['notify'].some(function (n) { return n.text.indexOf('cp2-7-') > -1; }));
@@ -20566,7 +20570,7 @@ function tgPsyCardStart_(chat) {
   if (!tgPsyIsHead_(chat)) return tgSend_(chat, 'این بخش برای مسئول روان‌پزشکی است.');
   var card = tgCfg_(TG_PSY_K.card), dn = tgCfg_(TG_PSY_K.direct);
   tgSetVal_('psycd', chat, '1');
-  return tgSend_(chat, '💳 <b>تنظیمات کارت‌به‌کارت دکتر سپهری</b>\n' + (card ? 'شمارهٔ کارت فعلی: <code>' + tgEsc_(card) + '</code>' : 'شمارهٔ کارت هنوز ثبت نشده.') +
+  return tgSend_(chat, '💳 <b>تنظیمات کارت‌به‌کارت ' + tgEsc_(tgNm_('psy_dr')) + '</b>\n' + (card ? 'شمارهٔ کارت فعلی: <code>' + tgEsc_(card) + '</code>' : 'شمارهٔ کارت هنوز ثبت نشده.') +
     '\n' + (dn ? 'روان‌پزشکِ تسویهٔ مستقیم: <b>' + tgEsc_(dn) + '</b>' : 'روان‌پزشکِ تسویهٔ مستقیم هنوز انتخاب نشده.') +
     '\n\nشمارهٔ کارت (۱۶ رقم) و در خط دوم نام صاحب کارت را بفرستید. این شماره فقط به مراجعِ نوبت کارت‌به‌کارت نشان داده می‌شود.',
     { inline_keyboard: [[{ text: '👤 انتخاب روان‌پزشکِ تسویهٔ مستقیم', callback_data: 'ps:dir' }], [{ text: '↩️ انصراف', callback_data: 'ps:cdx' }]] });
@@ -20579,7 +20583,7 @@ function tgPsyCardText_(chat, text) {
   if (digits.length !== 16) { tgSend_(chat, 'شمارهٔ کارت باید ۱۶ رقم باشد. دوباره بفرستید.'); return true; }
   tgDel_('psycd', chat);
   var owner = (lines[1] || '').trim(), val = digits.replace(/(\d{4})(?=\d)/g, '$1-') + (owner ? ' · ' + owner : '');
-  tgCfgSet_(TG_PSY_K.card, val, 'شمارهٔ کارت برای پرداخت کارت‌به‌کارت دکتر سپهری (مسئول روان‌پزشکی از بات وارد می‌کند)');
+  tgCfgSet_(TG_PSY_K.card, val, 'شمارهٔ کارت برای پرداخت کارت‌به‌کارت ' + tgNm_('psy_dr') + ' (مسئول روان‌پزشکی از بات وارد می‌کند)');
   try { tgPev_({ id: 'PSY_DR_CARD', actor: 'مسئول روان‌پزشکی', channel: 'بات', what: 'شمارهٔ کارت', to: 'به‌روز شد' }); } catch (e) {}
   tgSend_(chat, '✅ شمارهٔ کارت ثبت شد: <code>' + tgEsc_(val) + '</code>' + (tgCfg_(TG_PSY_K.direct) ? '' : '\n\nحالا روان‌پزشکِ تسویهٔ مستقیم را انتخاب کنید.'),
     tgCfg_(TG_PSY_K.direct) ? null : { inline_keyboard: [[{ text: '👤 انتخاب روان‌پزشکِ تسویهٔ مستقیم', callback_data: 'ps:dir' }]] });
@@ -20599,7 +20603,7 @@ function tgPsyDirSet_(chat, i) {
   tgDel_('psydir', chat);
   tgCfgSet_(TG_PSY_K.direct, name, 'نام دقیق سطر «درمانگران» روان‌پزشکِ تسویهٔ مستقیم (مسئول روان‌پزشکی از بات انتخاب می‌کند)');
   try { tgPev_({ id: 'PSY_DIRECT_NAME', actor: 'مسئول روان‌پزشکی', channel: 'بات', what: 'روان‌پزشک تسویهٔ مستقیم', to: name }); } catch (e) {}
-  return tgSend_(chat, '✅ ثبت شد: نوبت‌های <b>' + tgEsc_(name) + '</b> از این به بعد در دفتر دکتر سپهری با کارت‌به‌کارت ثبت می‌شوند.');
+  return tgSend_(chat, '✅ ثبت شد: نوبت‌های <b>' + tgEsc_(name) + '</b> از این به بعد در دفتر ' + tgEsc_(tgNm_('psy_dr')) + ' با کارت‌به‌کارت ثبت می‌شوند.');
 }
 /* یک بار: دفتر تجربه به هاب پذیرش، اسپردشیت جدای قبلی به سطل، اسلاگ رویدادها لاتین، پیام به مسئول روان‌پزشکی */
 function tgPsyV157Setup() {
@@ -20613,7 +20617,7 @@ function tgPsyV157Setup() {
   }
   log.push('اسلاگ لاتین برای ' + tgEvSlugFix_() + ' رویداد');
   var cs = tgPsyRoleChats_(), sent = 0;
-  for (var i = 0; i < cs.length; i++) if (tgNotify_(cs[i], TG_NK.task, '💳 برای فعال‌شدن پرداخت کارت‌به‌کارت دکتر سپهری، شمارهٔ کارت و روان‌پزشکِ تسویهٔ مستقیم را از همین‌جا ثبت کنید. با /psycard شروع کنید.', { ref: 'PSY_DR_CARD', force: true }) === 'رفت') sent++;
+  for (var i = 0; i < cs.length; i++) if (tgNotify_(cs[i], TG_NK.task, '💳 برای فعال‌شدن پرداخت کارت‌به‌کارت ' + tgNm_('psy_dr') + '، شمارهٔ کارت و روان‌پزشکِ تسویهٔ مستقیم را از همین‌جا ثبت کنید. با /psycard شروع کنید.', { ref: 'PSY_DR_CARD', force: true }) === 'رفت') sent++;
   log.push('پیام به ' + sent + ' مسئول روان‌پزشکی' + (cs.length ? '' : ' (کسی با نقش روان‌پزشکی و chat در افراد نیست)'));
   var m = log.join('\n'); Logger.log(m); return m;
 }
@@ -20622,16 +20626,16 @@ function tgV157Tests() {
   var pass = 0, fail = 0, text = [];
   function ok(label, cond) { if (cond) { pass++; text.push('✅ ' + label); } else { fail++; text.push('❌ ' + label); } }
   var keepDry = TG_DRY; TG_DRY = true;
-  TG_OUTBOX = []; TG_MEM['cfg'] = {}; TG_MEM['pev'] = []; TG_MEM['psynames'] = ['دکتر کیان سپهری', 'دکتر فرزین‌مهر'];
-  TG_MEM['people'] = [{ row: 2, id: 'P-1', name: 'یلدا', user: 'sh', chat: '200', roles: ['روان‌پزشکی'], status: 'فعال' }];
+  TG_OUTBOX = []; TG_MEM['cfg'] = {}; TG_MEM['pev'] = []; TG_MEM['psynames'] = ['دکتر پزشکی نمونه‌زاده', 'دکتر نمونه‌مهر'];
+  TG_MEM['people'] = [{ row: 2, id: 'P-1', name: 'روان‌یار', user: 'sh', chat: '200', roles: ['روان‌پزشکی'], status: 'فعال' }];
   ok('اسلاگ رویداد فقط لاتین', tgEvSlug_('ژورنال کلاب مهر') === 'ev' || /^[a-z0-9-]+$/.test(tgEvSlug_('ژورنال کلاب مهر')) && tgEvSlug_('Journal Club Mehr') === 'journal-club-mehr');
   ok('اسلاگ پارتنر بی‌عدد و لاتین', /^[a-z0-9-]+$/.test(tgPnSlugOf_({ 'شناسه مکان': 'Mashhad2' })));
   ok('غریبه کارت ثبت نمی‌کند', (tgPsyCardStart_('999'), !tgGetVal_('psycd', '999')));
   tgPsyCardStart_('200');
   ok('شمارهٔ کوتاه رد می‌شود', tgPsyCardText_('200', '۱۲۳۴') === true && !TG_MEM['cfg'].PSY_DR_CARD);
-  ok('شمارهٔ ۱۶ رقمی با نام ثبت می‌شود', tgPsyCardText_('200', '۶۰۳۷ ۹۹۷۱ ۲۳۴۵ ۶۷۸۹\nکیان سپهری') === true && TG_MEM['cfg'].PSY_DR_CARD === '6037-9971-2345-6789 · کیان سپهری' && !tgGetVal_('psycd', '200'));
+  ok('شمارهٔ ۱۶ رقمی با نام ثبت می‌شود', tgPsyCardText_('200', '۶۰۳۷ ۹۹۷۱ ۲۳۴۵ ۶۷۸۹\nپزشکی نمونه‌زاده') === true && TG_MEM['cfg'].PSY_DR_CARD === '6037-9971-2345-6789 · پزشکی نمونه‌زاده' && !tgGetVal_('psycd', '200'));  // pii:ok ساختگی
   tgPsyDirAsk_('200'); tgPsyDirSet_('200', 0);
-  ok('روان‌پزشک تسویهٔ مستقیم انتخاب شد', TG_MEM['cfg'].PSY_DIRECT_NAME === 'دکتر کیان سپهری' && tgPsyIsDirect_('دکتر کیان سپهری'));
+  ok('روان‌پزشک تسویهٔ مستقیم انتخاب شد', TG_MEM['cfg'].PSY_DIRECT_NAME === 'دکتر پزشکی نمونه‌زاده' && tgPsyIsDirect_('دکتر پزشکی نمونه‌زاده'));
   ok('نام تب دفتر تجربه در هاب پذیرش', TG_PSY_TAB_TJ['نوبت‌ها'] === 'نوبت‌های روان‌پزشکی' && TG_PSY_TAB_TJ['پرداخت‌ها'] === 'پرداخت‌های روان‌پزشکی');
   TG_DRY = keepDry;
   Logger.log('نتیجه: ' + pass + ' قبول · ' + fail + ' مردود');
@@ -20639,7 +20643,7 @@ function tgV157Tests() {
 }
 
 /* ==================================================================
-   v159 · جذب تراپیست زیر دست مسئول پذیرش (ژیلا): مالکان فرایند = ناظر + مسئول پذیرش؛
+   v159 · جذب تراپیست زیر دست مسئول پذیرش (مسئول پذیرش): مالکان فرایند = ناظر + مسئول پذیرش؛
    سوپروایزر از هر تب هویتی با نام پیدا می‌شود (نه فقط تب مدرسه)؛ پیام مؤدبانهٔ درخواست وقت به سوپروایزر؛
    آینهٔ مراحل در تب «جذب تراپیست» هاب پذیرش
    ================================================================== */
@@ -20710,7 +20714,7 @@ function tgApMirror_() {
   } catch (eV) { tgErr_('tgApMirror_ validation: ' + eV); }
   return rows.length;
 }
-/* v162: ویرایش ژیلا در تب «جذب تراپیست» به پروندهٔ اصلی (هاب مدرسه) برمی‌گردد */
+/* v162: ویرایش مسئول پذیرش در تب «جذب تراپیست» به پروندهٔ اصلی (هاب مدرسه) برمی‌گردد */
 function tgApmEdited_(e) {
   var sh = e.range.getSheet(), r0 = e.range.getRow(), n = e.range.getNumRows(), c1 = e.range.getColumn(), c2 = c1 + e.range.getNumColumns() - 1;
   if (r0 < 2 || n > 20) return;
@@ -20738,18 +20742,18 @@ function tgV159Tests() {
   var pass = 0, fail = 0, text = [];
   function ok(label, cond) { if (cond) { pass++; text.push('✅ ' + label); } else { fail++; text.push('❌ ' + label); } }
   var keepDry = TG_DRY; TG_DRY = true;
-  TG_OUTBOX = []; TG_MEM['watchids'] = ['1']; TG_MEM['desk'] = [{ name: 'ژیلا', role: 'مسئول پذیرش', chat: '55' }, { name: 'شیدا', role: 'پذیرش', chat: '56' }];
-  TG_MEM['people'] = [{ row: 2, id: 'P-7', name: 'دکتر مهتاب روشن‌فرد', user: 'niki', chat: '77', roles: ['درمانگر'], status: 'فعال' }];
-  TG_MEM['tearows'] = [{ row: 2, name: 'دکتر مهتاب روشن‌فرد', user: '', chat: '', role: 'سوپروایزر', approach: 'CBT', supOk: 'بله', status: 'فعال' }];
+  TG_OUTBOX = []; TG_MEM['watchids'] = ['1']; TG_MEM['desk'] = [{ name: 'پذیرشی', role: 'مسئول پذیرش', chat: '55' }, { name: 'کشیکی', role: 'پذیرش', chat: '56' }];
+  TG_MEM['people'] = [{ row: 2, id: 'P-7', name: 'دکتر سوپری نمونه‌فرد', user: 'niki', chat: '77', roles: ['درمانگر'], status: 'فعال' }];
+  TG_MEM['tearows'] = [{ row: 2, name: 'دکتر سوپری نمونه‌فرد', user: '', chat: '', role: 'سوپروایزر', approach: 'CBT', supOk: 'بله', status: 'فعال' }];
   TG_MEM['therrows'] = [];
   var o = tgApOwners_();
   ok('مالکان فرایند: ناظر و مسئول پذیرش، نه بقیهٔ پذیرش', o.indexOf('1') > -1 && o.indexOf('55') > -1 && o.indexOf('56') < 0);
   ok('مسئول پذیرش تشخیص داده می‌شود', tgApIsLead_({ role: 'مسئول پذیرش' }) && !tgApIsLead_({ role: 'پذیرش' }));
-  var s = tgApSupBy_('دکتر مهتاب روشن‌فرد');
+  var s = tgApSupBy_('دکتر سوپری نمونه‌فرد');
   ok('سوپروایزر بی‌chat در تب مدرسه از افراد وصل می‌شود', s && s.chat === '77');
   ok('نام ناشناخته null', tgApSupBy_('کسی که نیست') === null);
   TG_MEM['approw'] = { id: 'A-9', name: 'زهرا', chat: '', approach: 'CBT', sup: '' };
-  tgApHandoff_('55', TG_MEM['approw'], 'دکتر مهتاب روشن‌فرد');
+  tgApHandoff_('55', TG_MEM['approw'], 'دکتر سوپری نمونه‌فرد');
   var toSup = TG_OUTBOX.filter(function (x) { return String(x.chat) === '77'; });
   ok('کارت مصاحبه با درخواست وقت به سوپروایزر رفت', toSup.length === 1 && /وقت/.test(toSup[0].text) && /پیوستن/.test(toSup[0].text));
   ok('به مسئول پذیرش گفته شد وصل است', TG_OUTBOX.some(function (x) { return String(x.chat) === '55' && /وصل است/.test(x.text); }));
@@ -20889,7 +20893,7 @@ function tgIdBridgeTests() {
   var out = [], pass = 0, fail = 0;
   function ok(n, c) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n); }
   ok('نام یکسان با نیم‌فاصله', tgSameName_('مهشید امید‌زاده', 'مهشید امیدزاده'));
-  ok('نام متفاوت رد می‌شود', !tgSameName_('سارا سپهری', 'سارا غفوری‌نیا'));
+  ok('نام متفاوت رد می‌شود', !tgSameName_('سارا نمونه‌زاده', 'سارا غفوری‌نیا'));
   ok('کلید شماره ۱۰ رقم آخر', tgPhoneKey_('+98 910 000 0001') === '9100000001');
   ok('شمارهٔ کوتاه کلید ندارد', tgPhoneKey_('123') === '');
   /* v170.9: آزمون روی یک فرد واقعی (نام و chat_id) برداشته شد؛ مخزن عمومی است */
@@ -22218,16 +22222,16 @@ function tgLeadTests() {
     }));
 
     TG_DRY_LEAD = mk(); TG_OUTBOX = [];
-    tgLeadSet_(7, { 'آخرین تماس': '2026-09-14', 'وضعیت': 'در جریان' }, 'ژیلا', 'تلگرام');
+    tgLeadSet_(7, { 'آخرین تماس': '2026-09-14', 'وضعیت': 'در جریان' }, 'پذیرشی', 'تلگرام');
     ok('tgLeadSet_ لید را از «تماس اول» بیرون می‌برد', TG_DRY_LEAD.stage === 'live' && TG_DRY_LEAD.touched === true);
     ok('tgLeadSet_ در حالت خشک روی شیت نمی‌نویسد', TG_OUTBOX.length === 1 && TG_OUTBOX[0].kind === 'leadset');
 
     TG_DRY_LEAD = mk(); TG_OUTBOX = [];
-    tgLeadSet_(7, { 'ستون من‌درآوردی': 'x' }, 'ژیلا', 'تلگرام');
+    tgLeadSet_(7, { 'ستون من‌درآوردی': 'x' }, 'پذیرشی', 'تلگرام');
     ok('ستون خارج از فهرست در حالت خشک هم ساخته نمی‌شود', TG_LEAD_FIELDS.indexOf('ستون من‌درآوردی') < 0);
 
     TG_DRY_LEAD = mk(); TG_OUTBOX = [];
-    tgLeadNote_(7, 'تماس گرفتم، فردا زنگ می‌زند', 'ژیلا');
+    tgLeadNote_(7, 'تماس گرفتم، فردا زنگ می‌زند', 'پذیرشی');
     ok('یادداشت اضافه می‌شود نه جایگزین', TG_OUTBOX.length === 2 && TG_OUTBOX[0].kind === 'leadnote');
     ok('یادداشت یک رویداد هم ثبت می‌کند', TG_OUTBOX[1].kind === 'leadev' && TG_OUTBOX[1].o.what === 'یادداشت');
 
@@ -22241,12 +22245,12 @@ function tgLeadTests() {
        kb2.inline_keyboard[0][0].callback_data.indexOf('ld:open:') === 0);
 
     TG_DRY_LEAD = mk(); TG_OUTBOX = [];
-    var r1 = tgLeadText_(55, 'ژیلا', '@desk_lead', 'یادداشت تستی');
+    var r1 = tgLeadText_(55, 'پذیرشی', '@desk_lead', 'یادداشت تستی');
     ok('بدون فلگ، متن آزاد را نمی‌بلعد', r1 === false);
 
     TG_DRY_LEAD = mk(); TG_OUTBOX = [];
     tgSetVal_('ldn', 55, 'L-1042');
-    var r2 = tgLeadText_(55, 'ژیلا', '@desk_lead', '/start');
+    var r2 = tgLeadText_(55, 'پذیرشی', '@desk_lead', '/start');
     ok('دستور اسلش حالت یادداشت را می‌شکند', r2 === false && !tgGetVal_('ldn', 55));
 
     TG_DRY_LEAD = mk(); TG_OUTBOX = [];
@@ -22273,7 +22277,7 @@ function tgLead2Tests() {
       return {
         row: 7, code: 'L-1042', name: 'آزمایشی', phone: '09120000000',
         src: 'سایت › پذیرش › شروع تراپی', channel: 'سایت', region: 'داخل ایران',
-        first: 'سلام، برای شروع تراپی', status: 'جدید', owner: '', result: '', memo: 'chat_id: 4242 · ترجیح درمانگر: خانم\n09-20 ژیلا: زنگ زدم، فردا',
+        first: 'سلام، برای شروع تراپی', status: 'جدید', owner: '', result: '', memo: 'chat_id: 4242 · ترجیح درمانگر: خانم\n09-20 پذیرشی: زنگ زدم، فردا',
         booked: false, closed: false, touched: false, idle: 0, age: 120, stage: 'first',
         next: '', nextDate: '', noans: 0, reason: '', chatId: '4242', ref1: '', ref2: '', ref3: '', meetTher: '', meetDate: ''
       };
@@ -22281,8 +22285,8 @@ function tgLead2Tests() {
     function cq(data) { return { id: '1', message: { chat: { id: 55 }, message_id: 9 }, from: { username: 'desk_lead' }, data: data }; }
     function lastMsgWith(s) { for (var i = TG_OUTBOX.length - 1; i >= 0; i--) if (JSON.stringify(TG_OUTBOX[i]).indexOf(s) > -1) return TG_OUTBOX[i]; return null; }
     function sets() { return TG_OUTBOX.filter(function (o) { return o.kind === 'leadset'; }); }
-    TG_MEM['deskwho'] = { name: 'ژیلا', chat: '55', role: 'مسئول پذیرش', row: 2 };
-    TG_MEM['desk'] = [{ name: 'ژیلا', chat: '55', role: 'مسئول پذیرش' }];
+    TG_MEM['deskwho'] = { name: 'پذیرشی', chat: '55', role: 'مسئول پذیرش', row: 2 };
+    TG_MEM['desk'] = [{ name: 'پذیرشی', chat: '55', role: 'مسئول پذیرش' }];
     const today = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd');
 
     /* واژگان */
@@ -22303,9 +22307,9 @@ function tgLead2Tests() {
 
     /* tgLeadSet_ وضعیت را یکدست می‌نویسد */
     TG_DRY_LEAD = mk(); TG_OUTBOX = [];
-    tgLeadSet_(7, { 'وضعیت': 'در جریان' }, 'ژیلا', 'تلگرام');
+    tgLeadSet_(7, { 'وضعیت': 'در جریان' }, 'پذیرشی', 'تلگرام');
     ok('tgLeadSet_ «در جریان» را «در پیگیری» می‌نویسد', sets()[0].changes['وضعیت'] === 'در پیگیری' && TG_DRY_LEAD.status === 'در پیگیری');
-    tgLeadSet_(7, { 'وضعیت': 'منصرف شد' }, 'ژیلا', 'تلگرام');
+    tgLeadSet_(7, { 'وضعیت': 'منصرف شد' }, 'پذیرشی', 'تلگرام');
     ok('tgLeadSet_ «منصرف شد» را «بسته» می‌نویسد و لید بسته می‌شود', TG_DRY_LEAD.status === 'بسته' && TG_DRY_LEAD.closed === true);
 
     /* کارت v2 */
@@ -22327,7 +22331,7 @@ function tgLead2Tests() {
     TG_OUTBOX = [];
     tgOnLead_(cq(''), 'co:L-1042:ok');
     var s1 = sets()[0];
-    ok('«صحبت شد»: آخرین تماس امروز، وضعیت در پیگیری، مسئول خودم', s1 && s1.changes['آخرین تماس'] === today && s1.changes['وضعیت'] === 'در پیگیری' && s1.changes['مسئول'] === 'ژیلا');
+    ok('«صحبت شد»: آخرین تماس امروز، وضعیت در پیگیری، مسئول خودم', s1 && s1.changes['آخرین تماس'] === today && s1.changes['وضعیت'] === 'در پیگیری' && s1.changes['مسئول'] === 'پذیرشی');
     ok('بعدش منوی موعد می‌آید', !!lastMsgWith('ld:nx:L-1042:3'));
     TG_OUTBOX = [];
     tgOnLead_(cq(''), 'nx:L-1042:3');
@@ -22366,7 +22370,7 @@ function tgLead2Tests() {
     tgOnLead_(cq(''), 'na:L-1042:txt');
     ok('«خودم می‌نویسم» فلگ ldx می‌گذارد', tgGetVal_('ldx', 55) === 'L-1042');
     TG_OUTBOX = [];
-    var rT = tgLeadText_(55, 'ژیلا', '@desk_lead', 'پیام واتس‌اپ بده و لینک بفرست');
+    var rT = tgLeadText_(55, 'پذیرشی', '@desk_lead', 'پیام واتس‌اپ بده و لینک بفرست');
     ok('متن آزاد اقدام بعدی را می‌نویسد و موعد می‌پرسد', rT === true && TG_DRY_LEAD.next === 'پیام واتس‌اپ بده و لینک بفرست' && !!lastMsgWith('ld:nx:L-1042:1') && !tgGetVal_('ldx', 55));
 
     /* جست‌وجو */
@@ -22374,7 +22378,7 @@ function tgLead2Tests() {
     tgOnLead_(cq(''), 'find:L-1042');
     ok('«لید دیگر» فلگ جست‌وجو می‌گذارد', tgGetVal_('ldf', 55) === '1');
     TG_OUTBOX = [];
-    var rF = tgLeadText_(55, 'ژیلا', '@desk_lead', 'L-1042');
+    var rF = tgLeadText_(55, 'پذیرشی', '@desk_lead', 'L-1042');
     ok('جست‌وجو با کد کارت را می‌فرستد', rF === true && !!lastMsgWith('L-1042') && !tgGetVal_('ldf', 55));
     ok('جست‌وجو با شماره و نام', tgLeadFind_('0912000').length === 1 && tgLeadFind_('آزمایش').length === 1 && tgLeadFind_('L-0001').length === 0);
 
@@ -22398,7 +22402,7 @@ function tgLead2Tests() {
     tgOnLead_(cq(''), 'bs:L-1042:0');
     var bs = sets()[0];
     ok('رزرو: اسلات نوشته می‌شود', TG_OUTBOX.some(function (o) { return o.kind === 'slot' && o.s.therapist === 'دکتر الف'; }));
-    ok('رزرو: وضعیت معارفه رزرو شد، تاریخ و درمانگر معارفه، مسئول خودم', bs && bs.changes['وضعیت'] === 'معارفه رزرو شد' && bs.changes['درمانگر معارفه'] === 'دکتر الف' && bs.changes['تاریخ معارفه'] === tgLeadDayAdd_(2) && bs.changes['مسئول'] === 'ژیلا');
+    ok('رزرو: وضعیت معارفه رزرو شد، تاریخ و درمانگر معارفه، مسئول خودم', bs && bs.changes['وضعیت'] === 'معارفه رزرو شد' && bs.changes['درمانگر معارفه'] === 'دکتر الف' && bs.changes['تاریخ معارفه'] === tgLeadDayAdd_(2) && bs.changes['مسئول'] === 'پذیرشی');
     ok('رزرو: مراجع در بات خبر می‌گیرد و می‌تواند لغو کند', TG_OUTBOX.some(function (o) { return String(o.chat) === '4242' && JSON.stringify(o).indexOf('cancelmeet') > -1; }) && !!tgGetVal_('meet', '4242'));
     ok('رزرو: کش وقت‌ها پاک می‌شود', !tgGetVal_('ldbs', 55));
     TG_DRY_LEAD.booked = true; TG_DRY_LEAD.status = 'معارفه رزرو شد';
@@ -22416,7 +22420,7 @@ function tgLead2Tests() {
     ok('لغو: مراجع خبر می‌گیرد و وقتش از حافظه پاک می‌شود', TG_OUTBOX.some(function (o) { return String(o.chat) === '4242' && String(o.text || '').indexOf('لغو شد') > -1; }) && !tgGetVal_('meet', '4242'));
 
     /* فرم دوباره از سایت و پاسخ پیگیری خودکار */
-    TG_DRY_LEAD = mk(); TG_DRY_LEAD.status = 'بسته'; TG_DRY_LEAD.closed = true; TG_DRY_LEAD.reason = 'منصرف شد'; TG_DRY_LEAD.owner = 'ژیلا'; TG_OUTBOX = [];
+    TG_DRY_LEAD = mk(); TG_DRY_LEAD.status = 'بسته'; TG_DRY_LEAD.closed = true; TG_DRY_LEAD.reason = 'منصرف شد'; TG_DRY_LEAD.owner = 'پذیرشی'; TG_OUTBOX = [];
     tgLeadFormAgain_(7, { src: 'سایت › پذیرش › فرم', msg: 'دوباره می‌خواهم', pref: 'واتس‌اپ' });
     var fa = sets()[0];
     ok('فرم دوباره پروندهٔ بسته را باز می‌کند و کانال ترجیحی می‌گیرد', fa && fa.changes['وضعیت'] === 'جدید' && fa.changes['دلیل بستن'] === '' && fa.changes['کانال ترجیحی'] === 'واتس‌اپ' && TG_DRY_LEAD.closed === false);
@@ -22566,7 +22570,7 @@ function tgReferTests() {
     TG_DRY_LEAD = {
       row: 7, code: 'L-1042', name: 'آزمایشی', phone: '09120000000',
       src: 'سایت', channel: 'سایت', region: 'خارج از ایران',
-      first: 'دنبال زوج‌درمانی هستم', status: 'جدید', owner: 'ژیلا', result: '', memo: '',
+      first: 'دنبال زوج‌درمانی هستم', status: 'جدید', owner: 'پذیرشی', result: '', memo: '',
       booked: false, closed: false, touched: false, idle: 0, age: 60, stage: 'first'
     };
     TG_OUTBOX = [];
@@ -22592,7 +22596,7 @@ function tgReferTests() {
        TG_LEAD_FIELDS.indexOf('درمانگر معارفه') > -1 &&
        TG_LEAD_FIELDS.indexOf('تاریخ ارجاع') > -1);
     ok('ldr در کلیدهای کش هر پیام هست', TG_MEMO_KEYS.indexOf('ldr') > -1);
-    ok('کد ارجاع زیر ۶۴ بایت است (بایت، نه نویسه)', tgCbBytes_('rf:ok:L-1042') <= 64 && tgCbBytes_(tgCbShort_('rf:p:L-1042:ژیلا زرین‌مهر')) <= 64);
+    ok('کد ارجاع زیر ۶۴ بایت است (بایت، نه نویسه)', tgCbBytes_('rf:ok:L-1042') <= 64 && tgCbBytes_(tgCbShort_('rf:p:L-1042:پذیرشی زرین‌مهر')) <= 64);
   } catch (e) {
     fail++; out.push('❌ استثنا: ' + e);
   }
@@ -22836,7 +22840,7 @@ function tgWaTests() {
     TG_DRY_LEAD = {
       row: 7, code: 'L-1042', name: 'آزمایشی', phone: '09120000000',
       src: 'WhatsApp +90 535 513 69 50', channel: 'WhatsApp', region: 'خارج از ایران',
-      first: 'سلام', status: 'جدید', owner: 'ژیلا', result: '', memo: '',
+      first: 'سلام', status: 'جدید', owner: 'پذیرشی', result: '', memo: '',
       booked: false, closed: false, touched: false, idle: 0, age: 30, stage: 'first'
     };
 
@@ -24002,7 +24006,7 @@ function tgSlNext_(chat, doneRow) {
   return tgSlCardSend_(chat, list[0].row);
 }
 
-/* خلاصه و کارت‌ها برای ترانه */
+/* خلاصه و کارت‌ها برای مسئول مدرسه */
 function tgSlDesk_(chat) {
   var b = tgSlBuckets_(tgSlOpen_());
   var total = b.first.length + b.stale.length + b.live.length;
@@ -24127,7 +24131,7 @@ function tgOnSl_(cq, rest) {
   }
 
   if (act === 'acc') {
-    /* v142: پذیرش یعنی نتیجهٔ مصاحبه مثبت بود؛ ثبت‌نام قطعی جداست و ترانه می‌زند */
+    /* v142: پذیرش یعنی نتیجهٔ مصاحبه مثبت بود؛ ثبت‌نام قطعی جداست و مسئول مدرسه می‌زند */
     var l2 = tgSlRead_(row);
     var chA = { 'مرحلهٔ قیف': TG_SCH_STAGES[TG_SCH_SG.acc] };
     if (l2 && !l2.itvres) chA['نتیجهٔ مصاحبه'] = TG_CP_IV_RES.full;
@@ -24323,7 +24327,7 @@ function tgSchLeadEnsure_(o) {
   return { row: newRow, id: id, code: newCode, created: true };
 }
 
-/* ثبت‌نام قطعی: وضعیت و مرحله، سطر «عضویت دانشجو»، نقش دانشجو، خوش‌آمد. ترانه خودش می‌زند. */
+/* ثبت‌نام قطعی: وضعیت و مرحله، سطر «عضویت دانشجو»، نقش دانشجو، خوش‌آمد. مسئول مدرسه خودش می‌زند. */
 function tgSchEnroll_(row, actor) {
   var l = tgSlRead_(row);
   if (!l) return null;
@@ -24353,7 +24357,7 @@ function tgSchEnroll_(row, actor) {
   return tgSlRead_(row);
 }
 
-/* پیش‌پرداختی که خارج از بات رسیده و ترانه ثبت می‌کند؛ باز هم فقط با تأیید یاسر رسمی می‌شود */
+/* پیش‌پرداختی که خارج از بات رسیده و مسئول مدرسه ثبت می‌کند؛ باز هم فقط با تأیید یاسر رسمی می‌شود */
 function tgSchPreManual_(row, actor) {
   var l = tgSlRead_(row);
   if (!l) return 'لید پیدا نشد.';
@@ -24512,7 +24516,7 @@ function tgSchEditSetup() {
 }
 
 /* ==================================================================
-   v143 · تب «لیدهای مدرسه» (نام تازهٔ «درخواست عضویت»)، نمای ترانه، کارتابل مدرسه
+   v143 · تب «لیدهای مدرسه» (نام تازهٔ «درخواست عضویت»)، نمای مسئول مدرسه، کارتابل مدرسه
    ================================================================== */
 /* یک بار: تب قدیمی را به نام تازه برمی‌گرداند. اگر نام تازه هست، دست نمی‌زند. */
 function tgSchRenameReq_() {
@@ -24526,7 +24530,7 @@ function tgSchRenameReq_() {
   return 'تغییر نام: ' + TG_SCH_T_REQ_OLD + ' ← ' + TG_SCH_T_REQ;
 }
 
-/* ستون‌های فنی که ترانه لازم ندارد (با شماره؛ بات همچنان با ایندکس می‌خواند) */
+/* ستون‌های فنی که مسئول مدرسه لازم ندارد (با شماره؛ بات همچنان با ایندکس می‌خواند) */
 var TG_SCH_VIEW_HIDE = [4, 5, 6, 8, 11, 14, 15, 25, 28];
 var TG_SCH_VIEW_WORK = [13, 18, 19, 20, 21];
 var TG_SCH_VIEW_NOTE = {
@@ -26328,8 +26332,8 @@ function tgSchool3Tests() {
                      owner: '', touched: '', result: '', openday: '', itv: '', itvres: '',
                      note: '', closed: false, bucket: 'first', age: 3, idle: -1 };
     TG_DRY_SLROW = 5;
-    TG_MEM['schowner'] = { name: 'ترانه', chat: '777' };
-    TG_MEM['schowners'] = [{ name: 'ترانه', chat: '777' }];
+    TG_MEM['schowner'] = { name: 'مدرسه‌ای', chat: '777' };
+    TG_MEM['schowners'] = [{ name: 'مدرسه‌ای', chat: '777' }];
     var card = tgSlCardText_(TG_DRY_SLEAD);
     ok('کارت کد S- را نشان می‌دهد', card.indexOf('S-1007') > -1);
     ok('کارت خط تیرهٔ وسط جمله ندارد', card.indexOf('—') < 0 && card.indexOf('–') < 0);
@@ -26339,7 +26343,7 @@ function tgSchool3Tests() {
     ok('دکمهٔ ثبت مصاحبه هست', JSON.stringify(kb).indexOf('sl:itv') > -1);
 
     function cb(data) {
-      return { id: '1', data: data, from: { id: 777, first_name: 'ترانه', username: 'fake_school' },
+      return { id: '1', data: data, from: { id: 777, first_name: 'مدرسه‌ای', username: 'fake_school' },
                message: { message_id: 9, chat: { id: 777 } } };
     }
     TG_OUTBOX = [];
@@ -26360,7 +26364,7 @@ function tgSchool3Tests() {
     tgOnSl_(cb('x'), 'note:S-1007');
     ok('دکمهٔ یادداشت حالت sln را باز می‌کند', !!tgGetVal_('sln', 777));
     TG_OUTBOX = [];
-    ok('متن بعدی یادداشت می‌شود', tgSlText_(777, 'ترانه', '@fake_school', 'تماس گرفتیم') === true);
+    ok('متن بعدی یادداشت می‌شود', tgSlText_(777, 'مدرسه‌ای', '@fake_school', 'تماس گرفتیم') === true);
     ok('یادداشت در دفتر ثبت شد', TG_OUTBOX.some(function (o) { return o.kind === 'schnote'; }));
 
     TG_OUTBOX = [];
@@ -26375,7 +26379,7 @@ function tgSchool3Tests() {
     var txt = tgSchDailyText_();
     ok('گزارش روزانه عنوان دارد', txt.indexOf('گزارش روزانه') > -1);
     ok('گزارش روزانه خط تیره ندارد', txt.indexOf('—') < 0);
-    TG_MEM['schchief'] = { name: 'کاوه', chat: '7000003' };
+    TG_MEM['schchief'] = { name: 'مدیری', chat: '7000003' };
     TG_OUTBOX = [];
     tgSchDaily();
     ok('گزارش روزانه به مسئول ارشد می‌رود',
@@ -26448,14 +26452,14 @@ function tgSchool3Tests() {
        TG_OUTBOX.some(function (o) { return String(o.chat) === '777' && String(o.text).indexOf('باشگاه دانش‌آموختگان') > -1; }));
     TG_MEM['alumrow'] = { sh: null, row: 2, id: 'D-001', name: 'دانش‌آموخته نمونه', chat: '910', status: TG_AL_ST_WAIT };
     TG_OUTBOX = [];
-    tgAlDecide_(777, 'D-001', 'ok', { name: 'ترانه' });
+    tgAlDecide_(777, 'D-001', 'ok', { name: 'مدرسه‌ای' });
     var welcome = TG_OUTBOX.filter(function (o) { return String(o.chat) === '910'; });
     ok('پیام خوشامد باشگاه رفت', welcome.length === 1 && welcome[0].text.indexOf('رایگان') > -1);
     ok('پیام خوشامد خط تیره ندارد', welcome.length === 1 && welcome[0].text.indexOf('—') < 0);
 
     /* اپلای تراپیست: از این نسخه فقط ناظر (مالک) می‌گیرد و تصمیم می‌گیرد */
     TG_MEM['apply'] = [];
-    TG_MEM['desk'] = [{ name: 'ژیلا', role: 'مسئول پذیرش', chat: '7000004' }, { name: 'شیدا', role: 'پذیرش', chat: '556' }];
+    TG_MEM['desk'] = [{ name: 'پذیرشی', role: 'مسئول پذیرش', chat: '7000004' }, { name: 'کشیکی', role: 'پذیرش', chat: '556' }];
     TG_MEM['watchids'] = ['777'];
     TG_OUTBOX = [];
     tgApSave_(920, { name: 'متقاضی نمونه', user: '@t', phone: '09120000000', city: 'تهران',
@@ -27484,7 +27488,7 @@ var TG_CAP = [
 { key: 'desk_ann', page: 'desk', label: 'اطلاعیه‌ها برای پذیرش', roles: ['پذیرش'], bot: true, api: 'desk.ann', app: true },
 { key: 'desk_say', page: 'desk', label: 'پاسخ متنی پذیرش', roles: ['پذیرش'], bot: true, api: 'desk.say', app: true },
 
-/* ---------- مدرسه (ترانه و کاوه) ---------- */
+/* ---------- مدرسه (مسئول مدرسه و مدیر مدرسه) ---------- */
 { key: 'sch_desk', page: 'sch', label: 'کارتابل لید مدرسه', roles: ['مدرسه'], bot: true, api: 'sch.desk', app: true },
 { key: 'sch_card', page: 'sch', label: 'کارت لید مدرسه', roles: ['مدرسه'], bot: true, api: 'sch.card', app: true },
 { key: 'sch_act', page: 'sch', label: 'دکمه‌های کارت لید مدرسه', roles: ['مدرسه'], bot: true, api: 'sch.act', app: true },
@@ -29113,16 +29117,16 @@ function tgApV106Tests() {
   var oldDry = TG_DRY, oldMem = TG_MEM, oldOut = TG_OUTBOX;
   TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
   try {
-    var t1 = tgApTok_('A-001', 'پریسا نیک‌سرشت');
+    var t1 = tgApTok_('A-001', 'پریسا نمونه‌نژاد');
     ok('توکن لینک مصاحبه ۶ نویسه است', t1.length === 6);
-    ok('توکن پایدار است', t1 === tgApTok_('A-001', 'پریسا نیک‌سرشت'));
-    ok('توکن با سوپروایزر دیگر فرق می‌کند', t1 !== tgApTok_('A-001', 'دکتر پیمان کیانی'));
-    var url = tgApSvUrl_('A-001', 'پریسا نیک‌سرشت');
+    ok('توکن پایدار است', t1 === tgApTok_('A-001', 'پریسا نمونه‌نژاد'));
+    ok('توکن با سوپروایزر دیگر فرق می‌کند', t1 !== tgApTok_('A-001', 'دکتر پیمان نمونه‌کی'));
+    var url = tgApSvUrl_('A-001', 'پریسا نمونه‌نژاد');
     ok('لینک مصاحبه شکل درست دارد', url.indexOf('start=sv-A-001-' + t1) > -1);
 
     var kb0 = tgApKb_({ id: 'A-001' });
     ok('کارت بدون سوپروایزر دکمهٔ انتخاب دارد', JSON.stringify(kb0).indexOf('ap:sup:A-001') > -1);
-    var kb1 = tgApKb_({ id: 'A-001', sup: 'پریسا نیک‌سرشت' });
+    var kb1 = tgApKb_({ id: 'A-001', sup: 'پریسا نمونه‌نژاد' });
     ok('کارت با سوپروایزر دکمهٔ لینک دارد', JSON.stringify(kb1).indexOf('ap:lnk:A-001') > -1);
     ok('کارت دکمهٔ تأیید آنبوردینگ دارد', JSON.stringify(kb1).indexOf('ap:ok:A-001') > -1);
 
@@ -31681,7 +31685,7 @@ function tgV116Tests() {
     ok('۲۴ ساعت بی‌پاسخ: کارت به مسئول ارشد مدرسه می‌رود', TG_OUTBOX.some(function (x) { return x.chat === '8002' && x.text.indexOf('۲۴ ساعت') > -1; }));
     ok('و به مسئول مدرسه هم گفته می‌شود', TG_OUTBOX.some(function (x) { return x.chat === '8001' && x.text.indexOf('مسئول ارشد') > -1; }));
     TG_OUTBOX = [];
-    tgOnCls_({ message: { chat: { id: 8001 }, message_id: 2 }, from: { first_name: 'ترانه' } }, 'n:9');
+    tgOnCls_({ message: { chat: { id: 8001 }, message_id: 2 }, from: { first_name: 'مدرسه‌ای' } }, 'n:9');
     ok('«در فهرست نیست» نام را می‌پرسد', tgGetVal_('clsw', 8001) === '9');
     ok('روز نوبت: شنبه اولین ستون است', tgDutyDayIdx_(new Date('2026-09-19T10:00:00+03:30')) === 0 && tgDutyDayIdx_(new Date('2026-09-25T10:00:00+03:30')) === 6);
     TG_MEM['duty'] = TG_DUTY_DAYS.map(function () { return ['—', '—', '—']; });
@@ -32489,12 +32493,12 @@ TG_SUITES.push(['برنامهٔ من (v118)', 'tgV118Tests']);
    یک روند استاندارد و تکرارشدنی برای هر دوره: وبینار ◂ درخواست ◂ پیش‌پرداخت ◂ مصاحبه ◂ پذیرش ◂ پرداخت کامل.
    همهٔ داده در «هاب مدرسه» است و هر ستون را با نام سرستون می‌خوانیم، نه با شماره:
      کمپین‌ها          یک سطر برای هر دوره × حلقه · وضعیت همین‌جاست و سایت و بات هر دو از آن می‌خوانند
-     خط زمانی کمپین    وبینار، پله‌های قیمت، یادآوری‌ها و مهلت‌ها · کاوه از بات یا از شیت عوض می‌کند
+     خط زمانی کمپین    وبینار، پله‌های قیمت، یادآوری‌ها و مهلت‌ها · مدیر مدرسه از بات یا از شیت عوض می‌کند
      مصاحبه‌ها          وقت‌هایی که مصاحبه‌گرها اعلام می‌کنند و نتیجهٔ هر مصاحبه
      پرداخت‌ها          هر پرداخت تا یاسر تأیید نکند «منتظر تأیید» می‌ماند
      درخواست عضویت     لید مدرسه (کد S-) با چهار ستون تازه: کد کمپین · منبع · پلهٔ قیمت · وضعیت پرداخت
      ثبت‌نام رویداد     ثبت‌نام وبینار با کد رویداد «EFT-1/T-01» و حضور
-   پیشوند کال‌بک: cp:  · حالت‌ها: cpn (نام و شماره) · cpp (توضیح پرداخت) · cpv (ویرایش کاوه) · cpl (لینک مصاحبه‌گر)
+   پیشوند کال‌بک: cp:  · حالت‌ها: cpn (نام و شماره) · cpp (توضیح پرداخت) · cpv (ویرایش مدیر مدرسه) · cpl (لینک مصاحبه‌گر)
    تریگر: tgCpTick هر ۵ دقیقه (با tgCpSetup نصب می‌شود). تست: tgCpTests. */
 
 var TG_CP_TAB  = 'کمپین‌ها';
@@ -32795,7 +32799,7 @@ function tgCpIsOwner_(chat) {
   return false;
 }
 
-/* مسئولان مدرسه (ترانه و کاوه)، هر کدام یک chat */
+/* مسئولان مدرسه (مسئول مدرسه و مدیر مدرسه)، هر کدام یک chat */
 function tgCpOwners_() {
   if (TG_DRY) return (TG_MEM['cpowners'] || []).filter(function (c) { return c !== TG_CP_YASER; });
   var out = [];
@@ -33558,7 +33562,7 @@ function tgCpIvAdd_(chat, uname, code, key, hhmm) {
   return tgSend_(chat, '✅ ثبت شد: <b>' + tgCpWhen_(at, true) + '</b> · ' + sid + extra, { inline_keyboard: kb });
 }
 
-/* ---------- میز کمپین برای کاوه، ترانه و یاسر ---------- */
+/* ---------- میز کمپین برای مدیر مدرسه، مسئول مدرسه و یاسر ---------- */
 
 function tgCpStats_(camp) {
   var regs = tgCpWebRegs_(camp.code);
@@ -33677,7 +33681,7 @@ var TG_CP_FIELD_ASK = {
   m: 'متن تازهٔ پیام بات را بنویسید. همان را عیناً برای مخاطب می‌فرستیم؛ خط تیره وسط جمله نگذارید.', a: 'مبلغ را به تومان بنویسید، مثلاً ۳۵۰۰۰۰۰.'
 };
 
-/* مقدار تازه‌ای که کاوه تایپ کرد */
+/* مقدار تازه‌ای که مدیر مدرسه تایپ کرد */
 function tgCpValText_(chat, text) {
   var raw = tgGetVal_('cpv', chat);
   if (!raw) return false;
@@ -34100,7 +34104,7 @@ function tgSchNameFix() {
   return 'نام پاک‌شده: لید ' + n + ' · ثبت‌نام رویداد ' + m;
 }
 
-/* v166.24: خلاصهٔ روزانهٔ پیگیری برای مسئولان مدرسه (ترانه و کاوه) */
+/* v166.24: خلاصهٔ روزانهٔ پیگیری برای مسئولان مدرسه (مسئول مدرسه و مدیر مدرسه) */
 function tgCpFollowText_(camp, now) {
   var leads = tgCpRead_(TG_SCH_T_REQ).filter(function (l) { return tgCpS_(l['کد کمپین']) === camp.code; });
   var open = leads.filter(function (l) { return !tgSchClosed_(tgSchStNorm_(l['وضعیت']).st); });
@@ -34355,7 +34359,7 @@ function tgCpTests() {
     TG_MEM['cpowners'] = ['111', TG_CP_YASER];
     TG_MEM['cp:' + TG_CP_TAB] = [{ 'کد کمپین': E, 'دوره': 'دورهٔ آزمایشی', 'کد دوره': 'EFT', 'حلقه': '۱', 'وضعیت': 'ثبت‌نام باز',
       'تاریخ شروع دوره': '۲۰ مهر ۱۴۰۵', 'آخرین روز ثبت‌نام': '۱۵ مهر ۱۴۰۵', 'شهریهٔ ماهانه (تومان)': 5000000, 'پیش‌پرداخت (تومان)': 1000000,
-      'لینک پرداخت': 'https://pay.example/x', 'مسئول پیگیری': 'ترانه', 'مصاحبه‌گرها': 'مصاحبه‌گر آزمایشی', 'گروه تلگرام وبینار': 'https://t.me/+g', 'کلید بات': 'eftx', 'صفحهٔ سایت': '/school/eft/' }];
+      'لینک پرداخت': 'https://pay.example/x', 'مسئول پیگیری': 'مدرسه‌ای', 'مصاحبه‌گرها': 'مصاحبه‌گر آزمایشی', 'گروه تلگرام وبینار': 'https://t.me/+g', 'کلید بات': 'eftx', 'صفحهٔ سایت': '/school/eft/' }];
     TG_MEM['cp:' + TG_CPT_TAB] = [
       { 'کد': 'T-01', 'کد کمپین': E, 'نوع': 'وبینار', 'عنوان': 'وبینار آزمایشی', 'از تاریخ': '۵ مهر ۱۴۰۵', 'ساعت': '۲۰:۰۰', 'وضعیت': 'برنامه‌ریزی شد' },
       { 'کد': 'T-02', 'کد کمپین': E, 'نوع': 'یادآوری', 'عنوان': 'یک روز مانده', 'از تاریخ': '۴ مهر ۱۴۰۵', 'ساعت': '۲۰:۰۰', 'مخاطب': 'ثبت‌نام وبینار', 'پیام بات': 'فردا وبینار داریم.', 'وضعیت': 'برنامه‌ریزی شد' },
@@ -34472,14 +34476,14 @@ function tgCpTests() {
     tgCpTick();
     ok('رویداد بستن، کمپین را بست', TG_MEM['cp:' + TG_CP_TAB][0]['وضعیت'] === 'بسته');
 
-    /* ویرایش کاوه */
+    /* ویرایش مدیر مدرسه */
     TG_MEM['cp:now'] = tgCpAt_('۲۸ شهریور ۱۴۰۵', '۱۰:۰۰').getTime();
     tgSetVal_('cpv', '111', JSON.stringify({ code: E, id: 'T-01', f: 'd' }));
-    tgCpMaybe_('111', { text: '۶ مهر ۱۴۰۵' }, 'کاوه', '@e');
-    ok('کاوه تاریخ وبینار را عوض کرد', TG_MEM['cp:' + TG_CPT_TAB][0]['از تاریخ'] === '۶ مهر ۱۴۰۵');
+    tgCpMaybe_('111', { text: '۶ مهر ۱۴۰۵' }, 'مدیری', '@e');
+    ok('مدیری تاریخ وبینار را عوض کرد', TG_MEM['cp:' + TG_CPT_TAB][0]['از تاریخ'] === '۶ مهر ۱۴۰۵');
     ok('بعد از تغییر، وضعیت به سایت هل داده شد', TG_OUTBOX.some(function (x) { return x.kind === 'cppush'; }));
     tgSetVal_('cpv', '111', JSON.stringify({ code: E, id: 'T-02', f: 'm' }));
-    tgCpMaybe_('111', { text: 'متن با — خط تیره' }, 'کاوه', '@e');
+    tgCpMaybe_('111', { text: 'متن با — خط تیره' }, 'مدیری', '@e');
     ok('متن با خط تیره رد می‌شود', TG_MEM['cp:' + TG_CPT_TAB][1]['پیام بات'] === 'فردا وبینار داریم.');
     tgDel_('cpv', '111');
     ok('غیرمسئول به میز نمی‌رسد', (TG_OUTBOX = [], tgOnCp_({ message: { message_id: 1 } }, 'o:' + E, '500', 'x', ''), TG_OUTBOX.some(function (x) { return x.text.indexOf('مسئولان مدرسه') > -1; })));
@@ -35461,7 +35465,7 @@ function tgPaTests() {
   tgPaAskField_(77, 'ad');
   ok('پرچم فیلد ست شد', tgGetVal_('paf', 77) === 'ad');
   ok('در انتظار متن است', tgPaWaiting_(77) === true);
-  tgPaText_(77, 'کرج، گوهردشت، خیابان دهم، پلاک ۵', 'کاوه', 'erfun');
+  tgPaText_(77, 'کرج، گوهردشت، خیابان دهم، پلاک ۵', 'مدیری', 'erfun');
   ok('نشانی ذخیره شد', tgPaOf_(77)['نشانی کامل'].indexOf('گوهردشت') > -1);
   ok('پرچم پاک شد', !tgGetVal_('paf', 77));
   ok('درصد تکمیل بالا رفت', tgPaPct_(tgPaOf_(77)) > 0);
@@ -35531,7 +35535,7 @@ function tgPaTests() {
    گوگل‌شیت جدا: «هاب تنخواه». یاسر شارژ می‌کند و فیش شارژ را همان‌جا می‌گذارد،
    تنخواه‌گردان هر خرج را با دسته و «بابت چی» و فیش ثبت می‌کند، و هر وقت کم آورد
    از همان‌جا درخواست شارژ می‌دهد. جمع‌بندی ماهانه خودکار است.
-   از ابتدا چندنفره است: ژیلا پذیرش، و بعدتر کاوه یا آرین یا هر کس دیگر.
+   از ابتدا چندنفره است: مسئول پذیرش پذیرش، و بعدتر مدیر مدرسه یا آرین یا هر کس دیگر.
    فیش‌ها در درایو بایگانی می‌شوند و لینکشان در شیت می‌نشیند. */
 
 var TNK_BTN   = '💵 تنخواه';
@@ -36196,7 +36200,7 @@ function tnkTests() {
   ok('تنخواه‌گردان با چت پیدا می‌شود', tnkOf_(5) && tnkOf_(5)['نام'] === 'پذیرش ساختگی');
   ok('غریبه تنخواه‌گردان نیست', tnkOf_(99) === null);
   ok('یاسر باس است', tnkIsBoss_(1) === true);
-  ok('ژیلا باس نیست', tnkIsBoss_(5) === false);
+  ok('پذیرشی باس نیست', tnkIsBoss_(5) === false);
   ok('موجودی اول صفر است', tnkBalance_('پذیرش ساختگی').bal === 0);
 
   TG_OUTBOX = [];
@@ -36258,7 +36262,7 @@ function tnkTests() {
   ok('خانهٔ مالک همه را می‌آورد', home.indexOf('پذیرش ساختگی') > -1);
   ok('خانهٔ تنخواه‌گردان فقط خودش است', tnkHomeText_(5).indexOf('تنخواه پذیرش ساختگی') > -1);
   ok('دکمهٔ شارژ فقط برای یاسر است', JSON.stringify(tnkHomeKb_(1)).indexOf('tnk:ch') > -1 && JSON.stringify(tnkHomeKb_(5)).indexOf('tnk:ch') < 0);
-  ok('دکمهٔ ثبت هزینه برای ژیلا است', JSON.stringify(tnkHomeKb_(5)).indexOf('tnk:sp') > -1);
+  ok('دکمهٔ ثبت هزینه برای پذیرشی است', JSON.stringify(tnkHomeKb_(5)).indexOf('tnk:sp') > -1);
   ok('کال‌بک ناشناس بی‌اثر است', tnkCb_({}, 'zz', 5, '', '') === null);
   ok('متن‌ها خط تیرهٔ وسط جمله ندارند', (tnkHomeText_(1) + tnkHomeText_(5)).indexOf('—') < 0);
   ok('پیام غریبه در خانه', (TG_OUTBOX = [], tnkHome_(99), JSON.stringify(TG_OUTBOX).indexOf('تنخواه‌گردان‌های تجربه') > -1));

@@ -6,7 +6,7 @@
  * - هر ۱۵ دقیقه (از tgTick5، بی تریگر تازه) کامنت‌های تازه با Drive API (comments.list) خوانده می‌شوند.
  * - وصل به لید: کد L- در متن، یا محتوای خانه‌ای که کامنت رویش است (quotedFileContent) با نام، شماره یا کد لید.
  * - دسته‌بندی: اول قاعده (بی هزینه و قابل تست)، اگر نامطمئن بود Gemini با متن پاک‌شده (بی شماره، ایمیل، یوزرنیم و نام مراجع).
- *   اطمینان کم ← فقط کارت «بررسی دستی» برای ژیلا، بی هیچ تغییر.
+ *   اطمینان کم ← فقط کارت «بررسی دستی» برای مسئول پذیرش، بی هیچ تغییر.
  * - اقدام بر اساس دسته، همه در «رویدادهای لید» با کانال «کامنت»، نویسنده و متن. پاسخ کوتاه زیر کامنت (با 🤖)، بی resolve.
  * - دفتر: تب «دفتر کامنت‌ها» (هر کامنت یک ردیف؛ حالت آزمایشی، اعمال شد، بررسی دستی، بی لید).
  * - تا یاسر «✅ اجرا» را نزده (LM_ON)، فقط شمارش آزمایشی؛ هیچ لیدی عوض نمی‌شود و پاسخی نوشته نمی‌شود.
@@ -418,20 +418,20 @@ function cmTests() {
   TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
   var OWN = String(TG_OWNER_CHAT);
   try {
-    TG_MEM['stk:boss'] = { name: 'ژیلا', chat: '7101', role: 'مسئول پذیرش' };
+    TG_MEM['stk:boss'] = { name: 'پذیرشی', chat: '7101', role: 'مسئول پذیرش' };
     TG_MEM['stk:now'] = pbTehran_(2026, 10, 4, 10, 0).getTime();
     TG_MEM['cm:ther'] = ['شمیم آذرپاد', 'حدیثه حکیم زاده', 'درمانگر الف', 'درمانگر ب', 'درمانگر ج', 'درمانگر د'];
-    TG_MEM['desk'] = [{ name: 'ژیلا', chat: '7101' }, { name: 'سارا', chat: '7102' }];
+    TG_MEM['desk'] = [{ name: 'پذیرشی', chat: '7101' }, { name: 'سارا', chat: '7102' }];
     var key = v168PoolKey_('تراپی فردی', 'سایر'), pool = {}, free = {};
     ['درمانگر الف', 'درمانگر ب', 'درمانگر ج', 'درمانگر د', 'شمیم آذرپاد'].forEach(function (n) { var r = { abroad: true, inperson: n !== 'درمانگر الف' }; r[key] = true; pool[tgNorm_(n)] = r; free[tgNorm_(n)] = true; });
     TG_MEM['v168ctx'] = { ther: ['درمانگر الف', 'درمانگر ب', 'درمانگر ج', 'درمانگر د', 'شمیم آذرپاد'].map(function (n, i) { return { name: n, active: true, sug: i, tier: 1 }; }), pool: pool, free: free };
     TG_MEM['cm:full'] = { kind: 'تراپی فردی', topic: 'سایر', region: 'داخل ایران', mode: 'آنلاین', ref1: 'شمیم آذرپاد' };
     TG_MEM['lm:leads'] = [
       { row: 2, code: 'L-1272', type: 'مراجع', chat: '9001', owner: 'بات — خودرزرو', status: 'در پیگیری', name: 'نام آزمایشی یک', phone: '09120000001', noans: 0, meetTher: 'شمیم آذرپاد', date: '2026-09-20', time: '10:00' },
-      { row: 3, code: 'L-1300', type: 'مراجع', chat: '', owner: 'ژیلا', status: 'جدید', name: 'نام آزمایشی دو', phone: '09120000002', noans: 2, date: '2026-10-01', time: '9:00' },
-      { row: 4, code: 'L-1301', type: 'مراجع', chat: '', owner: 'ژیلا', status: 'در پیگیری', name: 'نام آزمایشی سه', phone: '09120000003', noans: 0, date: '2026-10-01', time: '9:00' },
-      { row: 5, code: 'L-1302', type: 'مراجع', chat: '', owner: 'ژیلا', status: 'در پیگیری', name: 'نام تکراری', phone: '0912', date: '2026-10-01', time: '9:00' },
-      { row: 6, code: 'L-1303', type: 'مراجع', chat: '', owner: 'ژیلا', status: 'در پیگیری', name: 'نام تکراری', phone: '0913', date: '2026-10-01', time: '9:00' }];
+      { row: 3, code: 'L-1300', type: 'مراجع', chat: '', owner: 'پذیرشی', status: 'جدید', name: 'نام آزمایشی دو', phone: '09120000002', noans: 2, date: '2026-10-01', time: '9:00' },  // pii:ok ساختگی
+      { row: 4, code: 'L-1301', type: 'مراجع', chat: '', owner: 'پذیرشی', status: 'در پیگیری', name: 'نام آزمایشی سه', phone: '09120000003', noans: 0, date: '2026-10-01', time: '9:00' },  // pii:ok ساختگی
+      { row: 5, code: 'L-1302', type: 'مراجع', chat: '', owner: 'پذیرشی', status: 'در پیگیری', name: 'نام تکراری', phone: '0912', date: '2026-10-01', time: '9:00' },
+      { row: 6, code: 'L-1303', type: 'مراجع', chat: '', owner: 'پذیرشی', status: 'در پیگیری', name: 'نام تکراری', phone: '0913', date: '2026-10-01', time: '9:00' }];
     var C = function (id, text, quoted, author, extra) { var c = { id: id, content: text, author: { displayName: author || 'سارا' }, createdTime: '2026-09-25T08:00:00Z', quotedFileContent: { value: quoted || '' }, replies: [] }; for (var k in (extra || {})) c[k] = extra[k]; return c; };
     TG_MEM['cm:list'] = [
       C('c1', 'لغو کرد چون ساعت‌های درمانگر بهش نمی‌خورد', 'L-1272'),
@@ -439,14 +439,14 @@ function cmTests() {
       C('c3', 'معارفه ۱۴ مهر ساعت ۱۸ با درمانگر ب', '09120000003'),
       C('c4', 'یه چیزی گفت', 'نام تکراری'),
       C('c5', 'حل شده', 'L-1300', 'سارا', { resolved: true }),
-      C('c6', 'ترجیحاً درمانگر خانم و آنلاین، مسن‌تر', 'L-1301', 'سارا', { replies: [{ id: 'r1', content: CM_MARK + ' ثبت شد', author: { displayName: 'یاسر' } }, { id: 'r2', content: 'لطفاً سارا فردا تماس بگیرید', author: { displayName: 'ژیلا' } }] }),
+      C('c6', 'ترجیحاً درمانگر خانم و آنلاین، مسن‌تر', 'L-1301', 'سارا', { replies: [{ id: 'r1', content: CM_MARK + ' ثبت شد', author: { displayName: 'یاسر' } }, { id: 'r2', content: 'لطفاً سارا فردا تماس بگیرید', author: { displayName: 'پذیرشی' } }] }),
       C('c7', 'به نظرم بهتره بیشتر صحبت کنیم', 'L-1300')
     ];
     TG_MEM['cm:ai'] = function (batch) { var o = {}; batch.forEach(function (b) { o[b.i] = { i: b.i, cat: 'other', conf: 0.5 }; }); return o; };
 
     /* آیتم‌ها و وصل */
     var items = cmItems_(TG_MEM['cm:list']);
-    ok('کامنت resolve‌شده و پاسخ خود بات کنار می‌روند؛ پاسخ ژیلا آیتم جداست', !items.some(function (x) { return x.id === 'c5' || /r1$/.test(x.id); }) && items.some(function (x) { return x.id === 'c6:r2' && x.parent === 'c6'; }));
+    ok('کامنت resolve‌شده و پاسخ خود بات کنار می‌روند؛ پاسخ پذیرشی آیتم جداست', !items.some(function (x) { return x.id === 'c5' || /r1$/.test(x.id); }) && items.some(function (x) { return x.id === 'c6:r2' && x.parent === 'c6'; }));
     var idx = lmLeadIdx_();
     ok('وصل با کد، نام و شماره؛ نام دوتایی وصل نمی‌شود', cmLink_(items[0], idx).code === 'L-1272' && cmLink_(items[1], idx).code === 'L-1300' && cmLink_(items[2], idx).code === 'L-1301' && cmLink_(items[3], idx) === null);
     /* قاعده‌ها */
@@ -457,7 +457,7 @@ function cmTests() {
     ok('بی‌پاسخ، شروع درمان، روان‌پزشکی', cmRule_({ text: 'جواب نداد' }).cat === 'noans' && cmRule_({ text: 'درمان را شروع کرد با شمیم' }).cat === 'start' && cmRule_({ text: 'ارجاع به روانپزشک لازم است' }).cat === 'psy');
     var r6 = cmRule_({ text: 'ترجیحاً درمانگر خانم و آنلاین، مسن‌تر' });
     ok('ترجیحات: حالت، جنسیت و سن', r6 && r6.cat === 'prefs' && r6.prefs.mode === 'آنلاین' && r6.prefs.gender === 'زن' && r6.prefs.age === 'بزرگ‌تر');
-    ok('دستور ژیلا فقط از ژیلا', cmRule_({ text: 'لطفاً فردا تماس بگیرید', author: tgNm_('reception') }).cat === 'order' && cmRule_({ text: 'لطفاً فردا تماس بگیرید', author: 'سارا' }) === null);
+    ok('دستور پذیرشی فقط از پذیرشی', cmRule_({ text: 'لطفاً فردا تماس بگیرید', author: tgNm_('reception') }).cat === 'order' && cmRule_({ text: 'لطفاً فردا تماس بگیرید', author: 'سارا' }) === null);
     ok('دو دستهٔ ناسازگار ← نامطمئن (هوش مصنوعی)', cmRule_({ text: 'جواب نداد، بعد گفت لغو' }) === null);
     ok('متن پاک برای هوش مصنوعی: بی شماره، ایمیل، یوزرنیم و نام', (function (s) { return s.indexOf('0912') < 0 && s.indexOf('@') < 0 && s.indexOf('نام آزمایشی') < 0; })(cmScrub_('نام آزمایشی یک 0912 345 6789 a.b@c.com @user', 'نام آزمایشی یک')));
 
@@ -483,13 +483,13 @@ function cmTests() {
     try { cmRun_(false, CM_MAX_RUN); } catch (eR) { log.push('✗ اجرا: ' + eR + ' ' + String(eR.stack).slice(0, 300)); fail++; }
     var sets = TG_OUTBOX.filter(function (o) { return o.kind === 'leadset'; });
     var s1 = sets.filter(function (o) { return o.code === 'L-1272'; })[0];
-    ok('ارجاع مجدد: وضعیت پیگیری، نتیجهٔ «نیاز به ارجاع مجدد: ساعت نخورد»، مسئول ژیلا، موعد فردا', s1 && s1.changes['وضعیت'] === TG_ST.FOLLOW && s1.changes['نتیجه'] === 'نیاز به ارجاع مجدد: ساعت نخورد' && s1.changes['مسئول'] === tgNm_('reception') && s1.changes['تاریخ اقدام بعدی'] === '2026-10-05');
+    ok('ارجاع مجدد: وضعیت پیگیری، نتیجهٔ «نیاز به ارجاع مجدد: ساعت نخورد»، مسئول پذیرشی، موعد فردا', s1 && s1.changes['وضعیت'] === TG_ST.FOLLOW && s1.changes['نتیجه'] === 'نیاز به ارجاع مجدد: ساعت نخورد' && s1.changes['مسئول'] === tgNm_('reception') && s1.changes['تاریخ اقدام بعدی'] === '2026-10-05');
     ok('سه درمانگر تازه، بی درمانگر قبلی و فقط با وقت خالی', s1 && s1.changes['درمانگر پیشنهادی ۱'] && s1.changes['درمانگر پیشنهادی ۳'] && JSON.stringify(s1.changes).indexOf('شمیم') < 0);
-    ok('کارت ارجاع مجدد برای ژیلا', TG_OUTBOX.some(function (o) { return o.chat === '7101' && /ارجاع مجدد/.test(o.text || '') && /L-1272/.test(o.text); }));
+    ok('کارت ارجاع مجدد برای پذیرشی', TG_OUTBOX.some(function (o) { return o.chat === '7101' && /ارجاع مجدد/.test(o.text || '') && /L-1272/.test(o.text); }));
     var rp = TG_MEM['cm:replies'] || [];
     ok('پاسخ کوتاه زیر کامنت، بی resolve', rp.some(function (x) { return x.id === 'c1' && x.text.indexOf('ثبت شد: نیاز به ارجاع مجدد (ساعت نخورد)، مسئول ' + tgNm_('reception') + '، موعد فردا') > -1 && x.text.indexOf(CM_MARK) === 0; }));
     var s2 = sets.filter(function (o) { return o.code === 'L-1300'; })[0];
-    ok('بی‌پاسخ: شمارنده ۳ و کارت به ژیلا، لید بسته نمی‌شود', s2 && s2.changes['شمار بی‌پاسخ'] === 3 && s2.changes['وضعیت'] === TG_ST.NOANS && TG_OUTBOX.some(function (o) { return o.chat === '7101' && /۳ تلاش بی‌پاسخ/.test(o.text || ''); }));
+    ok('بی‌پاسخ: شمارنده ۳ و کارت به پذیرشی، لید بسته نمی‌شود', s2 && s2.changes['شمار بی‌پاسخ'] === 3 && s2.changes['وضعیت'] === TG_ST.NOANS && TG_OUTBOX.some(function (o) { return o.chat === '7101' && /۳ تلاش بی‌پاسخ/.test(o.text || ''); }));
     var s3 = sets.filter(function (o) { return o.code === 'L-1301' && o.changes['تاریخ معارفه']; })[0];
     ok('معارفه تعیین شد: ستون‌های معارفه و پیگیری روز بعد', s3 && s3.changes['معارفه هماهنگ شد؟'] === 'بله' && s3.changes['درمانگر معارفه'] === 'درمانگر ب' && s3.changes['تاریخ اقدام بعدی'] === '2026-10-07');
     ok('ترجیحات در ستون‌های لید', sets.some(function (o) { return o.code === 'L-1301' && o.changes['ترجیح جنسیت'] === 'زن' && o.changes['حالت جلسه'] === 'آنلاین'; }));
@@ -506,10 +506,10 @@ function cmTests() {
     /* سلامت لید */
     TG_MEM['stk:rows'] = []; TG_MEM['stkp:STK_SEND_OK'] = '';
     TG_MEM['lm:leads'] = [
-      { row: 2, code: 'L-2001', owner: 'ژیلا', status: 'جدید', name: 'x', date: '2026-09-30', time: '9:00', next: 'تماس اول', nextDate: '2026-10-01' },
-      { row: 3, code: 'L-2002', owner: 'ژیلا', status: 'بسته', name: 'x', next: 'تماس دوباره', nextDate: '2026-10-05' },
-      { row: 4, code: 'L-2003', owner: 'ژیلا', status: 'معارفه رزرو شد', name: 'x', next: 'پیگیری', nextDate: '2026-10-09', meetDate: '2026-10-01', result: '' },
-      { row: 5, code: 'L-2004', owner: 'ژیلا', status: 'در پیگیری', name: 'x', next: '', nextDate: '' }];
+      { row: 2, code: 'L-2001', owner: 'پذیرشی', status: 'جدید', name: 'x', date: '2026-09-30', time: '9:00', next: 'تماس اول', nextDate: '2026-10-01' },
+      { row: 3, code: 'L-2002', owner: 'پذیرشی', status: 'بسته', name: 'x', next: 'تماس دوباره', nextDate: '2026-10-05' },
+      { row: 4, code: 'L-2003', owner: 'پذیرشی', status: 'معارفه رزرو شد', name: 'x', next: 'پیگیری', nextDate: '2026-10-09', meetDate: '2026-10-01', result: '' },
+      { row: 5, code: 'L-2004', owner: 'پذیرشی', status: 'در پیگیری', name: 'x', next: '', nextDate: '' }];
     TG_MEM['stkp:CM_OPEN3'] = 'L-2004';
     lmHealth_();
     var keys = stkRows_().map(function (r) { return r.key; }).join(',');

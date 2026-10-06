@@ -1052,7 +1052,7 @@ function mcTests() {
   MC_DRY_EDITORS = [E];
   MC_DRY_PERSON = {};
   MC_DRY_PERSON[A] = { name: 'آرمان دانش‌پژوه', url: 'https://tajrobeh.life/team/arman-daneshpajouh/', job: 'روان‌درمانگر', nz: '' };
-  MC_DRY_PERSON[E] = { name: 'کاوه امیرآرا', url: '', job: 'سردبیر', nz: '70828' };
+  MC_DRY_PERSON[E] = { name: 'مدیری آرانمونه', url: '', job: 'سردبیر', nz: '70828' };
   MC_DRY_PERSON[R] = { name: 'مینا ساحلی‌زاده', url: 'https://tajrobeh.life/team/mina/', job: 'روان‌درمانگر', nz: '' };
   MC_DRY_INDEX = [
     { id: 73, title: 'انتقال و انتقال متقابل', link: 'https://tajrobeh.life/mag/transference/', author: 'آرمان دانش‌پژوه', h: ['تعریف', 'انواع انتقال', 'جمع‌بندی'] },

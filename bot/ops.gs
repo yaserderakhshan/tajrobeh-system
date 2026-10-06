@@ -33,7 +33,7 @@ var OPS_REG_HEAD = ['نام', 'chat', 'شناسهٔ هاب', 'لینک', 'ساخ
 var OPS_FONT = 'Vazirmatn';
 var OPS_INK = '#222222', OPS_WHITE = '#fefefe', OPS_RED = '#c83f49', OPS_SOFT = '#f5f5f8', OPS_LINE = '#dfdfe2';
 var OPS_EMAIL_COL = 'ایمیل';
-/* هاب‌های فاز ۱: یاسر (TG_OWNER_CHAT) و سردبیر (کاوه، نقش «سردبیر»). بقیه با opsHubMake(نام) در فاز ۲ */
+/* هاب‌های فاز ۱: یاسر (TG_OWNER_CHAT) و سردبیر (سردبیر، نقش «سردبیر»). بقیه با opsHubMake(نام) در فاز ۲ */
 var OPS_HUB_ROLES = ['ناظر', 'سردبیر'];
 
 /* هاب شخصی */
@@ -66,7 +66,7 @@ function opsProp_(k, v) {
   return v;
 }
 function opsInHours_(d) { var h = +Utilities.formatDate(d || opsNow_(), TG_TZ, 'H'); return h >= 9 && h < 18; }
-/* مسئول پذیرش (ژیلا)؛ در تست خشک از TG_MEM */
+/* مسئول پذیرش (مسئول پذیرش)؛ در تست خشک از TG_MEM */
 function opsBoss_() { if (opsDry_()) return TG_MEM['ops:boss'] || null; try { return tgDutyBoss_(); } catch (e) { return null; } }
 function opsOwnerChat_() { return typeof TG_OWNER_CHAT !== 'undefined' ? String(TG_OWNER_CHAT) : ''; }
 function opsOpen_(t) { return t.st !== OPS_ST.DONE && t.st !== OPS_ST.DROP; }
@@ -347,7 +347,7 @@ function opsHubAudit_() {
   } catch (e2) { out += ' · آخرین شیر: خوانده نشد'; }
   return out;
 }
-/* ساختن هاب شخصی برای یک ردیف «افراد» (فاز ۲: opsHubMake('ژیلا …')) */
+/* ساختن هاب شخصی برای یک ردیف «افراد» (فاز ۲: opsHubMake('مسئول پذیرش …')) */
 function opsHubMake(name) {
   var p = opsPeople_().filter(function (x) { return x.name === name; })[0];
   if (!p) return 'این نام در «افراد» نیست.';
@@ -458,7 +458,7 @@ function opsHubRefresh_(name) {
   r.getRange(1, 1, 1, 2).setFontColor(OPS_WHITE).setBackground(OPS_INK).setFontWeight('bold');
   return mine.length;
 }
-/* صف‌های مرتبط با نقش: کاوه (سردبیر) و یاسر */
+/* صف‌های مرتبط با نقش: سردبیر (سردبیر) و یاسر */
 function opsQueues_(chat) {
   var out = [], own = chat === opsOwnerChat_(), ed = false;
   try { ed = mcEditors_().map(String).indexOf(String(chat)) > -1; } catch (e) {}
@@ -714,7 +714,7 @@ function attDayClose_() {
   });
   return n;
 }
-/* جمع‌بندی هفتگی ژیلا (مسئول پذیرش): فقط روز حضوری بی ثبت و بی فعالیت، با «تأیید» یا «اصلاح» */
+/* جمع‌بندی هفتگی مسئول پذیرش (مسئول پذیرش): فقط روز حضوری بی ثبت و بی فعالیت، با «تأیید» یا «اصلاح» */
 function attWeekly_() {
   var b = opsBoss_();
   if (!b || !b.chat) return 0;
@@ -1049,7 +1049,7 @@ function opsTests() {
     attDayClose_();
     var w2 = attRows_().filter(function (r) { return r.who === 'پذیرش دوم'; })[0], w3 = attRows_().filter(function (r) { return r.who === 'پذیرش سوم'; })[0];
     ok('بی ثبت ولی با فعالیت (تیک گاندی) ← منبع «فعالیت»، بی نیاز به تأیید', w2 && w2.src === 'فعالیت' && w2.st === ATT_ST.AUTO);
-    ok('بی ثبت و بی فعالیت ← از شیفت، منتظر تأیید ژیلا', w3 && w3.src === 'شیفت' && w3.st === ATT_ST.WAIT && w3.hrs === 6);
+    ok('بی ثبت و بی فعالیت ← از شیفت، منتظر تأیید پذیرشی', w3 && w3.src === 'شیفت' && w3.st === ATT_ST.WAIT && w3.hrs === 6);
     TG_OUTBOX = [];
     ok('جمع‌بندی هفتگی فقط روزهای بی ثبت و بی فعالیت را برای مسئول پذیرش می‌فرستد', attWeekly_() === 1 && said('7101').some(function (o) { return JSON.stringify(o.markup || {}).indexOf('at:ok:' + w3.row) > -1; }));
     ok('تأیید کارکرد فقط با مسئول پذیرش', /مسئول پذیرش/.test((attCb_('7102', 'at:ok:' + w3.row), said('7102').slice(-1)[0] || {}).text || ''));

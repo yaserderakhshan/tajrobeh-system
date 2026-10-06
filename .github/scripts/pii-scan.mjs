@@ -18,11 +18,23 @@ export const RULES = [
   ['شناسهٔ تقویم', /[0-9a-f]{20,}@group\.calendar\.google\.com/],
   ['نشانی Apps Script', /AKfycb[A-Za-z0-9_-]{30,}|script\.google\.com\/macros\/s\/(?!\$\{)[A-Za-z0-9_-]{20,}/],
 ];
+// v170.23: فقط در کد (نه محتوای منتشرشدهٔ سایت): نشانی workers.dev که نام حساب شخص را دارد (<کار>.<حساب>.workers.dev)
+export const CODE_RULES = [
+  ['نشانی workers.dev با نام حساب', /\b[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev\b/i],
+];
+const CODE_FILE = /^(bot|miniapp|\.github|data-scripts)\//;
+// v170.23: نام همکاران. فهرست در مخزن نیست (مخزن عمومی است)؛ از GitHub Secret «PII_NAMES» (با ویرگول جدا). نام پیداشده چاپ نمی‌شود.
+const NAMES = (process.env.PII_NAMES || '').split(/[,،\n]+/).map((x) => x.trim()).filter((x) => x.length >= 2);
+const nameRx = (n) => new RegExp(`(?<![\\u0620-\\u064A\\u066E-\\u06D3\\u06FA-\\u06FF\\u200c\\w])${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\u0620-\\u064A\\u066E-\\u06D3\\u06FA-\\u06FF\\u200c\\w])`);
 const FAKE_LINE = /pii:ok/;
-export function piiLine(line) {
+export function piiLine(line, file = '', names = NAMES) {
   if (FAKE_LINE.test(line)) return [];
   const l = latin(line), out = [];
   for (const [name, rx] of RULES) if (rx.test(l) && !out.includes(name)) out.push(name);
+  if (!file || CODE_FILE.test(file)) {
+    for (const [name, rx] of CODE_RULES) if (rx.test(l) && !out.includes(name)) out.push(name);
+    if (names.some((n) => nameRx(n).test(line))) out.push('نام همکار (فهرست PII_NAMES)');
+  }
   return out;
 }
 export function piiSelfTest() {
@@ -41,6 +53,11 @@ export function piiSelfTest() {
   t('اسکریپت', piiLine("u = 'https://script.google.com/macros/s/AKfycbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/exec'").includes('نشانی Apps Script'));
   t('pii:ok', piiLine("var p = '09121234567'; // pii:ok ساختگی").length === 0);
   t('متن عادی', piiLine('const TG_CODE_VERSION = "v170.5"; ok(\'۱۲ مهر ۱۴۰۵\')').length === 0);
+  t('workers.dev با نام حساب در کد', piiLine("const base = 'https://relay.someone.workers.dev';", 'bot/x.gs').includes('نشانی workers.dev با نام حساب'));
+  t('workers.dev در محتوای سایت مجاز', piiLine("var EDGE = 'https://edge.someone.workers.dev/x';", 'site/pages/1-x.html').length === 0);
+  t('نام همکار از فهرست', piiLine("// به نمونه‌الف بگو", 'bot/x.gs', ['نمونه‌الف']).includes('نام همکار (فهرست PII_NAMES)'));
+  t('نام فقط کلمهٔ کامل', piiLine("// نمونه‌الفبا", 'bot/x.gs', ['نمونه‌الف']).length === 0);
+  t('نام پیش از ویرگول فارسی', piiLine("// نمونه‌الف، و", 'bot/x.gs', ['نمونه‌الف']).length === 1);
   return bad;
 }
 
@@ -55,7 +72,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     if (h) { line = Number(h[1]); continue; }
     if (!l.startsWith('+') || l.startsWith('+++')) continue;
     if (/\.(png|jpe?g|webp|gif|woff2?|ttf|otf|pdf|ico)$|\.lock$|package-lock\.json$|^\.github\/scripts\/pii-scan\.mjs$/.test(file)) { line++; continue; }
-    const f = piiLine(l.slice(1));
+    const f = piiLine(l.slice(1), file);
     if (f.length) hits.push(`${file}:${line} ${f.join('، ')}`);
     line++;
   }

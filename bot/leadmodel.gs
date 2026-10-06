@@ -7,10 +7,10 @@
  * - تب‌های جزئیات (درخواست‌های حضوری، تقاضا و انتظار حضوری، اپلای تراپیست در هاب مدرسه، درخواست فضای پارتنر، صفحهٔ پارتنر)
  *   یک ستون «کد لید» در انتها می‌گیرند. «جذب تراپیست» آینهٔ اپلای است و دست نمی‌خورد.
  * - هر ردیف جزئیات بی کد، در اجرای ساعتی (از tgWatchdog، بی تریگر تازه) لید می‌گیرد یا به لید موجود همان chat وصل می‌شود.
- *   لید تازه: مسئول پیش‌فرض پذیرش (ژیلا)، «اقدام اول» با مهلت ۲۴ ساعت.
- * - لید با مسئول «بات · خودرزرو» مسئول آدم می‌گیرد (ژیلا).
+ *   لید تازه: مسئول پیش‌فرض پذیرش (مسئول پذیرش)، «اقدام اول» با مهلت ۲۴ ساعت.
+ * - لید با مسئول «بات · خودرزرو» مسئول آدم می‌گیرد (مسئول پذیرش).
  * - پیامد هر نوع با دکمهٔ «🏁 پیامد» روی کارت لید؛ «ارجاع به مدرسه» برای همه، یک ردیف در «درخواست عضویت» هاب مدرسه با همان کد لید.
- * - پیشنهاد کاربر (روز، ساعت، محله یا شهر) وقتی وقت آنلاین یا حضوری جور نشد: ستون «پیشنهاد کاربر» و کارت برای ژیلا.
+ * - پیشنهاد کاربر (روز، ساعت، محله یا شهر) وقتی وقت آنلاین یا حضوری جور نشد: ستون «پیشنهاد کاربر» و کارت برای مسئول پذیرش.
  * - داشبورد: تب «داشبورد لید» روزی یک بار.
  * - نام مراجع در هیچ کارت و خلاصه‌ای نمی‌آید؛ فقط کد لید.
  * - تا یاسر دکمهٔ «✅ اجرا» را نزده (LM_ON)، هیچ چیز نوشته نمی‌شود؛ یک‌بارهٔ tgV1702Plan فقط شمارش آزمایشی را می‌فرستد.
@@ -559,10 +559,10 @@ function lmTests() {
   TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
   var OWN = String(TG_OWNER_CHAT);
   try {
-    TG_MEM['stk:boss'] = { name: 'ژیلا', chat: '7101', role: 'مسئول پذیرش' };
+    TG_MEM['stk:boss'] = { name: 'پذیرشی', chat: '7101', role: 'مسئول پذیرش' };
     TG_MEM['stk:now'] = pbTehran_(2026, 10, 4, 10, 0).getTime();
     TG_MEM['lm:leads'] = [
-      { row: 2, code: 'L-1100', type: '', ref: '', chat: '8801', owner: 'ژیلا', status: 'جدید', src: 'Telegram bot', text: '', date: '2026-10-01', time: '10:00' },
+      { row: 2, code: 'L-1100', type: '', ref: '', chat: '8801', owner: 'پذیرشی', status: 'جدید', src: 'Telegram bot', text: '', date: '2026-10-01', time: '10:00' },
       { row: 3, code: 'L-1101', type: '', ref: '', chat: '', owner: 'بات — خودرزرو', status: 'معارفه رزرو شد', src: 'Telegram mini app', text: '', date: '2026-10-01', time: '11:00' }];
     TG_MEM['tab:' + TG_INP_DEM] = [['1405-07-10 10:00', 'مراجع', '-', '', '', '8801', 'حضوری در شهری که مکان نداریم · شهر: شیراز', 'باز'],
                                    ['1405-07-10 11:00', 'مراجع', 'gandhi', 'شنبه', 'صبح', '8803', 'در این روز درمانگر حضوری نبود', 'باز'],
@@ -597,7 +597,7 @@ function lmTests() {
     TG_OUTBOX = [];
     var h = stkHourly_();
     var L = TG_MEM['lm:leads'];
-    ok('لید تازه با نوع، مسئول ژیلا و مهلت ۲۴ ساعت', L.filter(function (l) { return l.type === LM_T.T; }).length === 2 &&
+    ok('لید تازه با نوع، مسئول پذیرشی و مهلت ۲۴ ساعت', L.filter(function (l) { return l.type === LM_T.T; }).length === 2 &&
       L.filter(function (l) { return l.f && l.f['مسئول'] === tgNm_('reception') && l.f['مهلت'] === '2026-10-05 10:00' && l.f['اقدام بعدی'] === 'اقدام اول'; }).length >= 3);
     ok('تقاضای حضوری مراجع با لید موجود همان chat وصل می‌شود، نه لید تازه', TG_MEM['tab:' + TG_INP_DEM][0][8] === 'L-1100');
     ok('تقاضای حضوری بی لید ← لید تازه با chat و پیشنهاد کاربر', L.some(function (l) { return l.chat === '8803' && l.type === LM_T.I && l.f['پیشنهاد کاربر'] === 'شنبه · صبح'; }));
@@ -606,23 +606,23 @@ function lmTests() {
     ok('متقاضی پذیرفته ← لید بسته با «پذیرش»', L.some(function (l) { return l.ref === 'اپلای تراپیست · A-002' && /^پذیرش/.test(l.out) && l.status === TG_ST.CLOSED; }));
     var pr = TG_MEM['lm:tab:صفحهٔ پارتنر'].rows;
     ok('صفحهٔ تکراری نور: علامت «تکراری، پاک نشود» و همان لید، بی ردیف حذف‌شده', pr.length === 2 && /تکراری nour، پاک نشود/.test(pr[1][pr[1].length - 1]) && pr[1][pr[1].length - 1].indexOf(pr[0][pr[0].length - 1]) === 0);
-    ok('مسئول «بات — خودرزرو» ← ژیلا', L[1].owner === tgNm_('reception'));
+    ok('مسئول «بات — خودرزرو» ← پذیرشی', L[1].owner === tgNm_('reception'));
     ok('لید قدیمی بی نوع ← نوع از منبع', L[0].type === LM_T.C);
     var n0 = L.length; stkHourly_();
     ok('اجرای دوباره لید تکراری نمی‌سازد', TG_MEM['lm:leads'].length === n0);
     ok('رویداد ساخت لید با نوع ثبت می‌شود', TG_OUTBOX.some(function (o) { return o.kind === 'leadev' && o.o.what === 'ساخت لید' && o.o.type === LM_T.T; }));
     /* کارت‌های متوقف ساخته ولی نگه‌داشته */
     var held = stkRows_().filter(function (r) { return r.card === STK_HELD; });
-    ok('کارت‌های موردهای فعلی ساخته و نگه‌داشته؛ چیزی برای ژیلا نرفت', held.length >= 1 && !TG_OUTBOX.some(function (o) { return o.chat === '7101' && /درخواست متوقف/.test(o.text || ''); }));
+    ok('کارت‌های موردهای فعلی ساخته و نگه‌داشته؛ چیزی برای پذیرشی نرفت', held.length >= 1 && !TG_OUTBOX.some(function (o) { return o.chat === '7101' && /درخواست متوقف/.test(o.text || ''); }));
     var rep = TG_OUTBOX.filter(function (o) { return o.chat === OWN && /مدل لید اجرا شد/.test(o.text || ''); });
     ok('گزارش اجرای اول یک بار برای یاسر با دکمهٔ «ارسال کارت‌ها»', rep.length === 1 && JSON.stringify(rep[0].markup).indexOf('sk:send') > -1);
     var city = stkRows_().filter(function (r) { return r.key === 'inp_nocity:شیراز'; })[0];
     ok('ستون‌های تب متوقف: کد لید، نوع، حالت، شهر، دلیل، از کی، مسئول، اقدام لازم', STK_HEAD.slice(0, 8).join('|') === 'کد لید|نوع|حالت|شهر یا مکان|دلیل دقیق توقف|از کی|مسئول|اقدام لازم' &&
-      city && city.lead === 'L-1100' && city.type === LM_T.I && city.mode === 'حضوری' && city.place === 'شیراز' && city.owner === 'ژیلا');
+      city && city.lead === 'L-1100' && city.type === LM_T.I && city.mode === 'حضوری' && city.place === 'شیراز' && city.owner === 'پذیرشی');
     stkCb_('7101', 'sk:send:all');
     ok('فقط یاسر کارت‌ها را آزاد می‌کند', !stkSendOn_());
     stkCb_(OWN, 'sk:send:all');
-    ok('بعد از تأیید یاسر کارت‌ها برای ژیلا می‌روند', stkSendOn_() && TG_OUTBOX.some(function (o) { return o.chat === '7101' && /درخواست متوقف/.test(o.text || ''); }));
+    ok('بعد از تأیید یاسر کارت‌ها برای پذیرشی می‌روند', stkSendOn_() && TG_OUTBOX.some(function (o) { return o.chat === '7101' && /درخواست متوقف/.test(o.text || ''); }));
     ok('نام مراجع و متقاضی در هیچ کارتی نیست', !TG_OUTBOX.some(function (o) { return /متقاضی آزمایشی|متقاضی دوم/.test(o.text || ''); }));
 
     /* پیشنهاد کاربر */
@@ -632,7 +632,7 @@ function lmTests() {
     ok('جست‌وجوی بی‌نتیجهٔ آنلاین در رویدادها (حالت، روز، دلیل)', TG_OUTBOX.some(function (o) { return o.kind === 'leadev' && o.o.what === 'جست‌وجوی بی‌نتیجه' && /آنلاین · Europe\/Berlin/.test(o.o.to) && /جور نشد/.test(o.o.note); }));
     lmOnSuggest_('9905', 'دوشنبه‌ها بعد از ۱۸، ونک', 'آنلاین');
     var sc = TG_OUTBOX.filter(function (o) { return o.chat === '7101' && /پیشنهاد کاربر/.test(o.text || ''); })[0];
-    ok('کارت پیشنهاد کاربر برای ژیلا: کد لید، نوع، دلیل دقیق، پیشنهاد', sc && /L-1100/.test(sc.text) && /نوع: مراجع/.test(sc.text) && /وقت معارفه جور نشد/.test(sc.text) && /ونک/.test(sc.text));
+    ok('کارت پیشنهاد کاربر برای پذیرشی: کد لید، نوع، دلیل دقیق، پیشنهاد', sc && /L-1100/.test(sc.text) && /نوع: مراجع/.test(sc.text) && /وقت معارفه جور نشد/.test(sc.text) && /ونک/.test(sc.text));
     ok('رویداد «پیشنهاد کاربر» ثبت می‌شود', TG_OUTBOX.some(function (o) { return o.kind === 'leadev' && o.o.what === 'پیشنهاد کاربر'; }));
     TG_OUTBOX = [];
     TG_MEM['stk:lead:8807'] = 'L-1100';
@@ -641,14 +641,14 @@ function lmTests() {
 
     /* پیامد */
     TG_DRY_LEAD = { row: 9, code: 'L-1200', type: LM_T.T, name: 'x' };
-    TG_MEM['deskwho'] = { name: 'ژیلا', chat: '7101' };
+    TG_MEM['deskwho'] = { name: 'پذیرشی', chat: '7101' };
     TG_OUTBOX = [];
     lmCb_('7101', 'lm:o:L-1200');
     var om = TG_OUTBOX.filter(function (o) { return o.chat === '7101'; })[0];
     ok('دکمه‌های پیامد بر اساس نوع (متقاضی: پذیرش، ارجاع به مدرسه، رد، در انتظار)', om && JSON.stringify(om.markup).indexOf('lm:s:L-1200:3') > -1 && /پذیرش \(ورود به سیستم/.test(JSON.stringify(om.markup)));
     lmCb_('7101', 'lm:s:L-1200:3');
     var set = TG_OUTBOX.filter(function (o) { return o.kind === 'leadset'; })[0];
-    ok('«در انتظار مصاحبه/سوپروایزر» مسئول و مهلت مرحله را ثبت می‌کند', set && set.changes['پیامد'] === LM_WAITSUP && set.changes['مسئول مرحله'] === 'ژیلا' && set.changes['مهلت مرحله'] === '2026-10-07 10:00');
+    ok('«در انتظار مصاحبه/سوپروایزر» مسئول و مهلت مرحله را ثبت می‌کند', set && set.changes['پیامد'] === LM_WAITSUP && set.changes['مسئول مرحله'] === 'پذیرشی' && set.changes['مهلت مرحله'] === '2026-10-07 10:00');
     lmCb_('7101', 'lm:s:L-1200:1');
     ok('«ارجاع به مدرسه» ردیف هاب مدرسه با همان کد لید می‌سازد', (TG_MEM['lm:school'] || []).some(function (x) { return x.code === 'L-1200' && /ارجاع از هاب پذیرش · L-1200/.test(x.note); }));
     ok('پیامد ← وضعیت (شروع درمان، بی‌پاسخ، رد، قرارداد)', lmStOf_('شروع درمان') === TG_ST.START && lmStOf_('بی‌پاسخ') === TG_ST.NOANS && lmStOf_('رد با دلیل') === TG_ST.CLOSED && lmStOf_('قرارداد') === TG_ST.FOLLOW);
@@ -658,7 +658,7 @@ function lmTests() {
     ok('غیرپذیرش پیامد ثبت نمی‌کند', !TG_OUTBOX.some(function (o) { return o.kind === 'leadset'; }));
 
     /* داشبورد */
-    TG_MEM['lm:ev'] = [{ t: pbTehran_(2026, 10, 1, 12, 0).getTime(), code: 'L-1100', actor: 'ژیلا', ch: 'تلگرام', what: 'آخرین تماس' }];
+    TG_MEM['lm:ev'] = [{ t: pbTehran_(2026, 10, 1, 12, 0).getTime(), code: 'L-1100', actor: 'پذیرشی', ch: 'تلگرام', what: 'آخرین تماس' }];
     var dsh = lmDashRows_(), txt = JSON.stringify(dsh);
     ok('داشبورد: زمان تا اولین تماس، نرخ تبدیل، توقف، تقاضای حضوری، متقاضی بر اساس پیامد',
       /زمان تا اولین تماس/.test(txt) && /نرخ تبدیل/.test(txt) && /توقف بر اساس دلیل/.test(txt) && /تقاضای حضوری بی‌جواب/.test(txt) && /درمانگر متقاضی بر اساس پیامد/.test(txt));
