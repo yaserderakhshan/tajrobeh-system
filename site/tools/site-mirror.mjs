@@ -10,7 +10,7 @@
 // یعنی آن فایل نوشته نمی‌شود و فقط شناسه و نوع در خلاصه می‌آید. اطلاعات شخصی (pii-scan با PII_NAMES) هم همین‌طور.
 import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
-import { SITE, ROOT, hash, lf, loadEnv, log, warn, fail, summary, output, maskSecrets, pageFiles, readJson, report, wpClient } from './site-lib.mjs';
+import { SITE, ROOT, hash, lf, loadEnv, log, warn, fail, summary, output, maskSecrets, pageFiles, readJson, report, wpClient, dirMarkerProblems } from './site-lib.mjs';
 import { scanLine } from './secrets.mjs';
 import { piiLine } from '../../.github/scripts/pii-scan.mjs';
 
@@ -215,6 +215,7 @@ async function main() {
   let pidxDirty = false;
   const dec = (s) => { try { return decodeURIComponent(s); } catch { return s; } };
   const published = new Set();
+  const liveHtml = {};   /* متن زندهٔ برگه‌هایی که این بار خوانده شدند (برای نگهبان نشانگرها) */
   for (const p of list) {
     published.add(p.id);
     const meta = { id: p.id, slug: dec(p.slug), status: p.status, title: p.title?.raw ?? p.title?.rendered, parent: p.parent, template: p.template, link: p.link };
@@ -227,6 +228,7 @@ async function main() {
       const r = await wp.get(`/wp-json/wp/v2/pages/${p.id}?context=edit&_fields=content,modified_gmt`);
       if (!r.ok) { warn(`برگهٔ ${p.id}: HTTP ${r.status}`); continue; }
       const raw = lf(r.json.content?.raw ?? '');
+      liveHtml[p.id] = raw;
       const repo = cur ? readFileSync(join(SITE, 'pages', cur), 'utf8') : null;
       if (repo === null || hash(repo) !== hash(raw) || cur !== fname) {
         if (okToWrite(`برگهٔ ${p.id}`, raw)) {
@@ -242,6 +244,10 @@ async function main() {
   }
   for (const p of pidx) if (p.status === 'publish' && !published.has(p.id)) notes.push(`برگهٔ ${p.id} در مخزن منتشرشده است ولی در سایت نه (پیش‌نویس، خصوصی یا حذف)؛ فایلش دست نخورد.`);
   if (pidxDirty) { put(pidxPath, J(pidx.sort((a, b) => b.id - a.id))); if (!changed.includes('pages-index.json')) changed.push('pages-index.json'); }
+
+  /* نگهبان (۱۴ مهر ۱۴۰۵): نشانگرهای دایرکتوری در برگه‌هایی که بات می‌نویسد. برگهٔ خوانده‌نشده با فایل مخزن (همان زنده) سنجیده می‌شود. */
+  const files2 = pageFiles();
+  const markerBad = dirMarkerProblems((id) => liveHtml[id] !== undefined ? liveHtml[id] : (files2.get(id) ? readFileSync(join(SITE, 'pages', files2.get(id)), 'utf8') : null));
 
   /* Yoast خام (از پل) فقط برای برگه‌های منتشرشده */
   if (S._yoast) {
@@ -299,10 +305,12 @@ async function main() {
   L.push(`- تازه: ${added.length ? added.join('، ') : 'هیچ'}`);
   L.push(`- ردشده: ${skipped.length ? '' : 'هیچ'}`); skipped.forEach((x) => L.push(`  - ${x}`));
   notes.forEach((x) => L.push(`- ${x}`));
+  markerBad.forEach((x) => L.push(`- ⛔ ${x}`));
   if (!NAMES.length) L.push('- PII_NAMES خالی است؛ سنجش نام همکاران روی فایل‌ها انجام نشد.');
   summary(L.join('\n'));
   log(L.join('\n'));
   output('changed', changed.length + added.length > 0 || stateChanged ? '1' : '0');
+  output('markers', markerBad.join(' | '));   /* گام آخر گردش کار با این قرمز می‌شود (بعد از کامیت آینه، تا آینه نایستد) */
 }
 
 if (process.argv[1] && process.argv[1].endsWith('site-mirror.mjs')) {
