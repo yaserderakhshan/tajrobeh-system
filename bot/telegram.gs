@@ -2455,6 +2455,7 @@ function tgPrivate_(m) {
   const chat  = m.chat.id;
   const name  = [m.from.first_name, m.from.last_name].filter(String).join(' ').trim() || 'بدون نام';
   const uname = m.from.username ? '@' + m.from.username : '';
+  if (typeof itk2Start_ === 'function') itk2Start_(m, chat);   /* v170.35: /start <کد رجیستری>__<توکن> ← کد قدیمی و ردپا */
   // هاب ساختمان ونک (building.gs): جدا از بقیهٔ بات، پیش از هر مسیریابی
   if (typeof vkRoute_ === 'function' && vkRoute_(m, chat, name, uname)) return;
   if (typeof tnkRoute_ === 'function' && tnkRoute_(m, chat, name, uname)) return;
@@ -2462,6 +2463,7 @@ function tgPrivate_(m) {
   if (typeof ptRoute_ === 'function' && ptRoute_(m, chat, name, uname)) return;
   /* v170.16: کمپین C-004 (ebi.gs): کدهای ebi، نام و شماره، نوشتن مورد فهرست و ویس، پیش از tgOnPhone_ و کلیدواژه‌ها */
   if (typeof ebiRoute_ === 'function' && ebiRoute_(m, chat, name, uname)) return;
+  if (m.text && /^\/start(@\w+)?\s+psyjoin-/.test(m.text) && typeof ps2Join_ === 'function' && ps2Join_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;   /* v170.23.8: اتصال با تأیید مسئول */
   if (m.text && /^\/start(@\w+)?\s+psy(dr)?-/.test(m.text) && typeof tgPsyJoin_ === 'function' && tgPsyJoin_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;
   if (m.text && /^\/start(@\w+)?\s+(psybook|off|voice|psycard)$/.test(m.text)) { var sp0 = m.text.replace(/^\/start(@\w+)?\s+/, '').trim(); if (sp0 === 'psybook') tgPsyBookStart_(chat); else if (sp0 === 'off') tgOffStart_(chat); else if (sp0 === 'voice') tgEnVolunteerStart_(chat); else tgPsyCardStart_(chat); return; }   /* v159: کدهای شروع مینی‌اپ */
   if (m.text && /^\/start(@\w+)?\s+evp-/.test(m.text) && tgEvPresenterJoin_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;
@@ -2509,15 +2511,19 @@ function tgPrivate_(m) {
   if (typeof tgCpMaybe_ === 'function' && tgCpMaybe_(chat, m, name, uname)) return;
   // پیام‌ها و «برای نسخهٔ بعد» (v117): دکمه، حالت نوشتن و ویس
   if (typeof tgMsgMaybe_ === 'function' && tgMsgMaybe_(chat, m, name, uname)) return;
+  if (typeof aiForwardText_ === 'function' && aiForwardText_(chat, m)) return;   /* v170.23.7: همکار ویس را فوروارد کند، متن بگیرد */
   // استاد کلاس (v116): نام استادی که در فهرست نبود
   if (m.text && typeof tgClsMaybe_ === 'function' && tgClsMaybe_(chat, m.text, name)) return;
   // بازبینی پروفایل (v57): دکمهٔ صف، /review و جوابِ ویرایش ناظر
+  if (typeof ktbMaybe_ === 'function' && ktbMaybe_(chat, m)) return;   /* v170.23.5: کارتابل «منتظر تأیید من» */
   if (typeof tgPrMaybe_ === 'function' && tgPrMaybe_(chat, m)) return;
   // پروفایل سایت (v54): حالت‌دار است و عکس و ویس و فایل هم می‌گیرد، پس پیش از هر مسیریابی
   if (tgGetVal_('pq', chat) && typeof tgPqStep_ === 'function' && tgPqStep_(chat, m)) return;
   // مدرسه v95: ویزاردهای دانش‌آموختگان و اپلای تراپیست، چون عکس و فایل هم می‌گیرند
   if (typeof tgSchMedia_ === 'function' && tgSchMedia_(chat, m)) return;
 
+  if (typeof inbRoute_ === 'function' && inbRoute_(chat, m)) return;   /* v170.28: صندوق یکتا (پاسخ تیم، صندوق من، جواب به پیام بات) */
+  if (typeof ps3Route_ === 'function' && ps3Route_(chat, m)) return;   /* v170.23.9: روان‌پزشکی (فرم اداری، تکمیل اطلاعات، نمای مسئول) */
   if ((m.photo || m.document) && tgGetVal_('psyrc', chat) && typeof tgPsyReceipt_ === 'function' && tgPsyReceipt_(chat, m)) return;
   if (m.text && typeof tgPsyText_ === 'function' && tgPsyText_(chat, m.text)) return;
   if (m.photo && tgGetVal_('pro', chat)) {
@@ -2740,6 +2746,7 @@ function tgPrivate_(m) {
       ]
     });
   }
+  if (m && m.reply_to_message && typeof inbReplyIn_ === 'function' && inbReplyIn_(chat, m, true)) return;   /* v170.28: جواب به پیام بات گم نمی‌شود */
   tgSend_(chat, T_FALLBACK, tgMenu_());
 }
 
@@ -3364,6 +3371,7 @@ function tgOpenLeadsOf_(v, hm, now) {
     const status = tgStOf_(statusRaw) || statusRaw;
     if (!name && !String(v[i][5] || '').trim()) continue;
     if (statusRaw && tgStClosed_(statusRaw)) continue;
+    if (typeof itkInternal_ === 'function' && itkInternal_(v[i], hm)) continue;   /* v170.31: سطر داخلی و تست در آمار نیست */
     /* لید مدرسه در کارتابل پذیرش نمی‌آید؛ جایش هاب مدرسه است */
     if (tgSection_(String(v[i][2] || ''), '') === 'مدرسه') continue;
     let when = v[i][0];
@@ -3612,6 +3620,11 @@ function tgDeskDigest_(kind) {
     if (kind === 'eve' && p.style === TG_DESK_STYLES[2]) continue;      // فقط صبح
     if (isFri && kind !== 'eve') continue;                              // جمعه فقط عصر
     if (!leads.length && kind === 'eve') continue;
+    if (kind === 'morn' && typeof afxDeskMorning_ === 'function') {   /* v170.30: صبح هر کس فقط کارهای خودش */
+      var mb = afxDeskMorning_(leads, p, typeof tgDutyBoss_ === 'function' ? tgDutyBoss_() : null);
+      if (mb) tgSend_(p.chat, '<b>' + title + '</b>\n\n' + mb);
+      continue;
+    }
     tgSend_(p.chat, '<b>' + title + '</b>\n\n' + body);
   }
 }
@@ -3710,7 +3723,7 @@ function tgDeskMenu_() {
     keyboard: [
       ['📥 کارهای روی زمین', TG_DUTY_BTN],
       [TG_PAY_BTN],
-      ['✉️ پیام‌های درمانگران'],
+      ['✉️ پیام‌های درمانگران', '📮 صندوق من'],
       ['⚙️ اعلان‌های من', '📊 خلاصهٔ امروز'],
       [TG_COLLQ_BTN, TG_INPQ_BTN],
       ['📈 نظارت', '📣 اطلاعیه‌ها'],
@@ -4506,7 +4519,11 @@ function tgOnCallback_(cq) {
   if (data.indexOf('mc:') === 0 && typeof mcOnCb_ === 'function') return mcOnCb_(chat, data, cq);   /* v163: مشارکت در مجله */
   if (data.indexOf('vx:') === 0 && typeof vxOnCb_ === 'function') return vxOnCb_(chat, data, cq, name, uname);   /* v166: موتور صدا */
   if (data.indexOf('dq:') === 0 && typeof dqCb_ === 'function') return dqCb_(chat, data);   /* v170: صف ارسال */
-  if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);   /* v170.2: درخواست متوقف */
+  if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);
+  if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);
+  if (data.indexOf('inb:') === 0 && typeof inbCb_ === 'function') return inbCb_(chat, data);   /* v170.28: صندوق یکتا */
+  if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
+  if (data.indexOf('ps2:') === 0 && typeof ps2Cb_ === 'function') return ps2Cb_(chat, data);   /* v170.23.8: اتصال روان‌پزشک */   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
   if (data.indexOf('cm:') === 0 && typeof cmCb_ === 'function') return cmCb_(chat, data);     /* v170.2: کامنت‌های هاب (پرسش ترجیح) */
   if (data.indexOf('rv:t:') === 0 && typeof rvToggleCb_ === 'function') return rvToggleCb_(chat, data);   /* v169: بازبینی علمی */
@@ -5221,6 +5238,8 @@ function tgClearBooking_(chat) {
 
 /* v166.12: true/false برمی‌گرداند. اگر نوشتن شکست خورد، لید در TG_LEAD_RETRY می‌ماند و tgLeadRetry_ (از tgDutyTick) دوباره می‌نویسد. */
 function tgAppendLead_(o, isRetry) {
+  if (!isRetry && typeof itkCollGuard_ === 'function' && itkCollGuard_(o)) return true;
+  if (!isRetry && typeof itk2Merge_ === 'function') o = itk2Merge_(o);   /* v170.35: صفحهٔ ورود، دکمه، کمپین، UTM، شناسهٔ بازدید */   /* v170.31: «درخواست صحبت با همکار» لید مراجع نیست */
   if (!isRetry && typeof igLeadPrefill_ === 'function') o = igLeadPrefill_(o);   /* v168: منبع اینستاگرام و فیلدهای پیش‌پر */
   if (!isRetry && typeof ebiLeadPrefill_ === 'function') o = ebiLeadPrefill_(o);   /* v170.16: منبع «کمپین › C-004 › <نوع>» */
   if (!isRetry && typeof v168NewLeadNext_ === 'function') o = v168NewLeadNext_(o);   /* v168 فاز ۲: لید تازه همان لحظه تکلیف دارد */
@@ -5255,7 +5274,7 @@ function tgAppendLead_(o, isRetry) {
       row = sh.getLastRow();
       if (o.extra) tgWriteExtras_(sh, row, o.extra);
       try { if (typeof lmOnAppend_ === 'function') lmOnAppend_(sh, row, o); } catch (eLm) {}   /* v170.2: نوع لید و مهلت ۲۴ ساعت */
-      try { tgLeadCode_(row); } catch (eCode) { tgErr_('tgAppendLead_ کد لید', eCode); }
+      try { var lcode = tgLeadCode_(row); if (typeof fnlLead_ === 'function') fnlLead_(o, lcode); } catch (eCode) { tgErr_('tgAppendLead_ کد لید', eCode); }   /* v170.36: lead_created */
     });
     const mm = String(o.note || '').match(/chat_id: (\d+)/);
     if (mm) CacheService.getScriptCache().remove('lr' + mm[1]);
@@ -5515,6 +5534,7 @@ function tgBtnSet_() {
   try { add([TG_MAG_DESK_BTNS]); } catch (e) {}
   try { if (typeof PB_BTNS !== 'undefined') add([PB_BTNS]); } catch (e) {}
   try { one(T_ROLE_SWITCH); }      catch (e) {}
+  try { if (typeof KTB_BTN !== 'undefined') one(KTB_BTN); } catch (e) {}
   try { one(TG_MAG_BTN); one(TG_PQ_BTN); one(TG_PQ_UBTN); one(TG_PR_BTN);
         one(TG_INP_BTN); one(TG_PAY_BTN); one(TG_SJ_BTN); one(TG_COMM_BTN); } catch (e) {}
   one('↩️ بازگشت'); one('بازگشت'); one('انصراف'); one('شروع');
@@ -6884,7 +6904,17 @@ function tgWatchdog(e) {
   /* v169.1: کارهای هفتگی و ساعتی که تریگر جدا داشتند. اگر کار هفتگی سنگین (tgTherWeekly، تا ۲۶۶ ثانیه) همین ساعت رفت،
      بقیهٔ کارهای این ساعت به ساعت بعد می‌رود تا اجرای واچ‌داگ از سقف ۶ دقیقه نگذرد. */
   try { if (typeof v1691Hourly_ === 'function') v1691Hourly_(e); } catch (eH) { tgErr_('v1691Hourly_', eH); }
-  try { if (typeof ebiHourly_ === 'function') ebiHourly_(); } catch (eEb) { tgErr_('ebiHourly_', eEb); }   /* v170.16: کمپین C-004 */
+  try { if (typeof ebiHourly_ === 'function') ebiHourly_(); } catch (eEb) { tgErr_('ebiHourly_', eEb); }
+  try { if (typeof aiRetryTick_ === 'function') aiRetryTick_(); } catch (eAr) { tgErr_('aiRetryTick_', eAr); }   /* v170.23.7: ویس‌های بی‌متن */
+  try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
+  try { if (typeof ps2FixMaybe_ === 'function') ps2FixMaybe_(); } catch (eP2) { tgErr_('ps2FixMaybe_', eP2); }
+  try { if (typeof fnlHourly_ === 'function') fnlHourly_(); } catch (eFh) { tgErr_('fnlHourly_', eFh); }   /* v170.36: قیف هفتگی و آنالیتیکس */
+  try { if (typeof itkMaybe_ === 'function') itkMaybe_(); } catch (eIk) { tgErr_('itkMaybe_', eIk); }   /* v170.31: اصلاح دادهٔ لیدها با «اوکی» Cowork */
+  try { if (typeof afx2Hourly_ === 'function') afx2Hourly_(); } catch (eAx2) { tgErr_('afx2Hourly_', eAx2); }   /* v170.30: ارجاع صفر هفتگی */
+  try { if (typeof afxHourly_ === 'function') afxHourly_(); } catch (eAx) { tgErr_('afxHourly_', eAx); }   /* v170.29: تماس اول لید، یادآوری پروفایل */
+  try { if (typeof inbTick_ === 'function') inbTick_(); } catch (eIb) { tgErr_('inbTick_', eIb); }   /* v170.28: صندوق یکتا (همگام‌سازی، مهلت، ارجاع، گزارش هفتگی) */
+  try { if (typeof ps3Tick_ === 'function') ps3Tick_(); } catch (eP3) { tgErr_('ps3Tick_', eP3); }   /* v170.23.9: یادآوری ویزیت و فرم بعد از ویزیت */
+  try { if (typeof ktbRouteMaybe_ === 'function') ktbRouteMaybe_(); } catch (eKr) { tgErr_('ktbRouteMaybe_', eKr); }   /* v170.16: کمپین C-004 */
   try { if (typeof v1691Weekly_ === 'function' && v1691Weekly_(e)) return; } catch (eW) { tgErr_('v1691Weekly_', eW); }
   // ستون‌های تاریخ شمسی خودشان پر می‌شوند؛ کسی نباید دستی اجرا کند
   try { tgFillJalali_(false); } catch (e) { tgErr_('tgFillJalali_: ' + e); }
@@ -8431,6 +8461,7 @@ function tgTkCreate_(chat, who, ix, body) {
   const now = new Date();
   const id = 'P-' + tgTkNext_();
   const tk = { id: id, topic: t[0], owner: t[1], urgent: t[2], body: body, ther: who.name, chat: String(chat) };
+  if (typeof inbHook_ === 'function') inbHook_('tk', tk);   /* v170.28 */
   if (TG_DRY) return tk;
   tgTkSheet_().appendRow([id, tgJDateFull_(now, TG_TZ), Utilities.formatDate(now, TG_TZ, 'HH:mm'),
     who.name, String(chat), t[0], body, t[1], 'باز', '', '', '', '', now]);
@@ -8555,6 +8586,7 @@ function tgTkReply_(chat, id, answer) {
     sh.getRange(tk.row, 11).setValue(tgJDateFull_(now, TG_TZ));
     if (tk.at instanceof Date) sh.getRange(tk.row, 12).setValue(Math.round((now - tk.at) / 60000));
   }
+  if (typeof inbHook_ === 'function') inbHook_('tkre', tk.id, answer);   /* v170.28 */
   if (tk.chat) tgSend_(tk.chat, ['💬 <b>پاسخ پذیرش</b> · <code>' + tk.id + '</code>',
     tgEsc_(tk.topic), tgEsc_(answer)].join('\n\n'), tgTherMenu_());
   tgSend_(chat, '✅ پاسخ ' + tk.id + ' فرستاده شد.', tgDeskMenu_());
@@ -8697,6 +8729,7 @@ function tgBugCreate_(chat, who, kind, body) {
     tgBugSheet_().appendRow([id, tgJDateFull_(new Date(), TG_TZ), kind, who.name, String(chat),
       body, 'تازه', '', '', '', new Date()]);
   }
+  if (typeof inbHook_ === 'function') inbHook_('bug', { id: id, kind: kind, body: body, chat: String(chat) });   /* v170.28 */
   return { id: id, kind: kind };
 }
 
@@ -8825,7 +8858,8 @@ const TG_PEOPLE_TAB = 'افراد';
 const TG_PEOPLE_HEAD = ['نام', 'یوزرنیم تلگرام', 'chat_id', 'نقش‌ها', 'حلقه یا دوره', 'وضعیت', 'شمارهٔ تماس', 'یادداشت', 'دامنهٔ گزارش', 'رویکرد', 'سوپرویژن می‌پذیرد؟', 'دانشگاه', 'مجلهٔ تجربه', 'شناسه'];
 const TG_ROLES = ['مراجع', 'درمانگر', 'دانشجو', 'استاد', 'سوپروایزر', 'پذیرش',
                   'مالی', 'مدرسه', 'سازمانی', 'روان‌پزشکی', 'ناظر', 'سردبیر', 'راهبر', 'مصاحبه‌گر', 'سوشال', 'پارتنر', 'تنخواه',
-                  /* v166.25: رویکرد تازهٔ مدرسه (school2.gs) */ 'منتور', 'نمایندهٔ کلاس'];
+                  /* v166.25: رویکرد تازهٔ مدرسه (school2.gs) */ 'منتور', 'نمایندهٔ کلاس',
+                  /* v170.23.8: روان‌پزشکِ ویزیت‌کننده (psy2.gs)؛ «روان‌پزشکی» نقش مسئول بخش است */ 'روان‌پزشک'];
 
 /* نقشِ بخش ← بخشی که فقط همان را می‌بیند. باندری گزارش از همین‌جا می‌آید. */
 const TG_SECTION_ROLE = {
@@ -8992,6 +9026,7 @@ function tgTkNew_(chat, name, topic, owner, urgent, body) {
   const now = new Date();
   const id = 'P-' + tgTkNext_();
   const tk = { id: id, topic: topic, owner: owner, urgent: urgent, body: body, ther: name, chat: String(chat) };
+  if (typeof inbHook_ === 'function') inbHook_('tk', tk);   /* v170.28 */
   if (TG_DRY) return tk;
   tgTkSheet_().appendRow([id, tgJDateFull_(now, TG_TZ), Utilities.formatDate(now, TG_TZ, 'HH:mm'),
     name, String(chat), topic, body, owner, 'باز', '', '', '', '', now]);
@@ -9441,9 +9476,11 @@ function tgMonWeek_(back) {
   const sh = tgSS_().getSheetByName(TG_LEADS);
   if (sh && sh.getLastRow() > 1) {
     const v = sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(21, sh.getLastColumn())).getValues();
+    const hmI = tgLeadHeadMap_(sh);
     for (var i = 0; i < v.length; i++) {
       const d = tgAsDate_(v[i][0], v[i][1]);
       if (!d || d < a || d >= b) continue;
+      if (typeof itkInternal_ === 'function' && itkInternal_(v[i], hmI)) continue;   /* v170.31 */
       if (!String(v[i][3] || '').trim() && !String(v[i][5] || '').trim()) continue;
       m.total++;
       const k = tgLeadSrc_(v[i][2], v[i][4]);
@@ -9818,7 +9855,7 @@ const T_WATCH_MENU = 'گزارش کامل هر شب یک بار خودش می‌
 
 function tgWatchMenu_() {
   return {
-    keyboard: [['📊 گزارش امروز', TG_STAT_BTN], ['📈 این هفته'], ['🩺 سلامت سیستم'], [TG_PR_BTN, TG_APQ_BTN], [TG_EVN_BTN], [TG_DASH_BTN, TG_TSK_BTN], [TG_BOX_BTN, TG_TSK_NEW]].concat(typeof DQ_BTN !== 'undefined' ? [[DQ_BTN]] : []).concat(tgRoleRow_()),
+    keyboard: (typeof KTB_BTN !== 'undefined' ? [[KTB_BTN]] : []).concat([['📊 گزارش امروز', TG_STAT_BTN], ['📈 این هفته'], ['🩺 سلامت سیستم'], [TG_PR_BTN, TG_APQ_BTN], [TG_EVN_BTN], [TG_DASH_BTN, TG_TSK_BTN], [TG_BOX_BTN, TG_TSK_NEW]]).concat(typeof DQ_BTN !== 'undefined' ? [[DQ_BTN]] : []).concat(tgRoleRow_()),
     resize_keyboard: true
   };
 }
@@ -10665,7 +10702,8 @@ const TG_ROLE_BTN = {
   'دانشجو': '🎓 دانشجو', 'استاد': '📚 استاد', 'سوپروایزر': '🧑‍🏫 سوپروایزر', 'سردبیر': '✒️ سردبیر مجله', 'راهبر': '🧭 راهبر رودمپ', 'مصاحبه‌گر': '🎤 مصاحبه‌گر',
   'منتور': '🌱 منتور', 'نمایندهٔ کلاس': '🗣 نمایندهٔ کلاس',
   /* v170.22: کسی که فقط نقش تنخواه دارد در حلقهٔ انتخاب نقش گیر می‌کرد (برچسب و شاخه نداشت) */
-  'تنخواه': '💵 تنخواه‌گردان' };
+  'تنخواه': '💵 تنخواه‌گردان',
+  'روان‌پزشک': '🧠 روان‌پزشک' };   /* v170.23.8 */
 
 /* نقش‌هایی که واقعاً مسیر کاری دارند. */
 /* فهرست افراد با کش پنج‌دقیقه‌ای — تب «افراد» مرجع همهٔ نقش‌هاست جز درمانگر */
@@ -10828,9 +10866,10 @@ function tgRoleByLabel_(text, roles) {
 }
 
 /* منوی مسئول بخش. هرکس فقط بخش خودش را می‌بیند، نه یک عدد بیشتر. */
-function tgOwnerMenu_() {
+function tgOwnerMenu_(role) {
+  var extra = role === 'روان‌پزشکی' && typeof PS3_HEAD_BTN !== 'undefined' ? [[PS3_HEAD_BTN]] : [];   /* v170.23.9: نمای روان‌پزشکی */
   return {
-    keyboard: [['📊 گزارش بخش من'], ['📣 اطلاعیه‌ها', '❓ راهنما'], [TG_DASH_BTN, TG_TSK_BTN], [TG_BOX_BTN, TG_TSK_NEW]].concat(tgRoleRow_()),
+    keyboard: [['📊 گزارش بخش من', '📮 صندوق من']].concat(extra).concat([['📣 اطلاعیه‌ها', '❓ راهنما'], [TG_DASH_BTN, TG_TSK_BTN], [TG_BOX_BTN, TG_TSK_NEW]]).concat(tgRoleRow_()),
     resize_keyboard: true
   };
 }
@@ -10838,14 +10877,14 @@ function tgOwnerMenu_() {
 function tgOwnerRoute_(chat, role, text, uname) {
   const sec = TG_SECTION_ROLE[role];
   const s = String(text || '');
-  if (s.indexOf('اطلاعیه') > -1) return tgAnnShow_(chat, tgOwnerMenu_());
+  if (s.indexOf('اطلاعیه') > -1) return tgAnnShow_(chat, tgOwnerMenu_(role));
   if (s.indexOf('گزارش') > -1 || s.indexOf('/start') === 0 || !s) {
     const d = tgDayView_(tgDayWin_(), tgScope_(sec));
-    return tgSend_(chat, tgDayReport_(d), tgOwnerMenu_());
+    return tgSend_(chat, tgDayReport_(d), tgOwnerMenu_(role));
   }
   return tgSend_(chat, 'اینجا گزارش بخش «' + sec + '» است.\n\n' +
     'با «📊 گزارش بخش من» عددهای ۲۴ ساعت گذشتهٔ همین بخش را می‌بینید. ' +
-    'عدد بخش‌های دیگر را نمی‌بینید، چون به کار شما نمی‌آید.', tgOwnerMenu_());
+    'عدد بخش‌های دیگر را نمی‌بینید، چون به کار شما نمی‌آید.', tgOwnerMenu_(role));
 }
 
 function tgRoleRoute_(chat, role, text, m) {
@@ -10870,6 +10909,7 @@ function tgRoleRoute_(chat, role, text, m) {
   if (role === 'مصاحبه‌گر' && typeof tgCpIvDesk_ === 'function') return tgCpIvDesk_(chat, arg, u);
   /* v170.22: تنخواه، راهبر و مالی شاخهٔ خودشان را دارند (پیش از این تنخواه و راهبر به انتخاب نقش برمی‌گشتند) */
   if (role === 'تنخواه' && typeof tnkHome_ === 'function') return tnkHome_(chat);
+  if (role === 'روان‌پزشک' && typeof ps2Desk_ === 'function') return ps2Desk_(chat, arg);   /* v170.23.8 */
   if (role === 'راهبر') {
     if (typeof tgRmIsGuide_ === 'function' && tgRmIsGuide_(chat, u)) return tgRmDesk_(chat, 'kanape');
     if (typeof tnkHome_ === 'function' && tnkIsBoss_(chat)) return tnkHome_(chat);
@@ -12599,6 +12639,7 @@ function tgStartLabel_(code) {
   if (typeof v1689StartLabel_ === 'function') { var vl = v1689StartLabel_(code); if (vl) return vl; }   /* v168.9: dsp_ ref_ prt_ */
   if (code.indexOf('rm-') === 0) return 'رودمپ › ' + code.slice(3);
   if (code.indexOf('gt-') === 0) return 'شروع تراپی › ' + code.slice(3);
+  if (typeof itk2Label_ === 'function') { var rl = itk2Label_(code); if (rl) return rl; }   /* v170.35: رجیستری دکمه‌ها */
   return code;
 }
 
@@ -13602,10 +13643,10 @@ var TG_PQ_GUIDE = 'https://tajrobeh.life/wp-content/uploads/2026/09/tjl-profile-
 var TG_PQ_SITE  = 'https://tajrobeh.life/#therapists';
 var TG_PQ_FIX   = ['id', 'name', 'roles', 'chat', 'src', 'status', 'pct', 'started', 'updated', 'invited', 'skipped', 'review', 'onsite',
                    'stamp', 'rstamp', 'notified', 'drive', 'site_name', 'site_sp', 'site_city', 'site_tags', 'site_photo', 'crop',
-                   'page', 'page_photo', 'page_voice', 'site_slug', 'congrats', 'pub_title', 'pub_headline', 'pub_method', 'pub_first', 'pub_trainings', 'pub_teach', 'pub_articles', 'pub_extra', 'teaminv', 'newq', 'pub_resume', 'modechk', 'csask', 'remind', 'inpoffer'];
+                   'page', 'page_photo', 'page_voice', 'site_slug', 'congrats', 'pub_title', 'pub_headline', 'pub_method', 'pub_first', 'pub_trainings', 'pub_teach', 'pub_articles', 'pub_extra', 'teaminv', 'newq', 'pub_resume', 'modechk', 'csask', 'remind', 'inpoffer', 'pub_resume_draft', 'basis'];
 var TG_PQ_FIXL  = ['شناسه', 'نام', 'نقش‌ها', 'chat_id', 'منبع', 'وضعیت', 'درصد تکمیل', 'شروع', 'آخرین پاسخ', 'دعوت', 'رد شده‌ها', 'بازبینی تیم', 'روی سایت',
                    'زمان آخرین پاسخ', 'زمان بازبینی', 'خبر به ناظر', 'فایل‌ها در درایو', 'نام روی سایت', 'خط رویکرد روی سایت', 'شهر روی سایت', 'تگ‌های کارت', 'عکس روی سایت', 'قاب عکس',
-                   'صفحهٔ شخصی', 'عکس صفحه (نسخه)', 'ویس صفحه (نسخه)', 'آدرس انگلیسی صفحه', 'پیام جشن انتشار', 'عنوان (ویرایش تیم)', 'یک جمله (ویرایش تیم)', 'روش درمان (ویرایش تیم)', 'جلسهٔ اول (ویرایش تیم)', 'آموزش‌ها (ویرایش تیم)', 'درس‌ها (ویرایش تیم)', 'نوشته‌ها (ویرایش تیم)', 'نقش‌های دیگر', 'دعوت به دیدن تیم', 'سؤال‌های تازه', 'رزومهٔ سبک (ویرایش تیم)', 'پرسش شکل جلسه', 'یادآوری اجازهٔ انتشار', 'یادآوری تکمیل', 'پیشنهاد حضوری'];
+                   'صفحهٔ شخصی', 'عکس صفحه (نسخه)', 'ویس صفحه (نسخه)', 'آدرس انگلیسی صفحه', 'پیام جشن انتشار', 'عنوان (ویرایش تیم)', 'یک جمله (ویرایش تیم)', 'روش درمان (ویرایش تیم)', 'جلسهٔ اول (ویرایش تیم)', 'آموزش‌ها (ویرایش تیم)', 'درس‌ها (ویرایش تیم)', 'نوشته‌ها (ویرایش تیم)', 'نقش‌های دیگر', 'دعوت به دیدن تیم', 'سؤال‌های تازه', 'رزومهٔ سبک (ویرایش تیم)', 'پرسش شکل جلسه', 'یادآوری اجازهٔ انتشار', 'یادآوری تکمیل', 'پیشنهاد حضوری', 'رزومهٔ سبک (پیش‌نویس جمنای)', 'پشتوانهٔ انتشار'];
 /* عکس کوچک‌تر از این (ضلع کوتاه، پیکسل) یک بار مؤدبانه پس داده می‌شود */
 var TG_PQ_MINPX = 720;
 var T_PQ_SMALL  = 'این عکس برای صفحهٔ سایت کمی کوچک است و آنجا تار دیده می‌شود. اگر عکس بزرگ‌تر یا واضح‌تری دارید بفرستید؛ بهتر است به شکل «فایل» بفرستید تا تلگرام فشرده‌اش نکند. اگر عکس دیگری ندارید، همین را دوباره بفرستید.';
@@ -13701,9 +13742,11 @@ var TG_PQ = [
   { k: 'supcap', l: 'ظرفیت حمایتی', t: 'choice', w: 'K', when: 'suppl', col: 'ظرفیت حمایتی',
     o: ['۱ مراجع', '۲ مراجع', '۳ مراجع', 'بیشتر از ۳'],
     a: 'هم‌زمان چند مراجع با نرخ حمایتی می‌توانید داشته باشید؟' },
-  { k: 'consent', l: 'اجازهٔ انتشار', t: 'choice', w: 'TES', req: true,
+  /* v170.23.6 (قاعدهٔ انتشار، تصمیم یاسر): اطلاعات سبک (عکس، نام، رویکرد، تحصیلات، بیو، شهر و صفحهٔ /team/ با همین‌ها) با پشتوانهٔ
+     قرارداد همکاری منتشر می‌شود و اجازهٔ جدا نمی‌خواهد. این پرسش فقط برای بخش‌های انتخابی است: رزومهٔ کامل و ویس معرفی. [متن از تیم] */
+  { k: 'consent', l: 'اجازهٔ بخش‌های انتخابی', t: 'choice', w: 'TES', req: true,
     o: ['بله، روی سایت منتشر شود', 'فعلاً فقط برای تیم'],
-    a: 'اجازه می‌دهید این اطلاعات (به‌جز کد نظام) روی صفحهٔ شما در سایت تجربه منتشر شود؟\nوقتی صفحه منتشر شد، لینکش را همین‌جا برایتان می‌فرستیم؛ تا لینک نیامده، یعنی هنوز منتشر نشده.' }
+    a: 'رزومهٔ کامل و ویس معرفی‌تان هم روی صفحهٔ شما در سایت تجربه بیاید؟\nصفحهٔ شما با عکس، نام، رویکرد، تحصیلات، معرفی کوتاه و شهر طبق قرارداد همکاری منتشر می‌شود؛ این پرسش فقط دربارهٔ رزومهٔ کامل و ویس است. وقتی صفحه منتشر شد، لینکش را همین‌جا برایتان می‌فرستیم.' }
 ];
 
 var T_PQ_INTRO_T = '🪪 <b>صفحهٔ شما در سایت تجربه</b>\n\n' +
@@ -13816,6 +13859,7 @@ function tgPqPut_(id, obj) {
 function tgPqGet_(chat) { try { return JSON.parse(tgGetVal_('pq', chat) || 'null'); } catch (e) { return null; } }
 function tgPqSet_(chat, st) { tgSetVal_('pq', chat, JSON.stringify(st)); }
 
+var TG_PQ_URLQ = ['links', 'articles', 'resume'];   /* v170.23.6: فقط این پرسش‌ها لینک می‌پذیرند */
 function tgPqAnswered_(v, q) { return !!(v && String(v[q.k] || '').trim()); }
 
 /* ورود: دکمه، /page، /start page، دکمهٔ دعوت */
@@ -13974,6 +14018,9 @@ function tgPqStep_(chat, m) {
   if (!q) { tgDel_('pq', chat); return false; }
   var text = String((m && (m.text || m.caption)) || '').trim();
   if (m && m.text && tgPqIsExit_(text) && !(q.o && q.o.indexOf(text) > -1)) { tgDel_('pq', chat); return false; }
+  /* v170.23.6: ریشهٔ «لینک گوگل‌میت در عنوان»: حالت پرسش‌نامه تا ۶ ساعت باز می‌ماند و پرسش متنی هر متنی را می‌پذیرفت؛ لینکی که
+     درمانگر برای پیام دیگری (مثل لینک جلسه) فرستاد، جواب «عنوان» ثبت شد. لینک برای پرسش غیرلینکی جواب نیست: حالت بسته و پیام به مسیر خودش. */
+  if (text && TG_PQ_URLQ.indexOf(q.k) < 0 && ['photo', 'voice', 'file', 'email', 'money', 'year'].indexOf(q.t) < 0 && TG_OK_URL_RX.test(text)) { tgDel_('pq', chat); return false; }
 
   if (q.t === 'photo') {
     var ph = m && m.photo && m.photo.length ? m.photo[m.photo.length - 1].file_id :
@@ -14339,7 +14386,7 @@ function tgPqTests() {
     tgPqStep_(901, { voice: { file_id: 'VOI', duration: 40 }, chat: { id: 901 } });
     ok('ویس ذخیره می‌شود', TG_MEM['pqrows'][id].voice.indexOf('tg:voice:VOI') === 0);
     TG_OUTBOX = []; tgPqCb_(901, 'sk');
-    ok('اجازهٔ انتشار رد نمی‌شود', said().indexOf('اجازهٔ انتشار') > -1 && said().indexOf('pq:sk') < 0);
+    ok('اجازهٔ بخش‌های انتخابی رد نمی‌شود', said().indexOf('اجازهٔ بخش‌های انتخابی') > -1 && said().indexOf('pq:sk') < 0);
     TG_OUTBOX = []; tgPqCb_(901, 'o:0');
     ok('در پایان درصد و وضعیت ثبت می‌شود', Number(TG_MEM['pqrows'][id].pct) > 60 && TG_MEM['pqrows'][id].status === 'منتظر بازبینی');
     ok('پیام پایان لینک سایت دارد', said().indexOf('tajrobeh.life') > -1 && said().indexOf('٪') > -1);
@@ -14477,6 +14524,8 @@ var T_PQ_CSASK = '🪪 <b>صفحهٔ شما در سایت تجربه هنوز م
   'اگر دوست دارید صفحه‌تان منتشر شود، دکمهٔ پایین را بزنید و «بله، روی سایت منتشر شود» را انتخاب کنید. وقتی صفحه منتشر شد، لینکش را همین‌جا برایتان می‌فرستیم؛ تا لینک نیامده، یعنی هنوز منتشر نشده.';
 var TG_PQ_OPEN = ['دعوت شد', 'در حال تکمیل', 'نیمه‌کاره'];
 function tgPqConsentAsk(send) {
+  /* v170.23.6 (قاعدهٔ انتشار): اطلاعات سبک اجازهٔ جدا نمی‌خواهد؛ این پیام دیگر فرستاده نمی‌شود */
+  if (send) { Logger.log('v170.23.6: اجازهٔ جدا برای اطلاعات سبک لازم نیست؛ پیامی نرفت.'); return []; }
   var out = [], seen = {};
   tgPrAll_().forEach(function (r) {
     var v = r.v, to = String(v.chat || '').split(/[,،;\s]+/)[0];
@@ -14580,6 +14629,7 @@ function tgPqArchive_(id, name, key) {
 
 function tgPqArchiveSafe_(id, name, key) {
   try { tgPqArchive_(id, name, key); } catch (e) { tgErr_('tgPqArchive_ ' + name + ' ' + key + ': ' + e); }
+  if (key === 'resume' && typeof afxCvNow_ === 'function') { try { afxCvNow_(id); } catch (eCv) { tgErr_('afxCvNow_', eCv); } }   /* v170.29: رزومهٔ سبک همان لحظه */
 }
 
 /* یک بار بعد از دادن دسترسی درایو: همهٔ فایل‌های قبلی را بایگانی می‌کند */
@@ -14811,8 +14861,10 @@ function tgPrPlan_(r) {
     keepPhoto: v.site_photo === 'فعلی',
     photoOff: String(v.site_photo || '').indexOf('ندارد') === 0,
     hasCurPhoto: !!cur.photo,
-    blocked: String(v.consent || '').indexOf('فقط برای تیم') > -1,
-    pageOk: String(v.consent || '').indexOf('بله') === 0
+    /* v170.23.6: اطلاعات سبک با پشتوانهٔ قرارداد همکاری؛ فقط تصمیم تیم («روی سایت نمی‌رود») جلویش را می‌گیرد */
+    blocked: /نمی‌رود/.test(String(v.status || '')),
+    pageOk: true,
+    extraOk: String(v.consent || '').indexOf('بله') === 0   /* رزومهٔ کامل و ویس: اجازهٔ جدا */
   };
   p.tags = v.site_tags || (p.create ? tgPrTags_([p.sp, ther && ther.school, ther && ther.raw].join(' '), v.ages, p.city) : (cur.tags || ''));
   try { p.tags = tgPrInpTag_(v.name, p.tags); } catch (eTg) {}
@@ -14830,59 +14882,70 @@ function tgPrPlan_(r) {
 /* ───── متن و دکمه‌ها ───── */
 function tgPrCut_(s, n) { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s; }
 
+/* v170.23.6 (تصمیم یاسر): همهٔ کارت‌های تأیید یک شکل دارند: بالای کارت فقط تغییرها («قبلی ← جدید» یا «تازه»)، بعد هشدارهای
+   اعتبارسنجی (تا اصلاح نشده تأیید قفل است)، بعد جزئیات. سه دکمه: «✅ تأیید و انتشار»، «✏️ اصلاح»، «⏭ بعدی». */
+var TG_OK_URL_RX = /https?:\/\/|www\.|meet\.google|zoom\.us|t\.me\/|@\w{3,}|[\w.+-]+@[\w-]+\.\w+/i;
+var TG_OK_PHONE_RX = /(?:\+|00)?9?8?\s*0?9[\d۰-۹٠-٩\s-]{8,}|[\d۰-۹٠-٩]{8,}/;
+function tgOkBad_(s) { s = String(s || ''); return TG_OK_URL_RX.test(s) ? 'لینک یا ایمیل دارد' : TG_OK_PHONE_RX.test(s) ? 'شماره دارد' : ''; }
+/* اعتبارسنجی پیش از نمایش: block یعنی تأیید قفل است */
+function tgPrValid_(p) {
+  var v = p.v, block = [], warn = [];
+  var chk = function (label, val) { var b = tgOkBad_(val); if (b) block.push('«' + label + '» ' + b + ': ' + tgPrCut_(val, 50)); };
+  chk('نام', p.name); chk('خط رویکرد', p.sp); chk('شهر', p.city);
+  chk('عنوان', String(v.pub_title || v.title || '')); chk('یک جمله', String(v.pub_headline || v.headline || '')); chk('مدرک', String(v.degree || ''));
+  if (p.create && !p.fid && !p.hasCurPhoto) block.push('عکس ندارد؛ کارت تازه بی‌عکس ساخته نمی‌شود');
+  else if (!p.fid && !p.hasCurPhoto && !p.keepPhoto) warn.push('عکس ندارد');
+  if (p.create && !p.sp) block.push('خط رویکرد ندارد');
+  if (/[A-Za-z0-9]/.test(p.name)) warn.push('در نام حرف لاتین یا عدد هست');
+  if (p.siteErr) block.push('سایت جواب نداد: ' + tgPrCut_(p.siteErr, 60));
+  return { block: block, warn: warn };
+}
+function tgPrBasis_() { var ver = String(cfg_('TG_CONTRACT_VER', '') || '').trim(); return 'قرارداد همکاری' + (ver ? ' · نسخهٔ ' + ver : ''); }
 function tgPrText_(p) {
   var v = p.v;
   var roles = String(v.roles || '').split('').map(function (c) { return TG_PR_ROLEFA[c]; }).filter(Boolean).join('، ');
-  var L = ['🪪 <b>بازبینی پروفایل</b> · ' + tgEsc_(v.name),
+  var L = ['🪪 <b>تأیید پروفایل</b> · ' + tgEsc_(p.name) + (p.create ? ' · <b>تازه</b>' : ''),
            tgEsc_(roles) + ' · تکمیل ' + tgFa_(v.pct || tgPqPct_(v, v.roles || 'T')) + '٪' + (v.updated ? ' · آخرین پاسخ ' + tgEsc_(v.updated) : '')];
-  if (p.blocked) L.push('⛔ گفته فعلاً فقط برای تیم؛ چیزی روی سایت نمی‌رود.');
-  L.push('');
-  var where = p.hits.map(function (h) { return (h.kind === 'supc' ? 'کارت استاد' : 'کارت') + ' ' + tgEsc_(h.title || h.page); });
-  L.push('<b>کارت سایت</b> ' + (p.siteErr ? '(سایت جواب نداد: ' + tgEsc_(p.siteErr) + ')' :
-         p.create ? '(کارت ندارد؛ کارت تازه در صفحهٔ اصلی ساخته می‌شود' + (p.school ? ' و در مدرسه' : '') + ')' :
-         p.hits.length ? '(' + where.join('، ') + ')' : '(کارتی در سایت ندارد؛ کارت استاد را دستی می‌سازیم)'));
+  if (p.blocked) L.push('⛔ تصمیم تیم: روی سایت نمی‌رود.');
+  /* ۱) فقط تغییرها */
+  var ch = [];
   var diff = function (label, now, was) {
-    var s = label + ': ' + (now ? tgEsc_(now) : '<i>خالی</i>');
-    if (was && now && was !== now) s += '  ← قبلاً: ' + tgEsc_(was);
-    return s;
+    now = String(now || ''); was = String(was || '');
+    if (p.create) { if (now) ch.push(label + ': ' + tgEsc_(now)); return; }
+    if (now && was && now !== was) ch.push(label + ': ' + tgEsc_(was) + ' ← ' + tgEsc_(now));
+    else if (now && !was) ch.push(label + ': تازه ← ' + tgEsc_(now));
   };
-  L.push(diff('نام', p.name, p.cur.name));
-  L.push(diff('خط رویکرد', p.sp, p.cur.sp));
-  var hubSp = tgPrSp_(p.ther && p.ther.school);
-  if (String(v.approach || '').trim() && hubSp && hubSp !== tgPrOwnSp_(v.approach)) L.push('   (به تعبیر خودش؛ در هاب: ' + tgEsc_(hubSp) + ')');
-  else if (!String(v.approach || '').trim() && !v.site_sp) L.push('   👈 رویکرد را خودش نگفته؛ این از ' + (p.cur.sp ? 'کارت فعلی' : 'هاب') + ' است.');
-  if (p.isT) L.push(diff('شهر', p.city, p.cur.city));
-  if (p.isT && p.ages) L.push('گروه مراجعان روی صفحه: ' + tgEsc_(p.ages) + (p.hubAges && String(v.ages || '') !== p.ages ? ' (پاسخ خودش: ' + tgEsc_(v.ages || 'خالی') + '؛ هاب: ' + tgEsc_(p.hubAges) + ')' : ''));
-  if (p.create || v.site_tags) L.push('تگ‌ها: ' + (p.tags ? tgEsc_(p.tags) : '<i>خالی</i>'));
-  L.push('عکس: ' + (p.keepPhoto ? 'عکس فعلی سایت می‌ماند' : p.fid ? 'عکس تازه از بات' + (p.hasCurPhoto ? ' (جای عکس فعلی)' : '') : (p.hasCurPhoto ? 'عکس فعلی سایت' : 'ندارد')));
-  if (p.isT) L.push('دانش‌آموختهٔ مدرسه: ' + (p.school ? 'بله' : 'نه'));
-  L.push('صفحهٔ شخصی: ' + (v.page ? '<a href="' + tgEsc_(v.page) + '">' + tgEsc_(tgPrUrl_(v.page)) + '</a>' + (p.pageOk ? ' (با انتشار به‌روز می‌شود)' : '') :
-         p.pageOk ? 'با انتشار ساخته می‌شود' : (p.blocked ? 'ساخته نمی‌شود' : 'منتظر اجازهٔ انتشار از خودش')));
+  diff('نام', p.name, p.cur.name);
+  diff('خط رویکرد', p.sp, p.cur.sp);
+  if (p.isT) diff('شهر', p.city, p.cur.city);
+  if (p.create || v.site_tags) diff('تگ‌ها', p.tags, p.cur.tags);
+  if (p.fid && !p.keepPhoto) ch.push('عکس: ' + (p.hasCurPhoto ? 'عکس فعلی ← عکس تازه از بات' : 'تازه'));
+  var t1 = String(v.pub_title || v.title || '').trim(); if (t1 && (p.create || !v.page)) ch.push('عنوان: ' + tgEsc_(tgPrCut_(t1, 80)));
+  if (!v.page && p.pageOk && !p.blocked) ch.push('صفحهٔ شخصی: تازه ساخته می‌شود');
+  if (p.extraOk && String(v.pub_resume || '').trim() && !String(v.page || '').trim()) ch.push('رزومهٔ کامل: تازه');
+  var vm = /^tg:voice:([^\s·]+)/.exec(String(v.voice || ''));
+  if (p.extraOk && vm && vm[1] !== String(v.page_voice || '')) ch.push('ویس معرفی: ' + (v.page_voice ? 'ویس قبلی ← ویس تازه' : 'تازه'));
+  L.push('');
+  L.push('<b>تغییرها</b>');
+  L = L.concat(ch.length ? ch.map(function (x) { return '• ' + x; }) : ['• چیزی در سایت عوض نمی‌شود؛ تأیید فقط بازبینی را ثبت می‌کند.']);
+  /* ۲) اعتبارسنجی */
+  var val = tgPrValid_(p);
+  if (val.block.length) { L.push(''); L.push('🔒 <b>تا اصلاح نشود تأیید قفل است</b>'); val.block.forEach(function (x) { L.push('⛔ ' + tgEsc_(x)); }); }
+  if (val.warn.length) val.warn.forEach(function (x) { L.push('⚠️ ' + tgEsc_(x)); });
+  /* ۳) جزئیات */
+  L.push('');
+  L.push('<b>کارت سایت</b> ' + (p.siteErr ? '(سایت جواب نداد)' : p.create ? '(کارت تازه در صفحهٔ اصلی' + (p.school ? ' و مدرسه' : '') + ')' :
+         p.hits.length ? '(' + p.hits.map(function (h) { return (h.kind === 'supc' ? 'کارت استاد' : 'کارت') + ' ' + tgEsc_(h.title || h.page); }).join('، ') + ')' : '(کارتی در سایت ندارد)'));
+  if (v.page) L.push('صفحهٔ شخصی: <a href="' + tgEsc_(v.page) + '">' + tgEsc_(tgPrUrl_(v.page)) + '</a>');
+  L.push('پشتوانهٔ انتشار: ' + tgEsc_(String(v.basis || '').trim() || tgPrBasis_()) + ' · رزومهٔ کامل و ویس: ' + (p.extraOk ? 'اجازه دارد' : 'اجازهٔ جدا ندارد'));
   var lsl = tgPrLatinSlug_(v.latin);
-  if (p.pageOk) L.push('آدرس انگلیسی: ' + (v.site_slug ? 'tajrobeh.life/team/' + tgEsc_(v.site_slug) + '/' : lsl ? 'tajrobeh.life/team/' + tgEsc_(lsl) + '/ (از نام لاتین خودش)' : (v.page ? 'همان آدرس فعلی' : '<b>👈 نام لاتین ندارد و آدرس خودکار بی‌حرکت می‌شود؛ «🔗 آدرس» را بزن</b>')));;
-  if (p.create && !p.sp) L.push('👈 برای کارت تازه خط رویکرد لازم است؛ «✏️ رویکرد» را بزن.');
-  if (p.create && !p.fid) L.push('👈 عکس ندارد؛ کارت بدون عکس ساخته نمی‌شود. با «💬 پیام به خودش» عکس بخواه.');
-  if (p.create && !p.card && p.pageOk) L.push('ℹ️ با «انتشار»، صفحهٔ شخصی الان منتشر می‌شود؛ کارت صفحهٔ اصلی بعد از رسیدن ' + (!p.fid ? 'عکس' : 'رویکرد') + ' ساخته می‌شود.');
-
+  if (!v.page && !v.site_slug && !lsl) L.push('👈 نام لاتین ندارد و آدرس خودکار بی‌حرکت می‌شود؛ از «✏️ اصلاح» آدرس بده.');
   var I = [];
   var add = function (label, k, n) { if (String(v[k] || '').trim()) I.push(label + ': ' + tgEsc_(tgPrCut_(v[k], n || 160))); };
   add('عنوان', 'title'); add('مدرک', 'degree'); add('کد نظام', 'license', 40); add('از سال', 'since', 10);
-  add('رویکرد', 'approach'); add('شکل جلسه', 'mode', 40); add('زبان', 'langs'); add('با', 'ages'); add('موضوع‌ها', 'focus'); add('آشنایی ویژه', 'groups'); add('یک جمله', 'headline', 220); add('روش درمان', 'method', 380);
-  add('جلسهٔ اول', 'first', 220); add('آموزش‌ها', 'trainings', 220); add('سوپرویژن', 'supervision', 60);
-  add('سوپروایزر', 'supervisor', 60); add('تراپی شخصی', 'personal', 60); add('درس‌ها', 'teach', 200);
-  add('سوپرویژن تازه', 'supaccept', 60); add('مقاله‌ها', 'articles', 220); add('لینک‌ها', 'links', 160);
-  add('رزومه', 'resume', 40); add('ویس', 'voice', 40);
-  if (String(v.resume || '').indexOf('tg:doc:') === 0 && !String(v.pub_resume || '').trim()) I.push('👈 رزومه هنوز خلاصه نشده؛ روی صفحه نمی‌آید تا تیم نسخهٔ سبکش را در ستون «رزومهٔ سبک» بگذارد.');
-  if (String(v.mode || '') === 'حضوری') I.push('👈 فقط «حضوری» زده' + (String(v.modechk || '') ? ' (' + tgEsc_(v.modechk) + ')' : '') + '.');
+  add('رویکرد', 'approach'); add('شکل جلسه', 'mode', 40); add('زبان', 'langs'); add('با', 'ages'); add('یک جمله', 'headline', 220); add('روش درمان', 'method', 300);
+  add('جلسهٔ اول', 'first', 200); add('آموزش‌ها', 'trainings', 200); add('سوپرویژن', 'supervision', 60); add('درس‌ها', 'teach', 160); add('مقاله‌ها', 'articles', 160); add('لینک‌ها', 'links', 120);
   if (I.length) { L.push(''); L.push('<b>برای صفحهٔ داخلی</b>'); L = L.concat(I); }
-  var dr = String(v.drive || '').split('\n').filter(String);
-  if (dr.length) {
-    L.push('');
-    L.push('📁 درایو: ' + dr.map(function (l) {
-      var k = l.split(': ')[0], u = l.slice(k.length + 2).split('#')[0];
-      return '<a href="' + tgEsc_(u) + '">' + ({ photo: 'عکس', resume: 'رزومه', voice: 'ویس' }[k] || k) + '</a>';
-    }).join(' · '));
-  }
   var t = L.join('\n');
   return t.length > 4000 ? t.slice(0, 3990) + '…' : t;
 }
@@ -14925,20 +14988,22 @@ function tgPrPhotoMsg_(chat, r) {
 }
 
 function tgPrKb_(p) {
+  var s = ':' + p.row + ':' + p.h, val = tgPrValid_(p);
+  var first = p.blocked ? [{ text: '⛔ تصمیم تیم: روی سایت نمی‌رود', callback_data: 'pr:ed' + s }]
+            : val.block.length ? [{ text: '🔒 تأیید قفل است؛ اول اصلاح کن', callback_data: 'pr:ed' + s }]
+            : [{ text: '✅ تأیید و انتشار', callback_data: 'pr:pub' + s }];
+  return { inline_keyboard: [first, [{ text: '✏️ اصلاح', callback_data: 'pr:ed' + s }, { text: '⏭ بعدی', callback_data: 'pr:nx' + s }]] };
+}
+/* زیرمنوی «✏️ اصلاح» */
+function tgPrEditKb_(p) {
   var s = ':' + p.row + ':' + p.h;
-  var rows = [];
-  if (p.canPublish) rows.push([{ text: '✅ انتشار روی سایت', callback_data: 'pr:pub' + s }]);
-  else rows.push([{ text: '✅ بازبینی شد (بدون تغییر در سایت)', callback_data: 'pr:rv' + s }]);
-  rows.push([{ text: '✏️ نام', callback_data: 'pr:en' + s }, { text: '✏️ رویکرد', callback_data: 'pr:es' + s },
-             { text: '✏️ شهر', callback_data: 'pr:ec' + s }, { text: '🔗 آدرس', callback_data: 'pr:eu' + s }]);
-  var r3 = [{ text: '🏷 تگ‌ها', callback_data: 'pr:et' + s }];
-  if (p.fid) r3.push({ text: '🖼 عکس و قاب', callback_data: 'pr:ph' + s });
-  if (p.keepPhoto || (p.fid && p.hasCurPhoto)) r3.push({ text: p.keepPhoto ? '🔁 عکس تازه برود' : '🔁 عکس فعلی بماند', callback_data: 'pr:pk' + s });
-  rows.push(r3);
-  rows.push([{ text: p.photoOff ? '📩 راهنمای عکس' : '🚫 فعلاً بدون عکس', callback_data: (p.photoOff ? 'pr:pm' : 'pr:po') + s }]);
-  rows.push([{ text: '💬 پیام به خودش', callback_data: 'pr:msg' + s }]);
-  rows.push([{ text: '⏭ بعدی', callback_data: 'pr:nx' + s }, { text: '🚫 روی سایت نرود', callback_data: 'pr:no' + s }]);
-  return { inline_keyboard: rows };
+  return { inline_keyboard: [
+    [{ text: 'نام', callback_data: 'pr:en' + s }, { text: 'رویکرد', callback_data: 'pr:es' + s }, { text: 'شهر', callback_data: 'pr:ec' + s }],
+    [{ text: 'تگ', callback_data: 'pr:et' + s }, { text: 'عنوان', callback_data: 'pr:eT' + s }, { text: 'عکس', callback_data: (p.fid ? 'pr:ph' : 'pr:pm') + s }],
+    [{ text: '🔗 آدرس صفحه', callback_data: 'pr:eu' + s }, { text: '💬 پیام به خودش', callback_data: 'pr:msg' + s }],
+    [{ text: '🚫 روی سایت نرود', callback_data: 'pr:no' + s }],
+    [{ text: '↩️ بازگشت به کارت', callback_data: 'pr:sh' + s }]
+  ] };
 }
 
 function tgPrShow_(chat, row, msgId) {
@@ -15157,7 +15222,7 @@ function tgPrWho_(chat) {
 function tgPrErrText_(e) {
   var x = String(e || '');
   if (/marker missing|anchor not found/.test(x)) return 'نشانگر دایرکتوری در این برگه نیست (برگه بازطراحی شده و نشانگر نمانده)';
-  if (/no team page/.test(x)) return 'صفحهٔ تیم این نفر هنوز ساخته نشده؛ کارت بی‌لینک گذاشته نشد' + ' (اجازهٔ انتشار صفحهٔ شخصی را لازم دارد)';
+  if (/no team page/.test(x)) return 'صفحهٔ تیم این نفر هنوز ساخته نشده؛ کارت بی‌لینک گذاشته نشد';
   if (/no photo/.test(x)) return 'برای کارت تازه عکس نیست';
   if (/no sp/.test(x)) return 'برای کارت تازه خط رویکرد نیست';
   if (/save verify failed/.test(x)) return 'برگه همان لحظه عوض شده بود؛ ذخیره برگشت خورد';
@@ -15167,7 +15232,7 @@ function tgPrErrText_(e) {
 function tgPrPublish_(chat, r, opts) {
   opts = opts || {};
   var p = tgPrPlan_(r), v = r.v;
-  if (p.blocked) return tgSend_(chat, '⛔ ' + tgEsc_(v.name) + ' گفته فعلاً فقط برای تیم. چیزی منتشر نشد.');
+  if (p.blocked) return tgSend_(chat, '⛔ برای ' + tgEsc_(v.name) + ' تصمیم تیم «روی سایت نمی‌رود» است. چیزی منتشر نشد.');
   if (!p.canPublish) {
     if (p.siteErr && !opts.dry) splNote_(r, opts, 'شکست', '', 'سایت جواب نداد: ' + p.siteErr);   /* v170.23.3: نتیجه در هاب و صف تلاش دوباره */
     if (opts.quiet) return { ok: false, errs: [], pageErr: p.siteErr || 'چیزی برای انتشار نیست', name: p.name };
@@ -15214,7 +15279,7 @@ function tgPrPublish_(chat, r, opts) {
   var ok = (lines.length > 0 || !!page) && !errs.length && !pageErr;
   var onsite = pages.filter(function (x) { return x.saved; }).map(function (x) { return x.title; }).join('، ');
   tgPqPut_(v.id, Object.assign({ review: tgPqNow_() + ' · ' + tgPrWho_(chat), rstamp: String(Date.now()), notified: String(tgPrStamp_(v)),
-                   status: ok ? 'روی سایت' : 'منتشر نشد', onsite: onsite || String(v.onsite || '') }, put));
+                   status: ok ? 'روی سایت' : 'منتشر نشد', onsite: onsite || String(v.onsite || ''), basis: String(v.basis || '').trim() || tgPrBasis_() }, put));
   if (lines.length && p.isT && !TG_DRY) {
     try {
       var sh = tgSS_().getSheetByName(TG_THER), tr = tgTherRow_(v.name);
@@ -15354,8 +15419,8 @@ function tgPrPage_(p, b64) {
   TG_PR_PAGE.forEach(function (k) { o[k] = String(v['pub_' + k] || '').trim() || String(v[k] || '').trim(); });
   o.ages = p.ages || o.ages;
   o.extra = String(v.pub_extra || '').split(/\s*[،,]\s*/).filter(String);
-  o.resume = String(v.pub_resume || '').trim();
-  o.cv_url = /^https?:\/\//i.test(String(v.resume || '').trim()) ? String(v.resume).trim() : '';
+  o.resume = p.extraOk ? String(v.pub_resume || '').trim() : '';   /* v170.23.6: رزومهٔ کامل و ویس فقط با اجازهٔ جدا */
+  o.cv_url = p.extraOk && /^https?:\/\//i.test(String(v.resume || '').trim()) ? String(v.resume).trim() : '';
   var sl = String(v.site_slug || '').trim() || tgPrLatinSlug_(v.latin);
   if (sl) o.slug = sl;
   var put = {};
@@ -15365,7 +15430,7 @@ function tgPrPage_(p, b64) {
     o.crop = tgPrCrop_(v) || {};
     put.page_photo = ph;
   }
-  var vm = /^tg:voice:([^\s·]+)(?:\s*·\s*(\d+)s)?/.exec(String(v.voice || ''));
+  var vm = p.extraOk ? /^tg:voice:([^\s·]+)(?:\s*·\s*(\d+)s)?/.exec(String(v.voice || '')) : null;
   if (vm && vm[1] !== String(v.page_voice || '')) {
     o.voice = { b64: TG_DRY ? 'VVVV' : Utilities.base64Encode(tgImgJpeg_(tgTgFile_(vm[1])).blob.getBytes()), dur: Number(vm[2] || 0) };
     put.page_voice = vm[1];
@@ -15454,7 +15519,13 @@ function tgPrCb_(cq, arg) {
   var v = r.v;
 
   if (act === 'sh') return tgPrShow_(chat, r.row, cq.message.photo ? 0 : msgId);
-  if (act === 'pub' || act === 'rt') return tgPrPublish_(chat, r);   /* rt: «دوباره امتحان کن» (v170.23.2) */
+  if (act === 'ed') { var pE = tgPrPlan_(r); return tgSend_(chat, '✏️ <b>اصلاح</b> · ' + tgEsc_(pE.name) + '\nکدام را عوض کنم؟', tgPrEditKb_(pE)); }   /* v170.23.6 */
+  if (act === 'pub') {   /* v170.23.6: تأیید؛ اگر قفل است انتشار نمی‌شود، اگر چیزی برای انتشار نیست فقط بازبینی ثبت می‌شود */
+    var pP = tgPrPlan_(r), vP = tgPrValid_(pP);
+    if (pP.blocked || vP.block.length) return tgSend_(chat, '🔒 تأیید قفل است:\n' + vP.block.map(function (x) { return '⛔ ' + tgEsc_(x); }).join('\n'), tgPrEditKb_(pP));
+    if (!pP.canPublish) act = 'rv'; else return tgPrPublish_(chat, r);
+  }
+  if (act === 'rt') return tgPrPublish_(chat, r);   /* rt: «دوباره امتحان کن» (v170.23.2) */
   if (act === 'rv' || act === 'no') {
     tgPqPut_(v.id, { review: tgPqNow_() + ' · ' + tgPrWho_(chat), rstamp: String(Date.now()), notified: String(tgPrStamp_(v)),
                      status: act === 'no' ? 'روی سایت نمی‌رود (تصمیم تیم)' : 'بازبینی شد' });
@@ -15468,13 +15539,14 @@ function tgPrCb_(cq, arg) {
   if (act === 'pk') { tgPqPut_(v.id, { site_photo: v.site_photo === 'فعلی' ? '' : 'فعلی' }); return tgPrShow_(chat, r.row, msgId); }
   if (act === 'ph') return tgPrPhoto_(chat, r, 0, '');
   if (/^(cu|cd|cl|cr|zi|zo)$/.test(act)) return tgPrPhoto_(chat, r, msgId, act);
-  if (act === 'en' || act === 'es' || act === 'ec' || act === 'eu' || act === 'msg') {
-    var f = { en: 'site_name', es: 'site_sp', ec: 'site_city', eu: 'site_slug', msg: '_msg' }[act];
+  if (act === 'en' || act === 'es' || act === 'ec' || act === 'eu' || act === 'eT' || act === 'msg') {
+    var f = { en: 'site_name', es: 'site_sp', ec: 'site_city', eu: 'site_slug', eT: 'pub_title', msg: '_msg' }[act];
     tgSetVal_('pr', chat, JSON.stringify({ row: r.row, h: a[2], f: f }));
     var ask = {
       site_name: 'نام را همان‌طور که روی کارت بیاید بنویس (با نیم‌فاصلهٔ درست، مثل «مهدی‌زاده»).',
       site_sp: 'خط رویکرد زیر نام را بنویس؛ کوتاه، مثل «روانکاوی روابط ابژه» یا «طرحواره‌درمانی و CBT».',
       site_city: 'شهر یا کشور را بنویس.',
+      pub_title: 'عنوان حرفه‌ای روی صفحه را بنویس؛ مثل «روان‌شناس بالینی · روانکاو». لینک و شماره پذیرفته نمی‌شود.',
       site_slug: 'آدرس انگلیسی صفحه را بنویس؛ فقط حروف کوچک انگلیسی و خط فاصله، مثل darya-navidi. آدرس قبلی خودش به آدرس تازه می‌رود.',
       _msg: 'پیامت را برای ' + tgEsc_(v.name) + ' بنویس. عیناً از طرف تیم تجربه می‌رود، با دکمه‌ای که پاسخ‌هایش را از اول مرور و اصلاح کند.'
     }[f];
@@ -15547,6 +15619,11 @@ function tgPrMaybe_(chat, m) {
     return true;
   }
   var val = text.replace(/\s*[—–]\s*/g, ' · ').slice(0, 120);
+  if (['site_name', 'site_sp', 'site_city', 'pub_title'].indexOf(st.f) > -1 && tgOkBad_(val)) {   /* v170.23.6 */
+    tgSetVal_('pr', chat, JSON.stringify(st));
+    tgSend_(chat, 'این ' + tgOkBad_(val) + '؛ اینجا فقط متن کوتاه. دوباره بنویس یا /cancel.');
+    return true;
+  }
   var o = {}; o[st.f] = val;
   tgPqPut_(r.v.id, o);
   tgPrShow_(chat, r.row);
@@ -15599,9 +15676,12 @@ function tgPrTests() {
     TG_OUTBOX = [];
     tgPrCb_(cq('pr:sh:3:' + h), 'sh:3:' + h);
     var t = said();
-    ok('کارت: کارت تازه چون در سایت نیست', t.indexOf('کارت تازه در صفحهٔ اصلی') > -1 && t.indexOf('و در مدرسه') > -1);
+    ok('کارت: کارت تازه چون در سایت نیست', t.indexOf('کارت تازه در صفحهٔ اصلی') > -1 && t.indexOf('و مدرسه') > -1 && t.indexOf('· <b>تازه</b>') > -1);
     ok('کارت: رویکرد پیشنهادی از مکتب', t.indexOf('روانکاوی روابط ابژه') > -1);
-    ok('کارت: دکمهٔ انتشار و قاب', t.indexOf('pr:pub:3:' + h) > -1 && t.indexOf('pr:ph:3:' + h) > -1);
+    ok('کارت: سه دکمه (تأیید، اصلاح، بعدی)؛ نه «بازبینی شد» و نه «بدون عکس»', t.indexOf('pr:pub:3:' + h) > -1 && t.indexOf('pr:ed:3:' + h) > -1 && t.indexOf('pr:nx:3:' + h) > -1 && t.indexOf('pr:rv:') < 0 && t.indexOf('pr:po:') < 0);
+    TG_OUTBOX = []; tgPrCb_(cq('pr:ed:3:' + h), 'ed:3:' + h);
+    ok('کارت: زیرمنوی اصلاح (نام، رویکرد، شهر، تگ، عنوان، عکس، پیام، روی سایت نرود)', ['pr:en:', 'pr:es:', 'pr:ec:', 'pr:et:', 'pr:eT:', 'pr:ph:', 'pr:msg:', 'pr:no:'].every(function (k) { return said().indexOf(k + '3:' + h) > -1; }));
+    ok('کارت: بالای کارت فقط تغییرها', t.indexOf('<b>تغییرها</b>') > -1 && t.indexOf('<b>تغییرها</b>') < t.indexOf('<b>کارت سایت</b>'));
     ok('کارت: هیچ خط تیره‌ای نیست', !/[—–]/.test(t.replace(/<[^>]+>/g, '')));
 
     TG_OUTBOX = [];
@@ -15630,6 +15710,7 @@ function tgPrTests() {
     TG_OUTBOX = [];
     TG_MEM['dirres'].publish = { ok: true, pages: [{ page: 503465, title: 'خانه', url: 'https://tajrobeh.life/', saved: true, changes: [{ kind: 'thc', done: ['new'] }] },
                                                   { page: 294, title: 'مدرسه', url: 'https://tajrobeh.life/school/', saved: true, changes: [{ kind: 'thc', done: ['new'] }] }], errors: [], media: {} };
+    TG_MEM['dirres'].person = { ok: true, url: 'https://tajrobeh.life/team/tara/' };
     tgPrCb_(cq('pr:pub:3:' + h), 'pub:3:' + h);
     var pb = dirs('publish')[0];
     ok('انتشار: کارت تازه با عکس و رویکرد و مدرسه', pb && pb.data.create === true && pb.data.photo === 'AAAA' && pb.data.f.sp === 'روانکاوی ابژه · مدرن' && pb.data.f.school === 1);
@@ -15637,9 +15718,11 @@ function tgPrTests() {
     ok('انتشار: قاب همراه است', pb && pb.data.crop.y > 0.35 && pb.data.crop.y < 0.37);
     var rw = TG_MEM['pqrows']['ther:تارا رهنما'];
     ok('انتشار: وضعیت و بازبینی ثبت شد', rw.status === 'روی سایت' && Number(rw.rstamp) > 0 && String(rw.review).indexOf('·') > -1);
-    ok('انتشار: به خود درمانگر خبر رفت', TG_OUTBOX.some(function (x) { return x.chat === '901' && x.text.indexOf('به‌روز شد') > -1; }));
+    ok('انتشار: به خود درمانگر خبر رفت', TG_OUTBOX.some(function (x) { return x.chat === '901'; }));
     ok('انتشار: از صف بیرون رفت', tgPrQueue_().every(function (x) { return x.v.name !== 'تارا رهنما'; }));
-    ok('بی‌اجازه: صفحهٔ شخصی ساخته نشد', dirs('person').length === 0 && !rw.page);
+    ok('v170.23.6: بی اجازهٔ جدا صفحهٔ سبک ساخته شد (پشتوانهٔ قرارداد)، بی ویس و رزومهٔ کامل', dirs('person').length === 1 && !dirs('person')[0].data.person.voice && !dirs('person')[0].data.person.resume && /^https/.test(rw.page) && /قرارداد همکاری/.test(rw.basis));
+    /* بقیهٔ آزمون صفحه، ساختن صفحه را از اول می‌سنجد (با اجازهٔ جدا، ویس و رزومه) */
+    ['page', 'page_photo', 'page_voice', 'congrats'].forEach(function (k) { TG_MEM['pqrows']['ther:تارا رهنما'][k] = ''; });
 
     // صفحهٔ شخصی (v59)
     TG_OUTBOX = [];
@@ -15650,10 +15733,10 @@ function tgPrTests() {
     TG_MEM['pqrows']['ther:تارا رهنما'].stamp = String(Date.now() + 5000);
     TG_MEM['dirres'].person = { ok: true, url: 'https://tajrobeh.life/team/%d8%aa%d8%a7%d8%b1%d8%a7/' };
     tgPrCb_(cq('pr:sh:3:' + h), 'sh:3:' + h);
-    ok('رزومهٔ خلاصه‌نشده در کارت بازبینی گفته می‌شود', said().indexOf('رزومه هنوز خلاصه نشده') > -1);
+    ok('کارت: اجازهٔ جدای رزومه و ویس گفته می‌شود', said().indexOf('رزومهٔ کامل و ویس: اجازه دارد') > -1);
     TG_MEM['pqrows']['ther:تارا رهنما'].pub_resume = '## تحصیلات\n- کارشناسی ارشد · ۱۴۰۱';
     TG_OUTBOX = []; tgPrCb_(cq('pr:sh:3:' + h), 'sh:3:' + h);
-    ok('صفحه: کارت بازبینی خبر ساختن صفحه را دارد', said().indexOf('صفحهٔ شخصی: با انتشار ساخته می‌شود') > -1);
+    ok('کارت: ویس تازه در تغییرها', said().indexOf('ویس معرفی: تازه') > -1);
     TG_OUTBOX = [];
     tgPrCb_(cq('pr:pub:3:' + h), 'pub:3:' + h);
     var ps = dirs('person')[0];
@@ -15677,7 +15760,7 @@ function tgPrTests() {
     var sp0 = TG_MEM['pqrows']['ther:تارا رهنما'].photo, spS = TG_MEM['pqrows']['ther:تارا رهنما'].site_sp;
     TG_MEM['pqrows']['ther:تارا رهنما'].photo = ''; TG_MEM['pqrows']['ther:تارا رهنما'].site_photo = 'فعلی';
     var pn = tgPrPlan_(tgPrAll_().filter(function (x) { return x.v.name === 'تارا رهنما'; })[0]);
-    ok('صفحه: درمانگر بی‌عکسِ بی‌کارت با اجازه منتشر می‌شود (کارت بعداً)', pn.create === true && pn.card === false && pn.canPublish === true && tgPrText_(pn).indexOf('ℹ️') > -1);
+    ok('v170.23.6: درمانگر تازهٔ بی‌عکس ← تأیید قفل تا عکس برسد', pn.create === true && tgPrValid_(pn).block.some(function (x) { return /عکس ندارد/.test(x); }) && tgPrText_(pn).indexOf('🔒') > -1 && JSON.stringify(tgPrKb_(pn)).indexOf('pr:pub') < 0);
     TG_MEM['pqrows']['ther:تارا رهنما'].photo = sp0; TG_MEM['pqrows']['ther:تارا رهنما'].site_photo = ''; TG_MEM['pqrows']['ther:تارا رهنما'].site_sp = spS;
     delete TG_MEM['dirres'].find;
     ok('سن: پاسخ و هاب با هم', tgPrAges_('نوجوان', 'بزرگسال') === 'نوجوان، بزرگسال' && tgPrAges_('', '') === '');
@@ -15699,10 +15782,9 @@ function tgPrTests() {
     TG_OUTBOX = [];
     var h2 = tgPrH_('ther:تیم');
     tgPrCb_(cq('pr:sh:6:' + h2), 'sh:6:' + h2);
-    ok('بدون اجازه: هشدار و بدون دکمهٔ انتشار', said().indexOf('فقط برای تیم') > -1 && said().indexOf('pr:pub') < 0);
-    TG_OUTBOX = [];
-    tgPrCb_(cq('pr:pub:6:' + h2), 'pub:6:' + h2);
-    ok('بدون اجازه: انتشار رد می‌شود', dirs('publish').length === 0);
+    ok('v170.23.6: «فقط برای تیم» فقط بخش‌های انتخابی را می‌بندد (اطلاعات سبک با قرارداد)', said().indexOf('رزومهٔ کامل و ویس: اجازهٔ جدا ندارد') > -1);
+    var pT = tgPrPlan_(tgPrRow_(6));
+    ok('v170.23.6: «روی سایت نمی‌رود» (تصمیم تیم) انتشار را می‌بندد، رضایت نه', !pT.blocked && !pT.extraOk && (function () { TG_MEM['pqrows'][pT.v.id].status = 'روی سایت نمی‌رود (تصمیم تیم)'; var b = tgPrPlan_(tgPrRow_(6)).blocked; TG_MEM['pqrows'][pT.v.id].status = ''; return b; })());
 
     TG_OUTBOX = [];
     tgPrCb_(cq('pr:msg:6:' + h2), 'msg:6:' + h2);
@@ -15789,7 +15871,8 @@ function tgPqApiSave_(chat, p) {
     return { ok: true };
   }
   var val = String(p.v == null ? '' : p.v).trim(), bad = '';
-  if (q.t === 'choice') { if (q.o.indexOf(val) < 0) bad = 'یکی از گزینه‌ها را بزنید.'; }
+  if (['text', 'long'].indexOf(q.t) > -1 && TG_PQ_URLQ.indexOf(q.k) < 0 && tgOkBad_(val)) bad = 'اینجا لینک، ایمیل یا شماره جا ندارد.';   /* v170.23.6 */
+  else if (q.t === 'choice') { if (q.o.indexOf(val) < 0) bad = 'یکی از گزینه‌ها را بزنید.'; }
   else if (q.t === 'multi') {
     var picks = val.split(/\s*[،,]\s*/).filter(String);
     if (!picks.length || picks.some(function (a) { return q.o.indexOf(a) < 0 && !(q.x && a.length > 1 && a.length <= 60); })) bad = 'دست‌کم یکی را بزنید.';
@@ -16635,6 +16718,7 @@ function tgInpReqMake_(chat, who, q) {
            : q.k === 'add' ? tgInpPlaceName_(q.pid, d) + '، ' + q.day + '، ' + tgInpHs_(Number(q.from)) + ' تا ' + tgInpHs_(Number(q.to))
            : tgInpRowText_({ p: q.pid, day: q.day, from: q.from, to: q.to, room: q.room }) + (q.k === 'off' ? ' · ' + q.date : '');
   var roomNote = (q.k === 'add' || q.k === 'chg') ? (q.room ? 'اتاق خالی: ' + tgFa_(q.room) : 'در این بازه اتاق خالی نیست') : '';
+  if ((q.k === 'add' || q.k === 'chg') && !q.room && typeof afxInpAlt_ === 'function') { var alt = afxInpAlt_(q, d); if (alt.length) roomNote += '\nنزدیک‌ترین بازه‌های خالی: ' + alt.join(' · '); }   /* v170.30 */
   var t = tgInpTab_(TG_INP_REQ, TG_INP_QHEAD);
   t.append([id, tgInpNow_(), who.name, String(chat), q.pid, kindLabel, q.day || '', q.from || '', q.to || '', q.room || '', q.key || '', q.date || '', what + (q.late ? ' · کمتر از ' + tgFa_(tgInpRule_('release_hours', who.name, q.pid)) + ' ساعت مانده' : ''), 'منتظر پذیرش', '', '']);
   var kb = { inline_keyboard: [[{ text: '✅ تأیید', callback_data: 'iv:y:' + id }, { text: '❌ رد', callback_data: 'iv:n:' + id }]] };
@@ -19845,6 +19929,7 @@ function tgPsyOnBook_(chat, s, lead, row) {
   var v = [a.code, new Date(), s.therapist, (lead && lead.name) || '', String(chat), s.dateIso, s.hhmm, a.acc, 'رزرو شده', a.acc === TG_PSY_ACC.dr ? 'کارت به کارت' : 'درگاه تجربه', ''];
   tgPsyNotifyHead_(tgPsyApptCard_(v), tgPsyApptKb_(a.code, a.acc), a.code);
   if (a.acc === TG_PSY_ACC.dr) tgPsyAskReceipt_(chat, a.code);
+  try { if (typeof ps3OnBook_ === 'function') ps3OnBook_(a, s, chat); } catch (eP3) { tgErr_('ps3OnBook_', eP3); }   /* v170.23.9 */
   return a;
 }
 /* مسئول: حساب نوبت را عوض می‌کند (سطر به دفتر دیگر می‌رود) */
@@ -19971,7 +20056,7 @@ function tgPsyTok_(k) { return tgHash_('psy|' + k + '|' + String(TG_OWNER_CHAT))
 function tgPsyInviteLinks_(chat) {
   if (!tgPsyIsHead_(chat)) return tgSend_(chat, 'این لینک‌ها دست مسئول روان‌پزشکی است.');
   var bot = tgBotName_ ? tgBotName_() : '';
-  return tgSend_(chat, '🔗 <b>لینک دعوت روان‌پزشک</b>\nروان‌پزشک تجربه:\nhttps://t.me/' + bot + '?start=psy-' + tgPsyTok_('tj') + '\n\nمخصوص ' + TG_PSY_ACC.dr + ':\nhttps://t.me/' + bot + '?start=psydr-' + tgPsyTok_('dr') + '\n\nهر که با لینک وارد شود، نامش را می‌گیریم و برای تکمیل سطر درمانگران و استخر روان‌پزشکی به شما کار می‌آید.');
+  return tgSend_(chat, '🔗 <b>لینک دعوت روان‌پزشک</b>\nروان‌پزشک تجربه:\nhttps://t.me/' + bot + '?start=psy-' + tgPsyTok_('tj') + '\n\nمخصوص ' + TG_PSY_ACC.dr + ':\nhttps://t.me/' + bot + '?start=psydr-' + tgPsyTok_('dr') + '\n\nهر که با لینک وارد شود، نامش را می‌گیریم و برای تکمیل سطر درمانگران و استخر روان‌پزشکی به شما کار می‌آید.' + (typeof ps2JoinLink_ === 'function' ? '\n\n<b>اتصال روان‌پزشکِ ثبت‌شده به حسابش</b> (با تأیید شما، روی همان ردیف):\n' + ps2JoinLink_() : ''));
 }
 function tgPsyJoin_(chat, uname, name, arg) {
   var m = String(arg || '').match(/^psy(dr)?-([0-9a-z]+)$/i); if (!m) return false;
@@ -21284,7 +21369,9 @@ const TG_LEAD_FIELDS = [
   /* v170.2 مدل لید */ 'نوع لید', 'پیشنهاد کاربر', 'پیامد', 'مسئول مرحله', 'مهلت مرحله', 'منبع جزئیات',
   /* v170.2 کامنت‌ها: ترجیحات برای پیشنهاد درمانگر */ 'ترجیحات', 'حالت جلسه', 'ترجیح جنسیت', 'ترجیح سن',
   /* v170.13 */ 'کد کمپین', 'آفر',
-  /* v170.18 برگشت مراجع: زمان ورود تازه، منطقه، اعلان */ 'تاریخ', 'زمان', 'تاریخ شمسی', 'داخل یا خارج', 'اعلان بات'
+  /* v170.18 برگشت مراجع: زمان ورود تازه، منطقه، اعلان */ 'تاریخ', 'زمان', 'تاریخ شمسی', 'داخل یا خارج', 'اعلان بات',
+  /* v170.31 */ 'داخلی',
+  /* v170.35 ردپای ورود */ 'صفحهٔ ورود', 'دکمه', 'کمپین', 'UTM', 'شناسهٔ بازدید'
 ];
 
 // ستون‌هایی که تریگر شیت رویشان حساس است
@@ -21309,6 +21396,7 @@ function tgLeadEvSheet_() {
 }
 
 function tgLeadEv_(o) {
+  try { if (typeof fnlFromLeadEv_ === 'function') fnlFromLeadEv_(o); } catch (eFn) { tgErr_('fnlFromLeadEv_', eFn); }   /* v170.36: رویدادهای قیف */
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'leadev', o: o }); return; }
   try {
     const sh = tgLeadEvSheet_();
@@ -22930,6 +23018,7 @@ function tgWaSend_(to, text) {
   const num = tgWaDigits_(to);
   const body = String(text || '').slice(0, 4000);
   if (!num || !body) return '';
+  try { if (typeof inbHook_ === 'function') { var wr = tgLeadByPhone_(num); if (wr >= 2) inbHook_('waout', { code: tgLeadCode_(wr), text: body.slice(0, 300) }); } } catch (eIw) {}   /* v170.28 */
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'wa', to: num, text: body }); return 'dry'; }
   const cfg = tgWaCfg_();
   if (!cfg.t || !cfg.id) { try { tgErr_('واتس‌اپ: توکن یا شناسهٔ شماره تنظیم نشده'); } catch (e) {} return ''; }
@@ -23008,6 +23097,7 @@ function tgWaMsg_(m, nm, ours) {
 
   const code = tgLeadCode_(row);
   tgLeadEv_({ code: code, row: row, actor: nm || from, channel: TG_WA_CH, what: 'پیام واتس‌اپ', to: String(text).slice(0, 120) });
+  if (typeof inbHook_ === 'function') inbHook_('wa', { code: code, text: String(text).slice(0, 500) });   /* v170.28 */
   if (!fresh) {
     /* v170.18: پیام واتس‌اپ پس از ۶ ساعت سکوت یعنی برگشت مراجع (tgLeadReturn_)؛ پیام‌های پشت‌سرهم یک گفت‌وگو لید را ریست نمی‌کنند */
     var rk = 'warc' + code, cc = TG_DRY ? null : CacheService.getScriptCache();
@@ -30002,18 +30092,8 @@ function tgRmBlobOk_(blob) {
   if (/\.(flac|mp3|mp4|mpeg|mpga|m4a|ogg|opus|wav|webm)$/i.test(n)) return blob;
   return blob.copyBlob().setName(n.replace(/\.[^.]+$/, '') + '.ogg').setContentType('audio/ogg');
 }
-function tgRmTranscribe_(blob0) {
-  const blob = tgRmBlobOk_(blob0);
-  const key = (PropertiesService.getScriptProperties().getProperty('GROQ_KEY') || PropertiesService.getScriptProperties().getProperty('groq'));
-  if (!key) return { engine: '', text: '', note: 'کلید GROQ_KEY در Script Properties نیست' };
-  const res = UrlFetchApp.fetch('https://api.groq.com/openai/v1/audio/transcriptions', { method: 'post', muteHttpExceptions: true,
-    headers: { Authorization: 'Bearer ' + key },
-    payload: { file: blob, model: 'whisper-large-v3', language: 'fa', response_format: 'verbose_json', temperature: '0' } });
-  if (res.getResponseCode() !== 200) return { engine: 'groq', text: '', note: 'خطای ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 160) };
-  var j = {}; try { j = JSON.parse(res.getContentText()); } catch (e) {}
-  const segs = (j.segments || []).map(function (s) { return [Math.round(s.start * 100) / 100, Math.round(s.end * 100) / 100, String(s.text || '').trim()]; });
-  return { engine: 'groq whisper-large-v3', text: String(j.text || '').trim(), note: '', segs: segs };
-}
+/* v170.23.7: جمنای به‌جای Groq whisper (ai.gs). priv: صدای مراجع یا پیام خصوصی، فقط با کلید پولی جمنای */
+function tgRmTranscribe_(blob0, priv) { return aiTranscribe_(tgRmBlobOk_(blob0), { priv: !!priv }); }
 function tgRmVoiceIn_(chat, rm, v, name, kind) {
   const R = TG_RM[rm], S = tgRmLive_(rm), dur = Number(v.duration || 0); kind = kind || 'post';
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'rmvoice', rm: rm, fid: v.file_id }); return tgSend_(chat, T_RM_VOICE_GOT.replace('%T', String(dur))); }
@@ -30179,7 +30259,7 @@ function tgRmTests() {
   return { pass: pass, fail: fail, text: out.join('\n') };
 }
 function tgRmTestsLog() { var r = tgRmTests(); console.log(r.pass + ' pass / ' + r.fail + ' fail\n' + r.text); return r; }
-function tgRmKeyCheck() { var k = (PropertiesService.getScriptProperties().getProperty('GROQ_KEY') || PropertiesService.getScriptProperties().getProperty('groq')); if (!k) { console.log('GROQ_KEY missing'); return; } var r = UrlFetchApp.fetch('https://api.groq.com/openai/v1/models', { headers: { Authorization: 'Bearer ' + k }, muteHttpExceptions: true }); console.log('GROQ_KEY present, length ' + k.length + ', http ' + r.getResponseCode() + ', whisper ' + (r.getContentText().indexOf('whisper-large-v3') > -1)); }
+function tgRmKeyCheck() { return typeof tgV170237Gemini === 'function' ? tgV170237Gemini() : ''; }   /* v170.23.7: گروک نیست؛ وضعیت جمنای */
 
 /* =====================================================================
  * رودمپ · انتشار کانال (v111، ۲۷ شهریور ۱۴۰۵)
@@ -32076,9 +32156,11 @@ function tgCrmRows_() {
     }
   } catch (e) {}
   var out = [];
+  var hmI = tgLeadHeadMap_(sh);
   for (var i = 0; i < v.length; i++) {
     var name = String(v[i][3] || '').trim(), phone = String(v[i][5] || '').trim();
     if (!name && !phone) continue;
+    if (typeof itkInternal_ === 'function' && itkInternal_(v[i], hmI)) continue;   /* v170.31 */
     var d = (v[i][0] instanceof Date) ? new Date(v[i][0]) : tgContactDate_(v[i][0], now);
     if (!d) continue;
     var hhmm = tgLatinDigits_(String(v[i][1] || '').trim());
@@ -32466,10 +32548,16 @@ function tgMsgDeliver_(chat, m, name, uname, st) {
   var mins = prev && prev.at ? Math.round((now - prev.at) / 60000) : '';
   if (m.voice && !TG_DRY) {
     if (vt) body = '🎙 ' + vt;
-    else { try { var tx = tgRmTranscribe_(tgTgFile_(m.voice.file_id).blob); body = '🎙 ' + (tx.text || '(ویس، متن گرفته نشد)'); } catch (e) { body = '🎙 ویس'; } }
+    else { try { var tx = tgRmTranscribe_(tgTgFile_(m.voice.file_id).blob, true); body = '🎙 ' + (tx.text || '(ویس، متن گرفته نشد)'); } catch (e) { body = '🎙 ویس'; } }
+    if (/^🎙 (ویس|\(ویس، متن گرفته نشد\))$/.test(body) && typeof aiRetryAdd_ === 'function') aiRetryAdd_(th, m.voice.file_id);   /* v170.23.7: فقط شناسه، حداکثر ۷ روز */
   }
   tgMsgAppend_(TG_MSG_LOG, [th, new Date(now), who, role, st.label || '', st.g || '', String(body).slice(0, 4000), m.voice ? 'ویس' : 'متن',
     String(chat), (st.to || []).join(','), st.th ? 'بله' : '', mins]);
+  /* v170.28: صندوق یکتا. پیام اول = ورود؛ پیام طرف گیرنده در همان رشته = پاسخ؛ پیام دوبارهٔ فرستنده = پیام تازه */
+  if (typeof inbHook_ === 'function') {
+    if (!prev || String(prev.a) === String(chat)) inbHook_('msg', { th: th, chat: String(prev ? prev.a : chat), text: String(body).slice(0, 500) });
+    else inbHook_('msgre', { th: th, who: who, text: String(body).slice(0, 300) });
+  }
 }
 
 /* ---------- برای نسخهٔ بعد ---------- */
@@ -32488,7 +32576,7 @@ function tgFbSave_(chat, m, name, uname) {
   var me = tgMsgMe_(chat, uname), code = tgFbNext_(), text = m.text || '';
   tgSend_(chat, '🙏 رسید (' + code + '). ممنون که گفتید؛ نتیجه را همین‌جا خبر می‌دهیم.');
   if (m.voice && !TG_DRY) {
-    try { var tx = tgRmTranscribe_(tgTgFile_(m.voice.file_id).blob); text = tx.text || '(ویس، متن گرفته نشد)'; } catch (e) { text = '(ویس)'; }
+    try { var tx = tgRmTranscribe_(tgTgFile_(m.voice.file_id).blob, true); text = tx.text || '(ویس، متن گرفته نشد)'; } catch (e) { text = '(ویس)'; }
   }
   var role = tgMsgRoleLbl_(me.roles);
   tgMsgAppend_(TG_FB_LOG, [code, new Date(), me.name || name, role, String(text).slice(0, 4000), m.voice ? 'ویس' : 'متن', '', '', '', '', String(chat)]);
@@ -34428,10 +34516,10 @@ function tgCpPush_(why) {
     var offers = []; try { if (typeof v17013OfPayload_ === 'function') offers = v17013OfPayload_(); } catch (eOf) { tgErr_('v17013OfPayload_', eOf); }   /* v170.13: آفرهای مراجعان */
     /* v166.23 (E-1006، سهمیهٔ حجم): فقط وقتی چیزی برای سایت عوض شده می‌فرستد (بی‌حساب زمان t)، و در تیک دست‌کم هر ۶۰ دقیقه یک بار */
     var P = PropertiesService.getScriptProperties();
-    var sig = tgHash_(JSON.stringify(camps.map(function (c) { var x = {}; for (var k in c) if (k !== 't') x[k] = c[k]; return x; })) + JSON.stringify(offers));
+    var sig = tgHash_(JSON.stringify(camps.map(function (c) { var x = {}; for (var k in c) if (k !== 't') x[k] = c[k]; return x; })) + JSON.stringify(offers) + (typeof itk2Push_ === 'function' ? JSON.stringify(itk2Push_()) : ''));
     var lastAt = Number(P.getProperty('CP_PUSH_AT') || 0);
     if (sig === P.getProperty('CP_PUSH_H') && (why === 'تیک' ? Date.now() - lastAt < 60 * 60000 : Date.now() - lastAt < 2 * 60000)) return 'بی‌تغییر';
-    var r = ssCampFetch_(TG_CP_WP_PUSH, { camps: camps, offers: offers, why: why || '' });
+    var r = ssCampFetch_(TG_CP_WP_PUSH, (function (pl) { if (typeof itk2Push_ === 'function') { var x = itk2Push_(); for (var k in x) pl[k] = x[k]; } return pl; })({ camps: camps, offers: offers, why: why || '' }));   /* v170.35: پارتنرها، شهرهای رأی، کلید ردپا */
     var out = r.getResponseCode() + ' ' + String(r.getContentText()).slice(0, 120);
     if (r.getResponseCode() === 200) { P.setProperty('CP_PUSH_H', sig); P.setProperty('CP_PUSH_AT', String(Date.now())); }
     if (r.getResponseCode() !== 200) tgErr_('tgCpPush_: ' + out);

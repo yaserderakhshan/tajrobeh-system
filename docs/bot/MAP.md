@@ -75,14 +75,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.4`
+نسخهٔ کد: `v170.36`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۴۱۲ | ۳۳ |
-| `telegram.gs` | ۳۷۶۸۴ | ۲۰۳۶ |
+| `Code.gs` | ۴۲۰ | ۳۳ |
+| `telegram.gs` | ۳۷۷۷۲ | ۲۰۴۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -91,7 +91,7 @@
 | `school2.gs` | ۴۳۹ | ۳۲ |
 | `mag_contrib.gs` | ۱۲۴۳ | ۹۷ |
 | `author.gs` | ۱۴۸ | ۱۰ |
-| `voice.gs` | ۱۰۷۶ | ۹۱ |
+| `voice.gs` | ۱۱۰۵ | ۹۳ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
@@ -103,8 +103,8 @@
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۱۰۳۶ | ۶۵ |
 | `dq.gs` | ۵۹۳ | ۴۹ |
-| `cfg.gs` | ۱۵۶ | ۱۴ |
-| `ops.gs` | ۱۱۱۱ | ۹۹ |
+| `cfg.gs` | ۱۶۶ | ۱۴ |
+| `ops.gs` | ۱۱۱۵ | ۱۰۰ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
 | `ebi.gs` | ۹۹۶ | ۷۱ |
@@ -113,6 +113,17 @@
 | `sec.gs` | ۱۰۵ | ۱ |
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
+| `kartable.gs` | ۴۲۶ | ۳۲ |
+| `ai.gs` | ۲۱۱ | ۱۵ |
+| `psy2.gs` | ۱۸۴ | ۱۷ |
+| `psy3.gs` | ۳۳۷ | ۳۲ |
+| `inbox.gs` | ۴۹۵ | ۴۴ |
+| `afx.gs` | ۱۹۰ | ۱۵ |
+| `afx2.gs` | ۱۵۷ | ۹ |
+| `intake.gs` | ۱۵۷ | ۱۳ |
+| `ctareg.gs` | ۵ | ۰ |
+| `intake2.gs` | ۱۸۵ | ۱۵ |
+| `funnel.gs` | ۲۱۲ | ۱۸ |
 
 ### کارهای زمان‌دار
 
@@ -146,20 +157,28 @@
 
 | ثابت | نام تب | فایل‌ها |
 |---|---|---|
+| `AFX_RC_TAB` | «آشتی کارهای تماس اول · پیش‌نمایش» | `afx.gs` |
+| `AFX_ZR_TAB` | «ارجاع صفر · هفتگی» | `afx2.gs` |
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
 | `CM_FIX_TAB` | «اصلاح کامنت‌ها · پیش‌نمایش» | `comments.gs` |
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
 | `DQ_TAB` | «صف ارسال» | `dq.gs` |
 | `EBI_MIRROR_TAB` | «پلی‌لیست ابی · ثبت‌نام‌ها» | `ebi.gs` |
+| `FNL_TAB` | «رویدادهای قیف» | `funnel.gs` |
 | `HUB_GUIDE` | «راهنما» | `ops.gs` |
 | `HUB_MINE` | «کارهای من» | `ops.gs` |
 | `HUB_QUEUES` | «صف‌ها» | `ops.gs` |
 | `HUB_REPORT` | «گزارش من» | `ops.gs` |
 | `HUB_TODAY` | «امروز» | `ops.gs` |
+| `ITK2_TAB` | «ردپای ورود» | `intake2.gs` |
+| `ITK_TAB` | «اصلاح دادهٔ لیدها · پیش‌نمایش» | `intake.gs` |
+| `KTB_FX_TAB` | «اصلاح پروفایل‌ها · پیش‌نمایش» | `kartable.gs` |
+| `KTB_RT_TAB` | «مسیریابی منتظرها · پیش‌نمایش» | `kartable.gs` |
 | `LM_DASH` | «داشبورد لید» | `leadmodel.gs` |
 | `OPS_LISTS_TAB` | «فهرست‌ها» | `ops.gs` |
 | `OPS_REG_TAB` | «هاب‌ها» | `ops.gs` |
 | `OPS_TAB` | «کارها» | `ops.gs` |
+| `PS2_FX_TAB` | «اصلاح روان‌پزشکی · پیش‌نمایش» | `psy2.gs` |
 | `SC_T_LADDER` | «نردبان دانشجو» | `school2.gs` |
 | `SEO_TAB` | «سئو · پیشنهاد Gemini» | `seo_gemini.gs` |
 | `SPL_TAB` | «نتیجهٔ انتشار سایت» | `sitepub.gs` |
@@ -168,7 +187,7 @@
 | `TG_ANN_TAB` | «اطلاعیه‌ها» | `telegram.gs` |
 | `TG_APM_TAB` | «جذب تراپیست» | `telegram.gs` |
 | `TG_BOX_TAB` | «صندوق پیام» | `telegram.gs` |
-| `TG_BUG_TAB` | «باگ و پیشنهاد» | `telegram.gs` |
+| `TG_BUG_TAB` | «باگ و پیشنهاد» | `telegram.gs` `kartable.gs` |
 | `TG_CFG_TAB` | «تنظیمات» | `telegram.gs` |
 | `TG_COLL_TAB` | «تماس همکاران» | `telegram.gs` |
 | `TG_CRM_TAB` | «🧭 CRM لیدها» | `telegram.gs` `v168.gs` |
@@ -192,13 +211,13 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `afx.gs` `afx2.gs` `intake.gs` `funnel.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
 | `TG_MIG_TAB` | «تست مهاجرت» | `mig.gs` |
 | `TG_MON_TAB` | «نظارت» | `telegram.gs` |
-| `TG_MSG_LOG` | «پیام‌ها» | `telegram.gs` |
+| `TG_MSG_LOG` | «پیام‌ها» | `telegram.gs` `ai.gs` |
 | `TG_OB_TAB` | «آنبوردینگ» | `telegram.gs` |
 | `TG_OCC_TAB` | «اشغال هفتگی گاندی» | `partners.gs` |
 | `TG_OFF_TAB` | «مرخصی درمانگران» | `telegram.gs` |
@@ -233,8 +252,8 @@
 | `TG_STAT_TAB` | «آمار روزانهٔ بات» | `telegram.gs` |
 | `TG_SUP_TAB` | «درخواست سوپرویژن» | `telegram.gs` |
 | `TG_TEST_TAB` | «تست‌ها» | `telegram.gs` |
-| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` |
-| `TG_TK_TAB` | «پیام‌های درمانگران» | `telegram.gs` |
+| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` `psy2.gs` |
+| `TG_TK_TAB` | «پیام‌های درمانگران» | `telegram.gs` `kartable.gs` |
 | `TG_TSK_TAB` | «کارها» | `telegram.gs` |
 | `TG_USERS_TAB` | «کاربران بات» | `telegram.gs` `ebi.gs` |
 | `TG_UTM_TAB` | «سئو · لینک‌های UTM» | `telegram.gs` |
@@ -247,7 +266,7 @@
 
 ### نقش‌ها (`TG_ROLES`)
 
-«مراجع»، «درمانگر»، «دانشجو»، «استاد»، «سوپروایزر»، «پذیرش»، «مالی»، «مدرسه»، «سازمانی»، «روان‌پزشکی»، «ناظر»، «سردبیر»، «راهبر»، «مصاحبه‌گر»، «سوشال»، «پارتنر»، «تنخواه»، «منتور»، «نمایندهٔ کلاس»
+«مراجع»، «درمانگر»، «دانشجو»، «استاد»، «سوپروایزر»، «پذیرش»، «مالی»، «مدرسه»، «سازمانی»، «روان‌پزشکی»، «ناظر»، «سردبیر»، «راهبر»، «مصاحبه‌گر»، «سوشال»، «پارتنر»، «تنخواه»، «منتور»، «نمایندهٔ کلاس»، «روان‌پزشک»
 
 ### مجموعه‌های تست (`TG_SUITES`)
 
@@ -361,6 +380,16 @@
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |
 | امنیت ورودی‌ها (v170.9) | `secTests` |
 | نتیجهٔ انتشار سایت و تلاش دوباره (v170.23.3) | `splTests` |
+| کارتابل تأیید یاسر (v170.23.5) | `ktbTests` |
+| جمنای به‌جای گروک (v170.23.7) | `aiTests` |
+| روان‌پزشکی: نقش و اتصال (v170.23.8) | `ps2Tests` |
+| روان‌پزشکی: ویزیت و فرم اداری (v170.23.9) | `ps3Tests` |
+| صندوق یکتا (v170.28) | `inbTests` |
+| خودکارسازی کارهای مانده (v170.29) | `afxTests` |
+| خودکارسازی کارهای مانده، بخش ۲ (v170.30) | `afx2Tests` |
+| درگاه‌های ورودی: اصلاح دادهٔ لیدها (v170.31) | `itkTests` |
+| درگاه‌های ورودی: قرارداد و ردپا (v170.35) | `itk2Tests` |
+| قیف و اندازه‌گیری یکپارچه (v170.36) | `fnlTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
