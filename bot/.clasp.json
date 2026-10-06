@@ -37,8 +37,7 @@
     "sec.gs",
     "version.gs",
     "sitepub.gs",
-    "kartable.gs",
-    "migrate.gs"
+    "kartable.gs"
   ],
   "htmlExtensions": [
     ".html"
