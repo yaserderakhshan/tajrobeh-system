@@ -1,5 +1,5 @@
 /**
- * Tajrobeh — دایرکتوری اعضا از بات تلگرام (v1)
+ * Tajrobeh · دایرکتوری اعضا از بات تلگرام (v1.1)
  *
  * بات تجربه (Apps Script) بعد از بازبینی یاسر، کارت‌های سایت را از همین‌جا به‌روز می‌کند:
  *   عکس، نام نمایشی، خط رویکرد، شهر و تگ‌های کارت‌های .thc (تراپیست) و .supc (استاد و سوپروایزر)
@@ -9,12 +9,20 @@
  * امنیت: هر درخواست با HMAC-SHA256 امضا می‌شود (?ts=&sig=). کلید را هیچ آدمی نمی‌بیند:
  *   مدیر پنجرهٔ جفت‌شدن را از پیشخوان باز می‌کند (POST /tj/v1/dir/pair-open) و بات کلید را خودش
  *   می‌سازد و یک بار به /tj/v1/dir/pair می‌فرستد.
+ * v1.1 (۱۴ مهر ۱۴۰۵): بخش #therapists صفحهٔ اصلی بازطراحی شد و حالا نوار .mq با کارت‌های a.p3 (لینک به /team/<slug>/) است؛
+ *   هیچ .thc یا «thc more» در آن نیست و هر کارت تازه با «anchor not found» می‌شکست. حالا:
+ *   - کارت a.p3 هم شناخته و به‌روز می‌شود (نام، عکس ۱۵۰، رویکرد کوتاه).
+ *   - کارت تازه فقط پیش از نشانگر ثابت می‌نشیند، نه کلاس طراحی: <!-- tj:dir:home --> در 503465 و <!-- tj:dir:school --> در 294.
+ *     بازطراحی این دو صفحه بدون نگه داشتن نشانگر ممنوع است (site-check و site-mirror قرمز می‌شوند).
+ *   - کارت تازهٔ صفحهٔ اصلی بی لینک /team/ گذاشته نمی‌شود: اگر صفحهٔ تیم نیست، خطای «no team page».
  * هر برگه پیش از ذخیره نسخهٔ قبلی‌اش را در revisions دارد و بعد از ذخیره عیناً بازخوانی می‌شود؛
  * اگر چیزی جز همان کارت‌ها عوض شده باشد، محتوای قبلی برمی‌گردد.
  */
 
 if (!defined('TJD_VER')) {
-    define('TJD_VER', '1.0');
+    define('TJD_VER', '1.1');
+    define('TJD_MARK_HOME', '<!-- tj:dir:home -->');
+    define('TJD_MARK_SCHOOL', '<!-- tj:dir:school -->');
     define('TJD_HOME', 503465);
     define('TJD_SCHOOL', 294);
     define('TJD_BADGE', '/wp-content/uploads/2026/09/tjl-verified-badge.webp');
@@ -151,6 +159,17 @@ function tjd_cards($html) {
             $off = $e;
         }
     }
+    /* v1.1: کارت نوار صفحهٔ اصلی <a class="p3" href="/team/<slug>/">…</a> (لینک تودرتو ندارد) */
+    $off = 0;
+    while (($s = strpos($html, '<a class="p3"', $off)) !== false) {
+        $e = strpos($html, '</a>', $s);
+        if ($e === false) break;
+        $e += 4;
+        $card = substr($html, $s, $e - $s);
+        $out[] = array('kind' => 'p3', 's' => $s, 'e' => $e, 'html' => $card, 'f' => tjd_fields('p3', $card), 'sec' => tjd_section($html, $s));
+        $off = $e;
+    }
+    usort($out, function ($a, $b) { return $a['s'] - $b['s']; });
     return $out;
 }
 
@@ -162,7 +181,11 @@ function tjd_section($html, $s) {
 function tjd_fields($kind, $card) {
     $f = array('name' => '', 'photo' => '', 'sp' => '', 'city' => '', 'tags' => '', 'badges' => array());
     if (preg_match('/<b>(.*?)<\/b>/su', $card, $m)) $f['name'] = trim(wp_strip_all_tags($m[1]));
-    if ($kind === 'thc') {
+    if ($kind === 'p3') {
+        if (preg_match('/<img[^>]*\ssrc="([^"]*)"/', $card, $m)) $f['photo'] = $m[1];
+        if (preg_match('/<small>(.*?)<\/small>/su', $card, $m)) $f['sp'] = trim(wp_strip_all_tags($m[1]));
+        if (preg_match('/href="([^"]*)"/', $card, $m)) $f['href'] = $m[1];
+    } elseif ($kind === 'thc') {
         if (preg_match('/<img class="ph" src="([^"]*)"/', $card, $m)) $f['photo'] = $m[1];
         if (preg_match('/<span class="sp">(.*?)<\/span>/su', $card, $m)) $f['sp'] = trim(wp_strip_all_tags($m[1]));
         if (preg_match('/<span class="loc">(?:<svg.*?<\/svg>)?([^<]*)<\/span>/su', $card, $m)) $f['city'] = trim($m[1]);
@@ -178,7 +201,7 @@ function tjd_fields($kind, $card) {
 function tjd_pages() {
     global $wpdb;
     $ids = $wpdb->get_col("SELECT ID FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status = 'publish'
-        AND (post_content LIKE '%class=\"thc%' OR post_content LIKE '%class=\"supc%') ORDER BY ID");
+        AND (post_content LIKE '%class=\"thc%' OR post_content LIKE '%class=\"supc%' OR post_content LIKE '%class=\"p3\"%') ORDER BY ID");
     return array_map('intval', $ids);
 }
 
@@ -284,6 +307,22 @@ function tjd_ini($name) {
 function tjd_patch($kind, $card, $f) {
     $done = array();
     $old = tjd_fields($kind, $card);
+    if ($kind === 'p3') {   /* v1.1: نام، عکس و رویکرد کوتاه؛ شهر و تگ ندارد */
+        if (!empty($f['name']) && tjd_norm($f['name']) !== '' && $f['name'] !== $old['name']) {
+            list($card, $n) = tjd_rep('/<b>.*?<\/b>/su', $card, function () use ($f) { return '<b>' . tjd_txt($f['name']) . '</b>'; });
+            if ($n) $done[] = 'name';
+        }
+        if (!empty($f['photo']) && $f['photo'] !== $old['photo']) {
+            list($card, $n) = tjd_rep('/(<img[^>]*\ssrc=")[^"]*(")/', $card, function ($m) use ($f) { return $m[1] . esc_url($f['photo']) . $m[2]; });
+            if ($n) $done[] = 'photo';
+        }
+        if (isset($f['sp']) && trim($f['sp']) !== '' && trim($f['sp']) !== $old['sp']) {
+            if (strpos($card, '<small>') !== false) list($card, $n) = tjd_rep('/<small>.*?<\/small>/su', $card, function () use ($f) { return '<small>' . tjd_txt($f['sp']) . '</small>'; });
+            else list($card, $n) = tjd_rep('/<\/b>/', $card, function () use ($f) { return '</b><small>' . tjd_txt($f['sp']) . '</small>'; });
+            if ($n) $done[] = 'sp';
+        }
+        return array($card, $done);
+    }
     if (!empty($f['name']) && tjd_norm($f['name']) !== '' && $f['name'] !== $old['name']) {
         list($card, $n) = tjd_rep('/<b>.*?<\/b>/su', $card, function () use ($f) { return '<b>' . tjd_txt($f['name']) . '</b>'; });
         if ($old['name'] !== '') $card = str_replace('alt="' . esc_attr($old['name']) . '"', 'alt="' . tjd_attr($f['name']) . '"', $card);
@@ -353,16 +392,30 @@ function tjd_new_card($f, $withTags) {
          . ($meta !== '' ? '<span class="meta">' . $meta . '</span>' : '') . '</div>';
 }
 
-/* کارت تازه قبل از کارت پایانی «بیشتر» همان اسلایدر */
-function tjd_insert_card($html, $card) {
-    $anchors = array('<a class="thc more"', '<div class="thc more"');
-    foreach ($anchors as $a) {
-        if (substr_count($html, $a) === 1) {
-            $p = strpos($html, $a);
-            return substr($html, 0, $p) . $card . "\n" . substr($html, $p);
-        }
+/* v1.1: کارت نوار صفحهٔ اصلی؛ بی لینک صفحهٔ تیم ساخته نمی‌شود */
+function tjd_new_p3($f, $href) {
+    return '<a class="p3" href="' . esc_url($href) . '"><img src="' . esc_url($f['photo']) . '" alt="" width="40" height="40" loading="lazy">'
+         . '<span><b>' . tjd_txt($f['name']) . '</b><small>' . tjd_txt(isset($f['sp']) ? $f['sp'] : '') . '</small></span></a>';
+}
+/* v1.1: لینک صفحهٔ /team/ این نفر: از بات (team: نشانی یا اسلاگ) یا پست tj_person با همین نام */
+function tjd_team_href($names, $d) {
+    $t = isset($d['team']) ? trim((string) $d['team']) : '';
+    if ($t !== '') {
+        if (preg_match('#/team/([a-z0-9-]+)/?#', $t, $m)) return '/team/' . $m[1] . '/';
+        if (preg_match('/^[a-z0-9]+(-[a-z0-9]+)*$/', $t)) return '/team/' . $t . '/';
     }
-    return false;
+    if (!post_type_exists('tj_person')) return '';
+    $ps = get_posts(array('post_type' => 'tj_person', 'post_status' => 'publish', 'numberposts' => 500, 'fields' => 'ids'));
+    foreach ($ps as $id) {
+        if (tjd_names_match(get_the_title($id), $names)) return wp_make_link_relative(get_permalink($id));
+    }
+    return '';
+}
+/* کارت تازه فقط پیش از نشانگر ثابت همان برگه (نه کلاس طراحی). نشانگر باید دقیقاً یک بار باشد. */
+function tjd_insert_card($html, $card, $marker) {
+    if (substr_count($html, $marker) !== 1) return false;
+    $p = strpos($html, $marker);
+    return substr($html, 0, $p) . $card . "\n" . substr($html, $p);
 }
 
 /* برگه را مستقیم ذخیره می‌کند (بی‌فیلتر، پس هیچ جای دیگرِ برگه دست نمی‌خورد)، نسخهٔ قبلی در revisions می‌ماند
@@ -409,9 +462,9 @@ function tjd_publish($d) {
         if (empty($d['photo'])) return '';
         if (isset($media[$kind])) return $media[$kind]['url'];
         if ($dry) { $media[$kind] = array('id' => 0, 'url' => '/dry-run.webp'); return $media[$kind]['url']; }
-        $h = $kind === 'supc' ? 472 : 400;
-        $img = tjd_image($d['photo'], isset($d['crop']) ? (array) $d['crop'] : array(), 400, $h, 'image/webp');
-        $media[$kind] = tjd_media($img['path'], ($kind === 'supc' ? 'tjl-sup-' : 'tjl-th2-') . $slug,
+        $w = $kind === 'p3' ? 150 : 400; $h = $kind === 'supc' ? 472 : ($kind === 'p3' ? 150 : 400);
+        $img = tjd_image($d['photo'], isset($d['crop']) ? (array) $d['crop'] : array(), $w, $h, 'image/webp');
+        $media[$kind] = tjd_media($img['path'], ($kind === 'supc' ? 'tjl-sup-' : ($kind === 'p3' ? 'tjl-p3-' : 'tjl-th2-')) . $slug,
                                   $display . '، ' . ($kind === 'supc' ? 'استاد مرکز تجربه زندگی' : 'تراپیست مرکز تجربه زندگی'), $alt);
         return $media[$kind]['url'];
     };
@@ -425,12 +478,13 @@ function tjd_publish($d) {
         $new = $old; $shift = 0; $changes = array();
         foreach ($cards as $c) {
             if (!tjd_names_match($c['f']['name'], $names)) continue;
-            if ($c['kind'] === 'thc' && $pid === TJD_HOME) $foundThcHome = true;
+            if (($c['kind'] === 'thc' || $c['kind'] === 'p3') && $pid === TJD_HOME) $foundThcHome = true;
             if ($c['kind'] === 'thc' && $pid === TJD_SCHOOL) $foundThcSchool = true;
             $ff = $f;
             unset($ff['school']);
             if ($c['kind'] === 'supc') { unset($ff['city'], $ff['tags']); if (empty($d['supc_sp'])) unset($ff['sp']); }
-            $ff['photo'] = (!empty($d['photo']) && ($c['kind'] === 'thc' || !empty($d['supc_photo']))) ? $photoFor($c['kind']) : '';
+            if ($c['kind'] === 'p3') unset($ff['city'], $ff['tags']);
+            $ff['photo'] = (!empty($d['photo']) && ($c['kind'] === 'thc' || $c['kind'] === 'p3' || !empty($d['supc_photo']))) ? $photoFor($c['kind']) : '';
             list($card2, $done) = tjd_patch($c['kind'], $c['html'], $ff);
             if (!$done) continue;
             $s = $c['s'] + $shift;
@@ -452,14 +506,24 @@ function tjd_publish($d) {
             if (empty($d['photo'])) { $report['err_' . $pid] = array('page' => $pid, 'error' => 'no photo for new card'); continue; }
             if (empty($f['sp'])) { $report['err_' . $pid] = array('page' => $pid, 'error' => 'no sp for new card'); continue; }
             $base = isset($report[$pid]) ? $report[$pid]['new'] : get_post_field('post_content', $pid, 'raw');
-            $cf = $f; $cf['name'] = $display; $cf['photo'] = $photoFor('thc');
-            if ($pid === TJD_HOME && !empty($f['school'])) $cf['tags'] = trim((isset($cf['tags']) ? $cf['tags'] : '') . ' school');
-            $ins = tjd_insert_card($base, tjd_new_card($cf, $pid === TJD_HOME));
-            if ($ins === false) { $report['err_' . $pid] = array('page' => $pid, 'error' => 'anchor not found'); continue; }
+            $cf = $f; $cf['name'] = $display;
+            if ($pid === TJD_HOME) {
+                /* v1.1: نوار a.p3 با لینک صفحهٔ تیم؛ بی صفحهٔ تیم کارت بی‌لینک گذاشته نمی‌شود */
+                $href = tjd_team_href(array_merge($names, array($display)), $d);
+                if ($href === '') { $report['err_' . $pid] = array('page' => $pid, 'error' => 'no team page'); continue; }
+                $cf['photo'] = $photoFor('p3');
+                $ins = tjd_insert_card($base, tjd_new_p3($cf, $href), TJD_MARK_HOME);
+                $mk = 'tj:dir:home';
+            } else {
+                $cf['photo'] = $photoFor('thc');
+                $ins = tjd_insert_card($base, tjd_new_card($cf, false), TJD_MARK_SCHOOL);
+                $mk = 'tj:dir:school';
+            }
+            if ($ins === false) { $report['err_' . $pid] = array('page' => $pid, 'error' => 'marker missing: ' . $mk); continue; }
             if (!isset($report[$pid])) $report[$pid] = array('page' => $pid, 'title' => get_the_title($pid), 'url' => get_permalink($pid),
                                                             'changes' => array(), 'old' => get_post_field('post_content', $pid, 'raw'));
             $report[$pid]['new'] = $ins;
-            $report[$pid]['changes'][] = array('kind' => 'thc', 'sec' => $pid === TJD_HOME ? 'therapists' : 'alumni', 'done' => array('new'));
+            $report[$pid]['changes'][] = array('kind' => $pid === TJD_HOME ? 'p3' : 'thc', 'sec' => $pid === TJD_HOME ? 'therapists' : 'alumni', 'done' => array('new'));
         }
     }
 

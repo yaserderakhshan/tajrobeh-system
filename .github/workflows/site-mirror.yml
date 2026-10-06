@@ -91,3 +91,13 @@ jobs:
           git commit -qm "آینه از سایت زنده [skip ci]"
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep $((i*5)); done
           echo "کامیت $(git rev-parse --short HEAD) روی main."
+
+      # ۱۴ مهر ۱۴۰۵: نشانگر دایرکتوری (<!-- tj:dir:home --> در 503465، <!-- tj:dir:school --> در 294) از صفحهٔ زنده حذف شده؛
+      # کارت تازهٔ پروفایل از بات دیگر جایی برای نشستن ندارد. بعد از کامیت آینه قرمز می‌شود تا آینه نایستد.
+      - name: نگهبان نشانگرهای دایرکتوری
+        if: steps.mirror.outputs.markers != ''
+        env:
+          BAD: ${{ steps.mirror.outputs.markers }}
+        run: |
+          echo "::error::انتشار پروفایل از بات می‌شکند: $BAD"
+          exit 1
