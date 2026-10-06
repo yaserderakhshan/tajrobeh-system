@@ -612,43 +612,51 @@
   },
   "snippet:506031": {
    "hash": "6a5596c3b99bcc7e",
-   "modified": "2026-10-06 11:20:28",
-   "active": true
+   "modified": "2026-10-06 12:57:41",
+   "active": true,
+   "live": "f3864f33d87c3b11"
   },
   "snippet:505915": {
    "hash": "1f7b00e7b9912066",
    "modified": "2026-10-05 15:40:05",
-   "active": true
+   "active": true,
+   "live": "1f7b00e7b9912066"
   },
   "snippet:505906": {
    "hash": "31a03fa938a523e8",
    "modified": "2026-10-03 20:52:28",
-   "active": true
+   "active": true,
+   "live": "31a03fa938a523e8"
   },
   "snippet:505905": {
    "hash": "57faee19db5c052e",
    "modified": "2026-10-03 20:52:00",
-   "active": true
+   "active": true,
+   "live": "57faee19db5c052e"
   },
   "snippet:505904": {
    "hash": "32d623b15307d82a",
    "modified": "2026-10-03 20:51:39",
-   "active": true
+   "active": true,
+   "live": "32d623b15307d82a"
   },
   "snippet:505903": {
    "hash": "715e2f0ef0258fc5",
    "modified": "2026-10-03 20:51:22",
-   "active": true
+   "active": true,
+   "live": "715e2f0ef0258fc5"
   },
   "snippet:505902": {
    "hash": "b14210a227c8191f",
    "modified": "2026-10-03 20:51:06",
-   "active": true
+   "active": true,
+   "live": "b14210a227c8191f"
   },
   "snippet:505901": {
    "hash": "fe7cd6dc63e291af",
-   "modified": "2026-10-03 20:50:51",
-   "active": true
+   "modified": "2026-10-06 11:48:00",
+   "active": true,
+   "live": "73a73758d4b1efa9"
   },
   "snippet:505878": {
    "hash": "90ae09073ca692a3",
@@ -658,207 +666,248 @@
   "snippet:505814": {
    "hash": "c75bf1153bb1f713",
    "modified": "2026-10-02 12:09:30",
-   "active": true
+   "active": true,
+   "live": "c75bf1153bb1f713"
   },
   "snippet:505693": {
    "hash": "08220a0a7af67467",
    "modified": "2026-10-03 17:04:31",
-   "active": true
+   "active": true,
+   "live": "08220a0a7af67467"
   },
   "snippet:505691": {
    "hash": "0e1f79692a5a5a41",
    "modified": "2026-09-29 13:20:00",
-   "active": true
+   "active": true,
+   "live": "0e1f79692a5a5a41"
   },
   "snippet:505618": {
    "hash": "6ce2d58151a1986d",
    "modified": "2026-10-03 07:33:05",
-   "active": true
+   "active": true,
+   "live": "6ce2d58151a1986d"
   },
   "snippet:505599": {
    "hash": "c601e5e6b2045809",
    "modified": "2026-09-28 15:18:25",
-   "active": true
+   "active": true,
+   "live": "c601e5e6b2045809"
   },
   "snippet:505571": {
    "hash": "8315bd4c3549edd0",
    "modified": "2026-09-28 15:08:12",
-   "active": true
+   "active": true,
+   "live": "8315bd4c3549edd0"
   },
   "snippet:505562": {
    "hash": "fef947254f74550c",
    "modified": "2026-09-28 16:45:48",
-   "active": true
+   "active": true,
+   "live": "fef947254f74550c"
   },
   "snippet:505452": {
    "hash": "a4418237df05c8c6",
    "modified": "2026-09-28 13:45:24",
-   "active": true
+   "active": true,
+   "live": "a4418237df05c8c6"
   },
   "snippet:505375": {
    "hash": "362b81e3e38f3bbf",
    "modified": "2026-09-26 14:33:59",
-   "active": true
+   "active": true,
+   "live": "362b81e3e38f3bbf"
   },
   "snippet:505366": {
    "hash": "909d128991977c3b",
    "modified": "2026-09-26 14:29:22",
-   "active": true
+   "active": true,
+   "live": "909d128991977c3b"
   },
   "snippet:505281": {
    "hash": "0b6885244a59f49b",
    "modified": "2026-10-01 14:59:55",
-   "active": true
+   "active": true,
+   "live": "0b6885244a59f49b"
   },
   "snippet:505260": {
    "hash": "298bdcc0bcf091f0",
    "modified": "2026-09-24 07:00:10",
-   "active": true
+   "active": true,
+   "live": "298bdcc0bcf091f0"
   },
   "snippet:505259": {
    "hash": "3f7ce4a11fed41c1",
    "modified": "2026-09-23 23:01:16",
-   "active": true
+   "active": true,
+   "live": "3f7ce4a11fed41c1"
   },
   "snippet:505131": {
    "hash": "5205f80e0d9b553e",
    "modified": "2026-10-03 13:55:28",
-   "active": true
+   "active": true,
+   "live": "5205f80e0d9b553e"
   },
   "snippet:505103": {
    "hash": "507f88f056c0fc77",
    "modified": "2026-10-01 13:32:53",
-   "active": true
+   "active": true,
+   "live": "507f88f056c0fc77"
   },
   "snippet:505078": {
    "hash": "3e272984ac4ee4d1",
    "modified": "2026-09-19 18:51:38",
-   "active": true
+   "active": true,
+   "live": "3e272984ac4ee4d1"
   },
   "snippet:505050": {
    "hash": "29aac00e83c754f9",
-   "modified": "2026-10-04 10:24:48",
-   "active": true
+   "modified": "2026-10-06 13:33:32",
+   "active": true,
+   "live": "2de66d828e50691f"
   },
   "snippet:504841": {
    "hash": "4f730af7aa356f6a",
    "modified": "2026-09-29 16:03:56",
-   "active": true
+   "active": true,
+   "live": "4f730af7aa356f6a"
   },
   "snippet:504354": {
    "hash": "f427888b334b4d05",
    "modified": "2026-09-12 12:19:19",
-   "active": true
+   "active": true,
+   "live": "f427888b334b4d05"
   },
   "snippet:504340": {
    "hash": "523e9a6e75b5f856",
    "modified": "2026-09-12 11:35:37",
-   "active": true
+   "active": true,
+   "live": "523e9a6e75b5f856"
   },
   "snippet:504267": {
    "hash": "ee7c57cc8b6df7a2",
    "modified": "2026-09-11 23:14:36",
-   "active": true
+   "active": true,
+   "live": "ee7c57cc8b6df7a2"
   },
   "snippet:504078": {
    "hash": "b8fcb359d9567900",
    "modified": "2026-09-23 23:08:48",
-   "active": true
+   "active": true,
+   "live": "b8fcb359d9567900"
   },
   "snippet:504064": {
    "hash": "b09cbe28578cdca8",
    "modified": "2026-10-03 20:50:33",
-   "active": true
+   "active": true,
+   "live": "b09cbe28578cdca8"
   },
   "snippet:504059": {
    "hash": "62d97bee2b28ec9a",
    "modified": "2026-09-17 15:00:18",
-   "active": true
+   "active": true,
+   "live": "62d97bee2b28ec9a"
   },
   "snippet:504048": {
    "hash": "fb16bae09cb3c1c8",
    "modified": "2026-09-10 16:19:58",
-   "active": true
+   "active": true,
+   "live": "fb16bae09cb3c1c8"
   },
   "snippet:504037": {
    "hash": "fe7275f2bdb34742",
-   "modified": "2026-09-12 11:29:08",
-   "active": true
+   "modified": "2026-10-06 11:47:26",
+   "active": true,
+   "live": "6e2269397a9c0c39"
   },
   "snippet:504035": {
    "hash": "0b25b67e470f12bc",
-   "modified": "2026-10-02 12:09:09",
-   "active": true
+   "modified": "2026-10-06 14:30:46",
+   "active": true,
+   "live": "2f4dc40514624d65"
   },
   "snippet:503947": {
    "hash": "d5ae305dc15f1225",
    "modified": "2026-09-12 12:23:34",
-   "active": true
+   "active": true,
+   "live": "d5ae305dc15f1225"
   },
   "snippet:503917": {
    "hash": "0868fa60846f742f",
    "modified": "2026-09-09 00:16:39",
-   "active": true
+   "active": true,
+   "live": "0868fa60846f742f"
   },
   "snippet:503916": {
    "hash": "48defeddd391ad5b",
    "modified": "2026-09-29 22:58:42",
-   "active": true
+   "active": true,
+   "live": "48defeddd391ad5b"
   },
   "snippet:503540": {
    "hash": "df65c23320413bc3",
    "modified": "2026-09-28 16:44:18",
-   "active": true
+   "active": true,
+   "live": "df65c23320413bc3"
   },
   "snippet:502071": {
    "hash": "fc918a8beb928810",
    "modified": "2026-09-02 23:33:45",
-   "active": true
+   "active": true,
+   "live": "fc918a8beb928810"
   },
   "snippet:502069": {
    "hash": "a724645f092606f3",
    "modified": "2026-09-29 12:42:25",
-   "active": true
+   "active": true,
+   "live": "a724645f092606f3"
   },
   "snippet:502068": {
    "hash": "e3d0c4cc3159d95b",
    "modified": "2026-09-09 20:37:29",
-   "active": true
+   "active": true,
+   "live": "e3d0c4cc3159d95b"
   },
   "snippet:501154": {
    "hash": "bf1263266528e5eb",
    "modified": "2026-09-02 16:16:54",
-   "active": true
+   "active": true,
+   "live": "bf1263266528e5eb"
   },
   "snippet:501147": {
    "hash": "e42d1df5668932bc",
    "modified": "2026-09-02 16:12:17",
-   "active": false
+   "active": false,
+   "live": "e42d1df5668932bc"
   },
   "snippet:501146": {
    "hash": "ae722cac402d6a13",
    "modified": "2026-09-09 14:30:30",
-   "active": true
+   "active": true,
+   "live": "ae722cac402d6a13"
   },
   "snippet:501145": {
    "hash": "ea56fbafc1984bf8",
    "modified": "2026-09-26 14:30:47",
-   "active": true
+   "active": true,
+   "live": "ea56fbafc1984bf8"
   },
   "snippet:501143": {
    "hash": "c9135be6c5d4cbae",
-   "modified": "2026-10-04 10:24:35",
-   "active": true
+   "modified": "2026-10-06 11:47:07",
+   "active": true,
+   "live": "831d08dc2d284594"
   },
   "snippet:501142": {
    "hash": "c74b52ad37bcd2a1",
    "modified": "0000-00-00 00:00:00",
-   "active": false
+   "active": false,
+   "live": "c74b52ad37bcd2a1"
   },
   "snippet:501141": {
    "hash": "64dee2948b9bd1c8",
    "modified": "0000-00-00 00:00:00",
-   "active": false
+   "active": false,
+   "live": "64dee2948b9bd1c8"
   },
   "yoast:2": {
    "hash": "2dcd2fb7152b4075"
@@ -1294,6 +1343,12 @@
   },
   "yoast:505992": {
    "hash": "2dcd2fb7152b4075"
+  },
+  "snippet:506033": {
+   "live": "2cb11eb2ac168f96",
+   "modified": "2026-10-06 14:29:03",
+   "active": true
   }
- }
+ },
+ "mirrored_at": "2026-10-06T14:57:39.587Z"
 }

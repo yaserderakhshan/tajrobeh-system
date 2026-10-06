@@ -377,3 +377,8 @@ html:not(#tjq) body .tj2 .steps>div>b{margin:6px 0 2px;font-size:15px}
 html:not(#tjq) body .tj2 .steps>div>span{font-size:13.5px}
 }
 /* ===== tj-steps v1 end ===== */
+
+/* == now-row scrollbar == (۱۴ مهر ۱۴۰۵) ریل افقی «این روزها در تجربه» و کپی‌هایش: نوار اسکرول خاکستری زشت دیده می‌شد.
+   نوار پنهان، اسکرول با لمس و ترک‌پد سر جایش؛ به‌جای نوار، لبهٔ انتهایی (چپ) محو می‌شود تا معلوم باشد ادامه دارد. */
+.tj2 .now-row{scrollbar-width:none!important;-ms-overflow-style:none;padding-bottom:0!important;-webkit-mask-image:linear-gradient(to right,transparent 0,#000 64px);mask-image:linear-gradient(to right,transparent 0,#000 64px)}
+.tj2 .now-row::-webkit-scrollbar{display:none!important;width:0;height:0}
