@@ -35604,16 +35604,17 @@ function tnkNum_(n) {
 
 function tnkToman_(n) { return tnkNum_(n) + ' تومان'; }
 
+/* v170.24: اعشار هم («۲.۵ میلیون»، «۲٫۵ میلیون»، «۱/۵ میلیون»)؛ جداکنندهٔ هزارگان ٬ و , و فاصله */
 function tnkAmt_(s) {
   var t = String(s === null || s === undefined ? '' : s);
-  t = t.replace(/[۰-۹]/g, function (d) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)); });
+  t = t.replace(/[۰-۹]/g, function (d) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)); }).replace(/[٠-٩]/g, function (d) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)); });
   t = t.replace(/[٬,،\s]/g, '');
-  var m = t.match(/(\d+)/);
+  var m = t.match(/(\d+)(?:[.٫\/](\d+))?/);
   if (!m) return 0;
-  var v = Number(m[1]);
+  var v = Number(m[1] + (m[2] ? '.' + m[2] : ''));
   if (/هزار/.test(String(s))) v = v * 1000;
   else if (/میلیون/.test(String(s))) v = v * 1000000;
-  return v;
+  return Math.round(v);
 }
 
 function tnkNow_() {
@@ -35689,6 +35690,16 @@ function tnkRows_(name, head) {
   return tnkTab_(name, head).rows().map(function (r, i) { return tnkObj_(head, r, i); });
 }
 
+/* v170.24: کد تازه و نوشتن سطر زیر یک قفل؛ دو ثبت هم‌زمان یک کد نمی‌گیرند. row(code) سطر را می‌سازد؛ {code, row} برمی‌گردد */
+function tnkAppendCoded_(name, head, pre, row) {
+  var lock = null;
+  if (!tnkDry_()) { lock = LockService.getScriptLock(); lock.waitLock(20000); }
+  try {
+    var code = tnkNextCode_(name, head, pre);
+    var at = tnkTab_(name, head).append(row(code));
+    return { code: code, row: at };
+  } finally { if (lock) lock.releaseLock(); }
+}
 function tnkNextCode_(name, head, pre) {
   var rows = tnkTab_(name, head).rows(), max = 0, re = new RegExp('^' + pre + '-(\\d+)$');
   for (var i = 0; i < rows.length; i++) {
@@ -35776,7 +35787,7 @@ function tnkSaveFile_(fid, label) {
     var ext = String(f.path || '').split('.').pop() || 'jpg';
     blob.setName(label + '.' + ext);
     var file = tnkFolder_().createFile(blob);
-    try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e2) {}
+    /* v170.24: فیش با لینک عمومی ذخیره نمی‌شود؛ فقط صاحب پوشه و کسانی که پوشه با آن‌ها هم‌رسانی شده می‌بینند */
     return file.getUrl();
   } catch (e) { tgErr_('tnkSaveFile_: ' + e); return ''; }
 }
@@ -35848,10 +35859,12 @@ function tnkSpStart_(chat) {
     { inline_keyboard: [[{ text: '↩️ انصراف', callback_data: 'tnk:x' }]] });
 }
 
+/* v170.24: دسته در کال‌بک با کد کوتاه پایدار (هش نام)، نه شماره؛ کم و زیاد شدن تب «دسته‌ها» دکمهٔ قدیمی را به دستهٔ دیگر نمی‌برد */
+function tnkCatCode_(name) { return tgHash_('tnkcat:' + String(name)).slice(0, 6); }
 function tnkCatKb_() {
   var cats = tnkCats_(), kb = [], row = [];
   for (var i = 0; i < cats.length; i++) {
-    row.push({ text: cats[i], callback_data: 'tnk:cat:' + i });
+    row.push({ text: cats[i], callback_data: 'tnk:cat:' + tnkCatCode_(cats[i]) });
     if (row.length === 2) { kb.push(row); row = []; }
   }
   if (row.length) kb.push(row);
@@ -35870,8 +35883,11 @@ function tnkSpAmt_(chat, text) {
 function tnkSpCat_(chat, idx) {
   var d = tnkState_(chat);
   if (!d) return null;
-  var cats = tnkCats_();
-  d.cat = cats[Number(idx)] || 'متفرقه'; d.s = 'why'; tnkPut_(chat, d);
+  var cats = tnkCats_(), want = String(idx || ''), hit = '';
+  for (var i = 0; i < cats.length; i++) if (tnkCatCode_(cats[i]) === want) hit = cats[i];
+  if (!hit && /^\d{1,2}$/.test(want)) hit = cats[Number(want)] || '';   /* دکمهٔ پیش از v170.24 */
+  if (!hit) return tgSend_(chat, 'این دسته دیگر در فهرست نیست. دوباره انتخاب کنید.', tnkCatKb_());
+  d.cat = hit; d.s = 'why'; tnkPut_(chat, d);
   return tgSend_(chat, 'دسته: <b>' + tnkEsc_(d.cat) + '</b>\n\nبابت چی بود؟ در یک خط بنویسید تا بعداً با یک نگاه معلوم باشد.',
     { inline_keyboard: [[{ text: '↩️ انصراف', callback_data: 'tnk:x' }]] });
 }
@@ -35888,10 +35904,10 @@ function tnkSpSave_(chat, fid) {
   if (!d || !me) return null;
   tnkEnd_(chat);
   var now = tnkNow_();
-  var code = tnkNextCode_(TNK_T_SPEND, TNK_H_SPEND, 'خ');
+  var put = tnkAppendCoded_(TNK_T_SPEND, TNK_H_SPEND, 'خ', function (c) { return [c, now.date, now.ym, me['نام'], d.cat, d.why, d.amt, '', 'ثبت شد', '']; });
+  var code = put.code;
   var link = fid ? tnkSaveFile_(fid, 'فیش ' + code) : '';
-  tnkTab_(TNK_T_SPEND, TNK_H_SPEND).append([code, now.date, now.ym, me['نام'], d.cat, d.why,
-    d.amt, link, 'ثبت شد', '']);
+  if (link) tnkTab_(TNK_T_SPEND, TNK_H_SPEND).set(put.row, TNK_H_SPEND.indexOf('فیش یا فاکتور') + 1, link);
   var b = tnkBalance_(me['نام']);
   tgSend_(chat, '✅ <b>ثبت شد · ' + tnkEsc_(code) + '</b>\n' +
     tnkToman_(d.amt) + ' · ' + tnkEsc_(d.cat) + '\n' + tnkEsc_(d.why) +
@@ -35943,9 +35959,8 @@ function tnkRqSave_(chat, text) {
   if (!d || !me) return null;
   tnkEnd_(chat);
   var now = tnkNow_();
-  var code = tnkNextCode_(TNK_T_REQ, TNK_H_REQ, 'د');
-  tnkTab_(TNK_T_REQ, TNK_H_REQ).append([code, now.date, me['نام'], String(chat), d.amt,
-    String(text || '').trim(), TNK_RST.wait, '', '']);
+  var code = tnkAppendCoded_(TNK_T_REQ, TNK_H_REQ, 'د', function (c) { return [c, now.date, me['نام'], String(chat), d.amt,
+    String(text || '').trim(), TNK_RST.wait, '', '']; }).code;
   tgSend_(chat, '✅ درخواست شما ثبت شد و برای یاسر رفت. نتیجه را همین‌جا می‌گویم.', tnkHomeKb_(chat));
   var b = tnkBalance_(me['نام']);
   var card = '📥 <b>درخواست شارژ تنخواه · ' + tnkEsc_(code) + '</b>\n' +
@@ -36031,11 +36046,12 @@ function tnkChSave_(chat, fid) {
   if (!d) return null;
   tnkEnd_(chat);
   var now = tnkNow_();
-  var code = tnkNextCode_(TNK_T_CHARGE, TNK_H_CHARGE, 'ش');
-  var link = fid ? tnkSaveFile_(fid, 'فیش شارژ ' + code) : '';
   var by = '';
   try { var p = tgWhoPerson_(chat, ''); by = (p && p.name) || ''; } catch (e) {}
-  tnkTab_(TNK_T_CHARGE, TNK_H_CHARGE).append([code, now.date, now.ym, d.who, d.amt, d.how || '', link, by || 'یاسر', '']);
+  var put = tnkAppendCoded_(TNK_T_CHARGE, TNK_H_CHARGE, 'ش', function (c) { return [c, now.date, now.ym, d.who, d.amt, d.how || '', '', by || 'مالک', '']; });
+  var code = put.code;
+  var link = fid ? tnkSaveFile_(fid, 'فیش شارژ ' + code) : '';
+  if (link) tnkTab_(TNK_T_CHARGE, TNK_H_CHARGE).set(put.row, TNK_H_CHARGE.indexOf('فیش') + 1, link);
   if (d.req) {
     var r = tnkReqByCode_(d.req);
     if (r) {
@@ -36140,10 +36156,7 @@ function tnkSetup() {
   tnkTab_(TNK_T_SUM, TNK_H_SUM);
   var cat = tnkTab_(TNK_T_CAT, TNK_H_CAT);
   if (!cat.rows().length) TNK_CATS.forEach(function (r) { cat.append(r); });
-  var ppl = tnkTab_(TNK_T_PEOPLE, TNK_H_PEOPLE);
-  if (!ppl.rows().length) {
-    ppl.append(['پذیرش ساختگی', 'مسئول پذیرش', '7000004', 'desk_lead', 'فعال', '', 'تنخواه‌گردان پذیرش']);
-  }
+  /* v170.24: هیچ سطر ساختگی در هاب واقعی نمی‌نشیند؛ تنخواه‌گردان با نقش «تنخواه» در تب «افراد» (v170.22) */
   var g = tnkTab_(TNK_T_GUIDE, ['راهنمای هاب تنخواه']);
   if (!g.rows().length) {
     [['هر شارژ تنخواه را یاسر در بات ثبت می‌کند و فیشش در پوشهٔ «فیش‌های تنخواه» درایو بایگانی می‌شود.'],
@@ -36152,7 +36165,7 @@ function tnkSetup() {
      ['درخواست شارژ از بات به یاسر می‌رود و با دکمهٔ «شارژ می‌کنم» همان‌جا به شارژ تبدیل می‌شود.'],
      ['دسته‌ها را در تب «دسته‌ها» کم و زیاد کنید؛ بات همان‌ها را نشان می‌دهد.'],
      ['تب «خلاصهٔ ماهانه» خودکار است و دستی ویرایش نشود.'],
-     ['برای افزودن تنخواه‌گردان تازه یک سطر در تب «تنخواه‌گردان‌ها» بسازید و chat_id تلگرامش را بگذارید.']
+     ['برای افزودن تنخواه‌گردان تازه، نقش «تنخواه» را در تب «افراد» هاب تجربه به او بدهید. سقف و وضعیت را اینجا در تب «تنخواه‌گردان‌ها» با همان نام بنویسید.']
     ].forEach(function (r) { g.append(r); });
   }
   return 'هاب تنخواه آماده است: ' + tnkBook_().getUrl();
@@ -36277,6 +36290,19 @@ function tnkTests() {
   ok('کد هزینه الگو دارد', /^خ-\d{3}$/.test(sp[0]['کد']));
   ok('موجودی کم شد', tnkBalance_('پذیرش ساختگی').bal === 4550000);
   ok('حالت پاک شد', tnkState_(5) === null);
+  /* v170.24: اعشار، دسته با کد، کد زیر قفل */
+  ok('v170.24: مبلغ اعشاری', tnkAmt_('۲.۵ میلیون') === 2500000 && tnkAmt_('۲٫۵ میلیون') === 2500000 && tnkAmt_('۱/۵ میلیون') === 1500000 && tnkAmt_('۱٬۲۵۰٬۰۰۰') === 1250000);
+  var kbC = JSON.stringify(tnkCatKb_());
+  ok('v170.24: دکمهٔ دسته کد دارد نه شماره', kbC.indexOf('tnk:cat:' + tnkCatCode_('پذیرایی و آبدارخانه')) > -1 && !/tnk:cat:\d{1,2}"/.test(kbC));
+  tnkSpStart_(5); tnkRoute_({ text: '۱۰۰ هزار' }, 5, '', '');
+  tnkCb_({}, 'cat:' + tnkCatCode_('متفرقه'), 5, '', '');
+  ok('v170.24: دسته با کد انتخاب شد', tnkState_(5).cat === 'متفرقه');
+  TG_OUTBOX = []; tnkCb_({}, 'cat:zzzzzz', 5, '', '');
+  ok('v170.24: کد ناشناخته دوباره فهرست دسته می‌دهد', tnkState_(5).cat === 'متفرقه' && JSON.stringify(TG_OUTBOX).indexOf('tnk:cat:') > -1);
+  tnkEnd_(5);
+  var c1 = tnkAppendCoded_(TNK_T_REQ, TNK_H_REQ, 'آ', function (c) { return [c]; }), c2 = tnkAppendCoded_(TNK_T_REQ, TNK_H_REQ, 'آ', function (c) { return [c]; });
+  ok('v170.24: دو ثبت پشت‌سرهم دو کد', c1.code === 'آ-001' && c2.code === 'آ-002' && c2.row === c1.row + 1);
+  TG_MEM['tnk:' + TNK_T_REQ] = TG_MEM['tnk:' + TNK_T_REQ].filter(function (r) { return String(r[0]).indexOf('آ-') !== 0; });
 
   TG_OUTBOX = [];
   tnkRqStart_(5);
