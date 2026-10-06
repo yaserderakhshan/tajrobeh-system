@@ -70,7 +70,9 @@ function ktbShow_(chat) {
     kb.push([{ text: KTB_KIND[k] + ' · ' + tgFa_(I[k].length), callback_data: 'ktb:l:' + k }]);
   });
   if (I.retry.length) L.push('', '🔁 ' + tgFa_(I.retry.length) + ' پروفایل «منتشر نشد» همین حالا خودکار دوباره فرستاده می‌شود؛ اگر باز نشد اینجا می‌آید.');
-  if (I.resumeWait.length) L.push('📝 نسخهٔ سبک ' + tgFa_(I.resumeWait.length) + ' رزومه در حال ساخت است.');
+  var cvNo = I.resumeWait.filter(function (r) { return ktbCvNo_(r); }).length, cvGo = I.resumeWait.length - cvNo;
+  if (cvGo) L.push('📝 نسخهٔ سبک ' + tgFa_(cvGo) + ' رزومه در حال ساخت است.');
+  if (cvNo) L.push('📄 ' + tgFa_(cvNo) + ' رزومه PDF یا تصویر نیست (مثلاً Word)؛ نسخهٔ سبکش دستی نوشته شود.');
   L.push('', 'مهلت هر مورد ' + tgFa_(KTB_SLA_D) + ' روز است؛ هر صبح ساعت ' + tgFa_(KTB_REMIND_H) + ' یادآوری می‌آید.');
   return tgSend_(chat, L.join('\n'), kb.length ? { inline_keyboard: kb } : null);
 }
@@ -118,7 +120,7 @@ function ktbCb_(chat, data) {
   if (act === 'rw') { tgSetVal_('ktbw', chat, JSON.stringify({ row: r.row, h: a[3] })); return tgSend_(chat, '✍️ متن رزومهٔ سبک را بفرست؛ هر بخش با «## عنوان» و هر ردیف با «- مورد · سال». برای انصراف: /cancel'); }
   if (act === 've') return tgSend_(chat, '✏️ <b>اصلاح ویس</b>', { inline_keyboard: [[{ text: '💬 پیام به خودش (ویس تازه بخواه)', callback_data: 'pr:msg:' + a[2] + ':' + a[3] }], [{ text: '🚫 این ویس روی صفحه نرود', callback_data: 'ktb:vx:' + a[2] + ':' + a[3] }], [{ text: '↩️ بازگشت', callback_data: 'ktb:o:voice:' + a[2] + ':' + a[3] }]] });
   if (act === 'vx') { var vx = ktbVoiceId_(r.v); tgPqPut_(r.v.id, { page_voice: vx }); return tgSend_(chat, '🚫 این ویس روی صفحه نمی‌رود (تا ویس تازه بیاید).', { inline_keyboard: [[{ text: '🗂 بقیهٔ منتظرها', callback_data: 'ktb:h' }]] }); }
-  if (act === 'rr') { tgPqPut_(r.v.id, { pub_resume_draft: '' }); var g = ktbResumeMake_(tgPrRow_(r.row)); return tgSend_(chat, g ? '📝 نسخهٔ تازه ساخته شد.' : '⚠️ ساخته نشد؛ ساعت بعد دوباره.', { inline_keyboard: [[{ text: '📝 دیدن', callback_data: 'ktb:o:resume:' + r.row + ':' + a[3] }]] }); }
+  if (act === 'rr') { tgPqPut_(r.v.id, { pub_resume_draft: '' }); var g = ktbResumeMake_(tgPrRow_(r.row)); return tgSend_(chat, g ? '📝 نسخهٔ تازه ساخته شد.' : ktbCvNo_(r.row) ? '📄 این رزومه PDF یا تصویر نیست؛ نسخهٔ سبک را دستی بنویسید.' : '⚠️ ساخته نشد؛ ساعت بعد دوباره.', { inline_keyboard: [[{ text: '📝 دیدن', callback_data: 'ktb:o:resume:' + r.row + ':' + a[3] }]] }); }
   if (act === 'va') {
     var o2 = tgPrPublish_(chat, r, { quiet: 1, src: 'redo' });
     return tgSend_(chat, (o2 && o2.ok !== false ? '✅ ویس روی صفحه رفت.' : '⚠️ انتشار کامل نشد؛ به صف تلاش دوباره رفت.'), { inline_keyboard: [[{ text: '🗂 بقیهٔ منتظرها', callback_data: 'ktb:h' }]] });
@@ -181,11 +183,22 @@ function ktbGemFile_(blob, prompt, schema) {
   }
   throw new Error('جمنای ناموفق: ' + last);
 }
+/** blob فایل تلگرام با نوع درست از پسوند مسیر (تلگرام اغلب application/octet-stream می‌دهد و جمنای آن را نمی‌خواند) */
+function ktbFileBlob_(f) {
+  var b = f && f.blob; if (!b) return null;
+  var ext = String((/\.([A-Za-z0-9]{2,5})$/.exec(String(f.path || '')) || [])[1] || '').toLowerCase();
+  var mt = { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[ext];
+  if (mt && typeof b.setContentType === 'function') b.setContentType(mt);
+  return b;
+}
 function ktbResumeMake_(r) {
   if (!r) return false;
   var m = /^tg:doc:([^\s·]+)/.exec(String(r.v.resume || '')); if (!m) return false;
   try {
-    var blob = ktbDry_() ? null : tgTgFile_(m[1]);
+    var blob = ktbDry_() ? (TG_MEM['ktb:blob'] || null) : ktbFileBlob_(tgTgFile_(m[1]));   /* v170.23.6: tgTgFile_ ‏{blob, path} می‌دهد، نه خود blob */
+    /* v170.23.6.2: Word و فرمت‌های دیگر را جمنای مستقیم نمی‌خواند؛ این خطا نیست. یک بار علامت می‌خورد، هر ساعت دوباره امتحان نمی‌شود و دستی نوشته می‌شود. */
+    var mime = blob && typeof blob.getContentType === 'function' ? String(blob.getContentType() || '') : '';
+    if (blob && !/pdf|image\//.test(mime)) { ktbProp_('KTB_CV_NO:' + r.v.id, mime || '?'); return false; }
     var o = ktbGemFile_(blob, KTB_CV_PROMPT, KTB_CV_SCHEMA), txt = ktbCvFormat_(o);
     if (!txt) return false;
     tgPqPut_(r.v.id, { pub_resume_draft: txt });
@@ -194,11 +207,13 @@ function ktbResumeMake_(r) {
 }
 
 /* ───── ساعتی از tgWatchdog: تلاش دوباره، رزومه‌های سبک (دو تا در ساعت)، یادآوری ساعت ۹ ───── */
+/** رزومه‌ای که فرمتش را جمنای نمی‌خواند (v170.23.6.2): نوع فایل، وگرنه '' */
+function ktbCvNo_(x) { var r = x && x.v ? x : tgPrRow_(x); return r && r.v && r.v.id ? ktbProp_('KTB_CV_NO:' + r.v.id) : ''; }
 function ktbHourly_() {
   try { ktbFixMaybe_(); } catch (eF) { tgErr_('ktbFixMaybe_', eF); }
   var I = ktbItems_();
   if (I.retry.length) ktbRetry_(I.retry);
-  I.resumeWait.slice(0, 2).forEach(function (r) { ktbResumeMake_(r); });
+  I.resumeWait.filter(function (r) { return !ktbCvNo_(r); }).slice(0, 2).forEach(function (r) { ktbResumeMake_(r); });
   return ktbRemind_(I);
 }
 function ktbRemind_(I) {
@@ -368,6 +383,14 @@ function ktbTests() {
     ok('بعد از تلاش باز شکست ← کارت', ktbItems_().failed.length === 1);
     /* رزومهٔ سبک با جمنای */
     TG_MEM['ktb:gem'] = { sections: [{ title: 'تحصیلات', items: [{ t: 'کارشناسی ارشد روان‌شناسی بالینی — دانشگاه نمونه', year: '۱۳۹۸' }] }, { title: 'خالی', items: [] }] };
+    /* v170.23.6: دیپلوی ۳۷۵۲۷۱۱۳۷۴۸ با «blob.getContentType is not a function» برگشت؛ نتیجهٔ tgTgFile_ شیء {blob, path} است */
+    var fb = { ct: 'application/octet-stream', getContentType: function () { return this.ct; }, setContentType: function (x) { this.ct = x; return this; } };
+    ok('فایل تلگرام: blob از {blob, path} و نوع PDF از پسوند', ktbFileBlob_({ blob: fb, path: 'documents/file_7.PDF' }) === fb && fb.getContentType() === 'application/pdf' && ktbFileBlob_({ path: 'x.pdf' }) === null);
+    /* v170.23.6.2: دیپلوی ۳۷۵۳۴۹۸۴۲۲۲ با «نوع فایل application/octet-stream را جمنای مستقیم نمی‌خواند» برگشت؛ Word خطا نیست */
+    TG_MEM['ktb:blob'] = { getContentType: function () { return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'; } };
+    var e0 = (TG_MEM['errs'] || []).length, rw0 = ktbItems_().resumeWait[0].row;
+    ok('رزومهٔ Word: بی خطا، علامت یک‌باره، بی تلاش ساعتی', ktbResumeMake_(tgPrRow_(rw0)) === false && !!ktbCvNo_(rw0) && (TG_MEM['errs'] || []).length === e0 && !TG_MEM['pqrows']['ther:ت'].pub_resume_draft);
+    delete TG_MEM['ktb:blob']; TG_MEM['ktbp:KTB_CV_NO:' + tgPrRow_(rw0).v.id] = '';
     ok('رزومهٔ سبک ساخته و در ستون پیش‌نویس', ktbResumeMake_(tgPrRow_(ktbItems_().resumeWait[0].row)) && /^## تحصیلات\n- کارشناسی ارشد روان‌شناسی بالینی، دانشگاه نمونه · ۱۳۹۸$/.test(TG_MEM['pqrows']['ther:ت'].pub_resume_draft), TG_MEM['pqrows']['ther:ت'].pub_resume_draft);
     ok('پیش‌نویس ← کارتابل', ktbItems_().resume.length === 1);
     /* نما و دکمه‌ها */

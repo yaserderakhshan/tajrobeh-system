@@ -38,7 +38,8 @@
     "version.gs",
     "sitepub.gs",
     "kartable.gs",
-    "ai.gs"
+    "ai.gs",
+    "migrate.gs"
   ],
   "htmlExtensions": [
     ".html"
