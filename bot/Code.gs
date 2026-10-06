@@ -86,6 +86,9 @@ function doPost(e) {
       /* v166.29.1: پینگ سلامت از tgWatchdog که از همان مسیر رلهٔ کلادفلر آمده؛ آپدیت تلگرام نیست */
       if (body.tj_ping) { PropertiesService.getScriptProperties().setProperty('TG_RELAY_PONG', String(Date.now())); return okJson_(); }
       tgHandle(body);
+    } else if (body.action === 'assist.ask' && typeof asWeb_ === 'function') {
+      /* v170.23.11: رابط وب واحد دستیار (assist.gs)؛ فقط با امضای درست سایت، پاسخ JSON */
+      return asWeb_(e, raw, body);
     } else if (body.kind === 'wp_sec') {
       /* v170.12: هشدار ورود مدیر و کد ورود دومرحله‌ای از وردپرس؛ فقط با امضای درست (sitesec.gs) */
       if (typeof wpSecIn_ === 'function') wpSecIn_(e, raw, body);
