@@ -75,14 +75,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.36`
+نسخهٔ کد: `v170.37`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۰ | ۳۳ |
-| `telegram.gs` | ۳۷۷۷۲ | ۲۰۴۰ |
+| `telegram.gs` | ۳۷۷۷۳ | ۲۰۴۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -124,6 +124,7 @@
 | `ctareg.gs` | ۵ | ۰ |
 | `intake2.gs` | ۱۸۵ | ۱۵ |
 | `funnel.gs` | ۲۱۲ | ۱۸ |
+| `intake3.gs` | ۸۵ | ۶ |
 
 ### کارهای زمان‌دار
 
@@ -159,6 +160,7 @@
 |---|---|---|
 | `AFX_RC_TAB` | «آشتی کارهای تماس اول · پیش‌نمایش» | `afx.gs` |
 | `AFX_ZR_TAB` | «ارجاع صفر · هفتگی» | `afx2.gs` |
+| `BF_TAB` | «پر کردن ردپای لیدها · پیش‌نمایش» | `intake3.gs` |
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
 | `CM_FIX_TAB` | «اصلاح کامنت‌ها · پیش‌نمایش» | `comments.gs` |
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
@@ -211,7 +213,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `afx.gs` `afx2.gs` `intake.gs` `funnel.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `afx.gs` `afx2.gs` `intake.gs` `funnel.gs` `intake3.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -390,6 +392,7 @@
 | درگاه‌های ورودی: اصلاح دادهٔ لیدها (v170.31) | `itkTests` |
 | درگاه‌های ورودی: قرارداد و ردپا (v170.35) | `itk2Tests` |
 | قیف و اندازه‌گیری یکپارچه (v170.36) | `fnlTests` |
+| درگاه‌های ورودی: پر کردن ردپای لیدهای قدیمی (v170.37) | `bfTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)

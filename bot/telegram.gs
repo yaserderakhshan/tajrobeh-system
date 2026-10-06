@@ -6908,6 +6908,7 @@ function tgWatchdog(e) {
   try { if (typeof aiRetryTick_ === 'function') aiRetryTick_(); } catch (eAr) { tgErr_('aiRetryTick_', eAr); }   /* v170.23.7: ویس‌های بی‌متن */
   try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
   try { if (typeof ps2FixMaybe_ === 'function') ps2FixMaybe_(); } catch (eP2) { tgErr_('ps2FixMaybe_', eP2); }
+  try { if (typeof bfMaybe_ === 'function') bfMaybe_(); } catch (eBf) { tgErr_('bfMaybe_', eBf); }   /* v170.37: ردپای لیدهای قدیمی با «اوکی» Cowork */
   try { if (typeof fnlHourly_ === 'function') fnlHourly_(); } catch (eFh) { tgErr_('fnlHourly_', eFh); }   /* v170.36: قیف هفتگی و آنالیتیکس */
   try { if (typeof itkMaybe_ === 'function') itkMaybe_(); } catch (eIk) { tgErr_('itkMaybe_', eIk); }   /* v170.31: اصلاح دادهٔ لیدها با «اوکی» Cowork */
   try { if (typeof afx2Hourly_ === 'function') afx2Hourly_(); } catch (eAx2) { tgErr_('afx2Hourly_', eAx2); }   /* v170.30: ارجاع صفر هفتگی */
@@ -12761,7 +12762,7 @@ function tgLogStart_(code, chat) {
     var now = new Date();
     sh.appendRow([Utilities.formatDate(now, TG_TZ, 'yyyy-MM-dd'),
       Utilities.formatDate(now, TG_TZ, 'HH:mm'), 'بات تلگرام',
-      (code.indexOf('ig_') === 0 ? 'اینستاگرام › بات › ' : 'سایت › بات › ') + tgStartLabel_(code), tgStartLabel_(code), '', code]);
+      (code.indexOf('ig_') === 0 ? 'اینستاگرام › بات › ' : 'سایت › بات › ') + tgStartLabel_(code), tgStartLabel_(code), '', code, String(chat || '')]);   /* v170.37: گفت‌وگو هم، برای ردپای لید */
   } catch (e) { tgErr_('tgLogStart_: ' + e); }
   try { if (typeof v1689StartUtm_ === 'function') v1689StartUtm_(code); } catch (eU) { tgErr_('v1689StartUtm_', eU); }   /* v168.9 */
 }

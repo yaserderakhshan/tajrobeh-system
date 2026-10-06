@@ -47,7 +47,8 @@
     "intake.gs",
     "ctareg.gs",
     "intake2.gs",
-    "funnel.gs"
+    "funnel.gs",
+    "intake3.gs"
   ],
   "htmlExtensions": [
     ".html"
