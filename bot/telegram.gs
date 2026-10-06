@@ -2521,6 +2521,7 @@ function tgPrivate_(m) {
   // مدرسه v95: ویزاردهای دانش‌آموختگان و اپلای تراپیست، چون عکس و فایل هم می‌گیرند
   if (typeof tgSchMedia_ === 'function' && tgSchMedia_(chat, m)) return;
 
+  if (typeof inbRoute_ === 'function' && inbRoute_(chat, m)) return;   /* v170.28: صندوق یکتا (پاسخ تیم، صندوق من، جواب به پیام بات) */
   if (typeof ps3Route_ === 'function' && ps3Route_(chat, m)) return;   /* v170.23.9: روان‌پزشکی (فرم اداری، تکمیل اطلاعات، نمای مسئول) */
   if ((m.photo || m.document) && tgGetVal_('psyrc', chat) && typeof tgPsyReceipt_ === 'function' && tgPsyReceipt_(chat, m)) return;
   if (m.text && typeof tgPsyText_ === 'function' && tgPsyText_(chat, m.text)) return;
@@ -2744,6 +2745,7 @@ function tgPrivate_(m) {
       ]
     });
   }
+  if (m && m.reply_to_message && typeof inbReplyIn_ === 'function' && inbReplyIn_(chat, m, true)) return;   /* v170.28: جواب به پیام بات گم نمی‌شود */
   tgSend_(chat, T_FALLBACK, tgMenu_());
 }
 
@@ -3714,7 +3716,7 @@ function tgDeskMenu_() {
     keyboard: [
       ['📥 کارهای روی زمین', TG_DUTY_BTN],
       [TG_PAY_BTN],
-      ['✉️ پیام‌های درمانگران'],
+      ['✉️ پیام‌های درمانگران', '📮 صندوق من'],
       ['⚙️ اعلان‌های من', '📊 خلاصهٔ امروز'],
       [TG_COLLQ_BTN, TG_INPQ_BTN],
       ['📈 نظارت', '📣 اطلاعیه‌ها'],
@@ -4512,6 +4514,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('dq:') === 0 && typeof dqCb_ === 'function') return dqCb_(chat, data);   /* v170: صف ارسال */
   if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);
+  if (data.indexOf('inb:') === 0 && typeof inbCb_ === 'function') return inbCb_(chat, data);   /* v170.28: صندوق یکتا */
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
   if (data.indexOf('ps2:') === 0 && typeof ps2Cb_ === 'function') return ps2Cb_(chat, data);   /* v170.23.8: اتصال روان‌پزشک */   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
@@ -6896,6 +6899,7 @@ function tgWatchdog(e) {
   try { if (typeof aiRetryTick_ === 'function') aiRetryTick_(); } catch (eAr) { tgErr_('aiRetryTick_', eAr); }   /* v170.23.7: ویس‌های بی‌متن */
   try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
   try { if (typeof ps2FixMaybe_ === 'function') ps2FixMaybe_(); } catch (eP2) { tgErr_('ps2FixMaybe_', eP2); }
+  try { if (typeof inbTick_ === 'function') inbTick_(); } catch (eIb) { tgErr_('inbTick_', eIb); }   /* v170.28: صندوق یکتا (همگام‌سازی، مهلت، ارجاع، گزارش هفتگی) */
   try { if (typeof ps3Tick_ === 'function') ps3Tick_(); } catch (eP3) { tgErr_('ps3Tick_', eP3); }   /* v170.23.9: یادآوری ویزیت و فرم بعد از ویزیت */
   try { if (typeof ktbRouteMaybe_ === 'function') ktbRouteMaybe_(); } catch (eKr) { tgErr_('ktbRouteMaybe_', eKr); }   /* v170.16: کمپین C-004 */
   try { if (typeof v1691Weekly_ === 'function' && v1691Weekly_(e)) return; } catch (eW) { tgErr_('v1691Weekly_', eW); }
@@ -8444,6 +8448,7 @@ function tgTkCreate_(chat, who, ix, body) {
   const now = new Date();
   const id = 'P-' + tgTkNext_();
   const tk = { id: id, topic: t[0], owner: t[1], urgent: t[2], body: body, ther: who.name, chat: String(chat) };
+  if (typeof inbHook_ === 'function') inbHook_('tk', tk);   /* v170.28 */
   if (TG_DRY) return tk;
   tgTkSheet_().appendRow([id, tgJDateFull_(now, TG_TZ), Utilities.formatDate(now, TG_TZ, 'HH:mm'),
     who.name, String(chat), t[0], body, t[1], 'باز', '', '', '', '', now]);
@@ -8568,6 +8573,7 @@ function tgTkReply_(chat, id, answer) {
     sh.getRange(tk.row, 11).setValue(tgJDateFull_(now, TG_TZ));
     if (tk.at instanceof Date) sh.getRange(tk.row, 12).setValue(Math.round((now - tk.at) / 60000));
   }
+  if (typeof inbHook_ === 'function') inbHook_('tkre', tk.id, answer);   /* v170.28 */
   if (tk.chat) tgSend_(tk.chat, ['💬 <b>پاسخ پذیرش</b> · <code>' + tk.id + '</code>',
     tgEsc_(tk.topic), tgEsc_(answer)].join('\n\n'), tgTherMenu_());
   tgSend_(chat, '✅ پاسخ ' + tk.id + ' فرستاده شد.', tgDeskMenu_());
@@ -8710,6 +8716,7 @@ function tgBugCreate_(chat, who, kind, body) {
     tgBugSheet_().appendRow([id, tgJDateFull_(new Date(), TG_TZ), kind, who.name, String(chat),
       body, 'تازه', '', '', '', new Date()]);
   }
+  if (typeof inbHook_ === 'function') inbHook_('bug', { id: id, kind: kind, body: body, chat: String(chat) });   /* v170.28 */
   return { id: id, kind: kind };
 }
 
@@ -9006,6 +9013,7 @@ function tgTkNew_(chat, name, topic, owner, urgent, body) {
   const now = new Date();
   const id = 'P-' + tgTkNext_();
   const tk = { id: id, topic: topic, owner: owner, urgent: urgent, body: body, ther: name, chat: String(chat) };
+  if (typeof inbHook_ === 'function') inbHook_('tk', tk);   /* v170.28 */
   if (TG_DRY) return tk;
   tgTkSheet_().appendRow([id, tgJDateFull_(now, TG_TZ), Utilities.formatDate(now, TG_TZ, 'HH:mm'),
     name, String(chat), topic, body, owner, 'باز', '', '', '', '', now]);
@@ -10846,7 +10854,7 @@ function tgRoleByLabel_(text, roles) {
 function tgOwnerMenu_(role) {
   var extra = role === 'روان‌پزشکی' && typeof PS3_HEAD_BTN !== 'undefined' ? [[PS3_HEAD_BTN]] : [];   /* v170.23.9: نمای روان‌پزشکی */
   return {
-    keyboard: [['📊 گزارش بخش من']].concat(extra).concat([['📣 اطلاعیه‌ها', '❓ راهنما'], [TG_DASH_BTN, TG_TSK_BTN], [TG_BOX_BTN, TG_TSK_NEW]]).concat(tgRoleRow_()),
+    keyboard: [['📊 گزارش بخش من', '📮 صندوق من']].concat(extra).concat([['📣 اطلاعیه‌ها', '❓ راهنما'], [TG_DASH_BTN, TG_TSK_BTN], [TG_BOX_BTN, TG_TSK_NEW]]).concat(tgRoleRow_()),
     resize_keyboard: true
   };
 }
@@ -22989,6 +22997,7 @@ function tgWaSend_(to, text) {
   const num = tgWaDigits_(to);
   const body = String(text || '').slice(0, 4000);
   if (!num || !body) return '';
+  try { if (typeof inbHook_ === 'function') { var wr = tgLeadByPhone_(num); if (wr >= 2) inbHook_('waout', { code: tgLeadCode_(wr), text: body.slice(0, 300) }); } } catch (eIw) {}   /* v170.28 */
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'wa', to: num, text: body }); return 'dry'; }
   const cfg = tgWaCfg_();
   if (!cfg.t || !cfg.id) { try { tgErr_('واتس‌اپ: توکن یا شناسهٔ شماره تنظیم نشده'); } catch (e) {} return ''; }
@@ -23067,6 +23076,7 @@ function tgWaMsg_(m, nm, ours) {
 
   const code = tgLeadCode_(row);
   tgLeadEv_({ code: code, row: row, actor: nm || from, channel: TG_WA_CH, what: 'پیام واتس‌اپ', to: String(text).slice(0, 120) });
+  if (typeof inbHook_ === 'function') inbHook_('wa', { code: code, text: String(text).slice(0, 500) });   /* v170.28 */
   if (!fresh) {
     /* v170.18: پیام واتس‌اپ پس از ۶ ساعت سکوت یعنی برگشت مراجع (tgLeadReturn_)؛ پیام‌های پشت‌سرهم یک گفت‌وگو لید را ریست نمی‌کنند */
     var rk = 'warc' + code, cc = TG_DRY ? null : CacheService.getScriptCache();
@@ -32520,6 +32530,11 @@ function tgMsgDeliver_(chat, m, name, uname, st) {
   }
   tgMsgAppend_(TG_MSG_LOG, [th, new Date(now), who, role, st.label || '', st.g || '', String(body).slice(0, 4000), m.voice ? 'ویس' : 'متن',
     String(chat), (st.to || []).join(','), st.th ? 'بله' : '', mins]);
+  /* v170.28: صندوق یکتا. پیام اول = ورود؛ پیام طرف گیرنده در همان رشته = پاسخ؛ پیام دوبارهٔ فرستنده = پیام تازه */
+  if (typeof inbHook_ === 'function') {
+    if (!prev || String(prev.a) === String(chat)) inbHook_('msg', { th: th, chat: String(prev ? prev.a : chat), text: String(body).slice(0, 500) });
+    else inbHook_('msgre', { th: th, who: who, text: String(body).slice(0, 300) });
+  }
 }
 
 /* ---------- برای نسخهٔ بعد ---------- */

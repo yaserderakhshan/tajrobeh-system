@@ -40,7 +40,8 @@
     "kartable.gs",
     "ai.gs",
     "psy2.gs",
-    "psy3.gs"
+    "psy3.gs",
+    "inbox.gs"
   ],
   "htmlExtensions": [
     ".html"

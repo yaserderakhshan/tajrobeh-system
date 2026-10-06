@@ -42,6 +42,10 @@ jobs:
       - name: بررسی محلی و همهٔ تست‌ها با دادهٔ ساختگی (و نقشهٔ بات در docs)
         run: node .github/scripts/bot-precheck.mjs
 
+      # v170.28: صندوق یکتا. قابلیت تازه‌ای که ورودی موازی بسازد (تب ورودی بیرون از INB_SRC و INB_NOT_INBOUND) رد می‌شود
+      - name: صندوق یکتا، بی ورودی موازی
+        run: node .github/scripts/inbox-guard.mjs bot
+
       # هر PR که کد بات را عوض کند: شمارهٔ نسخه در bot/version.gs بالا برود و یک خط برایش در CHANGELOG.md باشد
       - name: شمارهٔ نسخه و CHANGELOG
         env:
