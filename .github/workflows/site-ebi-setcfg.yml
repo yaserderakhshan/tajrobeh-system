@@ -1,0 +1,27 @@
+name: سایت · setcfg کمپین ابی
+
+# بات v170.16.3: تنظیم اسنیپت عملیات کمپین ابی (ebi-ops) با کلید دوم درگاه بات (BOT_API_KEY)، نشانی وب‌اپ و راهبران.
+# راهبران از خود بات خوانده می‌شوند (کلید «راهبران C-004» در تنظیمات خصوصی) و در لاگ پوشانده‌اند. پیش از این، site-deploy اسنیپت را نصب کرده باشد.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  setcfg:
+    environment: production   # رمزها فقط در Environment «production» (فقط main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: setcfg، status و test
+        env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          BOT_API_URL: ${{ secrets.BOT_API_URL }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+        run: node site/tools/ebi-setcfg.mjs

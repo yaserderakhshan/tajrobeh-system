@@ -1,0 +1,37 @@
+// بات v170.16.3: setcfg اسنیپت عملیات کمپین ابی (site/snippets/ebi-ops.php) از گردش کار site-ebi-setcfg.
+// ۱) فهرست راهبران از بات (اکشن ebi_mods درگاه، فقط با کلید دوم BOT_API_KEY). مقدارها پوشانده می‌شوند و هیچ‌جا نوشته نمی‌شوند.
+// ۲) POST /wp-json/tj/v1/ebi-ops با do=setcfg: کلید دوم، نشانی وب‌اپ (BOT_API_URL) و راهبران.
+// ۳) do=status و do=test (فرستادن آزمایشی، بی پیام واقعی). فقط ok، شمار و خطا چاپ می‌شود، نه پاسخ کامل.
+import { loadEnv, wpClient, log, fail, summary } from './site-lib.mjs';
+
+loadEnv();
+const url = process.env.BOT_API_URL, key = process.env.BOT_API_KEY;
+const bad = (m) => { fail(m); summary(`\n**❌ ${m}**`); process.exit(1); };
+if (!url || !key) bad('BOT_API_URL یا BOT_API_KEY در Environment «production» نیست');
+
+let j;
+try {
+  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, redirect: 'follow', body: JSON.stringify({ api: 1, key, action: 'ebi_mods' }) });
+  j = JSON.parse(await res.text());
+} catch (e) { j = { ok: false, error: 'پاسخ بات خوانده نشد' }; }
+if (!j.ok) bad(`فهرست راهبران از بات نیامد: ${j.error || '?'} (key2_only یعنی کلید دوم هنوز در بات ننشسته؛ unknown_action یعنی نسخهٔ v170.16.3 منتشر نشده)`);
+const mods = (j.data && j.data.mods || []).map(String);
+for (const m of mods) console.log(`::add-mask::${m}`);
+log(`راهبران از بات: ${mods.length}`);
+
+const wp = wpClient();
+if (!wp.hasAuth) bad('WP_USER یا WP_APP_PASSWORD نیست');
+const s1 = await wp.post('/wp-json/tj/v1/ebi-ops', { do: 'setcfg', key, webapp: url, mods });
+if (s1.status === 404) bad('مسیر /tj/v1/ebi-ops روی سایت نیست؛ اول اسنیپت ebi-ops با site-deploy نصب شود');
+if (!s1.ok || !s1.json || !s1.json.ok) bad(`setcfg نشد: HTTP ${s1.status}`);
+log(`setcfg: ${s1.json.mods} راهبر ثبت شد`);
+
+const s2 = await wp.post('/wp-json/tj/v1/ebi-ops', { do: 'status' });
+const okStatus = !!(s2.json && s2.json.ok);
+log(`status: ${okStatus ? 'سایت به بات وصل است' : 'سایت به بات وصل نشد'} · نسخهٔ بات: ${(s2.json && s2.json.version) || '?'}`);
+const s3 = await wp.post('/wp-json/tj/v1/ebi-ops', { do: 'test' });
+const okTest = !!(s3.json && s3.json.ok);
+log(`test (فرستادن آزمایشی به راهبر اول، بی پیام واقعی): ${okTest ? 'ok' : 'خطا: ' + ((s3.json && s3.json.error) || 'HTTP ' + s3.status)}`);
+
+summary(`## setcfg اسنیپت ابی\n\n- راهبران: ${mods.length}\n- setcfg: ✅\n- status: ${okStatus ? '✅' : '❌'}\n- test: ${okTest ? '✅' : '❌'}`);
+if (!okStatus || !okTest) process.exit(1);

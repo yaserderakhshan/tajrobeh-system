@@ -92,6 +92,9 @@ try {
   PB_ACTIONS.ebi_check = function (p, dry) { return ebiCheck_(p, dry); };
   PB_RATE_BUCKET.ebi_check = ['ebi', 'ebi_hourly_max', 120];
   if (PB_WRITE.indexOf('ebi_check') < 0) PB_WRITE.push('ebi_check');   /* dry_run را می‌پذیرد */
+  /* v170.16.3: فهرست راهبران برای setcfg اسنیپت ابی (گردش کار site-ebi-setcfg). فقط با کلید دوم درگاه؛ گردش کار مقدارها را می‌پوشاند و جایی نمی‌نویسد */
+  PB_ACTIONS.ebi_mods = function (p) { return ebiMods_(p); };
+  PB_RATE_BUCKET.ebi_mods = ['ebim', 'ebi_mods_hourly_max', 10];
 } catch (eEbiReg) {}
 
 /* ============================================================================
@@ -139,6 +142,19 @@ try {
   CFG_NOTE[EBI_CFG_DRIVE] = 'شناسهٔ پوشهٔ درایو کمپین برای ویس‌ها (اختیاری؛ خالی = پوشهٔ خود بات)';
 } catch (eEbiCfg) {}
 
+function ebiKey2Ok_(given) {
+  var k2 = TG_DRY ? TG_MEM['pb:key2'] : pbProps_().getProperty(PB_KEY2_PROP);
+  given = String(given || '');
+  if (!k2 || given.length < 20) return false;
+  var a = pbSha_(given), b = pbSha_(k2), d = 0;
+  for (var i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+function ebiMods_(p) {
+  if (!ebiKey2Ok_(p && p.key)) return { ok: false, error: 'key2_only' };
+  var m = ebiLeads_();
+  return m.length ? { ok: true, data: { mods: m, n: m.length } } : { ok: false, error: 'no_leads' };
+}
 function ebiLeads_() {
   var v = cfg_(EBI_CFG_LEADS, []);
   if (!Array.isArray(v)) v = String(v || '').split(/[\s,،;]+/);
@@ -537,6 +553,10 @@ function ebiCodeTests() {
     TG_CFG_ = Object.assign({}, TG_CFG_ || {}); TG_CFG_[EBI_CFG_LEADS] = ['7000101', '7000102'];
     ok('راهبران از تنظیمات، نه کد', JSON.stringify(ebiLeads_()) === '["7000101","7000102"]' && ebiIsLead_('7000102') && !ebiIsLead_('7000103'));
     ok('کلیدها اختیاری و توضیح‌دار', CFG_OPTIONAL.indexOf(EBI_CFG_LEADS) > -1 && !!CFG_NOTE[EBI_CFG_LEADS] && (EBI_CFG_LEADS in TG_CFG_SEEN));
+    /* v170.16.3: فهرست راهبران فقط با کلید دوم درگاه */
+    TG_MEM['pb:key'] = 'tjk_' + 'e'.repeat(48); TG_MEM['pb:key2'] = 'k'.repeat(40);
+    var g1 = pbGateway_({ api: 1, key: TG_MEM['pb:key'], action: 'ebi_mods' }), g2 = pbGateway_({ api: 1, key: 'k'.repeat(40), action: 'ebi_mods' });
+    ok('ebi_mods با کلید اول رد و با کلید دوم فهرست راهبران', !g1.ok && g1.error === 'key2_only' && g2.ok && JSON.stringify(g2.data.mods) === '["7000101","7000102"]', JSON.stringify([g1, g2]));
     TG_MEM['ebi:wp'] = function (method, path, body) {
       calls.push(method + ' ' + path);
       if (path === 'ebi-people' && method === 'POST') return body.start === 'ebi12-abcdef' || body.start === 'ebi77-0a0b0c' ? { ok: true, id: 12, kind: body.start === 'ebi77-0a0b0c' ? 'therapist' : 'night', name: 'x' } : { ok: false, error: 'bad_sig' };
