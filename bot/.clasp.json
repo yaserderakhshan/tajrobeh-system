@@ -39,6 +39,7 @@
     "sitepub.gs",
     "kartable.gs",
     "ai.gs",
+    "psy2.gs",
     "migrate.gs"
   ],
   "htmlExtensions": [
