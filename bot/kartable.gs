@@ -181,11 +181,19 @@ function ktbGemFile_(blob, prompt, schema) {
   }
   throw new Error('جمنای ناموفق: ' + last);
 }
+/** blob فایل تلگرام با نوع درست از پسوند مسیر (تلگرام اغلب application/octet-stream می‌دهد و جمنای آن را نمی‌خواند) */
+function ktbFileBlob_(f) {
+  var b = f && f.blob; if (!b) return null;
+  var ext = String((/\.([A-Za-z0-9]{2,5})$/.exec(String(f.path || '')) || [])[1] || '').toLowerCase();
+  var mt = { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[ext];
+  if (mt && typeof b.setContentType === 'function') b.setContentType(mt);
+  return b;
+}
 function ktbResumeMake_(r) {
   if (!r) return false;
   var m = /^tg:doc:([^\s·]+)/.exec(String(r.v.resume || '')); if (!m) return false;
   try {
-    var blob = ktbDry_() ? null : tgTgFile_(m[1]);
+    var blob = ktbDry_() ? null : ktbFileBlob_(tgTgFile_(m[1]));   /* v170.23.6: tgTgFile_ ‏{blob, path} می‌دهد، نه خود blob */
     var o = ktbGemFile_(blob, KTB_CV_PROMPT, KTB_CV_SCHEMA), txt = ktbCvFormat_(o);
     if (!txt) return false;
     tgPqPut_(r.v.id, { pub_resume_draft: txt });
@@ -368,6 +376,9 @@ function ktbTests() {
     ok('بعد از تلاش باز شکست ← کارت', ktbItems_().failed.length === 1);
     /* رزومهٔ سبک با جمنای */
     TG_MEM['ktb:gem'] = { sections: [{ title: 'تحصیلات', items: [{ t: 'کارشناسی ارشد روان‌شناسی بالینی — دانشگاه نمونه', year: '۱۳۹۸' }] }, { title: 'خالی', items: [] }] };
+    /* v170.23.6: دیپلوی ۳۷۵۲۷۱۱۳۷۴۸ با «blob.getContentType is not a function» برگشت؛ نتیجهٔ tgTgFile_ شیء {blob, path} است */
+    var fb = { ct: 'application/octet-stream', getContentType: function () { return this.ct; }, setContentType: function (x) { this.ct = x; return this; } };
+    ok('فایل تلگرام: blob از {blob, path} و نوع PDF از پسوند', ktbFileBlob_({ blob: fb, path: 'documents/file_7.PDF' }) === fb && fb.getContentType() === 'application/pdf' && ktbFileBlob_({ path: 'x.pdf' }) === null);
     ok('رزومهٔ سبک ساخته و در ستون پیش‌نویس', ktbResumeMake_(tgPrRow_(ktbItems_().resumeWait[0].row)) && /^## تحصیلات\n- کارشناسی ارشد روان‌شناسی بالینی، دانشگاه نمونه · ۱۳۹۸$/.test(TG_MEM['pqrows']['ther:ت'].pub_resume_draft), TG_MEM['pqrows']['ther:ت'].pub_resume_draft);
     ok('پیش‌نویس ← کارتابل', ktbItems_().resume.length === 1);
     /* نما و دکمه‌ها */

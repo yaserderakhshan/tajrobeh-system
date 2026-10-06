@@ -113,7 +113,7 @@
 | `sec.gs` | ۱۰۵ | ۱ |
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
-| `kartable.gs` | ۴۲۴ | ۳۲ |
+| `kartable.gs` | ۴۳۵ | ۳۳ |
 | `migrate.gs` | ۵۵۱ | ۵۵ |
 
 ### کارهای زمان‌دار
