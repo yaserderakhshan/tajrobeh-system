@@ -12285,6 +12285,7 @@ function tgEvRows_() {
     if (!String(v[i][1] || '').trim()) continue;
     if (String(v[i][7] || '').trim() !== 'باز') continue;
     if (v[i][2] instanceof Date && v[i][2] < today) continue;
+    if (String(v[i][4] || '').trim() === 'شب تجربه') continue;   /* v170.17: شب‌های کمپین C-004 رویداد مدرسه نیستند */
     out.push({
       id: String(v[i][0] || v[i][1]).trim(), title: String(v[i][1]).trim(), date: v[i][2],
       time: String(v[i][3] || ''), kind: String(v[i][4] || ''), cap: Number(v[i][5] || 0),
@@ -19976,7 +19977,7 @@ function tgEvContribText_(chat, name, uname, text) {
 }
 /* API عمومی صفحهٔ سایت: فهرست رویدادها (بی‌نام مراجع، بی‌chat) */
 function tgApiEvents_(p) {
-  var L = tgEvAll_().filter(function (o) { return o['وضعیت'] !== 'پیش‌نویس' && o['وضعیت'] !== 'بسته'; });
+  var L = tgEvAll_().filter(function (o) { return o['وضعیت'] !== 'پیش‌نویس' && o['وضعیت'] !== 'بسته' && !(typeof ebiIsNightEv_ === 'function' && ebiIsNightEv_(o)); });   /* v170.17: بی شب‌های کمپین */
   var out = L.map(function (o) {
     return { code: o.code, title: o.title, topic: o['موضوع'] || '', date: o['تاریخ'] instanceof Date ? tgJDateFull_(o['تاریخ'], TG_TZ) : String(o['تاریخ'] || ''),
       dateIso: o['تاریخ'] instanceof Date ? Utilities.formatDate(o['تاریخ'], TG_TZ, 'yyyy-MM-dd') : '', time: o['ساعت'] || '', kind: o['نوع'] || '',

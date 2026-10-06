@@ -74,14 +74,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.16.3`
+نسخهٔ کد: `v170.17`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۰ | ۳۲ |
-| `telegram.gs` | ۳۷۳۶۷ | ۲۰۱۵ |
+| `telegram.gs` | ۳۷۳۶۸ | ۲۰۱۵ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -106,7 +106,7 @@
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
-| `ebi.gs` | ۶۴۵ | ۴۵ |
+| `ebi.gs` | ۹۸۶ | ۷۰ |
 | `ci.gs` | ۵۱۴ | ۲۹ |
 | `sitesec.gs` | ۲۷۵ | ۲۲ |
 | `sec.gs` | ۱۰۵ | ۱ |
@@ -188,7 +188,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `v168.gs` `leadmodel.gs` `v17013.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `v168.gs` `leadmodel.gs` `v17013.gs` `ebi.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -353,8 +353,9 @@
 | نسخهٔ ۱۶۲ | `tgV162Tests` |
 | v170.13: سقف پذیرش، بورسیه، آفر | `v17013Tests` |
 | کمپین C-004 (پلی‌لیست ابی) | `ebiTests` |
-| امنیت ورودی‌ها (v170.9) | `secTests` |
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |
+| امنیت ورودی‌ها (v170.9) | `secTests` |
+| کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
 
