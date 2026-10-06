@@ -20,7 +20,7 @@ var CM_CAT = { set: 'معارفه تعیین شد', cancel: 'معارفه لغو
   prefs: 'ترجیحات و شرح حال', psy: 'روانپزشکی', order: 'دستور ' + tgNm_('reception') + ' به تیم', other: 'سایر' };
 var CM_WHY = { hours: 'ساعت نخورد', inp: 'حضوری نشد', fit: 'رویکرد یا جنسیت یا سن', cmp: 'مقایسه', other: 'دلیل دیگر' };
 var CM_MIN = 15, CM_MARK = '🤖', CM_MAX_RUN = 25, CM_NOANS_MAX = 3, CM_CONF = 0.75;
-var CM_PRIORITY = ['L-1272', 'L-1070', 'L-1153', 'L-1180', 'L-1225', 'L-1236', 'L-1252'];
+/* v170.21: فهرست ثابت اولویت با کد لید (CM_PRIORITY) برداشته شد؛ ترتیب فقط با زمان کامنت */
 
 function cmOn_() { return lmOn_(); }
 function cmNow_() { return stkNow_(); }
@@ -139,9 +139,31 @@ function cmWhen_(t) {
       if (mm) iso = Utilities.formatDate(tgJ2G_(jy, k + 1, +mm[1]), TG_TZ, 'yyyy-MM-dd');
     }
   }
-  var h = s.match(/ساعت\s*(\d{1,2})(?::(\d{2}))?/) || s.match(/\b(\d{1,2}):(\d{2})\b/);
-  if (h && +h[1] < 24) hh = ('0' + h[1]).slice(-2) + ':' + (h[2] || '00');
+  hh = cmHour_(s);
   return { iso: iso, hh: hh };
+}
+/* v170.21: ساعت با «صبح»، «ظهر»، «بعدازظهر»، «عصر» و «شب». «ساعت ۱ ظهر» ۱۳:۰۰ است، نه ۰۱:۰۰.
+   بی قید، ۱ تا ۷ در ساعت کاری مرکز یعنی بعدازظهر («ساعت ۲» = ۱۴). */
+var CM_PART = '(صبح|بعد\\s*از\\s*ظهر|بعدازظهر|ظهر|عصر|شب)';
+function cmHour_(s) {
+  s = tgLatinDigits_(String(s || '')).replace(/\u200c/g, '');
+  var re = new RegExp('ساعت\\s*(\\d{1,2})(?::(\\d{2}))?\\s*' + CM_PART + '?');
+  var m = s.match(re) || s.match(new RegExp('\\b(\\d{1,2})(?::(\\d{2}))?\\s*' + CM_PART)) || s.match(/\b(\d{1,2}):(\d{2})\b/);
+  if (!m) return '';
+  var h = +m[1], mi = m[2] || '00', part = String(m[3] || '').replace(/\s+/g, '');
+  if (h > 23 || +mi > 59) return '';
+  if (part === 'صبح') { if (h === 12) h = 0; }
+  else if (part === 'ظهر') { if (h >= 1 && h <= 5) h += 12; }
+  else if (part === 'بعدازظهر' || part === 'عصر') { if (h < 12) h += 12; }
+  else if (part === 'شب') { if (h === 12) h = 0; else if (h >= 5 && h < 12) h += 12; }
+  else if (h >= 1 && h <= 7) h += 12;
+  return ('0' + h).slice(-2) + ':' + mi;
+}
+/* روز خود کامنت (تهران)، برای «تماس بعدی» و موعد؛ کامنت قدیمی از روز خودش حساب می‌شود، نه امروز */
+function cmItDay_(it) {
+  var t = it && (it.t || it.created);
+  var d = t ? new Date(t) : null;
+  return d && !isNaN(d.getTime()) ? Utilities.formatDate(d, TG_TZ, 'yyyy-MM-dd') : '';
 }
 function cmTherNames_() {
   if (stkDry_()) return TG_MEM['cm:ther'] || [];
@@ -242,6 +264,8 @@ function cmResuggest_(l, why) {
 /* پیشنهاد اقدام یک کامنت: {to, ch, act, reply, card, task}. چیزی نمی‌نویسد */
 function cmPlanOne_(it, c, l) {
   var st = tgStOf_(l.status) || l.status || 'جدید', own = cmHuman_(l.owner), p = { from: st, ch: {}, act: '', reply: '', card: '', task: null, sug: [] };
+  var day0 = cmItDay_(it) || undefined;   /* v170.21: پایهٔ «تماس بعدی» روز خود کامنت است */
+  var t0 = it && (it.t || it.created) && !isNaN(new Date(it.t || it.created).getTime()) ? new Date(it.t || it.created) : cmNow_();
   if (c.cat === 'set') {
     p.to = TG_ST.BOOKED;
     p.ch = { 'معارفه هماهنگ شد؟': 'بله', 'تاریخ معارفه': c.iso, 'وضعیت': TG_ST.BOOKED, 'اقدام بعدی': 'پیگیری بعد از معارفه', 'تاریخ اقدام بعدی': cmDay_(1, c.iso), 'مسئول': own };
@@ -251,17 +275,17 @@ function cmPlanOne_(it, c, l) {
   } else if (c.cat === 'cancel') {
     var why = CM_WHY[c.why] || CM_WHY.other;
     p.to = 'نیاز به ارجاع مجدد';
-    p.ch = { 'وضعیت': TG_ST.FOLLOW, 'نتیجه': 'نیاز به ارجاع مجدد: ' + why, 'اقدام بعدی': 'ارجاع مجدد', 'تاریخ اقدام بعدی': cmDay_(1),
-      'مهلت': Utilities.formatDate(new Date(cmNow_().getTime() + 86400000), TG_TZ, 'yyyy-MM-dd HH:mm'), 'معارفه هماهنگ شد؟': 'خیر', 'مسئول': own };
+    p.ch = { 'وضعیت': TG_ST.FOLLOW, 'نتیجه': 'نیاز به ارجاع مجدد: ' + why, 'اقدام بعدی': 'ارجاع مجدد', 'تاریخ اقدام بعدی': cmDay_(1, day0),
+      'مهلت': Utilities.formatDate(new Date(t0.getTime() + 86400000), TG_TZ, 'yyyy-MM-dd HH:mm'), 'معارفه هماهنگ شد؟': 'خیر', 'مسئول': own };
     p.sug = cmResuggest_(l, c.why);
     p.sug.forEach(function (n, j) { p.ch[V168_SUG[j]] = n; });
     p.act = 'ارجاع مجدد (' + why + ')' + (p.sug.length ? '؛ پیشنهاد تازه: ' + p.sug.join('، ') : '؛ پیشنهاد تازه‌ای پیدا نشد');
-    p.reply = 'ثبت شد: نیاز به ارجاع مجدد (' + why + ')، مسئول ' + own + '، موعد فردا.';
+    p.reply = 'ثبت شد: نیاز به ارجاع مجدد (' + why + ')، مسئول ' + own + '، موعد ' + tgLeadJ_(p.ch['تاریخ اقدام بعدی']) + '.';
     p.card = 'cancel';
   } else if (c.cat === 'noans') {
     var n = (Number(l.noans) || 0) + 1;
     p.to = TG_ST.NOANS;
-    p.ch = { 'شمار بی‌پاسخ': n, 'نتیجه': 'پاسخ نداد (' + tgFa_(n) + ')', 'وضعیت': TG_ST.NOANS, 'اقدام بعدی': 'تماس دوباره', 'تاریخ اقدام بعدی': cmDay_(n >= CM_NOANS_MAX ? 3 : 1), 'مسئول': own };
+    p.ch = { 'شمار بی‌پاسخ': n, 'نتیجه': 'پاسخ نداد (' + tgFa_(n) + ')', 'وضعیت': TG_ST.NOANS, 'اقدام بعدی': 'تماس دوباره', 'تاریخ اقدام بعدی': cmDay_(n >= CM_NOANS_MAX ? 3 : 1, day0), 'مسئول': own };
     p.act = 'تلاش تماس ' + tgFa_(n) + '؛ تماس بعدی ' + tgFa_(p.ch['تاریخ اقدام بعدی']);
     p.reply = 'ثبت شد: بی‌پاسخ (تلاش ' + tgFa_(n) + ')، تماس بعدی ' + tgLeadJ_(p.ch['تاریخ اقدام بعدی']) + '.' + (n >= CM_NOANS_MAX ? ' بعد از ' + tgFa_(n) + ' تلاش به ' + tgNm_('reception') + ' خبر داده شد؛ لید فقط با دلیل ثبت‌شده بسته می‌شود.' : '');
     if (n >= CM_NOANS_MAX) p.card = 'noans';
@@ -282,9 +306,9 @@ function cmPlanOne_(it, c, l) {
     p.reply = 'ثبت شد: ترجیحات در ستون‌های لید نشست تا پیشنهاد درمانگر از آن‌ها استفاده کند.';
   } else if (c.cat === 'psy') {
     p.to = st;
-    p.ch = { 'اقدام بعدی': 'هماهنگی روان‌پزشکی', 'تاریخ اقدام بعدی': cmDay_(1), 'مسئول': own };
+    p.ch = { 'اقدام بعدی': 'هماهنگی روان‌پزشکی', 'تاریخ اقدام بعدی': cmDay_(1, day0), 'مسئول': own };
     p.act = 'هماهنگی روان‌پزشکی، موعد فردا';
-    p.reply = 'ثبت شد: هماهنگی روان‌پزشکی، مسئول ' + own + '، موعد فردا.';
+    p.reply = 'ثبت شد: هماهنگی روان‌پزشکی، مسئول ' + own + '، موعد ' + tgLeadJ_(p.ch['تاریخ اقدام بعدی']) + '.';
   } else if (c.cat === 'order') {
     p.to = st;
     var who = ''; try { (stkDry_() ? (TG_MEM['desk'] || []) : tgDeskRows_()).forEach(function (d) { if (d.name && String(it.text).indexOf(d.name) > -1 && !who) who = d.name; }); } catch (e) {}
@@ -334,8 +358,7 @@ function cmRun_(dry, max) {
   var idx = lmLeadIdx_(), log = cmLog_(), seen = {}, dryRow = {};
   log.forEach(function (e) { if (e.st === CM_ST.DRY) dryRow[e.id] = e; else seen[e.id] = 1; });
   var all = cmItems_(cmFetch_('')), items = all.filter(function (it) { return !seen[it.id]; });
-  var pri = function (it) { var l = cmLink_(it, idx); var k = l ? CM_PRIORITY.indexOf(l.code) : -1; return k < 0 ? 99 : k; };
-  items.sort(function (a, b) { return pri(a) - pri(b) || String(a.t).localeCompare(String(b.t)); });
+  items.sort(function (a, b) { return String(a.t).localeCompare(String(b.t)); });
   if (max) items = items.slice(0, max);
   var x = items.map(function (it) { return { it: it, lead: cmLink_(it, idx) }; });
   /* اجرای واقعی همان دسته‌بندی آزمایشیِ تأییدشده را به کار می‌برد */
@@ -371,8 +394,8 @@ function cmRun_(dry, max) {
 }
 function cmPlanText_(r) {
   var lines = Object.keys(r.byCat).map(function (k) { return '• ' + tgEsc_(k) + ': ' + tgFa_(r.byCat[k]); });
-  var pri = r.rows.filter(function (e) { return CM_PRIORITY.indexOf(e.code) > -1; });
-  var rest = r.rows.filter(function (e) { return e.code && CM_PRIORITY.indexOf(e.code) < 0; });
+  var pri = r.rows.filter(function (e) { return e.code && /ارجاع مجدد/.test(String(e.to || '')); });   /* v170.21: اولویت از خود کامنت، نه فهرست ثابت */
+  var rest = r.rows.filter(function (e) { return e.code && !/ارجاع مجدد/.test(String(e.to || '')); });
   var ln = function (e) { return '<code>' + tgEsc_(e.code) + '</code> ' + tgEsc_(e.from || '?') + ' ← ' + tgEsc_(e.to || '?') + ' · ' + tgEsc_(e.cat) + (e.act && e.act !== 'بررسی دستی' ? ' · ' + tgEsc_(String(e.act).slice(0, 80)) : ''); };
   return '💬 <b>کامنت‌های باز هاب پذیرش</b> · ' + tgFa_(r.rows.length) + ' کامنت\n' + (lines.join('\n') || 'هیچ') +
     '\n• بی لید (کارت بررسی دستی): ' + tgFa_(r.nolead) +
@@ -384,6 +407,7 @@ function cmPlanText_(r) {
 function cmTick5_() {
   var now = cmNow_().getTime(), last = Number(stkProp_('CM_AT') || 0);
   if (last && now - last < CM_MIN * 60000 - 30000) return 0;
+  try { cmFixMaybe_(); } catch (eFx) { tgErr_('cmFixMaybe_', eFx); }   /* v170.21: اصلاح یک‌باره فقط با «اوکی» در تب پیش‌نمایش */
   if (!cmOn_()) {
     if (stkProp_('CM_PLAN_REQ') !== '1') return 0;
     stkProp_('CM_PLAN_REQ', null); stkProp_('CM_AT', String(now));
@@ -455,6 +479,13 @@ function cmTests() {
     var r3 = cmRule_({ text: 'معارفه ۱۴ مهر ساعت ۱۸ با درمانگر ب' });
     ok('معارفه: تاریخ، ساعت و درمانگر بیرون کشیده می‌شود', r3 && r3.cat === 'set' && r3.iso === '2026-10-06' && r3.hh === '18:00' && r3.ther === 'درمانگر ب');
     ok('بی‌پاسخ، شروع درمان، روان‌پزشکی', cmRule_({ text: 'جواب نداد' }).cat === 'noans' && cmRule_({ text: 'درمان را شروع کرد با شمیم' }).cat === 'start' && cmRule_({ text: 'ارجاع به روانپزشک لازم است' }).cat === 'psy');
+    /* v170.21: ساعت با ظهر و عصر و شب؛ «ساعت ۲» بی قید = ۱۴ */
+    ok('v170.21: ساعت ۱ ظهر ← ۱۳:۰۰ (نه ۰۱:۰۰)', cmWhen_('معارفه ساعت ۱ ظهر').hh === '13:00' && cmWhen_('ساعت ۱۲ ظهر').hh === '12:00');
+    ok('v170.21: عصر، بعدازظهر و شب', cmWhen_('ساعت ۵ عصر').hh === '17:00' && cmWhen_('ساعت ۴ بعد از ظهر').hh === '16:00' && cmWhen_('ساعت ۳ بعدازظهر').hh === '15:00' && cmWhen_('ساعت ۸ شب').hh === '20:00' && cmWhen_('۹:۳۰ شب').hh === '21:30');
+    ok('v170.21: «ساعت ۲» بی قید ← ۱۴، «ساعت ۱۰ صبح» ← ۱۰، «۱۸:۳۰» همان', cmWhen_('ساعت ۲').hh === '14:00' && cmWhen_('ساعت ۱۰ صبح').hh === '10:00' && cmWhen_('ساعت ۱۰').hh === '10:00' && cmWhen_('۱۸:۳۰').hh === '18:30');
+    ok('v170.21: فهرست ثابت اولویت با کد لید نیست', typeof CM_PRIORITY === 'undefined');
+    var pOld = cmPlanOne_({ text: 'جواب نداد', t: '2026-09-28T09:00:00Z' }, { cat: 'noans', conf: 1 }, { status: 'جدید', owner: '', noans: 0 });
+    ok('v170.21: تماس بعدی کامنت قدیمی از روز خود کامنت', pOld.ch['تاریخ اقدام بعدی'] === '2026-09-29');
     var r6 = cmRule_({ text: 'ترجیحاً درمانگر خانم و آنلاین، مسن‌تر' });
     ok('ترجیحات: حالت، جنسیت و سن', r6 && r6.cat === 'prefs' && r6.prefs.mode === 'آنلاین' && r6.prefs.gender === 'زن' && r6.prefs.age === 'بزرگ‌تر');
     ok('دستور ژیلا فقط از ژیلا', cmRule_({ text: 'لطفاً فردا تماس بگیرید', author: tgNm_('reception') }).cat === 'order' && cmRule_({ text: 'لطفاً فردا تماس بگیرید', author: 'سارا' }) === null);
@@ -463,7 +494,7 @@ function cmTests() {
 
     /* آزمایشی: بی تغییر و بی پاسخ */
     var d = cmRun_(true);
-    ok('آزمایشی: شمار بر اساس دسته و اولویت L-1272 اول', d.rows[0].code === 'L-1272' && d.byCat[CM_CAT.cancel] === 1 && d.byCat[CM_CAT.noans] === 1 && d.byCat[CM_CAT.set] === 1 && d.byCat[CM_CAT.prefs] === 1 && d.nolead === 1);
+    ok('آزمایشی: شمار بر اساس دسته؛ ارجاع مجدد در بخش اولویت متن طرح', /اولویت[^]*L-1272/.test(cmPlanText_(d)) && d.byCat[CM_CAT.cancel] === 1 && d.byCat[CM_CAT.noans] === 1 && d.byCat[CM_CAT.set] === 1 && d.byCat[CM_CAT.prefs] === 1 && d.nolead === 1);
     ok('آزمایشی: هیچ تغییر لید، پاسخ یا کارتی', !TG_OUTBOX.some(function (o) { return o.kind === 'leadset' || o.kind === 'msg'; }) && !(TG_MEM['cm:replies'] || []).length);
     ok('آزمایشی: وضعیت فعلی و پیشنهادی در دفتر', cmLog_().some(function (e) { return e.code === 'L-1272' && e.from === 'در پیگیری' && e.to === 'نیاز به ارجاع مجدد' && e.st === CM_ST.DRY; }));
     var pt = cmPlanText_(d);
@@ -483,11 +514,11 @@ function cmTests() {
     try { cmRun_(false, CM_MAX_RUN); } catch (eR) { log.push('✗ اجرا: ' + eR + ' ' + String(eR.stack).slice(0, 300)); fail++; }
     var sets = TG_OUTBOX.filter(function (o) { return o.kind === 'leadset'; });
     var s1 = sets.filter(function (o) { return o.code === 'L-1272'; })[0];
-    ok('ارجاع مجدد: وضعیت پیگیری، نتیجهٔ «نیاز به ارجاع مجدد: ساعت نخورد»، مسئول ژیلا، موعد فردا', s1 && s1.changes['وضعیت'] === TG_ST.FOLLOW && s1.changes['نتیجه'] === 'نیاز به ارجاع مجدد: ساعت نخورد' && s1.changes['مسئول'] === tgNm_('reception') && s1.changes['تاریخ اقدام بعدی'] === '2026-10-05');
+    ok('ارجاع مجدد: وضعیت پیگیری، نتیجهٔ «نیاز به ارجاع مجدد: ساعت نخورد»، مسئول ژیلا، موعد فردای روز کامنت (v170.21)', s1 && s1.changes['وضعیت'] === TG_ST.FOLLOW && s1.changes['نتیجه'] === 'نیاز به ارجاع مجدد: ساعت نخورد' && s1.changes['مسئول'] === tgNm_('reception') && s1.changes['تاریخ اقدام بعدی'] === '2026-09-26');
     ok('سه درمانگر تازه، بی درمانگر قبلی و فقط با وقت خالی', s1 && s1.changes['درمانگر پیشنهادی ۱'] && s1.changes['درمانگر پیشنهادی ۳'] && JSON.stringify(s1.changes).indexOf('شمیم') < 0);
     ok('کارت ارجاع مجدد برای ژیلا', TG_OUTBOX.some(function (o) { return o.chat === '7101' && /ارجاع مجدد/.test(o.text || '') && /L-1272/.test(o.text); }));
     var rp = TG_MEM['cm:replies'] || [];
-    ok('پاسخ کوتاه زیر کامنت، بی resolve', rp.some(function (x) { return x.id === 'c1' && x.text.indexOf('ثبت شد: نیاز به ارجاع مجدد (ساعت نخورد)، مسئول ' + tgNm_('reception') + '، موعد فردا') > -1 && x.text.indexOf(CM_MARK) === 0; }));
+    ok('پاسخ کوتاه زیر کامنت، بی resolve', rp.some(function (x) { return x.id === 'c1' && x.text.indexOf('ثبت شد: نیاز به ارجاع مجدد (ساعت نخورد)، مسئول ' + tgNm_('reception') + '، موعد ' + tgLeadJ_('2026-09-26')) > -1 && x.text.indexOf(CM_MARK) === 0; }));
     var s2 = sets.filter(function (o) { return o.code === 'L-1300'; })[0];
     ok('بی‌پاسخ: شمارنده ۳ و کارت به ژیلا، لید بسته نمی‌شود', s2 && s2.changes['شمار بی‌پاسخ'] === 3 && s2.changes['وضعیت'] === TG_ST.NOANS && TG_OUTBOX.some(function (o) { return o.chat === '7101' && /۳ تلاش بی‌پاسخ/.test(o.text || ''); }));
     var s3 = sets.filter(function (o) { return o.code === 'L-1301' && o.changes['تاریخ معارفه']; })[0];
@@ -516,8 +547,71 @@ function cmTests() {
     ok('سلامت: موعد گذشته، بسته با اقدام باز، جدید ۴۸ ساعت، معارفهٔ بی نتیجه، کامنت ۳ روزه، بی اقدام',
       /lead_nonext:L-2001/.test(keys) && /lead_closednext:L-2002/.test(keys) && /lead_new48:L-2001/.test(keys) && /lead_meetstale:L-2003/.test(keys) && /lead_comment3:L-2004/.test(keys) && /lead_nonext:L-2004/.test(keys));
     ok('سلامت: کارت‌ها تا تأیید یاسر نگه‌داشته', stkRows_().every(function (r) { return r.card === STK_HELD; }));
+    /* v170.21: اصلاح یک‌باره؛ پیش‌نمایش بی تغییر، اعمال فقط با «اوکی» */
+    TG_MEM['lm:leads'] = [{ row: 2, code: 'L-1272', status: 'در پیگیری' }, { row: 3, code: 'L-1300', status: 'پاسخ نداد' }];
+    TG_MEM['cm:fixlead'] = { 'L-1272': { next: 'ارجاع مجدد', nextDate: '2026-10-05', noans: 0 }, 'L-1300': { next: 'تماس دیگر', nextDate: '2026-10-05' } };
+    TG_OUTBOX = [];
+    var pv = tgV17021CmFixPreview(), fx = TG_MEM['cm:fixtab'] || [];
+    ok('v170.21: پیش‌نمایش: فقط لیدی که هنوز همان اقدام را دارد، بی تغییر', /۱|1 لید/.test(pv) && fx.length === 1 && fx[0].code === 'L-1272' && fx[0].want === '2026-09-26' && !TG_OUTBOX.some(function (o) { return o.kind === 'leadset'; }), pv + ' ' + JSON.stringify(fx));
+    ok('v170.21: بی «اوکی» اعمال نمی‌شود', cmFixMaybe_() === 0 && !TG_OUTBOX.some(function (o) { return o.kind === 'leadset'; }));
+    TG_MEM['cm:fixok'] = 'اوکی';
+    ok('v170.21: با «اوکی» یک بار اعمال', cmFixMaybe_() === 1 && TG_OUTBOX.filter(function (o) { return o.kind === 'leadset' && o.changes['تاریخ اقدام بعدی'] === '2026-09-26'; }).length === 1 && cmFixMaybe_() === 0);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 400) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK;
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ کامنت‌ها درست است'));
   return tgTestTally_(log, fail);
 }
+
+/* ============================================================================
+   v170.21 · اصلاح یک‌بارهٔ «تماس بعدی» کامنت‌های قدیمی
+   پیش از این «تاریخ اقدام بعدی» کامنت بی‌پاسخ، لغو و روان‌پزشکی از روز اجرا حساب می‌شد، نه روز کامنت (برای ده‌ها لید «۱۳ مهر»).
+   - پیش‌نمایش (خودکار بعد از انتشار، فقط خواندن): تب «اصلاح کامنت‌ها · پیش‌نمایش» در هاب پذیرش و خلاصه برای یاسر.
+     فقط لیدی که آخرین کامنت اعمال‌شده‌اش همان اقدام را گذاشته و هنوز همان اقدام را دارد.
+   - اعمال فقط وقتی کسی در خانهٔ B1 همان تب «اوکی» بنویسد (یاسر در PR تأیید می‌کند). از tgLeadSet_، با رویداد لید.
+   ============================================================================ */
+var CM_FIX_TAB = 'اصلاح کامنت‌ها · پیش‌نمایش';
+var CM_FIX_HEAD = ['کد لید', 'زمان کامنت', 'دسته', 'اقدام', 'تاریخ اقدام بعدی فعلی', 'تاریخ درست', 'حالت'];
+function cmFixRows_() {
+  var log = cmLog_().filter(function (e) { return e.st === CM_ST.DONE && e.code && e.t; });
+  var last = {};
+  log.forEach(function (e) { if (!last[e.code] || String(e.t) > String(last[e.code].t)) last[e.code] = e; });
+  var idx = lmLeadIdx_(), byCode = {}, out = [];
+  idx.list.forEach(function (l) { byCode[l.code] = l; });
+  Object.keys(last).sort().forEach(function (code) {
+    var e = last[code], act = null;
+    if (e.cat === CM_CAT.noans) act = 'تماس دوباره'; else if (e.cat === CM_CAT.cancel) act = 'ارجاع مجدد'; else if (e.cat === CM_CAT.psy) act = 'هماهنگی روان‌پزشکی';
+    var l = byCode[code]; if (!act || !l) return;
+    var full = stkDry_() ? (TG_MEM['cm:fixlead'] || {})[code] || {} : (tgLeadRead_(l.row) || {});
+    if (String(full.next || '').trim() !== act) return;   /* بعدش دستی عوض شده؛ دست نمی‌زنیم */
+    var n = act === 'تماس دوباره' && Number(full.noans || 0) >= CM_NOANS_MAX ? 3 : 1;
+    var want = cmDay_(n, cmItDay_({ t: e.t }));
+    if (!want || String(full.nextDate || '') === want) return;
+    out.push({ code: code, row: l.row, t: e.t, cat: e.cat, act: act, cur: String(full.nextDate || ''), want: want });
+  });
+  return out;
+}
+function tgV17021CmFixPreview() {
+  var rows = cmFixRows_();
+  if (stkDry_()) { TG_MEM['cm:fixtab'] = rows; return 'پیش‌نمایش اصلاح کامنت‌ها: ' + rows.length + ' لید'; }
+  var ss = tgSS_(), sh = ss.getSheetByName(CM_FIX_TAB);
+  if (!sh) { sh = ss.insertSheet(CM_FIX_TAB); sh.setRightToLeft(true); }
+  sh.clearContents();
+  sh.getRange(1, 1, 1, 2).setValues([['اعمال؟ برای اعمال در B1 بنویسید: اوکی', '']]).setFontWeight('bold');
+  sh.getRange(2, 1, 1, CM_FIX_HEAD.length).setValues([CM_FIX_HEAD]).setFontWeight('bold').setBackground('#f5f5f8');
+  if (rows.length) sh.getRange(3, 1, rows.length, CM_FIX_HEAD.length).setNumberFormat('@').setValues(rows.map(function (r) { return [r.code, String(r.t).slice(0, 16), r.cat, r.act, r.cur, r.want, 'پیش‌نمایش']; }));
+  sh.setFrozenRows(2);
+  try { tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '🛠 <b>اصلاح «تماس بعدی» کامنت‌های قدیمی</b>\nپیش‌نمایش: ' + tgFa_(rows.length) + ' لید، در تب «' + CM_FIX_TAB + '» هاب پذیرش.\nچیزی عوض نشد. برای اعمال، در B1 همان تب «اوکی» بنویسید.', { ref: 'v170.21' }); } catch (eN) {}
+  return 'پیش‌نمایش اصلاح کامنت‌ها: ' + rows.length + ' لید';
+}
+/* ساعتی (stkHourly_ نه؛ از cmTick5_ هر ۱۵ دقیقه): اگر B1 «اوکی» است، یک بار اعمال */
+function cmFixMaybe_() {
+  var ok = stkDry_() ? TG_MEM['cm:fixok'] : (function () { var sh = tgSS_().getSheetByName(CM_FIX_TAB); return sh ? String(sh.getRange(1, 2).getValue() || '').trim() : ''; })();
+  if (ok !== 'اوکی' || stkProp_('CM_FIX_DONE') === '1') return 0;
+  stkProp_('CM_FIX_DONE', '1');
+  var rows = cmFixRows_(), n = 0;
+  rows.forEach(function (r) { tgLeadSet_(r.row, { 'تاریخ اقدام بعدی': r.want }, 'بات', 'کامنت', 'اصلاح یک‌بارهٔ v170.21: تماس بعدی از روز کامنت'); n++; });
+  if (!stkDry_()) { try { var sh = tgSS_().getSheetByName(CM_FIX_TAB); sh.getRange(1, 2).setValue('اعمال شد ' + Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm') + ' · ' + n + ' لید'); } catch (e) {} }
+  try { tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '✅ اصلاح «تماس بعدی» کامنت‌ها اعمال شد: ' + tgFa_(n) + ' لید.', { ref: 'v170.21' }); } catch (eN) {}
+  return n;
+}
+
