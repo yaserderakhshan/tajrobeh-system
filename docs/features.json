@@ -1,0 +1,640 @@
+{
+ "_about": "قاعدهٔ «قابلیت کامل» (برنامهٔ تکمیل، ۲-۰). هر قابلیت فقط وقتی کامل است که همهٔ فیلدها پر باشد. فیلد خالی باید در gaps آمده باشد. .github/scripts/features-check.mjs در بررسی محلی می‌سنجد؛ gaps و known فقط کوچک می‌شوند، بزرگ نه.",
+ "fields": {
+  "owner_role": "مسئول (نقش، نه اسم؛ یکی از TG_ROLES)",
+  "lifecycle": "شروع، وضعیت نهایی و راه برگشت",
+  "no_bare_message": "هیچ پیامی بی‌دکمه نمی‌ماند (سنجیده‌شده)",
+  "settings_in_hub": "سقف‌ها و عددها در تب تنظیمات هاب (کدام تب)",
+  "edit_cancel_history": "کاربر ورودی‌اش را اصلاح یا لغو می‌کند و سابقه می‌ماند",
+  "hub_tab": "تب هاب که در آن نوشته می‌شود",
+  "hub_edit_back": "ویرایش دستی تیم در آن تب به بات برمی‌گردد (چطور)",
+  "miniapp": "همان کار در مینی‌اپ (کلید page در TG_CAP)",
+  "tests": "مجموعه‌های تست (نام تابع در TG_SUITES)"
+ },
+ "features": [
+  {
+   "key": "tnk",
+   "name": "تنخواه",
+   "owner_role": "ناظر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": "هاب تنخواه › دسته‌ها",
+   "edit_cancel_history": null,
+   "hub_tab": "هاب تنخواه › هزینه‌ها، شارژها، درخواست شارژ",
+   "hub_edit_back": null,
+   "miniapp": "tnk",
+   "tests": [
+    "tnkTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "edit_cancel_history",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "dq",
+   "name": "صف ارسال مدیریت",
+   "owner_role": "ناظر",
+   "lifecycle": {
+    "start": "در انتظار تأیید",
+    "final": [
+     "بسته شد"
+    ],
+    "back": "خطا ← آمادهٔ ارسال"
+   },
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": "هاب پیام › صف ارسال",
+   "hub_edit_back": "وضعیت تیکت از «لینک ردیف تیکت» (dqHourly_)",
+   "miniapp": "dq",
+   "tests": [
+    "dqTests"
+   ],
+   "gaps": [
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history"
+   ]
+  },
+  {
+   "key": "ebi",
+   "name": "کمپین پلی‌لیست ابی (C-004)",
+   "owner_role": "راهبر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": "تنظیمات خصوصی بات › راهبران C-004، پایان C-004",
+   "edit_cancel_history": null,
+   "hub_tab": "هاب پذیرش › پلی‌لیست ابی · ثبت‌نام‌ها، ویس‌ها",
+   "hub_edit_back": null,
+   "miniapp": null,
+   "tests": [
+    "ebiTests",
+    "ebiCodeTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "edit_cancel_history",
+    "hub_edit_back",
+    "miniapp"
+   ]
+  },
+  {
+   "key": "pa",
+   "name": "تجربه پارتنرز",
+   "owner_role": "پارتنر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "pa",
+   "tests": [
+    "tgPaTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "bc",
+   "name": "پیام همگانی",
+   "owner_role": "ناظر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "bc",
+   "tests": [
+    "tgBcTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "book",
+   "name": "رزرو معارفه",
+   "owner_role": "پذیرش",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": "هاب تجربه › اسلات معارفه",
+   "hub_edit_back": null,
+   "miniapp": "book",
+   "tests": [
+    "tgSlotsCacheTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "meet",
+   "name": "جلسهٔ معارفهٔ من",
+   "owner_role": "مراجع",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "meet",
+   "tests": null,
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back",
+    "tests"
+   ]
+  },
+  {
+   "key": "client",
+   "name": "مسیر مراجع",
+   "owner_role": "مراجع",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "client",
+   "tests": null,
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back",
+    "tests"
+   ]
+  },
+  {
+   "key": "pay",
+   "name": "پرداخت مراجع",
+   "owner_role": "مالی",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "pay",
+   "tests": [
+    "tgPayTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "ther",
+   "name": "میز درمانگر",
+   "owner_role": "درمانگر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": "هاب تجربه › درمانگران",
+   "hub_edit_back": null,
+   "miniapp": "ther",
+   "tests": null,
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_edit_back",
+    "tests"
+   ]
+  },
+  {
+   "key": "desk",
+   "name": "میز پذیرش",
+   "owner_role": "پذیرش",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": "هاب تجربه › لیدها",
+   "hub_edit_back": null,
+   "miniapp": "desk",
+   "tests": [
+    "tgLeadTests",
+    "tgLead2Tests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "sch",
+   "name": "مدرسه",
+   "owner_role": "مدرسه",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": "هاب مدرسه",
+   "hub_edit_back": null,
+   "miniapp": "sch",
+   "tests": [
+    "tgSchoolTests",
+    "tgSchool2Tests",
+    "tgSchool3Tests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "tea",
+   "name": "استاد",
+   "owner_role": "استاد",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "tea",
+   "tests": null,
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back",
+    "tests"
+   ]
+  },
+  {
+   "key": "sup",
+   "name": "سوپروایزر",
+   "owner_role": "سوپروایزر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "sup",
+   "tests": null,
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back",
+    "tests"
+   ]
+  },
+  {
+   "key": "stu",
+   "name": "دانشجو",
+   "owner_role": "دانشجو",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "stu",
+   "tests": null,
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back",
+    "tests"
+   ]
+  },
+  {
+   "key": "ed",
+   "name": "سردبیر مجله",
+   "owner_role": "سردبیر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": "هاب محتوا",
+   "hub_edit_back": null,
+   "miniapp": "ed",
+   "tests": [
+    "tgMagTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "fin",
+   "name": "مالی",
+   "owner_role": "مالی",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "fin",
+   "tests": [
+    "tgFinSchTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "mon",
+   "name": "ناظر",
+   "owner_role": "ناظر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "mon",
+   "tests": [
+    "tgMonTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "psy",
+   "name": "روان‌پزشکی",
+   "owner_role": "روان‌پزشکی",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "psy",
+   "tests": [
+    "tgPsyTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "org",
+   "name": "سازمانی",
+   "owner_role": "سازمانی",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "org",
+   "tests": null,
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back",
+    "tests"
+   ]
+  },
+  {
+   "key": "rv",
+   "name": "بازبینی پروفایل",
+   "owner_role": "سردبیر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "rv",
+   "tests": [
+    "rvTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "task",
+   "name": "کارها",
+   "owner_role": "ناظر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": "هاب عملیات › کارها",
+   "hub_edit_back": null,
+   "miniapp": "task",
+   "tests": [
+    "opsTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "box",
+   "name": "صندوق پیام",
+   "owner_role": "ناظر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "box",
+   "tests": null,
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back",
+    "tests"
+   ]
+  },
+  {
+   "key": "ann",
+   "name": "اطلاعیه‌ها",
+   "owner_role": "ناظر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "ann",
+   "tests": [
+    "tgAnnSafeTests",
+    "tgAnnUiTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back"
+   ]
+  },
+  {
+   "key": "att",
+   "name": "رسیدم و رفتم",
+   "owner_role": "پذیرش",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "att",
+   "tests": null,
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back",
+    "tests"
+   ]
+  },
+  {
+   "key": "gd",
+   "name": "فهرست امروز گاندی",
+   "owner_role": "پذیرش",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "gd",
+   "tests": null,
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back",
+    "tests"
+   ]
+  },
+  {
+   "key": "rm",
+   "name": "رودمپ",
+   "owner_role": "راهبر",
+   "lifecycle": null,
+   "no_bare_message": null,
+   "settings_in_hub": null,
+   "edit_cancel_history": null,
+   "hub_tab": null,
+   "hub_edit_back": null,
+   "miniapp": "rm",
+   "tests": [
+    "tgRmTests"
+   ],
+   "gaps": [
+    "lifecycle",
+    "no_bare_message",
+    "settings_in_hub",
+    "edit_cancel_history",
+    "hub_tab",
+    "hub_edit_back"
+   ]
+  }
+ ],
+ "known": {
+  "bare_sends": 914,
+  "roles_without_bot_entry": [
+   "راهبر",
+   "پارتنر",
+   "تنخواه"
+  ],
+  "roles_without_app_entry": [
+   "مصاحبه‌گر",
+   "سوشال",
+   "منتور",
+   "نمایندهٔ کلاس"
+  ]
+ }
+}
