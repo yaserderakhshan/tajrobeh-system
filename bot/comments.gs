@@ -265,7 +265,8 @@ function cmResuggest_(l, why) {
 function cmPlanOne_(it, c, l) {
   var st = tgStOf_(l.status) || l.status || 'جدید', own = cmHuman_(l.owner), p = { from: st, ch: {}, act: '', reply: '', card: '', task: null, sug: [] };
   /* v170.22.2: کامنتی که از آخرین وضعیت غیرکامنتی (شیت یا بات) قدیمی‌تر است، وضعیت یا اقدام بعدی را عوض نمی‌کند (اجرای ۱۲ مهر) */
-  if (['set', 'cancel', 'noans', 'start', 'psy'].indexOf(c.cat) > -1 && cmIsStale_(it, l)) {
+  var cmTo = { set: TG_ST.BOOKED, cancel: TG_ST.FOLLOW, noans: TG_ST.NOANS, start: TG_ST.START }[c.cat] || '';
+  if (['set', 'cancel', 'noans', 'start', 'psy'].indexOf(c.cat) > -1 && cmIsStale_(it, l, cmTo)) {
     p.to = st; p.stale = true;
     p.act = 'کامنت قدیمی‌تر از آخرین وضعیت لید؛ وضعیت و اقدام دست نخورد';
     p.reply = 'ثبت شد در رویدادهای لید. وضعیت لید بعد از این کامنت عوض شده بود، پس وضعیت و اقدام بعدی دست نخورد.';
@@ -604,6 +605,37 @@ function cmTests() {
     var pNew = cmPlanOne_({ text: 'جواب نداد', t: '2026-09-22T08:00:00Z' }, { cat: 'noans', conf: 1 }, lSt);
     ok('v170.22.2: کامنت تازه‌تر از وضعیت همان رفتار قبلی را دارد', !pNew.stale && pNew.ch['وضعیت'] === TG_ST.NOANS);
     ok('v170.22.2: آخرین وضعیت غیرکامنتی از رویدادها', cmLastStAt_(cmEvIdx_()['L-3002']) === T('2026-10-04T09:00').getTime() && cmLastStAt_(cmEvIdx_()['L-3001']) === T('2026-09-21T10:00').getTime());
+    /* v170.23.1: «مهاجرت» (تغییر نام گروهی ۴ مهر) و «هم‌دقیقه و هم‌جهت» تغییر واقعی نیستند؛ CM_FIX_SKIP */
+    TG_MEM['lm:leads'] = [{ row: 4, code: 'L-3001', status: 'پاسخ نداد' }, { row: 7, code: 'L-3004', status: 'پاسخ نداد' }, { row: 8, code: 'L-3005', status: 'پاسخ نداد' }];
+    TG_MEM['cm:fixlead'] = { 'L-3001': { status: 'پاسخ نداد', next: 'تماس دوباره', nextDate: '2026-10-05', noans: 1 },
+      'L-3004': { status: 'پاسخ نداد', next: 'تماس دوباره', nextDate: '2026-10-05', noans: 1 }, 'L-3005': { status: 'پاسخ نداد', next: 'تماس دوباره', nextDate: '2026-10-05', noans: 1 } };
+    TG_MEM['cm:log'] = TG_MEM['cm:log'].concat([
+      { id: 'f4', code: 'L-3004', cat: CM_CAT.noans, st: CM_ST.DONE, t: '2026-09-19T08:00:00Z' },
+      { id: 'f5', code: 'L-3005', cat: CM_CAT.noans, st: CM_ST.DONE, t: '2026-09-26T06:30:20Z' }]);
+    TG_MEM['cm:ev'] = TG_MEM['cm:ev'].filter(function (e) { return e.code === 'L-3001'; }).concat([
+      /* L-3004: تنها وضعیت غیرکامنتی «مهاجرت» ۴ مهر است ← برگشت لازم نیست */
+      { t: T('2026-09-26T03:00'), code: 'L-3004', actor: 'بات', ch: 'مهاجرت', what: 'وضعیت', from: 'تماس گرفته نشد', to: 'پاسخ نداد' },
+      { t: T('2026-10-03T22:00'), code: 'L-3004', actor: 'کامنت', ch: 'کامنت', what: 'وضعیت', from: 'پاسخ نداد', to: 'پاسخ نداد' },
+      /* L-3005: کامنت ۱۰:۰۰:۲۰ و تغییر شیت ۱۰:۰۰:۵۰ همان روز، هر دو «پاسخ نداد» ← هم‌دقیقه و هم‌جهت */
+      { t: new Date(new Date('2026-09-26T06:30:50Z').getTime()), code: 'L-3005', actor: 'پذیرش', ch: 'شیت', what: 'وضعیت', from: 'جدید', to: 'پاسخ نداد' },
+      { t: T('2026-10-03T22:00'), code: 'L-3005', actor: 'کامنت', ch: 'کامنت', what: 'وضعیت', from: 'پاسخ نداد', to: 'پاسخ نداد' }]);
+    TG_OUTBOX = [];
+    cmFixPreview_({}, []);
+    var fx3 = TG_MEM['cm:fixtab'] || [], by3 = {}; fx3.forEach(function (r) { if (r.kind === CM_FIX_KIND.rev) by3[r.code] = r; });
+    ok('v170.23.1: «مهاجرت» تغییر واقعی نیست ← کنار می‌رود، با اوکی اعمال نمی‌شود', by3['L-3004'] && by3['L-3004'].state === CM_FIX_STATE.rule && /مهاجرت/.test(by3['L-3004'].prev), JSON.stringify(by3['L-3004']));
+    ok('v170.23.1: کامنت و تغییر شیت هم‌دقیقه و هم‌جهت ← کنار می‌رود', by3['L-3005'] && by3['L-3005'].state === CM_FIX_STATE.rule && /یک دقیقه/.test(by3['L-3005'].prev), JSON.stringify(by3['L-3005']));
+    ok('v170.23.1: آسیب‌دیدهٔ واقعی همچنان قابل اعمال', by3['L-3001'] && by3['L-3001'].state === CM_FIX_STATE.apply);
+    cmFixPreview_({}, ['L-3001']);
+    var fx4 = (TG_MEM['cm:fixtab'] || []).filter(function (r) { return r.code === 'L-3001' && r.kind === CM_FIX_KIND.rev; })[0] || {};
+    ok('v170.23.1: CM_FIX_SKIP ← «طبق بررسی، دست نمی‌خورد»', fx4.state === CM_FIX_STATE.skip && /کنار رفته با قاعدهٔ تازه 2/.test(TG_MEM['cm:fixsum']) && /قابل اعمال 0/.test(TG_MEM['cm:fixsum']), TG_MEM['cm:fixsum']);
+    ok('v170.23.1: آخرین تغییر واقعی، مهاجرت را نمی‌شمارد', cmLastStAt_(cmEvIdx_()['L-3004']) === 0);
+    /* گارد دائمی با همان قاعده */
+    var lMig = { row: 7, code: 'L-3004', status: 'پاسخ نداد' }; cmStAtAttach_([{ lead: lMig }]);
+    ok('v170.23.1: گارد دائمی: مهاجرت کامنت قدیمی را قدیمی نمی‌کند', !cmPlanOne_({ text: 'جواب نداد', t: '2026-09-19T08:00:00Z' }, { cat: 'noans', conf: 1 }, lMig).stale);
+    var lSame = { row: 8, code: 'L-3005', status: 'پاسخ نداد' }; cmStAtAttach_([{ lead: lSame }]);
+    ok('v170.23.1: گارد دائمی: هم‌دقیقه و هم‌جهت قدیمی نیست، خلاف‌جهت هست',
+      !cmPlanOne_({ text: 'جواب نداد', t: '2026-09-26T06:30:20Z' }, { cat: 'noans', conf: 1 }, lSame).stale &&
+      cmPlanOne_({ text: 'معارفه ۱۴ مهر ساعت ۱۸', t: '2026-09-26T06:30:20Z' }, { cat: 'set', conf: 1, iso: '2026-10-06' }, lSame).stale === true);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 400) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK;
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ کامنت‌ها درست است'));
@@ -628,9 +660,12 @@ var CM_FIX_TAB = 'اصلاح کامنت‌ها · پیش‌نمایش';
 var CM_FIX_HEAD = ['کد لید', 'نوع', 'وضعیت فعلی', 'وضعیت درست', 'اقدام فعلی', 'اقدام درست', 'تاریخ فعلی', 'تاریخ درست', 'زمان کامنت', 'آخرین وضعیت غیرکامنتی', 'حالت'];
 var CM_FIX_ACTOR = 'اصلاح ۱۷۰٫۲۱';
 var CM_FIX_KIND = { rev: 'برگشت وضعیت', date: 'تاریخ از روز کامنت', hint: 'پیشنهاد' };
-var CM_FIX_STATE = { apply: 'با اوکی اعمال می‌شود', hint: 'پیشنهاد؛ با اوکی اعمال نمی‌شود', later: 'بعداً دستی عوض شده؛ دست نمی‌خورد' };
+var CM_FIX_STATE = { apply: 'با اوکی اعمال می‌شود', hint: 'پیشنهاد؛ با اوکی اعمال نمی‌شود', later: 'بعداً دستی عوض شده؛ دست نمی‌خورد',
+  rule: 'با قاعدهٔ تازه کنار رفت (v170.23.1)', skip: 'طبق بررسی، دست نمی‌خورد' };
 var CM_FIX_FIELDS = ['وضعیت', 'اقدام بعدی', 'تاریخ اقدام بعدی', 'شمار بی‌پاسخ'];
 cfg_('CM_FIX_HINTS', {});   /* ثبت در بارگذاری تا cfgSync_ مقدار تب را بپذیرد */
+cfg_('CM_FIX_SKIP', []);   /* v170.23.1: آرایهٔ کد لیدهایی که طبق بررسی یاسر دست نمی‌خورند */
+function cmFixSkip_(skip) { var x = skip === undefined ? cfg_('CM_FIX_SKIP', []) : skip; var o = {}; (Array.isArray(x) ? x : []).forEach(function (c) { o[String(c).trim()] = 1; }); return o; }
 
 function cmFixToday_() { return cmDay_(0); }
 /* تاریخ هر شکلی (Date، yyyy-MM-dd، متن تاریخ شیت) ← yyyy-MM-dd یا '' */
@@ -659,16 +694,28 @@ function cmEvIdx_() {
   Object.keys(out).forEach(function (k) { out[k].sort(function (a, b) { return a.t - b.t; }); });
   return out;
 }
-/* زمان آخرین تغییر وضعیتی که از کامنت نیامده (پیش از لحظهٔ before، یا آخرین) */
-function cmLastStAt_(evs, before) {
-  var at = 0;
-  (evs || []).forEach(function (e) { if (e.what === 'وضعیت' && !cmFixIsCm_(e) && (!before || e.t < before) && e.t > at) at = e.t; });
+/* v170.23.1: «تغییر واقعی وضعیت» = شیت، بات یا مراجع. کامنت، مهاجرت (۴ مهر: فقط تغییر نام گروهی وضعیت، نه تصمیم تازه)
+   و خود این اصلاح حساب نمی‌شوند. */
+var CM_FIX_NOTREAL = ['کامنت', 'مهاجرت', 'اصلاح'];
+function cmFixReal_(e) { return e.what === 'وضعیت' && !cmFixIsCm_(e) && CM_FIX_NOTREAL.indexOf(e.ch) < 0 && e.actor !== CM_FIX_ACTOR; }
+/* آخرین تغییر واقعی وضعیت (پیش از لحظهٔ before، یا آخرین): {t, to} */
+function cmLastSt_(evs, before) {
+  var at = null;
+  (evs || []).forEach(function (e) { if (cmFixReal_(e) && (!before || e.t < before) && (!at || e.t > at.t)) at = { t: e.t, to: e.to }; });
   return at;
 }
-/* قاعدهٔ دائمی v170.22.2: کامنتی که از آخرین وضعیت غیرکامنتی لید قدیمی‌تر است، وضعیت یا اقدام بعدی را عوض نمی‌کند */
-function cmIsStale_(it, l) {
+function cmLastStAt_(evs, before) { var x = cmLastSt_(evs, before); return x ? x.t : 0; }
+var CM_SAME_MS = 60000;
+/* کامنت و تغییر واقعی در یک دقیقه و هم‌جهت (هر دو همان وضعیت را می‌خواهند): برگشت یا گارد لازم نیست */
+function cmSameMin_(tc, prev, to) {
+  return !!(prev && Math.abs(prev.t - tc) <= CM_SAME_MS && to && (tgStOf_(prev.to) || prev.to) === (tgStOf_(to) || to));
+}
+/* قاعدهٔ دائمی v170.22.2 (v170.23.1: فقط تغییر واقعی، و استثنای هم‌دقیقه و هم‌جهت): کامنتی که از آخرین تغییر واقعی وضعیت لید
+   قدیمی‌تر است، وضعیت یا اقدام بعدی را عوض نمی‌کند. to: وضعیتی که کامنت می‌خواهد. */
+function cmIsStale_(it, l, to) {
   var t = it && (it.t || it.created) ? new Date(it.t || it.created).getTime() : NaN;
-  return !!(l && l.stAt && !isNaN(t) && t < l.stAt);
+  if (!(l && l.stAt && !isNaN(t) && t < l.stAt)) return false;
+  return !cmSameMin_(t, { t: l.stAt, to: l.stTo || '' }, to);
 }
 
 /* لیدهای آسیب‌دیده: هر گروه رویداد کامنتی (۳۰ دقیقه) که وضعیت را عوض کرده و کامنتش قدیمی‌تر از وضعیت غیرکامنتی پیش از آن بوده */
@@ -680,14 +727,26 @@ function cmFixRevRows_(ev, log, byCode, readLead) {
     var evs = ev[code], l = byCode[code]; if (!l) return;
     var cs = evs.filter(function (e) { return cmFixIsCm_(e) && e.what === 'وضعیت'; });
     for (var i = 0; i < cs.length; i++) {
-      var E = cs[i], prev = cmLastStAt_(evs, E.t);
+      var E = cs[i], prevO = cmLastSt_(evs, E.t), prev = prevO ? prevO.t : 0;
       var tc = (cmt[code] || []).filter(function (x) { return x <= E.t; }).sort(function (a, b) { return b - a; })[0];
-      if (!prev || !tc || tc >= prev) continue;
+      if (!tc) continue;
+      /* v170.23.1: کنارگذاشته‌ها با قاعدهٔ تازه (برای گزارش؛ با اوکی اعمال نمی‌شوند) */
+      var old = null; (evs || []).forEach(function (e) { if (e.what === 'وضعیت' && !cmFixIsCm_(e) && e.t < E.t && (!old || e.t > old.t)) old = e; });
+      var whyOut = '';
+      if (old && tc < old.t && (!prevO || tc >= prev)) whyOut = 'وضعیت غیرکامنتی فقط «' + (old.ch || old.actor) + '» بود (تصمیم تازه نیست)';
+      else if (prevO && tc < prev && cmSameMin_(tc, prevO, E.to)) whyOut = 'کامنت و تغییر شیت در یک دقیقه و هم‌جهت';
+      if (whyOut) {
+        var c0 = readLead(l) || {};
+        out.push({ kind: CM_FIX_KIND.rev, code: code, row: l.row, curSt: tgStOf_(c0.status) || c0.status || '', wantSt: '', curNext: c0.next || '', wantNext: '', curDate: cmFixIso_(c0.nextDate), wantDate: '', noans: '',
+          t: Utilities.formatDate(new Date(tc), TG_TZ, 'yyyy-MM-dd HH:mm'), prev: whyOut, state: CM_FIX_STATE.rule });
+        break;
+      }
+      if (!prev || tc >= prev) continue;
       /* همهٔ رویدادهای کامنتی همان اجرا (۳۰ دقیقه از نخستین) */
       var g = evs.filter(function (e) { return cmFixIsCm_(e) && Math.abs(e.t - E.t) <= win; });
       var first = function (w) { var x = g.filter(function (e) { return e.what === w; })[0]; return x ? x.from : undefined; };
       var lastTo = g.filter(function (e) { return e.what === 'وضعیت'; }).slice(-1)[0].to;
-      var later = evs.some(function (e) { return e.what === 'وضعیت' && !cmFixIsCm_(e) && e.t > E.t + win; });
+      var later = evs.some(function (e) { return cmFixReal_(e) && e.t > E.t + win; });
       var cur = readLead(l) || {};
       var curSt = tgStOf_(cur.status) || cur.status || '';
       var wantSt = first('وضعیت');
@@ -762,43 +821,58 @@ function cmFixNoansRepair_() {
   return fixed;
 }
 /* همهٔ ردیف‌های پیش‌نمایش؛ hints برای آزمون (پیش‌فرض از تنظیمات خصوصی) */
-function cmFixRows2_(hints) {
+function cmFixRows2_(hints, skipList) {
   var idx = lmLeadIdx_(), byCode = {};
   idx.list.forEach(function (l) { if (l.code) byCode[l.code] = l; });
   var readLead = function (l) { return stkDry_() ? (TG_MEM['cm:fixlead'] || {})[l.code] || { status: l.status } : (tgLeadRead_(l.row) || {}); };
   var log = cmLog_(), rev = cmFixRevRows_(cmEvIdx_(), log, byCode, readLead), skip = {};
   rev.forEach(function (r) { skip[r.code] = 1; });
   var h = hints === undefined ? (function () { var x = cfg_('CM_FIX_HINTS', {}); return x && typeof x === 'object' ? x : {}; })() : hints;
-  return rev.concat(cmFixDateRows_(log, byCode, readLead, skip), cmFixHintRows_(h, byCode, readLead));
+  var rows = rev.concat(cmFixDateRows_(log, byCode, readLead, skip), cmFixHintRows_(h, byCode, readLead));
+  var sk = cmFixSkip_(skipList);
+  rows.forEach(function (r) { if (sk[r.code] && r.state !== CM_FIX_STATE.rule) r.state = CM_FIX_STATE.skip; });   /* v170.23.1 */
+  return rows;
 }
 /* در cmRun_: زمان آخرین وضعیت غیرکامنتی هر لید برای قاعدهٔ دائمی */
 function cmStAtAttach_(x) {
   if (!x.length) return;
   var ev = cmEvIdx_();
-  x.forEach(function (o) { if (o.lead) o.lead.stAt = cmLastStAt_(ev[o.lead.code]); });
+  x.forEach(function (o) { if (!o.lead) return; var ls = cmLastSt_(ev[o.lead.code]); o.lead.stAt = ls ? ls.t : 0; o.lead.stTo = ls ? ls.to : ''; });
 }
 
 function tgV17021CmFixPreview() { return cmFixPreview_(); }
+function cmFixFp_() { return cmFixToday_() + '|' + JSON.stringify(cfg_('CM_FIX_HINTS', {})) + '|' + JSON.stringify(cfg_('CM_FIX_SKIP', [])); }
+/* یک‌بارهٔ v170.23.1: همگام‌سازی دستی تنظیمات (CM_FIX_HINTS و CM_FIX_SKIP بی انتظار ساعتی) و پیش‌نمایش از نو. اعمال نه. */
+function tgV170231CmFix() {
+  var sy = {}; try { sy = cfgSync_() || {}; } catch (e) { sy = { ok: false }; }
+  try { TG_CFG_ = null; } catch (e2) {}
+  return 'همگام‌سازی تنظیمات: ' + (sy.ok ? 'شد (' + (sy.changed || 0) + ' کلید)' : 'نشد') + ' · ' + cmFixPreview_();
+}
 function tgV170222CmFix() { return cmFixPreview_(); }   /* یک‌بارهٔ v170.22.2: پیش‌نمایش تازه (اعمال نه) */
-function cmFixPreview_(hints) {
-  var rows = cmFixRows2_(hints), broken = cmFixNoansBroken_();
+function cmFixPreview_(hints, skipList) {
+  var rows = cmFixRows2_(hints, skipList), broken = cmFixNoansBroken_();
   var cnt = function (k, s) { return rows.filter(function (r) { return r.kind === k && (!s || r.state === s); }).length; };
-  var sum = 'برگشت وضعیت: ' + cnt(CM_FIX_KIND.rev, CM_FIX_STATE.apply) + ' (دست‌نخورده: ' + cnt(CM_FIX_KIND.rev, CM_FIX_STATE.later) + ') · تاریخ از روز کامنت: ' + cnt(CM_FIX_KIND.date) +
+  var codes = function (k, s) { return rows.filter(function (r) { return r.kind === k && r.state === s; }).map(function (r) { return r.code; }); };
+  /* فقط شمار (لاگ دیپلوی عمومی است)؛ کدها در تب و پیام خصوصی به یاسر */
+  var sum = 'برگشت وضعیت: قابل اعمال ' + cnt(CM_FIX_KIND.rev, CM_FIX_STATE.apply) + '، کنار رفته با قاعدهٔ تازه ' + cnt(CM_FIX_KIND.rev, CM_FIX_STATE.rule) + '، طبق بررسی ' + cnt(CM_FIX_KIND.rev, CM_FIX_STATE.skip) + '، بعداً دستی عوض‌شده ' + cnt(CM_FIX_KIND.rev, CM_FIX_STATE.later) +
+    ' · تاریخ از روز کامنت: قابل اعمال ' + cnt(CM_FIX_KIND.date, CM_FIX_STATE.apply) + '، طبق بررسی ' + cnt(CM_FIX_KIND.date, CM_FIX_STATE.skip) +
     ' · پیشنهاد: ' + cnt(CM_FIX_KIND.hint) + ' · «شمار بی‌پاسخ» خراب: ' + broken;
-  if (stkDry_()) { TG_MEM['cm:fixtab'] = rows; TG_MEM['cm:fixsum'] = sum; return 'پیش‌نمایش اصلاح کامنت‌ها: ' + sum; }
+  var detail = '\nکنار رفته با قاعدهٔ تازه (مهاجرت یا هم‌دقیقه): ' + (codes(CM_FIX_KIND.rev, CM_FIX_STATE.rule).join('، ') || 'هیچ') +
+    '\nطبق بررسی (CM_FIX_SKIP): ' + (rows.filter(function (r) { return r.state === CM_FIX_STATE.skip; }).map(function (r) { return r.code; }).join('، ') || 'هیچ');
+  if (stkDry_()) { TG_MEM['cm:fixtab'] = rows; TG_MEM['cm:fixsum'] = sum; TG_MEM['cm:fixdetail'] = detail; return 'پیش‌نمایش اصلاح کامنت‌ها: ' + sum; }
   var ss = tgSS_(), sh = ss.getSheetByName(CM_FIX_TAB);
   if (!sh) { sh = ss.insertSheet(CM_FIX_TAB); sh.setRightToLeft(true); }
   var ok0 = String(sh.getRange(1, 2).getValue() || '').trim();
   if (/^اعمال شد/.test(ok0)) return 'پیش‌نمایش: پیش از این اعمال شده؛ دوباره ساخته نشد';
   sh.clear();
-  sh.getRange(1, 1, 1, 3).setValues([['اعمال؟ برای اعمال در B1 بنویسید: اوکی', '', 'v170.22.2 · ' + stkStamp_() + ' · ' + sum]]).setFontWeight('bold');
+  sh.getRange(1, 1, 1, 3).setValues([['اعمال؟ برای اعمال در B1 بنویسید: اوکی', '', 'v170.23.1 · ' + stkStamp_() + ' · ' + sum]]).setFontWeight('bold');
   sh.getRange(2, 1, 1, CM_FIX_HEAD.length).setValues([CM_FIX_HEAD]).setFontWeight('bold').setBackground('#f5f5f8');
   if (rows.length) sh.getRange(3, 1, rows.length, CM_FIX_HEAD.length).setNumberFormat('@').setValues(rows.map(function (r) {
     return [r.code, r.kind, r.curSt, r.wantSt, r.curNext, r.wantNext, r.curDate, r.wantDate, r.t, r.prev, r.state];
   }));
   sh.setFrozenRows(2);
-  stkProp_('CM_FIX_PV', cmFixToday_() + '|' + JSON.stringify(hints === undefined ? cfg_('CM_FIX_HINTS', {}) : hints));
-  try { tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '🛠 <b>پیش‌نمایش تازهٔ اصلاح کامنت‌ها (v170.22.2)</b>\n' + tgEsc_(sum) + '\nدر تب «' + CM_FIX_TAB + '» هاب پذیرش. چیزی عوض نشد. برای اعمال، در B1 همان تب «اوکی» بنویسید.', { ref: 'v170.22.2' }); } catch (eN) {}
+  stkProp_('CM_FIX_PV', cmFixFp_());
+  try { tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '🛠 <b>پیش‌نمایش تازهٔ اصلاح کامنت‌ها (v170.23.1)</b>\n' + tgEsc_(sum) + tgEsc_(detail) + '\nدر تب «' + CM_FIX_TAB + '» هاب پذیرش. چیزی عوض نشد. برای اعمال، در B1 همان تب «اوکی» بنویسید.', { ref: 'v170.22.2' }); } catch (eN) {}
   return 'پیش‌نمایش اصلاح کامنت‌ها: ' + sum;
 }
 /* از cmTick5_: پیش‌نمایش هر روز یا با عوض شدن CM_FIX_HINTS تازه می‌شود (تاریخ‌ها کمینهٔ امروزند)؛ «اوکی» یک بار اعمال */
@@ -806,7 +880,7 @@ function cmFixMaybe_() {
   var ok = stkDry_() ? TG_MEM['cm:fixok'] : (function () { var sh = tgSS_().getSheetByName(CM_FIX_TAB); return sh ? String(sh.getRange(1, 2).getValue() || '').trim() : ''; })();
   if (stkProp_('CM_FIX2_DONE') === '1') return 0;
   if (ok !== 'اوکی') {
-    var fp = cmFixToday_() + '|' + JSON.stringify(cfg_('CM_FIX_HINTS', {}));
+    var fp = cmFixFp_();
     if (!stkDry_() && stkProp_('CM_FIX_PV') && stkProp_('CM_FIX_PV') !== fp) { try { cmFixPreview_(); } catch (eP) { tgErr_('cmFixPreview_', eP); } }
     return 0;
   }
