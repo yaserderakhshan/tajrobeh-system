@@ -6904,6 +6904,7 @@ function tgWatchdog(e) {
   try { if (typeof opsHourly_ === 'function') opsHourly_(); } catch (eOp) { tgErr_('opsHourly_', eOp); }   /* v169.2: کار امروز ۹:۰۰، ارجاع، تازه‌کردن هاب‌ها */
   try { if (typeof stkHourly_ === 'function') stkHourly_(); } catch (eSk) { tgErr_('stkHourly_', eSk); }   /* v170.2: اسکن درخواست‌های متوقف و خلاصهٔ ۹ صبح */
   try { if (typeof cfgHourly_ === 'function') cfgHourly_(); } catch (eCf) { tgErr_('cfgHourly_', eCf); }   /* v170.8: تب «تنظیمات تیم» ← Script Property TG_CFG */
+  try { if (typeof splHourly_ === 'function') splHourly_(); } catch (eSp) { tgErr_('splHourly_', eSp); }   /* v170.23.3: صف تلاش دوبارهٔ انتشار سایت و آشتی شبانه */
   try { if (Number(Utilities.formatDate(new Date(), TG_TZ, 'm')) < 10) tgApMirror_(); } catch (eAm) {}
   try { tgWeeklyConfirmTick_(); } catch (eWc) {}
   try { tgAssignTick_(); } catch (eAs) {}
@@ -15167,10 +15168,18 @@ function tgPrPublish_(chat, r, opts) {
   opts = opts || {};
   var p = tgPrPlan_(r), v = r.v;
   if (p.blocked) return tgSend_(chat, '⛔ ' + tgEsc_(v.name) + ' گفته فعلاً فقط برای تیم. چیزی منتشر نشد.');
-  if (!p.canPublish) return tgSend_(chat, 'چیزی برای انتشار نیست' + (p.siteErr ? ': ' + tgEsc_(p.siteErr) : '') + '.');
+  if (!p.canPublish) {
+    if (p.siteErr && !opts.dry) splNote_(r, opts, 'شکست', '', 'سایت جواب نداد: ' + p.siteErr);   /* v170.23.3: نتیجه در هاب و صف تلاش دوباره */
+    if (opts.quiet) return { ok: false, errs: [], pageErr: p.siteErr || 'چیزی برای انتشار نیست', name: p.name };
+    return tgSend_(chat, 'چیزی برای انتشار نیست' + (p.siteErr ? ': ' + tgEsc_(p.siteErr) : '') + '.');
+  }
   var b64 = '';
   if (p.fid) {
-    try { b64 = tgPrPhotoB64_(p.fid); } catch (e) { return tgSend_(chat, 'عکس از تلگرام گرفته نشد: ' + tgEsc_(String(e.message || e))); }
+    try { b64 = tgPrPhotoB64_(p.fid); } catch (e) {
+      if (!opts.dry) splNote_(r, opts, 'شکست', '', 'عکس از تلگرام گرفته نشد: ' + String(e.message || e));
+      if (opts.quiet) return { ok: false, errs: [], pageErr: 'عکس از تلگرام گرفته نشد', name: p.name };
+      return tgSend_(chat, 'عکس از تلگرام گرفته نشد: ' + tgEsc_(String(e.message || e)));
+    }
   }
   var res = { pages: [], errors: [] };
   /* v170.23.2: اول صفحهٔ شخصی (کارت تازهٔ صفحهٔ اصلی لینک /team/ لازم دارد)، بعد کارت */
@@ -15188,7 +15197,11 @@ function tgPrPublish_(chat, r, opts) {
     if (b64) data.photo = b64;
     if (page || hadPage) data.team = page || hadPage;
     if (opts.dry) data.dry = 1;
-    try { res = tgDir_('publish', data); } catch (e) { return tgSend_(chat, '❌ انتشار نشد: ' + tgEsc_(String(e.message || e))); if (tgImgErrText_()) tgSend_(chat, '🖼 ' + tgEsc_(tgImgErrText_())); }
+    try { res = tgDir_('publish', data); } catch (e) {
+      if (!opts.dry) splNote_(r, opts, 'شکست', page ? 'صفحهٔ تیم' : '', 'سایت: ' + String(e.message || e));
+      if (opts.quiet) return { ok: false, errs: [], pageErr: String(e.message || e), name: p.name };
+      return tgSend_(chat, '❌ انتشار نشد: ' + tgEsc_(String(e.message || e)));
+    }
   }
   if (opts.dry) return res;
   var pages = res.pages || [], errs = res.errors || [];
@@ -15218,6 +15231,10 @@ function tgPrPublish_(chat, r, opts) {
             (errLines.length ? '\n\n' + errLines.join('\n') : '');
   var nkb = [[{ text: '⏭ پروفایل بعدی', callback_data: 'pr:nx:' + r.row + ':' + p.h }]];
   if (errs.length || pageErr) nkb.unshift([{ text: '🔁 دوباره امتحان کن', callback_data: 'pr:rt:' + r.row + ':' + p.h }]);
+  /* v170.23.3: نتیجه در هاب (موفق، نیمه، شکست) با برگه‌ها و دلیل؛ نیمه و شکست به صف تلاش دوباره */
+  var savedT = pages.filter(function (x) { return x.saved; }).map(function (x) { return pgName(x.page); }).concat(page ? ['صفحهٔ تیم'] : []);
+  var why = errs.map(function (e) { return pgName(e.page) + ': ' + tgPrErrText_(e.error); }).concat(pageErr ? ['صفحهٔ تیم: ' + pageErr] : []).join(' · ');
+  splNote_(r, opts, ok ? 'موفق' : (savedT.length ? 'نیمه' : 'شکست'), savedT.join('، '), why);
   if (opts.quiet) return { res: res, ok: ok, errs: errs, page: page, pageErr: pageErr, name: p.name };
   if (page) nkb.unshift([{ text: '🌐 دیدن صفحهٔ ' + tgPrCut_(p.name, 24), url: page }]);
   tgSend_(chat, msg, { inline_keyboard: nkb });
