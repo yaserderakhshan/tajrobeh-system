@@ -2438,6 +2438,8 @@ function tgPrivate_(m) {
   if (typeof tnkRoute_ === 'function' && tnkRoute_(m, chat, name, uname)) return;
   // تجربه پارتنرز v137 (partners.gs): دکمهٔ میز، لینک‌های دعوت، ویزاردها و متن آزاد میز پارتنر
   if (typeof ptRoute_ === 'function' && ptRoute_(m, chat, name, uname)) return;
+  /* v170.16: کمپین C-004 (ebi.gs): کدهای ebi، نام و شماره، نوشتن مورد فهرست و ویس، پیش از tgOnPhone_ و کلیدواژه‌ها */
+  if (typeof ebiRoute_ === 'function' && ebiRoute_(m, chat, name, uname)) return;
   if (m.text && /^\/start(@\w+)?\s+psy(dr)?-/.test(m.text) && typeof tgPsyJoin_ === 'function' && tgPsyJoin_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;
   if (m.text && /^\/start(@\w+)?\s+(psybook|off|voice|psycard)$/.test(m.text)) { var sp0 = m.text.replace(/^\/start(@\w+)?\s+/, '').trim(); if (sp0 === 'psybook') tgPsyBookStart_(chat); else if (sp0 === 'off') tgOffStart_(chat); else if (sp0 === 'voice') tgEnVolunteerStart_(chat); else tgPsyCardStart_(chat); return; }   /* v159: کدهای شروع مینی‌اپ */
   if (m.text && /^\/start(@\w+)?\s+evp-/.test(m.text) && tgEvPresenterJoin_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;
@@ -4475,6 +4477,7 @@ function tgOnCallback_(cq) {
   // هاب ساختمان ونک (building.gs)
   if (typeof VK_CUR !== 'undefined') VK_CUR = String(chat);
   if (data.indexOf('vk:') === 0 && typeof vkCb_ === 'function') return vkCb_(cq, data.slice(3), chat, name, uname);
+  if (data.indexOf('ebi:') === 0 && typeof ebiCb_ === 'function') return ebiCb_(cq, chat, data, name, uname);   /* v170.16: کمپین C-004 */
   try { tgMyRoles_(chat, cq.from && cq.from.username); } catch (e) {}
 
   if (tgV1Cb_(chat, data, name, uname)) return;
@@ -5197,6 +5200,7 @@ function tgClearBooking_(chat) {
 /* v166.12: true/false برمی‌گرداند. اگر نوشتن شکست خورد، لید در TG_LEAD_RETRY می‌ماند و tgLeadRetry_ (از tgDutyTick) دوباره می‌نویسد. */
 function tgAppendLead_(o, isRetry) {
   if (!isRetry && typeof igLeadPrefill_ === 'function') o = igLeadPrefill_(o);   /* v168: منبع اینستاگرام و فیلدهای پیش‌پر */
+  if (!isRetry && typeof ebiLeadPrefill_ === 'function') o = ebiLeadPrefill_(o);   /* v170.16: منبع «کمپین › C-004 › <نوع>» */
   if (!isRetry && typeof v168NewLeadNext_ === 'function') o = v168NewLeadNext_(o);   /* v168 فاز ۲: لید تازه همان لحظه تکلیف دارد */
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'lead', o: o }); return true; }
   if (tgTestLeak_('لید تازه')) return false;
@@ -6787,6 +6791,7 @@ function tgWatchdog(e) {
   /* v169.1: کارهای هفتگی و ساعتی که تریگر جدا داشتند. اگر کار هفتگی سنگین (tgTherWeekly، تا ۲۶۶ ثانیه) همین ساعت رفت،
      بقیهٔ کارهای این ساعت به ساعت بعد می‌رود تا اجرای واچ‌داگ از سقف ۶ دقیقه نگذرد. */
   try { if (typeof v1691Hourly_ === 'function') v1691Hourly_(e); } catch (eH) { tgErr_('v1691Hourly_', eH); }
+  try { if (typeof ebiHourly_ === 'function') ebiHourly_(); } catch (eEb) { tgErr_('ebiHourly_', eEb); }   /* v170.16: کمپین C-004 */
   try { if (typeof v1691Weekly_ === 'function' && v1691Weekly_(e)) return; } catch (eW) { tgErr_('v1691Weekly_', eW); }
   // ستون‌های تاریخ شمسی خودشان پر می‌شوند؛ کسی نباید دستی اجرا کند
   try { tgFillJalali_(false); } catch (e) { tgErr_('tgFillJalali_: ' + e); }
@@ -9037,6 +9042,8 @@ const TG_SECTION_WORDS = [
 function tgSection_(src, note) {
   const s = String(src || '');
   const parts = s.split('›');
+  /* v170.16: «کمپین › C-004 › <نوع>» لید مراجع است و کشیک پذیرش باید خبر بگیرد (tgDutyClinic_) */
+  if (parts.length > 1 && String(parts[0]).trim() === 'کمپین') return 'پذیرش';
   if (parts.length > 1) {
     const sec = String(parts[1]).trim();
     if (sec) return sec;
@@ -12456,6 +12463,7 @@ function tgStartLabel_(code) {
   try { var sl = typeof pbStartLabel_ === 'function' ? pbStartLabel_(code) : ''; if (sl) return sl; } catch (e) {}   /* v167: تب «کدهای start» */
   if (TG_START_MAP[code]) return TG_START_MAP[code];
   if (/^c_/.test(code) && typeof v17013OfLabel_ === 'function') { var ol = v17013OfLabel_(code); if (ol) return ol; }   /* v170.13 */
+  if (/^ebi/.test(code) && typeof ebiStartLabel_ === 'function') { var el = ebiStartLabel_(code); if (el) return el; }   /* v170.16 */
   if (code.indexOf('ig_') === 0 && typeof igLabel_ === 'function') { var il = igLabel_(code); if (il) return il; }   /* v168 */
   if (code.indexOf('mag_') === 0) return 'مجله › ' + code.slice(4);
   if (code.indexOf('mg-') === 0) return 'مجله › ' + tgArtName_(code);
