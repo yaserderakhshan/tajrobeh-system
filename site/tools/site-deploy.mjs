@@ -102,7 +102,7 @@ async function liveOf(it) {
 }
 /* ۱۴ مهر ۱۴۰۵: «پذیرش» اسنیپتی که در مخزن نبود (آینه به‌خاطر نام یا شبه‌رمز ردش کرده بود) با ردیف index «adopt: comments»:
    اگر نسخهٔ زنده و نسخهٔ تازهٔ مخزن جز در کامنت‌ها یکی باشند، ناهمخوانی نیست و منتشر می‌شود (نام از کامنت بیرون می‌رود). */
-const codeOnly = (s) => String(s ?? '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/[ \t]+$/gm, '').replace(/\n{2,}/g, '\n').trim();
+const codeOnly = (s) => String(s ?? '').replace(/\r\n?/g, '\n').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/\s+/g, ' ').trim();   /* فاصله، تب و پایان خط مهم نیست */
 const same = (a, b) => (typeof a === 'string' || typeof b === 'string') ? hash(a ?? '') === hash(b ?? '') : JSON.stringify(a) === JSON.stringify(b);
 
 // ---------- نوشتن ----------
