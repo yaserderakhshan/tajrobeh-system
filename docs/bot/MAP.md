@@ -75,14 +75,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.6.3`
+نسخهٔ کد: `v170.23.7`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۲ | ۳۳ |
-| `telegram.gs` | ۳۷۷۳۶ | ۲۰۴۰ |
+| `telegram.gs` | ۳۷۷۲۹ | ۲۰۴۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -91,7 +91,7 @@
 | `school2.gs` | ۴۳۹ | ۳۲ |
 | `mag_contrib.gs` | ۱۲۴۳ | ۹۷ |
 | `author.gs` | ۱۴۸ | ۱۰ |
-| `voice.gs` | ۱۰۷۶ | ۹۱ |
+| `voice.gs` | ۱۱۰۵ | ۹۳ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
@@ -103,7 +103,7 @@
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۱۰۳۶ | ۶۵ |
 | `dq.gs` | ۵۹۳ | ۴۹ |
-| `cfg.gs` | ۱۶۴ | ۱۴ |
+| `cfg.gs` | ۱۶۵ | ۱۴ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -114,6 +114,7 @@
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
 | `kartable.gs` | ۴۴۷ | ۳۴ |
+| `ai.gs` | ۲۱۱ | ۱۵ |
 | `migrate.gs` | ۵۵۱ | ۵۵ |
 
 ### کارهای زمان‌دار
@@ -196,13 +197,13 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
 | `TG_MIG_TAB` | «تست مهاجرت» | `mig.gs` |
 | `TG_MON_TAB` | «نظارت» | `telegram.gs` |
-| `TG_MSG_LOG` | «پیام‌ها» | `telegram.gs` |
+| `TG_MSG_LOG` | «پیام‌ها» | `telegram.gs` `ai.gs` |
 | `TG_OB_TAB` | «آنبوردینگ» | `telegram.gs` |
 | `TG_OCC_TAB` | «اشغال هفتگی گاندی» | `partners.gs` |
 | `TG_OFF_TAB` | «مرخصی درمانگران» | `telegram.gs` |
@@ -366,6 +367,7 @@
 | امنیت ورودی‌ها (v170.9) | `secTests` |
 | نتیجهٔ انتشار سایت و تلاش دوباره (v170.23.3) | `splTests` |
 | کارتابل تأیید یاسر (v170.23.5) | `ktbTests` |
+| جمنای به‌جای گروک (v170.23.7) | `aiTests` |
 | مهاجرت مراجعان به نسخهٔ ۲ (v170.23.6.3) | `migTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 

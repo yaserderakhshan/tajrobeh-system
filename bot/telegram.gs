@@ -2512,6 +2512,7 @@ function tgPrivate_(m) {
   if (typeof tgCpMaybe_ === 'function' && tgCpMaybe_(chat, m, name, uname)) return;
   // پیام‌ها و «برای نسخهٔ بعد» (v117): دکمه، حالت نوشتن و ویس
   if (typeof tgMsgMaybe_ === 'function' && tgMsgMaybe_(chat, m, name, uname)) return;
+  if (typeof aiForwardText_ === 'function' && aiForwardText_(chat, m)) return;   /* v170.23.7: همکار ویس را فوروارد کند، متن بگیرد */
   // استاد کلاس (v116): نام استادی که در فهرست نبود
   if (m.text && typeof tgClsMaybe_ === 'function' && tgClsMaybe_(chat, m.text, name)) return;
   // بازبینی پروفایل (v57): دکمهٔ صف، /review و جوابِ ویرایش ناظر
@@ -6892,6 +6893,7 @@ function tgWatchdog(e) {
      بقیهٔ کارهای این ساعت به ساعت بعد می‌رود تا اجرای واچ‌داگ از سقف ۶ دقیقه نگذرد. */
   try { if (typeof v1691Hourly_ === 'function') v1691Hourly_(e); } catch (eH) { tgErr_('v1691Hourly_', eH); }
   try { if (typeof ebiHourly_ === 'function') ebiHourly_(); } catch (eEb) { tgErr_('ebiHourly_', eEb); }
+  try { if (typeof aiRetryTick_ === 'function') aiRetryTick_(); } catch (eAr) { tgErr_('aiRetryTick_', eAr); }   /* v170.23.7: ویس‌های بی‌متن */
   try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }
   try { if (typeof migSetupTick_ === 'function') migSetupTick_(); } catch (eMs) { tgErr_('migSetupTick_', eMs); }
   try { if (typeof migTick_ === 'function') migTick_(); } catch (eMg) { tgErr_('migTick_', eMg); }   /* v170.23.6.3: یادآوری، گزارش ۲۱ و پرسش موج مهاجرت */   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
@@ -30054,18 +30056,8 @@ function tgRmBlobOk_(blob) {
   if (/\.(flac|mp3|mp4|mpeg|mpga|m4a|ogg|opus|wav|webm)$/i.test(n)) return blob;
   return blob.copyBlob().setName(n.replace(/\.[^.]+$/, '') + '.ogg').setContentType('audio/ogg');
 }
-function tgRmTranscribe_(blob0) {
-  const blob = tgRmBlobOk_(blob0);
-  const key = (PropertiesService.getScriptProperties().getProperty('GROQ_KEY') || PropertiesService.getScriptProperties().getProperty('groq'));
-  if (!key) return { engine: '', text: '', note: 'کلید GROQ_KEY در Script Properties نیست' };
-  const res = UrlFetchApp.fetch('https://api.groq.com/openai/v1/audio/transcriptions', { method: 'post', muteHttpExceptions: true,
-    headers: { Authorization: 'Bearer ' + key },
-    payload: { file: blob, model: 'whisper-large-v3', language: 'fa', response_format: 'verbose_json', temperature: '0' } });
-  if (res.getResponseCode() !== 200) return { engine: 'groq', text: '', note: 'خطای ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 160) };
-  var j = {}; try { j = JSON.parse(res.getContentText()); } catch (e) {}
-  const segs = (j.segments || []).map(function (s) { return [Math.round(s.start * 100) / 100, Math.round(s.end * 100) / 100, String(s.text || '').trim()]; });
-  return { engine: 'groq whisper-large-v3', text: String(j.text || '').trim(), note: '', segs: segs };
-}
+/* v170.23.7: جمنای به‌جای Groq whisper (ai.gs). priv: صدای مراجع یا پیام خصوصی، فقط با کلید پولی جمنای */
+function tgRmTranscribe_(blob0, priv) { return aiTranscribe_(tgRmBlobOk_(blob0), { priv: !!priv }); }
 function tgRmVoiceIn_(chat, rm, v, name, kind) {
   const R = TG_RM[rm], S = tgRmLive_(rm), dur = Number(v.duration || 0); kind = kind || 'post';
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'rmvoice', rm: rm, fid: v.file_id }); return tgSend_(chat, T_RM_VOICE_GOT.replace('%T', String(dur))); }
@@ -30231,7 +30223,7 @@ function tgRmTests() {
   return { pass: pass, fail: fail, text: out.join('\n') };
 }
 function tgRmTestsLog() { var r = tgRmTests(); console.log(r.pass + ' pass / ' + r.fail + ' fail\n' + r.text); return r; }
-function tgRmKeyCheck() { var k = (PropertiesService.getScriptProperties().getProperty('GROQ_KEY') || PropertiesService.getScriptProperties().getProperty('groq')); if (!k) { console.log('GROQ_KEY missing'); return; } var r = UrlFetchApp.fetch('https://api.groq.com/openai/v1/models', { headers: { Authorization: 'Bearer ' + k }, muteHttpExceptions: true }); console.log('GROQ_KEY present, length ' + k.length + ', http ' + r.getResponseCode() + ', whisper ' + (r.getContentText().indexOf('whisper-large-v3') > -1)); }
+function tgRmKeyCheck() { return typeof tgV170237Gemini === 'function' ? tgV170237Gemini() : ''; }   /* v170.23.7: گروک نیست؛ وضعیت جمنای */
 
 /* =====================================================================
  * رودمپ · انتشار کانال (v111، ۲۷ شهریور ۱۴۰۵)
@@ -32518,7 +32510,8 @@ function tgMsgDeliver_(chat, m, name, uname, st) {
   var mins = prev && prev.at ? Math.round((now - prev.at) / 60000) : '';
   if (m.voice && !TG_DRY) {
     if (vt) body = '🎙 ' + vt;
-    else { try { var tx = tgRmTranscribe_(tgTgFile_(m.voice.file_id).blob); body = '🎙 ' + (tx.text || '(ویس، متن گرفته نشد)'); } catch (e) { body = '🎙 ویس'; } }
+    else { try { var tx = tgRmTranscribe_(tgTgFile_(m.voice.file_id).blob, true); body = '🎙 ' + (tx.text || '(ویس، متن گرفته نشد)'); } catch (e) { body = '🎙 ویس'; } }
+    if (/^🎙 (ویس|\(ویس، متن گرفته نشد\))$/.test(body) && typeof aiRetryAdd_ === 'function') aiRetryAdd_(th, m.voice.file_id);   /* v170.23.7: فقط شناسه، حداکثر ۷ روز */
   }
   tgMsgAppend_(TG_MSG_LOG, [th, new Date(now), who, role, st.label || '', st.g || '', String(body).slice(0, 4000), m.voice ? 'ویس' : 'متن',
     String(chat), (st.to || []).join(','), st.th ? 'بله' : '', mins]);
@@ -32540,7 +32533,7 @@ function tgFbSave_(chat, m, name, uname) {
   var me = tgMsgMe_(chat, uname), code = tgFbNext_(), text = m.text || '';
   tgSend_(chat, '🙏 رسید (' + code + '). ممنون که گفتید؛ نتیجه را همین‌جا خبر می‌دهیم.');
   if (m.voice && !TG_DRY) {
-    try { var tx = tgRmTranscribe_(tgTgFile_(m.voice.file_id).blob); text = tx.text || '(ویس، متن گرفته نشد)'; } catch (e) { text = '(ویس)'; }
+    try { var tx = tgRmTranscribe_(tgTgFile_(m.voice.file_id).blob, true); text = tx.text || '(ویس، متن گرفته نشد)'; } catch (e) { text = '(ویس)'; }
   }
   var role = tgMsgRoleLbl_(me.roles);
   tgMsgAppend_(TG_FB_LOG, [code, new Date(), me.name || name, role, String(text).slice(0, 4000), m.voice ? 'ویس' : 'متن', '', '', '', '', String(chat)]);
