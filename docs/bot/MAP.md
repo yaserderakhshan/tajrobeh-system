@@ -75,14 +75,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.5`
+نسخهٔ کد: `v170.23.6`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۲ | ۳۳ |
-| `telegram.gs` | ۳۷۶۸۹ | ۲۰۳۶ |
+| `telegram.gs` | ۳۷۷۳۰ | ۲۰۴۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -103,7 +103,7 @@
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۱۰۳۶ | ۶۵ |
 | `dq.gs` | ۵۹۳ | ۴۹ |
-| `cfg.gs` | ۱۵۷ | ۱۴ |
+| `cfg.gs` | ۱۵۸ | ۱۴ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -113,7 +113,7 @@
 | `sec.gs` | ۱۰۵ | ۱ |
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
-| `kartable.gs` | ۳۳۸ | ۲۸ |
+| `kartable.gs` | ۴۲۴ | ۳۲ |
 
 ### کارهای زمان‌دار
 
@@ -157,6 +157,7 @@
 | `HUB_QUEUES` | «صف‌ها» | `ops.gs` |
 | `HUB_REPORT` | «گزارش من» | `ops.gs` |
 | `HUB_TODAY` | «امروز» | `ops.gs` |
+| `KTB_FX_TAB` | «اصلاح پروفایل‌ها · پیش‌نمایش» | `kartable.gs` |
 | `KTB_RT_TAB` | «مسیریابی منتظرها · پیش‌نمایش» | `kartable.gs` |
 | `LM_DASH` | «داشبورد لید» | `leadmodel.gs` |
 | `OPS_LISTS_TAB` | «فهرست‌ها» | `ops.gs` |
