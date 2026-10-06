@@ -2,13 +2,18 @@ name: سایت · خواندن وضعیت زنده (pull)
 
 # فقط خواندن از tajrobeh.life با کاربر claude-ops (secrets: WP_USER، WP_APP_PASSWORD). هیچ درخواست نوشتنی به سایت نمی‌رود.
 # WP_BOT_USER و WP_BOT_APP_PASSWORD مال بات‌اند و اینجا استفاده نمی‌شوند.
-# خروجی: خلاصه در همین اجرا، artifact «site-pull»، و نسخهٔ زندهٔ /site روی شاخهٔ site-sync/live (برای مقایسه و PR).
+# خروجی: خلاصه در همین اجرا و artifact «site-pull» (فقط فهرست تفاوت‌ها). از ۱۴ مهر چیزی در مخزن push نمی‌شود.
 on:
   # v170.9: فقط اجرای دستی از main (رمزها فقط در Environment «production»)
   workflow_dispatch:
+    inputs:
+      files:
+        description: 'فایل‌های تغییرکردهٔ /site یک روز artifact شوند (برای PR همگام‌سازی؛ پیش از کامیت از نظر نام بازبینی شود)'
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
+  contents: write   # فقط برای پاک کردن شاخهٔ قدیمی site-sync/live؛ هیچ push دیگری نیست
 
 concurrency:
   group: site-pull
@@ -25,6 +30,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      # ۱۴ مهر ۱۴۰۵: شاخهٔ قدیمی خروجی خام (نام همکاران در تاریخچه) اگر هنوز هست پاک می‌شود
+      - name: پاک کردن شاخهٔ قدیمی site-sync/live
+        run: |
+          if git ls-remote --exit-code origin refs/heads/site-sync/live > /dev/null; then
+            git push origin --delete site-sync/live && echo "شاخهٔ site-sync/live پاک شد."
+          else echo "شاخهٔ site-sync/live نیست."; fi
 
       - name: خواندن سایت زنده و مقایسه با مخزن
         id: pull
@@ -48,10 +60,19 @@ jobs:
           path: ${{ runner.temp }}/site-pull
           retention-days: 30
 
-      - name: نسخهٔ زنده روی شاخهٔ site-sync/live
-        if: steps.pull.outcome == 'success'
+      # ۱۴ مهر ۱۴۰۵ (تصمیم یاسر): خروجی خام دیگر روی شاخه‌ای از این مخزن عمومی push نمی‌شود (شاخهٔ site-sync/live نام همکاران را
+      # در تاریخچه داشت و پاک شد). برای PR همگام‌سازی، فایل‌های تغییرکرده فقط اگر files روشن باشد و فقط یک روز artifact می‌شوند.
+      # نسخهٔ زنده پیش از کامیت در مخزن باید از نظر نام و اطلاعات شخصی بازبینی شود.
+      - name: فایل‌های تغییرکردهٔ /site (فقط با files، یک روز)
+        if: steps.pull.outcome == 'success' && inputs.files
         run: |
-          git config user.name "tajrobeh-site-pull"
-          git config user.email "actions@users.noreply.github.com"
-          git commit -qm "همگام‌سازی: وضعیت زندهٔ tajrobeh.life (${GITHUB_RUN_ID})" || { echo "تفاوتی نیست"; exit 0; }
-          git push -f origin HEAD:refs/heads/site-sync/live
+          mkdir -p "$RUNNER_TEMP/site-files"
+          git diff --cached --name-only -z -- site | xargs -0 -I{} cp --parents {} "$RUNNER_TEMP/site-files/" 2>/dev/null || true
+          echo "$(find "$RUNNER_TEMP/site-files" -type f | wc -l) فایل"
+
+      - uses: actions/upload-artifact@v4
+        if: steps.pull.outcome == 'success' && inputs.files
+        with:
+          name: site-files
+          path: ${{ runner.temp }}/site-files
+          retention-days: 1
