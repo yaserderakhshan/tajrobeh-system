@@ -1513,7 +1513,7 @@ function pbTests() {
     /* سقف فراخوانی */
     var rl = null; for (var i = 0; i < 40; i++) { rl = gw({ action: 'status' }); if (!rl.ok) break; }
     ok('سقف ۳۰ فراخوانی در ساعت', rl.ok === false && rl.error === 'rate_limited');
-    ok('همهٔ اکشن‌های نوشتنی dry_run دارند', PB_WRITE.every(function (a) { return typeof PB_ACTIONS[a] === 'function'; }) && Object.keys(PB_ACTIONS).length === 17 && typeof PB_ACTIONS.ebi_check === 'function' && typeof PB_ACTIONS.ebi_mods === 'function' && PB_WRITE.indexOf('ebi_mods') < 0);
+    ok('همهٔ اکشن‌های نوشتنی dry_run دارند', PB_WRITE.every(function (a) { return typeof PB_ACTIONS[a] === 'function'; }) && Object.keys(PB_ACTIONS).length === 18 && typeof PB_ACTIONS.error_report === 'function' && typeof PB_ACTIONS.ebi_check === 'function' && typeof PB_ACTIONS.ebi_mods === 'function' && PB_WRITE.indexOf('ebi_mods') < 0);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK;
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ درگاه انتشار درست است'));
