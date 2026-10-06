@@ -5274,7 +5274,7 @@ function tgAppendLead_(o, isRetry) {
       row = sh.getLastRow();
       if (o.extra) tgWriteExtras_(sh, row, o.extra);
       try { if (typeof lmOnAppend_ === 'function') lmOnAppend_(sh, row, o); } catch (eLm) {}   /* v170.2: نوع لید و مهلت ۲۴ ساعت */
-      try { tgLeadCode_(row); } catch (eCode) { tgErr_('tgAppendLead_ کد لید', eCode); }
+      try { var lcode = tgLeadCode_(row); if (typeof fnlLead_ === 'function') fnlLead_(o, lcode); } catch (eCode) { tgErr_('tgAppendLead_ کد لید', eCode); }   /* v170.36: lead_created */
     });
     const mm = String(o.note || '').match(/chat_id: (\d+)/);
     if (mm) CacheService.getScriptCache().remove('lr' + mm[1]);
@@ -6908,6 +6908,7 @@ function tgWatchdog(e) {
   try { if (typeof aiRetryTick_ === 'function') aiRetryTick_(); } catch (eAr) { tgErr_('aiRetryTick_', eAr); }   /* v170.23.7: ویس‌های بی‌متن */
   try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
   try { if (typeof ps2FixMaybe_ === 'function') ps2FixMaybe_(); } catch (eP2) { tgErr_('ps2FixMaybe_', eP2); }
+  try { if (typeof fnlHourly_ === 'function') fnlHourly_(); } catch (eFh) { tgErr_('fnlHourly_', eFh); }   /* v170.36: قیف هفتگی و آنالیتیکس */
   try { if (typeof itkMaybe_ === 'function') itkMaybe_(); } catch (eIk) { tgErr_('itkMaybe_', eIk); }   /* v170.31: اصلاح دادهٔ لیدها با «اوکی» Cowork */
   try { if (typeof afx2Hourly_ === 'function') afx2Hourly_(); } catch (eAx2) { tgErr_('afx2Hourly_', eAx2); }   /* v170.30: ارجاع صفر هفتگی */
   try { if (typeof afxHourly_ === 'function') afxHourly_(); } catch (eAx) { tgErr_('afxHourly_', eAx); }   /* v170.29: تماس اول لید، یادآوری پروفایل */
@@ -21395,6 +21396,7 @@ function tgLeadEvSheet_() {
 }
 
 function tgLeadEv_(o) {
+  try { if (typeof fnlFromLeadEv_ === 'function') fnlFromLeadEv_(o); } catch (eFn) { tgErr_('fnlFromLeadEv_', eFn); }   /* v170.36: رویدادهای قیف */
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'leadev', o: o }); return; }
   try {
     const sh = tgLeadEvSheet_();

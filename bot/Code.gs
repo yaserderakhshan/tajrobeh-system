@@ -269,6 +269,7 @@ function handleContactClick_(body) {
   var src     = String(body.source || '').slice(0, 200);
   var ref     = String(body.ref || '').slice(0, 60);
   if (body.tok && typeof itk2Click_ === 'function') itk2Click_(body);   /* v170.35: ردپای ورود با توکن لینک بات */
+  try { if (typeof fnlEv_ === 'function' && body.channel) fnlEv_('cta_click', { src: String(body.source || '').slice(0, 120), page: body.page_url || body.page || '', cta: body.cta || '', vid: body.vid || '', start: body.code || '', utm: typeof itk2Utm_ === 'function' ? itk2Utm_(body.utm) : '' }); } catch (eF) {}   /* v170.36 */
   if (!channel) return;
   if (ref && seenRecently_('click:' + ref)) return;
   /* v170.14: سایت بخش را می‌فرستد (نام در کد سایت نیست)؛ نام مسئول همان قبلی، از TG_NAMES */

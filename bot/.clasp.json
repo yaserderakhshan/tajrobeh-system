@@ -46,7 +46,8 @@
     "afx2.gs",
     "intake.gs",
     "ctareg.gs",
-    "intake2.gs"
+    "intake2.gs",
+    "funnel.gs"
   ],
   "htmlExtensions": [
     ".html"

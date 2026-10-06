@@ -75,14 +75,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.35`
+نسخهٔ کد: `v170.36`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۴۱۹ | ۳۳ |
-| `telegram.gs` | ۳۷۷۷۰ | ۲۰۴۰ |
+| `Code.gs` | ۴۲۰ | ۳۳ |
+| `telegram.gs` | ۳۷۷۷۲ | ۲۰۴۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -103,7 +103,7 @@
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۱۰۳۶ | ۶۵ |
 | `dq.gs` | ۵۹۳ | ۴۹ |
-| `cfg.gs` | ۱۶۵ | ۱۴ |
+| `cfg.gs` | ۱۶۶ | ۱۴ |
 | `ops.gs` | ۱۱۱۵ | ۱۰۰ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -123,6 +123,7 @@
 | `intake.gs` | ۱۵۷ | ۱۳ |
 | `ctareg.gs` | ۵ | ۰ |
 | `intake2.gs` | ۱۸۲ | ۱۵ |
+| `funnel.gs` | ۲۱۲ | ۱۸ |
 
 ### کارهای زمان‌دار
 
@@ -163,6 +164,7 @@
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
 | `DQ_TAB` | «صف ارسال» | `dq.gs` |
 | `EBI_MIRROR_TAB` | «پلی‌لیست ابی · ثبت‌نام‌ها» | `ebi.gs` |
+| `FNL_TAB` | «رویدادهای قیف» | `funnel.gs` |
 | `HUB_GUIDE` | «راهنما» | `ops.gs` |
 | `HUB_MINE` | «کارهای من» | `ops.gs` |
 | `HUB_QUEUES` | «صف‌ها» | `ops.gs` |
@@ -209,7 +211,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `afx.gs` `afx2.gs` `intake.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `afx.gs` `afx2.gs` `intake.gs` `funnel.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -387,6 +389,7 @@
 | خودکارسازی کارهای مانده، بخش ۲ (v170.30) | `afx2Tests` |
 | درگاه‌های ورودی: اصلاح دادهٔ لیدها (v170.31) | `itkTests` |
 | درگاه‌های ورودی: قرارداد و ردپا (v170.35) | `itk2Tests` |
+| قیف و اندازه‌گیری یکپارچه (v170.36) | `fnlTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
