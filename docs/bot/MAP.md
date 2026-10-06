@@ -74,14 +74,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.19`
+نسخهٔ کد: `v170.20`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۴۱۷ | ۳۳ |
-| `telegram.gs` | ۳۷۴۵۴ | ۲۰۱۹ |
+| `Code.gs` | ۴۱۲ | ۳۳ |
+| `telegram.gs` | ۳۷۴۶۴ | ۲۰۱۹ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -99,7 +99,7 @@
 | `v168.gs` | ۲۱۴۷ | ۱۲۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۸ | ۳۴ |
-| `leadmodel.gs` | ۷۷۸ | ۴۱ |
+| `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۵۲۴ | ۳۱ |
 | `dq.gs` | ۵۹۱ | ۴۸ |
 | `cfg.gs` | ۱۵۰ | ۱۴ |
