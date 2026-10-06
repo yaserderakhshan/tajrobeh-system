@@ -47,7 +47,9 @@ export function normText(s) {
     .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d))).replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
     .replace(/&([a-z]+);/gi, (m, n) => ENT[n.toLowerCase()] ?? m)
     .replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/[«»“”„"]/g, '"').replace(/[‘’]/g, "'")
-    .replace(/[\s‌‏‎]+/g, ' ').trim();
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')   /* اعراب، همزهٔ «هٔ» و کشیده: «محلهٔ» = «محله» */
+    .replace(/[\s\u200c\u200f\u200e]+/g, ' ').replace(/ه ی(?= |$|[.،,!?؟])/g, 'ه')   /* «شایسته‌ی» = «شایستهٔ» = «شایسته» */
+    .replace(/\s*([.،,!?؟:؛])\s*/g, '$1').trim();
 }
 /** wp: wpClient (فقط GET). برمی‌گرداند {problems, notes, checked} */
 export async function hookProblems(wp, php, rule = { where: 'قلاب‌های هیروی مجله', breaks: 'جملهٔ قلاب در متن مقاله نیست' }) {
@@ -78,6 +80,7 @@ export function contractsSelfTest() {
   const h = parseHooks("function tj_mag_hooks() {\n\treturn array(\n\t\tarray( 'p' => 12, 'q' => 'جملهٔ «یک».' ),\n\t\tarray( 'p' => 7, 'q' => 'it\\'s' ),\n\t);\n}\n");
   t('خواندن قلاب‌ها', h.length === 2 && h[0].p === 12 && h[1].q === "it's");
   t('یکی کردن متن', normText('<p>جمله&nbsp;ی &#171;یک&#187;.</p>') === normText('جمله ی «یک».') && normText('مي‌شود') === normText('می شود'));
+  t('هٔ و ـه‌ی و ه یکی‌اند', normText('محلهٔ کودکی‌اش') === normText('محله کودکی‌اش') && normText('شایسته‌ی روایت') === normText('شایستهٔ روایت'));
   return bad;
 }
 
