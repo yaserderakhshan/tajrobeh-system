@@ -121,6 +121,7 @@ function tajrobeh_lead_to_sheet($entryId, $formData, $form) {
         if (strpos($k, '_fluentform') === 0 || $k === '_wp_http_referer' || $k === '__fluent_form_embded_post_id') { unset($p[$k]); }
     }
 
+    $p = apply_filters('tj_lead_payload', $p);   // ردپای بازدید (درگاه‌های ورودی، بند ۳)
     tj_lead_enqueue($entryId, $p);
 }
 
@@ -311,9 +312,16 @@ function tajrobeh_contact_click() {
         'kind'    => 'click',
         'channel' => $channel,
         'source'  => 'سایت › ' . $dept . ' › ' . $channel,
-        'page'    => $page_title ? $page_title : ($page_id ? '#' . $page_id : ''),
         'owner'   => isset($owners[$dept]) ? $owners[$dept] : 'پذیرش',
         'ref'     => $ref,
+        // درگاه‌های ورودی، بند ۳ (بات v170.35): توکن لینک بات و ردپای همان بازدید
+        'tok'     => isset($_POST['tok']) ? preg_replace('/[^a-z0-9]/', '', strtolower((string) $_POST['tok'])) : '',
+        'code'    => isset($_POST['code']) ? preg_replace('/[^A-Za-z0-9_\-]/', '', (string) $_POST['code']) : '',
+        'cta'     => isset($_POST['cta']) && preg_match('/^[a-z0-9._\-]{1,60}$/', (string) $_POST['cta']) ? (string) $_POST['cta'] : '',
+        'page'    => $page_title ? $page_title : ($page_id ? '#' . $page_id : ''),
+        'page_url' => $page_id ? get_permalink($page_id) : '',
+        'vid'     => tj_lead_cookie_ctx()['vid'],
+        'utm'     => tj_lead_cookie_ctx()['utm'],
     ));
     wp_send_json_success();
 }
@@ -334,16 +342,120 @@ function tajrobeh_contact_click_js() {
         'ajax'  => admin_url('admin-ajax.php'),
         'pid'   => $page_id,
         'msg'   => 'سلام، از صفحهٔ «' . $title . '» در سایت تجربه آمده‌ام.',
+        'track' => (int) get_option('tj_push_track', 0),
     );
     echo '<script id="tajrobeh-contact-track">(function(){var C=' . wp_json_encode($data) . ';'
        . 'function tag(){document.querySelectorAll(\'a[href*="wa.me/"]\').forEach(function(a){if(a.href.indexOf("text=")<0){a.href+=(a.href.indexOf("?")<0?"?":"&")+"text="+encodeURIComponent(C.msg);}});}'
+       // درگاه‌های ورودی، بند ۳: شناسهٔ بازدید (کوکی درجهٔ اول ۱۸۰ روزه، بی دادهٔ شخصی) و UTM ورود (۳۰ روز)
+       . 'function ck(n){var m=document.cookie.match(new RegExp("(?:^|; )"+n+"=([^;]*)"));return m?decodeURIComponent(m[1]):"";}'
+       . 'function sk(n,v,d){document.cookie=n+"="+encodeURIComponent(v)+"; path=/; max-age="+(d*86400)+"; SameSite=Lax";}'
+       . 'function rid(n){var s="",a="abcdefghijklmnopqrstuvwxyz0123456789";for(var i=0;i<n;i++){s+=a[Math.floor(Math.random()*36)];}return s;}'
+       . 'if(!/^[a-z0-9]{8,20}$/.test(ck("tj_vid"))){sk("tj_vid",rid(12),180);}'
+       . 'try{var q=new URLSearchParams(location.search),u={};["source","medium","campaign","content","term"].forEach(function(k){var v=q.get("utm_"+k);if(v){u[k]=v.slice(0,40);}});if(Object.keys(u).length){sk("tj_utm",JSON.stringify(u),30);}}catch(x){}'
        . 'if(document.readyState!=="loading"){tag();}else{document.addEventListener("DOMContentLoaded",tag);}'
        . 'window.addEventListener("load",tag);'
-       . 'document.addEventListener("click",function(e){var a=e.target&&e.target.closest?e.target.closest("a"):null;if(!a)return;'
-       . 'var h=a.getAttribute("href")||"";var ch="";'
+       . 'document.addEventListener("click",function(e){var d=e.target&&e.target.closest?e.target.closest("[data-cta]"):null;var cta=d?(d.getAttribute("data-cta")||""):"";if(/^[a-z0-9._-]{1,60}$/.test(cta)){sk("tj_cta",cta,1);}else{cta="";}'
+       . 'var a=e.target&&e.target.closest?e.target.closest("a"):null;if(!a)return;'
+       . 'var h=a.getAttribute("href")||"";var ch="";var tok="",code="";'
+       . 'if(C.track===1&&/t\\.me\\/tajrobehlife_bot\\?start=/.test(h)&&h.indexOf("__")<0){var m=h.match(/start=([A-Za-z0-9_-]*)/);code=m?m[1]:"";if(code&&code.length<=52){tok=rid(8);a.setAttribute("href",h.replace("start="+code,"start="+code+"__"+tok));}}'
        . 'if(/wa\\.me\\//.test(h))ch="واتساپ";else if(/t\\.me\\/tajrobehlife_bot/.test(h))ch="بات تلگرام";else if(/t\\.me\\//.test(h))ch="تلگرام";else if(/^tel:/.test(h))ch="تلفن";else return;'
-       . 'var key="tjc:"+ch+":"+C.pid;try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,"1");}catch(x){}'
-       . 'try{var f=new FormData();f.append("action","tajrobeh_contact_click");f.append("channel",ch);f.append("page_id",C.pid);f.append("ref",Date.now().toString(36)+Math.random().toString(36).slice(2,8));'
+       . 'var key="tjc:"+ch+":"+C.pid;if(!tok){try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,"1");}catch(x){}}'
+       . 'try{var f=new FormData();f.append("action","tajrobeh_contact_click");f.append("channel",ch);f.append("page_id",C.pid);f.append("ref",Date.now().toString(36)+Math.random().toString(36).slice(2,8));if(tok){f.append("tok",tok);f.append("code",code);}if(cta){f.append("cta",cta);}'
        . 'if(navigator.sendBeacon){navigator.sendBeacon(C.ajax,f);}else{fetch(C.ajax,{method:"POST",body:f,keepalive:true});}}catch(x){}'
        . '},true);})();</script>';
 }
+/* ---------- درگاه یکتای ورود (درگاه‌های ورودی، بند ۱ و ۳؛ بات v170.35، ۱۴ مهر ۱۴۰۵) ----------
+ * POST /wp-json/tj/v1/lead : همهٔ فرم‌ها و ویجت‌های بیرون از فلوئنت از همین‌جا به بات می‌روند (با همان صف و امضای لید).
+ *   قرارداد: {line, intent, form, page, cta, campaign, utm:{source,medium,campaign,content,term}, ref, name, phone, email, msg, city}
+ *   شناسهٔ بازدید (کوکی درجهٔ اول tj_vid) و UTM ورود (کوکی tj_utm) را خود سرور اضافه می‌کند. intent=vote یعنی رأی شهر.
+ *   نگهبان: فقط از همین دامنه، فیلد تله (website) خالی، سقف ۲۰ درخواست در ۱۰ دقیقه برای هر IP. هیچ فرمی بیرون از این قرارداد نیست
+ *   (site-check با site/cta-registry.json). فراخوانی مستقیم مرورگر به Apps Script برداشته شد.
+ * GET /wp-json/tj/v1/data?k=partners|cities : فهرست‌هایی که بات با camp-push می‌فرستد (505050). کلید track روشن بودن ردپا را می‌گوید.
+ */
+function tj_lead_lines() { return array('پذیرش', 'مدرسه', 'روان‌پزشکی', 'سازمانی', 'رودمپ', 'کمپین', 'همکاری'); }
+function tj_lead_s($v, $n = 120) { return mb_substr(trim(sanitize_text_field(wp_unslash((string) $v))), 0, $n); }
+/** شناسهٔ بازدید و UTM ورود از کوکی‌های درجهٔ اول */
+function tj_lead_cookie_ctx() {
+    $vid = isset($_COOKIE['tj_vid']) && preg_match('/^[a-z0-9]{8,20}$/', (string) $_COOKIE['tj_vid']) ? (string) $_COOKIE['tj_vid'] : '';
+    $utm = array();
+    if (!empty($_COOKIE['tj_utm'])) {
+        $u = json_decode(wp_unslash((string) $_COOKIE['tj_utm']), true);
+        if (is_array($u)) { foreach (array('source', 'medium', 'campaign', 'content', 'term') as $k) { if (!empty($u[$k])) { $utm[$k] = tj_lead_s($u[$k], 40); } } }
+    }
+    $cta = isset($_COOKIE['tj_cta']) && preg_match('/^[a-z0-9._\-]{1,60}$/', (string) $_COOKIE['tj_cta']) ? (string) $_COOKIE['tj_cta'] : '';
+    return array('vid' => $vid, 'utm' => $utm, 'cta' => $cta);
+}
+/** قرارداد ← صف لید (همان tj_lead_enqueue فلوئنت) */
+function tj_lead_submit($in) {
+    $line = isset($in['line']) && in_array($in['line'], tj_lead_lines(), true) ? $in['line'] : 'پذیرش';
+    $c = tj_lead_cookie_ctx();
+    $utm = array();
+    if (!empty($in['utm']) && is_array($in['utm'])) { foreach (array('source', 'medium', 'campaign', 'content', 'term') as $k) { if (!empty($in['utm'][$k])) { $utm[$k] = tj_lead_s($in['utm'][$k], 40); } } }
+    if (!$utm) { $utm = $c['utm']; }
+    $cta = isset($in['cta']) && preg_match('/^[a-z0-9._\-]{1,60}$/', (string) $in['cta']) ? (string) $in['cta'] : $c['cta'];
+    $p = array(
+        'kind' => 'lead', 'line' => $line,
+        'intent' => isset($in['intent']) ? preg_replace('/[^a-z0-9_\-]/', '', strtolower((string) $in['intent'])) : '',
+        'form' => isset($in['form']) ? tj_lead_s($in['form'], 60) : '', 'page' => isset($in['page']) ? esc_url_raw((string) $in['page']) : '',
+        'cta' => $cta, 'campaign' => isset($in['campaign']) ? preg_replace('/[^A-Za-z0-9\-]/', '', (string) $in['campaign']) : '',
+        'utm' => $utm, 'ref' => isset($in['ref']) ? esc_url_raw((string) $in['ref']) : '', 'vid' => $c['vid'],
+        'name' => isset($in['name']) ? tj_lead_s($in['name'], 80) : '', 'phone' => isset($in['phone']) ? tj_lead_s($in['phone'], 30) : '',
+        'email' => isset($in['email']) ? sanitize_email((string) $in['email']) : '', 'msg' => isset($in['msg']) ? tj_lead_s($in['msg'], 1500) : '',
+        'city' => isset($in['city']) ? tj_lead_s($in['city'], 40) : '',
+    );
+    tj_lead_enqueue('api-' . wp_generate_password(10, false, false), $p);
+    return $p;
+}
+function tj_lead_rate() {
+    $ip = '';
+    foreach (array('HTTP_X_REAL_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR') as $h) {
+        $v = isset($_SERVER[$h]) ? trim(explode(',', (string) $_SERVER[$h])[0]) : '';
+        if ($v !== '' && filter_var($v, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) { $ip = $v; break; }
+    }
+    if ($ip === '') { return true; }
+    $k = 'tj_lead_rl_' . substr(md5($ip), 0, 16); $n = (int) get_transient($k);
+    if ($n >= 20) { return false; }
+    set_transient($k, $n + 1, 10 * MINUTE_IN_SECONDS);
+    return true;
+}
+add_action('rest_api_init', function () {
+    register_rest_route('tj/v1', '/lead', array('methods' => 'POST', 'permission_callback' => '__return_true', 'callback' => function ($req) {
+        $from = (string) $req->get_header('origin'); if ($from === '') { $from = (string) $req->get_header('referer'); }
+        $bare = function ($u) { return preg_replace('/^www\./', '', strtolower((string) wp_parse_url($u, PHP_URL_HOST))); };
+        if ($from === '' || $bare($from) !== $bare(home_url())) { return new WP_REST_Response(array('ok' => false), 403); }
+        $b = $req->get_json_params(); if (!is_array($b)) { $b = $req->get_body_params(); }
+        if (!is_array($b) || !empty($b['website'])) { return array('ok' => true); }   // تله: ربات‌ها پرش می‌کنند
+        if (!tj_lead_rate()) { return new WP_REST_Response(array('ok' => false, 'error' => 'rate'), 429); }
+        $intent = isset($b['intent']) ? (string) $b['intent'] : '';
+        if ($intent === 'vote') {
+            $city = isset($b['city']) ? tj_lead_s($b['city'], 40) : '';
+            if (mb_strlen($city) < 2) { return array('ok' => false, 'error' => 'bad'); }
+            tj_lead_submit(array('line' => 'همکاری', 'intent' => 'vote', 'city' => $city, 'page' => isset($b['page']) ? $b['page'] : ''));
+            // پاسخ فوری از آخرین فهرستی که بات فرستاده؛ عدد واقعی با push بعدی
+            $cl = get_option('tj_push_cities'); $hit = null;
+            if (is_array($cl) && !empty($cl['list'])) { foreach ($cl['list'] as $o) { if (isset($o['name']) && $o['name'] === $city) { $hit = $o; break; } } }
+            return array('ok' => true, 'city' => $city, 'isNew' => !$hit, 'n' => $hit ? ((int) $hit['n'] + 1) : 1, 'queued' => true);
+        }
+        $name = isset($b['name']) ? trim((string) $b['name']) : ''; $phone = isset($b['phone']) ? trim((string) $b['phone']) : ''; $email = isset($b['email']) ? trim((string) $b['email']) : '';
+        if ($name === '' && $phone === '' && $email === '') { return array('ok' => false, 'error' => 'empty'); }
+        tj_lead_submit($b);
+        return array('ok' => true);
+    }));
+    register_rest_route('tj/v1', '/data', array('methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => function ($req) {
+        $k = (string) $req->get_param('k');
+        $map = array('partners' => 'tj_push_partners', 'cities' => 'tj_push_cities');
+        if ($k === 'track') { return array('ok' => true, 'track' => (int) get_option('tj_push_track', 0)); }
+        if (!isset($map[$k])) { return new WP_REST_Response(array('ok' => false), 404); }
+        $v = get_option($map[$k]);
+        if (!is_array($v)) { return array('ok' => false, 'error' => 'not-yet'); }
+        $r = new WP_REST_Response($v, 200); $r->header('Cache-Control', 'public, max-age=300'); return $r;
+    }));
+});
+/* فلوئنت: ردپای همان بازدید (کوکی) همراه لید فرم */
+add_filter('tj_lead_payload', function ($p) {
+    $c = tj_lead_cookie_ctx();
+    if ($c['vid'] && empty($p['vid'])) { $p['vid'] = $c['vid']; }
+    if ($c['cta'] && empty($p['cta'])) { $p['cta'] = $c['cta']; }
+    foreach ($c['utm'] as $k => $v) { if (empty($p['utm_' . $k])) { $p['utm_' . $k] = $v; } }
+    return $p;
+});
