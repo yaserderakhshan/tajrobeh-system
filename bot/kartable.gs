@@ -183,6 +183,7 @@ function ktbGemFile_(blob, prompt, schema) {
 }
 function ktbResumeMake_(r) {
   if (!r) return false;
+  if (!ktbDry_() && typeof aiPaid_ === 'function' && !aiPaid_()) return false;   /* v170.29: رزومه دادهٔ شخصی است؛ فقط با کلید پولی */
   var m = /^tg:doc:([^\s·]+)/.exec(String(r.v.resume || '')); if (!m) return false;
   try {
     var blob = ktbDry_() ? null : tgTgFile_(m[1]);

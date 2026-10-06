@@ -37,7 +37,12 @@
     "sec.gs",
     "version.gs",
     "sitepub.gs",
-    "kartable.gs"
+    "kartable.gs",
+    "ai.gs",
+    "psy2.gs",
+    "psy3.gs",
+    "inbox.gs",
+    "afx.gs"
   ],
   "htmlExtensions": [
     ".html"
