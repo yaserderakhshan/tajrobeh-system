@@ -1609,7 +1609,7 @@ function tgRunPartsPlan_() {
   try { var o = JSON.parse(PropertiesService.getScriptProperties().getProperty('TG_TEST_PARTS') || 'null'); if (o && o.n >= 1 && o.n <= TG_RUN_MAX) return { n: Number(o.n), a: o.a || {} }; } catch (e) {}
   return { n: 3, a: {} };
 }
-function tgRunPart_(k) { var p = tgRunPartsPlan_(); if (k > p.n) return { pass: 1, fail: 0, text: '' }; TG_RUN_PART = { i: k - 1, of: p.n, a: p.a }; try { return tgRunTests(); } finally { TG_RUN_PART = null; } }
+function tgRunPart_(k) { var p = tgRunPartsPlan_(); if (k > p.n) return { pass: 1, fail: 0, text: '' }; TG_RUN_PART = { i: k - 1, of: p.n, a: p.a }; try { return tgRunTests(); } finally { TG_RUN_PART = null; TG_TEST_SLOTS = null; } }
 function tgRunTests1() { return tgRunPart_(1); }
 function tgRunTests2() { return tgRunPart_(2); }
 function tgRunTests3() { return tgRunPart_(3); }
@@ -5002,6 +5002,7 @@ function tgSlotsRead_() {
   return sh.getRange(4, 1, sh.getLastRow() - 3, 7).getValues();
 }
 function tgTakenSet_(vals) {
+  if (TG_TEST_SLOTS && !vals) return TG_TEST_SLOTS.taken;   /* v170.27 */
   const set = {};
   const v = vals || tgSlotsRead_();
   if (!v.length) return set;
@@ -5014,7 +5015,26 @@ function tgTakenSet_(vals) {
   return set;
 }
 
+/* v170.27: لایهٔ آزمون وقت‌ها. مجموعهٔ «اصلی» (tgRunTests) روی دیپلوی آزمایشی وقت‌ها، درمانگرها و ظرفیت هفتگی را از شیت
+   واقعی می‌خواند و «شمارهٔ +۹۸» یک بار ۴۶۱ ثانیه طول کشید (دیپلوی v170.22 قطع شد). در حالت تست (TG_TEST_SLOTS) همین داده‌ها
+   از یک نمونهٔ ساختگی کوچک می‌آید (۲۰ نوبت، سه درمانگر نمونه)؛ انتخاب، فیلتر، مرتب‌سازی و پیام همان کد زنده است.
+   بیرون از tgRunTests همیشه null است، پس بات زنده هرگز این نمونه را نمی‌بیند. */
+var TG_TEST_SLOTS = null;
+var TG_TEST_SLOTS_MAX = 20;
+function tgTestSlotsFixture_(now) {
+  now = now || new Date();
+  var ther = [{ n: 'درمانگر نمونهٔ الف', g: 'زن', c: '777091', t: 1 }, { n: 'درمانگر نمونهٔ ب', g: 'مرد', c: '777092', t: 2 }, { n: 'درمانگر نمونهٔ پ', g: 'زن', c: '', t: 3 }];
+  var info = {}, slots = [], hours = ['10:00', '12:00', '14:00', '16:00', '18:00'];
+  ther.forEach(function (x) { info[x.n] = { name: x.n, row: 0, chat: x.c, meet: x.c ? 'https://meet.example.com/t' + x.t : '', status: 'فعال', gender: x.g, tier: x.t, pool: 'هر دو', about: '', mode: '' }; });
+  for (var d = 2; slots.length < TG_TEST_SLOTS_MAX; d++) {
+    var iso = Utilities.formatDate(new Date(now.getTime() + d * 86400000), TG_TZ, 'yyyy-MM-dd');
+    for (var h = 0; h < hours.length && slots.length < TG_TEST_SLOTS_MAX; h++) slots.push({ therapist: ther[(d + h) % ther.length].n, dateIso: iso, hhmm: hours[h], weekly: false, row: 0 });
+  }
+  return { slots: slots, info: info, taken: {} };
+}
+
 function tgFreeSlots_(scope) {
+  if (TG_TEST_SLOTS) return TG_TEST_SLOTS.slots.filter(function (x) { return !TG_TEST_SLOTS.taken[x.therapist + '|' + x.dateIso + '|' + x.hhmm]; }).map(function (x) { return JSON.parse(JSON.stringify(x)); });   /* v170.27 */
   const rules = tgWeeklyRules_(scope);
   const sv = tgSlotsRead_();
   const taken = tgTakenSet_(sv);
@@ -5927,6 +5947,7 @@ function tgTier_(cell) {
 }
 
 function tgTherapistInfo_() {
+  if (TG_TEST_SLOTS) return TG_TEST_SLOTS.info;   /* v170.27: لایهٔ آزمون وقت‌ها */
   const rows = tgTherapistRows_(), map = {};
   for (var i = 0; i < rows.length; i++) map[rows[i].name] = rows[i];
   return map;
@@ -6996,6 +7017,7 @@ function tgClearCache() {
 
 function tgRunTests() {
   TG_DRY = true;
+  TG_TEST_SLOTS = tgTestSlotsFixture_();   /* v170.27: وقت‌ها و درمانگرها از نمونهٔ ساختگی، نه شیت واقعی */
   const log = [];
   let pass = 0, fail = 0, runIdx = 0, rPass = 0, rFail = 0;
   const rBad = [];
@@ -7114,11 +7136,11 @@ function tgRunTests() {
   if (tgScales_(1).profile === 'کاوشگر') { pass++; log.push('✅ نمره‌گذاری: کاوشگر'); } else { fail++; log.push('❌ نمره‌گذاری: کاوشگر'); }
   run('مچ: ترجیح خانم روی فهرست وقت‌ها',
       [P('🍓 شروع درمان'), CB('t:anx'), CB('g:f'), C('09120006919'), CB('z:ir'), CB('b:x')],
-      ['به وقت شما||وقت آماده‌ای ندارم']);
+      ['به وقت شما', 'درمانگر نمونهٔ الف||درمانگر نمونهٔ پ', '!درمانگر نمونهٔ ب']);   /* v170.27: نمونهٔ ساختگی وقت‌ها، قطعی */
 
   run('مسیر کامل رزرو معارفه',
       [P('/start'), C('09120006919'), CB('z:ir'), CB('b:x'), CB('s:0')],
-      ['رزرو شد', 'درمانگر شما', 'لینک جلسه||پذیرش']);
+      ['رزرو شد', 'درمانگر شما', 'درمانگر نمونهٔ', 'لینک جلسه||پذیرش']);
   run('پیام وقت معارفهٔ من بعد از رزرو',
       [P('/start'), C('09120006919'), CB('z:ir'), CB('b:x'), CB('s:0'), P('/mymeet')],
       ['وقت معارفهٔ شما']);
@@ -7216,6 +7238,13 @@ function tgRunTests() {
       ['وقت درمان', 'چند جلسهٔ ۵۰ دقیقه‌ای', '۲ جلسهٔ ۵۰ دقیقه‌ای از ساعت 19:00', 'وقت‌های درمان شما']);
   TG_DRY_THER = null;
 
+  /* v170.27: نمونهٔ وقت‌ها کوچک و قطعی است و از شیت واقعی چیزی خوانده نشد */
+  (function () {
+    var fx = TG_TEST_SLOTS, n = fx ? tgFreeSlots_('داخل ایران').length : -1;
+    if (fx && n > 0 && n <= TG_TEST_SLOTS_MAX && Object.keys(tgTherapistInfo_()).length === 3) { pass++; log.push('✅ وقت‌های تست از نمونهٔ ساختگی (' + n + ' نوبت)'); }
+    else { fail++; log.push('❌ نمونهٔ وقت‌های تست: ' + n); }
+  })();
+  TG_TEST_SLOTS = null;
   TG_DRY = false;
   /* v170.22.1: زمان هر سناریو برای تقسیم بعدی (فقط هش عنوان و ثانیه) */
   try {
@@ -9364,6 +9393,7 @@ function tgBookedThisWeek_(name) {
    هیچ مراجعی نباید به خاطر سیاست داخلی ما بی‌وقت بماند. */
 function tgCapFilter_(slots) {
   if (!slots || !slots.length) return slots;
+  if (TG_TEST_SLOTS) return slots;   /* v170.27: شمار رزرو هفتگی از شیت واقعی نه */
   const cache = {};
   const kept = [];
   for (var i = 0; i < slots.length; i++) {
