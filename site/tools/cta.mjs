@@ -109,7 +109,7 @@ export function registryProblems(reg, sc, php) {
 export function genBot(reg) {
   const to = {}, label = {};
   for (const e of reg.codes || []) {
-    const old = (e.aliases || [])[0] || e.code;
+    const old = e.to || (e.aliases || [])[0] || e.code;   /* to: کد قدیمی یا دستور بات (مثل /human) */
     if (e.code !== old) to[e.code] = old;
     for (const c of [e.code, ...(e.aliases || [])]) label[c] = e.label || '';
   }

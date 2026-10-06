@@ -116,6 +116,7 @@ function itk2Start_(m, chat) {
       try { var sh = tgSS_().getSheetByName(ITK2_TAB); if (sh) { var f = sh.createTextFinder(tok).matchEntireCell(true).findNext(); if (f) sh.getRange(f.getRow(), 9).setValue(String(chat)); } } catch (e2) {}
     }
   }
+  if (/^\/[a-z]+$/.test(to)) { m.text = to; return; }   /* کد رجیستری با دستور بات (مثل pz-reception ← /human) */
   if (to !== mm[2]) m.text = '/start ' + to;
 }
 /** برچسب کد از رجیستری (برای «کدهای start» و منبع) */
@@ -172,6 +173,8 @@ function itk2Tests() {
     ok('لید بات همان ردپا را می‌گیرد', o.extra['دکمه'] === 'home.hero.start' && o.extra['شناسهٔ بازدید'] === 'v9');
     var m2 = { text: '/start pt_de' }; itk2Start_(m2, '778');
     ok('کد قدیمی دست نمی‌خورد', m2.text === '/start pt_de');
+    var m3 = { text: '/start pz-reception' }; itk2Start_(m3, '779');
+    ok('گفت‌وگو با پذیرش ← /human', m3.text === '/human', m3.text);
     ok('برچسب از رجیستری و خانواده', itk2Label_('pt_de') !== '' && itk2Label_('mg-12-t') === 'مجله › مقاله');
     ok('push: کلید ردپا پیش‌فرض خاموش', itk2Push_().track === 0);
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
