@@ -2512,6 +2512,7 @@ function tgPrivate_(m) {
   // استاد کلاس (v116): نام استادی که در فهرست نبود
   if (m.text && typeof tgClsMaybe_ === 'function' && tgClsMaybe_(chat, m.text, name)) return;
   // بازبینی پروفایل (v57): دکمهٔ صف، /review و جوابِ ویرایش ناظر
+  if (typeof ktbMaybe_ === 'function' && ktbMaybe_(chat, m)) return;   /* v170.23.5: کارتابل «منتظر تأیید من» */
   if (typeof tgPrMaybe_ === 'function' && tgPrMaybe_(chat, m)) return;
   // پروفایل سایت (v54): حالت‌دار است و عکس و ویس و فایل هم می‌گیرد، پس پیش از هر مسیریابی
   if (tgGetVal_('pq', chat) && typeof tgPqStep_ === 'function' && tgPqStep_(chat, m)) return;
@@ -4506,7 +4507,8 @@ function tgOnCallback_(cq) {
   if (data.indexOf('mc:') === 0 && typeof mcOnCb_ === 'function') return mcOnCb_(chat, data, cq);   /* v163: مشارکت در مجله */
   if (data.indexOf('vx:') === 0 && typeof vxOnCb_ === 'function') return vxOnCb_(chat, data, cq, name, uname);   /* v166: موتور صدا */
   if (data.indexOf('dq:') === 0 && typeof dqCb_ === 'function') return dqCb_(chat, data);   /* v170: صف ارسال */
-  if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);   /* v170.2: درخواست متوقف */
+  if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);
+  if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
   if (data.indexOf('cm:') === 0 && typeof cmCb_ === 'function') return cmCb_(chat, data);     /* v170.2: کامنت‌های هاب (پرسش ترجیح) */
   if (data.indexOf('rv:t:') === 0 && typeof rvToggleCb_ === 'function') return rvToggleCb_(chat, data);   /* v169: بازبینی علمی */
@@ -5515,6 +5517,7 @@ function tgBtnSet_() {
   try { add([TG_MAG_DESK_BTNS]); } catch (e) {}
   try { if (typeof PB_BTNS !== 'undefined') add([PB_BTNS]); } catch (e) {}
   try { one(T_ROLE_SWITCH); }      catch (e) {}
+  try { if (typeof KTB_BTN !== 'undefined') one(KTB_BTN); } catch (e) {}
   try { one(TG_MAG_BTN); one(TG_PQ_BTN); one(TG_PQ_UBTN); one(TG_PR_BTN);
         one(TG_INP_BTN); one(TG_PAY_BTN); one(TG_SJ_BTN); one(TG_COMM_BTN); } catch (e) {}
   one('↩️ بازگشت'); one('بازگشت'); one('انصراف'); one('شروع');
@@ -6884,7 +6887,9 @@ function tgWatchdog(e) {
   /* v169.1: کارهای هفتگی و ساعتی که تریگر جدا داشتند. اگر کار هفتگی سنگین (tgTherWeekly، تا ۲۶۶ ثانیه) همین ساعت رفت،
      بقیهٔ کارهای این ساعت به ساعت بعد می‌رود تا اجرای واچ‌داگ از سقف ۶ دقیقه نگذرد. */
   try { if (typeof v1691Hourly_ === 'function') v1691Hourly_(e); } catch (eH) { tgErr_('v1691Hourly_', eH); }
-  try { if (typeof ebiHourly_ === 'function') ebiHourly_(); } catch (eEb) { tgErr_('ebiHourly_', eEb); }   /* v170.16: کمپین C-004 */
+  try { if (typeof ebiHourly_ === 'function') ebiHourly_(); } catch (eEb) { tgErr_('ebiHourly_', eEb); }
+  try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
+  try { if (typeof ktbRouteMaybe_ === 'function') ktbRouteMaybe_(); } catch (eKr) { tgErr_('ktbRouteMaybe_', eKr); }   /* v170.16: کمپین C-004 */
   try { if (typeof v1691Weekly_ === 'function' && v1691Weekly_(e)) return; } catch (eW) { tgErr_('v1691Weekly_', eW); }
   // ستون‌های تاریخ شمسی خودشان پر می‌شوند؛ کسی نباید دستی اجرا کند
   try { tgFillJalali_(false); } catch (e) { tgErr_('tgFillJalali_: ' + e); }
@@ -9818,7 +9823,7 @@ const T_WATCH_MENU = 'گزارش کامل هر شب یک بار خودش می‌
 
 function tgWatchMenu_() {
   return {
-    keyboard: [['📊 گزارش امروز', TG_STAT_BTN], ['📈 این هفته'], ['🩺 سلامت سیستم'], [TG_PR_BTN, TG_APQ_BTN], [TG_EVN_BTN], [TG_DASH_BTN, TG_TSK_BTN], [TG_BOX_BTN, TG_TSK_NEW]].concat(typeof DQ_BTN !== 'undefined' ? [[DQ_BTN]] : []).concat(tgRoleRow_()),
+    keyboard: (typeof KTB_BTN !== 'undefined' ? [[KTB_BTN]] : []).concat([['📊 گزارش امروز', TG_STAT_BTN], ['📈 این هفته'], ['🩺 سلامت سیستم'], [TG_PR_BTN, TG_APQ_BTN], [TG_EVN_BTN], [TG_DASH_BTN, TG_TSK_BTN], [TG_BOX_BTN, TG_TSK_NEW]]).concat(typeof DQ_BTN !== 'undefined' ? [[DQ_BTN]] : []).concat(tgRoleRow_()),
     resize_keyboard: true
   };
 }
@@ -13602,7 +13607,7 @@ var TG_PQ_GUIDE = 'https://tajrobeh.life/wp-content/uploads/2026/09/tjl-profile-
 var TG_PQ_SITE  = 'https://tajrobeh.life/#therapists';
 var TG_PQ_FIX   = ['id', 'name', 'roles', 'chat', 'src', 'status', 'pct', 'started', 'updated', 'invited', 'skipped', 'review', 'onsite',
                    'stamp', 'rstamp', 'notified', 'drive', 'site_name', 'site_sp', 'site_city', 'site_tags', 'site_photo', 'crop',
-                   'page', 'page_photo', 'page_voice', 'site_slug', 'congrats', 'pub_title', 'pub_headline', 'pub_method', 'pub_first', 'pub_trainings', 'pub_teach', 'pub_articles', 'pub_extra', 'teaminv', 'newq', 'pub_resume', 'modechk', 'csask', 'remind', 'inpoffer'];
+                   'page', 'page_photo', 'page_voice', 'site_slug', 'congrats', 'pub_title', 'pub_headline', 'pub_method', 'pub_first', 'pub_trainings', 'pub_teach', 'pub_articles', 'pub_extra', 'teaminv', 'newq', 'pub_resume', 'modechk', 'csask', 'remind', 'inpoffer', 'pub_resume_draft'];
 var TG_PQ_FIXL  = ['شناسه', 'نام', 'نقش‌ها', 'chat_id', 'منبع', 'وضعیت', 'درصد تکمیل', 'شروع', 'آخرین پاسخ', 'دعوت', 'رد شده‌ها', 'بازبینی تیم', 'روی سایت',
                    'زمان آخرین پاسخ', 'زمان بازبینی', 'خبر به ناظر', 'فایل‌ها در درایو', 'نام روی سایت', 'خط رویکرد روی سایت', 'شهر روی سایت', 'تگ‌های کارت', 'عکس روی سایت', 'قاب عکس',
                    'صفحهٔ شخصی', 'عکس صفحه (نسخه)', 'ویس صفحه (نسخه)', 'آدرس انگلیسی صفحه', 'پیام جشن انتشار', 'عنوان (ویرایش تیم)', 'یک جمله (ویرایش تیم)', 'روش درمان (ویرایش تیم)', 'جلسهٔ اول (ویرایش تیم)', 'آموزش‌ها (ویرایش تیم)', 'درس‌ها (ویرایش تیم)', 'نوشته‌ها (ویرایش تیم)', 'نقش‌های دیگر', 'دعوت به دیدن تیم', 'سؤال‌های تازه', 'رزومهٔ سبک (ویرایش تیم)', 'پرسش شکل جلسه', 'یادآوری اجازهٔ انتشار', 'یادآوری تکمیل', 'پیشنهاد حضوری'];
