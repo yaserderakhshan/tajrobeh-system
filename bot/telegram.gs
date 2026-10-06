@@ -2521,6 +2521,7 @@ function tgPrivate_(m) {
   // مدرسه v95: ویزاردهای دانش‌آموختگان و اپلای تراپیست، چون عکس و فایل هم می‌گیرند
   if (typeof tgSchMedia_ === 'function' && tgSchMedia_(chat, m)) return;
 
+  if (typeof ps3Route_ === 'function' && ps3Route_(chat, m)) return;   /* v170.23.9: روان‌پزشکی (فرم اداری، تکمیل اطلاعات، نمای مسئول) */
   if ((m.photo || m.document) && tgGetVal_('psyrc', chat) && typeof tgPsyReceipt_ === 'function' && tgPsyReceipt_(chat, m)) return;
   if (m.text && typeof tgPsyText_ === 'function' && tgPsyText_(chat, m.text)) return;
   if (m.photo && tgGetVal_('pro', chat)) {
@@ -4511,6 +4512,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('dq:') === 0 && typeof dqCb_ === 'function') return dqCb_(chat, data);   /* v170: صف ارسال */
   if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);
+  if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
   if (data.indexOf('ps2:') === 0 && typeof ps2Cb_ === 'function') return ps2Cb_(chat, data);   /* v170.23.8: اتصال روان‌پزشک */   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
   if (data.indexOf('cm:') === 0 && typeof cmCb_ === 'function') return cmCb_(chat, data);     /* v170.2: کامنت‌های هاب (پرسش ترجیح) */
@@ -6894,6 +6896,7 @@ function tgWatchdog(e) {
   try { if (typeof aiRetryTick_ === 'function') aiRetryTick_(); } catch (eAr) { tgErr_('aiRetryTick_', eAr); }   /* v170.23.7: ویس‌های بی‌متن */
   try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
   try { if (typeof ps2FixMaybe_ === 'function') ps2FixMaybe_(); } catch (eP2) { tgErr_('ps2FixMaybe_', eP2); }
+  try { if (typeof ps3Tick_ === 'function') ps3Tick_(); } catch (eP3) { tgErr_('ps3Tick_', eP3); }   /* v170.23.9: یادآوری ویزیت و فرم بعد از ویزیت */
   try { if (typeof ktbRouteMaybe_ === 'function') ktbRouteMaybe_(); } catch (eKr) { tgErr_('ktbRouteMaybe_', eKr); }   /* v170.16: کمپین C-004 */
   try { if (typeof v1691Weekly_ === 'function' && v1691Weekly_(e)) return; } catch (eW) { tgErr_('v1691Weekly_', eW); }
   // ستون‌های تاریخ شمسی خودشان پر می‌شوند؛ کسی نباید دستی اجرا کند
@@ -10840,9 +10843,10 @@ function tgRoleByLabel_(text, roles) {
 }
 
 /* منوی مسئول بخش. هرکس فقط بخش خودش را می‌بیند، نه یک عدد بیشتر. */
-function tgOwnerMenu_() {
+function tgOwnerMenu_(role) {
+  var extra = role === 'روان‌پزشکی' && typeof PS3_HEAD_BTN !== 'undefined' ? [[PS3_HEAD_BTN]] : [];   /* v170.23.9: نمای روان‌پزشکی */
   return {
-    keyboard: [['📊 گزارش بخش من'], ['📣 اطلاعیه‌ها', '❓ راهنما'], [TG_DASH_BTN, TG_TSK_BTN], [TG_BOX_BTN, TG_TSK_NEW]].concat(tgRoleRow_()),
+    keyboard: [['📊 گزارش بخش من']].concat(extra).concat([['📣 اطلاعیه‌ها', '❓ راهنما'], [TG_DASH_BTN, TG_TSK_BTN], [TG_BOX_BTN, TG_TSK_NEW]]).concat(tgRoleRow_()),
     resize_keyboard: true
   };
 }
@@ -10850,14 +10854,14 @@ function tgOwnerMenu_() {
 function tgOwnerRoute_(chat, role, text, uname) {
   const sec = TG_SECTION_ROLE[role];
   const s = String(text || '');
-  if (s.indexOf('اطلاعیه') > -1) return tgAnnShow_(chat, tgOwnerMenu_());
+  if (s.indexOf('اطلاعیه') > -1) return tgAnnShow_(chat, tgOwnerMenu_(role));
   if (s.indexOf('گزارش') > -1 || s.indexOf('/start') === 0 || !s) {
     const d = tgDayView_(tgDayWin_(), tgScope_(sec));
-    return tgSend_(chat, tgDayReport_(d), tgOwnerMenu_());
+    return tgSend_(chat, tgDayReport_(d), tgOwnerMenu_(role));
   }
   return tgSend_(chat, 'اینجا گزارش بخش «' + sec + '» است.\n\n' +
     'با «📊 گزارش بخش من» عددهای ۲۴ ساعت گذشتهٔ همین بخش را می‌بینید. ' +
-    'عدد بخش‌های دیگر را نمی‌بینید، چون به کار شما نمی‌آید.', tgOwnerMenu_());
+    'عدد بخش‌های دیگر را نمی‌بینید، چون به کار شما نمی‌آید.', tgOwnerMenu_(role));
 }
 
 function tgRoleRoute_(chat, role, text, m) {
@@ -19899,6 +19903,7 @@ function tgPsyOnBook_(chat, s, lead, row) {
   var v = [a.code, new Date(), s.therapist, (lead && lead.name) || '', String(chat), s.dateIso, s.hhmm, a.acc, 'رزرو شده', a.acc === TG_PSY_ACC.dr ? 'کارت به کارت' : 'درگاه تجربه', ''];
   tgPsyNotifyHead_(tgPsyApptCard_(v), tgPsyApptKb_(a.code, a.acc), a.code);
   if (a.acc === TG_PSY_ACC.dr) tgPsyAskReceipt_(chat, a.code);
+  try { if (typeof ps3OnBook_ === 'function') ps3OnBook_(a, s, chat); } catch (eP3) { tgErr_('ps3OnBook_', eP3); }   /* v170.23.9 */
   return a;
 }
 /* مسئول: حساب نوبت را عوض می‌کند (سطر به دفتر دیگر می‌رود) */
