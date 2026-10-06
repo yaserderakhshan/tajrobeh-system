@@ -75,14 +75,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.11`
+نسخهٔ کد: `v170.23.12`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۵ | ۳۳ |
-| `telegram.gs` | ۳۷۷۴۲ | ۲۰۴۱ |
+| `telegram.gs` | ۳۷۷۴۳ | ۲۰۴۱ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -97,13 +97,13 @@
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۵۷۴ | ۱۲۰ |
-| `v168.gs` | ۲۱۴۷ | ۱۲۶ |
+| `v168.gs` | ۲۱۴۸ | ۱۲۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۸ | ۳۴ |
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۱۰۳۶ | ۶۵ |
 | `dq.gs` | ۵۹۳ | ۴۹ |
-| `cfg.gs` | ۱۷۱ | ۱۴ |
+| `cfg.gs` | ۱۷۳ | ۱۴ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -117,6 +117,7 @@
 | `ai.gs` | ۲۱۱ | ۱۵ |
 | `migrate.gs` | ۵۵۱ | ۵۵ |
 | `assist.gs` | ۵۶۷ | ۵۰ |
+| `leadspeed.gs` | ۲۵۹ | ۲۳ |
 
 ### کارهای زمان‌دار
 
@@ -180,7 +181,7 @@
 | `TG_CRM_TAB` | «🧭 CRM لیدها» | `telegram.gs` `v168.gs` |
 | `TG_DAY_TAB` | «نظارت روزانه» | `telegram.gs` |
 | `TG_DESK_TAB` | «تیم پذیرش» | `telegram.gs` |
-| `TG_DUTY_LOG` | «نوبت پذیرش · پاسخ‌ها» | `telegram.gs` |
+| `TG_DUTY_LOG` | «نوبت پذیرش · پاسخ‌ها» | `telegram.gs` `leadspeed.gs` |
 | `TG_DUTY_TAB` | «نوبت پذیرش» | `telegram.gs` |
 | `TG_EFT_TAB` | «فرم ثبت‌نام EFT» | `telegram.gs` |
 | `TG_ERR_TAB` | «خطاها» | `telegram.gs` |
@@ -198,7 +199,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -371,6 +372,7 @@
 | جمنای به‌جای گروک (v170.23.7) | `aiTests` |
 | مهاجرت مراجعان به نسخهٔ ۲ (v170.23.6.3) | `migTests` |
 | دستیار پاسخ‌گو (v170.23.11) | `asTests` |
+| پاسخ زیر ۱۰ دقیقه و اولویت روزانه (v170.23.12) | `lsTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)

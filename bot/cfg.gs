@@ -37,13 +37,15 @@ var CFG_NOTE = {
   ASSIST_MATCH_MIN: 'آستانهٔ امتیاز جست‌وجوی دستیار، ۰ تا ۱ (خالی = ۰٫۶، محافظه‌کار؛ با دادهٔ گزارش شبانه تنظیم می‌شود) (v170.23.11)',
   ASSIST_EMERGENCY: 'شمارهٔ اورژانس هر کشور برای دستیار: {"DE": "متن", …} (JSON، اختیاری؛ خالی = متن ایران با ۱۲۳، ۱۱۵ و ۱۴۸۰) (v170.23.11)',
   ASSIST_RATE: 'سقف پرسش هر session_id در ساعت در رابط وب دستیار (خالی = ۲۰) (v170.23.11)',
+  LEAD_SPEED_ENABLED: 'روشن بودن پاسخ زیر ۱۰ دقیقه و فهرست اولویت ۹:۳۰ پذیرش (leadspeed.gs): «بله» = روشن (v170.23.12)',
+  LEAD_SCORE_WEIGHTS: 'وزن‌های امتیاز فهرست اولویت: {"fresh": 3, "complete": 2, "intro": 2, "channel": 1, "noans": -1, "due": 3} (JSON، اختیاری؛ v170.23.12)',
   TG_CONTRACT_VER: 'نسخهٔ قرارداد همکاری برای ستون «پشتوانهٔ انتشار» پروفایل‌ها، مثل «۱» (v170.23.6؛ با امضای الکترونیک نسخهٔ تازه به‌روز می‌شود)',
   TG_ROUTE: 'جدول مسیریابی منتظرها: {"تیکت" | "باگ" | دستهٔ کار | "پیش‌فرض": "کلید TG_NAMES"} (JSON، اختیاری؛ v170.23.5؛ بی آن: مدیر عملیات ops)',
   CM_FIX_FORCE: 'دور دوم اصلاح کامنت‌ها: لیدهایی که با وجود قاعدهٔ «فقط مهاجرت» به این وضعیت برمی‌گردند: {"کد لید": "وضعیت"} (JSON، اختیاری؛ v170.23.4)',
   CM_FIX_CALL: 'کد لیدهای وضعیت مبهم برای کار «بررسی تلفنی وضعیت» پذیرش: ["کد لید", …] (JSON، اختیاری؛ v170.23.4)'
 };
 /* کلیدهایی که خالی بودنشان مجاز است (جایگزین دارند) */
-var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'MIG_HUB', 'MIG_ENABLED', 'MIG_CHECKLIST', 'MIG_INVITE_TEXT', 'MIG_V2_LOGIN_URL', 'MIG_V2DEV_MSG', 'GEMINI_PAID', 'ASSIST_ENABLED', 'ASSIST_MODE', 'ASSIST_GEMINI_PAID', 'ASSIST_MATCH_MIN', 'ASSIST_EMERGENCY', 'ASSIST_RATE'];
+var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'MIG_HUB', 'MIG_ENABLED', 'MIG_CHECKLIST', 'MIG_INVITE_TEXT', 'MIG_V2_LOGIN_URL', 'MIG_V2DEV_MSG', 'GEMINI_PAID', 'ASSIST_ENABLED', 'ASSIST_MODE', 'ASSIST_GEMINI_PAID', 'ASSIST_MATCH_MIN', 'ASSIST_EMERGENCY', 'ASSIST_RATE', 'LEAD_SPEED_ENABLED', 'LEAD_SCORE_WEIGHTS'];
 /* v170.9: کلیدهای لازمی که در Property خالی‌اند (فقط نام). روی دیپلوی آزمایشی سنجیده می‌شود؛ هر کدام خالی = انتشار متوقف */
 function cfgMissing_() {
   var o = cfgPropGet_();

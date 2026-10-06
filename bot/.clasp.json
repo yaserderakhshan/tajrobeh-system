@@ -40,7 +40,8 @@
     "kartable.gs",
     "ai.gs",
     "migrate.gs",
-    "assist.gs"
+    "assist.gs",
+    "leadspeed.gs"
   ],
   "htmlExtensions": [
     ".html"
