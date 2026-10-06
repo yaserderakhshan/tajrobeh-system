@@ -54,6 +54,8 @@ const healthLine = (hl) => {
     ` · کش سایت ${st.src || st.http || st.error || '?'} سن ${st.age ?? '-'}ث (${st.n ?? '-'} نفر) · کمپین ${hl.push.campMin ?? '-'}د · رویدادها ${hl.evFlushMin ?? '-'}د`;
 };
 
+// v170.23.4: لاگ گردش کار این مخزن عمومی است؛ شناسهٔ شیت، درایو و تقویم (رشتهٔ بلند بی‌فاصله) در خروجی یک‌باره‌ها پوشانده می‌شود
+export const maskIds = (s) => String(s ?? '').replace(/[A-Za-z0-9_-]{25,}/g, '<شناسه>').replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, '<ایمیل>');
 const keyOf = (r) => `${r.where}|${String(r.msg).replace(/#/g, '').replace(/\s+/g, ' ').trim()}`;
 
 const mode = process.argv[2];
@@ -159,7 +161,7 @@ if (mode === 'once-auto') {
   const r = await call({ ci: 'onceAuto' });
   if (!r.ok) { console.log(`::warning::کارهای یک‌باره اجرا نشدند: ${r.error}`); process.exit(0); }
   for (const x of r.runs) {
-    const msg = `${x.fn}: ${x.ok ? (x.already ? 'قبلاً اجرا شده بود' : 'اجرا شد') : 'نشد'} · ${x.out}`;
+    const msg = `${x.fn}: ${x.ok ? (x.already ? 'قبلاً اجرا شده بود' : 'اجرا شد') : 'نشد'} · ${maskIds(x.out)}`;
     console.log(x.ok ? msg : `::warning::${msg}`);
     if (!x.already) summary(`- یک‌باره: ${msg}`);
   }
