@@ -190,7 +190,7 @@ function dqSend_(r) {
   if (r.st !== DQ_ST.READY) { r.st = DQ_ST.READY; dqWrite_(r); }
   if (!dqHoursOk_(r)) return 'wait';
   var links = [];
-  to.forEach(function (p) { var id = dqMsgId_(tgSend_(p.chat, dqMsgText_(r), dqKb_(r.code))); if (id) links.push('tg://openmessage?user_id=' + p.chat + '&message_id=' + id); });
+  to.forEach(function (p) { var id = dqMsgId_(tgSendAs_(TG_NK.task, p.chat, dqMsgText_(r), dqKb_(r.code))); if (id) links.push('tg://openmessage?user_id=' + p.chat + '&message_id=' + id); });
   if (!links.length) { dqFail_(r, 'تلگرام پیام را نپذیرفت'); return 'err'; }
   r.st = DQ_ST.SENT; r.sentAt = dqStamp_(dqNow_()); r.msg = links.join('\n'); dqWrite_(r);
   dqProp_(r.code, { to: to.map(function (p) { return p.chat; }), sent: dqNow_().getTime() });

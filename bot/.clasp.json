@@ -16,6 +16,7 @@
     "mag_contrib.gs",
     "author.gs",
     "voice.gs",
+    "blocked.gs",
     "review.gs",
     "seo_gemini.gs",
     "gemini_setup.gs",

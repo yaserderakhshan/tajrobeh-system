@@ -2408,6 +2408,8 @@ function tgHandle(update) {
         if (!vkOnly_) tgUserTouch_(pc, [uf.first_name, uf.last_name].filter(String).join(' '),
                      uf.username || '', update.callback_query ? 'دکمه' : 'پیام');
       } catch (eUt) {}
+      /* v170.25: هر پیام یا دکمه (از جمله /start) از خود کاربر یعنی بات را باز کرده؛ علامت «بلاک کرده» برداشته می‌شود */
+      try { if (Number(pc) > 0) tgBlkClear_(pc); } catch (eBk) {}
     }
     if (update.callback_query) return tgOnCallback_(update.callback_query);
 
@@ -3071,7 +3073,7 @@ function tgTqRemind_() {
   Object.keys(m).forEach(function (c) { if (m[c].at < day) old.push('• ' + tgEsc_(m[c].name) + ' · ' + tgEsc_(m[c].who || '')); });
   if (!old.length) return 0;
   var txt = '⏳ <b>درخواست اتصال بی‌جواب</b>\n' + old.join('\n') + '\n\nکارت تأیید هر کدام بالاتر در همین گفت‌وگو است.';
-  tgTqReviewers_().forEach(function (c) { try { tgSend_(c, txt); } catch (e) {} });
+  tgTqReviewers_().forEach(function (c) { try { tgSendAs_(TG_NK.remind, c, txt); } catch (e) {} });
   return old.length;
 }
 
@@ -5818,7 +5820,7 @@ function tgFeedPush() {
       if (String(sv[j][4] || '').trim() !== 'فعال') continue;
       const tp = String(sv[j][3] || '').split(',').filter(String);
       if (key && tp.length && tp.indexOf(key) < 0) continue;
-      tgSend_(String(sv[j][0]).trim(), tgFeedCard_(it), { inline_keyboard: [
+      tgSendAs_(TG_NK.invite, String(sv[j][0]).trim(), tgFeedCard_(it), { inline_keyboard: [
         [{ text: '🔕 دیگر نفرستید', callback_data: 'fd:off' }]
       ] });
       subs.getRange(j + 2, 7).setValue(new Date());
@@ -6592,7 +6594,10 @@ function tgSend_(chat, text, markup, replyTo) {
     if (TG_DRY) TG_OUTBOX.push({ kind: 'msg', chat: String(chat), text: String(text), markup: markup || null });
     return null;
   }
+  /* v170.25: کسی که بات را بلاک کرده پیامی نمی‌گیرد و دوباره تلاش نمی‌شود (blocked.gs) */
+  if (tgBlkIs_(chat)) { try { tgOutLog_(chat, text, 'blk'); } catch (eB0) {} return tgBlkResp_(); }
   if (TG_DRY) {
+    if (TG_MEM['blk403'] && TG_MEM['blk403'][String(chat)]) { tgBlkMark_(chat); tgOutLog_(chat, text, 'blk'); return tgBlkResp_(); }
     TG_OUTBOX.push({ kind: 'msg', chat: String(chat), text: String(text), markup: markup || null });
     return null;
   }
@@ -6607,6 +6612,8 @@ function tgSend_(chat, text, markup, replyTo) {
   if (replyTo) { body.reply_to_message_id = replyTo; body.allow_sending_without_reply = true; }
   const res = tgApi_('sendMessage', body);
   var sentOk = !!(res && res.getResponseCode() === 200);
+  /* v170.25: ۴۰۳ بلاک بی‌قالب دوباره فرستاده نمی‌شود (پیش از این هر بلاک دو خطا می‌ساخت)؛ tgApi_ علامتش را زده */
+  if (res && !sentOk && tgBlkIsResp_(res.getResponseCode(), res.getContentText())) { try { tgOutLog_(chat, text, 'blk'); } catch (eB1) {} return res; }
   if (res && res.getResponseCode() !== 200) {
     delete body.parse_mode;
     body.text = String(text).replace(/<[^>]+>/g, '');
@@ -6619,6 +6626,7 @@ function tgSend_(chat, text, markup, replyTo) {
 }
 
 function tgPhoto_(chat, url, caption, markup) {
+  if (tgBlkIs_(chat)) return tgBlkResp_();   /* v170.25 */
   if (TG_API_CHAT && String(chat) === String(TG_API_CHAT)) {
     TG_API_OUT.push({ text: String(caption || ''), kb: markup || null, photo: url });
     if (TG_DRY) TG_OUTBOX.push({ kind: 'msg', chat: String(chat), text: String(caption || ''), photo: url });
@@ -6665,6 +6673,8 @@ function tgApi_(method, body) {
   }
   /* پاسخ دیرِ دکمه هیچ اثری برای کاربر ندارد؛ خطا نیست */
   if (code === 400 && method === 'answerCallbackQuery' && /query is too old|query ID is invalid/i.test(txt)) return res;
+  /* v170.25: کاربر بات را بلاک کرده؛ خطای سامانه نیست. علامت در «کاربران بات» و دیگر تلاش نمی‌شود (blocked.gs) */
+  if (tgBlkIsResp_(code, txt)) { try { if (body && body.chat_id) tgBlkMark_(body.chat_id); } catch (eBk) {} return res; }
   if (code !== 200) tgErr_('tgApi_ ' + method, txt, body && body.chat_id ? 'chat ' + body.chat_id : '');
   return res;
 }
@@ -9885,7 +9895,7 @@ function tgDayView_(d, sc) {
   if (!tgInScope_(sc, 'مدرسه')) v.school = 0;
   // مالی و سلامت سامانه فقط در گزارش کامل می‌آید
   v.money = 0; v.errs = 0; v.pending = 0; v.hookErr = '';
-  v.bugNew = 0; v.bugOpen = 0;
+  v.bugNew = 0; v.bugOpen = 0; v.blocked = 0;
 
   v.call = v.callN ? Math.round(v.callSum * 10 / v.callN) / 10 : 0;
   v.tkAvg = v.tkN ? Math.round(v.tkSum / v.tkN) : 0;
@@ -9906,8 +9916,9 @@ function tgDayWin_() {
     tkNew: 0, tkOpen: 0, tkLate: 0, tkSum: 0, tkN: 0,
     bugNew: 0, bugOpen: 0, school: 0, money: 0, care: true, by: {},
     errs: 0, week: 0, weekSite: 0, weekBooked: 0,
-    worst: '', worstH: 0, pending: 0, hookErr: ''
+    worst: '', worstH: 0, pending: 0, hookErr: '', blocked: 0
   };
+  try { d.blocked = tgBlkCount_(); } catch (eBk) {}   /* v170.25 */
   const lateH = tgPol_('مهلت تماس اول (ساعت)', 4);
   const w7 = new Date(now.getTime() - 7 * 86400000);
 
@@ -10169,6 +10180,7 @@ function tgDayReport_(d) {
     L.push('مدرسه ' + tgFa_(d.school) + '  ·  مالی ' + tgFa_(d.money));
   }
   if (d.bugNew || d.bugOpen) L.push('باگ و پیشنهاد: ' + tgFa_(d.bugNew) + ' تازه، ' + tgFa_(d.bugOpen) + ' باز');
+  if (d.blocked) L.push(tgFa_(d.blocked) + ' نفر بات را بلاک کرده‌اند');   /* v170.25 */
   L.push('');
   }
 
@@ -14468,7 +14480,7 @@ function tgPqRemind(send) {
     var fresh = String(v.status) === 'دعوت شد';
     if (!send) { out.push('… ' + v.name + ' (' + v.status + ')'); return; }
     try {
-      tgSend_(to, 'سلام ' + tgEsc_(v.name) + '،\n\n' + (fresh
+      tgSendAs_(TG_NK.remind, to, 'سلام ' + tgEsc_(v.name) + '،\n\n' + (fresh
         ? '🪪 یادآوری کوتاه: صفحه‌های شخصی همکاران در سایت تجربه یکی‌یکی منتشر می‌شود و جای صفحهٔ شما هم خالی است. پرسش‌نامه حدود ده دقیقه وقت می‌گیرد و هر جا خواستید می‌توانید بعداً ادامه دهید.'
         : '🪪 یادآوری کوتاه: پرسش‌نامهٔ صفحهٔ شما نیمه‌کاره مانده. از همان جایی که رها کرده بودید ادامه می‌دهیم و فقط پرسش‌های باقی‌مانده را می‌پرسیم.') +
         '\n\nوقتی صفحه منتشر شد، لینکش را همین‌جا برایتان می‌فرستیم.',
@@ -18743,8 +18755,10 @@ function tgOutSheet_() {
 }
 /* بعد از ارسال صدا زده می‌شود؛ کاربر پیامش را گرفته، این فقط دفتر است */
 function tgOutLog_(chat, text, ok) {
-  if (TG_DRY) { (TG_MEM['outlog'] = TG_MEM['outlog'] || []).push({ chat: String(chat), kind: TG_OUT_KIND || 'نامشخص', ref: TG_OUT_REF || '', ok: !!ok }); return; }
-  if (TG_OUT_BUF) { TG_OUT_BUF.push([new Date(), String(chat), TG_OUT_KIND || 'نامشخص', TG_OUT_REF || '', String(text || '').replace(/<[^>]+>/g, '').slice(0, 300), ok ? 'رفت' : 'خطا', Date.now() - TG_T0]); return; }
+  var blk = ok === 'blk', res0 = blk ? 'بلاک' : (ok ? 'رفت' : 'خطا');   /* v170.25: «بلاک» = کاربر بات را بلاک کرده، ارسال رد شد */
+  if (blk) ok = false;
+  if (TG_DRY) { (TG_MEM['outlog'] = TG_MEM['outlog'] || []).push({ chat: String(chat), kind: TG_OUT_KIND || 'نامشخص', ref: TG_OUT_REF || '', ok: !!ok, blk: blk }); return; }
+  if (TG_OUT_BUF) { TG_OUT_BUF.push([new Date(), String(chat), TG_OUT_KIND || 'نامشخص', TG_OUT_REF || '', String(text || '').replace(/<[^>]+>/g, '').slice(0, 300), res0, Date.now() - TG_T0]); return; }
   try {
     var sh = tgOutSheet_(); if (!sh) return;
     var id;
@@ -18756,10 +18770,10 @@ function tgOutLog_(chat, text, ok) {
       var last = sh.getLastRow(), seq = 100000;
       if (last >= 2) { var m = String(sh.getRange(last, 1).getValue() || '').match(/M-(\d+)/); if (m) seq = Number(m[1]); }
       id = 'M-' + (seq + 1);
-      sh.appendRow([id, new Date(), String(chat), TG_OUT_KIND || 'نامشخص', TG_OUT_REF || '', String(text || '').replace(/<[^>]+>/g, '').slice(0, 300), ok ? 'رفت' : 'خطا', Date.now() - TG_T0]);
+      sh.appendRow([id, new Date(), String(chat), TG_OUT_KIND || 'نامشخص', TG_OUT_REF || '', String(text || '').replace(/<[^>]+>/g, '').slice(0, 300), res0, Date.now() - TG_T0]);
       if (!had) { try { lock.releaseLock(); } catch (eL) {} }
     } catch (e1) {
-      sh.appendRow(['', new Date(), String(chat), TG_OUT_KIND || 'نامشخص', TG_OUT_REF || '', String(text || '').replace(/<[^>]+>/g, '').slice(0, 300), ok ? 'رفت' : 'خطا']);
+      sh.appendRow(['', new Date(), String(chat), TG_OUT_KIND || 'نامشخص', TG_OUT_REF || '', String(text || '').replace(/<[^>]+>/g, '').slice(0, 300), res0]);
     }
   } catch (e) {}
 }
@@ -19226,6 +19240,8 @@ function tgCapBump_(chat, kind) { try { var c = CacheService.getScriptCache(), k
 function tgNotify_(chat, kind, text, opts) {
   opts = opts || {}; kind = kind || TG_NK.remind;
   if (!chat || !text) return 'خطا';
+  /* v170.25: بلاک‌کرده نه صف می‌شود نه دوباره امتحان؛ «بلاک» برمی‌گردد */
+  if (tgBlkIs_(chat)) { TG_OUT_KIND = kind; TG_OUT_REF = opts.ref || ''; try { tgOutLog_(chat, text, 'blk'); } catch (eB) {} TG_OUT_KIND = ''; TG_OUT_REF = ''; return 'بلاک'; }
   var pol = tgPolicy_(kind);
   if (TG_DRY) {
     (TG_MEM['notify'] = TG_MEM['notify'] || []).push({ chat: String(chat), kind: kind, ref: opts.ref || '', text: String(text) });
@@ -19233,7 +19249,8 @@ function tgNotify_(chat, kind, text, opts) {
     if (!opts.force && pol.cap && !(typeof v17013CapFree_ === 'function' && v17013CapFree_(chat)) && (TG_MEM['capdry'] = TG_MEM['capdry'] || {}) && (TG_MEM['capdry'][chat + '|' + kind] = (TG_MEM['capdry'][chat + '|' + kind] || 0) + 1) > pol.cap) return 'سقف';   /* v170.13: پذیرش بی سقف */
     if (!opts.force && pol.quiet && TG_MEM['quiet']) { (TG_MEM['queue'] = TG_MEM['queue'] || []).push({ chat: String(chat), kind: kind, text: String(text) }); if (opts.out) opts.out.queue_id = 'Q-DRY' + TG_MEM['queue'].length; return 'صف'; }
     TG_OUT_KIND = kind; TG_OUT_REF = opts.ref || '';
-    tgSend_(chat, text, opts.markup || null, opts.replyTo);
+    var rd = tgSend_(chat, text, opts.markup || null, opts.replyTo);
+    if (rd && rd.blocked) { TG_OUT_KIND = ''; TG_OUT_REF = ''; return 'بلاک'; }
     if (opts.out) opts.out.message_id = 7000 + TG_OUTBOX.length;
     tgOutLog_(chat, text, true);
     TG_OUT_KIND = ''; TG_OUT_REF = '';
@@ -19256,6 +19273,7 @@ function tgNotify_(chat, kind, text, opts) {
     if (opts.out) { try { opts.out.message_id = JSON.parse(res.getContentText()).result.message_id; } catch (eId) {} }
     return 'رفت';
   }
+  if (res && (res.blocked || tgBlkIsResp_(res.getResponseCode(), res.getContentText()))) return 'بلاک';
   return 'خطا';
 }
 /* صف شب: در tgWatchdog؛ بین ۹ و ۲۲ پیام‌های منتظر می‌روند (هر بار تا ۴۰ تا) */
@@ -19271,7 +19289,7 @@ function tgQueueFlush_() {
     var tries = mt ? Number(tgLatinDigits_(mt[1] || '1')) : 0;
     var kb = null; try { kb = v[i][6] ? JSON.parse(v[i][6]) : null; } catch (e0) {}
     var r = tgNotify_(String(v[i][2]), String(v[i][3]), String(v[i][5]), { ref: String(v[i][4] || ''), markup: kb, force: true });
-    var next = r === 'رفت' ? 'رفت' : (tries + 1 >= 3 ? 'نرسید' : 'خطا ' + (tries + 1));
+    var next = r === 'رفت' ? 'رفت' : r === 'بلاک' ? 'بلاک' : (tries + 1 >= 3 ? 'نرسید' : 'خطا ' + (tries + 1));   /* v170.25 */
     sh.getRange(i + 2, 8).setValue(next); sh.getRange(i + 2, 9).setValue(new Date()); sent++;
   }
   return sent;
@@ -23517,13 +23535,13 @@ function tgMeetRemindTick_() {
       const soon = tgSoonWord_(start, kind);
       if (cid) {
         try {
-          tgSend_(cid, '🔔 یادآوری معارفه: ' + soon + '، ' + when + ' با <b>' + tgEsc_(ther) + '</b>.' +
+          tgSendAs_(TG_NK.remind, cid, '🔔 یادآوری معارفه: ' + soon + '، ' + when + ' با <b>' + tgEsc_(ther) + '</b>.' +
             (tInfo.meet ? '\n🔗 لینک جلسه:\n' + tgEsc_(tInfo.meet) : '\nلینک جلسه را پذیرش برایتان می‌فرستد.') +
             '\n\nاگر نمی‌توانید بیایید، از «🗓 وقت معارفهٔ من» لغو کنید تا وقت آزاد شود.');
         } catch (eC) {}
       }
       if (tInfo.chat) {
-        try { tgSend_(tInfo.chat, '🔔 یادآوری: معارفه با ' + tgEsc_(nm) + ' ' + soon + '، ' + when + '.'); } catch (eT) {}
+        try { tgSendAs_(TG_NK.remind, tInfo.chat, '🔔 یادآوری: معارفه با ' + tgEsc_(nm) + ' ' + soon + '، ' + when + '.'); } catch (eT) {}
       }
       tgSlotSet_(i + 4, TG_H_REMIND, (flag ? flag + ' · ' : '') + kind + ' ' + Utilities.formatDate(new Date(), TG_TZ, 'MM-dd HH:mm'));
       sent++;
@@ -33967,7 +33985,7 @@ function tgCpRun_(camp, e, who) {
     var save = function () { var j = JSON.stringify(st0); if (TG_DRY) TG_MEM[key] = j; else P.setProperty(key, j); };
     batch.forEach(function (c, i) {
       st0.d.push(c); var r = null;
-      try { r = tgSend_(c, text, kb.inline_keyboard.length ? kb : null); } catch (x) {}
+      try { r = tgSendAs_((/یادآوری/.test(String(e.type || '')) ? TG_NK.remind : TG_NK.invite), c, text, kb.inline_keyboard.length ? kb : null); } catch (x) {}
       if (TG_DRY || (r && r.getResponseCode && r.getResponseCode() === 200)) st0.ok++; else st0.no++;
       if (i % 20 === 19) save();
       if (!TG_DRY && (i + 1) % 25 === 0) Utilities.sleep(1000);
@@ -34106,7 +34124,7 @@ function tgCpDeadlineRemind_(camp, now, log) {
     var c = tgCpS_(l['chat_id']);
     if (!c || !/^-?\d+$/.test(c) || off.indexOf(c) > -1 || done.indexOf(c) > -1) return;
     if (sent >= TG_CP_SEND_MAX) { left2++; return; }
-    tgSend_(c, txt, kb); done.push(c); sent++;
+    tgSendAs_(TG_NK.remind, c, txt, kb); done.push(c); sent++;
   });
   var save = left2 ? done : ['fin'];
   if (TG_DRY) TG_MEM[key] = JSON.stringify(save); else P.setProperty(key, JSON.stringify(save));
@@ -36869,7 +36887,7 @@ function tgBcSend_(chat, name) {
   tgDel_('bcg', chat); tgDel_('bct', chat);
   for (var i = 0; i < list.length; i++) {
     var res = null;
-    try { res = tgSend_(list[i].chat, msg); } catch (e) {}
+    try { res = tgSendAs_(TG_NK.task, list[i].chat, msg); } catch (e) {}
     if (TG_DRY || (res && res.getResponseCode && res.getResponseCode() === 200)) ok++;
     else { bad++; if (badNames.length < 12) badNames.push(list[i].name || list[i].chat); }
   }
@@ -36884,7 +36902,7 @@ function tgBcSend_(chat, name) {
   var rep = '✅ <b>فرستاده شد</b>\n\nکد: ' + code + '\nگروه: ' + tgEsc_(g.t) +
     '\nرسید: ' + tgFa_(ok) + ' نفر';
   if (bad) rep += '\nنرسید: ' + tgFa_(bad) + ' نفر (' + tgEsc_(badNames.join('، ')) + ')';
-  return tgSend_(chat, rep);
+  return tgSendAs_(TG_NK.task, chat, rep);
 }
 
 /* v166.8: فقط ناظر و راهبر (همان قاعدهٔ منو و مینی‌اپ). پیش از این هر کسی با کال‌بک ساختگی bc:g و bc:go می‌توانست پیام همگانی بفرستد. */

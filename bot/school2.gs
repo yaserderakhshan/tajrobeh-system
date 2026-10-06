@@ -230,7 +230,7 @@ function scClinRemind_(now) {
     if (String(r['وضعیت']) !== SC_ST.ok || String(r['یادآوری به حلقه'] || '').trim()) return;
     var at = tgCpAt_(r['تاریخ جلسه'], '', false);
     if (!at || Utilities.formatDate(at, TG_TZ, 'yyyy-MM-dd') !== tomorrow) return;
-    scMembers_(r['حلقه']).forEach(function (m) { if (m.chat) { tgSend_(m.chat, '⏰ فردا ' + tgEsc_(r['نوع']) + ' «' + tgEsc_(r['عنوان']) + '» در حلقهٔ شماست.'); n++; } });
+    scMembers_(r['حلقه']).forEach(function (m) { if (m.chat) { tgSendAs_(TG_NK.remind, m.chat, '⏰ فردا ' + tgEsc_(r['نوع']) + ' «' + tgEsc_(r['عنوان']) + '» در حلقهٔ شماست.'); n++; } });
     scSet_(SC_T_CLIN, r._row, { 'یادآوری به حلقه': scToday_() });
   });
   return n;
@@ -300,7 +300,7 @@ function scConnRemind_(now) {
   Object.keys(circles).forEach(function (c) {
     var txt = scPendingText_(c);
     if (!txt) return;
-    scPeopleOf_(SC_ROLE_REP, c).concat(scPeopleOf_(SC_ROLE_MENTOR, c)).forEach(function (x) { tgSend_(x.chat, txt); n++; });
+    scPeopleOf_(SC_ROLE_REP, c).concat(scPeopleOf_(SC_ROLE_MENTOR, c)).forEach(function (x) { tgSendAs_(TG_NK.remind, x.chat, txt); n++; });
   });
   return n;
 }

@@ -949,7 +949,7 @@ function pbDigestRun_(now, force) {
   var n = 0;
   for (; cur < pl.chats.length && n < 60; cur++, n++) {
     var c = pl.chats[cur], msg = pbDigestMsg_(pl.items, pl.rec[c], week);
-    var res = tgSend_(c, msg.text, msg.kb);
+    var res = tgSendAs_(TG_NK.invite, c, msg.text, msg.kb);
     var ok = TG_DRY ? true : !!(res && res.getResponseCode && res.getResponseCode() === 200);
     if (ok) { sent++; pl.rec[c].slice(0, pbCfgN_('digest_max', 3)).forEach(function (i) { per[pl.items[i].id] = (per[pl.items[i].id] || 0) + 1; }); }
     else fail++;
