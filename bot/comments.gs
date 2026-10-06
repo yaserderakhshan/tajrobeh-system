@@ -264,6 +264,13 @@ function cmResuggest_(l, why) {
 /* پیشنهاد اقدام یک کامنت: {to, ch, act, reply, card, task}. چیزی نمی‌نویسد */
 function cmPlanOne_(it, c, l) {
   var st = tgStOf_(l.status) || l.status || 'جدید', own = cmHuman_(l.owner), p = { from: st, ch: {}, act: '', reply: '', card: '', task: null, sug: [] };
+  /* v170.22.2: کامنتی که از آخرین وضعیت غیرکامنتی (شیت یا بات) قدیمی‌تر است، وضعیت یا اقدام بعدی را عوض نمی‌کند (اجرای ۱۲ مهر) */
+  if (['set', 'cancel', 'noans', 'start', 'psy'].indexOf(c.cat) > -1 && cmIsStale_(it, l)) {
+    p.to = st; p.stale = true;
+    p.act = 'کامنت قدیمی‌تر از آخرین وضعیت لید؛ وضعیت و اقدام دست نخورد';
+    p.reply = 'ثبت شد در رویدادهای لید. وضعیت لید بعد از این کامنت عوض شده بود، پس وضعیت و اقدام بعدی دست نخورد.';
+    return p;
+  }
   var day0 = cmItDay_(it) || undefined;   /* v170.21: پایهٔ «تماس بعدی» روز خود کامنت است */
   var t0 = it && (it.t || it.created) && !isNaN(new Date(it.t || it.created).getTime()) ? new Date(it.t || it.created) : cmNow_();
   if (c.cat === 'set') {
@@ -330,7 +337,7 @@ function cmApplyOne_(it, c, l, p) {
   var taskCode = '';
   if (p.task) {
     try { if (typeof opsAdd_ === 'function') taskCode = opsAdd_({ title: p.task.title, cat: 'پذیرش', owner: p.task.owner, by: it.author || 'کامنت', due: p.task.due, src: 'کامنت', ref: 'CM:' + it.id, note: code }); } catch (eT) { tgErr_('cmApplyOne_ opsAdd_', eT); }
-    if (!taskCode && row >= 2 && !stkDry_()) tgLeadSet_(row, { 'اقدام بعدی': p.task.title.slice(0, 80), 'تاریخ اقدام بعدی': cmDay_(1) }, it.author || 'کامنت', 'کامنت', 'دستور ' + tgNm_('reception'));
+    if (!taskCode && row >= 2 && !stkDry_() && !cmIsStale_(it, l)) tgLeadSet_(row, { 'اقدام بعدی': p.task.title.slice(0, 80), 'تاریخ اقدام بعدی': cmDay_(1) }, it.author || 'کامنت', 'کامنت', 'دستور ' + tgNm_('reception'));
     if (taskCode) p.reply = p.reply.replace('ثبت شد: کار', 'ثبت شد: کار ' + taskCode);
   }
   tgLeadEv_({ code: code, row: row, actor: it.author || 'کامنت', channel: 'کامنت', what: 'کامنت · ' + CM_CAT[c.cat], from: p.from, to: p.to, note: String(it.text).slice(0, 300), type: l.type || '' });
@@ -361,6 +368,7 @@ function cmRun_(dry, max) {
   items.sort(function (a, b) { return String(a.t).localeCompare(String(b.t)); });
   if (max) items = items.slice(0, max);
   var x = items.map(function (it) { return { it: it, lead: cmLink_(it, idx) }; });
+  try { cmStAtAttach_(x.filter(function (o) { return o.lead; })); } catch (eSt) { tgErr_('cmStAtAttach_', eSt); }   /* v170.22.2 */
   /* اجرای واقعی همان دسته‌بندی آزمایشیِ تأییدشده را به کار می‌برد */
   var need = [], cls = {};
   x.forEach(function (o, i) { var d = dryRow[o.it.id]; if (!dry && d) { try { if (d.data) cls[i] = JSON.parse(d.data); } catch (e) {} return; } need.push(i); });
@@ -547,15 +555,55 @@ function cmTests() {
     ok('سلامت: موعد گذشته، بسته با اقدام باز، جدید ۴۸ ساعت، معارفهٔ بی نتیجه، کامنت ۳ روزه، بی اقدام',
       /lead_nonext:L-2001/.test(keys) && /lead_closednext:L-2002/.test(keys) && /lead_new48:L-2001/.test(keys) && /lead_meetstale:L-2003/.test(keys) && /lead_comment3:L-2004/.test(keys) && /lead_nonext:L-2004/.test(keys));
     ok('سلامت: کارت‌ها تا تأیید یاسر نگه‌داشته', stkRows_().every(function (r) { return r.card === STK_HELD; }));
-    /* v170.21: اصلاح یک‌باره؛ پیش‌نمایش بی تغییر، اعمال فقط با «اوکی» */
-    TG_MEM['lm:leads'] = [{ row: 2, code: 'L-1272', status: 'در پیگیری' }, { row: 3, code: 'L-1300', status: 'پاسخ نداد' }];
-    TG_MEM['cm:fixlead'] = { 'L-1272': { next: 'ارجاع مجدد', nextDate: '2026-10-05', noans: 0 }, 'L-1300': { next: 'تماس دیگر', nextDate: '2026-10-05' } };
+    /* v170.21 و v170.22.2: اصلاح یک‌باره؛ پیش‌نمایش بی تغییر، اعمال فقط با «اوکی». ساعت آزمون: ۱۳ مهر ۱۰:۲۵ (۲۰۲۶-۱۰-۰۴) */
+    var T = function (iso) { return new Date(iso + ':00+03:30'); };
+    TG_MEM['lm:leads'] = [{ row: 2, code: 'L-1272', status: 'در پیگیری' }, { row: 3, code: 'L-1300', status: 'پاسخ نداد' },
+      { row: 4, code: 'L-3001', status: 'پاسخ نداد' }, { row: 5, code: 'L-3002', status: 'در پیگیری' }, { row: 6, code: 'L-3003', status: 'در پیگیری' }];
+    TG_MEM['cm:fixlead'] = { 'L-1272': { status: 'در پیگیری', next: 'ارجاع مجدد', nextDate: '2026-10-05', noans: 0 }, 'L-1300': { status: 'پاسخ نداد', next: 'تماس دیگر', nextDate: '2026-10-05' },
+      'L-3001': { status: 'پاسخ نداد', next: 'تماس دوباره', nextDate: '2026-10-05', noans: 1 }, 'L-3002': { status: 'در پیگیری', next: 'تماس دوباره', nextDate: '2026-10-05', noans: 1 },
+      'L-3003': { status: 'در پیگیری', next: 'تماس اول', nextDate: '2026-10-07', noans: 0 } };
+    /* L-3001: کامنت ۲۸ شهریور، معارفه از بات ۳۰ شهریور، اجرای کامنت ۱۲ مهر وضعیت را برگرداند (آسیب‌دیده)
+       L-3002: همان، ولی ۱۳ مهر کسی دستی وضعیت را عوض کرد (دست نمی‌خورد) */
+    TG_MEM['cm:log'] = TG_MEM['cm:log'].concat([
+      { id: 'f1', code: 'L-3001', cat: CM_CAT.noans, st: CM_ST.DONE, t: '2026-09-19T08:00:00Z' },
+      { id: 'f2', code: 'L-3002', cat: CM_CAT.noans, st: CM_ST.DONE, t: '2026-09-19T08:00:00Z' }]);
+    TG_MEM['cm:ev'] = [
+      { t: T('2026-09-21T10:00'), code: 'L-3001', actor: 'بات', ch: 'تلگرام', what: 'وضعیت', from: 'جدید', to: 'معارفه رزرو شد' },
+      { t: T('2026-10-03T22:00'), code: 'L-3001', actor: 'کامنت', ch: 'کامنت', what: 'وضعیت', from: 'معارفه رزرو شد', to: 'پاسخ نداد' },
+      { t: T('2026-10-03T22:00'), code: 'L-3001', actor: 'کامنت', ch: 'کامنت', what: 'اقدام بعدی', from: 'پیگیری بعد از معارفه', to: 'تماس دوباره' },
+      { t: T('2026-10-03T22:00'), code: 'L-3001', actor: 'کامنت', ch: 'کامنت', what: 'تاریخ اقدام بعدی', from: '2026-09-22', to: '2026-10-05' },
+      { t: T('2026-10-03T22:00'), code: 'L-3001', actor: 'کامنت', ch: 'کامنت', what: 'شمار بی‌پاسخ', from: '', to: '1' },
+      { t: T('2026-09-21T10:00'), code: 'L-3002', actor: 'شیت', ch: 'شیت', what: 'وضعیت', from: 'جدید', to: 'بسته' },
+      { t: T('2026-10-03T22:00'), code: 'L-3002', actor: 'کامنت', ch: 'کامنت', what: 'وضعیت', from: 'بسته', to: 'پاسخ نداد' },
+      { t: T('2026-10-04T09:00'), code: 'L-3002', actor: 'پذیرش', ch: 'شیت', what: 'وضعیت', from: 'پاسخ نداد', to: 'در پیگیری' }];
+    TG_MEM['cm:noansv'] = [0, new Date(1899, 11, 31), 2, new Date(1899, 11, 30)];
     TG_OUTBOX = [];
-    var pv = tgV17021CmFixPreview(), fx = TG_MEM['cm:fixtab'] || [];
-    ok('v170.21: پیش‌نمایش: فقط لیدی که هنوز همان اقدام را دارد، بی تغییر', /۱|1 لید/.test(pv) && fx.length === 1 && fx[0].code === 'L-1272' && fx[0].want === '2026-09-26' && !TG_OUTBOX.some(function (o) { return o.kind === 'leadset'; }), pv + ' ' + JSON.stringify(fx));
-    ok('v170.21: بی «اوکی» اعمال نمی‌شود', cmFixMaybe_() === 0 && !TG_OUTBOX.some(function (o) { return o.kind === 'leadset'; }));
+    var pv = cmFixPreview_({ 'L-3003': 'later:21', 'L-1300': 'badnum' }), fx = TG_MEM['cm:fixtab'] || [];
+    var rv = fx.filter(function (r) { return r.code === 'L-3001'; })[0] || {};
+    ok('v170.22.2: لید آسیب‌دیده به وضعیت پیش از اجرا برمی‌گردد، با اقدام و شمار درست', rv.kind === CM_FIX_KIND.rev && rv.state === CM_FIX_STATE.apply && rv.wantSt === 'معارفه رزرو شد' && rv.wantNext === 'پیگیری بعد از معارفه' && String(rv.noans) === '0', JSON.stringify(rv));
+    ok('v170.22.2: تاریخ اقدام بعدی هیچ‌وقت در گذشته نیست (کمینه امروز)', rv.wantDate === '2026-10-04' && fx.every(function (r) { return !r.wantDate || r.wantDate >= '2026-10-04'; }), JSON.stringify(fx.map(function (r) { return r.code + ':' + r.wantDate; })));
+    var r2 = fx.filter(function (r) { return r.code === 'L-3002'; })[0] || {};
+    ok('v170.22.2: بعد از اجرا دستی عوض شده ← دست نمی‌خورد', r2.kind === CM_FIX_KIND.rev && r2.state === CM_FIX_STATE.later && r2.wantSt === 'بسته', JSON.stringify(r2));
+    var h1 = fx.filter(function (r) { return r.kind === CM_FIX_KIND.hint; });
+    ok('v170.22.2: پیشنهادها در پیش‌نمایش، با اوکی اعمال نمی‌شوند', h1.length === 2 && h1.every(function (r) { return r.state === CM_FIX_STATE.hint; }) &&
+      h1.filter(function (r) { return r.code === 'L-1300'; })[0].wantSt === TG_ST.CLOSED && h1.filter(function (r) { return r.code === 'L-3003'; })[0].wantDate === '2026-10-25', JSON.stringify(h1));
+    var d1 = fx.filter(function (r) { return r.kind === CM_FIX_KIND.date; });
+    ok('v170.21: تاریخ از روز کامنت فقط برای لیدی که هنوز همان اقدام را دارد (کمینه امروز)', d1.length === 1 && d1[0].code === 'L-1272' && d1[0].wantDate === '2026-10-04', JSON.stringify(d1));
+    ok('v170.22.2: «شمار بی‌پاسخ» خراب شمرده می‌شود', /خراب: 2/.test(TG_MEM['cm:fixsum'] || ''), TG_MEM['cm:fixsum']);
+    ok('v170.22.2: پیش‌نمایش چیزی عوض نمی‌کند و بی «اوکی» اعمال نمی‌شود', !TG_OUTBOX.some(function (o) { return o.kind === 'leadset'; }) && cmFixMaybe_() === 0 && !TG_OUTBOX.some(function (o) { return o.kind === 'leadset'; }));
     TG_MEM['cm:fixok'] = 'اوکی';
-    ok('v170.21: با «اوکی» یک بار اعمال', cmFixMaybe_() === 1 && TG_OUTBOX.filter(function (o) { return o.kind === 'leadset' && o.changes['تاریخ اقدام بعدی'] === '2026-09-26'; }).length === 1 && cmFixMaybe_() === 0);
+    var nAp = cmFixMaybe_(), sets2 = TG_OUTBOX.filter(function (o) { return o.kind === 'leadset'; });
+    ok('v170.22.2: با «اوکی» فقط برگشت و تاریخ اعمال، یک بار، با کی=اصلاح ۱۷۰٫۲۱', nAp === 2 && sets2.length === 2 && sets2.every(function (o) { return o.actor === CM_FIX_ACTOR; }) &&
+      sets2.some(function (o) { return o.code === 'L-3001' && o.changes['وضعیت'] === 'معارفه رزرو شد' && o.changes['تاریخ اقدام بعدی'] === '2026-10-04'; }) &&
+      !sets2.some(function (o) { return o.code === 'L-3002' || o.code === 'L-1300' || o.code === 'L-3003'; }) && cmFixMaybe_() === 0, JSON.stringify(sets2));
+    ok('v170.22.2: «شمار بی‌پاسخ» خراب صفر شد', JSON.stringify(TG_MEM['cm:noansv']) === '[0,0,2,0]');
+    /* قاعدهٔ دائمی: کامنت قدیمی‌تر از آخرین وضعیت غیرکامنتی، وضعیت و اقدام را عوض نمی‌کند */
+    var lSt = { row: 4, code: 'L-3001', status: 'معارفه رزرو شد', stAt: T('2026-09-21T10:00').getTime() };
+    var pSt = cmPlanOne_({ text: 'جواب نداد', t: '2026-09-19T08:00:00Z' }, { cat: 'noans', conf: 1 }, lSt);
+    ok('v170.22.2: قاعدهٔ دائمی: کامنت قدیمی وضعیت و اقدام را عوض نمی‌کند', pSt.stale === true && !Object.keys(pSt.ch).length && pSt.to === 'معارفه رزرو شد', JSON.stringify(pSt.ch));
+    var pNew = cmPlanOne_({ text: 'جواب نداد', t: '2026-09-22T08:00:00Z' }, { cat: 'noans', conf: 1 }, lSt);
+    ok('v170.22.2: کامنت تازه‌تر از وضعیت همان رفتار قبلی را دارد', !pNew.stale && pNew.ch['وضعیت'] === TG_ST.NOANS);
+    ok('v170.22.2: آخرین وضعیت غیرکامنتی از رویدادها', cmLastStAt_(cmEvIdx_()['L-3002']) === T('2026-10-04T09:00').getTime() && cmLastStAt_(cmEvIdx_()['L-3001']) === T('2026-09-21T10:00').getTime());
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 400) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK;
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ کامنت‌ها درست است'));
@@ -565,53 +613,217 @@ function cmTests() {
 /* ============================================================================
    v170.21 · اصلاح یک‌بارهٔ «تماس بعدی» کامنت‌های قدیمی
    پیش از این «تاریخ اقدام بعدی» کامنت بی‌پاسخ، لغو و روان‌پزشکی از روز اجرا حساب می‌شد، نه روز کامنت (برای ده‌ها لید «۱۳ مهر»).
-   - پیش‌نمایش (خودکار بعد از انتشار، فقط خواندن): تب «اصلاح کامنت‌ها · پیش‌نمایش» در هاب پذیرش و خلاصه برای یاسر.
-     فقط لیدی که آخرین کامنت اعمال‌شده‌اش همان اقدام را گذاشته و هنوز همان اقدام را دارد.
-   - اعمال فقط وقتی کسی در خانهٔ B1 همان تب «اوکی» بنویسد (یاسر در PR تأیید می‌کند). از tgLeadSet_، با رویداد لید.
+   v170.22.2 (۱۴ مهر، تصمیم یاسر): این پیش‌نمایش ناقص بود. در اجرای ۱۲ مهر کامنت‌خوان کامنت‌های قدیمی را روی لیدهایی هم اعمال کرد
+   که بعد از آن کامنت وضعیت تازه‌تری از شیت یا بات گرفته بودند؛ وضعیتشان از «معارفه رزرو شد / بسته / شروع درمان» به
+   «پاسخ نداد / در پیگیری» برگشت. حالا پیش‌نمایش سه بخش دارد:
+   - «برگشت وضعیت»: لیدی که کامنتی قدیمی‌تر از آخرین وضعیت غیرکامنتی‌اش وضعیتش را عوض کرده (از «رویدادهای لید»).
+     وضعیت، اقدام بعدی، تاریخ و شمار بی‌پاسخ به مقدار پیش از همان اجرا برمی‌گردد. اگر بعد از آن اجرا کسی دستی وضعیت را عوض
+     کرده، دست نمی‌خورد.
+   - «تاریخ از روز کامنت»: همان اصلاح v170.21.
+   - «پیشنهاد»: از کلید اختیاری CM_FIX_HINTS در «تنظیمات خصوصی بات» (کد لید در مخزن عمومی نمی‌آید). با «اوکی» اعمال نمی‌شود.
+   تاریخ اقدام بعدی هیچ‌وقت در گذشته نیست (کمینه امروز). ستون «شمار بی‌پاسخ»: خانه‌هایی که صفر را تاریخ ۱۸۹۹ نشان می‌دهند.
+   اعمال فقط وقتی کسی در خانهٔ B1 همان تب «اوکی» بنویسد؛ هر تغییر با کی=«اصلاح ۱۷۰٫۲۱» در «رویدادهای لید».
    ============================================================================ */
 var CM_FIX_TAB = 'اصلاح کامنت‌ها · پیش‌نمایش';
-var CM_FIX_HEAD = ['کد لید', 'زمان کامنت', 'دسته', 'اقدام', 'تاریخ اقدام بعدی فعلی', 'تاریخ درست', 'حالت'];
-function cmFixRows_() {
-  var log = cmLog_().filter(function (e) { return e.st === CM_ST.DONE && e.code && e.t; });
-  var last = {};
-  log.forEach(function (e) { if (!last[e.code] || String(e.t) > String(last[e.code].t)) last[e.code] = e; });
-  var idx = lmLeadIdx_(), byCode = {}, out = [];
-  idx.list.forEach(function (l) { byCode[l.code] = l; });
-  Object.keys(last).sort().forEach(function (code) {
-    var e = last[code], act = null;
-    if (e.cat === CM_CAT.noans) act = 'تماس دوباره'; else if (e.cat === CM_CAT.cancel) act = 'ارجاع مجدد'; else if (e.cat === CM_CAT.psy) act = 'هماهنگی روان‌پزشکی';
-    var l = byCode[code]; if (!act || !l) return;
-    var full = stkDry_() ? (TG_MEM['cm:fixlead'] || {})[code] || {} : (tgLeadRead_(l.row) || {});
-    if (String(full.next || '').trim() !== act) return;   /* بعدش دستی عوض شده؛ دست نمی‌زنیم */
-    var n = act === 'تماس دوباره' && Number(full.noans || 0) >= CM_NOANS_MAX ? 3 : 1;
-    var want = cmDay_(n, cmItDay_({ t: e.t }));
-    if (!want || String(full.nextDate || '') === want) return;
-    out.push({ code: code, row: l.row, t: e.t, cat: e.cat, act: act, cur: String(full.nextDate || ''), want: want });
+var CM_FIX_HEAD = ['کد لید', 'نوع', 'وضعیت فعلی', 'وضعیت درست', 'اقدام فعلی', 'اقدام درست', 'تاریخ فعلی', 'تاریخ درست', 'زمان کامنت', 'آخرین وضعیت غیرکامنتی', 'حالت'];
+var CM_FIX_ACTOR = 'اصلاح ۱۷۰٫۲۱';
+var CM_FIX_KIND = { rev: 'برگشت وضعیت', date: 'تاریخ از روز کامنت', hint: 'پیشنهاد' };
+var CM_FIX_STATE = { apply: 'با اوکی اعمال می‌شود', hint: 'پیشنهاد؛ با اوکی اعمال نمی‌شود', later: 'بعداً دستی عوض شده؛ دست نمی‌خورد' };
+var CM_FIX_FIELDS = ['وضعیت', 'اقدام بعدی', 'تاریخ اقدام بعدی', 'شمار بی‌پاسخ'];
+cfg_('CM_FIX_HINTS', {});   /* ثبت در بارگذاری تا cfgSync_ مقدار تب را بپذیرد */
+
+function cmFixToday_() { return cmDay_(0); }
+/* تاریخ هر شکلی (Date، yyyy-MM-dd، متن تاریخ شیت) ← yyyy-MM-dd یا '' */
+function cmFixIso_(v) {
+  if (v instanceof Date) return isNaN(v.getTime()) ? '' : Utilities.formatDate(v, TG_TZ, 'yyyy-MM-dd');
+  var t = String(v == null ? '' : v).trim(); if (!t) return '';
+  if (/^\d{4}-\d{2}-\d{2}/.test(t)) return t.slice(0, 10);
+  var d = new Date(t); return isNaN(d.getTime()) ? '' : Utilities.formatDate(d, TG_TZ, 'yyyy-MM-dd');
+}
+function cmFixFloor_(iso) { var t = cmFixToday_(); return !iso || iso < t ? t : iso; }   /* هیچ‌وقت در گذشته */
+function cmFixIsCm_(e) { return e.ch === 'کامنت' || e.actor === 'کامنت'; }
+
+/* «رویدادهای لید» ← {کد: [{t, actor, ch, what, from, to}]} فقط چهار ستون وضعیت و اقدام، به ترتیب زمان */
+function cmEvIdx_() {
+  var out = {}, rows;
+  if (stkDry_()) rows = TG_MEM['cm:ev'] || [];
+  else {
+    var sh = tgSS_().getSheetByName(TG_LEAD_EV_TAB), n = sh ? sh.getLastRow() : 0;
+    rows = n < 2 ? [] : sh.getRange(2, 1, n - 1, 8).getValues().map(function (v) { return { t: v[0], code: String(v[1]).trim(), actor: String(v[3]).trim(), ch: String(v[4]).trim(), what: String(v[5]).trim(), from: v[6], to: v[7] }; });
+  }
+  rows.forEach(function (e) {
+    if (!e.code || CM_FIX_FIELDS.indexOf(e.what) < 0) return;
+    var t = e.t instanceof Date ? e.t.getTime() : new Date(e.t).getTime(); if (isNaN(t)) return;
+    (out[e.code] = out[e.code] || []).push({ t: t, actor: e.actor, ch: e.ch, what: e.what, from: String(e.from == null ? '' : e.from), to: String(e.to == null ? '' : e.to) });
+  });
+  Object.keys(out).forEach(function (k) { out[k].sort(function (a, b) { return a.t - b.t; }); });
+  return out;
+}
+/* زمان آخرین تغییر وضعیتی که از کامنت نیامده (پیش از لحظهٔ before، یا آخرین) */
+function cmLastStAt_(evs, before) {
+  var at = 0;
+  (evs || []).forEach(function (e) { if (e.what === 'وضعیت' && !cmFixIsCm_(e) && (!before || e.t < before) && e.t > at) at = e.t; });
+  return at;
+}
+/* قاعدهٔ دائمی v170.22.2: کامنتی که از آخرین وضعیت غیرکامنتی لید قدیمی‌تر است، وضعیت یا اقدام بعدی را عوض نمی‌کند */
+function cmIsStale_(it, l) {
+  var t = it && (it.t || it.created) ? new Date(it.t || it.created).getTime() : NaN;
+  return !!(l && l.stAt && !isNaN(t) && t < l.stAt);
+}
+
+/* لیدهای آسیب‌دیده: هر گروه رویداد کامنتی (۳۰ دقیقه) که وضعیت را عوض کرده و کامنتش قدیمی‌تر از وضعیت غیرکامنتی پیش از آن بوده */
+function cmFixRevRows_(ev, log, byCode, readLead) {
+  var out = [], win = 30 * 60000;
+  var cmt = {};   /* کد ← زمان کامنت‌های اعمال‌شده */
+  log.forEach(function (e) { if (e.st === CM_ST.DONE && e.code && e.t) { var x = new Date(e.t).getTime(); if (!isNaN(x)) (cmt[e.code] = cmt[e.code] || []).push(x); } });
+  Object.keys(ev).sort().forEach(function (code) {
+    var evs = ev[code], l = byCode[code]; if (!l) return;
+    var cs = evs.filter(function (e) { return cmFixIsCm_(e) && e.what === 'وضعیت'; });
+    for (var i = 0; i < cs.length; i++) {
+      var E = cs[i], prev = cmLastStAt_(evs, E.t);
+      var tc = (cmt[code] || []).filter(function (x) { return x <= E.t; }).sort(function (a, b) { return b - a; })[0];
+      if (!prev || !tc || tc >= prev) continue;
+      /* همهٔ رویدادهای کامنتی همان اجرا (۳۰ دقیقه از نخستین) */
+      var g = evs.filter(function (e) { return cmFixIsCm_(e) && Math.abs(e.t - E.t) <= win; });
+      var first = function (w) { var x = g.filter(function (e) { return e.what === w; })[0]; return x ? x.from : undefined; };
+      var lastTo = g.filter(function (e) { return e.what === 'وضعیت'; }).slice(-1)[0].to;
+      var later = evs.some(function (e) { return e.what === 'وضعیت' && !cmFixIsCm_(e) && e.t > E.t + win; });
+      var cur = readLead(l) || {};
+      var curSt = tgStOf_(cur.status) || cur.status || '';
+      var wantSt = first('وضعیت');
+      var closed = tgStClosed_(wantSt);
+      var wantNext = first('اقدام بعدی'); if (wantNext === undefined) wantNext = cur.next || '';
+      var wantDate = first('تاریخ اقدام بعدی'); wantDate = wantDate === undefined ? cmFixIso_(cur.nextDate) : cmFixIso_(wantDate);
+      if (closed) { wantNext = ''; wantDate = ''; } else wantDate = cmFixFloor_(wantDate);
+      var wantNo = first('شمار بی‌پاسخ'); wantNo = wantNo === undefined ? String(cur.noans || 0) : (Number(tgLatinDigits_(wantNo)) || 0);
+      var st = later || (tgStOf_(lastTo) || lastTo) !== curSt ? CM_FIX_STATE.later : CM_FIX_STATE.apply;
+      out.push({ kind: CM_FIX_KIND.rev, code: code, row: l.row, curSt: curSt, wantSt: wantSt, curNext: cur.next || '', wantNext: wantNext, curDate: cmFixIso_(cur.nextDate), wantDate: wantDate, noans: wantNo,
+        t: Utilities.formatDate(new Date(tc), TG_TZ, 'yyyy-MM-dd HH:mm'), prev: Utilities.formatDate(new Date(prev), TG_TZ, 'yyyy-MM-dd HH:mm'), state: st });
+      break;   /* هر لید یک ردیف: نخستین اجرای آسیب‌زا */
+    }
   });
   return out;
 }
-function tgV17021CmFixPreview() {
-  var rows = cmFixRows_();
-  if (stkDry_()) { TG_MEM['cm:fixtab'] = rows; return 'پیش‌نمایش اصلاح کامنت‌ها: ' + rows.length + ' لید'; }
-  var ss = tgSS_(), sh = ss.getSheetByName(CM_FIX_TAB);
-  if (!sh) { sh = ss.insertSheet(CM_FIX_TAB); sh.setRightToLeft(true); }
-  sh.clearContents();
-  sh.getRange(1, 1, 1, 2).setValues([['اعمال؟ برای اعمال در B1 بنویسید: اوکی', '']]).setFontWeight('bold');
-  sh.getRange(2, 1, 1, CM_FIX_HEAD.length).setValues([CM_FIX_HEAD]).setFontWeight('bold').setBackground('#f5f5f8');
-  if (rows.length) sh.getRange(3, 1, rows.length, CM_FIX_HEAD.length).setNumberFormat('@').setValues(rows.map(function (r) { return [r.code, String(r.t).slice(0, 16), r.cat, r.act, r.cur, r.want, 'پیش‌نمایش']; }));
-  sh.setFrozenRows(2);
-  try { tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '🛠 <b>اصلاح «تماس بعدی» کامنت‌های قدیمی</b>\nپیش‌نمایش: ' + tgFa_(rows.length) + ' لید، در تب «' + CM_FIX_TAB + '» هاب پذیرش.\nچیزی عوض نشد. برای اعمال، در B1 همان تب «اوکی» بنویسید.', { ref: 'v170.21' }); } catch (eN) {}
-  return 'پیش‌نمایش اصلاح کامنت‌ها: ' + rows.length + ' لید';
+/* همان اصلاح v170.21 (تاریخ از روز کامنت)، با کمینهٔ امروز */
+function cmFixDateRows_(log, byCode, readLead, skip) {
+  var last = {}, out = [];
+  log.filter(function (e) { return e.st === CM_ST.DONE && e.code && e.t; }).forEach(function (e) { if (!last[e.code] || String(e.t) > String(last[e.code].t)) last[e.code] = e; });
+  Object.keys(last).sort().forEach(function (code) {
+    if (skip[code]) return;
+    var e = last[code], act = null;
+    if (e.cat === CM_CAT.noans) act = 'تماس دوباره'; else if (e.cat === CM_CAT.cancel) act = 'ارجاع مجدد'; else if (e.cat === CM_CAT.psy) act = 'هماهنگی روان‌پزشکی';
+    var l = byCode[code]; if (!act || !l) return;
+    var full = readLead(l) || {};
+    if (String(full.next || '').trim() !== act) return;   /* بعدش دستی عوض شده؛ دست نمی‌زنیم */
+    var n = act === 'تماس دوباره' && Number(full.noans || 0) >= CM_NOANS_MAX ? 3 : 1;
+    var want = cmFixFloor_(cmDay_(n, cmItDay_({ t: e.t }))), cur = cmFixIso_(full.nextDate);
+    if (!want || cur === want) return;
+    var st = tgStOf_(full.status) || full.status || '';
+    out.push({ kind: CM_FIX_KIND.date, code: code, row: l.row, curSt: st, wantSt: st, curNext: act, wantNext: act, curDate: cur, wantDate: want, t: String(e.t).slice(0, 16), prev: '', state: CM_FIX_STATE.apply });
+  });
+  return out;
 }
-/* ساعتی (stkHourly_ نه؛ از cmTick5_ هر ۱۵ دقیقه): اگر B1 «اوکی» است، یک بار اعمال */
-function cmFixMaybe_() {
-  var ok = stkDry_() ? TG_MEM['cm:fixok'] : (function () { var sh = tgSS_().getSheetByName(CM_FIX_TAB); return sh ? String(sh.getRange(1, 2).getValue() || '').trim() : ''; })();
-  if (ok !== 'اوکی' || stkProp_('CM_FIX_DONE') === '1') return 0;
-  stkProp_('CM_FIX_DONE', '1');
-  var rows = cmFixRows_(), n = 0;
-  rows.forEach(function (r) { tgLeadSet_(r.row, { 'تاریخ اقدام بعدی': r.want }, 'بات', 'کامنت', 'اصلاح یک‌بارهٔ v170.21: تماس بعدی از روز کامنت'); n++; });
-  if (!stkDry_()) { try { var sh = tgSS_().getSheetByName(CM_FIX_TAB); sh.getRange(1, 2).setValue('اعمال شد ' + Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm') + ' · ' + n + ' لید'); } catch (e) {} }
-  try { tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '✅ اصلاح «تماس بعدی» کامنت‌ها اعمال شد: ' + tgFa_(n) + ' لید.', { ref: 'v170.21' }); } catch (eN) {}
-  return n;
+/* پیشنهادها از CM_FIX_HINTS: {"کد": "badnum" | "notclient" | "later:21" | "self:7"} */
+var CM_FIX_HINT = {
+  badnum: { st: TG_ST.CLOSED, next: '', reason: 'شمارهٔ نامعتبر', why: 'شماره نامعتبر؛ تماس دوباره نه' },
+  notclient: { st: TG_ST.CLOSED, next: '', reason: 'درمان نمی‌خواهد؛ ارجاع به جذب درمانگر', why: 'فرم همکاری بوده؛ ارجاع به جذب درمانگر' },
+  later: { st: TG_ST.FOLLOW, next: 'پیگیری شروع درمان', why: 'شروع بعداً؛ پیگیری، نه ارجاع مجدد' },
+  self: { st: TG_ST.FOLLOW, next: 'پیگیری (خودش تماس می‌گیرد)', why: 'خودش تماس می‌گیرد' }
+};
+function cmFixHintRows_(hints, byCode, readLead) {
+  var out = [];
+  Object.keys(hints || {}).sort().forEach(function (code) {
+    var m = String(hints[code] || '').match(/^(badnum|notclient|later|self)(?::(\d{1,3}))?$/), l = byCode[code];
+    if (!m || !l) return;
+    var h = CM_FIX_HINT[m[1]], cur = readLead(l) || {}, days = Number(m[2] || (m[1] === 'self' ? 7 : 21));
+    var wantDate = h.st === TG_ST.CLOSED ? '' : cmFixFloor_(cmDay_(days));
+    out.push({ kind: CM_FIX_KIND.hint, code: code, row: l.row, curSt: tgStOf_(cur.status) || cur.status || '', wantSt: h.st, curNext: cur.next || '', wantNext: h.next + (h.reason ? '' : ' (+' + tgFa_(days) + ' روز)'),
+      curDate: cmFixIso_(cur.nextDate), wantDate: wantDate, reason: h.reason || '', t: '', prev: h.why + (h.reason ? ' · دلیل بستن: ' + h.reason : ''), state: CM_FIX_STATE.hint });
+  });
+  return out;
+}
+/* «شمار بی‌پاسخ»: خانه‌هایی که تاریخ‌اند (صفر با قالب تاریخ، ۱۸۹۹) */
+function cmFixNoansBroken_() {
+  if (stkDry_()) return (TG_MEM['cm:noansv'] || []).filter(function (v) { return v instanceof Date; }).length;
+  var sh = tgSS_().getSheetByName(TG_LEADS), col = tgLeadCol_('شمار بی‌پاسخ'), n = sh.getLastRow();
+  if (!col || n < 2) return 0;
+  return sh.getRange(2, col, n - 1, 1).getValues().filter(function (r) { return r[0] instanceof Date; }).length;
+}
+function cmFixNoansRepair_() {
+  if (stkDry_()) { var v = TG_MEM['cm:noansv'] || [], k = 0; TG_MEM['cm:noansv'] = v.map(function (x) { if (x instanceof Date) { k++; return 0; } return x; }); return k; }
+  var sh = tgSS_().getSheetByName(TG_LEADS), col = tgLeadCol_('شمار بی‌پاسخ'), n = sh.getLastRow();
+  if (!col) return 0;
+  var rg = sh.getRange(2, col, Math.max(1, sh.getMaxRows() - 1), 1);
+  rg.setNumberFormat('0');
+  if (n < 2) return 0;
+  var r2 = sh.getRange(2, col, n - 1, 1), v = r2.getValues(), fixed = 0;
+  v.forEach(function (r) { if (r[0] instanceof Date) { r[0] = 0; fixed++; } });
+  if (fixed) r2.setValues(v);
+  return fixed;
+}
+/* همهٔ ردیف‌های پیش‌نمایش؛ hints برای آزمون (پیش‌فرض از تنظیمات خصوصی) */
+function cmFixRows2_(hints) {
+  var idx = lmLeadIdx_(), byCode = {};
+  idx.list.forEach(function (l) { if (l.code) byCode[l.code] = l; });
+  var readLead = function (l) { return stkDry_() ? (TG_MEM['cm:fixlead'] || {})[l.code] || { status: l.status } : (tgLeadRead_(l.row) || {}); };
+  var log = cmLog_(), rev = cmFixRevRows_(cmEvIdx_(), log, byCode, readLead), skip = {};
+  rev.forEach(function (r) { skip[r.code] = 1; });
+  var h = hints === undefined ? (function () { var x = cfg_('CM_FIX_HINTS', {}); return x && typeof x === 'object' ? x : {}; })() : hints;
+  return rev.concat(cmFixDateRows_(log, byCode, readLead, skip), cmFixHintRows_(h, byCode, readLead));
+}
+/* در cmRun_: زمان آخرین وضعیت غیرکامنتی هر لید برای قاعدهٔ دائمی */
+function cmStAtAttach_(x) {
+  if (!x.length) return;
+  var ev = cmEvIdx_();
+  x.forEach(function (o) { if (o.lead) o.lead.stAt = cmLastStAt_(ev[o.lead.code]); });
 }
 
+function tgV17021CmFixPreview() { return cmFixPreview_(); }
+function tgV170222CmFix() { return cmFixPreview_(); }   /* یک‌بارهٔ v170.22.2: پیش‌نمایش تازه (اعمال نه) */
+function cmFixPreview_(hints) {
+  var rows = cmFixRows2_(hints), broken = cmFixNoansBroken_();
+  var cnt = function (k, s) { return rows.filter(function (r) { return r.kind === k && (!s || r.state === s); }).length; };
+  var sum = 'برگشت وضعیت: ' + cnt(CM_FIX_KIND.rev, CM_FIX_STATE.apply) + ' (دست‌نخورده: ' + cnt(CM_FIX_KIND.rev, CM_FIX_STATE.later) + ') · تاریخ از روز کامنت: ' + cnt(CM_FIX_KIND.date) +
+    ' · پیشنهاد: ' + cnt(CM_FIX_KIND.hint) + ' · «شمار بی‌پاسخ» خراب: ' + broken;
+  if (stkDry_()) { TG_MEM['cm:fixtab'] = rows; TG_MEM['cm:fixsum'] = sum; return 'پیش‌نمایش اصلاح کامنت‌ها: ' + sum; }
+  var ss = tgSS_(), sh = ss.getSheetByName(CM_FIX_TAB);
+  if (!sh) { sh = ss.insertSheet(CM_FIX_TAB); sh.setRightToLeft(true); }
+  var ok0 = String(sh.getRange(1, 2).getValue() || '').trim();
+  if (/^اعمال شد/.test(ok0)) return 'پیش‌نمایش: پیش از این اعمال شده؛ دوباره ساخته نشد';
+  sh.clear();
+  sh.getRange(1, 1, 1, 3).setValues([['اعمال؟ برای اعمال در B1 بنویسید: اوکی', '', 'v170.22.2 · ' + stkStamp_() + ' · ' + sum]]).setFontWeight('bold');
+  sh.getRange(2, 1, 1, CM_FIX_HEAD.length).setValues([CM_FIX_HEAD]).setFontWeight('bold').setBackground('#f5f5f8');
+  if (rows.length) sh.getRange(3, 1, rows.length, CM_FIX_HEAD.length).setNumberFormat('@').setValues(rows.map(function (r) {
+    return [r.code, r.kind, r.curSt, r.wantSt, r.curNext, r.wantNext, r.curDate, r.wantDate, r.t, r.prev, r.state];
+  }));
+  sh.setFrozenRows(2);
+  stkProp_('CM_FIX_PV', cmFixToday_() + '|' + JSON.stringify(hints === undefined ? cfg_('CM_FIX_HINTS', {}) : hints));
+  try { tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '🛠 <b>پیش‌نمایش تازهٔ اصلاح کامنت‌ها (v170.22.2)</b>\n' + tgEsc_(sum) + '\nدر تب «' + CM_FIX_TAB + '» هاب پذیرش. چیزی عوض نشد. برای اعمال، در B1 همان تب «اوکی» بنویسید.', { ref: 'v170.22.2' }); } catch (eN) {}
+  return 'پیش‌نمایش اصلاح کامنت‌ها: ' + sum;
+}
+/* از cmTick5_: پیش‌نمایش هر روز یا با عوض شدن CM_FIX_HINTS تازه می‌شود (تاریخ‌ها کمینهٔ امروزند)؛ «اوکی» یک بار اعمال */
+function cmFixMaybe_() {
+  var ok = stkDry_() ? TG_MEM['cm:fixok'] : (function () { var sh = tgSS_().getSheetByName(CM_FIX_TAB); return sh ? String(sh.getRange(1, 2).getValue() || '').trim() : ''; })();
+  if (stkProp_('CM_FIX2_DONE') === '1') return 0;
+  if (ok !== 'اوکی') {
+    var fp = cmFixToday_() + '|' + JSON.stringify(cfg_('CM_FIX_HINTS', {}));
+    if (!stkDry_() && stkProp_('CM_FIX_PV') && stkProp_('CM_FIX_PV') !== fp) { try { cmFixPreview_(); } catch (eP) { tgErr_('cmFixPreview_', eP); } }
+    return 0;
+  }
+  stkProp_('CM_FIX2_DONE', '1');
+  /* فقط کدهایی که در پیش‌نمایش بازبینی‌شده «با اوکی اعمال می‌شود» بودند؛ مقدارها همین حالا دوباره حساب می‌شوند */
+  var shown = {};
+  if (stkDry_()) (TG_MEM['cm:fixtab'] || []).forEach(function (r) { if (r.state === CM_FIX_STATE.apply) shown[r.code + '|' + r.kind] = 1; });
+  else { var sh0 = tgSS_().getSheetByName(CM_FIX_TAB), n0 = sh0.getLastRow(); if (n0 >= 3) sh0.getRange(3, 1, n0 - 2, CM_FIX_HEAD.length).getValues().forEach(function (v) { if (String(v[10]) === CM_FIX_STATE.apply) shown[String(v[0]) + '|' + String(v[1])] = 1; }); }
+  var rows = cmFixRows2_({}).filter(function (r) { return r.state === CM_FIX_STATE.apply && shown[r.code + '|' + r.kind]; }), n = 0;
+  rows.forEach(function (r) {
+    var ch = r.kind === CM_FIX_KIND.rev ? { 'وضعیت': r.wantSt, 'اقدام بعدی': r.wantNext, 'تاریخ اقدام بعدی': r.wantDate, 'شمار بی‌پاسخ': r.noans } : { 'تاریخ اقدام بعدی': r.wantDate };
+    if (stkDry_()) TG_OUTBOX.push({ kind: 'leadset', row: r.row, changes: ch, actor: CM_FIX_ACTOR, code: r.code });
+    else tgLeadSet_(r.row, ch, CM_FIX_ACTOR, 'اصلاح', r.kind === CM_FIX_KIND.rev ? 'برگشت وضعیت: کامنت قدیمی‌تر از آخرین وضعیت شیت یا بات' : 'تماس بعدی از روز کامنت، کمینه امروز');
+    n++;
+  });
+  var nf = 0; try { nf = cmFixNoansRepair_(); } catch (eF) { tgErr_('cmFixNoansRepair_', eF); }
+  if (!stkDry_()) { try { tgSS_().getSheetByName(CM_FIX_TAB).getRange(1, 2).setValue('اعمال شد ' + Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm') + ' · ' + n + ' لید'); } catch (e) {} }
+  try { tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '✅ اصلاح کامنت‌ها اعمال شد: ' + tgFa_(n) + ' لید · «شمار بی‌پاسخ» درست‌شده: ' + tgFa_(nf) + '. پیشنهادها اعمال نشدند.', { ref: 'v170.22.2' }); } catch (eN) {}
+  return n;
+}
