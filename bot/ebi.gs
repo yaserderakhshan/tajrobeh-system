@@ -161,7 +161,8 @@ function ebiTellLeads_(text, kb, kind) {
 function ebiHomeKb_(extra) { return { inline_keyboard: (extra || []).concat([[{ text: '🏠 منوی اصلی', callback_data: 'ebi:home' }]]) }; }
 
 /* ---------- سایت ---------- */
-function ebiKey_() { return TG_DRY ? 'tjk_dry' : (pbProps_().getProperty(PB_KEY_PROP) || ''); }
+/* v170.16.1: کلید دوم درگاه (BOT_API_KEY)، همان که setcfg اسنیپت ابی دارد؛ تا نیامده کلید اول */
+function ebiKey_() { return TG_DRY ? 'tjk_dry' : (pbProps_().getProperty(PB_KEY2_PROP) || pbProps_().getProperty(PB_KEY_PROP) || ''); }
 function ebiWp_(method, path, body) {
   if (TG_DRY) {
     TG_OUTBOX.push({ kind: 'ebiwp', method: method, path: path, body: body || null });

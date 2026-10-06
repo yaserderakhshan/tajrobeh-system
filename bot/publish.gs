@@ -53,6 +53,8 @@ var PB_PKG_ST = { wait: 'منتظر بسته', q: 'در صف', pub: 'منتشر 
 var PB_DG_ST = { prev: 'پیش‌نمایش', ok: 'تأیید شد', run: 'در حال ارسال', sent: 'فرستاده شد', no: 'این هفته نه' };
 var PB_TYPE_MAG = 'مجله';
 var PB_KEY_PROP = 'CLAUDE_API_KEY';
+/* v170.16.1: کلید دوم درگاه (GitHub Secret «BOT_API_KEY»، از «ci: props»)؛ برای گردش کارهای سایت و اسنیپت ابی. کلید اول دست نمی‌خورد */
+var PB_KEY2_PROP = 'BOT_API_KEY';
 var PB_KEY_FILE = 'تجربه · کلید درگاه API (محرمانه، هم‌رسانی نشود).txt';
 var PB_SITE = 'https://tajrobeh.life';
 var PB_BTN_NEW = '🚀 انتشار مطلب تازه';
@@ -352,11 +354,17 @@ function pbIsEditor_(chat) {
 function pbKeyNew_() { return 'tjk_' + pbSha_(Utilities.getUuid() + Utilities.getUuid() + Date.now()).slice(0, 48); }
 function pbKeyOk_(given) {
   var k = TG_DRY ? TG_MEM['pb:key'] : pbProps_().getProperty(PB_KEY_PROP);
+  var k2 = TG_DRY ? TG_MEM['pb:key2'] : pbProps_().getProperty(PB_KEY2_PROP);
   given = String(given || '');
-  if (!k || given.length < 20) return false;
-  var a = pbSha_(given), b = pbSha_(k), d = 0;
-  for (var i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return d === 0;
+  if (given.length < 20) return false;
+  var a = pbSha_(given), ok = false;
+  [k, k2].forEach(function (x) {
+    if (!x) return;
+    var b = pbSha_(x), d = 0;
+    for (var i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    if (d === 0) ok = true;
+  });
+  return ok;
 }
 function pbKeyFile_(key) {
   var url = '';
