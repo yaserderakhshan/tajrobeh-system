@@ -33,10 +33,11 @@ var CFG_NOTE = {
   PSY_NATIONAL_NET: '«بله» در روزهای اینترنت ملی: لینک‌های ویزیت به بستر جایگزین (الوکام یا اسکای‌روم) می‌رود (v170.23.9)',
   PSY_FIRST_MIN: 'مدت ویزیت اول روان‌پزشکی به دقیقه، بین ۳۰ و ۴۰ (v170.23.9؛ پیش‌فرض ۴۰)',
   PSY_FOLLOW_MIN: 'مدت ویزیت پیگیری روان‌پزشکی به دقیقه (v170.23.9؛ پیش‌فرض ۲۰)',
+  ITK_TRACK: '«بله» تا سایت توکن ردپا را به لینک‌های بات بچسباند (v170.35؛ خالی = خاموش). اول بعد از انتشار بات روشن شود',
   INB_SLA: 'مهلت صندوق یکتا به ساعت، به تفکیک صف: {"پذیرش": 4, "مالی": 24, …} (JSON، اختیاری؛ v170.28؛ خالی = پیش‌فرض کد)'
 };
 /* کلیدهایی که خالی بودنشان مجاز است (جایگزین دارند) */
-var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'GEMINI_PAID', 'PSY_WELCOME', 'PSY_NATIONAL_NET', 'PSY_FIRST_MIN', 'PSY_FOLLOW_MIN', 'INB_SLA'];
+var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'GEMINI_PAID', 'PSY_WELCOME', 'PSY_NATIONAL_NET', 'PSY_FIRST_MIN', 'PSY_FOLLOW_MIN', 'INB_SLA', 'ITK_TRACK'];
 /* v170.9: کلیدهای لازمی که در Property خالی‌اند (فقط نام). روی دیپلوی آزمایشی سنجیده می‌شود؛ هر کدام خالی = انتشار متوقف */
 function cfgMissing_() {
   var o = cfgPropGet_();

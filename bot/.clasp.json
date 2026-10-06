@@ -44,7 +44,9 @@
     "inbox.gs",
     "afx.gs",
     "afx2.gs",
-    "intake.gs"
+    "intake.gs",
+    "ctareg.gs",
+    "intake2.gs"
   ],
   "htmlExtensions": [
     ".html"

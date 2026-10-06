@@ -105,6 +105,19 @@ export function registryProblems(reg, sc, php) {
   return bad;
 }
 
+/** bot/ctareg.gs: کد تازه ← کد قدیمی‌ای که بات می‌شناسد (اولین alias)، و برچسب هر کد (تازه و قدیمی) برای «کدهای start» */
+export function genBot(reg) {
+  const to = {}, label = {};
+  for (const e of reg.codes || []) {
+    const old = (e.aliases || [])[0] || e.code;
+    if (e.code !== old) to[e.code] = old;
+    for (const c of [e.code, ...(e.aliases || [])]) label[c] = e.label || '';
+  }
+  const fam = (reg.families || []).map((f) => [f.prefix, f.label || '']);
+  const j = (o) => JSON.stringify(o, null, 0);
+  return '/* تولید خودکار از site/cta-registry.json با «node site/tools/cta.mjs gen-bot». دستی ویرایش نکن؛ bot-check همگامی را می‌سنجد. */\n' +
+    'var CTA_TO = ' + j(to) + ';\n' + 'var CTA_LABEL = ' + j(label) + ';\n' + 'var CTA_FAMILY = ' + j(fam) + ';\n';
+}
 export function ctaSelfTest() {
   const bad = [], t = (n, c) => { if (!c) bad.push(n); };
   t('نام‌گذاری', NAME_RX.test('pz-home-hero') && !NAME_RX.test('rm_campus') && !NAME_RX.test('xx-a'));
@@ -123,6 +136,16 @@ export function ctaSelfTest() {
 if (process.argv[1] && process.argv[1].endsWith('cta.mjs')) {
   const mode = process.argv[2] || 'check';
   if (mode === 'selftest') { const b = ctaSelfTest(); console.log(b.length ? '❌ ' + b.join('، ') : '✅ رجیستری دکمه‌ها: خودآزمایی سبز'); process.exit(b.length ? 1 : 0); }
+  if (mode === 'gen-bot') {
+    const reg = JSON.parse(readFileSync(join(ROOT, 'site/cta-registry.json'), 'utf8'));
+    const out = genBot(reg), P = join(ROOT, 'bot/ctareg.gs');
+    if (process.argv[3] === '--check') {
+      const cur = existsSync(P) ? readFileSync(P, 'utf8') : '';
+      if (cur !== out) { console.log('::error::bot/ctareg.gs با site/cta-registry.json همگام نیست؛ node site/tools/cta.mjs gen-bot را اجرا کن و کامیت کن'); process.exit(1); }
+      console.log('bot/ctareg.gs همگام است.'); process.exit(0);
+    }
+    writeFileSync(P, out); console.log('bot/ctareg.gs ساخته شد.'); process.exit(0);
+  }
   const sc = scan(siteFiles());
   if (mode === 'scan') { console.log(JSON.stringify({ codes: Object.fromEntries(Object.entries(sc.codes).map(([k, v]) => [k, v.count])), forms: Object.keys(sc.forms), gt: Object.fromEntries(Object.entries(sc.gt).map(([k, v]) => [k, v.count])), ctas: Object.keys(sc.ctas).length }, null, 1)); process.exit(0); }
   if (mode === 'init') {

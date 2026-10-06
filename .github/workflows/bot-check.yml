@@ -46,6 +46,10 @@ jobs:
       - name: صندوق یکتا، بی ورودی موازی
         run: node .github/scripts/inbox-guard.mjs bot
 
+      # v170.35: کدهای start تازهٔ رجیستری (site/cta-registry.json) در bot/ctareg.gs؛ ناهمگام = قرمز
+      - name: رجیستری دکمه‌ها در بات
+        run: node site/tools/cta.mjs gen-bot --check
+
       # هر PR که کد بات را عوض کند: شمارهٔ نسخه در bot/version.gs بالا برود و یک خط برایش در CHANGELOG.md باشد
       - name: شمارهٔ نسخه و CHANGELOG
         env:

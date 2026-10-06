@@ -2455,6 +2455,7 @@ function tgPrivate_(m) {
   const chat  = m.chat.id;
   const name  = [m.from.first_name, m.from.last_name].filter(String).join(' ').trim() || 'بدون نام';
   const uname = m.from.username ? '@' + m.from.username : '';
+  if (typeof itk2Start_ === 'function') itk2Start_(m, chat);   /* v170.35: /start <کد رجیستری>__<توکن> ← کد قدیمی و ردپا */
   // هاب ساختمان ونک (building.gs): جدا از بقیهٔ بات، پیش از هر مسیریابی
   if (typeof vkRoute_ === 'function' && vkRoute_(m, chat, name, uname)) return;
   if (typeof tnkRoute_ === 'function' && tnkRoute_(m, chat, name, uname)) return;
@@ -5237,7 +5238,8 @@ function tgClearBooking_(chat) {
 
 /* v166.12: true/false برمی‌گرداند. اگر نوشتن شکست خورد، لید در TG_LEAD_RETRY می‌ماند و tgLeadRetry_ (از tgDutyTick) دوباره می‌نویسد. */
 function tgAppendLead_(o, isRetry) {
-  if (!isRetry && typeof itkCollGuard_ === 'function' && itkCollGuard_(o)) return true;   /* v170.31: «درخواست صحبت با همکار» لید مراجع نیست */
+  if (!isRetry && typeof itkCollGuard_ === 'function' && itkCollGuard_(o)) return true;
+  if (!isRetry && typeof itk2Merge_ === 'function') o = itk2Merge_(o);   /* v170.35: صفحهٔ ورود، دکمه، کمپین، UTM، شناسهٔ بازدید */   /* v170.31: «درخواست صحبت با همکار» لید مراجع نیست */
   if (!isRetry && typeof igLeadPrefill_ === 'function') o = igLeadPrefill_(o);   /* v168: منبع اینستاگرام و فیلدهای پیش‌پر */
   if (!isRetry && typeof ebiLeadPrefill_ === 'function') o = ebiLeadPrefill_(o);   /* v170.16: منبع «کمپین › C-004 › <نوع>» */
   if (!isRetry && typeof v168NewLeadNext_ === 'function') o = v168NewLeadNext_(o);   /* v168 فاز ۲: لید تازه همان لحظه تکلیف دارد */
@@ -12636,6 +12638,7 @@ function tgStartLabel_(code) {
   if (typeof v1689StartLabel_ === 'function') { var vl = v1689StartLabel_(code); if (vl) return vl; }   /* v168.9: dsp_ ref_ prt_ */
   if (code.indexOf('rm-') === 0) return 'رودمپ › ' + code.slice(3);
   if (code.indexOf('gt-') === 0) return 'شروع تراپی › ' + code.slice(3);
+  if (typeof itk2Label_ === 'function') { var rl = itk2Label_(code); if (rl) return rl; }   /* v170.35: رجیستری دکمه‌ها */
   return code;
 }
 
@@ -21365,7 +21368,9 @@ const TG_LEAD_FIELDS = [
   /* v170.2 مدل لید */ 'نوع لید', 'پیشنهاد کاربر', 'پیامد', 'مسئول مرحله', 'مهلت مرحله', 'منبع جزئیات',
   /* v170.2 کامنت‌ها: ترجیحات برای پیشنهاد درمانگر */ 'ترجیحات', 'حالت جلسه', 'ترجیح جنسیت', 'ترجیح سن',
   /* v170.13 */ 'کد کمپین', 'آفر',
-  /* v170.18 برگشت مراجع: زمان ورود تازه، منطقه، اعلان */ 'تاریخ', 'زمان', 'تاریخ شمسی', 'داخل یا خارج', 'اعلان بات'
+  /* v170.18 برگشت مراجع: زمان ورود تازه، منطقه، اعلان */ 'تاریخ', 'زمان', 'تاریخ شمسی', 'داخل یا خارج', 'اعلان بات',
+  /* v170.31 */ 'داخلی',
+  /* v170.35 ردپای ورود */ 'صفحهٔ ورود', 'دکمه', 'کمپین', 'UTM', 'شناسهٔ بازدید'
 ];
 
 // ستون‌هایی که تریگر شیت رویشان حساس است
@@ -34509,10 +34514,10 @@ function tgCpPush_(why) {
     var offers = []; try { if (typeof v17013OfPayload_ === 'function') offers = v17013OfPayload_(); } catch (eOf) { tgErr_('v17013OfPayload_', eOf); }   /* v170.13: آفرهای مراجعان */
     /* v166.23 (E-1006، سهمیهٔ حجم): فقط وقتی چیزی برای سایت عوض شده می‌فرستد (بی‌حساب زمان t)، و در تیک دست‌کم هر ۶۰ دقیقه یک بار */
     var P = PropertiesService.getScriptProperties();
-    var sig = tgHash_(JSON.stringify(camps.map(function (c) { var x = {}; for (var k in c) if (k !== 't') x[k] = c[k]; return x; })) + JSON.stringify(offers));
+    var sig = tgHash_(JSON.stringify(camps.map(function (c) { var x = {}; for (var k in c) if (k !== 't') x[k] = c[k]; return x; })) + JSON.stringify(offers) + (typeof itk2Push_ === 'function' ? JSON.stringify(itk2Push_()) : ''));
     var lastAt = Number(P.getProperty('CP_PUSH_AT') || 0);
     if (sig === P.getProperty('CP_PUSH_H') && (why === 'تیک' ? Date.now() - lastAt < 60 * 60000 : Date.now() - lastAt < 2 * 60000)) return 'بی‌تغییر';
-    var r = ssCampFetch_(TG_CP_WP_PUSH, { camps: camps, offers: offers, why: why || '' });
+    var r = ssCampFetch_(TG_CP_WP_PUSH, (function (pl) { if (typeof itk2Push_ === 'function') { var x = itk2Push_(); for (var k in x) pl[k] = x[k]; } return pl; })({ camps: camps, offers: offers, why: why || '' }));   /* v170.35: پارتنرها، شهرهای رأی، کلید ردپا */
     var out = r.getResponseCode() + ' ' + String(r.getContentText()).slice(0, 120);
     if (r.getResponseCode() === 200) { P.setProperty('CP_PUSH_H', sig); P.setProperty('CP_PUSH_AT', String(Date.now())); }
     if (r.getResponseCode() !== 200) tgErr_('tgCpPush_: ' + out);
