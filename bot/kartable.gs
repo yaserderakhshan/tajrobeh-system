@@ -12,6 +12,7 @@
  * حالت خشک: همان TG_MEM['pqrows'] پروفایل‌ها؛ TG_MEM['ktb:gem'] پاسخ ساختگی جمنای؛ TG_MEM['ktb:tk']، ['ktb:bug']، ['ktb:ops'].
  */
 var KTB_BTN = '🗂 منتظر تأیید من';
+cfg_('TG_CONTRACT_VER', '');   /* v170.23.6: نسخهٔ قرارداد همکاری برای ستون «پشتوانهٔ انتشار» */
 var KTB_SLA_D = 3;
 var KTB_REMIND_H = 9;
 var KTB_KIND = { review: 'پروفایل منتظر بازبینی', reviewed: 'بازبینی‌شده ولی منتشرنشده', failed: 'منتشر نشد، بعد از تلاش دوباره', resume: 'رزومهٔ سبک برای تأیید', voice: 'ویس معرفی برای انتشار' };
@@ -23,7 +24,7 @@ function ktbProp_(k, v) {
   if (ktbDry_()) { if (v !== undefined) TG_MEM['ktbp:' + k] = v; return TG_MEM['ktbp:' + k] || ''; }
   var P = PropertiesService.getScriptProperties(); if (v !== undefined) P.setProperty(k, String(v)); return P.getProperty(k) || '';
 }
-function ktbPub_(v) { return /[TES]/.test(String(v.roles || '')) && String(v.consent || '').indexOf('فقط برای تیم') < 0 && !/نمی‌رود/.test(String(v.status || '')); }
+function ktbPub_(v) { return /[TES]/.test(String(v.roles || '')) && !/نمی‌رود/.test(String(v.status || '')); }   /* v170.23.6: اطلاعات سبک با پشتوانهٔ قرارداد؛ فقط تصمیم تیم */
 function ktbSince_(v) { var t = Number(v.stamp || 0); if (t) return t; var d = new Date(String(v.updated || v.started || '')); return isNaN(d.getTime()) ? 0 : d.getTime(); }
 function ktbVoiceId_(v) { var m = /^tg:voice:([^\s·]+)/.exec(String(v.voice || '')); return m ? m[1] : ''; }
 function ktbSplHist_(id) { try { return splRows_().filter(function (e) { return e.id === id; }); } catch (e) { return []; } }
@@ -89,13 +90,13 @@ function ktbOpen_(chat, k, row, h) {
   if (k === 'resume') {
     var d = String(v.pub_resume_draft || '').trim();
     return tgSend_(chat, '📝 <b>نسخهٔ سبک رزومه</b> · ' + tgEsc_(v.site_name || v.name) + '\nساخته‌شده با جمنای از فایل رزومهٔ خودش. روی صفحهٔ شخصی، زیر «رزومهٔ کامل» می‌نشیند.\n\n' + tgEsc_(d.slice(0, 3200)),
-      { inline_keyboard: [[{ text: '✅ تأیید و انتشار', callback_data: 'ktb:ra' + s }], [{ text: '🔁 دوباره بساز', callback_data: 'ktb:rr' + s }, { text: '⏭ بعدی', callback_data: 'ktb:l:resume' }]] });
+      { inline_keyboard: [[{ text: v.consent && String(v.consent).indexOf('بله') === 0 ? '✅ تأیید و انتشار' : '✅ تأیید (روی صفحه با اجازهٔ جدا)', callback_data: 'ktb:ra' + s }], [{ text: '✏️ اصلاح', callback_data: 'ktb:re' + s }, { text: '⏭ بعدی', callback_data: 'ktb:l:resume' }]] });
   }
   if (k === 'voice') {
     var vid = ktbVoiceId_(v);
     if (vid && !ktbDry_()) { try { tgApi_('sendVoice', { chat_id: chat, voice: vid, caption: 'ویس معرفی ' + String(v.site_name || v.name).slice(0, 60) }); } catch (e) {} }
     return tgSend_(chat, '🎙 <b>ویس معرفی</b> · ' + tgEsc_(v.site_name || v.name) + '\nبعد از تأیید روی صفحهٔ شخصی‌اش می‌نشیند.',
-      { inline_keyboard: [[{ text: '✅ تأیید و انتشار', callback_data: 'ktb:va' + s }], [{ text: '⏭ بعدی', callback_data: 'ktb:l:voice' }]] });
+      { inline_keyboard: [[{ text: '✅ تأیید و انتشار', callback_data: 'ktb:va' + s }], [{ text: '✏️ اصلاح', callback_data: 'ktb:ve' + s }, { text: '⏭ بعدی', callback_data: 'ktb:l:voice' }]] });
   }
   return tgPrShow_(chat, row);
 }
@@ -113,6 +114,10 @@ function ktbCb_(chat, data) {
     var o1 = tgPrPublish_(chat, r, { quiet: 1, src: 'redo' });
     return tgSend_(chat, (o1 && o1.ok !== false ? '✅ رزومهٔ سبک روی صفحه رفت.' : '⚠️ رزومه ثبت شد ولی انتشار کامل نشد؛ به صف تلاش دوباره رفت.'), { inline_keyboard: [[{ text: '🗂 بقیهٔ منتظرها', callback_data: 'ktb:h' }]] });
   }
+  if (act === 're') return tgSend_(chat, '✏️ <b>اصلاح رزومهٔ سبک</b>', { inline_keyboard: [[{ text: '🔁 دوباره بساز', callback_data: 'ktb:rr:' + a[2] + ':' + a[3] }], [{ text: '✍️ متن را خودم می‌فرستم', callback_data: 'ktb:rw:' + a[2] + ':' + a[3] }], [{ text: '↩️ بازگشت', callback_data: 'ktb:o:resume:' + a[2] + ':' + a[3] }]] });
+  if (act === 'rw') { tgSetVal_('ktbw', chat, JSON.stringify({ row: r.row, h: a[3] })); return tgSend_(chat, '✍️ متن رزومهٔ سبک را بفرست؛ هر بخش با «## عنوان» و هر ردیف با «- مورد · سال». برای انصراف: /cancel'); }
+  if (act === 've') return tgSend_(chat, '✏️ <b>اصلاح ویس</b>', { inline_keyboard: [[{ text: '💬 پیام به خودش (ویس تازه بخواه)', callback_data: 'pr:msg:' + a[2] + ':' + a[3] }], [{ text: '🚫 این ویس روی صفحه نرود', callback_data: 'ktb:vx:' + a[2] + ':' + a[3] }], [{ text: '↩️ بازگشت', callback_data: 'ktb:o:voice:' + a[2] + ':' + a[3] }]] });
+  if (act === 'vx') { var vx = ktbVoiceId_(r.v); tgPqPut_(r.v.id, { page_voice: vx }); return tgSend_(chat, '🚫 این ویس روی صفحه نمی‌رود (تا ویس تازه بیاید).', { inline_keyboard: [[{ text: '🗂 بقیهٔ منتظرها', callback_data: 'ktb:h' }]] }); }
   if (act === 'rr') { tgPqPut_(r.v.id, { pub_resume_draft: '' }); var g = ktbResumeMake_(tgPrRow_(r.row)); return tgSend_(chat, g ? '📝 نسخهٔ تازه ساخته شد.' : '⚠️ ساخته نشد؛ ساعت بعد دوباره.', { inline_keyboard: [[{ text: '📝 دیدن', callback_data: 'ktb:o:resume:' + r.row + ':' + a[3] }]] }); }
   if (act === 'va') {
     var o2 = tgPrPublish_(chat, r, { quiet: 1, src: 'redo' });
@@ -123,6 +128,17 @@ function ktbCb_(chat, data) {
 /* دکمهٔ منو و دستور /ok */
 function ktbMaybe_(chat, m) {
   var t = String((m && m.text) || '').trim();
+  var w = tgGetVal_('ktbw', chat);
+  if (w && tgPrOk_(chat)) {   /* متن رزومهٔ سبک از خود یاسر */
+    tgDel_('ktbw', chat);
+    if (t === '/cancel' || t === 'انصراف') { tgSend_(chat, 'باشد، چیزی عوض نشد.'); return true; }
+    var st = {}; try { st = JSON.parse(w); } catch (e) {}
+    var r = tgPrRow_(st.row);
+    if (!r || tgPrH_(r.v.id) !== st.h) { tgSend_(chat, 'این مورد کهنه شده.'); return true; }
+    if (!/^##\s/m.test(t) || tgOkBad_(t)) { tgSetVal_('ktbw', chat, w); tgSend_(chat, 'متن باید بخش «## …» داشته باشد و لینک و شماره نداشته باشد. دوباره بفرست یا /cancel.'); return true; }
+    tgPqPut_(r.v.id, { pub_resume_draft: t.replace(/\s*[—–]\s*/g, '، ').slice(0, 3500) });
+    ktbOpen_(chat, 'resume', r.row, st.h); return true;
+  }
   if (t !== KTB_BTN && t !== '/ok') return false;
   if (!tgPrOk_(chat)) return false;
   ktbShow_(chat); return true;
@@ -165,11 +181,19 @@ function ktbGemFile_(blob, prompt, schema) {
   }
   throw new Error('جمنای ناموفق: ' + last);
 }
+/** blob فایل تلگرام با نوع درست از پسوند مسیر (تلگرام اغلب application/octet-stream می‌دهد و جمنای آن را نمی‌خواند) */
+function ktbFileBlob_(f) {
+  var b = f && f.blob; if (!b) return null;
+  var ext = String((/\.([A-Za-z0-9]{2,5})$/.exec(String(f.path || '')) || [])[1] || '').toLowerCase();
+  var mt = { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[ext];
+  if (mt && typeof b.setContentType === 'function') b.setContentType(mt);
+  return b;
+}
 function ktbResumeMake_(r) {
   if (!r) return false;
   var m = /^tg:doc:([^\s·]+)/.exec(String(r.v.resume || '')); if (!m) return false;
   try {
-    var blob = ktbDry_() ? null : tgTgFile_(m[1]);
+    var blob = ktbDry_() ? null : ktbFileBlob_(tgTgFile_(m[1]));   /* v170.23.6: tgTgFile_ ‏{blob, path} می‌دهد، نه خود blob */
     var o = ktbGemFile_(blob, KTB_CV_PROMPT, KTB_CV_SCHEMA), txt = ktbCvFormat_(o);
     if (!txt) return false;
     tgPqPut_(r.v.id, { pub_resume_draft: txt });
@@ -179,6 +203,7 @@ function ktbResumeMake_(r) {
 
 /* ───── ساعتی از tgWatchdog: تلاش دوباره، رزومه‌های سبک (دو تا در ساعت)، یادآوری ساعت ۹ ───── */
 function ktbHourly_() {
+  try { ktbFixMaybe_(); } catch (eF) { tgErr_('ktbFixMaybe_', eF); }
   var I = ktbItems_();
   if (I.retry.length) ktbRetry_(I.retry);
   I.resumeWait.slice(0, 2).forEach(function (r) { ktbResumeMake_(r); });
@@ -266,6 +291,55 @@ function ktbOwnerSet_(code, owner) {
     opsWrite_(t); opsMirror_(t, before); return true;
   } catch (e) { tgErr_('ktbOwnerSet_', e); return false; }
 }
+/* ───── v170.23.6: جواب‌های جابه‌جا (لینک یا شماره در «عنوان» و پرسش‌های متنی) و ستون «پشتوانهٔ انتشار» ─────
+   پیش‌نمایش در تب «اصلاح پروفایل‌ها · پیش‌نمایش»؛ اعمال فقط با «اوکی» Cowork در B1: لینک به «لینک‌ها» می‌رود، خانه خالی و از «ردشده»
+   برداشته می‌شود تا بات دوباره بپرسد؛ ستون «پشتوانهٔ انتشار» برای همکاران بی مقدار پر می‌شود. */
+var KTB_FX_TAB = 'اصلاح پروفایل‌ها · پیش‌نمایش';
+var KTB_FX_KEYS = ['title', 'latin', 'degree', 'headline', 'method', 'first', 'trainings', 'teach', 'pub_title', 'pub_headline'];
+function ktbFixRows_() {
+  var out = [];
+  tgPrAll_().forEach(function (r) {
+    var v = r.v;
+    KTB_FX_KEYS.forEach(function (k) { var val = String(v[k] || ''); var b = tgOkBad_(val); if (b && (k !== 'latin' || TG_OK_URL_RX.test(val))) out.push({ id: v.id, row: r.row, kind: 'جواب جابه‌جا', key: k, val: val.slice(0, 120), why: b }); });
+    if (/[TES]/.test(String(v.roles || '')) && !String(v.basis || '').trim()) out.push({ id: v.id, row: r.row, kind: 'پشتوانهٔ انتشار', key: 'basis', val: tgPrBasis_(), why: 'خالی' });
+  });
+  return out;
+}
+function ktbFixPreview_() {
+  var rows = ktbFixRows_(), cnt = function (k) { return rows.filter(function (x) { return x.kind === k; }).length; };
+  var sum = 'جواب جابه‌جا: ' + cnt('جواب جابه‌جا') + ' (در «عنوان»: ' + rows.filter(function (x) { return x.key === 'title' || x.key === 'pub_title'; }).length + ') · پشتوانهٔ انتشار خالی: ' + cnt('پشتوانهٔ انتشار');
+  if (ktbDry_()) { TG_MEM['ktb:fx'] = rows; return sum; }
+  var ss = tgSS_(), sh = ss.getSheetByName(KTB_FX_TAB) || ss.insertSheet(KTB_FX_TAB);
+  if (/^اعمال شد/.test(String(sh.getRange(1, 2).getValue() || ''))) return sum + ' · پیش از این اعمال شده';
+  sh.clear(); sh.setRightToLeft(true);
+  sh.getRange(1, 1, 1, 3).setValues([['بررسی Cowork: بعد از بررسی، Cowork در B1 «اوکی» می‌نویسد', '', 'v170.23.6 · ' + sum]]).setFontWeight('bold');
+  sh.getRange(2, 1, 1, 5).setValues([['شناسه', 'نوع', 'ستون', 'مقدار', 'دلیل']]).setFontWeight('bold').setBackground('#f5f5f8');
+  if (rows.length) sh.getRange(3, 1, rows.length, 5).setNumberFormat('@').setValues(rows.map(function (x) { return [x.id, x.kind, x.key, x.val, x.why]; }));
+  sh.setFrozenRows(2);
+  return sum;
+}
+function ktbFixMaybe_() {
+  if (ktbProp_('KTB_FX_DONE') === '1') return 0;
+  var ok = ktbDry_() ? TG_MEM['ktb:fxok'] : (function () { var sh = tgSS_().getSheetByName(KTB_FX_TAB); return sh ? String(sh.getRange(1, 2).getValue() || '').trim() : ''; })();
+  if (ok !== 'اوکی') return 0;
+  ktbProp_('KTB_FX_DONE', '1');
+  var n = 0, all = {}; tgPrAll_().forEach(function (r) { all[r.v.id] = r.v; });
+  ktbFixRows_().forEach(function (x) {
+    var v = all[x.id]; if (!v) return;
+    var put = {};
+    if (x.key === 'basis') put.basis = x.val;
+    else {
+      put[x.key] = '';
+      if (TG_OK_URL_RX.test(x.val)) put.links = (String(v.links || '') + '\n' + x.val).trim();
+      put.skipped = String(v.skipped || '').split(',').filter(function (k) { return k && k !== x.key; }).join(',');
+    }
+    tgPqPut_(x.id, put); Object.assign(v, put); n++;
+  });
+  if (!ktbDry_()) { try { tgSS_().getSheetByName(KTB_FX_TAB).getRange(1, 2).setValue('اعمال شد ' + Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm') + ' · ' + n + ' خانه'); } catch (e) {} }
+  return n;
+}
+function tgV170236OkCard() { return 'اصلاح پروفایل‌ها (پیش‌نمایش برای Cowork): ' + ktbFixPreview_(); }
+
 /* یک‌بارهٔ خودکار v170.23.5: شمار منتظرها (فقط شمار؛ لاگ عمومی است)، تلاش دوباره برای «منتشر نشد»، پیش‌نمایش مسیریابی */
 function tgV170235Kartable() {
   var I = ktbItems_(), t = ktbRetry_(I.retry);
@@ -288,20 +362,23 @@ function ktbTests() {
       'ther:پ': mk({ id: 'ther:پ', name: 'پ', status: 'منتشر نشد' }),
       'ther:ت': mk({ id: 'ther:ت', name: 'ت', status: 'روی سایت', onsite: 'خانه', resume: 'tg:doc:D1 · cv.pdf', page: 'https://tajrobeh.life/team/t/' }),
       'ther:ث': mk({ id: 'ther:ث', name: 'ث', status: 'روی سایت', onsite: 'خانه', voice: 'tg:voice:V1 · 40s', page: 'https://tajrobeh.life/team/s/', page_voice: '' }),
-      'ther:ج': mk({ id: 'ther:ج', name: 'ج', status: 'روی سایت', consent: 'فعلاً فقط برای تیم', resume: 'tg:doc:D2' }) };
+      'ther:ج': mk({ id: 'ther:ج', name: 'ج', status: 'روی سایت نمی‌رود (تصمیم تیم)', resume: 'tg:doc:D2' }) };
     var I = ktbItems_();
     ok('منتظر بازبینی', I.review.length === 1 && I.review[0].v.name === 'الف');
     ok('بازبینی‌شده ولی منتشرنشده', I.reviewed.length === 1 && I.reviewed[0].v.name === 'ب');
     ok('«منتشر نشد» اول به تلاش دوباره، نه کارت', I.retry.length === 1 && I.failed.length === 0);
     ok('رزومهٔ بی نسخهٔ سبک ← در حال ساخت', I.resumeWait.length === 1 && I.resume.length === 0);
     ok('ویس پردازش‌نشده', I.voice.length === 1 && I.voice[0].v.name === 'ث');
-    ok('«فقط برای تیم» در کارتابل نیست', !JSON.stringify(I).match(/"ج"/));
+    ok('«روی سایت نمی‌رود» (تصمیم تیم) در کارتابل نیست', !JSON.stringify(I).match(/"ج"/));
     ok('تلاش دوباره ← صف sitepub، یک بار', ktbRetry_(I.retry) === 1 && ktbRetry_(ktbItems_().retry) === 0 && splActive_('ther:پ').q === SPL_Q.wait);
     /* بعد از تلاش دوباره ناموفق ← کارت */
     var a = splActive_('ther:پ'); a.q = SPL_Q.task; splWrite_(a);
     ok('بعد از تلاش باز شکست ← کارت', ktbItems_().failed.length === 1);
     /* رزومهٔ سبک با جمنای */
     TG_MEM['ktb:gem'] = { sections: [{ title: 'تحصیلات', items: [{ t: 'کارشناسی ارشد روان‌شناسی بالینی — دانشگاه نمونه', year: '۱۳۹۸' }] }, { title: 'خالی', items: [] }] };
+    /* v170.23.6: دیپلوی ۳۷۵۲۷۱۱۳۷۴۸ با «blob.getContentType is not a function» برگشت؛ نتیجهٔ tgTgFile_ شیء {blob, path} است */
+    var fb = { ct: 'application/octet-stream', getContentType: function () { return this.ct; }, setContentType: function (x) { this.ct = x; return this; } };
+    ok('فایل تلگرام: blob از {blob, path} و نوع PDF از پسوند', ktbFileBlob_({ blob: fb, path: 'documents/file_7.PDF' }) === fb && fb.getContentType() === 'application/pdf' && ktbFileBlob_({ path: 'x.pdf' }) === null);
     ok('رزومهٔ سبک ساخته و در ستون پیش‌نویس', ktbResumeMake_(tgPrRow_(ktbItems_().resumeWait[0].row)) && /^## تحصیلات\n- کارشناسی ارشد روان‌شناسی بالینی، دانشگاه نمونه · ۱۳۹۸$/.test(TG_MEM['pqrows']['ther:ت'].pub_resume_draft), TG_MEM['pqrows']['ther:ت'].pub_resume_draft);
     ok('پیش‌نویس ← کارتابل', ktbItems_().resume.length === 1);
     /* نما و دکمه‌ها */
@@ -329,6 +406,26 @@ function ktbTests() {
     ok('مسیریابی: بی «اوکی» Cowork کاری ساخته نمی‌شود', ktbRouteMaybe_() === 0 && !(TG_MEM['ktb:tasks'] || []).length);
     TG_MEM['ktb:rtok'] = 'اوکی';
     ok('مسیریابی: با «اوکی» یک بار', ktbRouteMaybe_() === 3 && ktbRouteMaybe_() === 0 && (TG_MEM['ktb:own'] || []).length === 1);
+    /* v170.23.6: کارت تأیید یکسان، اعتبارسنجی، ریشهٔ لینک در «عنوان»، اصلاح هاب و پشتوانهٔ انتشار */
+    TG_CFG_ = { TG_CONTRACT_VER: '۱' };
+    ok('پشتوانهٔ انتشار با نسخهٔ قرارداد', tgPrBasis_() === 'قرارداد همکاری · نسخهٔ ۱');
+    ok('اعتبارسنجی: لینک گوگل‌میت در عنوان قفل می‌کند', tgOkBad_('https://meet.google.com/abc-defg-hij') === 'لینک یا ایمیل دارد' && tgOkBad_('روان‌شناس بالینی · روانکاو') === '' && !!tgOkBad_('09' + '121234567'));   // pii:ok ساختگی
+    TG_MEM['pqrows']['ther:ح'] = mk({ id: 'ther:ح', name: 'ح', title: 'https://meet.google.com/abc-defg-hij', links: '', skipped: 'title,links', basis: '' });
+    TG_MEM['dirres'] = { find: { ok: true, hits: [{ kind: 'p3', page: TG_PR_HOME, title: 'خانه', f: { name: 'ح', sp: 'لکانی', city: 'تهران', photo: 1 } }] } };
+    var pH = tgPrPlan_(tgPrRow_(Object.keys(TG_MEM['pqrows']).indexOf('ther:ح') + 3));
+    ok('کارت: لینک در عنوان ← ⛔ و دکمهٔ تأیید قفل', tgPrValid_(pH).block.some(function (x) { return /عنوان/.test(x); }) && JSON.stringify(tgPrKb_(pH)).indexOf('pr:pub') < 0);
+    var fxs = ktbFixPreview_(), fx = TG_MEM['ktb:fx'];
+    ok('اصلاح هاب: پیش‌نمایش جواب جابه‌جا و پشتوانهٔ خالی', /جواب جابه‌جا: 1 \(در «عنوان»: 1\)/.test(fxs) && fx.some(function (x) { return x.kind === 'پشتوانهٔ انتشار'; }), fxs);
+    ok('اصلاح هاب: بی «اوکی» Cowork چیزی عوض نمی‌شود', ktbFixMaybe_() === 0 && TG_MEM['pqrows']['ther:ح'].title !== '');
+    TG_MEM['ktb:fxok'] = 'اوکی';
+    ktbFixMaybe_();
+    var vH = TG_MEM['pqrows']['ther:ح'];
+    ok('اصلاح هاب: لینک به «لینک‌ها»، عنوان خالی و دوباره پرسیده می‌شود، پشتوانه پر', vH.title === '' && /meet\.google/.test(vH.links) && vH.skipped === 'links' && vH.basis === 'قرارداد همکاری · نسخهٔ ۱');
+    /* ریشه: لینک برای پرسش غیرلینکی جواب نیست؛ حالت بسته و پیام به مسیر خودش */
+    tgSetVal_('pq', '905', JSON.stringify({ id: 'ther:ح', w: 'T', name: 'ح', todo: ['title'], i: 0, pick: [], n: 1 }));
+    ok('ریشه: لینک وسط پرسش «عنوان» مصرف نمی‌شود و حالت بسته می‌شود', tgPqStep_('905', { text: 'https://meet.google.com/abc-defg-hij' }) === false && !tgGetVal_('pq', '905') && TG_MEM['pqrows']['ther:ح'].title === '');
+    tgSetVal_('pq', '905', JSON.stringify({ id: 'ther:ح', w: 'T', name: 'ح', todo: ['links'], i: 0, pick: [], n: 1 }));
+    ok('ریشه: پرسش «لینک‌ها» لینک را می‌پذیرد', tgPqStep_('905', { text: 'https://example.org/me' }) === true);
     TG_CFG_ = null;
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = null; }
