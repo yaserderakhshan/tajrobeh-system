@@ -127,9 +127,9 @@ function ciHealth_() {
 
 /* ---------- اجرای یک‌باره (v166.20) ---------- */
 /* فقط این توابع؛ هر کدام با تأیید یاسر به این فهرست می‌آید. خروجی‌شان نباید اطلاعات شخصی داشته باشد (فقط شمارش). */
-var CI_ONCE_ALLOW = ['tgApResumePrivatize', 'tgErrScrub', 'tgChatCellAudit', 'tgErrMarkFixed', 'tgSchNameFix', 'tgNdPurge', 'pbSetup', 'tgV168Hygiene', 'tgV168NextFill', 'tgV168QueueSetup', 'tgV168RefSetup', 'tgV168ModeSplit', 'tgV168VocabMigrate', 'tgV1689Setup', 'tgV16810Ticks', 'tgV169Setup', 'tgV1691Triggers', 'tgV1692Setup', 'tgV170Seed', 'tgV1701SendDry', 'tgV1702Plan', 'tgV1708Cfg', 'tgV1709CfgTab', 'tgV17013Setup', 'tgV17013Capped', 'tgV17013LmPlan', 'tgV17021CmFixPreview', 'tgV170222CmFix', 'tgV170231CmFix', 'tgV170232DirRetry', 'tgV170233SitePub'];
+var CI_ONCE_ALLOW = ['tgApResumePrivatize', 'tgErrScrub', 'tgChatCellAudit', 'tgErrMarkFixed', 'tgSchNameFix', 'tgNdPurge', 'pbSetup', 'tgV168Hygiene', 'tgV168NextFill', 'tgV168QueueSetup', 'tgV168RefSetup', 'tgV168ModeSplit', 'tgV168VocabMigrate', 'tgV1689Setup', 'tgV16810Ticks', 'tgV169Setup', 'tgV1691Triggers', 'tgV1692Setup', 'tgV170Seed', 'tgV1701SendDry', 'tgV1702Plan', 'tgV1708Cfg', 'tgV1709CfgTab', 'tgV17013Setup', 'tgV17013Capped', 'tgV17013LmPlan', 'tgV17021CmFixPreview', 'tgV170222CmFix', 'tgV170231CmFix', 'tgV170232DirRetry', 'tgV170233SitePub', 'tgV170234ErrBox'];
 /* v166.22: این‌ها بعد از هر انتشار سبز خودکار یک بار اجرا می‌شوند (اگر قبلاً اجرا نشده‌اند)؛ هر کدام باید در CI_ONCE_ALLOW هم باشد */
-var CI_ONCE_AUTO = ['tgErrScrub', 'tgChatCellAudit', 'tgErrMarkFixed', 'tgSchNameFix', 'tgNdPurge', 'pbSetup', 'tgV168Hygiene', 'tgV168NextFill', 'tgV168QueueSetup', 'tgV168RefSetup', 'tgV168ModeSplit', 'tgV168VocabMigrate', 'tgV1689Setup', 'tgV16810Ticks', 'tgV169Setup', 'tgV1691Triggers', 'tgV1692Setup', 'tgV170Seed', 'tgV1701SendDry', 'tgV1702Plan', 'tgV1708Cfg', 'tgV1709CfgTab', 'tgV17013Setup', 'tgV17013Capped', 'tgV17013LmPlan', 'tgV17021CmFixPreview', 'tgV170222CmFix', 'tgV170231CmFix', 'tgV170232DirRetry', 'tgV170233SitePub'];
+var CI_ONCE_AUTO = ['tgErrScrub', 'tgChatCellAudit', 'tgErrMarkFixed', 'tgSchNameFix', 'tgNdPurge', 'pbSetup', 'tgV168Hygiene', 'tgV168NextFill', 'tgV168QueueSetup', 'tgV168RefSetup', 'tgV168ModeSplit', 'tgV168VocabMigrate', 'tgV1689Setup', 'tgV16810Ticks', 'tgV169Setup', 'tgV1691Triggers', 'tgV1692Setup', 'tgV170Seed', 'tgV1701SendDry', 'tgV1702Plan', 'tgV1708Cfg', 'tgV1709CfgTab', 'tgV17013Setup', 'tgV17013Capped', 'tgV17013LmPlan', 'tgV17021CmFixPreview', 'tgV170222CmFix', 'tgV170231CmFix', 'tgV170232DirRetry', 'tgV170233SitePub', 'tgV170234ErrBox'];
 function ciOnceAuto_() {
   var out = [];
   for (var i = 0; i < CI_ONCE_AUTO.length; i++) {
@@ -294,6 +294,23 @@ function ciMask_(s) {
 }
 
 function ciErrs_(since) {
+  /* v170.23.4: صندوق یکتای خطا. هر اثر انگشت یک ردیف با first (اولین بار) و t (آخرین بار)؛ پایش فقط first بعد از انتشار را
+     تازه می‌داند. سطرهای تب قدیمی «خطاها» (دیگر نوشته نمی‌شود) با همان اثر انگشت می‌آیند تا پایه یکی باشد. */
+  if (typeof erbCiRows_ === 'function') {
+    var out = erbCiRows_(since).map(function (r) { return { t: r.t, first: r.first, where: ciMask_(r.where).slice(0, 60), msg: ciMask_(r.msg), n: r.n }; });
+    try {
+      var lh = tgErrSheet_(), ll = lh ? lh.getLastRow() : 0;
+      if (ll >= 2) {
+        var lf = Math.max(2, ll - 1500);
+        lh.getRange(lf, 1, ll - lf + 1, 6).getValues().forEach(function (v) {
+          var t0 = v[1] instanceof Date ? v[1].getTime() : 0; if (!t0 || t0 < since) return;
+          var f = erbFp_(v[2], v[4]);
+          out.push({ t: t0, first: t0, where: ciMask_(f.where).slice(0, 60), msg: ciMask_(f.kind), n: Number(v[5] || 1) });
+        });
+      }
+    } catch (eL) {}
+    return { ok: true, rows: out };
+  }
   var sh = tgErrSheet_();
   if (!sh || sh.getLastRow() < 2) return { ok: true, rows: [] };
   var last = sh.getLastRow(), from = Math.max(2, last - 1500);

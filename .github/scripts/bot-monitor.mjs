@@ -175,7 +175,8 @@ if (!first.ok) {
   output('monitor', 'unavailable');
   process.exit(0);
 }
-const base = new Set(first.rows.filter((r) => r.t < T0).map(keyOf));
+// v170.23.4: صندوق یکتای خطا یک ردیف برای هر اثر انگشت دارد؛ «first» اولین بار است (سطر قدیمی بی first: همان t)
+const base = new Set(first.rows.filter((r) => (r.first ?? r.t) < T0).map(keyOf));
 
 // خلاصهٔ ۲۴ ساعت پیش از انتشار
 const day = first.rows.filter((r) => r.t >= T0 - DAY && r.t < T0);
