@@ -1769,6 +1769,7 @@ function tgRunReset() {
 }
 
 function tgRun() {
+  if (typeof ciScope_ === 'function') ciScope_();   /* v170.16.2: دور محدود انتشار روز */
   var p = PropertiesService.getScriptProperties();
   var at = Number(p.getProperty('TG_TEST_AT') || 0);
   var runId = p.getProperty('TG_TEST_RUN') || '';
@@ -34138,8 +34139,7 @@ var TG_CP_WP_PUSH = 'https://tajrobeh.life/wp-json/tj/v1/camp-push';
 function tgCpPush_(why) {
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'cppush', why: why || '' }); return 'dry'; }
   try {
-    var sec = PropertiesService.getScriptProperties().getProperty('CP_WP_SECRET');
-    if (!sec) return 'بدون رمز';
+    if (!ssCampHas_()) return 'بدون رمز';   /* v170.16.1: رمز فعلی و تازه در sitesec.gs (ssCampFetch_) */
     TG_CP_MEMO = null;
     var camps = tgCpCamps_().map(function (c) { return tgCpApi_({ code: c.code, nocache: 1 }); });
     var offers = []; try { if (typeof v17013OfPayload_ === 'function') offers = v17013OfPayload_(); } catch (eOf) { tgErr_('v17013OfPayload_', eOf); }   /* v170.13: آفرهای مراجعان */
@@ -34148,8 +34148,7 @@ function tgCpPush_(why) {
     var sig = tgHash_(JSON.stringify(camps.map(function (c) { var x = {}; for (var k in c) if (k !== 't') x[k] = c[k]; return x; })) + JSON.stringify(offers));
     var lastAt = Number(P.getProperty('CP_PUSH_AT') || 0);
     if (sig === P.getProperty('CP_PUSH_H') && (why === 'تیک' ? Date.now() - lastAt < 60 * 60000 : Date.now() - lastAt < 2 * 60000)) return 'بی‌تغییر';
-    var r = UrlFetchApp.fetch(TG_CP_WP_PUSH, { method: 'post', contentType: 'application/json',
-      headers: { 'x-tj-secret': sec }, payload: JSON.stringify({ camps: camps, offers: offers, why: why || '' }), muteHttpExceptions: true });
+    var r = ssCampFetch_(TG_CP_WP_PUSH, { camps: camps, offers: offers, why: why || '' });
     var out = r.getResponseCode() + ' ' + String(r.getContentText()).slice(0, 120);
     if (r.getResponseCode() === 200) { P.setProperty('CP_PUSH_H', sig); P.setProperty('CP_PUSH_AT', String(Date.now())); }
     if (r.getResponseCode() !== 200) tgErr_('tgCpPush_: ' + out);
@@ -34164,16 +34163,14 @@ var TG_TH_WP_PUSH = 'https://tajrobeh.life/wp-json/tj/v1/thers-push';
 function tgThPush_() {
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'thpush' }); return 'dry'; }
   var P = PropertiesService.getScriptProperties();
-  var sec = P.getProperty('CP_WP_SECRET');
-  if (!sec) return 'بدون رمز';
+  if (!ssCampHas_()) return 'بدون رمز';   /* v170.16.1 */
   var now = Date.now(), lastAt = Number(P.getProperty('TH_PUSH_AT') || 0), miss = Number(P.getProperty('TH_PUSH_404') || 0);
   if (miss && now - miss < 6 * 3600000) return 'بی‌تغییر';
   var pub = tgApiThPub_();
   if (!pub || !pub.list || !pub.list.length) return 'فهرست خالی';
   var sig = tgHash_(JSON.stringify(pub.list));
   if (!tgThPushDue_(sig, P.getProperty('TH_PUSH_H'), now, lastAt)) return 'بی‌تغییر';
-  var r = UrlFetchApp.fetch(TG_TH_WP_PUSH, { method: 'post', contentType: 'application/json',
-    headers: { 'x-tj-secret': sec }, payload: JSON.stringify({ at: pub.at, list: pub.list }), muteHttpExceptions: true });
+  var r = ssCampFetch_(TG_TH_WP_PUSH, { at: pub.at, list: pub.list });
   var code = r.getResponseCode();
   if (code === 200) { P.setProperty('TH_PUSH_H', sig); P.setProperty('TH_PUSH_AT', String(now)); P.deleteProperty('TH_PUSH_404'); return '200'; }
   if (code === 404) { P.setProperty('TH_PUSH_404', String(now)); return '۴۰۴ (اسنیپت سایت هنوز منتشر نشده)'; }

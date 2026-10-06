@@ -1,0 +1,490 @@
+<!-- wp:html -->
+<style>/* ebi v4: minimal white, Tajrobeh brand */
+body{overflow-x:clip}
+#ebi{--r:#c83f49;--r4:#d9737a;--tint:#faeced;--tint2:#fdf4f4;--ink:#0e0e0e;--ink2:#222;--soft:#4e4e4e;--mut:#676768;--line:#dfdfe2;--y:#f2c14e;--sunk:#f5f5f8;
+font-family:'Anjoman Max','anjoman','Vazirmatn',system-ui,sans-serif;direction:rtl;color:var(--ink2);background:#fff;font-size:16px;line-height:1.85;
+width:100vw;max-width:none!important;margin:0 calc(50% - 50vw)!important;overflow-x:clip}
+#ebi *{box-sizing:border-box}
+#ebi img{max-width:100%;height:auto;display:block}
+#ebi a{color:inherit;text-decoration:none}
+#ebi p{margin:0 0 12px}
+#ebi h1,#ebi h2,#ebi h3{color:var(--ink);margin:0;line-height:1.45;font-weight:800}
+#ebi .w{max-width:1080px;margin-inline:auto;padding-inline:16px}
+#ebi .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#ebi .hl{background:linear-gradient(transparent 55%,var(--y) 55%,var(--y) 88%,transparent 88%);padding-inline:2px}
+#ebi .k{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--r);margin-bottom:6px}
+#ebi .k:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--r)}
+#ebi section{padding-block:36px}
+#ebi .h2{font-size:22px;margin-bottom:14px}
+/* buttons */
+#ebi .b{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:999px;font-weight:700;font-size:15px;border:1.5px solid transparent;cursor:pointer;font-family:inherit;transition:transform .15s,background .15s}
+#ebi .b:active{transform:scale(.97)}
+#ebi .b.red{background:var(--r);color:#fff}
+#ebi .b.red:hover{background:#b3343e}
+#ebi .b.line{border-color:var(--line);color:var(--ink);background:#fff}
+#ebi .b.line:hover{border-color:var(--ink)}
+#ebi .b.sm{min-height:38px;padding:0 14px;font-size:14px}
+/* hero: stage + notebook */
+#ebi .hero{position:relative;padding:0 0 30px;overflow:hidden;
+background:radial-gradient(60% 46% at 50% 0,var(--tint) 0,rgba(250,236,237,.5) 45%,rgba(255,255,255,0) 100%)}
+#ebi .val{height:14px;background:radial-gradient(circle at 50% 0,var(--r) 9px,transparent 9.5px) 0 0/22px 14px repeat-x;opacity:.9}
+#ebi .hero .w{position:relative;max-width:560px;text-align:center;padding-top:26px}
+#ebi .lg{width:170px;margin:0 auto 6px}
+#ebi .bill{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;font-size:13px;color:var(--mut);margin:0 0 18px}
+#ebi .bill span+span:before{content:"·";margin-left:10px;color:var(--r)}
+#ebi .hero h1{font-size:clamp(23px,6.4vw,34px);margin-bottom:6px}
+#ebi .hero .sub{color:var(--soft);font-size:15px;margin-bottom:20px}
+/* notebook */
+#ebi .nb{position:relative;text-align:right;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px -22px rgba(14,14,14,.25);
+padding:18px 44px 14px 18px;background-image:linear-gradient(var(--r4),var(--r4)),repeating-linear-gradient(#fff 0 35px,#eeeef1 35px 36px);background-size:1.5px 100%,100% 100%;background-position:right 30px top,0 14px;background-repeat:no-repeat,repeat}
+#ebi .nb .tt{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mut);height:36px;margin-top:-10px}
+#ebi .nb .tt{padding-left:78px}
+#ebi .nb .tt b{color:var(--ink);font-size:14px}
+#ebi .stamp{position:absolute;top:-22px;left:-10px;width:78px;transform:rotate(-8deg);border-radius:6px;box-shadow:0 8px 18px -8px rgba(0,0,0,.35);border:3px solid #fff}
+#ebi .stamp:after{content:"";position:absolute;top:-8px;left:22px;width:34px;height:14px;background:rgba(242,193,78,.75);transform:rotate(4deg)}
+#ebi .stamp img{border-radius:3px}
+#ebi .items{list-style:none;margin:0;padding:0;font-size:16px}
+#ebi .items li{display:flex;gap:8px;min-height:36px;align-items:center;line-height:1.5;padding-block:4px}
+#ebi .items .n{font-weight:800;color:var(--r);min-width:30px;font-size:15px}
+#ebi .items small{color:var(--mut);font-size:12px;margin-inline-start:auto;white-space:nowrap}
+#ebi .items li.new{animation:ebIn .5s ease both}
+#ebi .items li.mine .t{background:linear-gradient(transparent 60%,rgba(242,193,78,.6) 60%)}
+#ebi .items li.empty{color:var(--mut);font-size:14px}
+@keyframes ebIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#ebi form.add .row{display:flex;gap:8px;align-items:center;min-height:44px}
+#ebi form.add .n{font-weight:800;color:var(--r);min-width:30px;font-size:15px}
+#ebi form.add input[type=text]{font-family:inherit;font-size:16px;border:0;border-bottom:1.5px dashed var(--r4);background:transparent;padding:6px 2px;flex:1;min-width:0;color:var(--ink);outline:0;border-radius:0}
+#ebi form.add input[type=text]:focus{border-bottom-style:solid;border-bottom-color:var(--r)}
+#ebi form.add .go{width:40px;height:40px;border-radius:50%;background:var(--r);color:#fff;border:0;font-size:20px;line-height:1;cursor:pointer;flex:none}
+#ebi form.add .go:disabled{opacity:.5}
+#ebi form.add .more{display:none;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 0 2px;font-size:13px;color:var(--mut)}
+#ebi form.add.open .more{display:flex}
+#ebi form.add .more input[type=text]{font-size:14px;border-bottom:1px solid var(--line);flex:1 1 150px}
+#ebi form.add .more label{display:inline-flex;gap:5px;align-items:center}
+#ebi form.add .hp{position:absolute;left:-9999px}
+#ebi .msg{font-size:13px;margin-top:6px;display:none}
+#ebi .msg.on{display:block}
+#ebi .msg.ok{color:#1d7a45}
+#ebi .msg.err{color:var(--r)}
+#ebi .sup{display:none;margin-top:8px;font-size:13px;background:var(--tint2);border-radius:8px;padding:10px 12px}
+#ebi .sup.on{display:block}
+#ebi .sup a{color:var(--r);font-weight:700;text-decoration:underline}
+#ebi .note{font-size:12px;color:var(--mut);margin:8px 0 0}
+#ebi .hero .acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+#ebi .cnt{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--soft);margin-top:14px}
+#ebi .cnt b{color:var(--r);font-size:15px}
+/* tiles */
+#ebi .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#ebi .tile{display:flex;flex-direction:column;gap:2px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;transition:border-color .15s,transform .15s;position:relative}
+#ebi .tile:hover{border-color:var(--ink);transform:translateY(-2px)}
+#ebi .tile img{width:28px;height:28px;object-fit:contain;margin-bottom:4px}
+#ebi .tile b{display:block;font-size:14.5px;color:var(--ink);line-height:1.5}
+#ebi .tile span{display:block;font-size:12px;color:var(--mut);line-height:1.6}
+#ebi .tile.main{grid-column:1/-1;flex-direction:row;align-items:center;gap:12px;background:var(--tint2);border-color:var(--tint);padding:14px}
+#ebi .tile.main img{width:40px;height:40px;margin:0}
+#ebi .tile.main div{flex:1}
+#ebi .tile.main b{font-size:16px}
+#ebi .tile.main i{font-style:normal;color:var(--r);font-weight:800}
+/* show */
+#ebi .show{display:grid;gap:14px}
+#ebi .tk{display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px;position:relative}
+#ebi .tk img.p{width:84px;border-radius:8px;flex:none}
+#ebi .tk dl{margin:0;font-size:13px;display:grid;grid-template-columns:auto 1fr;gap:2px 10px}
+#ebi .tk dt{color:var(--mut)}
+#ebi .tk dd{margin:0;color:var(--ink)}
+#ebi .tk h3{font-size:16px;margin-bottom:4px}
+#ebi .sh{color:var(--soft);font-size:15px}
+#ebi details.dd{border-top:1px solid var(--line)}
+#ebi details.dd:last-of-type{border-bottom:1px solid var(--line)}
+#ebi details.dd summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;min-height:48px;font-weight:700;color:var(--ink);font-size:15px}
+#ebi details.dd summary::-webkit-details-marker{display:none}
+#ebi details.dd summary:after{content:"+";color:var(--r);font-size:20px;font-weight:400;transition:transform .2s}
+#ebi details.dd[open] summary:after{transform:rotate(45deg)}
+#ebi details.dd .in{padding-bottom:14px;font-size:14px;color:var(--soft)}
+#ebi .cr{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin:0;font-size:13px}
+#ebi .cr div{line-height:1.6}
+#ebi .cr dt{color:var(--mut);font-size:12px}
+#ebi .cr dd{margin:0;color:var(--ink);font-weight:600}
+#ebi ul.ul{margin:0;padding-inline-start:18px}
+/* press */
+#ebi .ph{display:flex;justify-content:space-between;align-items:baseline}
+#ebi .ph small{color:var(--mut);font-size:12px}
+#ebi .rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 16px 12px;margin-inline:-16px;scrollbar-width:none}
+#ebi .rail::-webkit-scrollbar{display:none}
+#ebi .pc{flex:0 0 200px;scroll-snap-align:start;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+#ebi .pc .im{aspect-ratio:16/10;background:var(--sunk);overflow:hidden}
+#ebi .pc .im img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+#ebi .pc .im.no{display:flex;align-items:center;justify-content:center;background:var(--tint2);color:var(--r);font-weight:800;font-size:15px;padding:10px;text-align:center}
+#ebi .pc .tx{padding:10px 12px 12px}
+#ebi .pc small{color:var(--r);font-size:12px;font-weight:700}
+#ebi .pc p{font-size:13.5px;line-height:1.65;color:var(--ink);margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* rows */
+#ebi .rows{display:grid;gap:10px}
+#ebi .rw{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:14px}
+#ebi .rw:hover{border-color:var(--ink)}
+#ebi .rw .ic{width:40px;height:40px;border-radius:50%;background:var(--tint2);color:var(--r);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none;font-size:14px}
+#ebi .rw b{display:block;color:var(--ink);font-size:15px}
+#ebi .rw span{font-size:13px;color:var(--mut)}
+#ebi .rw:after{content:"←";margin-inline-start:auto;color:var(--r)}
+/* end */
+#ebi .end{text-align:center;padding-block:34px 40px;border-top:1px solid var(--line)}
+#ebi .end .bry{width:46px;margin:0 auto 8px}
+#ebi .end .sl{font-size:17px;font-weight:800;color:var(--ink);margin-bottom:4px}
+#ebi .end .sl em{font-style:normal;color:var(--r)}
+#ebi .pair{display:flex;justify-content:center;align-items:center;gap:12px;margin:14px 0}
+#ebi .pair img{height:22px;width:auto}
+#ebi .pair i{color:var(--mut);font-style:normal}
+#ebi .care{font-size:12.5px;color:var(--mut);max-width:520px;margin:0 auto;line-height:1.8}
+#ebi .care b{color:var(--ink)}
+/* inner pages */
+#ebi .ih{padding:0 0 8px;background:radial-gradient(70% 60% at 50% 0,var(--tint2) 0,rgba(255,255,255,0) 100%)}
+#ebi .ih .w{max-width:760px;padding-top:18px}
+#ebi .crumb{font-size:12px;color:var(--mut);display:flex;gap:6px;align-items:center;margin-bottom:12px}
+#ebi .crumb a:hover{color:var(--r)}
+#ebi .crumb img{height:16px;width:auto}
+#ebi .ih h1{font-size:clamp(24px,6.6vw,36px);margin-bottom:8px}
+#ebi .lede{color:var(--soft);font-size:15.5px}
+#ebi .acts{display:flex;gap:8px;flex-wrap:wrap}
+#ebi .sib{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:14px 16px;margin-inline:-16px}
+#ebi .sib::-webkit-scrollbar{display:none}
+#ebi .sib a{flex:none;font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--soft);white-space:nowrap}
+#ebi .sib a[aria-current]{background:var(--ink);color:#fff;border-color:var(--ink)}
+#ebi .narrow{max-width:760px}
+#ebi .steps{list-style:none;margin:0;padding:0;counter-reset:s;display:grid;gap:10px}
+#ebi .steps li{counter-increment:s;display:flex;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;font-size:14px;color:var(--soft)}
+#ebi .steps li:before{content:counter(s);font-weight:800;color:var(--r);width:26px;height:26px;border-radius:50%;background:var(--tint2);display:flex;align-items:center;justify-content:center;flex:none;font-size:13px}
+#ebi .steps b{display:block;color:var(--ink);font-size:15px}
+#ebi .card{border:1px solid var(--line);border-radius:20px;padding:20px 16px;background:#fff}
+#ebi .card h2{font-size:20px;margin-bottom:6px}
+#ebi .card>p{font-size:13.5px;color:var(--mut)}
+#ebi .invs{display:grid;gap:10px}
+#ebi .inv{padding:14px;border:1px solid var(--line);border-radius:14px}
+#ebi .inv small{color:var(--r);font-weight:700;font-size:12px}
+#ebi .inv h3{font-size:16px;margin:2px 0 4px}
+#ebi .inv p{font-size:14px;color:var(--soft);margin:0}
+#ebi .inv.hi{background:var(--tint2);border-color:var(--tint)}
+#ebi .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+#ebi .chip{font-family:inherit;font-size:13px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--soft)}
+#ebi .chip.on{background:var(--r);border-color:var(--r);color:#fff}
+#ebi .yrs{list-style:none;margin:16px 0 0;padding:0;border-right:1.5px solid var(--tint);display:grid;gap:10px}
+#ebi .yrs li{position:relative;padding-right:16px;font-size:14px;color:var(--soft);line-height:1.7}
+#ebi .yrs li:before{content:"";position:absolute;right:-5px;top:9px;width:8px;height:8px;border-radius:50%;background:var(--r)}
+#ebi .yrs b{color:var(--ink);margin-left:6px}
+#ebi .yrs li.now:before{background:var(--y);box-shadow:0 0 0 3px #fff,0 0 0 4px var(--y)}
+#ebi .art{max-width:700px;font-size:16px}
+#ebi .art h2{font-size:20px;margin:26px 0 8px}
+#ebi .art a{color:var(--r);text-decoration:underline;text-underline-offset:3px}
+#ebi .art blockquote{margin:16px 0;padding:12px 16px;border-right:3px solid var(--y);background:var(--sunk);border-radius:8px;font-weight:600;color:var(--ink)}
+#ebi .src{font-size:12px;color:var(--mut);margin-top:20px}
+#ebi .full .items li{border-bottom:1px solid #f0f0f2}
+@media (min-width:760px){
+ #ebi section{padding-block:52px}
+ #ebi .h2{font-size:26px}
+ #ebi .tiles{grid-template-columns:repeat(4,1fr)}
+ #ebi .show{grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+ #ebi .pc{flex-basis:240px}
+ #ebi .rows{grid-template-columns:1fr 1fr}
+ #ebi .invs{grid-template-columns:1fr 1fr}
+ #ebi .card{padding:28px}
+ #ebi .stamp{width:96px;left:-34px}
+ #ebi .cr{grid-template-columns:1fr 1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){#ebi *{animation:none!important;transition:none!important}}
+/* v4.1 */
+.sh-wrap{position:fixed;inset:0;background:rgba(14,14,14,.4);z-index:99999;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;direction:rtl;font-family:'Anjoman Max','anjoman','Vazirmatn',system-ui,sans-serif}
+.sh-wrap.on{opacity:1;pointer-events:auto}
+.sh-wrap .sh{position:relative;background:#fff;width:100%;max-width:440px;border-radius:20px 20px 0 0;padding:20px 16px 22px;transform:translateY(30px);transition:transform .25s;box-shadow:0 -10px 40px rgba(0,0,0,.15);color:#222;line-height:1.8}
+.sh-wrap.on .sh{transform:none}
+.sh-wrap .x{position:absolute;left:12px;top:10px;border:0;background:#f5f5f8;width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer}
+.sh-wrap .k{color:#c83f49;font-size:13px;font-weight:700;margin:0}
+.sh-wrap .t{font-size:19px;margin:2px 0 12px;color:#0e0e0e}
+.sh-wrap .fl,#ebi .fl{display:block;margin-bottom:10px}
+.sh-wrap .fl span,#ebi .fl span{display:block;font-size:13px;color:#4e4e4e;margin-bottom:4px}
+.sh-wrap .fl i,#ebi .fl i{font-style:normal;color:#676768;font-size:12px}
+.sh-wrap input[type=text],#ebi .fl input,#ebi .fl select,#ebi .fph input{width:100%;font-family:inherit;font-size:16px;border:1px solid #dfdfe2;border-radius:12px;padding:10px 12px;background:#fff;color:#0e0e0e}
+.sh-wrap input:focus,#ebi .fl input:focus,#ebi .fl select:focus{outline:2px solid #faeced;border-color:#c83f49}
+.sh-wrap .gift{display:flex;gap:8px;align-items:center;font-size:14px;margin:4px 0 10px;cursor:pointer}
+.sh-wrap .pv{background:#fdf4f4;border-radius:12px;padding:10px 12px;font-size:14px;color:#222;margin-bottom:12px;border-right:3px solid #f2c14e}
+.sh-wrap .acts{display:flex;gap:8px;flex-wrap:wrap}
+.sh-wrap .b{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;border-radius:999px;font-weight:700;font-size:14px;border:1.5px solid transparent;cursor:pointer;font-family:inherit}
+.sh-wrap .b.red{background:#c83f49;color:#fff;flex:1}
+.sh-wrap .b.line{border-color:#dfdfe2;background:#fff;color:#0e0e0e}
+.sh-wrap .fine{font-size:12px;color:#676768;margin:8px 0 0}
+#ebi form.join{display:block}
+#ebi .fine{font-size:12px;color:var(--mut);margin:10px 0 0;line-height:1.7}
+#ebi .jmsg{font-size:13px;margin-top:6px}
+#ebi .jmsg.err{color:var(--r)}
+#ebi .okc .big{font-size:20px;font-weight:800;color:var(--ink);margin-bottom:4px}
+#ebi .okc .b{margin:6px 0 0 6px}
+#ebi .card .chips{margin-top:0}
+#ebi .follow{margin-top:12px;border:1px dashed var(--r4);background:var(--tint2);border-radius:14px;padding:14px;text-align:right;animation:ebIn .4s ease both}
+#ebi .follow .ft{font-weight:800;color:var(--ink);margin:0 0 4px}
+#ebi .follow .fs{font-size:13px;color:var(--soft);margin:0 0 10px}
+#ebi .follow .acts{justify-content:flex-start;margin:0}
+#ebi .fph{display:flex;gap:8px;margin-top:10px}
+#ebi .fph input{flex:1;min-width:0;padding:8px 12px;font-size:15px}
+#ebi .tk .gl{display:inline-block;font-size:12.5px;color:var(--r);margin-top:6px;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:3px}
+/* v4.2 */
+#ebi{--y:#f5d133}
+#ebi .hp,#ebi form .hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+#ebi .seen{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 18px;font-size:14px;color:var(--soft)}
+#ebi .seen button{font-family:inherit;font-size:14px;padding:7px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+#ebi .seen button.on{border-color:var(--ink);background:var(--ink);color:#fff}
+#ebi .seen-no{margin:-6px auto 18px;max-width:420px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+#ebi .seen-no[hidden]{display:none}
+.sh-wrap .sh{padding:22px 18px 20px}
+.sh-wrap .itk{display:flex;border:1.5px solid #dfdfe2;border-radius:16px;overflow:hidden;margin:6px 0 14px;background:#fff}
+.sh-wrap .itk-a{flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:2px;background:#fdf4f4}
+.sh-wrap .itk-a .k{font-size:12px;color:#c83f49;font-weight:700}
+.sh-wrap .itk-a b{font-size:20px;color:#0e0e0e;font-weight:800;line-height:1.5}
+.sh-wrap .itk-a b span{background:linear-gradient(transparent 58%,#f5d133 58%,#f5d133 90%,transparent 90%)}
+.sh-wrap .tk-gift{font-size:13px;color:#c83f49}
+.sh-wrap .itk-b{width:132px;border-right:2px dashed #dfdfe2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;position:relative}
+.sh-wrap .itk-b img{width:110px;height:auto}
+.sh-wrap .itk-b small{font-size:11px;color:#676768;text-align:center;line-height:1.5}
+.sh-wrap .seg{display:flex;background:#f5f5f8;border-radius:999px;padding:4px;margin-bottom:12px}
+.sh-wrap .seg button{flex:1;font-family:inherit;font-size:14px;border:0;background:none;padding:8px;border-radius:999px;cursor:pointer;color:#4e4e4e}
+.sh-wrap .seg button.on{background:#fff;color:#0e0e0e;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.sh-wrap input[type=text]:focus{outline:none;border-color:#0e0e0e}
+.sh-wrap .go-share{width:100%;margin-top:4px}
+.sh-wrap .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.sh-wrap .row3 .b{padding:0 6px;font-size:13px;min-height:40px}
+@media (min-width:600px){.sh-wrap{align-items:center}.sh-wrap .sh{border-radius:20px;max-width:420px}}
+#ebi .follow .acts .b{margin:0}
+
+.sh-wrap *{box-sizing:border-box}
+.sh-wrap .itk{margin-top:30px}
+
+#ebi .lg{width:230px}
+</style>
+<div id="ebi" class="alignfull" data-src="ebi-students" data-topic=""><section class="ih"><div class="w"><p class="crumb"><a href="/">تجربه زندگی</a><span>/</span><a href="/ebis-playlist/"><img src="/wp-content/uploads/2026/10/tjl-ebi-logo-title-purple.webp" alt="پلی‌لیستِ ابی" width="63" height="20"></a><span>/</span><span>دانشجوها</span></p><h1>دانشجوها، <span class="hl">با هم</span> بیایید</h1><p class="lede">اگر دانشجوی روانشناسی، مشاوره، روانپزشکی یا رشته‌های نزدیک هستید، «پلی‌لیستِ ابی» را با هم‌کلاسی‌هایتان ببینید. برای گروه‌های دانشجویی بلیت با تخفیف ویژه هماهنگ می‌کنیم و بعد از نمایش با مدرسهٔ تجربه درباره‌اش حرف می‌زنیم.</p><div class="acts"><button type="button" class="b line" data-invite>🎟 دعوت از یک دوست</button></div><nav class="sib" aria-label="صفحه‌های پلی‌لیست ابی"><a href="/ebis-playlist/">نمایش</a><a href="/ebis-playlist/list/">فهرست جمعی</a><a href="/ebis-playlist/night/">شب تجربه</a><a href="/ebis-playlist/together/">اهالی سلامت روان</a><a href="/ebis-playlist/students/" aria-current="page">دانشجوها</a><a href="/ebis-playlist/group/">گروه تجربهٔ نمایش</a><a href="/ebis-playlist/every-brilliant-thing/">تاریخچهٔ متن</a></nav></div></section>
+<section style="padding-top:20px"><div class="w narrow">
+<ol class="steps"><li><div><b>اعلام می‌کنید</b>از کدام دانشگاه و چند نفر.</div></li><li><div><b>هماهنگ می‌کنیم</b>شب و تخفیف گروهی را با گروه نمایش هماهنگ می‌کنیم و خبرتان می‌کنیم.</div></li><li><div><b>بعد از نمایش</b>یک گفت‌وگوی کوتاه با مدرسهٔ تجربه: نمایش از نگاه یک درمانگر.</div></li></ol>
+<div style="margin-top:22px"><div class="card" id="form"><h2>اعلام حضور دانشجویی</h2><p>نمایندهٔ یک گروه هستید یا تنها می‌آیید، فرقی ندارد.</p>
+<form class="join" data-join="student" novalidate>
+<label class="fl"><span>نام و نام خانوادگی</span><input type="text" name="name" maxlength="60" autocomplete="name" required></label>
+<label class="fl"><span>شمارهٔ موبایل</span><input type="tel" name="phone" inputmode="tel" maxlength="20" autocomplete="tel" dir="ltr" required></label>
+<label class="fl"><span>دانشگاه</span><input type="text" name="uni" maxlength="120" placeholder="مثلاً علامه طباطبایی"></label><label class="fl"><span>رشته و مقطع <i>(اختیاری)</i></span><input type="text" name="field" maxlength="120" placeholder="مثلاً کارشناسی روانشناسی"></label><label class="fl"><span>چند نفر هستید؟</span><select name="count"><option>فقط خودم</option><option>۲ تا ۵ نفر</option><option>۶ تا ۱۵ نفر</option><option>بیش از ۱۵ نفر</option></select></label>
+<div class="hp" aria-hidden="true"><input type="text" name="hp" tabindex="-1" autocomplete="off"></div>
+<button type="submit" class="b red">اعلام حضور</button>
+<p class="fine">اطلاعات شما فقط در اختیار تیم کمپین «پلی‌لیستِ ابی» در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت شما منتشر یا با کسی به اشتراک گذاشته نمی‌شود.</p>
+<div class="jmsg" role="status" aria-live="polite"></div></form></div></div>
+</div></section><footer class="end"><div class="w"><img class="bry" src="/wp-content/uploads/2026/09/tjl-berry.webp" width="200" height="200" alt="" loading="lazy">
+<p class="sl">یه توت‌فرنگی ما رو نجات داد. <em>یه فهرست، اونا رو.</em></p>
+<div class="pair"><img src="/wp-content/uploads/2026/10/tjl-ebi-logo-title-purple.webp" width="1400" height="432" alt="پلی‌لیستِ ابی" loading="lazy"><i>×</i><img src="/wp-content/uploads/2026/09/TajrobehMainLogo.webp" width="102" height="29" alt="مرکز تجربه زندگی" loading="lazy"></div><p class="care"><b>اگر همین حالا حالتان خوب نیست،</b> تنها نمانید: اورژانس اجتماعی <b>۱۲۳</b>، صدای مشاور بهزیستی <b>۱۴۸۰</b>، و در خطر فوری <b>۱۱۵</b>.</p></div></footer></div>
+<script>(function(){
+var R=document.getElementById('ebi'); if(!R){return;}
+var API='/wp-json/tj/v1/ebi-list', PAPI='/wp-json/tj/v1/ebi-press';
+function fa(x){return String(x).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});}
+function esc(s){var d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
+function ev(n,p){try{p=p||{};p.page_kind='ebi';p.page=R.getAttribute('data-src')||'';if(window.gtag){window.gtag('event',n,p);}else{(window.dataLayer=window.dataLayer||[]).push(Object.assign({event:n},p));}if(window.clarity){window.clarity('event',n);}}catch(e){}}
+ev('ebi_view');
+R.addEventListener('click',function(e){var a=e.target.closest('[data-ev]');if(a){ev(a.getAttribute('data-ev'),{label:a.getAttribute('data-lbl')||''});}});
+/* fluent hidden fields */
+function setH(n,v){var els=R.querySelectorAll('input[name="'+n+'"]');for(var i=0;i<els.length;i++){els[i].value=v;}}
+var SRC=R.getAttribute('data-src')||'ebi';
+function initForm(){setH('source',SRC);setH('topic',R.getAttribute('data-topic')||'');}
+initForm();setTimeout(initForm,1500);
+var chips=R.querySelectorAll('.chip');
+for(var c=0;c<chips.length;c++){chips[c].addEventListener('click',function(){for(var k=0;k<chips.length;k++){chips[k].classList.remove('on');chips[k].setAttribute('aria-pressed','false');}this.classList.add('on');this.setAttribute('aria-pressed','true');R.setAttribute('data-topic',this.getAttribute('data-topic'));setH('topic',this.getAttribute('data-topic'));ev('ebi_chip',{label:this.getAttribute('data-topic')});});}
+/* share */
+var shs=R.querySelectorAll('[data-share]');
+for(var s=0;s<shs.length;s++){shs[s].addEventListener('click',function(){var b=this,u=location.origin+location.pathname;if(navigator.share){navigator.share({title:document.title,url:u}).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(u);b.textContent='لینک کپی شد';}ev('ebi_share');});}
+/* list */
+var ol=R.querySelector('#ebiItems'),full=R.querySelector('#ebiFull'),more=R.querySelector('#ebiMore'),cnts=R.querySelectorAll('[data-ebi-count]'),nx=R.querySelector('[data-ebi-next]');
+var all=[],shown=0,STEP=40,count=0;
+function li(it,cls){var by=it.by?esc(it.by):'';return '<li class="'+(cls||'')+'"><span class="n">'+fa(it.n)+'.</span><span class="t">'+esc(it.t)+'</span>'+(by?'<small>'+by+'</small>':'')+'</li>';}
+function setCount(){for(var i=0;i<cnts.length;i++){cnts[i].textContent=count?fa(count)+' مورد':'اولین نفر باش';}if(nx){nx.textContent=fa(count+1)+'.';}}
+function renderFull(){if(!full){return;}var h='';var end=Math.min(all.length,shown+STEP);for(var i=shown;i<end;i++){h+=li(all[i]);}full.insertAdjacentHTML('beforeend',h);shown=end;if(more){more.style.display=shown<all.length?'':'none';}}
+if(more){more.addEventListener('click',renderFull);}
+if(ol||full||cnts.length){fetch(API,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){
+ all=d.items||[];count=d.count||all.length;setCount();
+ if(ol){var lim=parseInt(ol.getAttribute('data-limit')||'4',10);var sl=all.slice(0,lim).reverse();var h='';for(var i=0;i<sl.length;i++){h+=li(sl[i],'new');}
+  ol.innerHTML=h||'<li class="empty">فهرست تازه باز شده. اولی را تو بنویس.</li>';}
+ if(full){full.innerHTML='';if(!all.length){full.innerHTML='<li class="empty">هنوز موردی منتشر نشده. اولی را تو بنویس.</li>';}else{renderFull();}}
+}).catch(function(){setCount();});}
+/* rotating placeholder */
+var f=R.querySelector('#ebiAdd');
+if(f){
+ var inp=f.querySelector('input[name=text]'),nm=f.querySelector('input[name=name]'),an=f.querySelector('input[name=anon]'),msg=R.querySelector('#ebiMsg'),sup=R.querySelector('#ebiSup'),btn=f.querySelector('.go');
+ var ph=['بوی نان تازه','اولین چای صبح','صدای کسی که دوستش داری','باران روی شیشه','خندیدن تا اشک','یک چیز که زندگی را ارزشمند می‌کند'],pi=0;
+ setInterval(function(){if(document.activeElement!==inp){if(!inp.value){pi=(pi+1)%ph.length;inp.setAttribute('placeholder',ph[pi]+'…');}}},2600);
+ var started=false;
+ var risk=/خودکشی|خودمو بکشم|خودم را بکشم|بمیرم|تمومش کنم|تمامش کنم|نمی‌?خوام زنده|زنده نباشم|ارزش زندگی نداره/;
+ inp.addEventListener('focus',function(){f.classList.add('open');if(!started){started=true;ev('ebi_list_start');}});
+ inp.addEventListener('input',function(){if(sup){if(risk.test(inp.value)){if(!sup.classList.contains('on')){ev('ebi_list_support');}sup.classList.add('on');}else{sup.classList.remove('on');}}});
+ if(an){an.addEventListener('change',function(){nm.disabled=an.checked;if(an.checked){nm.value='';}});}
+ f.addEventListener('submit',function(e){
+  e.preventDefault();var t=inp.value.trim();msg.className='msg';
+  if(t.length<3){msg.textContent='کمی بیشتر بنویس؛ دست‌کم سه حرف.';msg.className='msg err on';return;}
+  btn.disabled=true;
+  var body={text:t,name:nm?nm.value.trim():'',anon:an?(an.checked?1:0):1,hp:f.querySelector('input[name=hp]').value,src:(R.getAttribute('data-seen')==='1'?'seen-':'')+SRC};
+  fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(d){
+   btn.disabled=false;
+   if(d.ok){ev('ebi_list_submit');msg.textContent='رسید. بعد از یک نگاه کوتاه به فهرست اضافه می‌شود.';msg.className='msg ok on';
+    var tgt=ol||full;if(tgt){var em=tgt.querySelector('.empty');if(em){em.remove();}var h=li({n:count+1,t:t,by:'در انتظار تأیید'},'new mine');if(tgt===full){tgt.insertAdjacentHTML('afterbegin',h);}else{tgt.insertAdjacentHTML('beforeend',h);}}
+    count=count+1;if(nx){nx.textContent=fa(count+1)+'.';}inp.value='';}
+   else{msg.textContent=d.msg||'ثبت نشد؛ دوباره امتحان کن.';msg.className='msg err on';}
+  }).catch(function(){btn.disabled=false;msg.textContent='ارتباط برقرار نشد؛ دوباره امتحان کن.';msg.className='msg err on';});
+ });
+}
+/* press rail */
+var rail=R.querySelector('#ebiPress');
+if(rail){fetch(PAPI).then(function(r){return r.json();}).then(function(d){
+ var it=d.items||[];if(!it.length){var sec=R.querySelector('#press');if(sec){sec.style.display='none';}return;}
+ rail.innerHTML='';
+ for(var i=0;i<it.length;i++){var x=it[i];var a=document.createElement('a');a.className='pc';a.href=x.u;a.target='_blank';a.rel='noopener';a.setAttribute('data-ev','ebi_press_click');a.setAttribute('data-lbl',x.s||'');
+  var im=document.createElement('div');im.className='im';
+  if(x.i){var g=document.createElement('img');g.src=x.i;g.alt='';g.loading='lazy';g.width=400;g.height=250;im.appendChild(g);}else{im.className='im no';im.textContent=x.s||'';}
+  var tx=document.createElement('div');tx.className='tx';var sm=document.createElement('small');sm.textContent=x.s||'';var p=document.createElement('p');p.textContent=x.t||'';tx.appendChild(sm);tx.appendChild(p);
+  a.appendChild(im);a.appendChild(tx);rail.appendChild(a);}
+ var cn=R.querySelector('#pressN');if(cn){cn.textContent=fa(it.length)+' خبر';}
+}).catch(function(){});}
+})();
+
+/* v4.1 js */
+(function(){
+var R=document.getElementById('ebi'); if(!R){return;}
+var AMP=String.fromCharCode(38), BOT='https://t.me/tajrobehlife_bot?start=';
+var TIW='https://www.tiwall.com/p/playlist';
+function fa(x){return String(x).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});}
+function ev(n,p){try{p=p||{};p.page_kind='ebi';p.page=R.getAttribute('data-src')||'';if(window.gtag){window.gtag('event',n,p);}else{(window.dataLayer=window.dataLayer||[]).push(Object.assign({event:n},p));}if(window.clarity){window.clarity('event',n);}}catch(e){}}
+function q(u,o){var s=[];for(var k in o){if(o.hasOwnProperty(k)){s.push(k+'='+encodeURIComponent(o[k]));}}return u+(u.indexOf('?')<0?'?':AMP)+s.join(AMP);}
+function el(t,c,h){var e=document.createElement(t);if(c){e.className=c;}if(h){e.innerHTML=h;}return e;}
+function post(path,body){return fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();});}
+/* ---------- entry source from #src= (keeps page cache) ---------- */
+var hs=location.hash||'';
+if(hs.indexOf('src=')>-1){ev('ebi_entry',{label:hs.split('src=')[1].slice(0,40)});try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}}
+var LOGO='/wp-content/uploads/2026/10/tjl-ebi-logo-title-purple.webp',TJL='/wp-content/uploads/2026/09/TajrobehMainLogo.webp';
+/* ---------- story image (1080x1920, canvas) ---------- */
+function img(u){return new Promise(function(ok){var i=new Image();i.onload=function(){ok(i);};i.onerror=function(){ok(null);};i.src=u;});}
+function wrap(c,t,w){var ws=t.split(' '),ls=[],l='';for(var i=0;i<ws.length;i++){var x=l?l+' '+ws[i]:ws[i];if(c.measureText(x).width>w){if(l){ls.push(l);}l=ws[i];}else{l=x;}}if(l){ls.push(l);}return ls;}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function story(o){
+ var F="'Anjoman Max','anjoman',Vazirmatn,Tahoma,sans-serif";
+ return Promise.all([document.fonts?document.fonts.load('80px '+F.split(',')[0]):null,img(LOGO),img(TJL)]).then(function(r){
+  var cv=document.createElement('canvas');cv.width=1080;cv.height=1920;var c=cv.getContext('2d');
+  c.fillStyle='#fff';c.fillRect(0,0,1080,1920);
+  var g=c.createRadialGradient(540,0,40,540,0,900);g.addColorStop(0,'#faeced');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(0,0,1080,1100);
+  c.fillStyle='#c83f49';for(var x=-6;x<1100;x+=60){c.beginPath();c.arc(x+30,0,24,0,Math.PI);c.fill();}
+  var lg=r[1];if(lg){var lw=760,lh=lw*lg.height/lg.width;c.drawImage(lg,540-lw/2,150,lw,lh);}
+  c.direction='rtl';c.textAlign='center';c.fillStyle='#676768';c.font='40px '+F;c.fillText('تئاتر · عمارت هما، سالن شیشه‌ای · هر شب ۱۹',540,480);
+  c.fillStyle='#c83f49';c.font='46px '+F;c.fillText(o.kicker,540,610);
+  c.font='86px '+F;var tl=wrap(c,o.title,860),y=730;
+  for(var i=0;i<tl.length;i++){var tw=c.measureText(tl[i]).width;c.fillStyle='#f5d133';c.fillRect(540-tw/2-10,y+14,tw+20,40);c.fillStyle='#0e0e0e';c.fillText(tl[i],540,y+40);y+=118;}
+  var rows=o.rows,top=y+60,lh2=104,h=rows.length*lh2+60;
+  c.save();c.shadowColor='rgba(14,14,14,.12)';c.shadowBlur=60;c.shadowOffsetY=30;c.fillStyle='#fff';rr(c,110,top,860,h,36);c.fill();c.restore();
+  c.strokeStyle='#dfdfe2';c.lineWidth=3;rr(c,110,top,860,h,36);c.stroke();
+  c.save();rr(c,110,top,860,h,36);c.clip();
+  c.strokeStyle='#eeeef1';c.lineWidth=3;for(var k=1;k<rows.length;k++){c.beginPath();c.moveTo(110,top+30+k*lh2);c.lineTo(970,top+30+k*lh2);c.stroke();}
+  c.strokeStyle='#d9737a';c.lineWidth=4;c.beginPath();c.moveTo(880,top);c.lineTo(880,top+h);c.stroke();c.restore();
+  c.textAlign='right';
+  for(var j=0;j<rows.length;j++){var ry=top+30+j*lh2+70;c.fillStyle='#c83f49';c.font='50px '+F;c.fillText(rows[j][0],935,ry);c.fillStyle=rows[j][2]||'#0e0e0e';c.font='52px '+F;var t=wrap(c,rows[j][1],680)[0]||'';c.fillText(t,850,ry);}
+  c.textAlign='center';c.fillStyle='#4e4e4e';c.font='44px '+F;c.fillText(o.foot||'تو چه می‌نویسی؟',540,top+h+150);
+  c.fillStyle='#c83f49';c.font='42px '+F;c.direction='ltr';c.fillText('tajrobeh.life/ebis-playlist',540,top+h+225);c.direction='rtl';
+  var tj=r[2];if(tj){var tw2=200,th=tw2*tj.height/tj.width;c.drawImage(tj,540-tw2/2-90,1780-th/2,tw2,th);}c.fillStyle='#676768';c.font='36px '+F;c.textAlign='right';c.fillText('با همراهی',740,1792);
+  return new Promise(function(ok){cv.toBlob(function(b){ok(b);},'image/png');});
+ });
+}
+function shareBlob(b,text,name){
+ var f=null;try{f=new File([b],name||'ebi-story.png',{type:'image/png'});}catch(e){}
+ if(f){if(navigator.canShare){if(navigator.canShare({files:[f]})){return navigator.share({files:[f],text:text}).catch(function(){});}}}
+ var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name||'ebi-story.png';document.body.appendChild(a);a.click();setTimeout(function(){a.remove();},500);
+ return Promise.resolve();
+}
+/* ---------- invite ---------- */
+var sheet=null,mode='friend',gift=false;
+function link(){return location.origin+'/ebis-playlist/#src=invite-'+(gift?'gift':mode);}
+function who(){var n=sheet.querySelector('.fn').value.trim();return n;}
+function msg(){var n=who(),hi=n?(n+' جان، '):'';
+ if(mode==='colleague'){return hi+'«پلی‌لیستِ ابی» را با هم ببینیم؟ یک همکاری هنری برای پیشگیری از خودکشی است. عمارت هما، سالن شیشه‌ای، هر شب ساعت ۱۹.';}
+ if(gift){return hi+'یک بلیت «پلی‌لیستِ ابی» برایت گرفته‌ام 🎁 نمایشی دربارهٔ فهرست چیزهایی که زندگی را ارزشمند می‌کنند. عمارت هما، هر شب ساعت ۱۹.';}
+ return hi+'بیا «پلی‌لیستِ ابی» را با هم ببینیم؛ نمایشی دربارهٔ فهرست چیزهایی که زندگی را ارزشمند می‌کنند. عمارت هما، سالن شیشه‌ای، هر شب ساعت ۱۹.';}
+function paint(){var n=who();sheet.querySelector('.tk-to').textContent=n?n:(mode==='colleague'?'همکار عزیز':'تو');
+ sheet.querySelector('.tk-gift').style.display=gift?'':'none';sheet.querySelector('.gtx').style.display=gift?'':'none';
+ sheet.querySelector('.lbl').textContent=mode==='colleague'?'اسم همکارت (اختیاری)':'اسم دوستت (اختیاری)';
+ var sg=sheet.querySelectorAll('.seg button');for(var i=0;i<sg.length;i++){sg[i].classList.toggle('on',(sg[i].getAttribute('data-g')==='1')===gift);}}
+function after(){if(gift){setTimeout(function(){window.open(q(TIW,{utm_source:'tajrobeh',utm_medium:'invite',utm_campaign:'c-004'}),'_blank');},700);ev('ebi_ticket',{label:'gift'});}}
+function inviteImg(){var n=who();return story({kicker:mode==='colleague'?'دعوت از یک همکار':'دعوت‌نامه',title:n?('برای '+n):'یک صندلی برای تو',rows:[['۱.','نمایش «پلی‌لیستِ ابی»'],['۲.','سالن شیشه‌ای عمارت هما'],['۳.','هر شب ساعت ۱۹'],['۴.',gift?'بلیتت با من 🎁':'با هم برویم؟','#c83f49']],foot:'فهرست چیزهایی که زندگی را ارزشمند می‌کنند'});}
+function openInvite(m){
+ mode=m==='colleague'?'colleague':'friend';gift=m==='gift';
+ if(!sheet){
+  sheet=el('div','sh-wrap');
+  sheet.innerHTML='<div class="sh" role="dialog" aria-modal="true" aria-label="دعوت به پلی‌لیستِ ابی"><button type="button" class="x" aria-label="بستن">×</button>'+
+  '<div class="itk"><div class="itk-a"><span class="k">دعوت‌نامه</span><b>برای <span class="tk-to">تو</span></b><span class="tk-gift">🎁 بلیتت با من</span></div><div class="itk-b"><'+'img src="'+LOGO+'" alt="پلی‌لیستِ ابی" width="140" height="43"><small>عمارت هما · هر شب ۱۹</small></div></div>'+
+  '<div class="seg" role="group"><button type="button" data-g="0">دعوت</button><button type="button" data-g="1">بلیت هدیه 🎁</button></div>'+
+  '<label class="fl"><span class="lbl">اسم دوستت (اختیاری)</span><input type="text" class="fn" maxlength="30" placeholder="مثلاً مریم"></label>'+
+  '<button type="button" class="b red go-share">فرستادن دعوت</button>'+
+  '<div class="row3"><button type="button" class="b line go-tg">تلگرام</button><button type="button" class="b line go-copy">کپی لینک</button><button type="button" class="b line go-img">تصویر استوری</button></div>'+
+  '<p class="fine gtx">بعد از فرستادن، صفحهٔ خرید بلیت در تیوال باز می‌شود.</p></div>';
+  document.body.appendChild(sheet);
+  sheet.addEventListener('click',function(e){if(e.target===sheet||e.target.classList.contains('x')){close();}});
+  sheet.querySelector('.fn').addEventListener('input',paint);
+  var sg=sheet.querySelectorAll('.seg button');for(var i=0;i<sg.length;i++){sg[i].addEventListener('click',function(){gift=this.getAttribute('data-g')==='1';paint();});}
+  sheet.querySelector('.go-share').addEventListener('click',function(){var t=msg()+'\n'+link();ev('ebi_invite',{label:'share_'+(gift?'gift':mode)});
+   if(navigator.share){inviteImg().then(function(b){var f=null;try{f=new File([b],'ebi-invite.png',{type:'image/png'});}catch(e){}
+     var d={text:t};if(f){if(navigator.canShare){if(navigator.canShare({files:[f]})){d.files=[f];}}}
+     navigator.share(d).then(after).catch(function(){});});}
+   else{window.open(q('https://t.me/share/url',{url:link(),text:msg()}),'_blank');after();}});
+  sheet.querySelector('.go-tg').addEventListener('click',function(){window.open(q('https://t.me/share/url',{url:link(),text:msg()}),'_blank');ev('ebi_invite',{label:'telegram'});after();});
+  sheet.querySelector('.go-copy').addEventListener('click',function(){var b=this;if(navigator.clipboard){navigator.clipboard.writeText(msg()+'\n'+link());b.textContent='کپی شد ✓';setTimeout(function(){b.textContent='کپی لینک';},1800);}ev('ebi_invite',{label:'copy'});});
+  sheet.querySelector('.go-img').addEventListener('click',function(){var b=this;b.textContent='…';inviteImg().then(function(bl){b.textContent='تصویر استوری';return shareBlob(bl,msg()+'\n'+link(),'ebi-invite.png');});ev('ebi_invite',{label:'story'});});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){close();}});
+ }
+ paint();sheet.classList.add('on');document.documentElement.style.overflow='hidden';
+ ev('ebi_invite_open',{label:m||'friend'});
+}
+function close(){if(sheet){sheet.classList.remove('on');document.documentElement.style.overflow='';}}
+R.addEventListener('click',function(e){var b=e.target.closest('[data-invite]');if(b){e.preventDefault();openInvite(b.getAttribute('data-inv')||'friend');}});
+/* ---------- seen the show? ---------- */
+var sn=R.querySelector('.seen');
+if(sn){sn.addEventListener('click',function(e){var b=e.target.closest('[data-seen]');if(!b){return;}var v=b.getAttribute('data-seen');
+ var bs=sn.querySelectorAll('[data-seen]');for(var i=0;i<bs.length;i++){bs[i].classList.toggle('on',bs[i]===b);}
+ R.setAttribute('data-seen',v);ev(v==='1'?'ebi_seen':'ebi_notseen');
+ var tt=R.querySelector('.nb .tt b'),nx2=R.querySelector('.seen-no');
+ if(v==='1'){if(tt){tt.textContent='تو هم دیدی 🎭 مورد بعدی را بنویس';}if(nx2){nx2.hidden=true;}var ip=R.querySelector('#ebiText');if(ip){ip.focus();}}
+ else{if(tt){tt.textContent='فهرست ما';}if(nx2){nx2.hidden=false;}}
+});}
+/* ---------- join forms ---------- */
+var forms=R.querySelectorAll('form.join');
+for(var i=0;i<forms.length;i++){(function(f){
+ var kind=f.getAttribute('data-join'),m=f.querySelector('.jmsg'),btn=f.querySelector('button[type=submit]');
+ var ch=f.querySelectorAll('.chip');
+ for(var c=0;c<ch.length;c++){ch[c].addEventListener('click',function(){for(var k=0;k<ch.length;k++){ch[k].classList.remove('on');ch[k].setAttribute('aria-pressed','false');}this.classList.add('on');this.setAttribute('aria-pressed','true');kind=this.getAttribute('data-kind');ev('ebi_chip',{label:kind});});}
+ f.addEventListener('submit',function(e){
+  e.preventDefault();var d={kind:kind,src:R.getAttribute('data-src')||''};
+  var ins=f.querySelectorAll('input,select');for(var j=0;j<ins.length;j++){if(ins[j].name){d[ins[j].name]=ins[j].value;}}
+  if(!d.name||!d.phone){m.textContent='نام و شمارهٔ موبایل را بنویسید.';m.className='jmsg err';return;}
+  btn.disabled=true;
+  post('/wp-json/tj/v1/ebi-join',d).then(function(r){
+   btn.disabled=false;
+   if(r.code==='rest_no_route'){f.innerHTML='<div class="okc"><p class="big">یک قدم مانده 🍓</p><p>ثبت‌نام این بخش را در بات تجربه کامل کنید؛ همان‌جا خبر شب اجرا را می‌گیرید.</p><a class="b red" target="_blank" rel="noopener" data-ev="ebi_bot" data-lbl="join_'+kind+'" href="'+BOT+'ebi-'+kind+'">ادامه در بات تلگرام</a></div>';ev('ebi_join_fallback',{label:kind});return;}
+   if(r.ok){ev('ebi_join',{label:kind});
+    f.innerHTML='<div class="okc"><p class="big">ثبت شد 🍓</p><p>خبرتان می‌کنیم. اگر در بات تجربه هم وصل شوید، خبر شب اجرا را با یک پیام می‌گیرید.</p><a class="b red" target="_blank" rel="noopener" data-ev="ebi_bot" data-lbl="join_'+kind+'" href="'+BOT+encodeURIComponent(r.start)+'">وصل شدن در بات تلگرام</a><button type="button" class="b line" data-invite>🎟 دعوت از یک دوست</button></div>';}
+   else{m.textContent=r.msg||'ثبت نشد؛ دوباره امتحان کنید.';m.className='jmsg err';}
+  }).catch(function(){btn.disabled=false;m.textContent='ارتباط برقرار نشد؛ دوباره امتحان کنید.';m.className='jmsg err';});
+ });
+})(forms[i]);}
+/* ---------- after list submit: stay with us ---------- */
+var add=R.querySelector('#ebiAdd');
+if(add){
+ var origFetch=window.fetch;
+ window.fetch=function(u,o){var p=origFetch.apply(this,arguments);
+  if(typeof u==='string'){if(u.indexOf('/tj/v1/ebi-list')>-1){if(o){if(o.method==='POST'){p.then(function(r){return r.clone().json();}).then(function(d){if(d.ok){showFollow(d.ref||'');}}).catch(function(){});}}}}
+  return p;};
+}
+function showFollow(ref){
+ var old=R.querySelector('.follow');if(old){old.remove();}
+ var b=el('div','follow');
+ b.innerHTML='<p class="ft">به فهرست اضافه شدی 🌱 همراه این کمپین می‌مانی؟</p><p class="fs">«پلی‌لیستِ ابی» سی شب ادامه دارد و بعدش هم ادامه دارد. در بات تجربه از شب‌های ویژه، گروه آنلاین و فهرست‌های تازه باخبر می‌شوی.</p><div class="acts"><a class="b red sm" target="_blank" rel="noopener" data-ev="ebi_bot" data-lbl="after_list" href="'+BOT+'ebi-list">همراهی در بات تلگرام</a><button type="button" class="b line sm go-story">📸 تصویر استوری</button><button type="button" class="b line sm" data-invite>🎟 دعوت</button></div><form class="fph" novalidate><input type="tel" name="phone" inputmode="tel" dir="ltr" maxlength="20" placeholder="یا فقط شمارهٔ موبایل" aria-label="شمارهٔ موبایل"><button type="submit" class="b line sm">بماند</button></form><p class="fine">شماره فقط برای خبر دادن از برنامه‌های همین کمپین است و جایی منتشر نمی‌شود.</p>';
+ add.parentNode.insertBefore(b,add.nextSibling);
+ var fp=b.querySelector('.fph');
+ fp.addEventListener('submit',function(e){e.preventDefault();var ph=fp.querySelector('input').value;
+  post('/wp-json/tj/v1/ebi-join',{kind:'follow',phone:ph,ref:ref,src:R.getAttribute('data-src')||''}).then(function(r){if(r.code==='rest_no_route'){fp.style.display='none';return;}if(r.ok){fp.innerHTML='<p class="fine" style="color:#1d7a45">ممنون؛ شماره‌ات ماند ✓</p>';ev('ebi_join',{label:'follow'});}else{fp.querySelector('input').setCustomValidity(r.msg||'');fp.querySelector('input').reportValidity();}});});
+ var gs=b.querySelector('.go-story');gs.addEventListener('click',function(){var li=R.querySelector('#ebiItems li.mine')||R.querySelector('#ebiFull li.mine');var t=li?li.querySelector('.t').textContent:'';var n=li?li.querySelector('.n').textContent.replace('.',''):'';gs.textContent='…';story({kicker:'مورد شمارهٔ '+n+' فهرست ما',title:t,rows:[['۱.','بستنی'],['۲.','آب‌بازی'],['…','…'],[n+'.',t,'#c83f49']],foot:'تو چه می‌نویسی؟'}).then(function(bl){gs.textContent='📸 تصویر استوری';return shareBlob(bl,'«'+t+'» · فهرست چیزهایی که زندگی را ارزشمند می‌کنند\n'+location.origin+'/ebis-playlist/#src=story','ebi-list-story.png');});ev('ebi_story',{label:'item'});});
+ ev('ebi_follow_view');
+}
+})();
+</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "تجربه زندگی", "item": "https://tajrobeh.life/"}, {"@type": "ListItem", "position": 2, "name": "پلی‌لیستِ ابی", "item": "https://tajrobeh.life/ebis-playlist/"}, {"@type": "ListItem", "position": 3, "name": "دانشجوها", "item": "https://tajrobeh.life/ebis-playlist/students/"}]}]}</script>
+<!-- /wp:html -->

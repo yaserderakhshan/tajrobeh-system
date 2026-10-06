@@ -4,6 +4,7 @@
 // ۴) نوشتن نتیجه در لاگ و GITHUB_STEP_SUMMARY ۵) کد خروج ۱ اگر حتی یک مردود باشد،
 //    یا مجموعه‌ای جا مانده باشد، یا مجموعه‌ای هیچ چیزی نسنجیده باشد (۰ قبول و ۰ مردود).
 import { appendFileSync, readFileSync } from 'node:fs';
+import { scope } from './bot-suites.mjs';
 
 const EXEC = process.env.BOT_EXEC_URL;
 const KEY = readFileSync(`${process.env.RUNNER_TEMP}/ci_key`, 'utf8').trim();   // کلید یک‌بارمصرف گام قبل
@@ -46,6 +47,18 @@ async function call(op) {
   return r;
 }
 
+async function callStart(only) {
+  let r;
+  for (let i = 0; i < 5; i++) {
+    r = await fetch(EXEC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(only ? { ci: 'start', k: KEY, only } : { ci: 'start', k: KEY }), redirect: 'follow' })
+      .then(async (res) => { const t = await res.text(); try { const j = JSON.parse(t); return j && j.error === 'key' ? { ...j, transient: true } : j; } catch { return { ok: false, transient: true, error: `HTTP ${res.status}` }; } })
+      .catch((e) => ({ ok: false, transient: true, error: String(e) }));
+    if (!r.transient) return r;
+    console.log(`پاسخ گذرا برای start (${i + 1}/5): ${r.error}`);
+    await sleep(5000 * (i + 1));
+  }
+  return r;
+}
 function summary(md) {
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md + '\n');
 }
@@ -98,9 +111,25 @@ function fail(msg) {
   if (au && au.status === 'REQUIRED') fail('کد این نسخه مجوز تازهٔ گوگل می‌خواهد که تأیید نشده است. انتشار متوقف شد؛ به یاسر خبر بده.');
   console.log(`مجوزهای گوگل: ${au && au.status ? au.status : 'نامعلوم'}`);
 }
-const st = await call('start');
+// v170.16.2 (سهمیهٔ روزانهٔ Apps Script، تصمیم یاسر): آزمون کامل روی Apps Script فقط شب (TEST_SCOPE=full).
+// انتشار روز: فقط مجموعه‌های مربوط به تغییر نسبت به کد زندهٔ قبلی (PREV_REF)، مگر پرداخت، تنخواه، نقش‌ها و دسترسی‌ها (bot-suites.mjs).
+let only = null, why = 'اجرای شبانه یا دستی';
+if (process.env.TEST_SCOPE !== 'full') {
+  const base = process.env.PREV_REF || '';
+  if (!base || base === 'live') why = 'کد زندهٔ قبلی در گیت معلوم نیست';
+  else {
+    try {
+      const r = scope(base, 'HEAD');
+      if (r.full) why = r.why; else { only = r.only; why = `مجموعه‌های مربوط به تغییر: ${r.only.length} از ${r.total}`; }
+    } catch (e) { why = `انتخاب مجموعه‌ها نشد (${String(e).slice(0, 120)})`; }
+  }
+}
+console.log(only ? `دور محدود: ${why}\n${only.join(' ')}` : `آزمون کامل: ${why}`);
+summary(only ? `- دور محدود روی Apps Script (${why}). آزمون کامل محلی پیش از این سبز شد؛ آزمون کامل Apps Script شب اجرا می‌شود.` : `- آزمون کامل روی Apps Script (${why})`);
+const st = await callStart(only);
 if (!st.ok) fail(`شروع تست‌ها نشد: ${st.error}`);
-console.log(`تست‌ها شروع شد: ${st.suites} مجموعه.`);
+if (only && st.all && st.suites === st.all) console.log('::warning::این نسخه دور محدود را نمی‌شناسد یا فهرست خالی شد؛ دور کامل اجرا می‌شود.');
+console.log(`تست‌ها شروع شد: ${st.suites} مجموعه${st.all ? ` از ${st.all}` : ''}.`);
 
 // ۳) پیگیری
 const t0 = now();
@@ -117,7 +146,7 @@ for (;;) {
   if (now() - lastMove > STALL_MIN * 60 * 1000) {
     if (kicks >= MAX_KICKS) fail(`زنجیرهٔ تست ${STALL_MIN} دقیقه پیش نرفت و ${MAX_KICKS} بار ادامه دادن هم فایده نداشت`);
     kicks++;
-    const k = await call(s.run ? 'kick' : 'start');
+    const k = s.run ? await call('kick') : await callStart(only);
     if (!k.ok) kicks--;   // خطای گذرای شبکه ادامه حساب نمی‌شود
     console.log(`زنجیره پیش نمی‌رفت؛ ادامهٔ دوباره (${kicks}): ${JSON.stringify(k)}`);
     lastMove = now();
