@@ -100,6 +100,9 @@ async function liveOf(it) {
   if (it.kind === 'yoast') return (await bridge()).yoast[it.id] || null;
   if (it.kind === 'snippet-new') { await bridge(); return null; } // پل باید در دسترس باشد
 }
+/* ۱۴ مهر ۱۴۰۵: «پذیرش» اسنیپتی که در مخزن نبود (آینه به‌خاطر نام یا شبه‌رمز ردش کرده بود) با ردیف index «adopt: comments»:
+   اگر نسخهٔ زنده و نسخهٔ تازهٔ مخزن جز در کامنت‌ها یکی باشند، ناهمخوانی نیست و منتشر می‌شود (نام از کامنت بیرون می‌رود). */
+const codeOnly = (s) => String(s ?? '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/[ \t]+$/gm, '').replace(/\n{2,}/g, '\n').trim();
 const same = (a, b) => (typeof a === 'string' || typeof b === 'string') ? hash(a ?? '') === hash(b ?? '') : JSON.stringify(a) === JSON.stringify(b);
 
 // ---------- نوشتن ----------
@@ -182,6 +185,7 @@ for (const it of items) {
     if (it.kind === 'snippet-new') { it.action = 'create'; continue; }
     if (same(it.live, it.new)) it.action = 'skip';
     else if (same(it.live, it.old)) it.action = 'apply';
+    else if (it.kind === 'snippet' && it.old === null && it.ent?.adopt === 'comments' && codeOnly(it.live) === codeOnly(it.new)) { it.action = 'apply'; it.adopt = true; }
     else { it.action = 'drift'; blocked++; }
   } catch (e) { it.action = 'error'; it.err = e.message; blocked++; }
   if (it.kind === 'page' && it.meta?.link && it.meta.status === 'publish') urls.push(it.meta.link.replace(B, '') || '/');
