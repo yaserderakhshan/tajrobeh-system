@@ -1769,6 +1769,7 @@ function tgRunReset() {
 }
 
 function tgRun() {
+  if (typeof ciScope_ === 'function') ciScope_();   /* v170.16.2: دور محدود انتشار روز */
   var p = PropertiesService.getScriptProperties();
   var at = Number(p.getProperty('TG_TEST_AT') || 0);
   var runId = p.getProperty('TG_TEST_RUN') || '';
@@ -5207,7 +5208,18 @@ function tgAppendLead_(o, isRetry) {
   try {
     const sh = tgSS_().getSheetByName(TG_LEADS);
     if (!sh) { tgErr_('تب ' + TG_LEADS + ' پیدا نشد'); if (!isRetry) tgLeadRetryPush_(o); return false; }
-    const now = new Date();
+    const now = o.when ? new Date(o.when) : new Date();
+    /* v170.20: تنها نویسندهٔ سطر تازهٔ «لیدها» (بات، فرم سایت، واتس‌اپ، مدل لید). ستون شناخته‌شده‌ای که هنوز نیست ساخته می‌شود؛
+       شماره همیشه متن نوشته می‌شود تا صفر اول نیفتد؛ کد لید همان لحظه زیر همان قفل. خروجی: شمارهٔ سطر. */
+    var ph = String(o.phone == null ? '' : o.phone);
+    if (/^[0-9+]/.test(ph)) ph = "'" + ph;
+    if (o.extra) {
+      var miss = Object.keys(o.extra).filter(function (k) { return TG_LEAD_FIELDS.indexOf(k) > -1 && o.extra[k] !== '' && o.extra[k] != null; });
+      var have = tgScaleCols_(sh), made = false;
+      miss.forEach(function (k) { if (!have[k]) { tgLeadCol_(k); made = true; } });
+      if (made) { TG_SCALE_COLS_ = null; try { CacheService.getScriptCache().remove('scols'); } catch (eC) {} }
+    }
+    var row = 0;
     /* v166.13: نوشتن سطر و ستون‌های اسکیل زیر یک قفل؛ پیش از این getLastRow() جدا گرفته می‌شد و اگر فرم سایت یا
        واتس‌اپ همان لحظه سطری می‌افزود، پاسخ‌های بالینی این مراجع روی سطر آدم دیگری می‌نشست. */
     tgLeadRowLock_(function () {
@@ -5215,16 +5227,18 @@ function tgAppendLead_(o, isRetry) {
         Utilities.formatDate(now, TG_TZ, 'yyyy-MM-dd'),
         Utilities.formatDate(now, TG_TZ, 'H:mm'),
         o.source || 'Telegram bot',
-        o.name || '', o.channel || 'تلگرام', o.phone || '', o.region || '',
-        o.firstText || '', o.status || 'جدید', '', '', '', o.note || '',
+        o.name || '', o.channel || 'تلگرام', ph, o.region || '',
+        o.firstText || '', o.status || 'جدید', o.owner || '', '', '', o.note || '',
         o.kind || '', o.topic || ''
       ]));
-      if (o.extra) tgWriteExtras_(sh, sh.getLastRow(), o.extra);
-      try { if (typeof lmOnAppend_ === 'function') lmOnAppend_(sh, sh.getLastRow(), o); } catch (eLm) {}   /* v170.2: نوع لید و مهلت ۲۴ ساعت */
+      row = sh.getLastRow();
+      if (o.extra) tgWriteExtras_(sh, row, o.extra);
+      try { if (typeof lmOnAppend_ === 'function') lmOnAppend_(sh, row, o); } catch (eLm) {}   /* v170.2: نوع لید و مهلت ۲۴ ساعت */
+      try { tgLeadCode_(row); } catch (eCode) { tgErr_('tgAppendLead_ کد لید', eCode); }
     });
     const mm = String(o.note || '').match(/chat_id: (\d+)/);
     if (mm) CacheService.getScriptCache().remove('lr' + mm[1]);
-    return true;
+    return row || true;
   } catch (e) {
     tgErr_('tgAppendLead_: ' + e);
     if (!isRetry) tgLeadRetryPush_(o);
@@ -5321,18 +5335,24 @@ function tgScaleColumns() {
 }
 
 // سطر لید با همین شماره (ده رقم آخر). از پایین می‌گردد تا تازه‌ترین سطر برگردد
-function tgLeadByPhone_(p) {
-  if (TG_DRY) return TG_DRY_LEADROW || -1;
-  const d = tgLatinDigits_(p).replace(/\D/g, '');
-  if (d.length < 10) return -1;
-  const tail = d.slice(-10);
+function tgLeadByPhone_(p, email) {
+  if (TG_DRY) return TG_DRY_LEADROW || (email && TG_MEM['leadbyemail'] && TG_MEM['leadbyemail'][String(email).toLowerCase()]) || -1;
   const sh = tgSS_().getSheetByName(TG_LEADS);
   const last = sh.getLastRow();
   if (last < 2) return -1;
-  const ph = sh.getRange(2, 6, last - 1, 1).getValues();
-  for (var i = ph.length - 1; i >= 0; i--) {
-    const x = tgLatinDigits_(String(ph[i][0])).replace(/\D/g, '');
-    if (x.length >= 10 && x.slice(-10) === tail) return i + 2;
+  const tail = phoneKey_(p);   /* v170.19 */
+  if (tail) {
+    const ph = sh.getRange(2, 6, last - 1, 1).getValues();
+    for (var i = ph.length - 1; i >= 0; i--) if (phoneKey_(ph[i][0]) === tail) return i + 2;
+  }
+  /* v170.18: با شماره پیدا نشد (مثلاً شمارهٔ خارجی بی‌کد کشور)، با ایمیل در یادداشت یا ستون «ایمیل» */
+  const em = String(email || '').trim().toLowerCase();
+  if (em.indexOf('@') < 1) return -1;
+  const hm = tgLeadHeadMap_(sh), ec = hm['ایمیل'] || 0;
+  const notes = sh.getRange(2, 13, last - 1, 1).getValues(), emails = ec ? sh.getRange(2, ec, last - 1, 1).getValues() : null;
+  for (var j = notes.length - 1; j >= 0; j--) {
+    if (String(notes[j][0]).toLowerCase().indexOf(em) > -1) return j + 2;
+    if (emails && String(emails[j][0]).trim().toLowerCase() === em) return j + 2;
   }
   return -1;
 }
@@ -5344,39 +5364,91 @@ function tgUpdateLead_(row, extra, q, chat, uname, phone) {
     const sh = tgSS_().getSheetByName(TG_LEADS);
     const today = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd');
     const lu = tgLeadRead_(row) || {};
-    const wasClosedU = !!lu.closed;
-    const ch = { 'اقدام بعدی': 'درخواست دوباره از بات، تماس', 'تاریخ اقدام بعدی': today };
-    if (wasClosedU) { ch['وضعیت'] = TG_ST.NEW; ch['دلیل بستن'] = ''; }
-    else if (!lu.status) ch['وضعیت'] = TG_ST.NEW;
-    if (q && q.kind) ch['نوع درخواست'] = q.kind;
-    if (q && q.topic) ch['موضوع اصلی'] = q.topic;
-    // لیدی که با یوزرنیم یا chat_id ثبت شده بود، حالا شمارهٔ واقعی می‌گیرد
-    const curPh = tgLatinDigits_(String(lu.phone || '')).replace(/\D/g, '');
-    if (phone && curPh.length < 10) ch['شماره / شناسه'] = phone;
-    tgLeadSet_(row, ch, 'مراجع', 'بات', wasClosedU ? 'بازگشایی: درخواست دوباره از بات' : 'درخواست دوباره از بات');
-    var add = 'درخواست دوباره از بات' + (lu.statusRaw && lu.statusRaw !== TG_ST.NEW ? ' (وضعیت قبلی: ' + lu.statusRaw + ')' : '');
-    if (!tgChatIdIn_(lu.memo, chat)) add += ' · chat_id: ' + chat;
-    if (uname && String(lu.memo || '').indexOf(uname) < 0) add += ' · ' + uname;
-    tgLeadNote_(row, add, 'بات');
+    /* v170.18: همان رفتار فرم دوباره (tgLeadReturn_)؛ لیدی که با یوزرنیم یا chat_id ثبت شده بود هم شمارهٔ واقعی می‌گیرد */
+    tgLeadReturn_(row, { via: 'بات', phone: phone, kind: q && q.kind, topic: q && q.topic });
+    var add = '';
+    if (!tgChatIdIn_(lu.memo, chat)) add += 'chat_id: ' + chat;
+    if (uname && String(lu.memo || '').indexOf(uname) < 0) add += (add ? ' · ' : '') + uname;
+    if (add) tgLeadNote_(row, add, 'بات');
     tgWriteExtras_(sh, row, extra);
     CacheService.getScriptCache().remove('lr' + chat);
-    if (lu.owner) tgLeadOwnerSay_(lu, (wasClosedU ? '↺ پروندهٔ بسته دوباره باز شد: ' : '🔁 درخواست دوباره: ') + tgEsc_(lu.name || '') + ' (' + tgEsc_(lu.code || '') + ') از بات دوباره درخواست داد.', true);
   } catch (e) { tgErr_('tgUpdateLead_: ' + e); }
 }
 
 // فرم دوباره از سایت با شماره‌ای که لید دارد: سطر تازه نمی‌سازد، یادداشت و اقدام بعدی روی همان پرونده
 function tgLeadFormAgain_(row, o) {
-  const today = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd');
-  const lf = tgLeadRead_(row) || {};
-  const wasClosed = !!lf.closed;
-  const ch = { 'اقدام بعدی': 'فرم دوباره از سایت، تماس', 'تاریخ اقدام بعدی': today };
-  if (wasClosed) { ch['وضعیت'] = TG_ST.NEW; ch['دلیل بستن'] = ''; }
-  if (o && o.pref) ch['کانال ترجیحی'] = o.pref;
-  tgLeadSet_(row, ch, 'مراجع', 'سایت', wasClosed ? 'بازگشایی: فرم دوباره از سایت' : 'فرم دوباره از سایت');
-  tgLeadNote_(row, 'فرم دوباره از سایت' + (o && o.src ? ' (' + String(o.src).slice(0, 60) + ')' : '') +
-    (o && o.msg ? ': ' + String(o.msg).slice(0, 200) : '') + (o && o.email ? ' · ایمیل: ' + o.email : ''), 'سایت');
-  tgLeadOwnerSay_(lf, (wasClosed ? '↺ پروندهٔ بسته با فرم تازهٔ سایت باز شد: ' : '🔁 فرم دوباره از سایت: ') + tgEsc_(lf.name || '') + ' (' + tgEsc_(lf.code || '') + ')', true);
-  return lf.code || '';
+  o = o || {};
+  return tgLeadReturn_(row, { via: 'سایت', src: o.src, msg: o.msg, page: o.page, email: o.email, pref: o.pref, phone: o.phone, name: o.name }).code;
+}
+
+/* v170.18: مراجعی که برمی‌گردد (فرم دوباره، درخواست دوباره در بات، واتس‌اپ). یک تابع برای هر سه.
+   - لید بسته، یا باز ولی هنوز نه ارجاع و نه معارفه: از نو «جدید» می‌شود. دلیل بستن، آخرین تماس و شمار بی‌پاسخ خالی؛
+     تاریخ و زمان امروز؛ «اعلان بات» خالی؛ و لید زیر قفل وارد صف کشیک (TG_DUTY_PEND) می‌شود تا نوبت پذیرش خبر بگیرد.
+     مقدارهای قبلی در «رویدادهای لید» (از tgLeadSet_) و یک خط یادداشت می‌ماند.
+   - لید جلوتر (ارجاع، معارفه، درمان): فقط اقدام بعدی امروز و یادداشت؛ چیزی ریست نمی‌شود.
+   - شمارهٔ تازه کامل‌تر (کد کشور دارد یا رقم بیشتر): شماره و «داخل یا خارج» به‌روز می‌شود. */
+/* TG_ST پایین‌تر در همین فایل تعریف می‌شود (const)؛ پس فهرست هنگام صدا زدن ساخته می‌شود */
+function tgLeadAdvanced_() { return [TG_ST.REF, TG_ST.BOOKED, TG_ST.HELD, TG_ST.START]; }
+function tgPhoneBetter_(oldP, newP) {
+  var o = tgLatinDigits_(String(oldP || '')).trim(), n = tgLatinDigits_(String(newP || '')).trim();
+  var od = o.replace(/\D/g, ''), nd = n.replace(/\D/g, '');
+  if (nd.length < 10) return false;
+  if (od.length < 10) return true;
+  if (od.slice(-10) !== nd.slice(-10)) return false;   /* شمارهٔ دیگری است، نه کامل‌ترِ همان */
+  var oInt = /^\+|^00/.test(o) || (od.indexOf('98') === 0 && od.length >= 12), nInt = /^\+|^00/.test(n) || (nd.indexOf('98') === 0 && nd.length >= 12);
+  if (nInt && !oInt) return true;
+  return nd.length > od.length && !(oInt && !nInt);
+}
+function tgLeadReturn_(row, o) {
+  o = o || {};
+  var via = o.via || 'سایت', now = new Date(), today = Utilities.formatDate(now, TG_TZ, 'yyyy-MM-dd');
+  var lf = tgLeadRead_(row) || {};
+  var wasClosed = !!lf.closed;
+  var early = !wasClosed && tgLeadAdvanced_().indexOf(lf.status) < 0 && !lf.booked;
+  var reopen = wasClosed || early;
+  var ch = {}, prev = [];
+  if (reopen) {
+    if (lf.statusRaw || lf.status) prev.push('وضعیت: ' + (lf.statusRaw || lf.status));
+    if (lf.reason) prev.push('دلیل بستن: ' + lf.reason);
+    if (lf.noans) prev.push('بی‌پاسخ: ' + lf.noans);
+    if (lf.touched) prev.push('آخرین تماس پیشین ثبت داشت');
+    ch['وضعیت'] = TG_ST.NEW; ch['دلیل بستن'] = ''; ch['آخرین تماس'] = ''; ch['شمار بی‌پاسخ'] = '';
+    ch['تاریخ'] = today; ch['زمان'] = Utilities.formatDate(now, TG_TZ, 'H:mm'); ch['اعلان بات'] = '';
+    try { ch['تاریخ شمسی'] = tgJDateFull_(now, TG_TZ); } catch (eJ) {}
+    ch['اقدام بعدی'] = 'تماس اول، برگشت از ' + via;
+  } else ch['اقدام بعدی'] = 'درخواست دوباره از ' + via + '، تماس';
+  ch['تاریخ اقدام بعدی'] = today;
+  if (o.phone && tgPhoneBetter_(lf.phone, o.phone)) {
+    var np = tgLatinDigits_(String(o.phone)).replace(/[^\d+]/g, '');
+    ch['شماره / شناسه'] = "'" + np; ch['داخل یا خارج'] = tgRegion_(np);
+    prev.push('شمارهٔ قبلی: ' + (lf.phone || 'خالی'));
+  }
+  if (o.pref) ch['کانال ترجیحی'] = o.pref;
+  if (o.kind) ch['نوع درخواست'] = o.kind;
+  if (o.topic) ch['موضوع اصلی'] = o.topic;
+  var why = (reopen ? (wasClosed ? 'بازگشایی' : 'از نو') + ': ' : '') + 'برگشت از ' + via;
+  var code = tgLeadSet_(row, ch, 'مراجع', via, why) || lf.code || '';
+  tgLeadNote_(row, (via === 'سایت' ? 'فرم دوباره از سایت' : 'برگشت از ' + via) + (o.src ? ' (' + String(o.src).slice(0, 60) + ')' : '') + (o.msg ? ': ' + String(o.msg).slice(0, 200) : '') +
+    (o.email ? ' · ایمیل: ' + o.email : '') + (prev.length ? ' · پیش از این: ' + prev.join('، ') : ''), via);
+  var queued = reopen ? tgDutyEnqueue_(code) : false;
+  if (lf.owner || !reopen) tgLeadOwnerSay_(lf, (wasClosed ? '↺ پروندهٔ بسته دوباره باز شد: ' : reopen ? '↺ مراجع برگشت؛ لید از نو «جدید» شد: ' : '🔁 درخواست دوباره: ') +
+    tgEsc_(lf.name || '') + ' (' + tgEsc_(code) + ') از ' + via, true);
+  return { code: code, reopened: reopen, queued: queued };
+}
+/* لید را زیر قفل در صف کشیک می‌گذارد (همان صفی که tgDutyRun_ لید تازه را با آن پیگیری می‌کند) */
+function tgDutyEnqueue_(code) {
+  if (!code) return false;
+  if (TG_DRY) { var q = TG_MEM['dutypend'] = TG_MEM['dutypend'] || []; if (q.indexOf(code) < 0) q.push(code); return true; }
+  var lock = LockService.getScriptLock(), mine = !TG_LOCK_HELD;
+  if (mine && !lock.tryLock(15000)) { tgErr_('tgDutyEnqueue_', 'قفل گرفته نشد', code); return false; }
+  try {
+    var P = PropertiesService.getScriptProperties(), pend = [];
+    try { pend = JSON.parse(P.getProperty('TG_DUTY_PEND') || '[]'); } catch (e) { pend = []; }
+    pend = pend.filter(function (x) { return x.k !== code; });
+    pend.push({ k: code, n: 0 });
+    P.setProperty('TG_DUTY_PEND', JSON.stringify(pend.slice(-80)));
+    return true;
+  } finally { if (mine) lock.releaseLock(); }
 }
 
 // سلول «زمان» شیت به‌صورت Date با تاریخ ۱۸۹۹ برمی‌گردد؛ فقط ساعت و دقیقه‌اش معنا دارد
@@ -6381,7 +6453,7 @@ function tgIsCrisis_(text) {
 }
 
 function tgRegion_(phone) {
-  const p = tgLatinDigits_(phone).replace(/[^\d]/g, '');
+  const p = phoneDigits_(phone);
   if (!p) return '';
   if (p.indexOf('0098') === 0) return 'داخل ایران';
   if (p.indexOf('98') === 0 && p.length >= 12) return 'داخل ایران';
@@ -10557,7 +10629,9 @@ const TG_ROLE_BTN = {
   'مدرسه': '🎓 مدرسه', 'روان‌پزشکی': '💊 روان‌پزشکی',
   'سازمانی': '🏢 سازمانی', 'مالی': '💳 مالی', 'درمانگر': '🩺 درمانگر', 'پذیرش': '📥 پذیرش', 'ناظر': '📊 ناظر', 'سوشال': '📣 سوشال',
   'دانشجو': '🎓 دانشجو', 'استاد': '📚 استاد', 'سوپروایزر': '🧑‍🏫 سوپروایزر', 'سردبیر': '✒️ سردبیر مجله', 'راهبر': '🧭 راهبر رودمپ', 'مصاحبه‌گر': '🎤 مصاحبه‌گر',
-  'منتور': '🌱 منتور', 'نمایندهٔ کلاس': '🗣 نمایندهٔ کلاس' };
+  'منتور': '🌱 منتور', 'نمایندهٔ کلاس': '🗣 نمایندهٔ کلاس',
+  /* v170.22: کسی که فقط نقش تنخواه دارد در حلقهٔ انتخاب نقش گیر می‌کرد (برچسب و شاخه نداشت) */
+  'تنخواه': '💵 تنخواه‌گردان' };
 
 /* نقش‌هایی که واقعاً مسیر کاری دارند. */
 /* فهرست افراد با کش پنج‌دقیقه‌ای — تب «افراد» مرجع همهٔ نقش‌هاست جز درمانگر */
@@ -10760,6 +10834,13 @@ function tgRoleRoute_(chat, role, text, m) {
   if (role === 'پارتنر' && typeof ptEntry_ === 'function') return ptEntry_(chat, u);
   if (role === 'سردبیر' && typeof tgMagDesk_ === 'function') return tgMagDesk_(chat, arg);
   if (role === 'مصاحبه‌گر' && typeof tgCpIvDesk_ === 'function') return tgCpIvDesk_(chat, arg, u);
+  /* v170.22: تنخواه، راهبر و مالی شاخهٔ خودشان را دارند (پیش از این تنخواه و راهبر به انتخاب نقش برمی‌گشتند) */
+  if (role === 'تنخواه' && typeof tnkHome_ === 'function') return tnkHome_(chat);
+  if (role === 'راهبر') {
+    if (typeof tgRmIsGuide_ === 'function' && tgRmIsGuide_(chat, u)) return tgRmDesk_(chat, 'kanape');
+    if (typeof tnkHome_ === 'function' && tnkIsBoss_(chat)) return tnkHome_(chat);
+  }
+  if (role === 'مالی') return tgOwnerRoute_(chat, role, arg, u);
   if (TG_SECTION_ROLE[role]) return tgOwnerRoute_(chat, role, arg, u);
   if (typeof tgSchoolRoute_ === 'function' && tgSchoolRoute_(chat, role, arg, m)) return;
   tgDel_('role', chat);
@@ -10830,6 +10911,15 @@ function tgRoleTests() {
   ok('متن خیلی کوتاه رد می‌شود', tgTherFind_('ok', true).length === 0);
   ok('خط تیرهٔ وسط جمله در متن نقش نیست', T_ROLE_PICK.indexOf(' — ') === -1);
   ok('متن تأیید اسم بدون خط تیره', T_SIGN_CONFIRM.indexOf(' — ') === -1);
+  /* v170.22: تنخواه، راهبر و مالی برچسب و شاخه دارند و به انتخاب نقش برنمی‌گردند */
+  ok('v170.22: برچسب تنخواه، راهبر و مالی', !!TG_ROLE_BTN['تنخواه'] && !!TG_ROLE_BTN['راهبر'] && !!TG_ROLE_BTN['مالی'] && tgRoleByLabel_(TG_ROLE_BTN['تنخواه'], ['تنخواه', 'مراجع']) === 'تنخواه');
+  function picks(role, chat) { TG_OUTBOX = []; tgRoleRoute_(chat, role, '', { from: { id: chat } }); return TG_OUTBOX.some(function (x) { return x.kind === 'msg' && String(x.text).indexOf(T_ROLE_PICK.slice(0, 20)) > -1; }); }
+  TG_MEM['tnkboss'] = '';
+  ok('v170.22: نقش تنخواه به خانهٔ تنخواه می‌رود، نه انتخاب نقش', !picks('تنخواه', 4401) && TG_OUTBOX.length > 0);
+  var keepG = TG_DRY_GUIDE; TG_DRY_GUIDE = false; TG_MEM['tnkboss'] = '4402';
+  ok('v170.22: راهبر (بی رودمپ) به خانهٔ تنخواه می‌رود', !picks('راهبر', 4402) && TG_OUTBOX.length > 0);
+  TG_DRY_GUIDE = keepG;
+  ok('v170.22: نقش مالی گزارش بخش می‌گیرد', !picks('مالی', 4403) && TG_OUTBOX.length > 0);
 
   TG_DRY = wasDry;
   return out.join('\n') + '\n(' + out.filter(function (s) { return s.indexOf('✅') === 0; }).length + ' از ' + out.length + ')';
@@ -12288,6 +12378,7 @@ function tgEvRows_() {
     if (!String(v[i][1] || '').trim()) continue;
     if (String(v[i][7] || '').trim() !== 'باز') continue;
     if (v[i][2] instanceof Date && v[i][2] < today) continue;
+    if (String(v[i][4] || '').trim() === 'شب تجربه') continue;   /* v170.17: شب‌های کمپین C-004 رویداد مدرسه نیستند */
     out.push({
       id: String(v[i][0] || v[i][1]).trim(), title: String(v[i][1]).trim(), date: v[i][2],
       time: String(v[i][3] || ''), kind: String(v[i][4] || ''), cap: Number(v[i][5] || 0),
@@ -18438,10 +18529,7 @@ function tgDiagChatIds() {
 var TG_C_WPHONE = 21;   // U شمارهٔ کاری (اختیاری)
 var TG_C_CONN   = 25;   // Y وضعیت اتصال
 
-function tgPhoneKey_(v) {
-  var d = tgLatinDigits_(String(v == null ? '' : v)).replace(/\D/g, '');
-  return d.length >= 10 ? d.slice(-10) : '';
-}
+function tgPhoneKey_(v) { return phoneKey_(v); }   /* v170.19: یک پیاده‌سازی در Code.gs */
 
 function tgSameName_(a, b) {
   var x = tgNorm_(a), y = tgNorm_(b);
@@ -19979,7 +20067,7 @@ function tgEvContribText_(chat, name, uname, text) {
 }
 /* API عمومی صفحهٔ سایت: فهرست رویدادها (بی‌نام مراجع، بی‌chat) */
 function tgApiEvents_(p) {
-  var L = tgEvAll_().filter(function (o) { return o['وضعیت'] !== 'پیش‌نویس' && o['وضعیت'] !== 'بسته'; });
+  var L = tgEvAll_().filter(function (o) { return o['وضعیت'] !== 'پیش‌نویس' && o['وضعیت'] !== 'بسته' && !(typeof ebiIsNightEv_ === 'function' && ebiIsNightEv_(o)); });   /* v170.17: بی شب‌های کمپین */
   var out = L.map(function (o) {
     return { code: o.code, title: o.title, topic: o['موضوع'] || '', date: o['تاریخ'] instanceof Date ? tgJDateFull_(o['تاریخ'], TG_TZ) : String(o['تاریخ'] || ''),
       dateIso: o['تاریخ'] instanceof Date ? Utilities.formatDate(o['تاریخ'], TG_TZ, 'yyyy-MM-dd') : '', time: o['ساعت'] || '', kind: o['نوع'] || '',
@@ -21031,7 +21119,8 @@ const TG_LEAD_FIELDS = [
   /* v168.9 */ 'کشور محل زندگی', 'از کجا با ما آشنا شدید؟',
   /* v170.2 مدل لید */ 'نوع لید', 'پیشنهاد کاربر', 'پیامد', 'مسئول مرحله', 'مهلت مرحله', 'منبع جزئیات',
   /* v170.2 کامنت‌ها: ترجیحات برای پیشنهاد درمانگر */ 'ترجیحات', 'حالت جلسه', 'ترجیح جنسیت', 'ترجیح سن',
-  /* v170.13 */ 'کد کمپین', 'آفر'
+  /* v170.13 */ 'کد کمپین', 'آفر',
+  /* v170.18 برگشت مراجع: زمان ورود تازه، منطقه، اعلان */ 'تاریخ', 'زمان', 'تاریخ شمسی', 'داخل یا خارج', 'اعلان بات'
 ];
 
 // ستون‌هایی که تریگر شیت رویشان حساس است
@@ -22425,6 +22514,38 @@ function tgLead2Tests() {
     var fa = sets()[0];
     ok('فرم دوباره پروندهٔ بسته را باز می‌کند و کانال ترجیحی می‌گیرد', fa && fa.changes['وضعیت'] === 'جدید' && fa.changes['دلیل بستن'] === '' && fa.changes['کانال ترجیحی'] === 'واتس‌اپ' && TG_DRY_LEAD.closed === false);
     ok('فرم دوباره یادداشت می‌نویسد و به مسئول خبر می‌دهد', TG_OUTBOX.some(function (o) { return o.kind === 'leadnote' && o.text.indexOf('فرم دوباره') > -1; }) && TG_OUTBOX.some(function (o) { return String(o.chat) === '55' && String(o.text || '').indexOf('باز شد') > -1; }));
+    ok('v170.18: لید بسته از نو: آخرین تماس، بی‌پاسخ، تاریخ، زمان، اعلان بات خالی یا امروز و در صف کشیک', fa.changes['آخرین تماس'] === '' && fa.changes['شمار بی‌پاسخ'] === '' &&
+      fa.changes['تاریخ'] === today && /^\d{1,2}:\d{2}$/.test(fa.changes['زمان']) && fa.changes['اعلان بات'] === '' && (TG_MEM['dutypend'] || []).indexOf('L-1042') > -1);
+    ok('v170.18: مقدار قبلی (وضعیت و دلیل بستن) در یادداشت می‌ماند', TG_OUTBOX.some(function (o) { return o.kind === 'leadnote' && /وضعیت: بسته/.test(o.text) && /دلیل بستن: منصرف شد/.test(o.text); }));
+    /* v170.18: حالت «باز» (باگ L-1127): لید باز که هنوز به ارجاع یا معارفه نرسیده هم از نو «جدید» می‌شود */
+    TG_MEM['dutypend'] = [];
+    TG_DRY_LEAD = mk(); TG_DRY_LEAD.status = 'پاسخ نداد'; TG_DRY_LEAD.statusRaw = 'پاسخ نداد'; TG_DRY_LEAD.noans = 3; TG_DRY_LEAD.touched = true; TG_DRY_LEAD.owner = 'ژیلا';
+    TG_DRY_LEAD.phone = '2025550123'; TG_DRY_LEAD.region = 'خارج از ایران'; TG_OUTBOX = [];   // pii:ok ساختگی
+    var rb = tgLeadFormAgain_(7, { src: 'سایت › پذیرش › فرم', msg: 'دوباره', phone: '+1 202 555 0123', email: 'x@example.invalid' });   // pii:ok ساختگی
+    var fo = sets()[0];
+    ok('v170.18: لید باز پیش از ارجاع: جدید، بی‌پاسخ صفر، آخرین تماس خالی، در صف کشیک', rb === 'L-1042' && fo.changes['وضعیت'] === 'جدید' && fo.changes['شمار بی‌پاسخ'] === '' && fo.changes['آخرین تماس'] === '' && (TG_MEM['dutypend'] || []).indexOf('L-1042') > -1);
+    ok('v170.18: شمارهٔ کامل‌تر (با کد کشور) جای شمارهٔ بی‌کد را می‌گیرد', fo.changes['شماره / شناسه'] === "'+12025550123" && fo.changes['داخل یا خارج'] === 'خارج از ایران');
+    TG_MEM['dutypend'] = [];
+    TG_DRY_LEAD = mk(); TG_DRY_LEAD.status = 'معارفه رزرو شد'; TG_DRY_LEAD.statusRaw = 'معارفه رزرو شد'; TG_DRY_LEAD.booked = true; TG_DRY_LEAD.touched = true; TG_OUTBOX = [];
+    tgLeadFormAgain_(7, { src: 'سایت › پذیرش › فرم', msg: 'سؤال', phone: '09120000000' });   // pii:ok ساختگی
+    var fb2 = sets()[0];
+    ok('v170.18: لید جلوتر (معارفه رزرو شد) ریست نمی‌شود، فقط اقدام بعدی', fb2 && fb2.changes['وضعیت'] === undefined && fb2.changes['آخرین تماس'] === undefined && /درخواست دوباره/.test(fb2.changes['اقدام بعدی']) && !(TG_MEM['dutypend'] || []).length);
+    ok('v170.18: شمارهٔ کامل‌تر', tgPhoneBetter_('2025550123', '+12025550123') && tgPhoneBetter_('', '09120000000') && !tgPhoneBetter_('+12025550123', '2025550123') && !tgPhoneBetter_('09120000000', '09350000000') && tgPhoneBetter_('9120000000', '09120000000'));   // pii:ok ساختگی
+    ok('v170.18: جست‌وجو با ایمیل وقتی شماره پیدا نشد', (function () { var k = TG_DRY_LEADROW; TG_DRY_LEADROW = null; TG_MEM['leadbyemail'] = { 'x@example.invalid': 9 }; var r = tgLeadByPhone_('123', 'X@example.invalid'); TG_DRY_LEADROW = k; return r === 9; })());   // pii:ok ساختگی
+    /* v170.20: یک نویسنده؛ لید سایت از tgAppendLead_ می‌گذرد و اقدام بعدی می‌گیرد */
+    TG_OUTBOX = [];
+    handleWebForm_({ name: 'مراجع ساختگی', mobile: '09120000077', source: 'سایت › پذیرش › شروع تراپی', note: 'سلام', form_title: 'شروع تراپی' });   // pii:ok ساختگی
+    var wl = TG_OUTBOX.filter(function (x) { return x.kind === 'lead'; })[0];
+    ok('v170.20: فرم سایت از نویسندهٔ واحد: کانال، منطقه و اقدام بعدی', !!wl && wl.o.channel === 'فرم سایت' && wl.o.region === 'داخل ایران' && !!(wl.o.extra && wl.o.extra['اقدام بعدی']), JSON.stringify(wl && wl.o).slice(0, 200));
+    /* v170.19: یک تابع منطقه و یک کلید شماره */
+    ok('v170.19: region_ حذف شد؛ ۰۷ انگلیس و افغانستان خارج از ایران', typeof region_ === 'undefined' && tgRegion_('07911123456') === 'خارج از ایران' && tgRegion_('0799744687') === 'خارج از ایران');   // pii:ok ساختگی
+    ok('v170.19: شکل‌های شمارهٔ ایران داخل ایران', ['09120000000', '9120000000', '989120000000', '+98 912 000 0000', '00989120000000', '۰۹۱۲۰۰۰۰۰۰۰'].every(function (x) { return tgRegion_(x) === 'داخل ایران'; }));   // pii:ok ساختگی
+    ok('v170.19: کلید شماره یکی است', phoneKey_('+98 ۹۱۲ 000 0000') === '9120000000' && tgPhoneKey_('09120000000') === '9120000000' && phoneKey_('123') === '' &&   // pii:ok ساختگی
+      tgWaDigits_('+1 (202) 555-0123') === '12025550123' && cmDigits_('۰۹۱۲') === '0912' && digits_('٠٩١٢') === '0912');   // pii:ok ساختگی
+    TG_DRY_LEAD = mk(); TG_DRY_LEAD.status = 'در پیگیری'; TG_DRY_LEAD.touched = true; TG_OUTBOX = []; TG_MEM['dutypend'] = [];
+    tgUpdateLead_(7, {}, { kind: 'تراپی فردی', topic: '' }, 4242, '', '09120000000');   // pii:ok ساختگی
+    var fu = TG_OUTBOX.filter(function (o) { return o.kind === 'lead-update'; });
+    ok('v170.18: درخواست دوباره از بات همان مسیر', fu.length === 1 || (sets()[0] && sets()[0].changes['وضعیت'] === 'جدید'));
     TG_DRY_LEAD = mk(); TG_DRY_LEAD.touched = true; TG_OUTBOX = [];
     tgOnFollow_(4242, 'stop');
     ok('«دیگر نمی‌خواهم»: بسته با دلیل منتفی (خود مراجع)', TG_DRY_LEAD.status === 'بسته' && TG_DRY_LEAD.reason === 'منتفی (خود مراجع)');
@@ -22637,9 +22758,7 @@ function tgWaReady_() {
   return !!(c.t && c.id);
 }
 
-function tgWaDigits_(p) {
-  return tgLatinDigits_(String(p || '')).replace(/\D/g, '');
-}
+function tgWaDigits_(p) { return phoneDigits_(p); }   /* v170.19 */
 
 // خروجی: شناسهٔ پیام در صورت موفقیت، رشتهٔ خالی در صورت شکست
 function tgWaSend_(to, text) {
@@ -22724,7 +22843,12 @@ function tgWaMsg_(m, nm, ours) {
 
   const code = tgLeadCode_(row);
   tgLeadEv_({ code: code, row: row, actor: nm || from, channel: TG_WA_CH, what: 'پیام واتس‌اپ', to: String(text).slice(0, 120) });
-  if (!fresh) tgLeadNote_(row, 'واتس‌اپ: ' + String(text).slice(0, 200), nm || from);
+  if (!fresh) {
+    /* v170.18: پیام واتس‌اپ پس از ۶ ساعت سکوت یعنی برگشت مراجع (tgLeadReturn_)؛ پیام‌های پشت‌سرهم یک گفت‌وگو لید را ریست نمی‌کنند */
+    var rk = 'warc' + code, cc = TG_DRY ? null : CacheService.getScriptCache();
+    if (TG_DRY ? !TG_MEM[rk] : !cc.get(rk)) { tgLeadReturn_(row, { via: 'واتس‌اپ', msg: text, phone: '+' + from }); if (TG_DRY) TG_MEM[rk] = 1; else cc.put(rk, '1', 21600); }
+    else tgLeadNote_(row, 'واتس‌اپ: ' + String(text).slice(0, 200), nm || from);
+  }
 
   const head = (fresh ? '🟢 <b>مراجع تازه در واتس‌اپ</b>' : '💬 <b>پیام تازه در واتس‌اپ</b>') +
                '\n\n' + tgEsc_(String(text).slice(0, 400));
@@ -22739,18 +22863,10 @@ function tgWaNewLead_(from, nm, text, when, ours) {
   try { lock.waitLock(20000); } catch (e) { return -1; }
   TG_LOCK_HELD = true;   /* v166.13: tgLeadCode_ قفل را رها نکند */
   try {
-    appendRow_(TAB_LEADS, [
-      fmtDate_(when), fmtTime_(when),
-      'WhatsApp ' + ours,
-      nm, 'WhatsApp', "'" + from,
-      region_(from), text,
-      'جدید', '', '', '', ''
-    ]);
-    const sh = tgSS_().getSheetByName(TG_LEADS);
-    const row = sh.getLastRow();
-    try { sh.getRange(row, tgLeadCol_('کانال ترجیحی')).setValue(TG_WA_CH); } catch (e) {}
-    tgLeadCode_(row);
-    return row;
+    /* v170.20: از همان نویسندهٔ واحد (tgAppendLead_)، تا قلاب‌های نوع لید، مهلت و اقدام بعدی اجرا شوند */
+    var row = tgAppendLead_({ when: when, source: 'WhatsApp ' + ours, name: nm, channel: 'WhatsApp', phone: '+' + from, region: tgRegion_(from),
+      firstText: text, status: 'جدید', extra: { 'کانال ترجیحی': TG_WA_CH } });
+    return typeof row === 'number' ? row : -1;
   } finally {
     TG_LOCK_HELD = false;
     try { lock.releaseLock(); } catch (e) {}
@@ -35688,7 +35804,27 @@ function tnkNextCode_(name, head, pre) {
 
 /* ---------- آدم‌ها و موجودی ---------- */
 
-function tnkPeople_()  { return tnkRows_(TNK_T_PEOPLE, TNK_H_PEOPLE); }
+/* v170.22: منبع حقیقت تنخواه‌گردان نقش «تنخواه» در تب «افراد» است. تب «تنخواه‌گردان‌ها» فقط سقف، وضعیت و یادداشت را نگه می‌دارد
+   (با نام همان ردیف «افراد»). ردیف قدیمی تب بی آن نقش تا اضافه شدن نقش کار می‌کند و tnkRoleAudit آن را گزارش می‌کند. */
+function tnkPeople_() {
+  var tab = tnkRows_(TNK_T_PEOPLE, TNK_H_PEOPLE), byName = {}, seen = {}, out = [];
+  tab.forEach(function (o) { byName[String(o['نام']).trim()] = o; });
+  var ppl = [];
+  try { ppl = tgPeopleList_() || []; } catch (e) {}
+  ppl.forEach(function (p) {
+    if ((p.roles || []).indexOf('تنخواه') < 0 || String(p.status).trim() === 'غیرفعال') return;
+    var t = byName[p.name] || {};
+    out.push({ 'نام': p.name, 'نقش': t['نقش'] || '', 'chat_id': String(p.chat || t['chat_id'] || '').split(/[,،;\s]+/)[0], 'یوزرنیم': p.user || t['یوزرنیم'] || '',
+      'وضعیت': t['وضعیت'] || 'فعال', 'سقف تنخواه (تومان)': t['سقف تنخواه (تومان)'] || '', 'یادداشت': t['یادداشت'] || '', _chats: String(p.chat || ''), _src: 'role' });
+    seen[p.name] = 1;
+  });
+  tab.forEach(function (o) { if (!seen[String(o['نام']).trim()]) { o._src = 'tab'; out.push(o); } });
+  return out;
+}
+/* ردیف‌های تب «تنخواه‌گردان‌ها» که در «افراد» نقش تنخواه ندارند (فقط نام، برای مالک) */
+function tnkRoleAudit_() {
+  return tnkPeople_().filter(function (o) { return o._src === 'tab' && o['وضعیت'] !== 'غیرفعال'; }).map(function (o) { return o['نام']; });
+}
 function tnkCharges_() { return tnkRows_(TNK_T_CHARGE, TNK_H_CHARGE); }
 function tnkSpends_()  { return tnkRows_(TNK_T_SPEND,  TNK_H_SPEND); }
 function tnkReqs_()    { return tnkRows_(TNK_T_REQ,    TNK_H_REQ); }
@@ -35701,7 +35837,10 @@ function tnkCats_() {
 
 function tnkOf_(chat) {
   var want = String(chat || ''), rows = tnkPeople_();
-  for (var i = 0; i < rows.length; i++) if (rows[i]['chat_id'] === want && rows[i]['وضعیت'] !== 'غیرفعال') return rows[i];
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i]['وضعیت'] === 'غیرفعال') continue;
+    if (rows[i]['chat_id'] === want || (rows[i]._chats && tgChatIn_(rows[i]._chats, want))) return rows[i];
+  }
   return null;
 }
 
@@ -35767,6 +35906,9 @@ function tnkHomeText_(chat) {
     s += '  موجودی ' + tnkToman_(bb.bal) + ' · شارژ ' + tnkToman_(bb.inn) + ' · خرج ' + tnkToman_(bb.out) + '\n';
   }
   if (wait.length) s += '\n📥 ' + tnkFa_(wait.length) + ' درخواست شارژ در انتظار شما.';
+  /* v170.22: ردیف تب بی نقش «تنخواه» در «افراد» */
+  var legacy = tnkRoleAudit_();
+  if (legacy.length) s += '\n\n⚠️ نقش «تنخواه» را در تب «افراد» به این‌ها بدهید (فعلاً فقط از تب «تنخواه‌گردان‌ها» شناخته می‌شوند): ' + legacy.map(tnkEsc_).join('، ');
   return s;
 }
 
@@ -36199,6 +36341,13 @@ function tnkTests() {
   tnkTab_(TNK_T_PEOPLE, TNK_H_PEOPLE).append(['پذیرش ساختگی', 'مسئول پذیرش', '5', 'desk_lead', 'فعال', '', '']);
   ok('تنخواه‌گردان با چت پیدا می‌شود', tnkOf_(5) && tnkOf_(5)['نام'] === 'پذیرش ساختگی');
   ok('غریبه تنخواه‌گردان نیست', tnkOf_(99) === null);
+  /* v170.22: نقش «تنخواه» در «افراد» منبع حقیقت است؛ تب فقط سقف و وضعیت */
+  TG_MEM['people'] = [{ name: 'همکار ساختگی', user: 'fake_tnk', chat: '77,78', roles: ['پذیرش', 'تنخواه'], status: 'فعال' }, { name: 'بی‌نقش ساختگی', user: '', chat: '79', roles: ['پذیرش'], status: 'فعال' }];
+  ok('v170.22: نقش تنخواه در افراد بی ردیف تب کافی است (هر دو chat)', tnkOf_(77) && tnkOf_(78) && tnkOf_(78)['نام'] === 'همکار ساختگی' && tnkOf_(79) === null);
+  tnkTab_(TNK_T_PEOPLE, TNK_H_PEOPLE).append(['همکار ساختگی', '', '', '', 'غیرفعال', '5000000', '']);
+  ok('v170.22: وضعیت «غیرفعال» تب، نقش را خاموش می‌کند', tnkOf_(77) === null);
+  ok('v170.22: ردیف قدیمی تب بی نقش در گزارش می‌آید', JSON.stringify(tnkRoleAudit_()) === '["پذیرش ساختگی"]');
+  TG_MEM['people'] = [];
   ok('یاسر باس است', tnkIsBoss_(1) === true);
   ok('پذیرشی باس نیست', tnkIsBoss_(5) === false);
   ok('موجودی اول صفر است', tnkBalance_('پذیرش ساختگی').bal === 0);

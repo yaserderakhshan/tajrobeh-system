@@ -42,11 +42,15 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1] && pro
   const me = await gh(`/actions/runs/${process.env.GITHUB_RUN_ID}`);
   const t0 = Date.now();
   for (;;) {
+    /* ۱۴ مهر ۱۴۰۵: LOCK_WORKFLOWS (نام فایل‌ها با ویرگول) یعنی قفل مشترک چند گردش کار؛ site-deploy و site-mirror هرگز هم‌زمان نیستند
+       و چون concurrency گیت‌هاب اجرای منتظر را لغو می‌کند، هیچ انتشاری به‌خاطر یک آینهٔ ساعتی بی‌صدا لغو نمی‌شود */
+    const wfs = (process.env.LOCK_WORKFLOWS || '').split(',').map((x) => x.trim()).filter(Boolean);
     let runs = [];
-    try { runs = (await gh(`/actions/workflows/${me.workflow_id}/runs?per_page=50`)).workflow_runs || []; }
-    catch (e) { console.log(`خواندن اجراها نشد (${e.message})؛ دوباره`); }
+    try {
+      for (const w of (wfs.length ? wfs : [me.workflow_id])) runs = runs.concat((await gh(`/actions/workflows/${w}/runs?per_page=50`)).workflow_runs || []);
+    } catch (e) { console.log(`خواندن اجراها نشد (${e.message})؛ دوباره`); runs = []; }
     const b = blockers(runs.map((r) => ({ id: r.id, status: r.status, created_at: r.created_at })), me);
-    if (!b.length && runs.length) { console.log(`قفل انتشار آزاد است (${Math.round((Date.now() - t0) / 60000)} دقیقه صبر).`); break; }
+    if (!b.length && runs.length) { console.log(`قفل آزاد است (${Math.round((Date.now() - t0) / 60000)} دقیقه صبر).`); break; }
     if (Date.now() - t0 > MAX_MIN * 60000) { console.log(`::error::قفل انتشار: بعد از ${MAX_MIN} دقیقه هنوز اجرای زودتری باز است (${b.join('، ')}). این انتشار انجام نشد؛ دوباره اجرا کنید.`); process.exit(1); }
     console.log(`منتظر اجرای زودتر: ${b.join('، ')}`);
     await new Promise((r) => setTimeout(r, 60000));

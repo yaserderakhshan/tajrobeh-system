@@ -13,12 +13,16 @@
  * - کد PHP پیش از ذخیره با token_get_all(TOKEN_PARSE) سنجیده می‌شود؛ خطای نحوی = 422 و هیچ تغییری.
  * - فقط این کنش‌ها، و هیچ کنش دیگری:
  *     GET  /state            خواندن اسنیپت‌ها، متای Yoast، نسخه‌ها و به‌روزرسانی‌ها، اندازهٔ صف لید و خط‌های آخر لاگ لید و امنیت
+ *                            (۱۴ مهر ۱۴۰۵) ?lite=1 فقط شناسه، عنوان، روشنی، هش و تاریخ هر اسنیپت و متای Yoast، بی متن کد (برای site-mirror ساعتی)؛
+ *                            ?code=12,34 متن کد فقط همان اسنیپت‌ها
  *     POST /snippet/<id>     نوشتن متن کد یک اسنیپت موجود (عنوان و محل اجرا عوض نمی‌شود)
  *     POST /snippet-new      ساخت اسنیپت تازه، همیشه غیرفعال
  *     POST /snippet-active/<id>  روشن یا خاموش کردن یک اسنیپت
  *     POST /yoast/<id>       نوشتن title، description، canonical، noindex یک برگه
  *     POST /purge            پاک کردن کش WP-Optimize
  *     POST /restore          برگرداندن آخرین نسخهٔ ذخیره‌شدهٔ یک شیء
+ * - (۱۴ مهر ۱۴۰۵) Application Password با نام «فقط خواندن» برای همان claude-ops فقط GET دارد: هر درخواست نوشتنی، چه tj-ops و چه REST
+ *   خود وردپرس، 403 می‌گیرد و XML-RPC هم بسته است. همین رمز در Environment «site-read» گیت‌هاب برای مقایسهٔ برنامهٔ انتشار روی PRهاست.
  * - پنج نسخهٔ قبلی هر شیء در گزینهٔ tj_ops_hist می‌ماند.
  * - هر فراخوانی (خواندن یا نوشتن، موفق یا رد) یک خط در tj_ops_log دارد: زمان، روش، مسیر، نتیجه، IP. بدون متن کد و بدون رمز.
  *   ۵۰۰ خط آخر نگه داشته می‌شود و از /state هم برمی‌گردد.
@@ -36,6 +40,16 @@ if (!function_exists('tj_ops_norm')) {
     if (!$u || !$u->exists() || $u->user_login !== TJ_OPS_USER) { return false; }
     if (!function_exists('rest_get_authenticated_app_password') || !rest_get_authenticated_app_password()) { return false; }
     return user_can($u, 'manage_options');
+  }
+
+  /* رمز «فقط خواندن» (۱۴ مهر ۱۴۰۵): نام Application Password دقیقاً «فقط خواندن» */
+  function tj_ops_readonly() {
+    if (!function_exists('rest_get_authenticated_app_password') || !class_exists('WP_Application_Passwords')) { return false; }
+    $uuid = rest_get_authenticated_app_password();
+    $u = wp_get_current_user();
+    if (!$uuid || !$u || !$u->exists()) { return false; }
+    $ap = WP_Application_Passwords::get_user_application_password($u->ID, $uuid);
+    return is_array($ap) && isset($ap['name']) && trim($ap['name']) === 'فقط خواندن';
   }
 
   function tj_ops_log($what) {
@@ -92,6 +106,19 @@ add_action('admin_init', function () {
   }, 'general');
 });
 
+// رمز «فقط خواندن»: هیچ نوشتنی از REST (tj-ops یا خود وردپرس)، و هیچ XML-RPC
+add_filter('rest_pre_dispatch', function ($result, $server, $req) {
+  if ($result === null && !in_array($req->get_method(), array('GET', 'HEAD'), true) && tj_ops_readonly()) {
+    return new WP_Error('tj_ops_read_only', 'read-only application password', array('status' => 403));
+  }
+  return $result;
+}, 5, 3);
+add_action('application_password_did_authenticate', function ($user, $item) {
+  if (defined('XMLRPC_REQUEST') && XMLRPC_REQUEST && is_array($item) && isset($item['name']) && trim($item['name']) === 'فقط خواندن') {
+    wp_die('read-only application password', '', array('response' => 403));
+  }
+}, 10, 2);
+
 // ثبت همهٔ فراخوانی‌های tj-ops، چه پذیرفته چه رد شده
 add_filter('rest_post_dispatch', function ($res, $server, $req) {
   if (strpos($req->get_route(), '/tj-ops/v1') === 0) {
@@ -104,13 +131,23 @@ add_filter('rest_post_dispatch', function ($res, $server, $req) {
 
 add_action('rest_api_init', function () {
   $perm = 'tj_ops_allowed';
+  $permw = function () { return tj_ops_allowed() && !tj_ops_readonly(); };   /* نوشتن: رمز «فقط خواندن» نه */
 
   // وضعیت کامل: اسنیپت‌ها، متای Yoast برگه‌ها، نسخه‌ها و به‌روزرسانی‌های در انتظار (برای چک هفتگی امنیت)
-  register_rest_route('tj-ops/v1', '/state', array('methods' => 'GET', 'permission_callback' => $perm, 'callback' => function () {
+  register_rest_route('tj-ops/v1', '/state', array('methods' => 'GET', 'permission_callback' => $perm, 'callback' => function ($r) {
+    $lite = (string) $r->get_param('lite') === '1';
+    $only = array_filter(array_map('intval', explode(',', (string) $r->get_param('code'))));
     $snips = array();
-    foreach (get_posts(array('post_type' => 'wpcode', 'post_status' => array('publish', 'draft'), 'numberposts' => -1)) as $p) { $snips[] = tj_ops_snippet($p); }
+    foreach (get_posts(array('post_type' => 'wpcode', 'post_status' => array('publish', 'draft'), 'numberposts' => -1)) as $p) {
+      if ($only && !in_array($p->ID, $only, true)) { continue; }
+      $sn = tj_ops_snippet($p);
+      if ($lite) { unset($sn['code']); $sn['self'] = tj_ops_is_self($p); }
+      $snips[] = $sn;
+    }
+    if ($only) { return array('snippets' => $snips); }
     $yoast = array();
     foreach (get_posts(array('post_type' => 'page', 'post_status' => array('publish', 'draft', 'private'), 'numberposts' => -1, 'fields' => 'ids')) as $pid) { $yoast[$pid] = tj_ops_yoast($pid); }
+    if ($lite) { return array('lite' => true, 'snippets' => $snips, 'yoast' => $yoast); }
     if (!function_exists('get_plugins')) { require_once ABSPATH . 'wp-admin/includes/plugin.php'; }
     require_once ABSPATH . 'wp-admin/includes/update.php';
     $upd = get_site_transient('update_plugins');
@@ -135,7 +172,7 @@ add_action('rest_api_init', function () {
   }));
 
   // نوشتن متن یک اسنیپت
-  register_rest_route('tj-ops/v1', '/snippet/(?P<id>\d+)', array('methods' => 'POST', 'permission_callback' => $perm, 'callback' => function ($r) {
+  register_rest_route('tj-ops/v1', '/snippet/(?P<id>\d+)', array('methods' => 'POST', 'permission_callback' => $permw, 'callback' => function ($r) {
     $p = get_post((int) $r['id']);
     if (!$p || $p->post_type !== 'wpcode') { return new WP_Error('tj_ops_404', 'snippet', array('status' => 404)); }
     if (tj_ops_is_self($p)) { return new WP_Error('tj_ops_self', 'bridge snippet is not writable', array('status' => 403)); }
@@ -157,7 +194,7 @@ add_action('rest_api_init', function () {
   }));
 
   // ساخت اسنیپت تازه، همیشه غیرفعال. محل اجرا و نوع از ورودی، فقط از فهرست مجاز.
-  register_rest_route('tj-ops/v1', '/snippet-new', array('methods' => 'POST', 'permission_callback' => $perm, 'callback' => function ($r) {
+  register_rest_route('tj-ops/v1', '/snippet-new', array('methods' => 'POST', 'permission_callback' => $permw, 'callback' => function ($r) {
     $type = (string) $r->get_param('type');
     $loc = (string) $r->get_param('location');
     if (!in_array($type, array('php', 'html', 'css', 'js'), true)) { return new WP_Error('tj_ops_type', 'type', array('status' => 400)); }
@@ -174,7 +211,7 @@ add_action('rest_api_init', function () {
   }));
 
   // روشن یا خاموش کردن یک اسنیپت (برای برگشت خودکار: خاموش کردن اسنیپتی که تازه روشن شده)
-  register_rest_route('tj-ops/v1', '/snippet-active/(?P<id>\d+)', array('methods' => 'POST', 'permission_callback' => $perm, 'callback' => function ($r) {
+  register_rest_route('tj-ops/v1', '/snippet-active/(?P<id>\d+)', array('methods' => 'POST', 'permission_callback' => $permw, 'callback' => function ($r) {
     $p = get_post((int) $r['id']);
     if (!$p || $p->post_type !== 'wpcode') { return new WP_Error('tj_ops_404', 'snippet', array('status' => 404)); }
     if (tj_ops_is_self($p)) { return new WP_Error('tj_ops_self', 'bridge snippet is not writable', array('status' => 403)); }
@@ -185,7 +222,7 @@ add_action('rest_api_init', function () {
   }));
 
   // نوشتن متای Yoast یک برگه یا نوشته (title، desc، canonical، noindex)
-  register_rest_route('tj-ops/v1', '/yoast/(?P<id>\d+)', array('methods' => 'POST', 'permission_callback' => $perm, 'callback' => function ($r) {
+  register_rest_route('tj-ops/v1', '/yoast/(?P<id>\d+)', array('methods' => 'POST', 'permission_callback' => $permw, 'callback' => function ($r) {
     $pid = (int) $r['id'];
     if (!get_post($pid)) { return new WP_Error('tj_ops_404', 'post', array('status' => 404)); }
     $old = tj_ops_yoast($pid);
@@ -204,14 +241,14 @@ add_action('rest_api_init', function () {
   }));
 
   // پاک کردن کش WP-Optimize (یک برگه یا همه)
-  register_rest_route('tj-ops/v1', '/purge', array('methods' => 'POST', 'permission_callback' => $perm, 'callback' => function ($r) {
+  register_rest_route('tj-ops/v1', '/purge', array('methods' => 'POST', 'permission_callback' => $permw, 'callback' => function ($r) {
     $what = tj_ops_purge((int) $r->get_param('post'));
     tj_ops_log('purge ' . $what);
     return array('ok' => true, 'purge' => $what);
   }));
 
   // برگرداندن آخرین نسخهٔ ذخیره‌شده (پشتیبان برگشت خودکار گردش کار)
-  register_rest_route('tj-ops/v1', '/restore', array('methods' => 'POST', 'permission_callback' => $perm, 'callback' => function ($r) {
+  register_rest_route('tj-ops/v1', '/restore', array('methods' => 'POST', 'permission_callback' => $permw, 'callback' => function ($r) {
     $key = (string) $r->get_param('key');
     $h = get_option('tj_ops_hist', array());
     if (empty($h[$key])) { return new WP_Error('tj_ops_404', 'no history', array('status' => 404)); }

@@ -181,13 +181,12 @@ function lmCreate_(o, idx) {
     code = 'L-D' + (1001 + idx.list.length);
     idx.list.push({ row: idx.list.length + 2, code: code, type: o.type, ref: o.ref, chat: o.chat || '', owner: f['مسئول'], status: f['وضعیت'], out: o.out || '', f: f });
   } else {
-    var sh = tgSS_().getSheetByName(TG_LEADS);
-    LM_COLS.forEach(function (c) { tgLeadCol_(c); });
-    TG_LEAD_HM_ = null; TG_LEAD_HEAD_X = null;
-    var hm = tgLeadHeadMap_(sh), w = sh.getLastColumn(), row = [], r = 0;
-    for (var i = 0; i < w; i++) row.push('');
-    for (var k in f) if (hm[k] !== undefined && hm[k] < w) row[hm[k]] = f[k];
-    tgLeadRowLock_(function () { sh.appendRow(row); r = sh.getLastRow(); });
+    /* v170.20: از نویسندهٔ واحد (tgAppendLead_)؛ ستون‌های ثابت جدا، بقیه به‌عنوان extra */
+    var base = { 'تاریخ': 1, 'زمان': 1, 'منبع': 1, 'نام': 1, 'کانال': 1, 'متن اولیه': 1, 'وضعیت': 1, 'مسئول': 1, 'یادداشت': 1 }, ex = {};
+    for (var k in f) if (!base[k]) ex[k] = f[k];
+    var r = tgAppendLead_({ source: f['منبع'], name: f['نام'], channel: f['کانال'], phone: '', region: '', firstText: f['متن اولیه'],
+      status: f['وضعیت'], owner: f['مسئول'], note: f['یادداشت'], type: o.type, extra: ex });
+    if (typeof r !== 'number') throw new Error('lmCreate_: لید نوشته نشد');
     code = tgLeadCode_(r);
     idx.list.push({ row: r, code: code, type: o.type, ref: o.ref, chat: o.chat || '', owner: f['مسئول'], status: f['وضعیت'], out: o.out || '' });
     if (o.chat) { try { CacheService.getScriptCache().remove('lr' + o.chat); } catch (e) {} }

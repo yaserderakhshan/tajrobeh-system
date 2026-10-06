@@ -432,12 +432,30 @@
   "active": true
  },
  {
-  "id": null,
-  "file": "ebi-ops.php",
+  "id": 505915,
+  "file": "505915.php",
+  "title": "Tajrobeh — فهرست جمعی پلی‌لیست ابی (CPT + REST)",
+  "type": "php",
+  "location": "everywhere",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
+  "id": 506031,
+  "file": "506031.php",
   "title": "Tajrobeh · پلی‌لیست ابی · عملیات",
   "type": "php",
-  "location": "اجرا همه جا",
+  "location": "everywhere",
   "loc": "everywhere",
+  "active": true
+ },
+ {
+  "id": 506033,
+  "file": "506033.php",
+  "title": "Tajrobeh · پلی‌لیست ابی · ویجت کوچک سراسری (tjeb v1)",
+  "type": "php",
+  "location": "frontend_only",
+  "loc": "frontend_only",
   "active": true
  }
 ]

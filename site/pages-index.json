@@ -1,5 +1,77 @@
 [
  {
+  "id": 505992,
+  "slug": "students",
+  "status": "publish",
+  "title": "دانشجوها · پلی‌لیستِ ابی",
+  "parent": 505918,
+  "template": "",
+  "link": "https://tajrobeh.life/ebis-playlist/students/"
+ },
+ {
+  "id": 505990,
+  "slug": "night",
+  "status": "publish",
+  "title": "شب تجربه · پلی‌لیستِ ابی",
+  "parent": 505918,
+  "template": "",
+  "link": "https://tajrobeh.life/ebis-playlist/night/"
+ },
+ {
+  "id": 505923,
+  "slug": "every-brilliant-thing",
+  "status": "publish",
+  "title": "تاریخچهٔ Every Brilliant Thing",
+  "parent": 505918,
+  "template": "",
+  "link": "https://tajrobeh.life/ebis-playlist/every-brilliant-thing/"
+ },
+ {
+  "id": 505922,
+  "slug": "together",
+  "status": "publish",
+  "title": "دعوت از اهالی سلامت روان",
+  "parent": 505918,
+  "template": "",
+  "link": "https://tajrobeh.life/ebis-playlist/together/"
+ },
+ {
+  "id": 505921,
+  "slug": "group",
+  "status": "publish",
+  "title": "گروه تجربهٔ نمایش",
+  "parent": 505918,
+  "template": "",
+  "link": "https://tajrobeh.life/ebis-playlist/group/"
+ },
+ {
+  "id": 505920,
+  "slug": "talk",
+  "status": "publish",
+  "title": "گفت‌وگو با متخصص بعد از نمایش پلی‌لیستِ ابی",
+  "parent": 505918,
+  "template": "",
+  "link": "https://tajrobeh.life/ebis-playlist/talk/"
+ },
+ {
+  "id": 505919,
+  "slug": "list",
+  "status": "publish",
+  "title": "فهرست جمعی پلی‌لیستِ ابی",
+  "parent": 505918,
+  "template": "",
+  "link": "https://tajrobeh.life/ebis-playlist/list/"
+ },
+ {
+  "id": 505918,
+  "slug": "ebis-playlist",
+  "status": "publish",
+  "title": "پلی‌لیستِ ابی؛ فهرستی که با هم ادامه‌اش می‌دهیم",
+  "parent": 0,
+  "template": "",
+  "link": "https://tajrobeh.life/ebis-playlist/"
+ },
+ {
   "id": 505908,
   "slug": "scholarship",
   "status": "publish",

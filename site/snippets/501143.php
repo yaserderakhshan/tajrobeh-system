@@ -257,7 +257,8 @@ function tajrobeh_leads_post_async($payload) {
 
 /* امضای ارسال به بات (بات v170.9، امنیت ورودی سایت؛ کد بات از PR #73): ?ts=&sig= با HMAC-SHA256 روی «ts.بدنهٔ خام».
    رمز در گیت خالی است و هنگام انتشار سایت از GitHub Secret «SITE_LEAD_SECRET» گذاشته می‌شود (مثل رمز کمپین)؛
-   بات همان را از همان Secret در Script Properties دارد. بی رمز، بی امضا می‌فرستد (بات تا روشن شدن SITE_SIG_ENFORCE می‌پذیرد). */
+   بات همان را از همان Secret در Script Properties دارد. بی رمز، بی امضا می‌فرستد (بات تا روشن شدن SITE_SIG_ENFORCE می‌پذیرد).
+   ۱۴ مهر ۱۴۰۵ (بات v170.16.1): رمز با GitHub Secret تازهٔ «SITE_LEAD_SECRET» عوض شد. بات هر دو رمز را می‌پذیرد و با اولین امضای تازه جابه‌جا می‌شود. */
 if (!defined('TJ_LEAD_SECRET')) define('TJ_LEAD_SECRET', '');
 function tajrobeh_leads_signed_url($body) {
     $url = tajrobeh_leads_endpoint();

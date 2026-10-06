@@ -187,12 +187,23 @@ for (const it of items) {
   if (it.kind === 'page' && it.meta?.link && it.meta.status === 'publish') urls.push(it.meta.link.replace(B, '') || '/');
 }
 const label = (it) => `${{ page: 'برگه', snippet: 'اسنیپت', 'snippet-new': 'اسنیپت تازه', 'snippet-active': 'روشن/خاموش اسنیپت', css: 'CSS سراسری', templates: 'قالب', 'template-parts': 'قطعه‌قالب', yoast: 'Yoast' }[it.kind]} ${it.id}`;
-const ACT = { skip: 'همین الان روی سایت است', apply: 'منتشر می‌شود', create: 'ساخته می‌شود (اول غیرفعال)', drift: '⛔ در وردپرس دستی عوض شده؛ منتشر نمی‌شود', error: '⛔ خطا' };
+const ACT = { skip: 'همین الان روی سایت است', apply: 'منتشر می‌شود', create: 'ساخته می‌شود (اول غیرفعال)', drift: '⛔ این فایل روی سایت عوض شده؛ site-mirror اجرا شد، PR را با main به‌روز کن', error: '⛔ خطا' };
 say(`## برنامهٔ انتشار (${BEFORE.slice(0, 7)}..${String(AFTER).slice(0, 7)})\n`);
 for (const it of items) say(`- ${label(it)}: ${ACT[it.action]}${it.err ? ` (${it.err})` : ''}`);
 if (!items.length) say('- تغییری در /site نیست');
 summary(lines.join('\n'));
-if (blocked) { fail(`${blocked} مورد ناهمخوان یا خطادار؛ انتشار متوقف شد. اول site-pull را اجرا کن و تفاوت را بررسی کن.`); }
+/* ۱۴ مهر ۱۴۰۵: سایت زنده مرجع است. اگر سایت جلوتر بود (ویرایش در Cowork)، انتشار می‌ایستد و site-mirror را خودش صدا می‌زند تا
+   main به سایت برسد؛ بعد PR با main به‌روز می‌شود. هیچ ادغام خودکاری نیست. */
+const drifted = items.filter((it) => it.action === 'drift');
+if (drifted.length && MODE !== 'plan' && process.env.GITHUB_TOKEN && process.env.GITHUB_REPOSITORY) {
+  try {
+    const r = await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/actions/workflows/site-mirror.yml/dispatches`, {
+      method: 'POST', headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}`, Accept: 'application/vnd.github+json' }, body: JSON.stringify({ ref: 'main' }) });
+    say(r.status === 204 ? '\nsite-mirror اجرا شد؛ بعد از کامیت آینه، PR را با main به‌روز کن.' : `\n⛔ اجرای site-mirror نشد (HTTP ${r.status})؛ دستی اجرایش کن.`);
+  } catch (e) { say(`\n⛔ اجرای site-mirror نشد (${e.message})؛ دستی اجرایش کن.`); }
+  summary(lines.join('\n'));
+}
+if (blocked) { fail(drifted.length ? `${drifted.length} فایل روی سایت عوض شده (سایت جلوتر است)؛ انتشار متوقف شد. site-mirror اجرا شد؛ PR را با main به‌روز کن.` : `${blocked} مورد خطادار؛ انتشار متوقف شد.`); }
 if (MODE === 'plan' || blocked) { output('blocked', blocked); process.exit(blocked ? 1 : 0); }
 
 const todo = items.filter((it) => it.action === 'apply' || it.action === 'create');

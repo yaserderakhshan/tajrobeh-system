@@ -80,8 +80,8 @@
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۴۲۰ | ۳۲ |
-| `telegram.gs` | ۳۷۳۷۰ | ۲۰۱۵ |
+| `Code.gs` | ۴۱۲ | ۳۳ |
+| `telegram.gs` | ۳۷۵۱۹ | ۲۰۲۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -99,15 +99,15 @@
 | `v168.gs` | ۲۱۴۷ | ۱۲۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۸ | ۳۴ |
-| `leadmodel.gs` | ۷۷۸ | ۴۱ |
-| `comments.gs` | ۵۲۴ | ۳۱ |
+| `leadmodel.gs` | ۷۷۷ | ۴۱ |
+| `comments.gs` | ۶۱۸ | ۳۶ |
 | `dq.gs` | ۵۹۳ | ۴۹ |
 | `cfg.gs` | ۱۵۱ | ۱۴ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
-| `ebi.gs` | ۶۲۵ | ۴۳ |
-| `ci.gs` | ۴۸۲ | ۲۷ |
+| `ebi.gs` | ۹۹۶ | ۷۱ |
+| `ci.gs` | ۵۱۴ | ۲۹ |
 | `sitesec.gs` | ۲۷۵ | ۲۲ |
 | `sec.gs` | ۱۰۵ | ۱ |
 | `version.gs` | ۸ | ۰ |
@@ -145,6 +145,7 @@
 | ثابت | نام تب | فایل‌ها |
 |---|---|---|
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
+| `CM_FIX_TAB` | «اصلاح کامنت‌ها · پیش‌نمایش» | `comments.gs` |
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
 | `DQ_TAB` | «صف ارسال» | `dq.gs` |
 | `EBI_MIRROR_TAB` | «پلی‌لیست ابی · ثبت‌نام‌ها» | `ebi.gs` |
@@ -188,7 +189,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `v168.gs` `leadmodel.gs` `v17013.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `v168.gs` `leadmodel.gs` `v17013.gs` `ebi.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -353,8 +354,9 @@
 | نسخهٔ ۱۶۲ | `tgV162Tests` |
 | v170.13: سقف پذیرش، بورسیه، آفر | `v17013Tests` |
 | کمپین C-004 (پلی‌لیست ابی) | `ebiTests` |
-| امنیت ورودی‌ها (v170.9) | `secTests` |
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |
+| امنیت ورودی‌ها (v170.9) | `secTests` |
+| کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
 

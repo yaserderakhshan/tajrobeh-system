@@ -24,10 +24,10 @@ on:
 
 permissions:
   contents: write
+  actions: write    # ۱۴ مهر: قفل مشترک با site-mirror و صدا زدن site-mirror وقتی سایت جلوتر است
 
-concurrency:
-  group: site-deploy
-  cancel-in-progress: false
+# ۱۴ مهر ۱۴۰۵: concurrency برداشته شد، چون اجرای منتظر قبلی را بی‌صدا لغو می‌کند. قفل مشترک site-deploy و site-mirror (bot-lock.mjs)
+# هر اجرا را تا تمام شدن اجراهای زودتر هر دو گردش کار نگه می‌دارد.
 
 jobs:
   deploy:
@@ -41,6 +41,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: قفل مشترک با site-mirror
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          LOCK_WORKFLOWS: site-deploy.yml,site-mirror.yml
+          LOCK_MAX_MIN: '90'
+        run: node .github/scripts/bot-lock.mjs wait
       - name: انتشار، تست دود، نظارت
         id: deploy
         env:
@@ -55,6 +61,7 @@ jobs:
           # رمزهای تازه که در گیت خالی‌اند و هنگام نوشتن اسنیپت گذاشته می‌شوند (site/tools/secrets.mjs)
           SITE_SECRET_TJ_CAMP_SECRET_V2: ${{ secrets.CP_WP_SECRET }}
           SITE_SECRET_TJ_LEAD_SECRET: ${{ secrets.SITE_LEAD_SECRET }}   # بات v170.9: امضای لید سایت؛ همان Secret که بات در Script Properties دارد
+          GITHUB_TOKEN: ${{ github.token }}   # فقط برای صدا زدن site-mirror وقتی سایت جلوتر است
         run: node site/tools/site-deploy.mjs apply
       - name: تست دود کمپین
         if: success()

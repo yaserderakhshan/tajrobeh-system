@@ -17,6 +17,7 @@ import { newScopes, scopeSelfTest } from './bot-scopes.mjs';
 import { pageGs, pageSha, PAGE } from './page-gs.mjs';
 import { lockSelfTest } from './bot-lock.mjs';
 import { versionSelfTest } from './bot-version.mjs';
+import { suitesSelfTest } from './bot-suites.mjs';
 import { prevSelfTest } from './bot-prev-test.mjs';
 import vm from 'node:vm';
 
@@ -183,6 +184,7 @@ try {
 try {
   for (const b of lockSelfTest()) problems.push('قفل انتشار: ' + b);
   for (const b of versionSelfTest()) problems.push('رزرو نسخه: ' + b);
+  for (const b of suitesSelfTest()) problems.push('انتخاب مجموعه‌های روز (v170.16.2): ' + b);
   for (const b of prevSelfTest()) problems.push('پشتوانهٔ برگشت: ' + b);
 } catch (e) { problems.push('قفل انتشار و رزرو نسخه: ' + (e && e.message)); }
 
