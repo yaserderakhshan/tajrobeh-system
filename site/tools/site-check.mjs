@@ -11,6 +11,8 @@ import { join } from 'node:path';
 import { fail, log, summary, warn } from './site-lib.mjs';
 import { loadContracts, contractProblems, contractsSelfTest } from './contracts.mjs';
 import { scanLine } from './secrets.mjs';
+import { scan, siteFiles, registryProblems, ctaSelfTest } from './cta.mjs';
+import { readFileSync } from 'node:fs';
 
 const BASE = process.env.BASE, HEAD = process.env.HEAD || 'HEAD';
 const SYNC = /همگام‌سازی|site-sync/.test(process.env.PR_TITLE || '');
@@ -45,6 +47,16 @@ for (const f of files) {
   let C = null;
   try { C = loadContracts(show('site/contracts.json')); } catch (e) { errs.push(`site/contracts.json خوانده نشد (${e.message})`); }
   if (C) for (const p of contractProblems(C, show)) errs.push(p);
+}
+// رجیستری دکمه‌ها (درگاه‌های ورودی، بند ۲): هر کد start، data-cta، فرم فلوئنت و پارامتر /get-therapy/ روی سایت باید در
+// site/cta-registry.json ثبت باشد. قاعده: «هر صفحه یا کمپین تازه اول در رجیستری ثبت می‌شود، بعد منتشر می‌شود».
+{
+  for (const b of ctaSelfTest()) errs.push(`خودآزمایی رجیستری دکمه‌ها: ${b}`);
+  try {
+    const reg = JSON.parse(readFileSync('site/cta-registry.json', 'utf8'));
+    let php = ''; try { php = readFileSync('site/snippets/501143.php', 'utf8'); } catch {}
+    for (const p of registryProblems(reg, scan(siteFiles(process.cwd())), php)) errs.push(p);
+  } catch (e) { errs.push(`site/cta-registry.json خوانده نشد (${e.message})`); }
 }
 // اسنیپت تازه
 if (files.includes('site/snippets/index.json')) {
