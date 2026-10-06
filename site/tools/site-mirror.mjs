@@ -67,7 +67,77 @@ export function mirrorSelfTest() {
   t('کد عادی سالم است', secretKinds("add_action('init', function () { return 'tj-offer'; });\n.tj2 a.tj-offer{color:#c83f49}").length === 0);
   t('نام همکار از فهرست ← رد', piiKinds('<p>با نمونه‌الف تماس بگیرید</p>', ['نمونه‌الف']).length === 1 && piiKinds('<p>سلام</p>', ['نمونه‌الف']).length === 0);
   t('شماره ← رد', piiKinds('تلفن: 09121234567', []).includes('شمارهٔ تلفن')); // pii:ok نمونهٔ ساختگی
+  t('پوشاندن نام', maskNames('سلام نمونه‌الف و نمونه‌الفی', ['نمونه‌الف']) === 'سلام [نام] و نمونه‌الفی');
+  t('نوع خط', JSON.stringify(lineContexts("<?php\n// x\necho 'a';\n$a = 1;\n?>\n<p>b</p>")) === JSON.stringify(['کد یا رشتهٔ داخلی PHP', 'کامنت PHP', 'رشتهٔ خروجی PHP', 'کد یا رشتهٔ داخلی PHP', 'کد یا رشتهٔ داخلی PHP', 'HTML خروجی (روی صفحه)']));
   return bad;
+}
+
+/* ---------------- توضیح یک مورد ردشده (بی خود نام) ----------------
+   node site-mirror.mjs explain <id>: برای اسنیپتی که آینه به‌خاطر نام یا اطلاعات شخصی رد کرده، جای هر برخورد را می‌گوید
+   (شمارهٔ خط، کامنت یا متن خروجی یا رشتهٔ PHP) و متن را با نام پوشانده چاپ می‌کند تا اصلاح از PR نوشته شود.
+   نام همکار هرگز چاپ نمی‌شود (جایش «[نام]»). خطی که بعد از پوشاندن نام هنوز اطلاعات شخصی یا شبه‌رمز دارد کامل پنهان می‌شود.
+   برای دیده شدن روی سایت: کدهای کوتاه اسنیپت در برگه‌های مخزن جست‌وجو و صفحهٔ عمومی همان برگه‌ها (و خانه) بی ورود خوانده می‌شود؛ فقط «بله/خیر». */
+export function maskNames(text, names) {
+  let t = String(text);
+  for (const n of [...names].sort((a, b) => b.length - a.length)) t = t.replace(new RegExp(nameRx(n).source, 'g'), '[نام]');
+  return t;
+}
+export function lineContexts(code) {
+  const out = []; let php = !/^\s*</.test(code) || /^\s*<\?php/.test(code), block = false;
+  for (const l of String(code).split('\n')) {
+    const tr = l.trim(); let kind;
+    if (block) kind = 'کامنت PHP';
+    else if (!php) kind = 'HTML خروجی (روی صفحه)';
+    else if (/^(\/\/|#|\/\*|\*)/.test(tr)) kind = 'کامنت PHP';
+    else if (/echo|print|printf|return\s+['"<]|\.=\s*['"]/.test(l)) kind = 'رشتهٔ خروجی PHP';
+    else kind = 'کد یا رشتهٔ داخلی PHP';
+    if (/\/\*/.test(l) && !/\*\//.test(l.slice(l.indexOf('/*')))) block = true;
+    if (block && /\*\//.test(l)) block = false;
+    if (/\?>/.test(l) && !/<\?php/.test(l.slice(l.lastIndexOf('?>')))) php = false;
+    if (/<\?php/.test(l)) php = true;
+    out.push(kind);
+  }
+  return out;
+}
+async function explain(id) {
+  if (!/^\d+$/.test(String(id || ""))) { fail("شناسهٔ اسنیپت باید عدد باشد"); process.exit(1); }
+  const wp = wpClient();
+  if (!wp.hasAuth) { fail('WP_USER یا WP_APP_PASSWORD نیست'); process.exit(1); }
+  const NAMES = (process.env.PII_NAMES || '').split(/[,،\n]+/).map((x) => x.trim()).filter((x) => x.length >= 2);
+  if (!NAMES.length) { fail('PII_NAMES خالی است'); process.exit(1); }
+  const FILL = fillNames(readFileSync(join(ROOT, '.github/workflows/site-deploy.yml'), 'utf8'));
+  let r = await wp.get(`/wp-json/tj-ops/v1/state?code=${id}`, { timeout: 90000 });
+  let sn = Array.isArray(r.json?.snippets) ? r.json.snippets.find((s) => String(s.id) === String(id)) : null;
+  if (!sn || typeof sn.code !== 'string') { r = await wp.get('/wp-json/tj-ops/v1/state', { timeout: 90000 }); sn = (r.json?.snippets || []).find((s) => String(s.id) === String(id)); }
+  if (!sn || typeof sn.code !== 'string') { fail(`اسنیپت ${id} در state پل پیدا نشد (HTTP ${r.status})`); process.exit(1); }
+  const code = lf(blankKnown(sn.code, FILL)), lines = code.split('\n'), ctx = lineContexts(code);
+  const L = [`## توضیح اسنیپت ${id}`, '', `- عنوان: ${maskNames(sn.title || '', NAMES)}`, `- نوع: ${sn.type} · محل اجرا: ${sn.location} · روشن: ${sn.active ? 'بله' : 'خیر'}`, '', '### برخوردها'];
+  const hits = [];
+  lines.forEach((l, i) => {
+    const nm = !/pii:ok/.test(l) && NAMES.some((n) => nameRx(n).test(l));
+    const pk = piiLine(l);
+    if (nm || pk.length) hits.push(i), L.push(`- خط ${i + 1}: ${[nm && 'نام همکار', ...pk].filter(Boolean).join('، ')} · ${ctx[i]}`);
+  });
+  if (!hits.length) L.push('- هیچ (احتمالاً در عنوان)');
+  /* دیده شدن روی سایت عمومی: کدهای کوتاه این اسنیپت در برگه‌های مخزن + خانه */
+  const sc = [...code.matchAll(/add_shortcode\(\s*['"]([\w-]+)['"]/g)].map((m) => m[1]);
+  const pidx = readJson(join(SITE, 'pages-index.json'), []), files = pageFiles();
+  const urls = new Set([wp.base + '/']);
+  for (const [pid, f] of files) { const t = readFileSync(join(SITE, 'pages', f), 'utf8'); if (sc.some((s) => t.includes(`[${s}`))) { const p = pidx.find((x) => x.id === pid); if (p?.link) urls.add(p.link); } }
+  L.push('', `### روی سایت عمومی`, `- کدهای کوتاه: ${sc.length ? sc.join('، ') : 'هیچ'}`);
+  for (const u of urls) {
+    const pr = await wp.get(u, { authed: false, timeout: 30000, retries: 2 });
+    const seen = NAMES.filter((n) => nameRx(n).test(pr.text || '')).length;
+    L.push(`- ${u.replace(wp.base, '') || '/'}: HTTP ${pr.status} · نام همکار در HTML عمومی: ${seen ? 'بله' : 'خیر'}`);
+  }
+  L.push('', '### متن با نام پوشانده', '```');
+  lines.forEach((l, i) => {
+    const m = maskNames(l, NAMES);
+    const bad = piiLine(m).length || secretKinds(m).length || maskSecrets(m) !== m;
+    L.push(`${String(i + 1).padStart(4)}| ${bad ? '[این خط پنهان شد: اطلاعات شخصی یا شبه‌رمز]' : m}`);
+  });
+  L.push('```');
+  summary(L.join('\n')); log(L.join('\n'));
 }
 
 /* ---------------- اجرا ---------------- */
@@ -237,5 +307,5 @@ async function main() {
 
 if (process.argv[1] && process.argv[1].endsWith('site-mirror.mjs')) {
   if (process.argv[2] === 'selftest') { const b = mirrorSelfTest(); console.log(b.length ? '❌ ' + b.join('، ') : '✅ site-mirror'); process.exit(b.length ? 1 : 0); }
-  await main();
+  if (process.argv[2] === 'explain') await explain(process.argv[3]); else await main();
 }

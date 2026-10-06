@@ -8,6 +8,11 @@ on:
   schedule:
     - cron: '7 * * * *'
   workflow_dispatch:
+    inputs:
+      explain:
+        description: 'فقط توضیح یک اسنیپت ردشده (شناسه): جای نام یا اطلاعات شخصی، با نام پوشانده؛ هیچ نوشتنی'
+        required: false
+        default: ''
   repository_dispatch:
     types: [site-changed]
 
@@ -54,8 +59,10 @@ jobs:
           BOT_API_URL: ${{ secrets.BOT_API_URL }}
           BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
           REPORT_CHAT_ID: ${{ secrets.REPORT_CHAT_ID }}
+          EXPLAIN: ${{ github.event.inputs.explain }}
         run: |
           git pull -q --ff-only origin main
+          if [ -n "$EXPLAIN" ]; then node site/tools/site-mirror.mjs explain "$EXPLAIN"; exit 0; fi
           node site/tools/site-mirror.mjs
 
       - name: کامیت آینه روی main
