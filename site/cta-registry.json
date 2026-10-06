@@ -283,7 +283,38 @@
     ],
     "note": "need = نیاز (مثل anx)، src = منبع (کد دکمه یا صفحه). from و tj_* همچنان خوانده می‌شوند و به need/src نگاشته می‌شوند."
   },
-  "ctas": [],
+  "ctas": [
+    {
+      "id": "contact.reception",
+      "line": "pz",
+      "label": "تماس با ما › گفت‌وگو با پذیرش"
+    },
+    {
+      "id": "footer.reception",
+      "line": "pz",
+      "label": "فوتر › گفت‌وگو با پذیرش"
+    },
+    {
+      "id": "fab.reception",
+      "line": "pz",
+      "label": "دکمهٔ شناور › گفت‌وگو با پذیرش"
+    },
+    {
+      "id": "ent.reception",
+      "line": "pz",
+      "label": "سازمانی › گفت‌وگو با پذیرش"
+    },
+    {
+      "id": "yd.mohajer",
+      "line": "rm",
+      "label": "صفحهٔ یاسر › مسیر مهاجران"
+    },
+    {
+      "id": "yd.mohajer.audio",
+      "line": "rm",
+      "label": "صفحهٔ یاسر › صوت › مسیر مهاجران"
+    }
+  ],
   "codes": [
     {
       "code": "cmp-ebi-voice",
@@ -744,6 +775,16 @@
       "links": 7
     },
     {
+      "code": "pz-reception",
+      "line": "pz",
+      "label": "گفت‌وگو با پذیرش",
+      "to": "/human",
+      "aliases": [],
+      "pages": [],
+      "links": 0,
+      "note": "جای تلفن، واتس‌اپ، ایمیل و حساب شخصی پشتیبانی روی سایت (بند ۴)"
+    },
+    {
       "code": "pz-vxc",
       "line": "pz",
       "label": "پذیرش › مچ‌میکینگ صوتی",
@@ -926,6 +967,16 @@
         "site/pages/504915-assessment.html"
       ],
       "links": 3
+    },
+    {
+      "code": "rm-mohajer",
+      "line": "rm",
+      "label": "رودمپ › مهاجرت",
+      "to": "rm_hero",
+      "aliases": [],
+      "pages": [],
+      "links": 0,
+      "note": "جای حساب شخصی tajrobehmohajer (بند ۴)"
     },
     {
       "code": "rm-nz",
