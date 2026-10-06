@@ -6,6 +6,9 @@
 //   node bot-monitor.mjs watch    ← خلاصهٔ خطاهای ۲۴ ساعت گذشته، بعد پایش تب «خطاها» تا MONITOR_MIN دقیقه.
 //                                    اگر خطایی آمد که در ۷ روز پیش از push نبود، کد خروج ۲ (گردش کار نسخهٔ قبل را برمی‌گرداند).
 // پاسخ ci فقط نام تابع، تعداد و متن پوشانده‌شده دارد (ci.gs → ciErrs_)؛ هیچ اطلاعات مراجعی اینجا نمی‌آید.
+// v170.16.4: لاگ اجراهای این مخزن عمومی است. شناسهٔ فایل و شیت درایو و شناسهٔ دیپلوی Apps Script در خروجی پوشانده می‌شود.
+export const maskIds = (t) => String(t).replace(/AKfycb[A-Za-z0-9_-]{20,}/g, '[شناسهٔ دیپلوی]').replace(/(?<![A-Za-z0-9_-])1[A-Za-z0-9_-]{24,43}(?![A-Za-z0-9_-])/g, '[شناسهٔ درایو]');
+{ const log0 = console.log.bind(console); console.log = (...a) => log0(...a.map((x) => (typeof x === 'string' ? maskIds(x) : x))); }
 import { appendFileSync, readFileSync } from 'node:fs';
 
 const EXEC = process.env.BOT_EXEC_URL;
