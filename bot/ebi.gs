@@ -135,7 +135,7 @@ var EBI_WELCOME = {
   community: 'ثبت شد ✓ به کامیونیتی تجربه خوش آمدید. خبرهای کمپین همین‌جا به شما می‌رسد.',
   follow: 'ثبت شد ✓ همراه فهرست شدید.'
 };
-var EBI_CFG_LEADS = 'راهبران C-004', EBI_CFG_END = 'پایان C-004', EBI_CFG_CHECK = 'چک‌لیست شب C-004', EBI_CFG_DRIVE = 'پوشهٔ درایو C-004';
+var EBI_CFG_LEADS = 'راهبران C-004', EBI_CFG_END = 'پایان C-004', EBI_CFG_DRIVE = 'پوشهٔ درایو C-004';   /* v170.19: «چک‌لیست شب C-004» برداشته شد (یادآور ساعت ۲۱ لازم نیست) */
 var EBI_VOICE_TAB = 'پلی‌لیست ابی · ویس‌ها';
 var EBI_VOICE_HEAD = ['زمان', 'نام', 'نقش', 'لینک فایل', 'اجازهٔ انتشار', 'متن', 'chat_id', 'کد'];
 var EBI_PERM = { y: 'اجازه می‌دهم در مجله و کانال بیاید', n: 'فقط برای تیم', w: 'هنوز نپرسیده' };
@@ -146,11 +146,10 @@ var EBI_FIXED_CODES = ['ebi-night', 'ebi-student', 'ebi-therapist', 'ebi-crisis'
 
 /* کلیدهای تنظیمات: سر بارگذاری ثبت می‌شوند تا cfgSync_ ردیف تب را بپذیرد؛ اختیاری‌اند تا خالی بودنشان انتشار را نگه ندارد */
 try {
-  cfg_(EBI_CFG_LEADS, []); cfg_(EBI_CFG_END, ''); cfg_(EBI_CFG_CHECK, ''); cfg_(EBI_CFG_DRIVE, '');
-  [EBI_CFG_LEADS, EBI_CFG_END, EBI_CFG_CHECK, EBI_CFG_DRIVE].forEach(function (k) { if (CFG_OPTIONAL.indexOf(k) < 0) CFG_OPTIONAL.push(k); });
+  cfg_(EBI_CFG_LEADS, []); cfg_(EBI_CFG_END, ''); cfg_(EBI_CFG_DRIVE, '');
+  [EBI_CFG_LEADS, EBI_CFG_END, EBI_CFG_DRIVE].forEach(function (k) { if (CFG_OPTIONAL.indexOf(k) < 0) CFG_OPTIONAL.push(k); });
   CFG_NOTE[EBI_CFG_LEADS] = 'chat_id راهبران کمپین پلی‌لیست ابی (JSON، مثل ["…","…"])';
   CFG_NOTE[EBI_CFG_END] = 'آخرین روز کمپین C-004 (شمسی یا میلادی، مثل 1405-08-12)';
-  CFG_NOTE[EBI_CFG_CHECK] = 'لینک چک‌لیست شب در سند «برنامهٔ عملیاتی سی شب» (اختیاری)';
   CFG_NOTE[EBI_CFG_DRIVE] = 'شناسهٔ پوشهٔ درایو کمپین برای ویس‌ها (اختیاری؛ خالی = پوشهٔ خود بات)';
 } catch (eEbiCfg) {}
 
@@ -517,7 +516,7 @@ function ebiHourly_() {
    - اعلام: افراد kind=night با chat_id از GET /ebi-people?kind=night، هر نفر یک پیام با یک دکمه برای هر شب باز
      (نوع «دعوت» از «سیاست پیام»؛ سکوت شب و صف همان tgNotify_). بی chat_id ← فهرست برای راهبران تا تماس بگیرند.
    - انتخاب شب زیر قفل، با ظرفیت و بی تکرار؛ ثبت در «ثبت‌نام رویداد» (منبع C-004)؛ لغو با دکمه.
-   - ظهر روز شب: یادآوری به ثبت‌نامی‌ها. ساعت ۲۱ شب‌های اجرا: یادآور راهبران با لینک چک‌لیست (کلید «چک‌لیست شب C-004»).
+   - ظهر روز شب: یادآوری به ثبت‌نامی‌ها.
    - شنبه ساعت ۱۰: گزارش برای راهبران. بعد از «پایان C-004»: دکمهٔ اعلام پنهان، گزارش نهایی یک بار.
    ============================================================================ */
 var EBI_NIGHT_KIND = 'شب تجربه';
@@ -734,7 +733,6 @@ function ebiReport_(final) {
     '• لیدهای کمپین در «لیدها»: ' + (leads < 0 ? 'خوانده نشد' : tgFa_(leads));
   var N = ebiNights_(false);
   if (N.length) t += '\n\n🌙 شب‌ها:\n' + N.map(function (o) { return '• ' + tgEsc_(ebiNightWhen_(o)) + ' · ' + tgFa_(ebiRegsOf_(o.code).length) + (ebiNightCap_(o) ? ' از ' + tgFa_(ebiNightCap_(o)) : ''); }).join('\n');
-  if (!cfg_(EBI_CFG_CHECK, '')) t += '\n\n<i>لینک چک‌لیست شب در تنظیمات («چک‌لیست شب C-004») خالی است.</i>';
   return t;
 }
 
@@ -745,21 +743,11 @@ function ebiHourly2_(day, hour) {
   if (ebiEnded_()) { if (pbProp_('EBI_FINAL') !== '1') { pbProp_('EBI_FINAL', '1'); ebiTellLeads_(ebiReport_(true), ebiHomeKb_(), TG_NK.report); } return; }
   var tonight = ebiNights_(true).filter(function (o) { return ebiIso_(o['تاریخ']) === day; });
   /* ظهر روز شب: یادآوری به ثبت‌نامی‌ها */
-  if (hour >= 12 && hour < 21 && tonight.length && pbProp_('EBI_NOON') !== day) {
+  if (hour >= 12 && tonight.length && pbProp_('EBI_NOON') !== day) {
     pbProp_('EBI_NOON', day);
     tonight.forEach(function (o) {
       ebiRegsOf_(o.code).forEach(function (r) { var c = String(r[8] || '').trim(); if (c) tgNotify_(c, TG_NK.remind, '🌙 یادآوری: امشب <b>' + tgEsc_(ebiNightWhen_(o)) + '</b>. منتظرتان هستیم.', { ref: EBI_CODE, markup: ebiHomeKb_([[{ text: '✖️ نمی‌توانم بیایم', callback_data: 'ebi:nc:' + o.code }]]) }); });
     });
-  }
-  /* ساعت ۲۱ شب‌های اجرا: یادآور راهبران با لینک چک‌لیست */
-  var allToday = ebiNights_(false).filter(function (o) { return ebiIso_(o['تاریخ']) === day && String(o['وضعیت']).trim() !== 'لغو'; });
-  if (hour >= 21 && allToday.length && pbProp_('EBI_21') !== day) {
-    pbProp_('EBI_21', day);
-    var link = String(cfg_(EBI_CFG_CHECK, '') || '');
-    var rows = /^https:\/\//.test(link) ? [[{ text: '✅ چک‌لیست شب', url: link }]] : [];
-    rows.push([{ text: '👥 ثبت‌نامی‌های امشب', callback_data: 'ebi:nl:' + allToday[0].code }]);
-    ebiTellLeads_('🌙 <b>امشب شب تجربه است</b>\n' + allToday.map(function (o) { return '• ' + tgEsc_(ebiNightWhen_(o)) + ' · ثبت‌نام ' + tgFa_(ebiRegsOf_(o.code).length); }).join('\n') +
-      (rows.length > 1 ? '' : '\n\n<i>لینک چک‌لیست در «تنظیمات خصوصی بات» (چک‌لیست شب C-004) خالی است.</i>'), ebiHomeKb_(rows), TG_NK.remind);
   }
   /* شنبه ساعت ۱۰: گزارش هفتگی */
   if (Utilities.formatDate(now, TG_TZ, 'u') === '6' && hour >= 10 && pbProp_('EBI_WEEK') !== day) {
@@ -935,7 +923,7 @@ function ebiNightTests() {
   function last(chat) { var a = TG_OUTBOX.filter(function (x) { return x.kind === 'msg' && String(x.chat) === String(chat); }); return a[a.length - 1] || {}; }
   function P(chat, text) { return ebiRoute_({ chat: { id: chat }, from: { id: chat, first_name: 'ک' }, text: text }, chat, 'ک', ''); }
   try {
-    TG_CFG_ = Object.assign({}, TG_CFG_ || {}); TG_CFG_[EBI_CFG_LEADS] = ['7000101', '7000102']; TG_CFG_[EBI_CFG_CHECK] = '';
+    TG_CFG_ = Object.assign({}, TG_CFG_ || {}); TG_CFG_[EBI_CFG_LEADS] = ['7000101', '7000102'];
     TG_MEM['ebi:today'] = '2026-10-10';
     TG_MEM['evall'] = [{ code: 'EV-2005', title: 'ژورنال کلاب', 'نوع': 'ژورنال کلاب', 'وضعیت': 'باز', 'تاریخ': '2026-10-20' }];
     TG_MEM['ebi:wp'] = function (m, path) {
@@ -985,12 +973,8 @@ function ebiNightTests() {
     ebiHourly2_('2026-10-12', 12);
     ok('ظهر روز شب: یادآوری به ثبت‌نامی‌ها، یک بار', TG_MEM['notify'].filter(function (x) { return x.kind === 'یادآوری'; }).length === 2 && (function () { ebiHourly2_('2026-10-12', 13); return TG_MEM['notify'].filter(function (x) { return x.kind === 'یادآوری'; }).length === 2; })());
     TG_MEM['notify'] = [];
-    ebiHourly2_('2026-10-12', 21);
-    var r21 = TG_MEM['notify'].filter(function (x) { return /امشب شب تجربه/.test(x.text); });
-    ok('ساعت ۲۱: یادآور هر دو راهبر، بی لینک چک‌لیست گفته می‌شود', r21.length === 2 && /خالی است/.test(r21[0].text));
-    TG_CFG_[EBI_CFG_CHECK] = 'https://docs.google.com/document/d/x'; pbProp_('EBI_21', '');
-    TG_OUTBOX = []; ebiHourly2_('2026-10-12', 22);
-    ok('با لینک: دکمهٔ چک‌لیست', TG_OUTBOX.some(function (x) { return x.kind === 'msg' && JSON.stringify(x.markup || '').indexOf('docs.google.com/document') > -1; }));
+    ebiHourly2_('2026-10-12', 21); ebiHourly2_('2026-10-12', 22);
+    ok('v170.19: ساعت ۲۱ و بعد یادآوری برای راهبران نمی‌رود و کلید چک‌لیست نیست', !TG_MEM['notify'].some(function (x) { return /امشب شب تجربه/.test(x.text); }) && typeof EBI_CFG_CHECK === 'undefined' && !(('چک‌لیست شب C-004') in TG_CFG_SEEN));
     /* گزارش */
     TG_MEM['ebi:leadsrc'] = ['کمپین › C-004 › night', 'Telegram bot', 'کمپین › C-004 › student'];
     var rp = ebiReport_(false);

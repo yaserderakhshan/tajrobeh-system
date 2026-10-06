@@ -216,7 +216,7 @@ function handleWebForm_(body) {
       name,
       'فرم سایت',
       phone ? "'" + phone : '',
-      region_(phone),
+      tgRegion_(phone),
       msg,
       'جدید', '', '', '',
       (email ? 'ایمیل: ' + email + ' · ' : '') + 'صفحه: ' + page
@@ -365,22 +365,19 @@ function isNewContact_(phone) {
 }
 
 // v166.12: رقم فارسی و عربی هم (پیش از این «۰۹۱۲…» خالی می‌شد و منطقه و کلید تکرار از دست می‌رفت)
-function digits_(s) {
+/* v170.19: یک تابع برای ارقام شماره و یک تابع برای کلید شماره، برای همهٔ فایل‌ها (پیش از این digits_ و tgWaDigits_ و
+   cmDigits_ و tgPhoneKey_ و منطق داخل tgLeadByPhone_ هرکدام جدا بودند). رقم فارسی و عربی هم خوانده می‌شود. */
+function phoneDigits_(s) {
   return String(s == null ? '' : s)
-    .replace(/[۰-۹]/g, function (d) { return String(d.charCodeAt(0) - 0x06F0); })
-    .replace(/[٠-٩]/g, function (d) { return String(d.charCodeAt(0) - 0x0660); })
+    .replace(/[\u06F0-\u06F9]/g, function (d) { return String(d.charCodeAt(0) - 0x06F0); })
+    .replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x0660); })
     .replace(/\D/g, '');
 }
+/* کلید یکتای شماره: ده رقم آخر، یا خالی اگر کمتر از ده رقم است */
+function phoneKey_(s) { var d = phoneDigits_(s); return d.length >= 10 ? d.slice(-10) : ''; }
+function digits_(s) { return phoneDigits_(s); }
 
-function region_(phone) {
-  var d = digits_(phone);
-  if (!d) return '';
-  // شماره‌های بین‌المللی که با 00 شروع می‌شوند (مثل 0049…) داخل ایران نیستند
-  if (d.indexOf('00') === 0) { return d.indexOf('0098') === 0 ? 'داخل ایران' : 'خارج از ایران'; }
-  if (d.indexOf('98') === 0 && d.length >= 12) return 'داخل ایران';
-  if (d.indexOf('0') === 0 && d.length <= 11) return 'داخل ایران';
-  return 'خارج از ایران';
-}
+/* v170.19: region_ حذف شد؛ «داخل یا خارج» فقط از tgRegion_ (telegram.gs). region_ شمارهٔ ۰۷… انگلیس را «داخل ایران» می‌دانست. */
 
 function flatten_(obj, prefix, out) {
   out = out || {}; prefix = prefix || '';

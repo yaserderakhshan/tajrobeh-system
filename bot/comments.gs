@@ -92,7 +92,7 @@ function cmLogWrite_(e) {
 }
 
 /* ---------------- وصل به لید ---------------- */
-function cmDigits_(s) { return tgLatinDigits_(String(s || '')).replace(/\D/g, ''); }
+function cmDigits_(s) { return phoneDigits_(s); }   /* v170.19 */
 function cmLink_(it, idx) {
   var codes = {}; idx.list.forEach(function (l) { if (l.code) codes[l.code] = l; });
   var m = (String(it.text) + ' ' + String(it.quoted)).match(/L-\d{3,5}/g) || [];
