@@ -1,7 +1,39 @@
 {
- "pulled_at": "2026-10-04T10:12:27.041Z",
+ "pulled_at": "2026-10-06T11:40:37.878Z",
  "base": "https://tajrobeh.life",
  "items": {
+  "page:505992": {
+   "hash": "3aae3b7bb92d5d40",
+   "modified": "2026-10-06T11:16:07"
+  },
+  "page:505990": {
+   "hash": "0c4f008cc70ba36a",
+   "modified": "2026-10-06T11:16:04"
+  },
+  "page:505923": {
+   "hash": "acb75c7a28a5a2e2",
+   "modified": "2026-10-06T11:16:02"
+  },
+  "page:505922": {
+   "hash": "320b7ef1e106438c",
+   "modified": "2026-10-06T11:15:58"
+  },
+  "page:505921": {
+   "hash": "b330b900e4fde917",
+   "modified": "2026-10-06T11:15:56"
+  },
+  "page:505920": {
+   "hash": "ba49d3f1aae08e80",
+   "modified": "2026-10-05T14:29:24"
+  },
+  "page:505919": {
+   "hash": "75aee2bc994b30f0",
+   "modified": "2026-10-06T11:15:51"
+  },
+  "page:505918": {
+   "hash": "c2cdec1100b7bc20",
+   "modified": "2026-10-06T11:15:47"
+  },
   "page:505908": {
    "hash": "f3ff5cf9e3033111",
    "modified": "2026-10-04T09:20:58"
@@ -71,8 +103,8 @@
    "modified": "2026-09-28T15:32:49"
   },
   "page:505409": {
-   "hash": "8b5eb5cc9dad80f9",
-   "modified": "2026-10-02T10:46:01"
+   "hash": "c5c869d3a9f937e7",
+   "modified": "2026-10-05T13:38:40"
   },
   "page:505404": {
    "hash": "b0a816499341a859",
@@ -387,8 +419,8 @@
    "modified": "2026-09-18T06:54:06"
   },
   "page:503465": {
-   "hash": "a55c661e19898627",
-   "modified": "2026-09-29T10:12:38"
+   "hash": "e7515d9cd050fc92",
+   "modified": "2026-10-05T13:37:24"
   },
   "page:503069": {
    "hash": "d60ec40e2a87b22b",
@@ -578,6 +610,16 @@
    "hash": "00f6d33bbfff09d9",
    "source": "custom"
   },
+  "snippet:506031": {
+   "hash": "6a5596c3b99bcc7e",
+   "modified": "2026-10-06 11:20:28",
+   "active": true
+  },
+  "snippet:505915": {
+   "hash": "1f7b00e7b9912066",
+   "modified": "2026-10-05 15:40:05",
+   "active": true
+  },
   "snippet:505906": {
    "hash": "31a03fa938a523e8",
    "modified": "2026-10-03 20:52:28",
@@ -694,8 +736,8 @@
    "active": true
   },
   "snippet:505050": {
-   "hash": "f79f599c33c6aa51",
-   "modified": "2026-10-03 15:36:37",
+   "hash": "29aac00e83c754f9",
+   "modified": "2026-10-04 10:24:48",
    "active": true
   },
   "snippet:504841": {
@@ -804,8 +846,8 @@
    "active": true
   },
   "snippet:501143": {
-   "hash": "a010b230477a0654",
-   "modified": "2026-10-03 20:50:20",
+   "hash": "c9135be6c5d4cbae",
+   "modified": "2026-10-04 10:24:35",
    "active": true
   },
   "snippet:501142": {
@@ -1228,6 +1270,30 @@
   },
   "yoast:505908": {
    "hash": "7b074dfdc2061c0f"
+  },
+  "yoast:505918": {
+   "hash": "2dcd2fb7152b4075"
+  },
+  "yoast:505919": {
+   "hash": "2dcd2fb7152b4075"
+  },
+  "yoast:505920": {
+   "hash": "2dcd2fb7152b4075"
+  },
+  "yoast:505921": {
+   "hash": "2dcd2fb7152b4075"
+  },
+  "yoast:505922": {
+   "hash": "2dcd2fb7152b4075"
+  },
+  "yoast:505923": {
+   "hash": "2dcd2fb7152b4075"
+  },
+  "yoast:505990": {
+   "hash": "2dcd2fb7152b4075"
+  },
+  "yoast:505992": {
+   "hash": "2dcd2fb7152b4075"
   }
  }
 }
