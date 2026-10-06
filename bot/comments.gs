@@ -636,6 +636,22 @@ function cmTests() {
     ok('v170.23.1: گارد دائمی: هم‌دقیقه و هم‌جهت قدیمی نیست، خلاف‌جهت هست',
       !cmPlanOne_({ text: 'جواب نداد', t: '2026-09-26T06:30:20Z' }, { cat: 'noans', conf: 1 }, lSame).stale &&
       cmPlanOne_({ text: 'معارفه ۱۴ مهر ساعت ۱۸', t: '2026-09-26T06:30:20Z' }, { cat: 'set', conf: 1, iso: '2026-10-06' }, lSame).stale === true);
+    /* v170.23.4: دور دوم (CM_FIX_FORCE و پیشنهادها با «اوکی» دوم) و کار تلفنی */
+    TG_MEM['lm:leads'] = [{ row: 7, code: 'L-3004', status: 'پاسخ نداد' }, { row: 9, code: 'L-3006', status: 'در پیگیری' }, { row: 10, code: 'L-3007', status: 'پاسخ نداد' }];
+    TG_MEM['cm:fixlead'] = { 'L-3004': { status: 'پاسخ نداد', next: 'تماس دوباره', nextDate: '2026-10-05', noans: 1 }, 'L-3006': { status: 'در پیگیری', next: 'تماس اول', nextDate: '2026-10-07' },
+      'L-3007': { status: 'پاسخ نداد', next: 'تماس دوباره', nextDate: '2026-10-05', noans: 1 } };
+    TG_OUTBOX = []; TG_MEM['cm:fixok'] = 'اوکی'; stkProp_('CM_FIX2_DONE', '1'); stkProp_('CM_FIX3_PV', ''); stkProp_('CM_FIX3_DONE', '');
+    TG_CFG_ = { CM_FIX_FORCE: { 'L-3004': 'معارفه رزرو شد', 'L-3007': 'وضعیت من‌درآوردی' }, CM_FIX_HINTS: { 'L-3006': 'self:7' }, CM_FIX_CALL: ['L-3010'] };
+    ok('v170.23.4: بعد از دور اول، «اوکی» قدیمی دور دوم را اعمال نمی‌کند؛ فقط پیش‌نمایش', cmFixMaybe_('اوکی') === 0 && !TG_OUTBOX.some(function (o) { return o.kind === 'leadset'; }) && !!TG_MEM['cm:fix3sum']);
+    var f3 = TG_MEM['cm:fix3tab'] || [], fr = f3.filter(function (r) { return r.code === 'L-3004'; })[0] || {};
+    ok('v170.23.4: CM_FIX_FORCE با وجود «فقط مهاجرت» به همان وضعیت، اقدام از پیش از کامنت، تاریخ کمینه امروز', fr.kind === CM_FIX_KIND.force && fr.state === CM_FIX_STATE.apply && fr.wantSt === 'معارفه رزرو شد' && fr.wantNext === 'تماس دوباره' && fr.wantDate >= '2026-10-04', JSON.stringify(fr));
+    ok('v170.23.4: وضعیت ناشناخته در CM_FIX_FORCE رد می‌شود', (f3.filter(function (r) { return r.code === 'L-3007'; })[0] || {}).state === CM_FIX_STATE.skip);
+    ok('v170.23.4: پیشنهاد در دور دوم قابل اعمال است', (f3.filter(function (r) { return r.code === 'L-3006'; })[0] || {}).state === CM_FIX_STATE.apply);
+    ok('v170.23.4: کار «بررسی تلفنی وضعیت» برای پذیرش', (TG_MEM['cm:calls'] || []).some(function (c) { return /L-3010/.test(c.title) && c.ref === 'CMCALL:L-3010'; }));
+    var n3 = cmFixMaybe_('اوکی'), s3 = TG_OUTBOX.filter(function (o) { return o.kind === 'leadset'; });
+    ok('v170.23.4: «اوکی» دوم فقط ردیف‌های قابل اعمال، یک بار', n3 === 2 && s3.length === 2 && s3.some(function (o) { return o.code === 'L-3004' && o.changes['وضعیت'] === 'معارفه رزرو شد'; }) &&
+      s3.some(function (o) { return o.code === 'L-3006' && o.changes['وضعیت'] === TG_ST.FOLLOW && !/\(\+/.test(o.changes['اقدام بعدی']); }) && !s3.some(function (o) { return o.code === 'L-3007'; }) && cmFixMaybe_('اوکی') === 0, JSON.stringify(s3));
+    TG_CFG_ = null;
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 400) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK;
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ کامنت‌ها درست است'));
@@ -654,17 +670,20 @@ function cmTests() {
    - «تاریخ از روز کامنت»: همان اصلاح v170.21.
    - «پیشنهاد»: از کلید اختیاری CM_FIX_HINTS در «تنظیمات خصوصی بات» (کد لید در مخزن عمومی نمی‌آید). با «اوکی» اعمال نمی‌شود.
    تاریخ اقدام بعدی هیچ‌وقت در گذشته نیست (کمینه امروز). ستون «شمار بی‌پاسخ»: خانه‌هایی که صفر را تاریخ ۱۸۹۹ نشان می‌دهند.
-   اعمال فقط وقتی کسی در خانهٔ B1 همان تب «اوکی» بنویسد؛ هر تغییر با کی=«اصلاح ۱۷۰٫۲۱» در «رویدادهای لید».
+   اعمال فقط وقتی Cowork بعد از بررسی در خانهٔ B1 همان تب «اوکی» بنویسد (قاعدهٔ تأیید v170.23.4: پیش‌نمایش اصلاح داده با Cowork است، نه یاسر)؛
+   هر تغییر با کی=«اصلاح ۱۷۰٫۲۱» در «رویدادهای لید».
    ============================================================================ */
 var CM_FIX_TAB = 'اصلاح کامنت‌ها · پیش‌نمایش';
 var CM_FIX_HEAD = ['کد لید', 'نوع', 'وضعیت فعلی', 'وضعیت درست', 'اقدام فعلی', 'اقدام درست', 'تاریخ فعلی', 'تاریخ درست', 'زمان کامنت', 'آخرین وضعیت غیرکامنتی', 'حالت'];
 var CM_FIX_ACTOR = 'اصلاح ۱۷۰٫۲۱';
-var CM_FIX_KIND = { rev: 'برگشت وضعیت', date: 'تاریخ از روز کامنت', hint: 'پیشنهاد' };
+var CM_FIX_KIND = { rev: 'برگشت وضعیت', date: 'تاریخ از روز کامنت', hint: 'پیشنهاد', force: 'برگشت به دستور' };
 var CM_FIX_STATE = { apply: 'با اوکی اعمال می‌شود', hint: 'پیشنهاد؛ با اوکی اعمال نمی‌شود', later: 'بعداً دستی عوض شده؛ دست نمی‌خورد',
   rule: 'با قاعدهٔ تازه کنار رفت (v170.23.1)', skip: 'طبق بررسی، دست نمی‌خورد' };
 var CM_FIX_FIELDS = ['وضعیت', 'اقدام بعدی', 'تاریخ اقدام بعدی', 'شمار بی‌پاسخ'];
 cfg_('CM_FIX_HINTS', {});   /* ثبت در بارگذاری تا cfgSync_ مقدار تب را بپذیرد */
 cfg_('CM_FIX_SKIP', []);   /* v170.23.1: آرایهٔ کد لیدهایی که طبق بررسی یاسر دست نمی‌خورند */
+cfg_('CM_FIX_FORCE', {});   /* v170.23.4: {کد لید: وضعیت}؛ با وجود قاعدهٔ «فقط مهاجرت» به همین وضعیت برمی‌گردند (دور دوم) */
+cfg_('CM_FIX_CALL', []);   /* v170.23.4: کد لیدهای وضعیت مبهم ← کار «بررسی تلفنی وضعیت» برای پذیرش */
 function cmFixSkip_(skip) { var x = skip === undefined ? cfg_('CM_FIX_SKIP', []) : skip; var o = {}; (Array.isArray(x) ? x : []).forEach(function (c) { o[String(c).trim()] = 1; }); return o; }
 
 function cmFixToday_() { return cmDay_(0); }
@@ -846,7 +865,7 @@ function cmFixFp_() { return cmFixToday_() + '|' + JSON.stringify(cfg_('CM_FIX_H
 function tgV170231CmFix() {
   var sy = {}; try { sy = cfgSync_() || {}; } catch (e) { sy = { ok: false }; }
   try { TG_CFG_ = null; } catch (e2) {}
-  return 'همگام‌سازی تنظیمات: ' + (sy.ok ? 'شد (' + (sy.changed || 0) + ' کلید)' : 'نشد') + ' · ' + cmFixPreview_();
+  return 'همگام‌سازی تنظیمات: ' + (sy.ok ? 'خوانده ' + (sy.read || 0) + ' کلید، تازه ' + (sy.changed || 0) : 'نشد') + ' · ' + cmFixPreview_();
 }
 function tgV170222CmFix() { return cmFixPreview_(); }   /* یک‌بارهٔ v170.22.2: پیش‌نمایش تازه (اعمال نه) */
 function cmFixPreview_(hints, skipList) {
@@ -865,20 +884,20 @@ function cmFixPreview_(hints, skipList) {
   var ok0 = String(sh.getRange(1, 2).getValue() || '').trim();
   if (/^اعمال شد/.test(ok0)) return 'پیش‌نمایش: پیش از این اعمال شده؛ دوباره ساخته نشد';
   sh.clear();
-  sh.getRange(1, 1, 1, 3).setValues([['اعمال؟ برای اعمال در B1 بنویسید: اوکی', '', 'v170.23.1 · ' + stkStamp_() + ' · ' + sum]]).setFontWeight('bold');
+  sh.getRange(1, 1, 1, 3).setValues([['بررسی Cowork: بعد از بررسی، Cowork در B1 «اوکی» می‌نویسد', '', 'v170.23.1 · ' + stkStamp_() + ' · ' + sum]]).setFontWeight('bold');
   sh.getRange(2, 1, 1, CM_FIX_HEAD.length).setValues([CM_FIX_HEAD]).setFontWeight('bold').setBackground('#f5f5f8');
   if (rows.length) sh.getRange(3, 1, rows.length, CM_FIX_HEAD.length).setNumberFormat('@').setValues(rows.map(function (r) {
     return [r.code, r.kind, r.curSt, r.wantSt, r.curNext, r.wantNext, r.curDate, r.wantDate, r.t, r.prev, r.state];
   }));
   sh.setFrozenRows(2);
   stkProp_('CM_FIX_PV', cmFixFp_());
-  try { tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '🛠 <b>پیش‌نمایش تازهٔ اصلاح کامنت‌ها (v170.23.1)</b>\n' + tgEsc_(sum) + tgEsc_(detail) + '\nدر تب «' + CM_FIX_TAB + '» هاب پذیرش. چیزی عوض نشد. برای اعمال، در B1 همان تب «اوکی» بنویسید.', { ref: 'v170.22.2' }); } catch (eN) {}
+  /* v170.23.4 (قاعدهٔ تأیید): پیش‌نمایش و اعمال اصلاح داده را Cowork در همین تب بررسی و «اوکی» می‌کند؛ پیامی به یاسر نمی‌رود */
   return 'پیش‌نمایش اصلاح کامنت‌ها: ' + sum;
 }
 /* از cmTick5_: پیش‌نمایش هر روز یا با عوض شدن CM_FIX_HINTS تازه می‌شود (تاریخ‌ها کمینهٔ امروزند)؛ «اوکی» یک بار اعمال */
 function cmFixMaybe_() {
   var ok = stkDry_() ? TG_MEM['cm:fixok'] : (function () { var sh = tgSS_().getSheetByName(CM_FIX_TAB); return sh ? String(sh.getRange(1, 2).getValue() || '').trim() : ''; })();
-  if (stkProp_('CM_FIX2_DONE') === '1') return 0;
+  if (stkProp_('CM_FIX2_DONE') === '1') return cmFix3Maybe_(ok);   /* v170.23.4: دور دوم بعد از اعمال دور اول */
   if (ok !== 'اوکی') {
     var fp = cmFixFp_();
     if (!stkDry_() && stkProp_('CM_FIX_PV') && stkProp_('CM_FIX_PV') !== fp) { try { cmFixPreview_(); } catch (eP) { tgErr_('cmFixPreview_', eP); } }
@@ -898,6 +917,119 @@ function cmFixMaybe_() {
   });
   var nf = 0; try { nf = cmFixNoansRepair_(); } catch (eF) { tgErr_('cmFixNoansRepair_', eF); }
   if (!stkDry_()) { try { tgSS_().getSheetByName(CM_FIX_TAB).getRange(1, 2).setValue('اعمال شد ' + Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm') + ' · ' + n + ' لید'); } catch (e) {} }
-  try { tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '✅ اصلاح کامنت‌ها اعمال شد: ' + tgFa_(n) + ' لید · «شمار بی‌پاسخ» درست‌شده: ' + tgFa_(nf) + '. پیشنهادها اعمال نشدند.', { ref: 'v170.22.2' }); } catch (eN) {}
+  /* v170.23.4 (قاعدهٔ تأیید): پیش‌نمایش و اعمال اصلاح داده را Cowork در همین تب بررسی و «اوکی» می‌کند؛ پیامی به یاسر نمی‌رود */
   return n;
+}
+
+/* ============================================================================
+   v170.23.4 · دور دوم اصلاح کامنت‌ها (تصمیم یاسر، ۱۴ مهر ۱۴۰۵)، فقط بعد از اعمال دور اول
+   - «برگشت به دستور»: کلید CM_FIX_FORCE ({کد لید: وضعیت}) در «تنظیمات خصوصی بات». این لیدها با وجود قاعدهٔ «فقط مهاجرت» به
+     همان وضعیت برمی‌گردند؛ اقدام، تاریخ (کمینه امروز) و شمار بی‌پاسخ از پیش از آخرین اجرای کامنت. اگر بعدش کسی دستی وضعیت را
+     عوض کرده، دست نمی‌خورد. وضعیت ناشناخته رد می‌شود.
+   - «پیشنهاد»ها (CM_FIX_HINTS) در این دور با «اوکی» دوم اعمال می‌شوند.
+   - CM_FIX_CALL: برای هر کد یک کار «بررسی تلفنی وضعیت» برای پذیرش (یک بار؛ تکراری نه).
+   همان تب پیش‌نمایش با سرتیتر «دور دوم»؛ اعمال فقط با «اوکی» تازهٔ Cowork در B1. کد لید در مخزن نیست، فقط در تب.
+   ============================================================================ */
+function cmFixForce_(force) { var x = force === undefined ? cfg_('CM_FIX_FORCE', {}) : force; return x && typeof x === 'object' && !Array.isArray(x) ? x : {}; }
+function cmFixForceRows_(force, ev, byCode, readLead) {
+  var out = [], win = 30 * 60000;
+  Object.keys(force).sort().forEach(function (code) {
+    var l = byCode[code]; if (!l) return;
+    var norm = tgStNorm_(String(force[code] || '')), want = norm.known ? norm.st : '';
+    var cur = readLead(l) || {}, curSt = tgStOf_(cur.status) || cur.status || '';
+    var row = { kind: CM_FIX_KIND.force, code: code, row: l.row, curSt: curSt, wantSt: want, curNext: cur.next || '', wantNext: '', curDate: cmFixIso_(cur.nextDate), wantDate: '', noans: '', t: '', prev: 'به دستور CM_FIX_FORCE', state: CM_FIX_STATE.apply };
+    if (!want) { row.state = CM_FIX_STATE.skip; row.prev = 'وضعیت «' + String(force[code]) + '» شناخته نیست'; out.push(row); return; }
+    if (want === curSt) return;   /* همین حالا همان وضعیت است */
+    var evs = ev[code] || [], cs = evs.filter(function (e) { return cmFixIsCm_(e) && e.what === 'وضعیت'; }), E = cs[cs.length - 1];
+    var g = E ? evs.filter(function (e) { return cmFixIsCm_(e) && Math.abs(e.t - E.t) <= win; }) : [];
+    var first = function (w) { var x = g.filter(function (e) { return e.what === w; })[0]; return x ? x.from : undefined; };
+    var nx = first('اقدام بعدی'), dt = first('تاریخ اقدام بعدی'), no = first('شمار بی‌پاسخ');
+    row.wantNext = nx === undefined ? (cur.next || '') : nx;
+    row.wantDate = dt === undefined ? cmFixIso_(cur.nextDate) : cmFixIso_(dt);
+    if (tgStClosed_(want)) { row.wantNext = ''; row.wantDate = ''; } else row.wantDate = cmFixFloor_(row.wantDate);
+    row.noans = no === undefined ? String(cur.noans || 0) : (Number(tgLatinDigits_(no)) || 0);
+    if (E) {
+      row.t = Utilities.formatDate(new Date(E.t), TG_TZ, 'yyyy-MM-dd HH:mm');
+      if (evs.some(function (e) { return cmFixReal_(e) && e.t > E.t + win; })) row.state = CM_FIX_STATE.later;
+    }
+    out.push(row);
+  });
+  return out;
+}
+function cmFix3Rows_(force, hints) {
+  var idx = lmLeadIdx_(), byCode = {};
+  idx.list.forEach(function (l) { if (l.code) byCode[l.code] = l; });
+  var readLead = function (l) { return stkDry_() ? (TG_MEM['cm:fixlead'] || {})[l.code] || { status: l.status } : (tgLeadRead_(l.row) || {}); };
+  var f = cmFixForce_(force), h = hints === undefined ? (function () { var x = cfg_('CM_FIX_HINTS', {}); return x && typeof x === 'object' ? x : {}; })() : hints;
+  var rows = cmFixForceRows_(f, cmEvIdx_(), byCode, readLead), seen = {};
+  rows.forEach(function (r) { seen[r.code] = 1; });
+  cmFixHintRows_(h, byCode, readLead).forEach(function (r) { if (seen[r.code]) return; r.state = CM_FIX_STATE.apply; rows.push(r); });   /* دستور یاسر بر پیشنهاد مقدم است */
+  return rows;
+}
+function cmFix3Fp_() { return 'r2|' + cmFixToday_() + '|' + JSON.stringify(cfg_('CM_FIX_FORCE', {})) + '|' + JSON.stringify(cfg_('CM_FIX_HINTS', {})); }
+function cmFix3Preview_(force, hints) {
+  var rows = cmFix3Rows_(force, hints);
+  var cnt = function (k, s) { return rows.filter(function (r) { return r.kind === k && (!s || r.state === s); }).length; };
+  var sum = 'دور دوم · برگشت به دستور: قابل اعمال ' + cnt(CM_FIX_KIND.force, CM_FIX_STATE.apply) + '، بعداً دستی عوض‌شده ' + cnt(CM_FIX_KIND.force, CM_FIX_STATE.later) + '، ردشده ' + cnt(CM_FIX_KIND.force, CM_FIX_STATE.skip) +
+    ' · پیشنهاد: قابل اعمال ' + cnt(CM_FIX_KIND.hint, CM_FIX_STATE.apply);
+  if (stkDry_()) { TG_MEM['cm:fix3tab'] = rows; TG_MEM['cm:fix3sum'] = sum; stkProp_('CM_FIX3_PV', cmFix3Fp_()); return sum; }
+  var ss = tgSS_(), sh = ss.getSheetByName(CM_FIX_TAB) || ss.insertSheet(CM_FIX_TAB);
+  var b1 = String(sh.getRange(1, 2).getValue() || '').trim();
+  var done1 = /^اعمال شد/.test(b1) ? b1 : String(sh.getRange(1, 4).getValue() || '');
+  sh.clear(); sh.setRightToLeft(true);
+  sh.getRange(1, 1, 1, 4).setValues([['دور دوم · بررسی Cowork: بعد از بررسی، Cowork در B1 «اوکی» می‌نویسد', '', 'v170.23.4 · ' + stkStamp_() + ' · ' + sum, done1 ? 'دور اول: ' + done1.replace(/^دور اول: /, '') : '']]).setFontWeight('bold');
+  sh.getRange(2, 1, 1, CM_FIX_HEAD.length).setValues([CM_FIX_HEAD]).setFontWeight('bold').setBackground('#f5f5f8');
+  if (rows.length) sh.getRange(3, 1, rows.length, CM_FIX_HEAD.length).setNumberFormat('@').setValues(rows.map(function (r) {
+    return [r.code, r.kind, r.curSt, r.wantSt, r.curNext, r.wantNext, r.curDate, r.wantDate, r.t, r.prev, r.state];
+  }));
+  sh.setFrozenRows(2);
+  stkProp_('CM_FIX3_PV', cmFix3Fp_());
+  /* v170.23.4 (قاعدهٔ تأیید): پیش‌نمایش و اعمال اصلاح داده را Cowork در همین تب بررسی و «اوکی» می‌کند؛ پیامی به یاسر نمی‌رود */
+  return sum;
+}
+/* کار «بررسی تلفنی وضعیت» برای پذیرش؛ تکراری نه (ref یکتا) */
+function cmFixCallTasks_(list) {
+  var x = list === undefined ? cfg_('CM_FIX_CALL', []) : list, n = 0;
+  (Array.isArray(x) ? x : []).forEach(function (c) {
+    var code = String(c || '').trim(); if (!code) return;
+    var t = { title: 'بررسی تلفنی وضعیت لید ' + code + ' (اصلاح کامنت‌ها: وضعیت بعد از مهاجرت مبهم است)', cat: 'پذیرش', owner: tgNm_('reception'), by: 'بات',
+      due: new Date(Date.now() + 86400000), src: 'بات', ref: 'CMCALL:' + code, note: 'وضعیت درست را با تماس بپرسید و در تب لیدها ثبت کنید. جزئیات در تب «' + CM_FIX_TAB + '».' };
+    if (stkDry_()) { (TG_MEM['cm:calls'] = TG_MEM['cm:calls'] || []).push(t); n++; return; }
+    if (stkProp_('CM_CALL:' + code) === '1') return;
+    try { if (typeof opsAdd_ === 'function' && opsAdd_(t)) { stkProp_('CM_CALL:' + code, '1'); n++; } } catch (e) { tgErr_('cmFixCallTasks_', e); }
+  });
+  return n;
+}
+function cmFix3Maybe_(ok) {
+  if (stkProp_('CM_FIX3_DONE') === '1') return 0;
+  try { cmFixCallTasks_(); } catch (eC) {}
+  var pv = stkProp_('CM_FIX3_PV');
+  if (!pv || (ok !== 'اوکی' && pv !== cmFix3Fp_())) { try { cmFix3Preview_(); } catch (eP) { tgErr_('cmFix3Preview_', eP); } return 0; }
+  if (ok !== 'اوکی') return 0;
+  stkProp_('CM_FIX3_DONE', '1');
+  var shown = {};
+  if (stkDry_()) (TG_MEM['cm:fix3tab'] || []).forEach(function (r) { if (r.state === CM_FIX_STATE.apply) shown[r.code + '|' + r.kind] = 1; });
+  else { var sh0 = tgSS_().getSheetByName(CM_FIX_TAB), n0 = sh0.getLastRow(); if (n0 >= 3) sh0.getRange(3, 1, n0 - 2, CM_FIX_HEAD.length).getValues().forEach(function (v) { if (String(v[10]) === CM_FIX_STATE.apply) shown[String(v[0]) + '|' + String(v[1])] = 1; }); }
+  var n = 0;
+  cmFix3Rows_().filter(function (r) { return r.state === CM_FIX_STATE.apply && shown[r.code + '|' + r.kind]; }).forEach(function (r) {
+    var ch = { 'وضعیت': r.wantSt, 'اقدام بعدی': String(r.wantNext).replace(/ \(\+.*\)$/, ''), 'تاریخ اقدام بعدی': r.wantDate };
+    if (r.kind === CM_FIX_KIND.force) ch['شمار بی‌پاسخ'] = r.noans;
+    if (r.reason) ch['دلیل بستن'] = r.reason;
+    var why = r.kind === CM_FIX_KIND.force ? 'برگشت به دستور یاسر (CM_FIX_FORCE)' : 'پیشنهاد بازبینی‌شده: ' + r.prev;
+    if (stkDry_()) TG_OUTBOX.push({ kind: 'leadset', row: r.row, changes: ch, actor: CM_FIX_ACTOR, code: r.code });
+    else tgLeadSet_(r.row, ch, CM_FIX_ACTOR, 'اصلاح', why);
+    n++;
+  });
+  if (!stkDry_()) { try { tgSS_().getSheetByName(CM_FIX_TAB).getRange(1, 2).setValue('اعمال شد ' + Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm') + ' · ' + n + ' لید (دور دوم)'); } catch (e) {} }
+  /* v170.23.4 (قاعدهٔ تأیید): پیش‌نمایش و اعمال اصلاح داده را Cowork در همین تب بررسی و «اوکی» می‌کند؛ پیامی به یاسر نمی‌رود */
+  return n;
+}
+/* یک‌بارهٔ خودکار v170.23.4: همگام‌سازی تنظیمات و، اگر دور اول اعمال شده، پیش‌نمایش دور دوم و کارهای تلفنی. خروجی فقط شمار. */
+function tgV170234CmFix2() {
+  var sy = {}; try { sy = cfgSync_() || {}; } catch (e) { sy = { ok: false }; }
+  try { TG_CFG_ = null; } catch (e2) {}
+  var head = 'همگام‌سازی تنظیمات: ' + (sy.ok ? 'خوانده ' + (sy.read || 0) + ' کلید، تازه ' + (sy.changed || 0) : 'نشد');
+  if (stkProp_('CM_FIX2_DONE') !== '1') return head + ' · دور اول هنوز «اوکی» نشده؛ دور دوم بعد از اعمال آن خودکار ساخته می‌شود';
+  var calls = cmFixCallTasks_();
+  return head + ' · ' + cmFix3Preview_() + ' · کار بررسی تلفنی: ' + calls;
 }
