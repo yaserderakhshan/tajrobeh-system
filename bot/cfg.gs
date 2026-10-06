@@ -23,10 +23,12 @@ var CFG_NOTE = {
   TG_INP_MIG68: 'دادهٔ مهاجرت v68 ساعت‌های حضوری (JSON، اختیاری؛ اجرا شده)', PT_M0924: 'گیرنده‌های پیام یک‌بارهٔ ۲ مهر پارتنرها (JSON، اختیاری؛ فرستاده شده)',
   TG_RELAY_BASE: 'نشانی رلهٔ وبهوک کلادفلر بی رمز (v170.23، اختیاری؛ فقط برای tgSwitchRelay و tgRelayTidy)',
   CM_FIX_HINTS: 'پیشنهادهای پیش‌نمایش اصلاح کامنت‌ها: {"کد لید": "badnum" | "notclient" | "later:21" | "self:7"} (JSON، اختیاری؛ v170.22.2؛ با «اوکی» اعمال نمی‌شوند)',
-  CM_FIX_SKIP: 'کد لیدهایی که در پیش‌نمایش اصلاح کامنت‌ها طبق بررسی دست نمی‌خورند: ["کد لید", …] (JSON، اختیاری؛ v170.23.1)'
+  CM_FIX_SKIP: 'کد لیدهایی که در پیش‌نمایش اصلاح کامنت‌ها طبق بررسی دست نمی‌خورند: ["کد لید", …] (JSON، اختیاری؛ v170.23.1)',
+  CM_FIX_FORCE: 'دور دوم اصلاح کامنت‌ها: لیدهایی که با وجود قاعدهٔ «فقط مهاجرت» به این وضعیت برمی‌گردند: {"کد لید": "وضعیت"} (JSON، اختیاری؛ v170.23.4)',
+  CM_FIX_CALL: 'کد لیدهای وضعیت مبهم برای کار «بررسی تلفنی وضعیت» پذیرش: ["کد لید", …] (JSON، اختیاری؛ v170.23.4)'
 };
 /* کلیدهایی که خالی بودنشان مجاز است (جایگزین دارند) */
-var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP'];
+var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL'];
 /* v170.9: کلیدهای لازمی که در Property خالی‌اند (فقط نام). روی دیپلوی آزمایشی سنجیده می‌شود؛ هر کدام خالی = انتشار متوقف */
 function cfgMissing_() {
   var o = cfgPropGet_();
@@ -68,16 +70,17 @@ function cfgTabMake_(rows) {
 /* تب ← Property. فقط کلیدهای شناخته‌شده؛ مقدار خالی یا ناخوانا نادیده گرفته می‌شود. */
 function cfgSync_() {
   var rows = cfgTabRows_(); if (!rows) return { ok: false, why: 'tab' };
-  var cur = cfgPropGet_(), n = 0, bad = [];
+  var cur = cfgPropGet_(), n = 0, bad = [], read = 0;
   rows.forEach(function (r) {
     var k = String(r[0]).trim(); if (!k || !(k in TG_CFG_SEEN) || CFG_PROP_ONLY.indexOf(k) > -1) return;
     var v = cfgDec_(r[1], TG_CFG_SEEN[k]);
     if (v === undefined || v === '') { if (String(r[1]).trim()) bad.push(k); return; }
+    read++;   /* v170.23.4: شمار کلیدهای خوانده‌شده (پیام «۰ کلید» فقط «تازه» را می‌شمرد) */
     if (cfgEnc_(cur[k]) !== cfgEnc_(v)) { cur[k] = v; n++; }
   });
   if (n) cfgPropSet_(cur);
   if (bad.length) { try { tgErr_('cfgSync_', 'مقدار ناخوانا در «' + CFG_TAB + '»: ' + bad.join('، ')); } catch (e) {} }
-  return { ok: true, changed: n, bad: bad };
+  return { ok: true, changed: n, bad: bad, read: read };
 }
 function tgCfgSync() { return cfgSync_(); }
 /* ساعتی از tgWatchdog؛ خطایش چیزی را نمی‌شکند */
