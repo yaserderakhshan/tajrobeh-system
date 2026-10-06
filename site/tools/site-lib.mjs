@@ -132,17 +132,4 @@ export async function report(text, { type = 'گزارش', ref = 'SITE' } = {}) {
   } catch (e) { warn(`گزارش بات نرفت: ${e}`); return { ok: false, error: String(e) }; }
 }
 
-// ---------- نشانگرهای دایرکتوری (اسنیپت 504064، v1.1) ----------
-// کارت تازهٔ پروفایل از بات فقط پیش از این نشانگرها می‌نشیند، نه کلاس طراحی. بازطراحی این برگه‌ها بدون نگه داشتن نشانگر
-// یعنی انتشار پروفایل از بات می‌شکند؛ site-check (PR) و site-mirror (سایت زنده) آن را قرمز می‌کنند.
-export const DIR_MARKERS = { 503465: '<!-- tj:dir:home -->', 294: '<!-- tj:dir:school -->' };
-export function dirMarkerProblems(contentOf) {
-  const out = [];
-  for (const [id, mk] of Object.entries(DIR_MARKERS)) {
-    const html = contentOf(Number(id));
-    if (html === null || html === undefined) continue;
-    const n = String(html).split(mk).length - 1;
-    if (n !== 1) out.push(`برگهٔ ${id}: نشانگر ${mk} ${n ? n + ' بار' : 'نیست'}؛ انتشار پروفایل از بات می‌شکند`);
-  }
-  return out;
-}
+// نشانگرهای دایرکتوری و بقیهٔ وابستگی‌های ساختاری برگه‌ها: site/contracts.json و site/tools/contracts.mjs (قرارداد صفحه‌ها).

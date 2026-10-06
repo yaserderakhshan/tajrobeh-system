@@ -54,3 +54,10 @@ jobs:
             exit 1
           fi
           node site/tools/site-deploy.mjs plan
+      # ۱۴ مهر ۱۴۰۵ (قرارداد صفحه‌ها): قلاب‌های عینی مجله (tj_mag_hooks در 503540) باید عیناً در متن همان مقاله باشند.
+      # فقط خواندن از سایت با همان رمز «فقط خواندن»؛ اگر جمله‌ای در مقاله نبود قرمز.
+      - name: قلاب‌های مجله در متن مقاله‌ها (فقط خواندن)
+        env:
+          WP_USER: ${{ secrets.WP_READ_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_READ_APP_PASSWORD }}
+        run: node site/tools/contracts.mjs hooks
