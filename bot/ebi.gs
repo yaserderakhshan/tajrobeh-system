@@ -72,7 +72,19 @@ function ebiGem_(text) {
   return { o: JSON.parse(parts.map(function (p) { return p.text || ''; }).join('')), usage: res.body.usageMetadata || null };
 }
 
+/* v170.17.1: سرور سایت (ایران) پاسخ Apps Script را از script.googleusercontent.com نمی‌تواند بخواند؛ فقط می‌داند درخواست رسید (۳۰۲).
+   پس اگر id آمده، بات خودش حکم را به سایت می‌فرستد (POST /tj/v1/ebi-verdict با کلید دوم؛ بات به سایت می‌رسد).
+   ok یعنی انتشار؛ review یعنی همان پیام تأیید برای راهبران (اسنیپت 506031). */
 function ebiCheck_(p, dry) {
+  var r = ebiCheckRun_(p, dry);
+  var id = Number(p && p.id);
+  if (!dry && r.ok && r.data && r.data.verdict && id > 0 && Math.floor(id) === id) {
+    var w = ebiWp_('POST', 'ebi-verdict', { id: id, verdict: r.data.verdict, reason: r.data.reason || '' });
+    r.data.pushed = !!(w && w.ok);
+  }
+  return r;
+}
+function ebiCheckRun_(p, dry) {
   var text = String((p && p.text) || '').trim();
   if (!text) return { ok: false, error: 'text لازم است' };
   if (text.length > EBI_TEXT_MAX) return { ok: true, data: { verdict: 'review', reason: 'متن بلندتر از اندازهٔ فهرست است.' } };
@@ -792,6 +804,20 @@ function ebiTests() {
     ok('سقف عمومی درگاه پر شده', st.error === 'rate_limited');
     ok('ebi_check سقف ساعتی خودش را دارد', gw({ text: 'گل', dry_run: true }).ok === true);
     ok('status شمار امروز کمپین را دارد', (function () { pbProp_('EBI_GEM:' + ebiDayKey_(), '3'); TG_MEM['pb:now'] = pbTehran_(2026, 10, 5, 16, 0).getTime(); var s2 = pbStatus_(); return s2.data.gemini.ebi_today === 3; })());
+    /* v170.17.1: حکم با id به سایت فرستاده می‌شود؛ بی id یا آزمایشی نه */
+    TG_MEM['pb:now'] = pbTehran_(2026, 10, 6, 10, 0).getTime(); pbProp_('EBI_GEM:' + ebiDayKey_(), '0');
+    var vs = []; TG_MEM['ebi:wp'] = function (m, path, body) { if (path === 'ebi-verdict') vs.push(body); return { ok: true }; };
+    TG_MEM['ebi:gem'] = { verdict: 'ok', reason: 'مهربان' };
+    var g1 = gw({ text: 'بوی نان تازه', id: 41 });
+    ok('v170.17.1: حکم ok با id به سایت رفت', g1.data.pushed === true && vs.length === 1 && vs[0].id === 41 && vs[0].verdict === 'ok', JSON.stringify([g1, vs]));
+    TG_MEM['ebi:gem'] = { verdict: 'review', reason: 'نامطمئن' };
+    gw({ text: 'یک جملهٔ دیگر', id: '42' });
+    ok('v170.17.1: حکم review هم می‌رود', vs.length === 2 && vs[1].id === 42 && vs[1].verdict === 'review');
+    gw({ text: 'بی شناسه' }); gw({ text: 'آزمایشی', id: 43, dry_run: true }); gw({ text: 'شناسهٔ بد', id: 'x' });
+    ok('v170.17.1: بی id، آزمایشی یا id نادرست چیزی نمی‌رود', vs.length === 2);
+    TG_MEM['ebi:wp'] = function () { return { ok: false, error: 'not_found', _code: 404 }; };
+    var g4 = gw({ text: 'مسیر هنوز نیست', id: 44 });
+    ok('v170.17.1: مسیر سایت نبود ← حکم همچنان در پاسخ، بی خطای درگاه', g4.ok && g4.data.verdict === 'review' && g4.data.pushed === false);
     ok('پرامپت متن را در گیومه دارد و خط تیره ندارد', /«گل سرخ»/.test(ebiCheckPrompt_('گل سرخ')) && !/[—–]/.test(ebiCheckPrompt_('x')));
   } catch (err) { fail++; out.push('❌ خطا: ' + (err.message || err) + ' ' + String(err.stack || '').split('\n')[1]); }
   TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box;
