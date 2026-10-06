@@ -56,14 +56,14 @@ export function mirrorSelfTest() {
   const yml = "SITE_SECRET_TJ_CAMP_SECRET_V2: ${{ secrets.CP_WP_SECRET }}\n          SITE_SECRET_TJ_LEAD_SECRET: ${{ secrets.X }}";
   const names = fillNames(yml);
   t('نام رمزهای انتشار از site-deploy.yml', JSON.stringify(names) === '["TJ_CAMP_SECRET_V2","TJ_LEAD_SECRET"]');
-  const live = "if (!defined('TJ_CAMP_SECRET_V2')) define('TJ_CAMP_SECRET_V2', 'Zx9" + "kQ2mP7vL4nR8sT1wY6bC3dF5gH0jK2a');\n$x = 1;";
+  const live = "if (!defined('TJ_CAMP_SECRET_V2')) define('TJ_CAMP_SECRET_V2', '" + 'Zx9k'.repeat(8) + "');\n$x = 1;";
   const b = blankKnown(live, names);
   t('رمز شناخته‌شده خالی می‌شود', b.includes("define('TJ_CAMP_SECRET_V2', '')") && secretKinds(b).length === 0);
   t('define ناشناخته با مقدار ← شبیه رمز', secretKinds("define('TJ_NEW_KEY', 'abc')").includes('define TJ_NEW_KEY'));
   t('توکن تلگرام ← شبیه رمز', secretKinds('$t = "123456789:AA' + 'x'.repeat(33) + '";').length > 0);
   t('کلید API گوگل ← شبیه رمز', secretKinds('k = "AIza' + 'b'.repeat(35) + '"').length > 0);
   t('هگز بلند ← شبیه رمز', secretKinds('$h = "' + 'a1'.repeat(24) + '";').includes('رشتهٔ هگز بلند'));
-  t('تصویر base64 درون‌خطی رمز نیست', secretKinds('<img src="data:image/png;base64,' + 'iVBORw0KGgoAAAANSUhEUgAA'.repeat(4) + '">').length === 0);
+  t('تصویر base64 درون‌خطی رمز نیست', secretKinds('<img src="data:image/png;base64,' + ['iVBO', 'Rw0K', 'GgoA'].join('').repeat(8) + '">').length === 0);
   t('کد عادی سالم است', secretKinds("add_action('init', function () { return 'tj-offer'; });\n.tj2 a.tj-offer{color:#c83f49}").length === 0);
   t('نام همکار از فهرست ← رد', piiKinds('<p>با نمونه‌الف تماس بگیرید</p>', ['نمونه‌الف']).length === 1 && piiKinds('<p>سلام</p>', ['نمونه‌الف']).length === 0);
   t('شماره ← رد', piiKinds('تلفن: 09121234567', []).includes('شمارهٔ تلفن'));
