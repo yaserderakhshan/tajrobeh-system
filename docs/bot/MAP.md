@@ -74,7 +74,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23`
+نسخهٔ کد: `v170.23.1`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -100,9 +100,9 @@
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۸ | ۳۴ |
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
-| `comments.gs` | ۸۳۰ | ۵۱ |
+| `comments.gs` | ۹۰۴ | ۵۷ |
 | `dq.gs` | ۵۹۳ | ۴۹ |
-| `cfg.gs` | ۱۵۲ | ۱۴ |
+| `cfg.gs` | ۱۵۳ | ۱۴ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
