@@ -124,7 +124,7 @@ if (mode === 'props') {
   // v169.4: سکرت‌های وردپرس به Script Properties (ci.gs → wpPageProps_). مقدارها هرگز چاپ نمی‌شوند؛ فقط نام کلیدهای ثبت‌شده.
   const props = { WP_BOT_USER: process.env.WP_BOT_USER || '', WP_BOT_APP_PASSWORD: process.env.WP_BOT_APP_PASSWORD || '' };
   // v170.4: رمزهای مشترک با سایت (CP_WP_SECRET، SITE_LEAD_SECRET)؛ فقط اگر در GitHub Secrets هست
-  for (const k of ['CP_WP_SECRET', 'SITE_LEAD_SECRET', 'BOT_API_KEY']) if (process.env[k]) props[k] = process.env[k];   // v170.16.1: کلید دوم درگاه
+  for (const k of ['CP_WP_SECRET', 'SITE_LEAD_SECRET', 'BOT_API_KEY', 'GH_DISPATCH_TOKEN']) if (process.env[k]) props[k] = process.env[k];   // v170.23.7: توکن دکمهٔ ادغام   // v170.16.1: کلید دوم درگاه
   if (process.env.SITE_SIG_ENFORCE === '0' || process.env.SITE_SIG_ENFORCE === '1') props.SITE_SIG_ENFORCE = process.env.SITE_SIG_ENFORCE;   // v170.9: متغیر GitHub، نه رمز
   if (!Object.values(props).some(Boolean)) { console.log('::warning::هیچ سکرتی برای ثبت نیست.'); process.exit(0); }
   const r = await call({ ci: 'props', props });

@@ -91,6 +91,57 @@ async function sync() {
   console.log(`صندوق خطا ← issue: ${rows.length} ردیف · issue تازه ${made} · بسته ${closed} · بازشده ${reopened} · به‌روز در هاب ${res.updated}${res.skipped?.length ? ' · ردشده ' + res.skipped.length : ''}`);
 }
 
+/* مرحلهٔ ۳ (v170.23.7): اصلاح‌گر شبانه فقط PR می‌زند؛ ادغام فقط با دکمهٔ یاسر در بات (erb-merge.yml). */
+export const NEED_OK = 'نیاز-به-اوکی', AUTOFIX = 'auto-fix';
+export function sevOf(title) { const m = String(title).match(/\[شدت ([۱-۳1-3])\]/); return m ? '0123۰۱۲۳'.indexOf(m[1]) % 4 : 3; }
+async function pick() {
+  const r = await gh('GET', `/repos/${REPO}/issues?labels=${LABEL}&state=open&per_page=100&sort=created&direction=asc`);
+  const L = (r.json || []).filter((i) => !i.pull_request && !(i.labels || []).some((l) => l.name === WATCH || l.name === NEED_OK));
+  L.sort((a, b) => sevOf(a.title) - sevOf(b.title) || Date.parse(a.created_at) - Date.parse(b.created_at));
+  for (const i of L) {
+    if ((await prState(i.number)).open) continue;
+    console.log(`issue بعدی: #${i.number}`);
+    if (process.env.GITHUB_OUTPUT) (await import('node:fs')).appendFileSync(process.env.GITHUB_OUTPUT, `issue=${i.number}\nsev=${sevOf(i.title)}\n`);
+    return;
+  }
+  console.log('issue بازی برای اصلاح نیست.');
+}
+/* فهرست PRهای auto-fix باز و آماده (نه پیش‌نویس، نه «نیاز-به-اوکی») ← بات برای پیام ساعت ۹ */
+async function fixnote() {
+  const prs = ((await gh('GET', `/repos/${REPO}/pulls?state=open&per_page=50`)).json || [])
+    .filter((p) => !p.draft && (p.labels || []).some((l) => l.name === AUTOFIX) && !(p.labels || []).some((l) => l.name === NEED_OK))
+    .map((p) => ({ n: p.number, title: String(p.title).slice(0, 120), issue: refsOf(p.body)[0] || 0, sev: sevOf(p.title) }));
+  const d = await bot('fix_note', { prs });
+  console.log(`اصلاح‌های آماده برای پیام صبح: ${prs.length} (${d.stored})`);
+}
+/* erb-merge.yml: فقط PRهایی که یاسر با دکمه خواسته؛ هر کدام فقط اگر auto-fix، بی «نیاز-به-اوکی»، نه پیش‌نویس و همهٔ بررسی‌ها سبز.
+   ادغام با GITHUB_TOKEN گردش کار push را راه نمی‌اندازد؛ پس همان دیپلوی بات یا سایت صریحاً dispatch می‌شود (پایش و برگشت خودکار). */
+async function merge() {
+  const want = String(process.env.PRS || '').split(',').map(Number).filter((n) => n > 0).slice(0, 10);
+  const done = [], skip = []; let base0 = '', bot0 = false, site0 = false;
+  for (const n of want) {
+    const p = (await gh('GET', `/repos/${REPO}/pulls/${n}`)).json;
+    const labels = (p?.labels || []).map((l) => l.name);
+    if (!p || p.state !== 'open') { skip.push(`#${n}: باز نیست`); continue; }
+    if (!labels.includes(AUTOFIX) || labels.includes(NEED_OK) || p.draft) { skip.push(`#${n}: اصلاح خودکار آماده نیست`); continue; }
+    const runs = (await gh('GET', `/repos/${REPO}/commits/${p.head.sha}/check-runs?per_page=100`)).json?.check_runs || [];
+    if (!runs.length || runs.some((c) => c.status !== 'completed' || !['success', 'skipped', 'neutral'].includes(c.conclusion))) { skip.push(`#${n}: بررسی‌ها سبز نیست`); continue; }
+    const files = ((await gh('GET', `/repos/${REPO}/pulls/${n}/files?per_page=100`)).json || []).map((f) => f.filename);
+    if (!base0) base0 = (await gh('GET', `/repos/${REPO}/commits/main`)).json?.sha || '';
+    const m = await gh('PUT', `/repos/${REPO}/pulls/${n}/merge`, { merge_method: 'merge', sha: p.head.sha });
+    if (!m.ok) { skip.push(`#${n}: ادغام نشد (HTTP ${m.status}${m.status === 405 || m.status === 409 ? '، تعارض یا نسخهٔ تکراری' : ''})`); continue; }
+    done.push(`#${n}`);
+    if (files.some((f) => f.startsWith('bot/') || f.startsWith('.github/scripts/'))) bot0 = true;
+    if (files.some((f) => /^site\/(pages|snippets|css|templates|template-parts)\/|^site\/yoast-meta\.json$/.test(f))) site0 = true;
+  }
+  const after = (await gh('GET', `/repos/${REPO}/commits/main`)).json?.sha || '';
+  if (bot0) await gh('POST', `/repos/${REPO}/actions/workflows/bot-deploy.yml/dispatches`, { ref: 'main', inputs: { scope: 'related' } });
+  if (site0 && base0 && after) await gh('POST', `/repos/${REPO}/actions/workflows/site-deploy.yml/dispatches`, { ref: 'main', inputs: { before: base0, after } });
+  const msg = `🔧 ادغام اصلاح‌های شبانه: ${done.length ? done.join('، ') + ' ادغام شد' + (bot0 ? '؛ انتشار بات با پایش راه افتاد' : '') + (site0 ? '؛ انتشار سایت راه افتاد' : '') : 'هیچ'}${skip.length ? '\nنشد: ' + skip.join(' · ') : ''}`;
+  console.log(msg);
+  if (API && KEY && process.env.REPORT_CHAT_ID) { try { await bot('send', { chat: process.env.REPORT_CHAT_ID, type: 'گزارش', ref: 'ERB-MERGE', text: msg }); } catch (e) { console.log(`::warning::خبر نرفت: ${e.message}`); } }
+}
+
 /* PR اصلاحی بی تست یا قرارداد ← قرمز */
 export function refsOf(text) { return [...String(text || '').matchAll(/\b(?:fix(?:e[sd])?|close[sd]?|resolve[sd]?|refs?)\s+#(\d+)/gi)].map((m) => Number(m[1])); }
 export function hasGuard(files, addedLines) {
@@ -119,6 +170,7 @@ export function selfTest() {
   t('تست در bot ← سبز', hasGuard(['bot/errbox.gs'], ["+    ok('x', true);"]));
   t('قرارداد ← سبز', hasGuard(['site/contracts.json'], []));
   t('بی تست ← قرمز', !hasGuard(['bot/telegram.gs'], ['+ var a = 1;']));
+  t('شدت از عنوان', sevOf('[شدت ۱] x') === 1 && sevOf('[شدت ۲] y') === 2 && sevOf('z') === 3);
   return bad;
 }
 
@@ -126,6 +178,9 @@ if (process.argv[1] && process.argv[1].endsWith('erb-issues.mjs')) {
   const mode = process.argv[2];
   if (mode === 'selftest') { const b = selfTest(); console.log(b.length ? '❌ ' + b.join('، ') : '✅ erb-issues: خودآزمایی سبز'); process.exit(b.length ? 1 : 0); }
   if (mode === 'prcheck') await prcheck();
+  else if (mode === 'pick') await pick();
+  else if (mode === 'fixnote') await fixnote();
+  else if (mode === 'merge') await merge();
   else if (mode === 'sync') { if (!API || !KEY) { console.log('::warning::درگاه بات تنظیم نشده'); process.exit(0); } await sync(); }
   else { console.log('mode: sync | prcheck | selftest'); process.exit(1); }
 }

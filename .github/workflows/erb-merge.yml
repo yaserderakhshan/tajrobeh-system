@@ -1,0 +1,35 @@
+# صندوق یکتای خطا، مرحلهٔ ۳ (v170.23.7): ادغام اصلاح‌های شبانه فقط با دکمهٔ یاسر در بات («ادغام همه» یا «ادغام #N»).
+# بات با توکن کم‌دسترس GH_DISPATCH_TOKEN (فقط اجرای Actions) همین گردش کار را با فهرست PRها صدا می‌زند. هر PR فقط اگر برچسب
+# auto-fix دارد، «نیاز-به-اوکی» ندارد، پیش‌نویس نیست و همهٔ بررسی‌هایش سبز است ادغام می‌شود. ادغام با GITHUB_TOKEN گردش کار
+# push را راه نمی‌اندازد، پس همان دیپلوی بات (پایش ۵ دقیقه و برگشت خودکار) یا site-deploy (سنجش هش) صریحاً dispatch می‌شود.
+name: صندوق خطا · ادغام با دکمهٔ یاسر
+on:
+  workflow_dispatch:
+    inputs:
+      prs:
+        description: 'شمارهٔ PRها با ویرگول (از دکمهٔ بات)'
+        required: true
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+concurrency: erb-merge
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: ادغام PRهای سبز و انتشار
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRS: ${{ inputs.prs }}
+          BOT_API_URL: ${{ secrets.BOT_API_URL }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+          REPORT_CHAT_ID: ${{ secrets.REPORT_CHAT_ID }}
+        run: node .github/scripts/erb-issues.mjs merge

@@ -18782,6 +18782,7 @@ function tgSecretMask_(s) {
     .replace(/\bya29\.[0-9A-Za-z_-]{20,}/g, '<رمز>')
     .replace(/\b(?:sk|gsk|pk)-[A-Za-z0-9_-]{20,}/g, '<رمز>')
     .replace(/\btjk_[A-Za-z0-9]{16,}/g, '<رمز>')   /* v167: کلید درگاه API */
+    .replace(/\b(?:github_pat_|gh[pousr]_)[A-Za-z0-9_]{20,}/g, '<رمز>')   /* v170.23.7: توکن GitHub */
     .replace(/("(?:key|token|secret|api_key)"\s*:\s*")[^"]{8,}"/gi, '$1<رمز>"');
 }
 function tgErr_(where, err, ref) {

@@ -16,7 +16,10 @@
  *   و با «error_set» پیوند issue و وضعیت را برمی‌گرداند: issue ساخته شد ← «در برنامه»، PR باز ← «PR»، PR ادغام شد ← «اصلاح‌شده».
  *   شاهد (روزانه در erbHourly_): «اصلاح‌شده»ای که ۷ روز تکرار نشد ← «تأییدشده» (گردش کار issue را می‌بندد)؛ تکرار ← «بازگشته»
  *   (issue دوباره باز). وضعیت فقط در همین تب است؛ گردش کار فقط آینهٔ آن روی گیت‌هاب.
- * مرحلهٔ بعد (اصلاح‌گر شبانه) روی همین ستون‌ها سوار است.
+ * مرحلهٔ ۳ (v170.23.7): اصلاح‌گر شبانه فقط PR می‌زند (erb-fixer.yml، برچسب auto-fix) و فهرستش را با اکشن «fix_note» به بات می‌دهد.
+ *   پیام ساعت ۹ یاسر آن‌ها را با دکمهٔ «ادغام همه» و «ادغام #N» می‌آورد. دکمه با توکن کم‌دسترس GH_DISPATCH_TOKEN (Script Property،
+ *   فقط اجرای Actions) گردش کار erb-merge.yml را صدا می‌زند؛ همان گردش کار فقط PR سبز auto-fix را ادغام می‌کند و همان مسیر
+ *   انتشار (پایش ۵ دقیقه و برگشت خودکار بات، یا سنجش هش سایت) را راه می‌اندازد. ادغام بی دکمهٔ یاسر نیست.
  * حالت خشک: TG_MEM['erb:rows'] سطرها، TG_MEM['erb:now'] زمان.
  */
 var ERB_TAB = 'خطاها';
@@ -189,8 +192,9 @@ function erbWitness_() {
 }
 try { if (typeof PB_ACTIONS === 'object') { PB_ACTIONS.error_report = function (p, dry) { return erbGateway_(p, dry); }; if (PB_WRITE.indexOf('error_report') < 0) PB_WRITE.push('error_report');
   PB_ACTIONS.error_list = function () { return erbList_(); };
+  PB_ACTIONS.fix_note = function (p, dry) { return erbFixNote_(p, dry); }; if (PB_WRITE.indexOf('fix_note') < 0) PB_WRITE.push('fix_note');
   PB_ACTIONS.error_set = function (p, dry) { return erbSet_(p, dry); }; if (PB_WRITE.indexOf('error_set') < 0) PB_WRITE.push('error_set');
-  PB_RATE_BUCKET.error_list = PB_RATE_BUCKET.error_set = ['erbgh', 'erb_gh_hourly_max', 20]; PB_RATE_BUCKET.error_report = ['erb', 'erb_hourly_max', 60]; } } catch (eGw) {}
+  PB_RATE_BUCKET.error_list = PB_RATE_BUCKET.error_set = PB_RATE_BUCKET.fix_note = ['erbgh', 'erb_gh_hourly_max', 20]; PB_RATE_BUCKET.error_report = ['erb', 'erb_hourly_max', 60]; } } catch (eGw) {}
 /* گزارش خطای اسنیپت‌ها از پل سایت: op «errs» اسنیپت 504064 فهرست را می‌دهد و پاک می‌کند. اسنیپت قدیمی‌تر ← بی‌صدا هیچ. */
 function erbSitePull_() {
   var j;
@@ -226,7 +230,16 @@ function erbDigest_(force) {
   var back = L.filter(function (e) { return e.stAt > since && e.st === ERB_ST.back; });
   var wait = erbAwaiting_(L);
   var friday = Utilities.formatDate(d, TG_TZ, 'u') === '5';
+  var fx = erbFixPrs_(), fixPrs = fx.at > since ? fx.prs : [];
   var T = [], kb = [];
+  if (fixPrs.length) {   /* v170.23.7: PRهای اصلاح‌گر شبانه، ادغام فقط با دکمه */
+    T.push('🔧 <b>اصلاح‌های شبانه</b> (' + tgFa_(fixPrs.length) + ' PR، بررسی‌ها پیش از ادغام دوباره سنجیده می‌شوند):');
+    fixPrs.forEach(function (x) { T.push('• #' + tgFa_(x.n) + ' ' + ['', '🔴', '🟠', '⚪️'][x.sev] + ' ' + tgEsc_(x.title)); });
+    kb.push([{ text: '✅ ادغام همه', callback_data: 'erb:m:all' }]);
+    var row = []; fixPrs.forEach(function (x) { row.push({ text: 'ادغام #' + tgFa_(x.n), callback_data: 'erb:m:' + x.n }); if (row.length === 3) { kb.push(row); row = []; } });
+    if (row.length) kb.push(row);
+    T.push('');
+  }
   if (fresh.length || fixed.length || back.length) {
     T.push('🧯 <b>صندوق خطاها</b> · از گزارش قبل');
     if (fresh.length) { T.push('', '<b>تازه</b> (' + tgFa_(fresh.length) + '):'); fresh.sort(function (a, b) { return a.sev - b.sev || b.n - a.n; }).slice(0, 8).forEach(function (e) { T.push(erbLine_(e)); }); }
@@ -259,13 +272,41 @@ function erbDigest_(force) {
 /* دکمه‌های «منتظر تصمیم»: فقط مالک */
 function erbCb_(chat, data) {
   if (String(chat) !== String(TG_OWNER_CHAT)) return tgSend_(chat, 'این بخش فقط برای مالک است.');
-  var a = String(data).split(':'), act = a[1], e = erbFind_(a.slice(2).join(':'));
+  var a = String(data).split(':'), act = a[1], e = act === 'm' ? { fp: '' } : erbFind_(a.slice(2).join(':'));
   if (!e) return tgSend_(chat, 'این خطا در صندوق پیدا نشد.');
   if (act === 'p') { e.st = ERB_ST.plan; e.stAt = erbNow_(); erbWrite_(e); return tgSend_(chat, '📌 در برنامه: ' + tgEsc_(e.fp.slice(0, 90))); }
+  if (act === 'm') {   /* v170.23.7: ادغام PRهای اصلاح‌گر شبانه */
+    var all = erbFixPrs_().prs.map(function (x) { return x.n; }), arg = a.slice(2).join(':');
+    return tgSend_(chat, erbMergeAsk_(arg === 'all' ? all : [Number(arg)].filter(function (n) { return all.indexOf(n) > -1; })));
+  }
   if (act === 'l') { e.sev = 3; erbWrite_(e); return tgSend_(chat, '⬇️ شدت ۳ شد: ' + tgEsc_(e.fp.slice(0, 90))); }
   return null;
 }
 
+/* ───── مرحلهٔ ۳: PRهای اصلاح‌گر شبانه و دکمهٔ ادغام ───── */
+cfg_('GH_REPO', '');   /* مالک/نام مخزن برای فراخوانی Actions (در کد نیست) */
+/* fix_note از erb-fixer.yml: {prs: [{n, title, issue, sev}]} */
+function erbFixNote_(p, dry) {
+  var prs = (Array.isArray(p.prs) ? p.prs : []).slice(0, 10).map(function (x) {
+    return { n: Number(x.n) || 0, title: String(x.title || '').replace(/[<>]/g, '').slice(0, 120), issue: Number(x.issue) || 0, sev: Number(x.sev) || 3 };
+  }).filter(function (x) { return x.n > 0; });
+  if (!dry) erbProp_('ERB_FIX_PRS', JSON.stringify({ at: erbNow_(), prs: prs }));
+  return { ok: true, data: { stored: prs.length } };
+}
+function erbFixPrs_() { try { var o = JSON.parse(erbProp_('ERB_FIX_PRS') || '{}'); return { at: Number(o.at) || 0, prs: Array.isArray(o.prs) ? o.prs : [] }; } catch (e) { return { at: 0, prs: [] }; } }
+/* دکمهٔ ادغام: فقط مالک؛ گردش کار erb-merge.yml با فهرست PRها. خود گردش کار سبز بودن و برچسب‌ها را دوباره می‌سنجد. */
+function erbMergeAsk_(nums) {
+  var list = nums.filter(function (n) { return n > 0; }).slice(0, 10);
+  if (!list.length) return 'PRی برای ادغام نیست.';
+  if (erbDry_()) { (TG_MEM['erb:merge'] = TG_MEM['erb:merge'] || []).push(list.join(',')); return 'dry'; }
+  var tok = PropertiesService.getScriptProperties().getProperty('GH_DISPATCH_TOKEN'), repo = String(cfg_('GH_REPO', '') || '');
+  if (!tok || !/^[\w.-]+\/[\w.-]+$/.test(repo)) return 'ادغام از بات هنوز راه نیفتاده: GH_DISPATCH_TOKEN یا GH_REPO نیست.';
+  var r = UrlFetchApp.fetch('https://api.github.com/repos/' + repo + '/actions/workflows/erb-merge.yml/dispatches', { method: 'post', muteHttpExceptions: true, contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + tok, Accept: 'application/vnd.github+json' }, payload: JSON.stringify({ ref: 'main', inputs: { prs: list.join(',') } }) });
+  var code = r.getResponseCode();
+  if (code !== 204) { tgErr_('erbMergeAsk_', 'dispatch ' + code); return 'درخواست ادغام نرفت (HTTP ' + code + ').'; }
+  return 'درخواست ادغام ' + list.map(function (n) { return '#' + tgFa_(n); }).join('، ') + ' رفت. هر کدام فقط اگر بررسی‌هایش سبز باشد ادغام و از همان مسیر انتشار و پایش منتشر می‌شود؛ نتیجه را خبر می‌دهم.';
+}
 /* ───── خواندن برای ci (پایش بعد از انتشار) و گزارش‌ها ───── */
 /* هر ردیف: {t: آخرین بار, first, where, msg: نوع, n}. پایش فقط اثر انگشت‌هایی را تازه می‌داند که first آن‌ها بعد از انتشار است. */
 function erbCiRows_(since) {
@@ -398,6 +439,15 @@ function erbTests() {
     ok('بازگشته با PR تازه جلو می‌رود', erbFind_(x1).st === 'PR');
     ok('درگاه: اکشن‌های گیت‌هاب ثبت شده', typeof PB_ACTIONS.error_list === 'function' && typeof PB_ACTIONS.error_set === 'function' && PB_WRITE.indexOf('error_set') > -1);
     void x3;
+    /* مرحلهٔ ۳: PRهای شبانه در پیام ۹ و دکمهٔ ادغام */
+    TG_MEM['erb:now'] += 86400000; TG_MEM['erb:digest'] = [];
+    erbFixNote_({ prs: [{ n: 51, title: 'اصلاح <b>x</b>', issue: 7, sev: 1 }, { n: 52, title: 'y', issue: 8, sev: 2 }, { n: 0, title: 'بد' }] });
+    var dg2 = erbDigest_(true), kb2 = (TG_MEM['erb:digest'].slice(-1)[0] || {}).kb || [];
+    ok('پیام ۹: PRهای شبانه با «ادغام همه» و «ادغام #N»', /اصلاح‌های شبانه/.test(dg2) && dg2.indexOf('<b>x</b>') < 0 && kb2[0][0].callback_data === 'erb:m:all' && kb2[1].length === 2 && kb2[1][1].callback_data === 'erb:m:52', JSON.stringify(kb2));
+    TG_MEM['erb:merge'] = [];
+    erbCb_(TG_OWNER_CHAT, 'erb:m:all'); erbCb_(TG_OWNER_CHAT, 'erb:m:52'); erbCb_(TG_OWNER_CHAT, 'erb:m:99'); erbCb_('999', 'erb:m:all');
+    ok('ادغام: همه، تک، نه PR ناشناخته، نه غیرمالک', JSON.stringify(TG_MEM['erb:merge']) === JSON.stringify(['51,52', '52']), JSON.stringify(TG_MEM['erb:merge']));
+    ok('درگاه: fix_note ثبت شده', typeof PB_ACTIONS.fix_note === 'function' && PB_WRITE.indexOf('fix_note') > -1);
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; }
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };

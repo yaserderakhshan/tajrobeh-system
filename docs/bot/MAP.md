@@ -76,14 +76,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.6`
+نسخهٔ کد: `v170.23.7`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۶ | ۳۳ |
-| `telegram.gs` | ۳۷۶۸۲ | ۲۰۳۶ |
+| `telegram.gs` | ۳۷۶۸۳ | ۲۰۳۶ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -99,12 +99,12 @@
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۵۷۴ | ۱۲۰ |
 | `v168.gs` | ۲۱۴۷ | ۱۲۶ |
-| `wppage.gs` | ۱۹۴ | ۱۵ |
+| `wppage.gs` | ۱۹۷ | ۱۵ |
 | `stuck.gs` | ۴۷۸ | ۳۴ |
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۹۰۴ | ۵۷ |
 | `dq.gs` | ۵۹۳ | ۴۹ |
-| `cfg.gs` | ۱۵۳ | ۱۴ |
+| `cfg.gs` | ۱۵۴ | ۱۴ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -114,7 +114,7 @@
 | `sec.gs` | ۱۰۵ | ۱ |
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۴ | ۱۵ |
-| `errbox.gs` | ۴۰۶ | ۳۲ |
+| `errbox.gs` | ۴۵۶ | ۳۵ |
 
 ### کارهای زمان‌دار
 
