@@ -2,14 +2,19 @@
 
 /* ---------- bot API bridge ---------- */
 function tj_ebibot_cfg(){ $o = get_option('tj_bot_api'); return is_array($o) ? $o : array(); }
+/* ۱۴ مهر ۱۴۰۵ (مثل 501143): Apps Script بعد از اجرای doPost با ۳۰۲ به script.googleusercontent.com/macros/echo جواب می‌دهد و
+   سرور ایران آن نشانی را نمی‌خواند. پس ریدایرکت دنبال نمی‌شود و ۳۰۲ به echo یعنی «رسید» (received). جواب JSON مستقیم هم پذیرفته است. */
 function tj_ebibot_call($payload, $timeout = 25){
   $c = tj_ebibot_cfg();
   if (empty($c['key']) || empty($c['webapp'])) return array('ok'=>false,'error'=>'no_cfg');
   $payload = array_merge(array('api'=>1,'key'=>$c['key']), $payload);
-  $r = wp_remote_post($c['webapp'], array('timeout'=>$timeout,'redirection'=>5,'headers'=>array('Content-Type'=>'text/plain'),'body'=>wp_json_encode($payload)));
+  $r = wp_remote_post($c['webapp'], array('timeout'=>$timeout,'redirection'=>0,'headers'=>array('Content-Type'=>'text/plain'),'body'=>wp_json_encode($payload)));
   if (is_wp_error($r)) return array('ok'=>false,'error'=>'http: '.$r->get_error_message());
+  $code = (int) wp_remote_retrieve_response_code($r);
+  $loc = (string) wp_remote_retrieve_header($r, 'location');
+  if (in_array($code, array(302, 303), true) && strpos($loc, 'https://script.googleusercontent.com/macros/echo') === 0) return array('ok'=>true,'received'=>true);
   $j = json_decode(wp_remote_retrieve_body($r), true);
-  return is_array($j) ? $j : array('ok'=>false,'error'=>'bad_json');
+  return is_array($j) ? $j : array('ok'=>false,'error'=>'http'.$code);
 }
 function tj_ebi_mods(){ $c = tj_ebibot_cfg(); $m = isset($c['mods']) ? (array)$c['mods'] : array(); return array_values(array_filter(array_map(function($x){ return preg_replace('/[^0-9-]/','',(string)$x); }, $m))); } /* campaign leads: option tj_bot_api, field mods (set with do=setcfg) */
 function tj_ebi_send_all($text, $buttons, $ref, $type = 'کار'){
@@ -49,19 +54,26 @@ function tj_ebi_rule_flag($t){
   if (preg_match('/خودکشی|خودمو بکشم|خودم را بکشم|بمیرم|تمومش کنم|تمامش کنم|زنده نباشم|ارزش زندگی نداره/u', $t)) return 'risk';
   return '';
 }
+/* ۱۴ مهر ۱۴۰۵: سایت منتظر حکم نمی‌ماند. ebi_check با id می‌رود؛ «رسید» یعنی tj_review=wait و بات حکم را به /ebi-verdict می‌فرستد. */
 function tj_ebi_moderate($id){
   $p = get_post($id); if (!$p || $p->post_status !== 'pending') return;
   $t = $p->post_title; $flag = tj_ebi_rule_flag($t); $why = $flag;
   if ($flag === ''){
-    $r = tj_ebibot_call(array('action'=>'ebi_check','text'=>$t), 20);
-    if (!empty($r['ok']) && isset($r['data']['verdict'])){
-      update_post_meta($id,'tj_check', sanitize_text_field($r['data']['verdict'].' '.(isset($r['data']['reason']) ? $r['data']['reason'] : '')));
-      if ($r['data']['verdict'] === 'ok'){ wp_update_post(array('ID'=>$id,'post_status'=>'publish')); update_post_meta($id,'tj_by','gemini'); return; }
-      $why = 'gemini';
-    } else { $why = 'manual'; }
+    $r = tj_ebibot_call(array('action'=>'ebi_check','text'=>$t,'id'=>(int)$id), 20);
+    if (!empty($r['ok']) && !empty($r['received'])){ update_post_meta($id,'tj_review','wait'); update_post_meta($id,'tj_wait_at',time()); return; }
+    if (!empty($r['ok']) && isset($r['data']['verdict'])){ tj_ebi_apply_verdict($id, $r['data']['verdict'], isset($r['data']['reason']) ? $r['data']['reason'] : ''); return; }
+    $why = 'manual';
   }
   update_post_meta($id,'tj_review',$why);
   tj_ebi_notify_queue($id, $why);
+}
+function tj_ebi_apply_verdict($id, $verdict, $reason){
+  $p = get_post($id); if (!$p || $p->post_type !== 'tj_ebi_item' || $p->post_status !== 'pending') return 'skip';
+  update_post_meta($id,'tj_check', sanitize_text_field($verdict.' '.$reason));
+  if ($verdict === 'ok'){ wp_update_post(array('ID'=>$id,'post_status'=>'publish')); update_post_meta($id,'tj_by','gemini'); update_post_meta($id,'tj_review','ok'); return 'publish'; }
+  update_post_meta($id,'tj_review','gemini');
+  tj_ebi_notify_queue($id, 'gemini');
+  return 'review';
 }
 function tj_ebi_pending_ids(){ return get_posts(array('post_type'=>'tj_ebi_item','post_status'=>'pending','numberposts'=>200,'fields'=>'ids','orderby'=>'date','order'=>'ASC','suppress_filters'=>true)); }
 function tj_ebi_notify_queue($id, $why){
@@ -82,8 +94,17 @@ function tj_ebi_notify_queue($id, $why){
 add_action('init', function(){ if (!wp_next_scheduled('tj_ebi_sweep')) wp_schedule_event(time()+300, 'hourly', 'tj_ebi_sweep'); });
 add_action('tj_ebi_sweep', function(){
   $ids = tj_ebi_pending_ids(); if (!$ids) return;
-  foreach ($ids as $id){ if (!get_post_meta($id,'tj_review',true)) { tj_ebi_moderate($id); } }
-  $ids = tj_ebi_pending_ids(); if ($ids) tj_ebi_notify_queue(end($ids), 'manual');
+  foreach ($ids as $id){
+    $rv = get_post_meta($id,'tj_review',true);
+    if (!$rv) { tj_ebi_moderate($id); continue; }
+    /* حکمی که بعد از ۳۰ دقیقه نیامد: یک بار دوباره، بعد بازبینی دستی */
+    if ($rv === 'wait' && time() - (int)get_post_meta($id,'tj_wait_at',true) > 30*MINUTE_IN_SECONDS){
+      if (!get_post_meta($id,'tj_wait_retry',true)){ update_post_meta($id,'tj_wait_retry',1); tj_ebi_moderate($id); }
+      else { update_post_meta($id,'tj_review','manual'); tj_ebi_notify_queue($id,'manual'); }
+    }
+  }
+  $left = array_filter(tj_ebi_pending_ids(), function($i){ return get_post_meta($i,'tj_review',true) !== 'wait'; });
+  if ($left) tj_ebi_notify_queue(end($left), 'manual');
 });
 
 /* one-tap pages for moderators */
@@ -176,10 +197,21 @@ add_action('rest_api_init', function(){
   register_rest_route('tj/v1','/ebi-ops', array('methods'=>'POST','permission_callback'=>function(){ return current_user_can('manage_options'); },'callback'=>function($req){
     $do = (string)$req->get_param('do');
     if ($do === 'setcfg'){ $mods = array_values(array_filter(array_map(function($x){ return preg_replace('/[^0-9-]/','',(string)$x); }, (array)$req->get_param('mods')))); update_option('tj_bot_api', array('key'=>sanitize_text_field((string)$req->get_param('key')),'webapp'=>esc_url_raw((string)$req->get_param('webapp')),'mods'=>$mods), false); return array('ok'=>true,'mods'=>count($mods)); }
-    if ($do === 'status'){ $r = tj_ebibot_call(array('action'=>'status')); return array('ok'=>!empty($r['ok']),'version'=>isset($r['data']['version']) ? $r['data']['version'] : null,'log'=>array_slice((array)get_option('tj_ebi_ops_log',array()),0,10)); }
-    if ($do === 'test'){ $mods = tj_ebi_mods(); if (!$mods) return array('ok'=>false,'error'=>'no_mods'); return tj_ebibot_call(array('action'=>'send','dry'=>true,'chat'=>$mods[0],'type'=>'کار','ref'=>'EBI-TEST','text'=>'test')); }
+    /* status و test: «رسید» (۳۰۲ به echo) یعنی درست؛ دنبال JSON نیستند */
+    if ($do === 'status'){ $r = tj_ebibot_call(array('action'=>'status')); return array('ok'=>!empty($r['ok']),'received'=>!empty($r['received']),'version'=>isset($r['data']['version']) ? $r['data']['version'] : null,'error'=>isset($r['error']) ? $r['error'] : null); }
+    if ($do === 'test'){ $mods = tj_ebi_mods(); if (!$mods) return array('ok'=>false,'error'=>'no_mods'); $r = tj_ebibot_call(array('action'=>'send','dry'=>true,'chat'=>$mods[0],'type'=>'کار','ref'=>'EBI-TEST','text'=>'test')); return array('ok'=>!empty($r['ok']),'received'=>!empty($r['received']),'error'=>isset($r['error']) ? $r['error'] : null); }
     if ($do === 'moderate'){ $ids = tj_ebi_pending_ids(); foreach ($ids as $id) tj_ebi_moderate($id); return array('ok'=>true,'n'=>count($ids)); }
+    /* یک‌باره: موردهایی که چون جواب بات خوانده نمی‌شد دستی ماندند، دوباره سنجیده شوند (حکم را بات می‌فرستد) */
+    if ($do === 'recheck'){ $n = 0; foreach (tj_ebi_pending_ids() as $id){ if (get_post_meta($id,'tj_review',true) === 'manual'){ delete_post_meta($id,'tj_review'); delete_post_meta($id,'tj_wait_retry'); tj_ebi_moderate($id); $n++; } } return array('ok'=>true,'n'=>$n); }
     return array('ok'=>false);
+  }));
+});
+/* حکم بررسی از بات (v170.17.1)؛ فقط با کلید دوم درگاه (X-TJ-Key) */
+add_action('rest_api_init', function(){
+  register_rest_route('tj/v1','/ebi-verdict', array('methods'=>'POST','permission_callback'=>'tj_ebi_botauth','callback'=>function($req){
+    $id = (int)$req->get_param('id'); $v = (string)$req->get_param('verdict');
+    if ($id <= 0 || !in_array($v, array('ok','review'), true)) return array('ok'=>false,'error'=>'bad_params');
+    return array('ok'=>true,'did'=>tj_ebi_apply_verdict($id, $v, sanitize_text_field((string)$req->get_param('reason'))));
   }));
 });
 function tj_ebi_botauth($req){

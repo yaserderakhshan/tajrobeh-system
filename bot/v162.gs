@@ -608,7 +608,7 @@ function tgOnEvf_(cq, rest) {
 /* بعد از برگزاری: پیام بازخورد به ثبت‌نام‌کننده‌ها و ارائه‌دهنده (هر رویداد یک بار؛ در tgWatchdog) */
 function tgEvAfterTick_() {
   var today = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd'), sent = 0;
-  var L = tgEvAll_().filter(function (o) { return o['تاریخ'] instanceof Date && Utilities.formatDate(o['تاریخ'], TG_TZ, 'yyyy-MM-dd') < today && !o['درخواست بازخورد'] && o['وضعیت'] !== 'پیش‌نویس' && o['وضعیت'] !== 'بسته'; });
+  var L = tgEvAll_().filter(function (o) { return o['تاریخ'] instanceof Date && Utilities.formatDate(o['تاریخ'], TG_TZ, 'yyyy-MM-dd') < today && !o['درخواست بازخورد'] && o['وضعیت'] !== 'پیش‌نویس' && o['وضعیت'] !== 'بسته' && !(typeof ebiIsNightEv_ === 'function' && ebiIsNightEv_(o)); });   /* v170.17: بی شب‌های کمپین */
   if (!L.length) return 0;
   var regs = [];
   if (!TG_DRY) { try { var sh = tgEvSheet_(); if (sh.getLastRow() > 1) regs = sh.getRange(2, 1, sh.getLastRow() - 1, 10).getValues(); } catch (e) {} } else regs = TG_MEM['evregs'] || [];
