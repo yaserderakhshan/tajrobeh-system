@@ -1,0 +1,54 @@
+# صندوق یکتای خطا، مرحلهٔ ۲ (v170.23.5): issue خودکار برای خطاهای شدت ۱ و ۲، وضعیت با PR، و شاهد ۷ روزه.
+# وضعیت فقط در تب «خطاها»ی هاب است؛ این گردش کار آینهٔ آن روی گیت‌هاب است (.github/scripts/erb-issues.mjs).
+# بررسی PR: هر PR اصلاحی (Fixes/Refs به issue auto-bug) تست یا قرارداد ضد تکرار اضافه می‌کند.
+name: صندوق خطا · issue و شاهد
+on:
+  schedule:
+    - cron: '41 * * * *'
+  workflow_dispatch:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+jobs:
+  sync:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency: erb-issues
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: هاب ← issueها
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BOT_API_URL: ${{ secrets.BOT_API_URL }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+        run: node .github/scripts/erb-issues.mjs sync
+  prcheck:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: PR اصلاحی تست یا قرارداد ضد تکرار دارد
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          node .github/scripts/erb-issues.mjs selftest
+          node .github/scripts/erb-issues.mjs prcheck

@@ -11,7 +11,12 @@
  *   که از کار افتاده · ۳ = بقیه. یاسر با دکمه می‌تواند به ۳ پایینش بیاورد؛ تکرار آن را عوض نمی‌کند.
  * - گزارش: هر روز ساعت ۹ تهران فقط اگر چیزی عوض شده (تازه‌ها، اصلاح‌شده‌ها، بازگشته‌ها، منتظر تصمیم با دکمه)؛ جمعه‌ها
  *   جمع‌بندی هفته. شدت ۱ همان لحظه.
- * مرحله‌های بعد (issue خودکار، شاهد ۷ روزه، اصلاح‌گر شبانه) روی همین ستون‌های «وضعیت»، «issue» و «وضعیت از» سوارند.
+ * مرحلهٔ ۲ (v170.23.5): برنامه و شاهد. گردش کار erb-issues.yml هر ساعت با اکشن درگاه «error_list» اثر انگشت‌های شدت ۱ و ۲ را
+ *   می‌خواند و برای هر کدام یک issue با برچسب auto-bug می‌سازد یا همان را به‌روز می‌کند (بی نام و شماره؛ فقط اثر انگشت و شمار)،
+ *   و با «error_set» پیوند issue و وضعیت را برمی‌گرداند: issue ساخته شد ← «در برنامه»، PR باز ← «PR»، PR ادغام شد ← «اصلاح‌شده».
+ *   شاهد (روزانه در erbHourly_): «اصلاح‌شده»ای که ۷ روز تکرار نشد ← «تأییدشده» (گردش کار issue را می‌بندد)؛ تکرار ← «بازگشته»
+ *   (issue دوباره باز). وضعیت فقط در همین تب است؛ گردش کار فقط آینهٔ آن روی گیت‌هاب.
+ * مرحلهٔ بعد (اصلاح‌گر شبانه) روی همین ستون‌ها سوار است.
  * حالت خشک: TG_MEM['erb:rows'] سطرها، TG_MEM['erb:now'] زمان.
  */
 var ERB_TAB = 'خطاها';
@@ -146,7 +151,46 @@ function erbGateway_(p, dry) {
   if (dry) { var f = erbFp_(where, msg); return { ok: true, data: { id: erbId_(src, f.fp), fp: f.fp } }; }
   return { ok: true, data: { id: erbAdd_(src, where, msg, { sev: p.sev }) } };
 }
-try { if (typeof PB_ACTIONS === 'object') { PB_ACTIONS.error_report = function (p, dry) { return erbGateway_(p, dry); }; if (PB_WRITE.indexOf('error_report') < 0) PB_WRITE.push('error_report'); PB_RATE_BUCKET.error_report = ['erb', 'erb_hourly_max', 60]; } } catch (eGw) {}
+/* ───── مرحلهٔ ۲: درگاه برای گردش کار issue‌ها ───── */
+var ERB_WITNESS_D = 7;
+/* فهرست برای گیت‌هاب: فقط شدت ۱ و ۲، فقط فیلدهای بی نام (نمونه نمی‌رود) */
+function erbList_() {
+  return { ok: true, data: { rows: erbRows_().filter(function (e) { return e.sev <= 2 || e.issue; }).map(function (e) {
+    return { id: e.id, fp: e.fp, src: e.src, sev: e.sev, first: e.first, last: e.last, n: e.n, st: e.st, issue: e.issue, stAt: e.stAt };
+  }) } };
+}
+/* items: [{id, issue?, st?}]. وضعیت‌هایی که گیت‌هاب می‌تواند بگذارد: در برنامه، PR، اصلاح‌شده. «بازگشته» و «تأییدشده» فقط از خود بات. */
+var ERB_GH_ST = ['در برنامه', 'PR', 'اصلاح‌شده'];
+function erbSet_(p, dry) {
+  var items = Array.isArray(p.items) ? p.items.slice(0, 50) : [], done = 0, skip = [];
+  items.forEach(function (it) {
+    var e = erbFind_(String(it.id || ''));
+    if (!e) { skip.push(it.id + ': نیست'); return; }
+    var issue = String(it.issue || '').trim(), st = String(it.st || '').trim(), ch = false;
+    if (issue && !/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/issues\/\d+$/.test(issue)) { skip.push(it.id + ': پیوند نادرست'); return; }
+    if (st && ERB_GH_ST.indexOf(st) < 0) { skip.push(it.id + ': وضعیت مجاز نیست'); return; }
+    if (issue && issue !== e.issue) { e.issue = issue; ch = true; }
+    /* «بازگشته» با PR تازه دوباره جلو می‌رود؛ «تأییدشده» دیگر دست نمی‌خورد؛ «اصلاح‌شده» با PR قدیمی عقب نمی‌رود */
+    var order = { 'تازه': 0, 'بازگشته': 0, 'در برنامه': 1, 'PR': 2, 'اصلاح‌شده': 3, 'تأییدشده': 4 };
+    if (st && st !== e.st && e.st !== ERB_ST.ok && (order[st] > order[e.st] || e.st === ERB_ST.back)) {
+      if (!(e.st === ERB_ST.back && st === ERB_ST.plan && e.issue)) { e.st = st; e.stAt = Number(it.at) || erbNow_(); ch = true; }
+    }
+    if (ch) { if (!dry) erbWrite_(e); done++; }
+  });
+  return { ok: true, data: { updated: done, skipped: skip } };
+}
+/* شاهد: «اصلاح‌شده» بی تکرار ۷ روزه ← «تأییدشده». تکرار را erbAdd_ همان لحظه «بازگشته» می‌کند. */
+function erbWitness_() {
+  var now = erbNow_(), n = 0;
+  erbRows_().forEach(function (e) {
+    if (e.st === ERB_ST.fixed && e.stAt && now - e.stAt >= ERB_WITNESS_D * 86400000 && e.last <= e.stAt) { e.st = ERB_ST.ok; e.stAt = now; erbWrite_(e); n++; }
+  });
+  return n;
+}
+try { if (typeof PB_ACTIONS === 'object') { PB_ACTIONS.error_report = function (p, dry) { return erbGateway_(p, dry); }; if (PB_WRITE.indexOf('error_report') < 0) PB_WRITE.push('error_report');
+  PB_ACTIONS.error_list = function () { return erbList_(); };
+  PB_ACTIONS.error_set = function (p, dry) { return erbSet_(p, dry); }; if (PB_WRITE.indexOf('error_set') < 0) PB_WRITE.push('error_set');
+  PB_RATE_BUCKET.error_list = PB_RATE_BUCKET.error_set = ['erbgh', 'erb_gh_hourly_max', 20]; PB_RATE_BUCKET.error_report = ['erb', 'erb_hourly_max', 60]; } } catch (eGw) {}
 /* گزارش خطای اسنیپت‌ها از پل سایت: op «errs» اسنیپت 504064 فهرست را می‌دهد و پاک می‌کند. اسنیپت قدیمی‌تر ← بی‌صدا هیچ. */
 function erbSitePull_() {
   var j;
@@ -159,6 +203,7 @@ function erbSitePull_() {
 /* ───── ساعتی از tgWatchdog: پل سایت و گزارش ساعت ۹ ───── */
 function erbHourly_() {
   try { erbSitePull_(); } catch (e) {}
+  try { erbWitness_(); } catch (e) {}
   return erbDigest_();
 }
 function erbProp_(k, v) {
@@ -328,6 +373,31 @@ function erbTests() {
     /* ci */
     var cr = erbCiRows_(0);
     ok('ci: هر ردیف first و t دارد', cr.length === erbRows_().length && cr.every(function (r) { return r.first && r.t && r.where; }));
+    /* مرحلهٔ ۲: درگاه گیت‌هاب و شاهد */
+    TG_MEM['erb:rows'] = []; TG_MEM['erb:now'] = Date.UTC(2026, 9, 10, 6, 0);
+    var x1 = erbAdd_('کار نیمه', 'انتشار پروفایل', 'نیمه: no team page');
+    var x3 = erbAdd_('بات', 'tgFillJalali_', 'TypeError: x is undefined');
+    var lst = erbList_().data.rows;
+    ok('error_list: فقط شدت ۱ و ۲، بی نمونه', lst.length === 1 && lst[0].id === x1 && lst[0].sample === undefined);
+    var U = 'https://github.com/o/r/issues/7';
+    erbSet_({ items: [{ id: x1, issue: U, st: 'در برنامه' }] });
+    ok('error_set: پیوند issue و «در برنامه»', erbFind_(x1).issue === U && erbFind_(x1).st === 'در برنامه');
+    ok('error_set: پیوند نادرست و وضعیت غیرمجاز رد', erbSet_({ items: [{ id: x1, issue: 'https://evil.example/x' }, { id: x1, st: 'تأییدشده' }] }).data.skipped.length === 2);
+    erbSet_({ items: [{ id: x1, st: 'PR' }] }); erbSet_({ items: [{ id: x1, st: 'در برنامه' }] });
+    ok('error_set: وضعیت عقب نمی‌رود', erbFind_(x1).st === 'PR');
+    erbSet_({ items: [{ id: x1, st: 'اصلاح‌شده', at: TG_MEM['erb:now'] }] });
+    TG_MEM['erb:now'] += 6 * 86400000; erbWitness_();
+    ok('شاهد: پیش از ۷ روز «اصلاح‌شده» می‌ماند', erbFind_(x1).st === 'اصلاح‌شده');
+    TG_MEM['erb:now'] += 86400000 + 1; erbWitness_();
+    ok('شاهد: ۷ روز بی تکرار ← «تأییدشده»', erbFind_(x1).st === 'تأییدشده');
+    erbSet_({ items: [{ id: x1, st: 'در برنامه' }] });
+    ok('تأییدشده با گیت‌هاب عقب نمی‌رود', erbFind_(x1).st === 'تأییدشده');
+    erbAdd_('کار نیمه', 'انتشار پروفایل', 'نیمه: no team page');
+    ok('تکرارِ تأییدشده ← «بازگشته» (issue همان)', erbFind_(x1).st === 'بازگشته' && erbFind_(x1).issue === U);
+    erbSet_({ items: [{ id: x1, st: 'PR' }] });
+    ok('بازگشته با PR تازه جلو می‌رود', erbFind_(x1).st === 'PR');
+    ok('درگاه: اکشن‌های گیت‌هاب ثبت شده', typeof PB_ACTIONS.error_list === 'function' && typeof PB_ACTIONS.error_set === 'function' && PB_WRITE.indexOf('error_set') > -1);
+    void x3;
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; }
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
