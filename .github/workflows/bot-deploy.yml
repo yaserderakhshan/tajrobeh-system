@@ -297,6 +297,7 @@ jobs:
           echo "::notice::Version $V روی دیپلوی آزمایشی؛ نشانی اصلی هنوز روی Version ${{ steps.prev.outputs.prev_version }} است."
 
       - name: اجرای تست‌ها روی دیپلوی آزمایشی (شب همه، روز مربوط‌ها؛ پرداخت، تنخواه و نقش‌ها همیشه همه)
+        id: tests
         env:
           TEST_SCOPE: ${{ (github.event_name == 'schedule' || inputs.scope == 'full') && 'full' || 'related' }}
           PREV_REF: ${{ steps.prev.outputs.prev_ref }}
@@ -487,7 +488,10 @@ jobs:
           git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BR"
           # v170.9.2: گردش کارها برگردانده نمی‌شوند؛ توکن گردش کار اجازهٔ نوشتن در .github/workflows ندارد (اجرای 37152498810)
-          git diff --binary "$BEFORE" HEAD -- . ':(exclude).github/workflows' > /tmp/rev.patch
+          # v170.22.1: فقط کد بات و دفترهایش (bot/، CHANGELOG.md، docs/bot/). از ۱۴ مهر ساخت و مرج خودکار PR روشن است و
+          # برگرداندن کل مخزن کار سایت و ابزارهای دیگری را که در همان push بودند هم پاک می‌کرد.
+          git diff --binary "$BEFORE" HEAD -- bot CHANGELOG.md docs/bot > /tmp/rev.patch
+          [ -s /tmp/rev.patch ] || { echo "در bot/ چیزی برای برگرداندن نیست (کد زنده همان گیت است)."; exit 0; }
           git apply -R --index /tmp/rev.patch
           git commit -m "برگشت خودکار: $SHORT (دیپلوی بات قرمز شد، اجرای $GITHUB_RUN_ID)"
           git push origin "$BR"
@@ -498,6 +502,28 @@ jobs:
           echo "PR معکوس: $URL"
           gh pr merge "$URL" --squash --delete-branch || echo "::warning::PR معکوس خودکار مرج نشد؛ دستی مرج کنید: $URL"
           echo "- PR معکوس: $URL" >> "$GITHUB_STEP_SUMMARY"
+
+      # v170.22.1: زمان واقعی هر سناریو و مجموعه برای تقسیم بعدی «اصلی» (bot-parts.mjs). روی main با [skip ci]
+      # تا انتشار تازه‌ای نسازد؛ در worktree جدا چون این کار پوشهٔ دیپلوی (bot/.clasp.json پرشده) را لمس نمی‌کند.
+      - name: ذخیرهٔ زمان آزمون‌ها روی main
+        if: always() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure')
+        continue-on-error: true
+        run: |
+          F=.github/scripts/bot-test-times.json
+          [ -f "$F" ] || exit 0
+          cp "$F" /tmp/times.json
+          for i in 1 2 3; do
+            git fetch -q origin main
+            rm -rf /tmp/tw; git worktree prune; git worktree add -q -B times-up /tmp/tw origin/main
+            cp /tmp/times.json "/tmp/tw/$F"
+            cd /tmp/tw
+            git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            if git diff --quiet -- "$F"; then echo "زمان‌ها عوض نشد."; exit 0; fi
+            git add "$F" && git commit -qm "زمان آزمون‌های بات [skip ci]"
+            if git push -q origin HEAD:main; then echo "زمان‌ها روی main نشست."; exit 0; fi
+            cd "$GITHUB_WORKSPACE"; sleep $((i*5))
+          done
+          echo "::warning::زمان آزمون‌ها روی main ننشست؛ دور بعد دوباره."
 
   # کد زندهٔ Apps Script را بی‌دیپلوی می‌کشد: اول همهٔ فایل‌ها برای کلید و توکن جست‌وجو می‌شوند (اگر چیزی پیدا
   # شود کار می‌ایستد و فقط فایل:سطر گزارش می‌شود)، بعد اثر انگشت و فهرست فایل‌های متفاوت در خلاصهٔ اجرا می‌آید
