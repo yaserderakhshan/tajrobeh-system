@@ -150,7 +150,7 @@ if (mode === 'once') {
   const fn = process.env.ONCE_FN;
   const r = await call({ ci: 'once', fn });
   if (!r.ok) { console.log(`::error::اجرای یک‌بارهٔ ${fn} نشد: ${r.error}`); summary(`\n**❌ اجرای یک‌بارهٔ ${fn} نشد:** ${r.error}`); process.exit(1); }
-  const msg = `${r.already ? 'قبلاً اجرا شده بود' : 'اجرا شد'} (${r.result.at}): ${r.result.out}`;
+  const msg = `${r.already ? 'قبلاً اجرا شده بود' : 'اجرا شد'} (${r.result.at}): ${maskIds(r.result.out)}`;
   console.log(`::notice::${fn}: ${msg}`);
   summary(`\n## اجرای یک‌باره\n\n- \`${fn}\`: ${msg}`);
   process.exit(0);
