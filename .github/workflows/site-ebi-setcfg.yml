@@ -4,6 +4,11 @@ name: سایت · setcfg کمپین ابی
 # راهبران از خود بات خوانده می‌شوند (کلید «راهبران C-004» در تنظیمات خصوصی) و در لاگ پوشانده‌اند. پیش از این، site-deploy اسنیپت را نصب کرده باشد.
 on:
   workflow_dispatch:
+    inputs:
+      recheck:
+        description: 'موردهای فهرست که دستی در صف مانده‌اند یک بار دوباره به بات بروند (حکم را بات می‌فرستد)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -24,4 +29,5 @@ jobs:
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
           BOT_API_URL: ${{ secrets.BOT_API_URL }}
           BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+          RECHECK: ${{ inputs.recheck }}
         run: node site/tools/ebi-setcfg.mjs
