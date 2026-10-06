@@ -46,13 +46,15 @@ var CFG_NOTE = {
   NURTURE_INTRO_1: 'متن پیام ۱ «معارفه بی‌شروع» با جای {name}؛ حداکثر دو جمله (اختیاری؛ خالی = پیش‌نویس nurture.gs؛ v170.23.13)',
   NURTURE_INTRO_2: 'متن پیام ۲ «معارفه بی‌شروع» با جای {name}؛ حداکثر دو جمله (اختیاری؛ خالی = پیش‌نویس nurture.gs؛ v170.23.13)',
   NURTURE_INTRO_3: 'متن پیام ۳ «معارفه بی‌شروع» با جای {name}؛ حداکثر دو جمله (اختیاری؛ خالی = پیش‌نویس nurture.gs؛ v170.23.13)',
+  REACTIVATE_ENABLED: 'روشن بودن بازگرداندن مراجعان قدیمی (reactivate.gs): «بله» = کارت دستهٔ روزانه برای یاسر؛ ارسال فقط با «بفرست» (v170.23.14)',
+  REACTIVATE_TEXT: 'متن پیام بازگرداندن با {name} و {therapist}، حداکثر سه جمله (اختیاری؛ خالی = پیش‌نویس reactivate.gs؛ v170.23.14)',
   TG_CONTRACT_VER: 'نسخهٔ قرارداد همکاری برای ستون «پشتوانهٔ انتشار» پروفایل‌ها، مثل «۱» (v170.23.6؛ با امضای الکترونیک نسخهٔ تازه به‌روز می‌شود)',
   TG_ROUTE: 'جدول مسیریابی منتظرها: {"تیکت" | "باگ" | دستهٔ کار | "پیش‌فرض": "کلید TG_NAMES"} (JSON، اختیاری؛ v170.23.5؛ بی آن: مدیر عملیات ops)',
   CM_FIX_FORCE: 'دور دوم اصلاح کامنت‌ها: لیدهایی که با وجود قاعدهٔ «فقط مهاجرت» به این وضعیت برمی‌گردند: {"کد لید": "وضعیت"} (JSON، اختیاری؛ v170.23.4)',
   CM_FIX_CALL: 'کد لیدهای وضعیت مبهم برای کار «بررسی تلفنی وضعیت» پذیرش: ["کد لید", …] (JSON، اختیاری؛ v170.23.4)'
 };
 /* کلیدهایی که خالی بودنشان مجاز است (جایگزین دارند) */
-var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'MIG_HUB', 'MIG_ENABLED', 'MIG_CHECKLIST', 'MIG_INVITE_TEXT', 'MIG_V2_LOGIN_URL', 'MIG_V2DEV_MSG', 'GEMINI_PAID', 'ASSIST_ENABLED', 'ASSIST_MODE', 'ASSIST_GEMINI_PAID', 'ASSIST_MATCH_MIN', 'ASSIST_EMERGENCY', 'ASSIST_RATE', 'LEAD_SPEED_ENABLED', 'LEAD_SCORE_WEIGHTS', 'NURTURE_ENABLED', 'NURTURE_1', 'NURTURE_2', 'NURTURE_3', 'NURTURE_INTRO_1', 'NURTURE_INTRO_2', 'NURTURE_INTRO_3'];
+var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'MIG_HUB', 'MIG_ENABLED', 'MIG_CHECKLIST', 'MIG_INVITE_TEXT', 'MIG_V2_LOGIN_URL', 'MIG_V2DEV_MSG', 'GEMINI_PAID', 'ASSIST_ENABLED', 'ASSIST_MODE', 'ASSIST_GEMINI_PAID', 'ASSIST_MATCH_MIN', 'ASSIST_EMERGENCY', 'ASSIST_RATE', 'LEAD_SPEED_ENABLED', 'LEAD_SCORE_WEIGHTS', 'NURTURE_ENABLED', 'NURTURE_1', 'NURTURE_2', 'NURTURE_3', 'NURTURE_INTRO_1', 'NURTURE_INTRO_2', 'NURTURE_INTRO_3', 'REACTIVATE_ENABLED', 'REACTIVATE_TEXT'];
 /* v170.9: کلیدهای لازمی که در Property خالی‌اند (فقط نام). روی دیپلوی آزمایشی سنجیده می‌شود؛ هر کدام خالی = انتشار متوقف */
 function cfgMissing_() {
   var o = cfgPropGet_();
