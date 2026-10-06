@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fail, log, summary, warn } from './site-lib.mjs';
+import { fail, log, summary, warn, DIR_MARKERS, dirMarkerProblems } from './site-lib.mjs';
 import { scanLine } from './secrets.mjs';
 
 const BASE = process.env.BASE, HEAD = process.env.HEAD || 'HEAD';
@@ -35,6 +35,12 @@ for (const f of files) {
     // wptexturize در محتوای برگه و قالب && را به &#038;&#038; می‌شکند (دام «د» در اسکیل وردپرس)
     if (/^site\/(pages|templates|template-parts)\//.test(f) && /&&/.test(l)) errs.push(`${f}: «&&» در محتوای برگه یا قالب؛ if تودرتو بنویس`);
   });
+}
+// نشانگرهای دایرکتوری در برگه‌هایی که بات می‌نویسد (۱۴ مهر ۱۴۰۵: بازطراحی صفحهٔ اصلی «thc more» را برداشت و هر کارت تازه شکست)
+{
+  const all = git('ls-tree', '-r', '--name-only', HEAD, '--', 'site/pages').split('\n').filter(Boolean);
+  const byId = (id) => { const f = all.find((x) => x.startsWith(`site/pages/${id}-`)); return f ? git('show', `${HEAD}:${f}`) : null; };
+  for (const p of dirMarkerProblems(byId)) errs.push(p);
 }
 // اسنیپت تازه
 if (files.includes('site/snippets/index.json')) {
