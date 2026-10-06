@@ -66,7 +66,7 @@ export function mirrorSelfTest() {
   t('تصویر base64 درون‌خطی رمز نیست', secretKinds('<img src="data:image/png;base64,' + ['iVBO', 'Rw0K', 'GgoA'].join('').repeat(8) + '">').length === 0);
   t('کد عادی سالم است', secretKinds("add_action('init', function () { return 'tj-offer'; });\n.tj2 a.tj-offer{color:#c83f49}").length === 0);
   t('نام همکار از فهرست ← رد', piiKinds('<p>با نمونه‌الف تماس بگیرید</p>', ['نمونه‌الف']).length === 1 && piiKinds('<p>سلام</p>', ['نمونه‌الف']).length === 0);
-  t('شماره ← رد', piiKinds('تلفن: 09121234567', []).includes('شمارهٔ تلفن'));
+  t('شماره ← رد', piiKinds('تلفن: 09121234567', []).includes('شمارهٔ تلفن')); // pii:ok نمونهٔ ساختگی
   return bad;
 }
 
