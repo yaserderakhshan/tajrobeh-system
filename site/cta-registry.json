@@ -283,7 +283,44 @@
     ],
     "note": "need = نیاز (مثل anx)، src = منبع (کد دکمه یا صفحه). from و tj_* همچنان خوانده می‌شوند و به need/src نگاشته می‌شوند."
   },
-  "ctas": [],
+  "ctas": [
+    {
+      "id": "hdr.app",
+      "line": "pz",
+      "label": "هدر › ورود (مینی‌اپ)",
+      "target": "/app/"
+    },
+    {
+      "id": "footer.app",
+      "line": "pz",
+      "label": "فوتر › مینی‌اپ تجربه",
+      "target": "/app/"
+    },
+    {
+      "id": "footer.apps",
+      "line": "pz",
+      "label": "فوتر › نسخهٔ وب‌اپلیکیشن",
+      "target": "/app/"
+    },
+    {
+      "id": "home.hero.app",
+      "line": "pz",
+      "label": "هوم › مراجع تجربه هستید؟",
+      "target": "/app/"
+    },
+    {
+      "id": "gt.old.app",
+      "line": "pz",
+      "label": "شروع تراپی › مراجع قبلی",
+      "target": "/app/"
+    },
+    {
+      "id": "mag.banner.start",
+      "line": "pz",
+      "label": "مجله › بنر قدیمی ورود ← شروع تراپی",
+      "target": "/get-therapy/?src=mag-banner"
+    }
+  ],
   "codes": [
     {
       "code": "cmp-ebi-voice",
