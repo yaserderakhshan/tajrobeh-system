@@ -105,15 +105,25 @@ function wpPageProps_(props) {
     if (!wpPageDry_()) PropertiesService.getScriptProperties().setProperty(k, v.trim()); else TG_MEM['wpp:prop:' + k] = v.trim();
     set.push(k);
   });
-  /* v170.4: رمزهای مشترک با سایت (عوض کردن رمز کمپین، امضای لید). فقط همین نام‌ها، فقط وقتی دست‌کم ۳۲ نویسه است؛ مقدار برنمی‌گردد */
+  /* v170.4: رمزهای مشترک با سایت (عوض کردن رمز کمپین، امضای لید). فقط همین نام‌ها، فقط وقتی دست‌کم ۳۲ نویسه است؛ مقدار برنمی‌گردد
+     v170.16.1: رمز تازه روی رمز فعلی نمی‌نشیند؛ تا سایت منتشر شود هر دو پذیرفته‌اند (ssRotIn_ در sitesec.gs) */
   var sec = [];
   CI_SECRET_PROPS.forEach(function (k) {
     var v = props && props[k];
     if (typeof v !== 'string' || v.trim().length < 32) return;
-    if (!wpPageDry_()) PropertiesService.getScriptProperties().setProperty(k, v.trim()); else TG_MEM['wpp:prop:' + k] = v.trim();
-    sec.push(k);
+    var st = ssRotIn_(k, v.trim());
+    sec.push(st === 'next' ? k + ' (تازه، منتظر انتشار سایت)' : st === 'same' ? k + ' (بی‌تغییر)' : k);
   });
-  if (sec.length && !wpPageDry_()) { try { CacheService.getScriptCache().remove('sssec'); } catch (e) {} }
+  /* v170.16.1: کلید دوم درگاه؛ دست‌کم ۳۲ نویسه و جدا از کلید اول */
+  var k2 = props && props.BOT_API_KEY;
+  if (typeof k2 === 'string' && k2.trim().length >= 32) {
+    k2 = k2.trim();
+    var k1 = wpPageDry_() ? TG_MEM['pb:key'] : pbProps_().getProperty(PB_KEY_PROP);
+    if (k2 !== k1) {
+      if (!wpPageDry_()) pbProps_().setProperty(PB_KEY2_PROP, k2); else TG_MEM['pb:key2'] = k2;
+      sec.push(PB_KEY2_PROP);
+    }
+  }
   var flag = wpPageFlag_(props);
   return { ok: set.length === WP_PAGE_PROPS.length, set: set, sec: sec, flag: flag };
 }
@@ -158,7 +168,13 @@ function wpPageTests() {
     TG_MEM['wpp:repo'] = NEW;
     ok('فایل پروژه با هش گیت یکی نیست ← نوشته نمی‌شود', !wpPageSync_('00ff').ok && puts === 0);
     var pr = wpPageProps_({ CP_WP_SECRET: 'c'.repeat(64), SITE_LEAD_SECRET: 'short', OTHER: 'z'.repeat(64) });
-    ok('v170.4: رمز کمپین ثبت شد، رمز کوتاه و نام ناشناخته نه', pr.sec.length === 1 && pr.sec[0] === 'CP_WP_SECRET' && TG_MEM['wpp:prop:CP_WP_SECRET'] === 'c'.repeat(64) && !TG_MEM['wpp:prop:OTHER'] && !TG_MEM['wpp:prop:SITE_LEAD_SECRET']);
+    ok('v170.4: رمز کمپین ثبت شد، رمز کوتاه و نام ناشناخته نه', pr.sec.length === 1 && pr.sec[0] === 'CP_WP_SECRET' && TG_MEM['ssp:CP_WP_SECRET'] === 'c'.repeat(64) && !TG_MEM['wpp:prop:OTHER'] && !TG_MEM['ssp:SITE_LEAD_SECRET']);
+    /* v170.16.1: رمز تازه منتظر سایت می‌ماند؛ کلید دوم درگاه جدا از کلید اول */
+    TG_MEM['pb:key'] = 'a'.repeat(40);
+    var pr2 = wpPageProps_({ CP_WP_SECRET: 'd'.repeat(64), BOT_API_KEY: 'a'.repeat(40) });
+    ok('v170.16.1: رمز کمپین تازه روی رمز فعلی نمی‌نشیند؛ کلید دوم هم‌مقدار کلید اول ثبت نمی‌شود', TG_MEM['ssp:CP_WP_SECRET'] === 'c'.repeat(64) && TG_MEM['ssp:CP_WP_SECRET_NEXT'] === 'd'.repeat(64) && !TG_MEM['pb:key2'] && pr2.sec.length === 1);
+    var pr3 = wpPageProps_({ BOT_API_KEY: 'b'.repeat(40) });
+    ok('v170.16.1: کلید دوم درگاه ثبت و پذیرفته می‌شود و کلید اول هم می‌ماند', TG_MEM['pb:key2'] === 'b'.repeat(40) && pr3.sec[0] === 'BOT_API_KEY' && pbKeyOk_('b'.repeat(40)) && pbKeyOk_('a'.repeat(40)) && !pbKeyOk_('c'.repeat(40)));
     ok('v170.4: مقدار رمز در پاسخ نیست', JSON.stringify(pr).indexOf('ccc') < 0);
     mangle = true;
     var r3 = wpPageSync_('');

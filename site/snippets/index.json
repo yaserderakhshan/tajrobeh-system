@@ -430,5 +430,23 @@
   "location": "اجرا همه جا",
   "loc": "everywhere",
   "active": true
+ },
+ {
+  "id": 505915,
+  "file": "505915.php",
+  "title": "Tajrobeh · فهرست جمعی پلی‌لیست ابی (CPT + REST)",
+  "type": "php",
+  "location": "everywhere",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
+  "id": 506031,
+  "file": "506031.php",
+  "title": "Tajrobeh · پلی‌لیست ابی · عملیات",
+  "type": "php",
+  "location": "everywhere",
+  "loc": "everywhere",
+  "active": true
  }
 ]

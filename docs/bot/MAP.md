@@ -26,6 +26,7 @@
 | `seo_gemini.gs` | پیشنهاد سئوی مجله با Gemini (فقط محتوای منتشرشده) | `seo` |
 | `gemini_setup.gs` | اتصال Gemini؛ کلید فقط در Script Properties | `gem` |
 | `ci.gs` | مسیر دیپلوی خودکار: کلید یک‌بارمصرف، توقف کارهای زمان‌دار، تست، پایش خطا، اجرای یک‌باره | `ci` |
+| `ebi.gs` | کمپین «پلی‌لیستِ ابی» (C-004، v170.15 به بعد): اکشن `ebi_check` درگاه، کدهای start `ebi…`، ویس درمانگران، تب آینهٔ ثبت‌نام‌ها، راهبران از تنظیمات | `ebi` و `EBI_` |
 | `version.gs` | شمارهٔ نسخهٔ کد (`TG_CODE_VERSION`) | |
 
 ترتیب اجرای فایل‌ها مهم است و در `bot/.clasp.json` (`filePushOrder`) ثابت شده: اول `Code.gs`، بعد `telegram.gs`.
@@ -63,6 +64,7 @@
 | مجله | نویسنده، بازبینی، صدا، انتشار | `mag_contrib.gs`، `author.gs`، `voice.gs` |
 | ساختمان | شارژ، پرداخت (کارت از نقش «روان‌پزشکی» در «افراد»)، هزینه، اطلاعیه | `building.gs` |
 | پرداخت | پرداخت تتر برای خارج از ایران | `tgPay*`، `tgPayTick` |
+| کمپین C-004 | `ebi<id>-<hex>` اتصال ثبت‌نام سایت · `ebi-<نوع>` نام و شماره ← `/tj/v1/ebi-join` ← اتصال · `ebi-list` نوشتن و دیدن فهرست · `ebi-voice` ویس درمانگر با اجازه ← راهبران. تب‌ها: «پلی‌لیست ابی · ویس‌ها» و «پلی‌لیست ابی · ثبت‌نام‌ها» (هاب پذیرش، بی شماره). راهبران: کلید «راهبران C-004» در «تنظیمات خصوصی بات» | `ebiRoute_`، `ebiCb_`، `ebiHourly_` |
 
 ## ۵. انتشار
 
@@ -79,7 +81,7 @@
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۷ | ۳۳ |
-| `telegram.gs` | ۳۷۴۴۸ | ۲۰۱۹ |
+| `telegram.gs` | ۳۷۴۵۴ | ۲۰۱۹ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -93,9 +95,9 @@
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۵۶۶ | ۱۲۰ |
+| `publish.gs` | ۱۵۷۴ | ۱۲۰ |
 | `v168.gs` | ۲۱۴۷ | ۱۲۶ |
-| `wppage.gs` | ۱۷۸ | ۱۵ |
+| `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۸ | ۳۴ |
 | `leadmodel.gs` | ۷۷۸ | ۴۱ |
 | `comments.gs` | ۵۲۴ | ۳۱ |
@@ -104,9 +106,9 @@
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
-| `ebi.gs` | ۱۳۹ | ۹ |
-| `ci.gs` | ۴۸۱ | ۲۷ |
-| `sitesec.gs` | ۱۷۳ | ۱۲ |
+| `ebi.gs` | ۹۹۶ | ۷۱ |
+| `ci.gs` | ۵۱۴ | ۲۹ |
+| `sitesec.gs` | ۲۷۵ | ۲۲ |
 | `sec.gs` | ۱۰۵ | ۱ |
 | `version.gs` | ۸ | ۰ |
 
@@ -145,6 +147,7 @@
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
 | `DQ_TAB` | «صف ارسال» | `dq.gs` |
+| `EBI_MIRROR_TAB` | «پلی‌لیست ابی · ثبت‌نام‌ها» | `ebi.gs` |
 | `HUB_GUIDE` | «راهنما» | `ops.gs` |
 | `HUB_MINE` | «کارهای من» | `ops.gs` |
 | `HUB_QUEUES` | «صف‌ها» | `ops.gs` |
@@ -185,7 +188,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `v168.gs` `leadmodel.gs` `v17013.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `v168.gs` `leadmodel.gs` `v17013.gs` `ebi.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -229,7 +232,7 @@
 | `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` |
 | `TG_TK_TAB` | «پیام‌های درمانگران» | `telegram.gs` |
 | `TG_TSK_TAB` | «کارها» | `telegram.gs` |
-| `TG_USERS_TAB` | «کاربران بات» | `telegram.gs` |
+| `TG_USERS_TAB` | «کاربران بات» | `telegram.gs` `ebi.gs` |
 | `TG_UTM_TAB` | «سئو · لینک‌های UTM» | `telegram.gs` |
 | `TG_WEEKLY` | «وقت‌های هفتگی» | `telegram.gs` `v162.gs` |
 | `TG_WF_TAB` | «بازخورد وبینار» | `telegram.gs` |
@@ -349,8 +352,10 @@
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |
 | نسخهٔ ۱۶۲ | `tgV162Tests` |
 | v170.13: سقف پذیرش، بورسیه، آفر | `v17013Tests` |
-| امنیت ورودی‌ها (v170.9) | `secTests` |
 | کمپین C-004 (پلی‌لیست ابی) | `ebiTests` |
+| کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |
+| امنیت ورودی‌ها (v170.9) | `secTests` |
+| کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
 
