@@ -87,7 +87,7 @@ function stkWrite_(r) {
 function stkOpen_(r) { return r.st !== STK_ST.DONE; }
 
 /* ---------------- گیرنده‌ها و کارت ---------------- */
-/* کارت کامل برای مسئول پذیرش (ژیلا)؛ یاسر برای هر مورد یک خط کوتاه می‌گیرد */
+/* کارت کامل برای مسئول پذیرش (مسئول پذیرش)؛ یاسر برای هر مورد یک خط کوتاه می‌گیرد */
 function stkBoss_() {
   try { var b = stkDry_() ? TG_MEM['stk:boss'] : tgDutyBoss_(); var c = b ? tgChatIds_(b.chat)[0] : ''; return c ? { name: b.name || '', chat: String(c) } : null; } catch (e) { return null; }
 }
@@ -118,7 +118,7 @@ function stkSentToday_(chat, reason, mark) {
   m[id] = 1; stkProp_(k, JSON.stringify(m));
   return true;
 }
-/* فرستادن کارت یک مورد: کارت کامل به ژیلا، خط کوتاه به یاسر؛ هر نفر و هر علت روزی یک بار */
+/* فرستادن کارت یک مورد: کارت کامل به مسئول پذیرش، خط کوتاه به یاسر؛ هر نفر و هر علت روزی یک بار */
 function stkSend_(r) {
   var def = STK_R[r.key.split(':')[0]]; if (!def) return 0;
   var boss = stkBoss_(), own = String(TG_OWNER_CHAT), sent = 0, rk = r.key.split(':')[0];

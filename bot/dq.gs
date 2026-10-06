@@ -100,7 +100,7 @@ function dqSheet_() {
     sh.getRange(1, 1, 1, DQ_HEAD.length).setValues([DQ_HEAD]).setFontWeight('bold').setFontColor('#fefefe').setBackground('#222222');
     sh.setFrozenRows(1);
     var n = Math.max(200, sh.getMaxRows() - 1);
-    sh.getRange(2, DQ_C['ثبت‌کننده'] + 1, n, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['یاسر', 'دستیار'], true).setAllowInvalid(true).build());
+    sh.getRange(2, DQ_C['ثبت‌کننده'] + 1, n, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList([dqBy_(), 'دستیار'], true).setAllowInvalid(true).build());
     sh.getRange(2, DQ_C['تأیید'] + 1, n, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList([DQ_OK], true).setAllowInvalid(true).build());
     sh.getRange(2, DQ_C['وضعیت ارسال'] + 1, n, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(DQ_ST_LIST, true).setAllowInvalid(false).build());
     sh.setColumnWidth(DQ_C['متن پیام'] + 1, 360); sh.setColumnWidth(DQ_C['پاسخ گیرنده'] + 1, 300);
@@ -130,7 +130,7 @@ function dqGet_(code) { return dqRows_().filter(function (r) { return r.code ===
 function dqAdd_(o) {
   var mx = 1000;
   dqRows_().forEach(function (r) { var m = /^Q-(\d+)$/.exec(r.code); if (m) mx = Math.max(mx, +m[1]); });
-  var r = { code: 'Q-' + (mx + 1), at: dqStamp_(dqNow_()), by: o.by || 'یاسر', to: String(o.to || '').trim(), subject: String(o.subject || '').trim().slice(0, 120),
+  var r = { code: 'Q-' + (mx + 1), at: dqStamp_(dqNow_()), by: o.by || dqBy_(), to: String(o.to || '').trim(), subject: String(o.subject || '').trim().slice(0, 120),
     text: String(o.text || '').slice(0, 3500), link: String(o.link || '').trim(), tk: String(o.tk || '').trim(), ok: o.ok ? DQ_OK : '', st: '', sentAt: '', msg: '',
     reply: '', repAt: '', tkSt: '', note: '' };
   dqWrite_(r);
@@ -308,7 +308,7 @@ function dqNewIn_(chat, text) {
   if (st.step === 'subject') { st.subject = text.slice(0, 120); st.step = 'text'; tgSetVal_('dqnew', chat, JSON.stringify(st)); tgSend_(chat, 'متن پیام؟'); return true; }
   if (st.step === 'text') {
     tgDel_('dqnew', chat);
-    var r = dqAdd_({ by: 'یاسر', to: st.to, subject: st.subject, text: text, ok: String(chat) === dqOwner_() });
+    var r = dqAdd_({ by: dqBy_(), to: st.to, subject: st.subject, text: text, ok: String(chat) === dqOwner_() });
     if (r.ok !== DQ_OK) { dqPreview_(r); return true; }
     var s = dqSend_(r);
     tgSend_(chat, s === 'sent' ? '✅ ' + r.code + ' فرستاده شد.' : s === 'wait' ? '🕘 ' + r.code + ' ثبت شد و در ساعت کاری می‌رود.' : '⚠️ ' + r.code + ' فرستاده نشد؛ دلیل در ستون یادداشت.');
@@ -376,6 +376,8 @@ function dqTick5_() {
 }
 
 /* ---------------- مینی‌اپ ---------------- */
+/* v170.23: «ثبت‌کننده» از نام مالک در TG_NAMES (کلید owner)، نه نام ثابت در کد */
+function dqBy_() { return tgNm_('owner') || 'مالک'; }
 function dqApi_(p, api) {
   var w = tgApiWho_(p); if (!w) return { ok: false, error: 'auth' };
   var chat = String(w.chat);
@@ -384,7 +386,7 @@ function dqApi_(p, api) {
     var to = String(p.to || '').trim(), subject = String(p.subject || '').trim(), text = String(p.text || '').trim();
     if (!to || !subject || !text) return { ok: false, error: 'گیرنده، موضوع و متن لازم است.' };
     if (!dqResolve_(to).length) return { ok: false, error: 'این نقش یا نام در «افراد» گیرندهٔ فعال ندارد.' };
-    var r = dqAdd_({ by: 'یاسر', to: to, subject: subject, text: text, link: String(p.link || ''), ok: chat === dqOwner_() });
+    var r = dqAdd_({ by: dqBy_(), to: to, subject: subject, text: text, link: String(p.link || ''), ok: chat === dqOwner_() });
     if (r.ok !== DQ_OK) { dqPreview_(r); return { ok: true, code: r.code, msg: 'پیش‌نمایش برای یاسر رفت.' }; }
     var s = dqSend_(r);
     return { ok: s !== 'err', code: r.code, msg: s === 'sent' ? 'فرستاده شد.' : s === 'wait' ? 'در ساعت کاری می‌رود.' : 'فرستاده نشد.' };

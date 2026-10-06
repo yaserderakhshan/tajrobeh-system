@@ -19,6 +19,6 @@ export const FAKE_CFG = {
   VK_GUARD: 'نگهبان ساختگی',
   TG_MAIN_CHANNEL: '-1009999999999',
   // v170.14: نام همکاران؛ همه ساختگی‌اند و با نام‌های تست‌ها یکی‌اند
-  TG_NAMES: { reception: 'ژیلا', reception_lat: 'jila', school: 'ترانه', school_full: 'ترانه پارسا', school_user: 'fake_school',
-    chief: 'کاوه', chief_full: 'کاوه امیرآرا', psy: 'یلدا', desk3: 'شیدا', psy_dr: 'دکتر سپهری', ap_sup: 'پریسا نیک‌سرشت' }
+  TG_NAMES: { reception: 'پذیرشی', reception_lat: 'pazir', school: 'مدرسه‌ای', school_full: 'مدرسه‌ای نمونه‌فر', school_user: 'fake_school',
+    chief: 'مدیری', chief_full: 'مدیری آرانمونه', psy: 'روان‌یار', desk3: 'کشیکی', psy_dr: 'دکتر نمونه‌زاده', ap_sup: 'پریسا نمونه‌نژاد' }
 };
