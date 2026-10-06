@@ -772,5 +772,53 @@
   "description": "بخشی از شهریهٔ دوره‌های مدرسهٔ تجربه را با نوشتن، ترجمه، ویراستاری یا تولید محتوا برای مجلهٔ تجربه زندگی جبران کنید. فرم کوتاه درخواست بورسیه.",
   "canonical": "https://tajrobeh.life/school/scholarship/",
   "robots": "index,follow"
+ },
+ "505918": {
+  "title": "پلی‌لیستِ ابی؛ فهرستی که با هم ادامه‌اش می‌دهیم - مرکز تجربه زندگی",
+  "description": "",
+  "canonical": "https://tajrobeh.life/ebis-playlist/",
+  "robots": "index,follow"
+ },
+ "505919": {
+  "title": "فهرست جمعی پلی‌لیستِ ابی - مرکز تجربه زندگی",
+  "description": "",
+  "canonical": "https://tajrobeh.life/ebis-playlist/list/",
+  "robots": "index,follow"
+ },
+ "505920": {
+  "title": "گفت‌وگو با متخصص بعد از نمایش پلی‌لیستِ ابی - مرکز تجربه زندگی",
+  "description": "",
+  "canonical": "https://tajrobeh.life/ebis-playlist/talk/",
+  "robots": "index,follow"
+ },
+ "505921": {
+  "title": "گروه تجربهٔ نمایش - مرکز تجربه زندگی",
+  "description": "",
+  "canonical": "https://tajrobeh.life/ebis-playlist/group/",
+  "robots": "index,follow"
+ },
+ "505922": {
+  "title": "دعوت از اهالی سلامت روان - مرکز تجربه زندگی",
+  "description": "",
+  "canonical": "https://tajrobeh.life/ebis-playlist/together/",
+  "robots": "index,follow"
+ },
+ "505923": {
+  "title": "تاریخچهٔ Every Brilliant Thing - مرکز تجربه زندگی",
+  "description": "",
+  "canonical": "https://tajrobeh.life/ebis-playlist/every-brilliant-thing/",
+  "robots": "index,follow"
+ },
+ "505990": {
+  "title": "شب تجربه · پلی‌لیستِ ابی - مرکز تجربه زندگی",
+  "description": "",
+  "canonical": "https://tajrobeh.life/ebis-playlist/night/",
+  "robots": "index,follow"
+ },
+ "505992": {
+  "title": "دانشجوها · پلی‌لیستِ ابی - مرکز تجربه زندگی",
+  "description": "",
+  "canonical": "https://tajrobeh.life/ebis-playlist/students/",
+  "robots": "index,follow"
  }
 }

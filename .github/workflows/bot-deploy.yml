@@ -6,6 +6,8 @@ name: دیپلوی بات
 # ۲) clasp push. کارهای زمان‌دار (تریگرها همیشه آخرین کد push‌شده را اجرا می‌کنند) تا سبز شدن تست‌ها
 #    متوقف می‌مانند (CI_PAUSE_UNTIL در ci_key.gs؛ ci.gs → ciPaused_).
 # ۳) نسخهٔ تازه اول روی دیپلوی آزمایشی «CI staging» می‌رود و همهٔ تست‌ها (tgRun) آنجا اجرا می‌شوند.
+#    از v170.16.2 (سهمیهٔ روزانه): روز فقط مجموعه‌های مربوط به تغییر (bot-suites.mjs)، مگر پرداخت، تنخواه، نقش‌ها و دسترسی‌ها؛
+#    آزمون کامل شبی یک بار با اجرای زمان‌بندی‌شده (دیپلوی اصلی عوض نمی‌شود). آزمون کامل محلی (گام ۱) همیشه هست.
 #    مراجعان در این مدت همچنان نسخهٔ قبلی را روی نشانی اصلی می‌بینند.
 # ۴) فقط اگر همه سبز بود، همان نسخه روی دیپلوی اصلی می‌رود (آدرس وبهوک عوض نمی‌شود)، کارهای زمان‌دار ادامه
 #    پیدا می‌کنند و برچسب bot-live جابه‌جا می‌شود.
@@ -25,8 +27,17 @@ on:
       - '.github/workflows/bot-deploy.yml'
       - '.github/scripts/**'
       - 'site/pages/503886-app.html'   # v169.4: برگهٔ مینی‌اپ بعد از انتشار سبز خودکار روی سایت می‌رود
+  # v170.16.2 (سهمیهٔ روزانهٔ Apps Script، تصمیم یاسر): آزمون کامل روی Apps Script فقط شبی یک بار، ۰۲:۲۰ تهران.
+  # اجرای شبانه همان کد main را روی دیپلوی آزمایشی می‌برد و همهٔ مجموعه‌ها را اجرا می‌کند؛ دیپلوی اصلی، رمزها و برچسب‌ها دست نمی‌خورند.
+  schedule:
+    - cron: '50 22 * * *'
   workflow_dispatch:
     inputs:
+      scope:
+        description: 'تست روی Apps Script: related (فقط مجموعه‌های مربوط به تغییر) یا full (همه؛ سهمیهٔ روزانه را می‌خورد)'
+        type: choice
+        options: [related, full]
+        default: related
       label:
         description: 'برچسب نسخه در توضیح دیپلوی. خالی (پیش‌فرض): TG_CODE_VERSION از bot/version.gs'
         required: false
@@ -62,7 +73,7 @@ env:
 jobs:
   # v170.5: قفل انتشار. دو انتشار هرگز هم‌زمان نیستند؛ انتشار دوم صبر می‌کند تا اولی و پایشش تمام شود.
   lock:
-    if: (github.event_name == 'workflow_dispatch' && inputs.mode != 'snapshot') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch)
+    if: (github.event_name == 'workflow_dispatch' && inputs.mode != 'snapshot') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 340
     steps:
@@ -79,13 +90,14 @@ jobs:
 
   deploy:
     needs: lock
-    if: (github.event_name == 'workflow_dispatch' && inputs.mode != 'snapshot') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch)
+    if: (github.event_name == 'workflow_dispatch' && inputs.mode != 'snapshot') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     # v170.9: همهٔ رمزها و شناسهٔ پروژه فقط در Environment «production» (فقط main به آن دسترسی دارد)
     environment: production
     env:
       SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
       DEPLOYMENT_ID: ${{ secrets.DEPLOYMENT_ID }}
+      NIGHTLY: ${{ github.event_name == 'schedule' && '1' || '' }}   # v170.16.2: اجرای شبانه فقط آزمون کامل است
     timeout-minutes: 200
     steps:
       - uses: actions/checkout@v4
@@ -284,8 +296,10 @@ jobs:
           echo "staging=$SID" >> "$GITHUB_OUTPUT"
           echo "::notice::Version $V روی دیپلوی آزمایشی؛ نشانی اصلی هنوز روی Version ${{ steps.prev.outputs.prev_version }} است."
 
-      - name: اجرای همهٔ تست‌ها روی دیپلوی آزمایشی
+      - name: اجرای تست‌ها روی دیپلوی آزمایشی (شب همه، روز مربوط‌ها؛ پرداخت، تنخواه و نقش‌ها همیشه همه)
         env:
+          TEST_SCOPE: ${{ (github.event_name == 'schedule' || inputs.scope == 'full') && 'full' || 'related' }}
+          PREV_REF: ${{ steps.prev.outputs.prev_ref }}
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ steps.stage.outputs.staging }}/exec
           CI_BUILD: ${{ steps.key.outputs.build }}
           BOT_VERSION: ${{ steps.stage.outputs.version }}
@@ -295,6 +309,7 @@ jobs:
 
       - name: انتشار روی دیپلوی اصلی (فقط بعد از سبز شدن همهٔ تست‌ها)
         id: promote
+        if: env.NIGHTLY != '1'
         working-directory: bot
         env:
           DESC: ${{ steps.label.outputs.label }} · ${{ steps.label.outputs.short }} · GitHub Actions
@@ -316,12 +331,14 @@ jobs:
 
       - name: نشانی اصلی و ادامهٔ کارهای زمان‌دار
         env:
-          BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
+          # v170.16.2: شب دیپلوی اصلی عوض نمی‌شود؛ ادامهٔ کارهای زمان‌دار، دود و سلامت از نشانی آزمایشی
+          BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.NIGHTLY == '1' && steps.stage.outputs.staging || env.DEPLOYMENT_ID }}/exec
           CI_BUILD: ${{ steps.key.outputs.build }}
         run: node .github/scripts/bot-monitor.mjs promote
 
       # v169.4: سکرت‌های وردپرس (کاربر Editor) به Script Properties. مقدار در کد یا لاگ نمی‌آید (گیت‌هاب سکرت‌ها را می‌پوشاند و اسکریپت چاپشان نمی‌کند).
       - name: سکرت‌های وردپرس به Script Properties
+        if: env.NIGHTLY != '1'
         continue-on-error: true
         env:
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
@@ -330,10 +347,12 @@ jobs:
           WP_BOT_APP_PASSWORD: ${{ secrets.WP_BOT_APP_PASSWORD }}
           CP_WP_SECRET: ${{ secrets.CP_WP_SECRET }}
           SITE_LEAD_SECRET: ${{ secrets.SITE_LEAD_SECRET }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}   # v170.16.1: کلید دوم درگاه
           SITE_SIG_ENFORCE: ${{ vars.SITE_SIG_ENFORCE }}   # v170.9: ۱ = لید سایت بی امضای درست رد می‌شود
         run: node .github/scripts/bot-monitor.mjs props
 
       - name: پایش خطاها بعد از انتشار
+        if: env.NIGHTLY != '1'
         env:
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
           CI_BUILD: ${{ steps.key.outputs.build }}
@@ -344,12 +363,13 @@ jobs:
       # v170.9.2: برچسب فقط بعد از پایش سبز. پیش از این قبل از پایش زده می‌شد و اگر پایش قرمز و برگشت از پشتیبان کد زنده بود،
       # برچسب روی کدی می‌ماند که دیگر زنده نبود (اجرای 37152498810).
       - name: برچسب bot-live روی کد زنده
+        if: env.NIGHTLY != '1'
         run: |
           git tag -f bot-live HEAD
           git push -f origin refs/tags/bot-live || echo "::warning::برچسب bot-live فرستاده نشد"
 
       - name: برچسب گیت نسخه (bot-<نسخه>)
-        if: success() && steps.label.outputs.version != ''
+        if: success() && steps.label.outputs.version != '' && env.NIGHTLY != '1'
         env:
           V: ${{ steps.label.outputs.version }}
         run: |
@@ -372,7 +392,7 @@ jobs:
 
       # v166.22: کارهای یک‌بارهٔ CI_ONCE_AUTO (ci.gs) بعد از هر انتشار سبز، اگر قبلاً اجرا نشده‌اند. شکستش انتشار را برنمی‌گرداند.
       - name: کارهای یک‌بارهٔ خودکار
-        if: success()
+        if: success() && env.NIGHTLY != '1'
         continue-on-error: true
         env:
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
@@ -381,7 +401,7 @@ jobs:
 
       # v169.4: بعد از انتشار و پایش سبز، اگر برگهٔ مینی‌اپ عوض شده، روی برگهٔ 503886 (و فقط همان) نوشته می‌شود. شکستش انتشار بات را برنمی‌گرداند.
       - name: انتشار برگهٔ مینی‌اپ (503886)
-        if: success()
+        if: success() && env.NIGHTLY != '1'
         continue-on-error: true
         env:
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
@@ -398,6 +418,18 @@ jobs:
           CI_BUILD: ${{ steps.key.outputs.build }}
           ONCE_FN: ${{ inputs.run_once }}
         run: node .github/scripts/bot-monitor.mjs once
+
+      # v170.16.2: آزمون کامل شبانه قرمز شد؛ کد زنده همان است، پس فقط خبر به یاسر از درگاه بات (بی دادهٔ شخصی)
+      - name: خبر آزمون شبانهٔ قرمز
+        if: failure() && env.NIGHTLY == '1'
+        continue-on-error: true
+        env:
+          BOT_API_URL: ${{ secrets.BOT_API_URL }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+          REPORT_CHAT_ID: ${{ secrets.REPORT_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node -e "import('./site/tools/site-lib.mjs').then(m => m.report('آزمون کامل شبانهٔ بات روی Apps Script قرمز شد. کد زنده عوض نشده است. جزئیات: ' + process.env.RUN_URL, { type: 'گزارش', ref: 'BOT-NIGHTLY' }))"
 
       # ---------- برگشت خودکار: فقط اگر کد push شده بود و گامی بعد از آن قرمز شد ----------
       - name: برگشت خودکار به نسخهٔ قبل

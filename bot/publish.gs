@@ -53,6 +53,8 @@ var PB_PKG_ST = { wait: 'منتظر بسته', q: 'در صف', pub: 'منتشر 
 var PB_DG_ST = { prev: 'پیش‌نمایش', ok: 'تأیید شد', run: 'در حال ارسال', sent: 'فرستاده شد', no: 'این هفته نه' };
 var PB_TYPE_MAG = 'مجله';
 var PB_KEY_PROP = 'CLAUDE_API_KEY';
+/* v170.16.1: کلید دوم درگاه (GitHub Secret «BOT_API_KEY»، از «ci: props»)؛ برای گردش کارهای سایت و اسنیپت ابی. کلید اول دست نمی‌خورد */
+var PB_KEY2_PROP = 'BOT_API_KEY';
 var PB_KEY_FILE = 'تجربه · کلید درگاه API (محرمانه، هم‌رسانی نشود).txt';
 var PB_SITE = 'https://tajrobeh.life';
 var PB_BTN_NEW = '🚀 انتشار مطلب تازه';
@@ -352,11 +354,17 @@ function pbIsEditor_(chat) {
 function pbKeyNew_() { return 'tjk_' + pbSha_(Utilities.getUuid() + Utilities.getUuid() + Date.now()).slice(0, 48); }
 function pbKeyOk_(given) {
   var k = TG_DRY ? TG_MEM['pb:key'] : pbProps_().getProperty(PB_KEY_PROP);
+  var k2 = TG_DRY ? TG_MEM['pb:key2'] : pbProps_().getProperty(PB_KEY2_PROP);
   given = String(given || '');
-  if (!k || given.length < 20) return false;
-  var a = pbSha_(given), b = pbSha_(k), d = 0;
-  for (var i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return d === 0;
+  if (given.length < 20) return false;
+  var a = pbSha_(given), ok = false;
+  [k, k2].forEach(function (x) {
+    if (!x) return;
+    var b = pbSha_(x), d = 0;
+    for (var i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    if (d === 0) ok = true;
+  });
+  return ok;
 }
 function pbKeyFile_(key) {
   var url = '';
@@ -1505,7 +1513,7 @@ function pbTests() {
     /* سقف فراخوانی */
     var rl = null; for (var i = 0; i < 40; i++) { rl = gw({ action: 'status' }); if (!rl.ok) break; }
     ok('سقف ۳۰ فراخوانی در ساعت', rl.ok === false && rl.error === 'rate_limited');
-    ok('همهٔ اکشن‌های نوشتنی dry_run دارند', PB_WRITE.every(function (a) { return typeof PB_ACTIONS[a] === 'function'; }) && Object.keys(PB_ACTIONS).length === 16 && typeof PB_ACTIONS.ebi_check === 'function');
+    ok('همهٔ اکشن‌های نوشتنی dry_run دارند', PB_WRITE.every(function (a) { return typeof PB_ACTIONS[a] === 'function'; }) && Object.keys(PB_ACTIONS).length === 17 && typeof PB_ACTIONS.ebi_check === 'function' && typeof PB_ACTIONS.ebi_mods === 'function' && PB_WRITE.indexOf('ebi_mods') < 0);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK;
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ درگاه انتشار درست است'));
