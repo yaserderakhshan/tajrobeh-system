@@ -1,4 +1,4 @@
-// صندوق یکتای خطا (v170.23.4): شکست یک گردش کار روی main ← اکشن درگاه بات «error_report» با منبع «CI».
+// صندوق یکتای خطا (v170.23.5): شکست یک گردش کار روی main ← اکشن درگاه بات «error_report» با منبع «CI».
 // اثر انگشت = نام گردش کار › نام گام شکسته؛ هیچ متن لاگ، نام یا شماره‌ای فرستاده نمی‌شود.
 // ورودی (env): RUN_ID، GITHUB_REPOSITORY، GITHUB_TOKEN، BOT_API_URL، BOT_API_KEY، WF_NAME، RUN_URL
 const { RUN_ID, GITHUB_REPOSITORY: REPO, GITHUB_TOKEN: GH, BOT_API_URL: URL_, BOT_API_KEY: KEY, WF_NAME, RUN_URL } = process.env;

@@ -172,7 +172,7 @@ function handleWebForm_(body) {
   var lf = typeof v1689WebFields_ === 'function' ? v1689WebFields_(flat) : null;
 
   // فرم آزمایشی را وارد کارتابل نکن: نه سطر، نه کارت، نه پیام (پیش از مسیر مدرسه و پرونده‌های تکراری، پس برای همهٔ فرم‌های سایت)
-  if (isTestLead_(name, phone, email, flat)) return;   /* v170.23.4: فرم تستی خطا نیست و در صندوق خطا نمی‌آید */
+  if (isTestLead_(name, phone, email, flat)) return;   /* v170.23.5: فرم تستی خطا نیست و در صندوق خطا نمی‌آید */
 
   var page  = String(flat['source_page'] || flat['_wp_http_referer'] || flat['__fluent_form_embded_post_id'] || '');
   var form  = String(pickKey_(flat, ['form_title', 'form_name']) || '');
@@ -388,7 +388,7 @@ function fmtDate_(d) { return Utilities.formatDate(d, TIMEZONE, 'yyyy-MM-dd'); }
 function fmtTime_(d) { return Utilities.formatDate(d, TIMEZONE, 'HH:mm'); }
 
 function logError_(err, e) {
-  /* v170.23.4: صندوق یکتای خطا (errbox.gs؛ در حالت خشک فقط حافظه). «Errors» فقط بایگانی بازیابی دادهٔ فرم است (وقتی e دادهٔ خام دارد). */
+  /* v170.23.5: صندوق یکتای خطا (errbox.gs؛ در حالت خشک فقط حافظه). «Errors» فقط بایگانی بازیابی دادهٔ فرم است (وقتی e دادهٔ خام دارد). */
   var inBox = false;
   try { if (typeof erbAdd_ === 'function') { erbAdd_('سایت', 'Code.gs', String(err)); inBox = true; } } catch (x1) {}
   /* v170.9: در حالت خشک (تست‌ها، از جمله تست‌های امنیت روی دیپلوی آزمایشی) ردیف واقعی در Errors نوشته نمی‌شود */

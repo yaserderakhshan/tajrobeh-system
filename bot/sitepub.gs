@@ -63,7 +63,7 @@ function splNote_(r, opts, res, pages, why) {
       if (act) { act.q = SPL_Q.fixed; act.next = 0; splWrite_(act); }
       return;
     }
-    /* نیمه یا شکست: صندوق خطا (v170.23.4؛ بی نام)، سطر نتیجه + صف (یکی برای هر شناسه) */
+    /* نیمه یا شکست: صندوق خطا (v170.23.5؛ بی نام)، سطر نتیجه + صف (یکی برای هر شناسه) */
     if (typeof erbAdd_ === 'function') erbAdd_('کار نیمه', kind, res + ': ' + String(why || ''));
     var tries = act ? act.tries + (opts.src === 'retry' ? 1 : 0) : 0;
     splWrite_({ id: id, name: v.name, kind: kind, res: res, pages: pages, why: why, tries: tries, q: '' });
@@ -153,7 +153,7 @@ function splRecon_(fix) {
     if (miss.length) {
       out.missing.push({ name: v.name, what: miss.join('، ') });
       /* تأییدشده‌ای که روی سایت نیست ← صف تلاش دوباره (اگر هنوز در صف نیست) */
-      if (fix && typeof erbAdd_ === 'function') erbAdd_('کار نیمه', 'آشتی شبانه', 'تأییدشده روی سایت نیست: ' + miss.join('، '));   /* v170.23.4، بی نام */
+      if (fix && typeof erbAdd_ === 'function') erbAdd_('کار نیمه', 'آشتی شبانه', 'تأییدشده روی سایت نیست: ' + miss.join('، '));   /* v170.23.5، بی نام */
       if (fix && !splActive_(String(v.id))) splWrite_({ id: String(v.id), name: v.name, kind: 'آشتی شبانه', res: 'شکست', pages: titles.join('، '), why: 'روی سایت نیست: ' + miss.join('، '), tries: 0, next: splNow_(), q: SPL_Q.wait });
     }
   });

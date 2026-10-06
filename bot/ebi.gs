@@ -203,7 +203,7 @@ function ebiWp_(method, path, body) {
     if (!j || typeof j !== 'object') j = { ok: false, error: 'bad_json' };
     if (code >= 400 && j.ok !== false) j.ok = false;
     j._code = code;
-    /* v170.23.4: سایت خراب جواب داد ← صندوق خطا (کار نیمه). پاسخ «نه» عادی (مثلاً پیدا نشد) خطا نیست. */
+    /* v170.23.5: سایت خراب جواب داد ← صندوق خطا (کار نیمه). پاسخ «نه» عادی (مثلاً پیدا نشد) خطا نیست. */
     if ((code >= 500 || j.error === 'bad_json') && typeof erbAdd_ === 'function') erbAdd_('کار نیمه', 'ebiWp_ ' + String(path).split('?')[0], 'site ' + code + ' ' + String(j.error || ''));
     return j;
   } catch (e) { tgErr_('ebiWp_ ' + path, e); return { ok: false, error: 'http' }; }
