@@ -135,6 +135,7 @@ for (const [name, fn] of suites) {
         if (__mode === 'net' && __calls.length < 3) throw new Error('Address unavailable: ' + u);
         if (__mode === 'parse' && b.parse_mode) return __resp(400, '{"ok":false,"description":"Bad Request: can\\'t parse entities"}');
         if (__mode === 'old') return __resp(400, '{"ok":false,"description":"Bad Request: query is too old and response timeout expired"}');
+        if (__mode === 'blk') return __resp(403, '{"ok":false,"error_code":403,"description":"Forbidden: bot was blocked by the user"}');
         return __resp(200, '{"ok":true}');
       };`);
     t.run(`__mode = 'net'; __calls = []; tgApi_('sendMessage', { chat_id: 5, text: 'x' })`);
@@ -150,6 +151,9 @@ for (const [name, fn] of suites) {
     chk('پیام به خانهٔ دوشناسه‌ای به هر دو می‌رسد', t.run(`__calls.filter(function (c) { return /sendMessage/.test(c.u); }).map(function (c) { return String(c.b.chat_id); }).join(' ')`) === '111111 222222');
     t.run(`__calls = []; tgSend_(70000017000002400, 'سلام')`);
     chk('عدد ادغام‌شده فرستاده نمی‌شود', t.run(`__calls.filter(function (c) { return /sendMessage/.test(c.u); }).length`) === 0);
+    // v170.25: ۴۰۳ بلاک یک درخواست، بی خطا، علامت در «کاربران بات»؛ ارسال بعدی اصلاً نمی‌رود
+    const eb = t.run(`(function () { var n = 0, orig = tgErr_; tgErr_ = function () { n++; }; __mode = 'blk'; __calls = []; tgSend_('555001', '<b>اطلاعیه</b>'); var c1 = __calls.length; tgSend_('555001', 'دوباره'); tgErr_ = orig; __mode = ''; return [n, c1, __calls.length, tgBlkIs_('555001')]; })()`);
+    chk('بلاک: یک درخواست، بی خطا، علامت، ارسال بعدی نمی‌رود', JSON.stringify(eb) === '[0,1,1,true]', JSON.stringify(eb));
   }
   const q = loadBot(BOT);
   chk('بدون ci_key.gs هیچ توقفی نیست', q.run(`ciPaused_({ triggerUid: 'u' }, 'tgPayTick', 'skip')`) === false);

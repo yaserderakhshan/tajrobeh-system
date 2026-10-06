@@ -23,6 +23,7 @@
 | `mag_contrib.gs` | مشارکت در مجله: بازبینی علمی، صدای نویسنده، افزوده | `mc` |
 | `author.gs` | حساب نویسندهٔ وردپرس، خودسرویس | `tgAu` |
 | `voice.gs` | موتور صدا: ویس به متن، مچ‌میکینگ صوتی، صدای نویسنده | `vx` |
+| `blocked.gs` | کاربری که بات را بلاک کرده: علامت در «کاربران بات»، رد ارسال، خبر لید باز، نوع ارسال‌های گروهی (v170.25) | `tgBlk` |
 | `seo_gemini.gs` | پیشنهاد سئوی مجله با Gemini (فقط محتوای منتشرشده) | `seo` |
 | `gemini_setup.gs` | اتصال Gemini؛ کلید فقط در Script Properties | `gem` |
 | `ci.gs` | مسیر دیپلوی خودکار: کلید یک‌بارمصرف، توقف کارهای زمان‌دار، تست، پایش خطا، اجرای یک‌باره | `ci` |
@@ -74,14 +75,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.22`
+نسخهٔ کد: `v170.25`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۲ | ۳۳ |
-| `telegram.gs` | ۳۷۵۱۵ | ۲۰۲۰ |
+| `telegram.gs` | ۳۷۵۳۳ | ۲۰۲۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -91,6 +92,7 @@
 | `mag_contrib.gs` | ۱۲۴۳ | ۹۷ |
 | `author.gs` | ۱۴۸ | ۱۰ |
 | `voice.gs` | ۱۰۷۶ | ۹۱ |
+| `blocked.gs` | ۱۷۹ | ۱۶ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
@@ -189,7 +191,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `v168.gs` `leadmodel.gs` `v17013.gs` `ebi.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `blocked.gs` `v168.gs` `leadmodel.gs` `v17013.gs` `ebi.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -349,6 +351,7 @@
 | تجربه پارتنرز ۲ | `ptTests` |
 | برنامهٔ من (v118) | `tgV118Tests` |
 | اشغال گاندی (v144) | `tgOccTests` |
+| بلاک شدن بات (v170.25) | `tgBlkTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |
 | نسخهٔ ۱۶۲ | `tgV162Tests` |
