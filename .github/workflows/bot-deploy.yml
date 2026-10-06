@@ -330,6 +330,7 @@ jobs:
           WP_BOT_APP_PASSWORD: ${{ secrets.WP_BOT_APP_PASSWORD }}
           CP_WP_SECRET: ${{ secrets.CP_WP_SECRET }}
           SITE_LEAD_SECRET: ${{ secrets.SITE_LEAD_SECRET }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}   # v170.16.1: کلید دوم درگاه
           SITE_SIG_ENFORCE: ${{ vars.SITE_SIG_ENFORCE }}   # v170.9: ۱ = لید سایت بی امضای درست رد می‌شود
         run: node .github/scripts/bot-monitor.mjs props
 

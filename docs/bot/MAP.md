@@ -74,14 +74,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.16`
+نسخهٔ کد: `v170.16.1`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۰ | ۳۲ |
-| `telegram.gs` | ۳۷۳۷۰ | ۲۰۱۵ |
+| `telegram.gs` | ۳۷۳۶۶ | ۲۰۱۵ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -95,9 +95,9 @@
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۵۶۶ | ۱۲۰ |
+| `publish.gs` | ۱۵۷۴ | ۱۲۰ |
 | `v168.gs` | ۲۱۴۷ | ۱۲۶ |
-| `wppage.gs` | ۱۷۸ | ۱۵ |
+| `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۸ | ۳۴ |
 | `leadmodel.gs` | ۷۷۸ | ۴۱ |
 | `comments.gs` | ۵۲۴ | ۳۱ |
@@ -106,9 +106,9 @@
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
-| `ebi.gs` | ۶۲۴ | ۴۳ |
-| `ci.gs` | ۴۸۱ | ۲۷ |
-| `sitesec.gs` | ۱۷۳ | ۱۲ |
+| `ebi.gs` | ۶۲۵ | ۴۳ |
+| `ci.gs` | ۴۸۲ | ۲۷ |
+| `sitesec.gs` | ۲۷۵ | ۲۲ |
 | `sec.gs` | ۱۰۵ | ۱ |
 | `version.gs` | ۸ | ۰ |
 
