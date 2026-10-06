@@ -164,8 +164,22 @@ fetch('/wp-json/tj/v1/camp?code='+encodeURIComponent(code)).then(function(r){ret
 <?php
 }, 30);
 
-/* v170.13: بخش آفر روی /persian-therapy/ و صفحه‌های کشوری، خودکار از tj_offers_last (بی ویرایش دستی هر برگه).
-   صفحه‌های انگلیسی (/en/) نه. دکمه همان «رزرو معارفه در تلگرام» صفحه با کد c_<کد>. */
+/* استاندارد اتصال کمپین به صفحه (۱۴ مهر ۱۴۰۵؛ جای نسخهٔ v170.13 که آفر را بالای کل صفحه و بیرون از طراحی می‌گذاشت)
+   آفرهای کمپین مراجعان (tj_offers_last، از تب «کمپین‌های مراجعان» هاب پذیرش) خودکار روی /persian-therapy/ و زیرصفحه‌ها می‌نشیند، نه /en/.
+   قاعده‌ها:
+   ۱) آفر همیشه داخل طراحی خود صفحه و داخل هیرو می‌نشیند، هرگز بالای هیرو یا بیرون از .tj2.
+      جا به ترتیب: نشانگر <div data-tj-offer-slot></div> اگر برگه دارد · پیش از ردیف اعداد هیرو (div.nums) · بعد از lede زیر h1.
+      اگر هیچ‌کدام نبود، چیزی تزریق نمی‌شود (بهتر از شکستن صفحه).
+   ۲) ظاهر یکی است: کارت سفید با حاشیهٔ قرمز برند، بج «پیشنهاد ویژه»، عنوان، و دعوت به اقدام؛ کل کارت یک لینک است. استایل خودبسنده است و به .btn صفحه وابسته نیست.
+   ۳) لینک همان کد شروع اختصاصی کمپین (c_<کد>) و data-tj-slot="offer" برای شمارش کلیک. */
+if (!function_exists('tj_offer_html')) {
+  function tj_offer_html($o) {
+    return '<a class="tj-offer" id="offer-' . esc_attr($o['code']) . '" href="' . esc_url($o['bot']) . '" target="_blank" rel="noopener" data-tj-slot="offer">'
+      . '<span class="tj-offer-k">پیشنهاد ویژه</span>'
+      . '<span class="tj-offer-t">' . esc_html($o['title']) . '</span>'
+      . '<span class="tj-offer-go">رزرو معارفه در تلگرام</span></a>';
+  }
+}
 add_filter('the_content', function ($c) {
   if (!is_page() || !in_the_loop() || !is_main_query()) return $c;
   $offers = get_option('tj_offers_last');
@@ -175,14 +189,32 @@ add_filter('the_content', function ($c) {
   $html = '';
   foreach ($offers as $o) {
     if (empty($o['path']) || strpos($path, $o['path']) !== 0) continue;
-    $html .= '<section class="tj-offer" id="offer-' . esc_attr($o['code']) . '" dir="rtl"><p class="tj-offer-t">' . esc_html($o['title']) . '</p>'
-           . '<a class="btn btn-brand" href="' . esc_url($o['bot']) . '" target="_blank" rel="noopener">رزرو معارفه در تلگرام</a></section>';
+    $html .= tj_offer_html($o);
   }
-  return $html === '' ? $c : $html . $c;
+  if ($html === '') return $c;
+  $html = '<div class="tj-offers">' . $html . '</div>';
+  if (preg_match('/<div data-tj-offer-slot[^>]*><\/div>/', $c)) {
+    return preg_replace('/<div data-tj-offer-slot[^>]*><\/div>/', $html, $c, 1);
+  }
+  $n = strpos($c, '<div class="nums"');
+  if ($n !== false) return substr($c, 0, $n) . $html . substr($c, $n);
+  $h = strpos($c, '</h1>');
+  if ($h !== false) {
+    $p = strpos($c, '</p>', $h);
+    if ($p !== false) { $p += 4; return substr($c, 0, $p) . $html . substr($c, $p); }
+  }
+  return $c;
 }, 20);
 add_action('wp_head', function () {
   if (!is_page()) return;
   $offers = get_option('tj_offers_last');
   if (empty($offers)) return;
-  echo '<style>.tj-offer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;max-width:1100px;margin:16px auto;padding:14px 18px;background:#faeced;border-inline-start:4px solid #c83f49;border-radius:12px;font-family:"Anjoman Max","Vazirmatn",system-ui,sans-serif;line-height:1.5}.tj-offer-t{margin:0;font-weight:800;color:#222222}@media (max-width:600px){.tj-offer{margin:12px 16px}.tj-offer .btn{width:100%;text-align:center}}</style>';
+  echo '<style id="tj-offer-css">.tj-offers{display:grid;gap:10px;margin:22px 0 4px;max-width:600px}'
+     . 'a.tj-offer,.tj2 a.tj-offer{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:12px 16px;background:#fff;border:1px solid var(--tj-line,#dfdfe2);border-inline-start:4px solid var(--tj-red,#c83f49);border-radius:14px;color:var(--tj-ink,#0e0e0e);text-decoration:none;line-height:1.6;font-family:inherit;transition:border-color .2s,box-shadow .2s}'
+     . 'a.tj-offer:hover,.tj2 a.tj-offer:hover{border-color:var(--tj-red,#c83f49);box-shadow:0 6px 20px rgba(200,63,73,.12);color:var(--tj-ink,#0e0e0e)}'
+     . '.tj-offer .tj-offer-k{flex:none;font-size:12px;font-weight:700;color:var(--tj-red,#c83f49);background:var(--tj-tint,#faeced);padding:2px 10px;border-radius:999px;white-space:nowrap;line-height:1.8}'
+     . '.tj-offer .tj-offer-t{flex:1 1 220px;font-weight:700;font-size:15px;color:var(--tj-ink,#0e0e0e)}'
+     . '.tj-offer .tj-offer-go{flex:none;font-size:14px;font-weight:700;color:var(--tj-red,#c83f49);white-space:nowrap}'
+     . '.tj-offer .tj-offer-go::after{content:" \2190"}'
+     . '@media (max-width:760px){.tj-offers{max-width:none}}</style>';
 });
