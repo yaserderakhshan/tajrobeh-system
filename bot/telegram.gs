@@ -6893,6 +6893,7 @@ function tgWatchdog(e) {
   try { if (typeof v1691Hourly_ === 'function') v1691Hourly_(e); } catch (eH) { tgErr_('v1691Hourly_', eH); }
   try { if (typeof ebiHourly_ === 'function') ebiHourly_(); } catch (eEb) { tgErr_('ebiHourly_', eEb); }
   try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }
+  try { if (typeof migSetupTick_ === 'function') migSetupTick_(); } catch (eMs) { tgErr_('migSetupTick_', eMs); }
   try { if (typeof migTick_ === 'function') migTick_(); } catch (eMg) { tgErr_('migTick_', eMg); }   /* v170.23.6.1: یادآوری، گزارش ۲۱ و پرسش موج مهاجرت */   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
   try { if (typeof ktbRouteMaybe_ === 'function') ktbRouteMaybe_(); } catch (eKr) { tgErr_('ktbRouteMaybe_', eKr); }   /* v170.16: کمپین C-004 */
   try { if (typeof v1691Weekly_ === 'function' && v1691Weekly_(e)) return; } catch (eW) { tgErr_('v1691Weekly_', eW); }

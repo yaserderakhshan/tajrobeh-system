@@ -416,6 +416,7 @@ function migShare_() {
   f.getViewers().forEach(function (u) { var e = u.getEmail().toLowerCase(); if (e !== owner && want.indexOf(e) < 0) { f.removeViewer(u); removed++; } });
   var have = f.getEditors().map(function (u) { return u.getEmail().toLowerCase(); });
   want.forEach(function (e) { if (have.indexOf(e) < 0) { f.addEditor(e); added++; } });
+  if (want.length === 2) migProp_('MIG_SHARED', String(migNow_()));
   return 'اشتراک هاب مهاجرت: ' + added + ' ویرایشگر تازه · ' + removed + ' دسترسی اضافه برداشته شد · ایمیل پیدا‌شده ' + want.length + ' از ۲';
 }
 function migV2Dev_() {
@@ -448,6 +449,14 @@ function tgV1702361Mig() {
   try { a += migShare_(); } catch (e) { a += 'خطا'; tgErr_('migShare_', e); }
   try { b += migV2Send_(); } catch (e2) { b += 'خطا'; tgErr_('migV2Send_', e2); }
   return a + ' · ' + b + ' · مهاجرت ' + (migOn_() ? 'روشن' : 'خاموش (MIG_ENABLED)');
+}
+/** ساعتی و مستقل از MIG_ENABLED: اگر یک‌باره پیش از پر شدن کلیدها اجرا شد، همین‌جا وقتی کلیدها آمد کار را تمام می‌کند (فقط ۹ تا ۲۱ تهران) */
+function migSetupTick_() {
+  var h = Number(Utilities.formatDate(new Date(migNow_()), TG_TZ, 'H')); if (h < 9 || h >= 21) return '';
+  var r = [];
+  if (!migProp_('MIG_SHARED') && String(cfg_('MIG_HUB', '') || '').trim()) { r.push(migShare_()); }
+  if (!migProp_('MIG_V2DEV_SENT') && String(cfg_('MIG_V2DEV_MSG', '') || '').trim() && tgNm_('v2dev')) r.push(migV2Send_());
+  return r.join(' · ');
 }
 /* اجرای دستی پرسش همیار (یاسر): /migpilot */
 function migOwnerCmd_(chat, t) {
@@ -525,6 +534,13 @@ function migTests() {
     migNightly_();
     ok('گزارش ۲۱: قیف، بی‌پاسخ‌ها، گیرکرده‌ها، بی نام مراجع', /قیف|تطبیق‌شده/.test(TG_MEM['mig:night']) && /بی‌پاسخ/.test(TG_MEM['mig:night']) && /گیرکرده/.test(TG_MEM['mig:night']) && TG_MEM['mig:night'].indexOf('مراجع سه') < 0);
     ok('شماره به E.164', migE164_('09121234567') === '+98' + '9121234567' && migE164_('0044 20 7946 0000') === '+44' + '2079460000');   // pii:ok ساختگی
+    /* پیام یک‌بارهٔ همکار نسخهٔ ۲: وقتی کلیدها آمد، یک بار؛ پاسخ ثبت و برای مالک */
+    TG_MEM['mig:now'] = new Date('2026-10-16T11:00:00+03:30').getTime();
+    TG_CFG_.MIG_V2DEV_MSG = 'پیام نمونه'; TG_CFG_.TG_NAMES.v2dev = 'همکار نمونه';
+    TG_MEM['people'].push({ id: 'P-9', name: 'همکار نمونه', chat: '609', roles: [], status: 'فعال' });
+    TG_OUTBOX = []; migSetupTick_(); migSetupTick_();
+    ok('پیام یک‌باره فقط یک بار و با متن تنظیمات', TG_OUTBOX.filter(function (x) { return x.chat === '609' && x.text === 'پیام نمونه'; }).length === 1);
+    ok('پاسخ همکار نسخهٔ ۲ برای مالک می‌رود', migRoute_('609', { text: 'پاسخ نمونه' }) === true && TG_OUTBOX.some(function (x) { return x.chat === String(TG_OWNER_CHAT) && /پاسخ نمونه/.test(x.text); }));
     TG_CFG_ = { MIG_ENABLED: '' };
     ok('پرچم خاموش ← دکمه و مسیر نیست', migMenuRow_().length === 0 && migRoute_('501', { text: MIG_BTN }) === false);
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
