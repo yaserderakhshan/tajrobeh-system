@@ -20,10 +20,11 @@ var CFG_NOTE = {
   RATE_HI: 'سقف نرخ جلسه (تومان)', SUPRATE_LO: 'کف نرخ حمایتی (تومان)', SUPRATE_HI: 'سقف نرخ حمایتی (تومان)', VK_ADMIN_SEED: 'مدیران پایهٔ ساختمان (JSON)', VK_GUARD: 'نام نگهبان ساختمان',
   RM_FOLDER_ID: 'شناسهٔ پوشهٔ «رودمپ‌ها» در درایو (فایل فقط از همین پوشه با ?rmfile سرو می‌شود)', RECEPTION_USER: 'یوزرنیم پذیرش در پیام‌ها (اختیاری؛ خالی = مسئول پذیرش تب «تیم پذیرش»)', SCHOOL_CHIEF_USER: 'یوزرنیم مسئول ارشد مدرسه (اختیاری؛ خالی = نقش «مسئول سازمانی» در «تیم پذیرش»)',
   TG_MAIN_CHANNEL: 'شناسهٔ عددی کانال اصلی تلگرام (v170.14)', TG_NAMES: 'نام همکاران در متن‌ها، تب‌ها و مسئول‌ها (JSON؛ v170.14)', TG_INP_SEED: 'دادهٔ اولیهٔ مکان و ساعت حضوری برای هاب تازه (JSON، اختیاری)',
-  TG_INP_MIG68: 'دادهٔ مهاجرت v68 ساعت‌های حضوری (JSON، اختیاری؛ اجرا شده)', PT_M0924: 'گیرنده‌های پیام یک‌بارهٔ ۲ مهر پارتنرها (JSON، اختیاری؛ فرستاده شده)'
+  TG_INP_MIG68: 'دادهٔ مهاجرت v68 ساعت‌های حضوری (JSON، اختیاری؛ اجرا شده)', PT_M0924: 'گیرنده‌های پیام یک‌بارهٔ ۲ مهر پارتنرها (JSON، اختیاری؛ فرستاده شده)',
+  VX_GROQ_LLM: 'مدل متنی گروک برای برداشت صوتی مراجع (اختیاری؛ خالی = انتخاب خودکار از فهرست زندهٔ گروک؛ v170.26)'
 };
 /* کلیدهایی که خالی بودنشان مجاز است (جایگزین دارند) */
-var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924'];
+var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'VX_GROQ_LLM'];
 /* v170.9: کلیدهای لازمی که در Property خالی‌اند (فقط نام). روی دیپلوی آزمایشی سنجیده می‌شود؛ هر کدام خالی = انتشار متوقف */
 function cfgMissing_() {
   var o = cfgPropGet_();
@@ -79,6 +80,18 @@ function cfgSync_() {
 function tgCfgSync() { return cfgSync_(); }
 /* ساعتی از tgWatchdog؛ خطایش چیزی را نمی‌شکند */
 function cfgHourly_() { try { return cfgSync_(); } catch (e) { try { tgErr_('cfgHourly_', e); } catch (e2) {} return { ok: false }; } }
+
+/* v170.26: کلید تازه در تب موجود (tgV1708Cfg و tgV1709CfgTab فقط تب خالی را می‌سازند) */
+function cfgTabAddKeys_(keys) {
+  var rows = cfgTabRows_(); if (!rows) return 'تب نیست';
+  var have = rows.map(function (r) { return String(r[0]).trim(); }), add = keys.filter(function (k) { return have.indexOf(k) < 0; });
+  if (!add.length) return 'بود';
+  var cur = cfgPropGet_(), nr = add.map(function (k) { return [k, cfgEnc_(cur[k] === undefined ? '' : cur[k]), CFG_NOTE[k] || '']; });
+  if (cfgDry_()) { TG_MEM['cfg:tab'] = rows.concat(nr); return 'افزوده شد'; }
+  var sh = SpreadsheetApp.openById(TG_SHEET_ID).getSheetByName(CFG_TAB);
+  sh.getRange(sh.getLastRow() + 1, 1, nr.length, 3).setNumberFormat('@').setValues(nr);
+  return 'افزوده شد';
+}
 
 /* یک‌باره بعد از انتشار: مقدارهای فعلی در Property و تب */
 function tgV1708Cfg() {

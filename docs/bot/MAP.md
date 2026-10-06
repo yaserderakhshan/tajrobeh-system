@@ -74,7 +74,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.22`
+نسخهٔ کد: `v170.26`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -90,7 +90,7 @@
 | `school2.gs` | ۴۳۹ | ۳۲ |
 | `mag_contrib.gs` | ۱۲۴۳ | ۹۷ |
 | `author.gs` | ۱۴۸ | ۱۰ |
-| `voice.gs` | ۱۰۷۶ | ۹۱ |
+| `voice.gs` | ۱۱۸۸ | ۱۰۱ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
@@ -102,7 +102,7 @@
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۶۱۸ | ۳۶ |
 | `dq.gs` | ۵۹۱ | ۴۸ |
-| `cfg.gs` | ۱۵۰ | ۱۴ |
+| `cfg.gs` | ۱۶۳ | ۱۵ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -189,7 +189,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `v168.gs` `leadmodel.gs` `v17013.gs` `ebi.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `v17013.gs` `ebi.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |

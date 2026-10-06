@@ -8,6 +8,7 @@
  *  ۲) صدای خصوصی (مراجع، پیام به پذیرش، هر ورودی متنی بات): فقط Groq whisper، فایل ذخیره نمی‌شود،
  *     متن به خود فرستنده برمی‌گردد و با «همین را بفرست» مثل یک پیام متنی وارد همان مسیر بات می‌شود.
  *     هیچ صدای مراجع به Gemini یا Auphonic نمی‌رود.
+ *     v170.26 (درخواست یاسر): اگر مدل متنی گروک در دسترس نبود، فقط متن حرف مراجع (نه صدا) برای برداشت به Gemini می‌رود.
  *  ۳) مچ‌میکینگ صوتی مراجع (vxc): مراجع حرفش را می‌گوید، Groq متن و برداشت ساختاریافته می‌سازد
  *     (موضوع، نیازها، سبک، جنسیت، سن، حالت جلسه)، مراجع تأیید می‌کند و مسیر عادی پذیرش ادامه پیدا می‌کند.
  *
@@ -26,11 +27,16 @@ var VX_HEAD = ['کد', 'زمان', 'کاربرد', 'ارجاع', 'chat_id', 'ن�
 var VX_ST = { Q: 'در صف', ENH: 'در حال تمیزکاری', TXT: 'در حال متن', ASK: 'منتظر تأیید گوینده', OK: 'تأیید شد', DONE: 'تحویل شد', ERR: 'خطا', DROP: 'کنار گذاشته شد' };
 var VX_FOLDER = 'صدا · تمیزشده و متن';
 var VX_GEM_MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest'];
-var VX_GROQ_LLM = 'llama-3.3-70b-versatile';
+/* v170.26: نام مدل متنی گروک دیگر در کد نیست: کلید VX_GROQ_LLM در «تنظیمات خصوصی بات»؛ خالی = انتخاب از فهرست زندهٔ گروک (vxGroqModel_).
+   ثبت در بارگذاری تا cfgSync_ ساعتی مقدار تب را بپذیرد؛ خود مدل هر بار تازه خوانده می‌شود. */
+cfg_('VX_GROQ_LLM', '');
 var VX_AU_ALGO = { filtering: true, leveler: true, normloudness: true, loudnesstarget: -16, denoise: true, denoisemethod: 'dynamic', denoiseamount: 0, deverbamount: 0 };
 var VX_DRY_JOBS = null;
 var VX_DRY_LLM = null;   // در TG_DRY: پاسخ جعلی مدل برای مچ‌میکینگ صوتی
 var VX_DRY_TEXT = null;  // در TG_DRY: متن جعلی ترانویسی
+var VX_DRY_GROQ = null;  // در TG_DRY: پاسخ جعلی گروک {code, text}؛ تهی = همان VX_DRY_LLM
+var VX_DRY_GEM = null;   // در TG_DRY: پاسخ جعلی جمنای برای برگشت
+var VX_DRY_GROQ_MODELS = null;   // در TG_DRY: فهرست جعلی مدل‌های گروک
 
 function vxDry_() { return (typeof TG_DRY !== 'undefined') ? !!TG_DRY : false; }
 function vxP_() { return PropertiesService.getScriptProperties(); }
@@ -616,15 +622,106 @@ var VX_C_SYS = 'تو دستیار پذیرش یک مرکز روان‌درمان
   'summary: دو جملهٔ کوتاه فارسی به دوم شخص محترمانه («شما…») که حرف اصلی مراجع را بدون قضاوت بازگو کند؛ بدون خط تیره\n' +
   'city: نام شهر اگر گفت، وگرنه خالی';
 
-function vxGroqJson_(sys, user) {
-  if (vxDry_()) return VX_DRY_LLM || { topic: 'anx', needs: ['n5'], prefs: [], gender: 'x', age: 'x', mode: 'x', crisis: false, summary: 'شما اضطراب دارید.' };
-  var key = vxP_().getProperty('GROQ_KEY') || vxP_().getProperty('groq');
+/* ---------- v170.26: مدل متنی گروک از تنظیمات یا فهرست زنده؛ ۴۰۴ ← جمنای و یک خبر به ناظر ---------- */
+var VX_GROQ_SKIP = /whisper|tts|guard|playai|orpheus|compound|embed|distil|safeguard|audio|vision/i;
+/* ترتیب ترجیح فقط میان مدل‌هایی که فهرست زندهٔ گروک همان لحظه فعال اعلام کرده؛ هیچ‌کدام نبود = اولین مدل متنی فعال */
+var VX_GROQ_RANK = [/gpt-oss-120b/i, /llama-4-maverick/i, /llama-3\.3-70b/i, /kimi-k2/i, /qwen.*32b/i, /gpt-oss-20b/i, /llama-4-scout/i, /70b/i];
+function vxGroqPick_(ids) {
+  var list = (ids || []).filter(function (x) { return x && !VX_GROQ_SKIP.test(x); });
+  for (var i = 0; i < VX_GROQ_RANK.length; i++) for (var j = 0; j < list.length; j++) if (VX_GROQ_RANK[i].test(list[j])) return list[j];
+  return list[0] || '';
+}
+function vxGroqKey_() { return vxP_().getProperty('GROQ_KEY') || vxP_().getProperty('groq'); }
+/** شناسهٔ مدل‌های فعال گروک از GET /models (کش ۶ ساعت) */
+function vxGroqModels_() {
+  if (vxDry_()) return VX_DRY_GROQ_MODELS || [];
+  var c = CacheService.getScriptCache(), hit = c.get('vx:groqmodels');
+  if (hit) return JSON.parse(hit);
+  var res = UrlFetchApp.fetch('https://api.groq.com/openai/v1/models', { muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + vxGroqKey_() } });
+  if (res.getResponseCode() !== 200) throw new Error('groq models ' + res.getResponseCode());
+  var ids = (JSON.parse(res.getContentText()).data || []).filter(function (m) { return m.active !== false; }).map(function (m) { return String(m.id); });
+  c.put('vx:groqmodels', JSON.stringify(ids), 21600);
+  return ids;
+}
+/** مدل متنی: کلید VX_GROQ_LLM؛ خالی = انتخاب از فهرست زندهٔ گروک */
+function vxGroqModel_() {
+  var m = String(cfg_('VX_GROQ_LLM', '') || '').trim();
+  if (m) return m;
+  try { return vxGroqPick_(vxGroqModels_()); } catch (e) { vxErr_('groq models', e); return ''; }
+}
+function vxGroqCall_(model, sys, user) {
+  if (vxDry_()) return VX_DRY_GROQ;
   var res = UrlFetchApp.fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'post', muteHttpExceptions: true, contentType: 'application/json',
-    headers: { Authorization: 'Bearer ' + key },
-    payload: JSON.stringify({ model: VX_GROQ_LLM, temperature: 0.1, response_format: { type: 'json_object' }, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }] }) });
-  if (res.getResponseCode() !== 200) throw new Error('groq llm ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 120));
-  var j = JSON.parse(res.getContentText());
-  return JSON.parse(j.choices[0].message.content);
+    headers: { Authorization: 'Bearer ' + vxGroqKey_() },
+    payload: JSON.stringify({ model: model, temperature: 0.1, response_format: { type: 'json_object' }, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }] }) });
+  return { code: res.getResponseCode(), text: res.getContentText() };
+}
+var VX_C_SCHEMA = { type: 'OBJECT', properties: {
+  topic: { type: 'STRING' }, needs: { type: 'ARRAY', items: { type: 'STRING' } }, prefs: { type: 'ARRAY', items: { type: 'STRING' } },
+  gender: { type: 'STRING' }, age: { type: 'STRING' }, mode: { type: 'STRING' }, couple: { type: 'BOOLEAN' }, crisis: { type: 'BOOLEAN' },
+  summary: { type: 'STRING' }, city: { type: 'STRING' } }, required: ['topic', 'summary'] };
+/** برگشت به جمنای: فقط متن (نه صدا) */
+function vxGemFallback_(sys, user) {
+  if (vxDry_()) { TG_OUTBOX.push({ kind: 'gemfb' }); if (!VX_DRY_GEM) throw new Error('Gemini: dry'); return VX_DRY_GEM; }
+  var o = vxGem_([{ text: sys + '\n\n' + user }], VX_C_SCHEMA);
+  delete o._model;
+  return o;
+}
+/* یک بار برای هر مدل ازکارافتاده (نه هر پیام): خبر به ناظرها؛ با موفقیت دوبارهٔ گروک پاک می‌شود */
+function vxGroqGone_(model) {
+  var k = 'VX_GROQ_GONE', m = model || '(بی‌مدل)';
+  var cur = vxDry_() ? TG_MEM['vxgone'] : vxP_().getProperty(k);
+  if (cur === m) return false;
+  if (vxDry_()) TG_MEM['vxgone'] = m; else vxP_().setProperty(k, m);
+  vxErr_('vxc llm', 'مدل گروک در دسترس نیست (۴۰۴): ' + m + ' · برگشت به جمنای');
+  try { tgWatchIds_().forEach(function (w) { tgSend_(w, '⚠️ مدل متنی گروک موتور صدا (<code>' + vxEsc_(m) + '</code>) دیگر در دسترس نیست. برداشت صوتی مراجع فعلاً با جمنای انجام می‌شود.\n\nمدل گروک باید عوض شود: در «تنظیمات خصوصی بات» کلید <code>VX_GROQ_LLM</code> را با یکی از مدل‌های فعال گروک پر کنید، یا خالی بگذارید تا خودکار از فهرست زندهٔ گروک انتخاب شود.'); }); } catch (x) {}
+  return true;
+}
+function vxGroqOk_() {
+  if (vxDry_()) { delete TG_MEM['vxgone']; return; }
+  try { if (vxP_().getProperty('VX_GROQ_GONE')) vxP_().deleteProperty('VX_GROQ_GONE'); } catch (e) {}
+}
+function vxGroqJson_(sys, user) {
+  if (vxDry_() && !VX_DRY_GROQ) return VX_DRY_LLM || { topic: 'anx', needs: ['n5'], prefs: [], gender: 'x', age: 'x', mode: 'x', crisis: false, summary: 'شما اضطراب دارید.' };
+  var model = vxGroqModel_(), r = model ? vxGroqCall_(model, sys, user) : { code: 404, text: 'no model' };
+  if (r.code === 200) {
+    try { var o = JSON.parse(JSON.parse(r.text).choices[0].message.content); vxGroqOk_(); return o; } catch (e) { r = { code: -1, text: 'json: ' + e }; }
+  }
+  if (r.code === 404 || /model_not_found|decommissioned|does not exist/i.test(String(r.text))) vxGroqGone_(model);
+  else vxErr_('vxc llm', 'groq ' + r.code + ' ' + String(r.text).slice(0, 120) + ' · برگشت به جمنای');
+  return vxGemFallback_(sys, user);
+}
+
+/* برداشت دوباره برای یادداشت لید (یک‌بارهٔ tgV17026VxRedo) */
+function vxcRedoNote_(r) {
+  var lbl = function (list, keys) { return list.filter(function (x) { return keys.indexOf(x.k) > -1; }).map(function (x) { return x.label.replace(/^\S+\s/, ''); }).join('، '); };
+  var p = ['🎙 برداشت دوباره از صدای مراجع (موتور صدا آن روز خطا داشت): ' + (r.summary || '')];
+  p.push('موضوع: ' + lbl(TG_TOPICS, [r.topic]));
+  if ((r.needs || []).length) p.push('گفته‌ها: ' + lbl(TG_NEEDS, r.needs));
+  if ((r.prefs || []).length) p.push('از تراپی: ' + lbl(TG_PREFS, r.prefs));
+  return p.join(' · ');
+}
+var VX_REDO_RX = /^(\d\d-\d\d) \d\d:\d\d [^:\n]*: 🎙 از صدای مراجع \(متن شد؛ فایل صدا نگه داشته نشد\):\s*\| متن: (.+)$/;
+/* v170.26 یک‌باره: ویس‌هایی که از ۱۴ مهر (۱۰-۰۶) بی‌برداشت ماندند دوباره برداشت می‌شوند؛ فقط یک یادداشت تازه روی لید (افزودنی) */
+function tgV17026VxRedo() {
+  var tab = cfgTabAddKeys_(['VX_GROQ_LLM']);
+  var model = vxGroqModel_();
+  var sh = tgSS_().getSheetByName(TG_LEADS), col = tgLeadCol_('یادداشت'), n = sh.getLastRow();
+  var vals = n > 1 ? sh.getRange(2, col, n - 1, 1).getValues() : [], seen = 0, done = 0, bad = 0;
+  for (var i = 0; i < vals.length; i++) {
+    var cell = String(vals[i][0] || '');
+    if (cell.indexOf('🎙 برداشت دوباره') > -1) continue;
+    var lines = cell.split('\n');
+    for (var j = 0; j < lines.length; j++) {
+      var m = lines[j].match(VX_REDO_RX);
+      if (!m || m[1] < '10-06') continue;
+      seen++;
+      try { tgLeadNote_(i + 2, vxcRedoNote_(vxcNormalize_(vxGroqJson_(VX_C_SYS, 'حرف مراجع:\n' + m[2]), m[2])), 'بات'); done++; }
+      catch (e) { bad++; vxErr_('vxRedo', e); }
+      break;
+    }
+  }
+  return 'تب تنظیمات (VX_GROQ_LLM): ' + tab + ' · مدل گروک از فهرست زنده: ' + (model || 'هیچ، جمنای') + ' · ویس بی‌برداشت: ' + seen + ' · دوباره پردازش شد: ' + done + ' · ناموفق: ' + bad;
 }
 
 /** بی‌مدل: اگر Groq جواب نداد، حداقل موضوع از کلیدواژه‌ها */
@@ -1032,6 +1129,9 @@ function vxTests() {
   ok('مچ صوتی: زوج ← rel', vxcNormalize_({ topic: 'anx', couple: true }, '').topic === 'rel');
   ok('خلاصه بی‌خط‌تیره', n.summary.indexOf('—') < 0);
   ok('حدس بی‌مدل: همسر ← rel', vxcGuess_('با همسرم دعوا داریم') === 'rel');
+  ok('گروک: انتخاب از فهرست زنده بی whisper و guard', vxGroqPick_(['whisper-large-v3', 'meta-llama/llama-guard-4-12b', 'llama-3.1-8b-instant', 'openai/gpt-oss-20b']) === 'openai/gpt-oss-20b');
+  ok('گروک: فهرست بی مدل آشنا ← اولین مدل متنی', vxGroqPick_(['whisper-large-v3', 'new-model-x']) === 'new-model-x' && vxGroqPick_([]) === '');
+  ok('برداشت دوباره: الگوی یادداشت بی‌خلاصه', VX_REDO_RX.test('10-06 14:02 مراجع: 🎙 از صدای مراجع (متن شد؛ فایل صدا نگه داشته نشد):  | متن: استرس دارم') && !VX_REDO_RX.test('10-06 14:02 مراجع: 🎙 از صدای مراجع (متن شد؛ فایل صدا نگه داشته نشد): شما نگرانید | متن: استرس دارم'));
   ok('امضای لینک ثابت است', vxSig_('E-4001', '1') === vxSig_('E-4001', '1') && vxSig_('E-4001', '1') !== vxSig_('E-4001', '2'));
   ok('تکه‌تکه‌کردن متن بلند', vxTextChunks_(new Array(40).join('پاراگراف نسبتاً بلند برای تست. ') + '\n\n' + new Array(40).join('دومی. '), 600).length >= 2);
   return out;
@@ -1069,7 +1169,19 @@ function vxTestsRun() {
     vxUniversal_(C, { chat: { id: C }, from: from, voice: { file_id: 'V2', duration: 12 } }, 'تست', '');
     lines.push((kbHas(last(), 'vx:u:ok') && kbHas(last(), 'vx:c:use') && last().text.indexOf('نگه داشته نمی‌شود') > -1 ? '✓' : '✗') + ' ویس بی‌حالت: متن + «همین را بفرست» + پیشنهاد مچ');
     lines.push((tgGetVal_('vxu', C) === VX_DRY_TEXT ? '✓' : '✗') + ' متن ویس برای تزریق نگه داشته شد');
+    /* v170.26: مدل گروک ۴۰۴ ← جمنای، و فقط یک خبر به ناظر */
+    var gone = function () { return TG_OUTBOX.filter(function (x) { return x.kind === 'msg' && String(x.text).indexOf('مدل متنی گروک') > -1; }).length; };
+    VX_DRY_GROQ_MODELS = ['whisper-large-v3', 'llama-3.3-70b-versatile'];
+    VX_DRY_GROQ = { code: 404, text: '{"error":{"code":"model_not_found"}}' };
+    VX_DRY_GEM = { topic: 'dep', needs: ['n1'], prefs: [], gender: 'x', age: 'x', mode: 'x', crisis: false, summary: 'شما مدتی است بی‌حوصله‌اید.' };
+    vxcIntro_(C); vxcAnalyze_(C, 'مدتی است بی‌حوصله‌ام', 'تست');
+    lines.push((TG_OUTBOX.some(function (x) { return x.kind === 'gemfb'; }) && last().text.indexOf('بی‌حوصله') > -1 ? '✓' : '✗') + ' گروک ۴۰۴: برداشت با جمنای');
+    vxcAnalyze_(C, 'هنوز هم', 'تست');
+    lines.push((gone() === 1 ? '✓' : '✗') + ' گروک ۴۰۴: فقط یک خبر به ناظر (' + gone() + ')');
+    VX_DRY_GROQ = { code: 200, text: JSON.stringify({ choices: [{ message: { content: JSON.stringify({ topic: 'anx', summary: 'شما نگرانید.' }) } }] }) };
+    vxcAnalyze_(C, 'نگرانم', 'تست');
+    lines.push((!TG_MEM['vxgone'] && last().text.indexOf('نگرانید') > -1 ? '✓' : '✗') + ' گروک دوباره سالم: برداشت از گروک و علامت ۴۰۴ پاک شد');
   } catch (e) { lines.push('✗ خطا: ' + e + ' ' + (e.stack || '').slice(0, 200)); }
-  finally { TG_DRY = keepDry; TG_MEM = keepMem; TG_OUTBOX = keepBox; VX_DRY_TEXT = null; VX_DRY_LLM = null; }
+  finally { TG_DRY = keepDry; TG_MEM = keepMem; TG_OUTBOX = keepBox; VX_DRY_TEXT = null; VX_DRY_LLM = null; VX_DRY_GROQ = null; VX_DRY_GEM = null; VX_DRY_GROQ_MODELS = null; }
   return lines.join('\n');
 }
