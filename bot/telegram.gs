@@ -3618,6 +3618,11 @@ function tgDeskDigest_(kind) {
     if (kind === 'eve' && p.style === TG_DESK_STYLES[2]) continue;      // فقط صبح
     if (isFri && kind !== 'eve') continue;                              // جمعه فقط عصر
     if (!leads.length && kind === 'eve') continue;
+    if (kind === 'morn' && typeof afxDeskMorning_ === 'function') {   /* v170.30: صبح هر کس فقط کارهای خودش */
+      var mb = afxDeskMorning_(leads, p, typeof tgDutyBoss_ === 'function' ? tgDutyBoss_() : null);
+      if (mb) tgSend_(p.chat, '<b>' + title + '</b>\n\n' + mb);
+      continue;
+    }
     tgSend_(p.chat, '<b>' + title + '</b>\n\n' + body);
   }
 }
@@ -6899,6 +6904,7 @@ function tgWatchdog(e) {
   try { if (typeof aiRetryTick_ === 'function') aiRetryTick_(); } catch (eAr) { tgErr_('aiRetryTick_', eAr); }   /* v170.23.7: ویس‌های بی‌متن */
   try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
   try { if (typeof ps2FixMaybe_ === 'function') ps2FixMaybe_(); } catch (eP2) { tgErr_('ps2FixMaybe_', eP2); }
+  try { if (typeof afx2Hourly_ === 'function') afx2Hourly_(); } catch (eAx2) { tgErr_('afx2Hourly_', eAx2); }   /* v170.30: ارجاع صفر هفتگی */
   try { if (typeof afxHourly_ === 'function') afxHourly_(); } catch (eAx) { tgErr_('afxHourly_', eAx); }   /* v170.29: تماس اول لید، یادآوری پروفایل */
   try { if (typeof inbTick_ === 'function') inbTick_(); } catch (eIb) { tgErr_('inbTick_', eIb); }   /* v170.28: صندوق یکتا (همگام‌سازی، مهلت، ارجاع، گزارش هفتگی) */
   try { if (typeof ps3Tick_ === 'function') ps3Tick_(); } catch (eP3) { tgErr_('ps3Tick_', eP3); }   /* v170.23.9: یادآوری ویزیت و فرم بعد از ویزیت */
@@ -16703,6 +16709,7 @@ function tgInpReqMake_(chat, who, q) {
            : q.k === 'add' ? tgInpPlaceName_(q.pid, d) + '، ' + q.day + '، ' + tgInpHs_(Number(q.from)) + ' تا ' + tgInpHs_(Number(q.to))
            : tgInpRowText_({ p: q.pid, day: q.day, from: q.from, to: q.to, room: q.room }) + (q.k === 'off' ? ' · ' + q.date : '');
   var roomNote = (q.k === 'add' || q.k === 'chg') ? (q.room ? 'اتاق خالی: ' + tgFa_(q.room) : 'در این بازه اتاق خالی نیست') : '';
+  if ((q.k === 'add' || q.k === 'chg') && !q.room && typeof afxInpAlt_ === 'function') { var alt = afxInpAlt_(q, d); if (alt.length) roomNote += '\nنزدیک‌ترین بازه‌های خالی: ' + alt.join(' · '); }   /* v170.30 */
   var t = tgInpTab_(TG_INP_REQ, TG_INP_QHEAD);
   t.append([id, tgInpNow_(), who.name, String(chat), q.pid, kindLabel, q.day || '', q.from || '', q.to || '', q.room || '', q.key || '', q.date || '', what + (q.late ? ' · کمتر از ' + tgFa_(tgInpRule_('release_hours', who.name, q.pid)) + ' ساعت مانده' : ''), 'منتظر پذیرش', '', '']);
   var kb = { inline_keyboard: [[{ text: '✅ تأیید', callback_data: 'iv:y:' + id }, { text: '❌ رد', callback_data: 'iv:n:' + id }]] };

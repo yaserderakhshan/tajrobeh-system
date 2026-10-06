@@ -285,7 +285,8 @@ function inbReplyIn_(chat, m, loose) {
   var o = inbAdd_('re', ref || ('R-' + chat + '-' + rt.message_id), { chat: chat, text: text, owner: base ? base['صاحب'] : '', q: base ? base['صف'] : '', more: true });
   var c = inbChatOf_(o['صاحب']) || String(TG_OWNER_CHAT || '');
   if (c) {
-    tgNotify_(c, TG_NK.task, '📮 <b>جواب به پیام بات</b> · ' + o['شناسه'] + (ref ? ' · <code>' + tgEsc_(ref) + '</code>' : '') + '\n\n<b>پیام بات:</b> ' + tgEsc_(quoted.slice(0, 300)) + '\n\n<b>جواب:</b> ' + tgEsc_(String(text).slice(0, 1500)), { ref: o['شناسه'], markup: inbItemKb_(o) });
+    var sug = m.text && typeof afxOpsSuggest_ === 'function' ? afxOpsSuggest_(chat, m.text, quoted) : '';   /* v170.30 */
+    tgNotify_(c, TG_NK.task, '📮 <b>جواب به پیام بات</b> · ' + o['شناسه'] + (ref ? ' · <code>' + tgEsc_(ref) + '</code>' : '') + '\n\n<b>پیام بات:</b> ' + tgEsc_(quoted.slice(0, 300)) + '\n\n<b>جواب:</b> ' + tgEsc_(String(text).slice(0, 1500)) + (sug ? '\n\n' + sug : ''), { ref: o['شناسه'], markup: inbItemKb_(o) });
     if (!m.text && m.message_id && !inbDry_()) { try { tgApi_('copyMessage', { chat_id: c, from_chat_id: chat, message_id: m.message_id }); } catch (eC) {} }
   }
   tgSend_(chat, '✓ رسید؛ به همکار مسئول همین کار رسید و پاسخ همین‌جا می‌آید.');

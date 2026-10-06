@@ -214,6 +214,7 @@ function ktbRemind_(I) {
     var late = I[k].filter(function (x) { return x.since && ktbNow_() - x.since >= KTB_SLA_D * 86400000; }).length;
     L.push('• ' + KTB_KIND[k] + ': ' + tgFa_(I[k].length) + (late ? ' (⏰ ' + tgFa_(late) + ' از مهلت گذشته)' : ''));
   });
+  if (typeof afxOwnerLines_ === 'function') L = L.concat(afxOwnerLines_());   /* v170.30: از مهلت گذشته و بی‌صاحب */
   var text = L.join('\n'), kb = { inline_keyboard: [[{ text: '🗂 باز کن', callback_data: 'ktb:h' }]] };
   if (ktbDry_()) { (TG_MEM['ktb:remind'] = TG_MEM['ktb:remind'] || []).push(text); return text; }
   TG_OUT_KIND = 'سیستم'; TG_OUT_REF = 'کارتابل';

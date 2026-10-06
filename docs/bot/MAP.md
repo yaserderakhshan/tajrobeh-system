@@ -77,14 +77,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.29`
+نسخهٔ کد: `v170.30`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۲ | ۳۳ |
-| `telegram.gs` | ۳۷۷۵۱ | ۲۰۴۰ |
+| `telegram.gs` | ۳۷۷۵۸ | ۲۰۴۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -115,12 +115,13 @@
 | `sec.gs` | ۱۰۵ | ۱ |
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
-| `kartable.gs` | ۴۲۵ | ۳۲ |
+| `kartable.gs` | ۴۲۶ | ۳۲ |
 | `ai.gs` | ۲۱۱ | ۱۵ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `psy3.gs` | ۳۳۷ | ۳۲ |
-| `inbox.gs` | ۴۹۴ | ۴۴ |
+| `inbox.gs` | ۴۹۵ | ۴۴ |
 | `afx.gs` | ۱۹۰ | ۱۵ |
+| `afx2.gs` | ۱۵۷ | ۹ |
 
 ### کارهای زمان‌دار
 
@@ -155,6 +156,7 @@
 | ثابت | نام تب | فایل‌ها |
 |---|---|---|
 | `AFX_RC_TAB` | «آشتی کارهای تماس اول · پیش‌نمایش» | `afx.gs` |
+| `AFX_ZR_TAB` | «ارجاع صفر · هفتگی» | `afx2.gs` |
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
 | `CM_FIX_TAB` | «اصلاح کامنت‌ها · پیش‌نمایش» | `comments.gs` |
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
@@ -204,7 +206,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `afx.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `afx.gs` `afx2.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -379,6 +381,7 @@
 | روان‌پزشکی: ویزیت و فرم اداری (v170.23.9) | `ps3Tests` |
 | صندوق یکتا (v170.28) | `inbTests` |
 | خودکارسازی کارهای مانده (v170.29) | `afxTests` |
+| خودکارسازی کارهای مانده، بخش ۲ (v170.30) | `afx2Tests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
