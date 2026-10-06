@@ -1,0 +1,70 @@
+name: سایت · آینه از سایت زنده (site-mirror)
+
+# ۱۴ مهر ۱۴۰۵ (تصمیم یاسر؛ جای site-pull): سایت زنده مرجع اسنیپت‌ها، برگه‌ها و قالب‌هاست. Cowork روی سایت کار می‌کند و بعد از هر
+# ویرایش این گردش کار را با repository_dispatch (site-changed) صدا می‌زند؛ هر ساعت هم خودش اجرا می‌شود.
+# فقط GET به سایت (site/tools/site-mirror.mjs)؛ هرگز چیزی روی سایت نمی‌نویسد. اگر تفاوتی بود یک کامیت «آینه از سایت زنده [skip ci]»
+# روی main. رمزهای انتشار خالی؛ فایل شبیه رمز یا با اطلاعات شخصی نوشته نمی‌شود و فقط در خلاصه می‌آید. بی هیچ مدل هوش مصنوعی.
+on:
+  schedule:
+    - cron: '7 * * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [site-changed]
+
+permissions:
+  contents: write   # فقط کامیت آینه روی main (و پاک کردن شاخهٔ قدیمی site-sync/live)
+  actions: read     # قفل مشترک با site-deploy
+
+jobs:
+  mirror:
+    environment: production   # رمز claude-ops فقط در Environment «production» (فقط main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # concurrency گیت‌هاب اجرای منتظر قبلی را لغو می‌کند؛ آینهٔ ساعتی نباید یک انتشار در صف را بی‌صدا لغو کند.
+      # پس قفل مشترک: هر اجرای site-deploy یا site-mirror صبر می‌کند تا اجراهای زودتر هر دو تمام شوند.
+      - name: قفل مشترک با site-deploy
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          LOCK_WORKFLOWS: site-deploy.yml,site-mirror.yml
+          LOCK_MAX_MIN: '55'
+        run: node .github/scripts/bot-lock.mjs wait
+
+      # شاخهٔ قدیمی خروجی خام (نام همکاران در تاریخچه) اگر هنوز هست پاک می‌شود
+      - name: پاک کردن شاخهٔ قدیمی site-sync/live
+        run: |
+          if git ls-remote --exit-code origin refs/heads/site-sync/live > /dev/null; then
+            git push origin --delete site-sync/live && echo "شاخهٔ site-sync/live پاک شد."
+          fi
+
+      - name: آینه
+        id: mirror
+        env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          PII_NAMES: ${{ secrets.PII_NAMES }}
+          BOT_API_URL: ${{ secrets.BOT_API_URL }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+          REPORT_CHAT_ID: ${{ secrets.REPORT_CHAT_ID }}
+        run: |
+          git pull -q --ff-only origin main
+          node site/tools/site-mirror.mjs
+
+      - name: کامیت آینه روی main
+        if: steps.mirror.outputs.changed == '1'
+        run: |
+          git config user.name "tajrobeh-site-mirror"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A site
+          git diff --cached --quiet && { echo "تفاوتی نماند."; exit 0; }
+          git commit -qm "آینه از سایت زنده [skip ci]"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep $((i*5)); done
+          echo "کامیت $(git rev-parse --short HEAD) روی main."

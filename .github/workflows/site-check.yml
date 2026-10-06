@@ -28,11 +28,29 @@ jobs:
           HEAD: ${{ github.event.pull_request.head.sha }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: node site/tools/site-check.mjs
-      # v170.9: در PR رمز وردپرس نیست (رمزها فقط در Environment «production» برای main)؛ مقایسه با سایت زنده بی ورود
-      # و فقط برای اطلاع است. سنجش کامل پیش از نوشتن، در site-deploy روی main انجام می‌شود.
-      - name: برنامهٔ انتشار و ناهمخوانی با سایت زنده (بی ورود)
-        continue-on-error: true
+
+  # ۱۴ مهر ۱۴۰۵: مقایسهٔ برنامهٔ انتشار با سایت زنده روی PR، با رمز «فقط خواندن» (Environment «site-read»، روی PRها هم در دسترس).
+  # رمز نوشتن (production) فقط برای main است. continue-on-error برداشته شد: بی رمز یا اگر سایت در دسترس نبود، این بررسی قرمز است، نه سبزِ دروغین.
+  live-plan:
+    runs-on: ubuntu-latest
+    environment: site-read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: برنامهٔ انتشار و ناهمخوانی با سایت زنده (فقط خواندن)
         env:
           BEFORE: ${{ github.event.pull_request.base.sha }}
           AFTER: ${{ github.event.pull_request.head.sha }}
-        run: node site/tools/site-deploy.mjs plan
+          WP_USER: ${{ secrets.WP_READ_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_READ_APP_PASSWORD }}
+        run: |
+          if [ -z "$WP_USER" ] || [ -z "$WP_APP_PASSWORD" ]; then
+            echo "::error::دسترسی فقط‌خواندنی (Environment «site-read»: WP_READ_USER و WP_READ_APP_PASSWORD) هنوز ساخته نشده؛ مقایسه با سایت زنده انجام نشد."
+            exit 1
+          fi
+          node site/tools/site-deploy.mjs plan
