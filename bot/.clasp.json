@@ -43,7 +43,8 @@
     "psy3.gs",
     "inbox.gs",
     "afx.gs",
-    "afx2.gs"
+    "afx2.gs",
+    "intake.gs"
   ],
   "htmlExtensions": [
     ".html"

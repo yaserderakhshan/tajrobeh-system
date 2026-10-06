@@ -77,14 +77,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.30`
+نسخهٔ کد: `v170.31`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۲ | ۳۳ |
-| `telegram.gs` | ۳۷۷۵۸ | ۲۰۴۰ |
+| `telegram.gs` | ۳۷۷۶۵ | ۲۰۴۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -122,6 +122,7 @@
 | `inbox.gs` | ۴۹۵ | ۴۴ |
 | `afx.gs` | ۱۹۰ | ۱۵ |
 | `afx2.gs` | ۱۵۷ | ۹ |
+| `intake.gs` | ۱۵۷ | ۱۳ |
 
 ### کارهای زمان‌دار
 
@@ -167,6 +168,7 @@
 | `HUB_QUEUES` | «صف‌ها» | `ops.gs` |
 | `HUB_REPORT` | «گزارش من» | `ops.gs` |
 | `HUB_TODAY` | «امروز» | `ops.gs` |
+| `ITK_TAB` | «اصلاح دادهٔ لیدها · پیش‌نمایش» | `intake.gs` |
 | `KTB_FX_TAB` | «اصلاح پروفایل‌ها · پیش‌نمایش» | `kartable.gs` |
 | `KTB_RT_TAB` | «مسیریابی منتظرها · پیش‌نمایش» | `kartable.gs` |
 | `LM_DASH` | «داشبورد لید» | `leadmodel.gs` |
@@ -206,7 +208,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `afx.gs` `afx2.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `afx.gs` `afx2.gs` `intake.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -382,6 +384,7 @@
 | صندوق یکتا (v170.28) | `inbTests` |
 | خودکارسازی کارهای مانده (v170.29) | `afxTests` |
 | خودکارسازی کارهای مانده، بخش ۲ (v170.30) | `afx2Tests` |
+| درگاه‌های ورودی: اصلاح دادهٔ لیدها (v170.31) | `itkTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)

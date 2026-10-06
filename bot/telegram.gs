@@ -3370,6 +3370,7 @@ function tgOpenLeadsOf_(v, hm, now) {
     const status = tgStOf_(statusRaw) || statusRaw;
     if (!name && !String(v[i][5] || '').trim()) continue;
     if (statusRaw && tgStClosed_(statusRaw)) continue;
+    if (typeof itkInternal_ === 'function' && itkInternal_(v[i], hm)) continue;   /* v170.31: سطر داخلی و تست در آمار نیست */
     /* لید مدرسه در کارتابل پذیرش نمی‌آید؛ جایش هاب مدرسه است */
     if (tgSection_(String(v[i][2] || ''), '') === 'مدرسه') continue;
     let when = v[i][0];
@@ -5236,6 +5237,7 @@ function tgClearBooking_(chat) {
 
 /* v166.12: true/false برمی‌گرداند. اگر نوشتن شکست خورد، لید در TG_LEAD_RETRY می‌ماند و tgLeadRetry_ (از tgDutyTick) دوباره می‌نویسد. */
 function tgAppendLead_(o, isRetry) {
+  if (!isRetry && typeof itkCollGuard_ === 'function' && itkCollGuard_(o)) return true;   /* v170.31: «درخواست صحبت با همکار» لید مراجع نیست */
   if (!isRetry && typeof igLeadPrefill_ === 'function') o = igLeadPrefill_(o);   /* v168: منبع اینستاگرام و فیلدهای پیش‌پر */
   if (!isRetry && typeof ebiLeadPrefill_ === 'function') o = ebiLeadPrefill_(o);   /* v170.16: منبع «کمپین › C-004 › <نوع>» */
   if (!isRetry && typeof v168NewLeadNext_ === 'function') o = v168NewLeadNext_(o);   /* v168 فاز ۲: لید تازه همان لحظه تکلیف دارد */
@@ -6904,6 +6906,7 @@ function tgWatchdog(e) {
   try { if (typeof aiRetryTick_ === 'function') aiRetryTick_(); } catch (eAr) { tgErr_('aiRetryTick_', eAr); }   /* v170.23.7: ویس‌های بی‌متن */
   try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
   try { if (typeof ps2FixMaybe_ === 'function') ps2FixMaybe_(); } catch (eP2) { tgErr_('ps2FixMaybe_', eP2); }
+  try { if (typeof itkMaybe_ === 'function') itkMaybe_(); } catch (eIk) { tgErr_('itkMaybe_', eIk); }   /* v170.31: اصلاح دادهٔ لیدها با «اوکی» Cowork */
   try { if (typeof afx2Hourly_ === 'function') afx2Hourly_(); } catch (eAx2) { tgErr_('afx2Hourly_', eAx2); }   /* v170.30: ارجاع صفر هفتگی */
   try { if (typeof afxHourly_ === 'function') afxHourly_(); } catch (eAx) { tgErr_('afxHourly_', eAx); }   /* v170.29: تماس اول لید، یادآوری پروفایل */
   try { if (typeof inbTick_ === 'function') inbTick_(); } catch (eIb) { tgErr_('inbTick_', eIb); }   /* v170.28: صندوق یکتا (همگام‌سازی، مهلت، ارجاع، گزارش هفتگی) */
@@ -9470,9 +9473,11 @@ function tgMonWeek_(back) {
   const sh = tgSS_().getSheetByName(TG_LEADS);
   if (sh && sh.getLastRow() > 1) {
     const v = sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(21, sh.getLastColumn())).getValues();
+    const hmI = tgLeadHeadMap_(sh);
     for (var i = 0; i < v.length; i++) {
       const d = tgAsDate_(v[i][0], v[i][1]);
       if (!d || d < a || d >= b) continue;
+      if (typeof itkInternal_ === 'function' && itkInternal_(v[i], hmI)) continue;   /* v170.31 */
       if (!String(v[i][3] || '').trim() && !String(v[i][5] || '').trim()) continue;
       m.total++;
       const k = tgLeadSrc_(v[i][2], v[i][4]);
@@ -32144,9 +32149,11 @@ function tgCrmRows_() {
     }
   } catch (e) {}
   var out = [];
+  var hmI = tgLeadHeadMap_(sh);
   for (var i = 0; i < v.length; i++) {
     var name = String(v[i][3] || '').trim(), phone = String(v[i][5] || '').trim();
     if (!name && !phone) continue;
+    if (typeof itkInternal_ === 'function' && itkInternal_(v[i], hmI)) continue;   /* v170.31 */
     var d = (v[i][0] instanceof Date) ? new Date(v[i][0]) : tgContactDate_(v[i][0], now);
     if (!d) continue;
     var hhmm = tgLatinDigits_(String(v[i][1] || '').trim());
