@@ -1,0 +1,1025 @@
+{
+  "version": 1,
+  "rule": "کد تازه: <خط>-<جا>[-<جزء>]، حروف کوچک لاتین، رقم و «-». کد قدیمی در aliases می‌ماند و کار می‌کند. هر صفحه یا کمپین تازه اول اینجا ثبت می‌شود، بعد منتشر می‌شود.",
+  "lines": {
+    "pz": "پذیرش",
+    "sch": "مدرسه",
+    "psy": "روان‌پزشکی",
+    "org": "سازمانی",
+    "rm": "رودمپ",
+    "cmp": "کمپین",
+    "co": "همکاری"
+  },
+  "families": [
+    {
+      "prefix": "mg-",
+      "line": "pz",
+      "label": "مجله › مقاله",
+      "shape": "mg-<شناسهٔ مطلب>-<t|d|a|k|s>[-i]",
+      "by": "اسنیپت مجله"
+    },
+    {
+      "prefix": "mag_",
+      "line": "pz",
+      "label": "مجله (قدیمی)",
+      "shape": "mag_<نامک>"
+    },
+    {
+      "prefix": "tm-",
+      "line": "pz",
+      "label": "صفحهٔ تیم › رزرو معارفه",
+      "shape": "tm-<slug>",
+      "by": "504078"
+    },
+    {
+      "prefix": "c_",
+      "line": "cmp",
+      "label": "پیشنهاد فرهنگی",
+      "shape": "c_<کد>"
+    },
+    {
+      "prefix": "ebi",
+      "line": "cmp",
+      "label": "کمپین ابی",
+      "shape": "ebi<id>-<6hex> یا ebi-<نوع>"
+    },
+    {
+      "prefix": "ig_",
+      "line": "pz",
+      "label": "اینستاگرام",
+      "shape": "ig_<ts|tl>_<کد>"
+    },
+    {
+      "prefix": "web_",
+      "line": "sch",
+      "label": "رویداد مدرسه › وبینار",
+      "shape": "web_<رویداد>_<جا>"
+    },
+    {
+      "prefix": "pre_",
+      "line": "sch",
+      "label": "رویداد مدرسه › پیش‌ثبت‌نام",
+      "shape": "pre_<رویداد>_<جا>"
+    },
+    {
+      "prefix": "app_",
+      "line": "sch",
+      "label": "رویداد مدرسه › درخواست",
+      "shape": "app_<رویداد>_<جا>"
+    },
+    {
+      "prefix": "cp_",
+      "line": "sch",
+      "label": "رویداد مدرسه › کد تخفیف",
+      "shape": "cp_<رویداد>[_<جا>]"
+    },
+    {
+      "prefix": "dsp_",
+      "line": "pz",
+      "label": "دیاسپورا",
+      "shape": "dsp_<کد>"
+    },
+    {
+      "prefix": "ref_",
+      "line": "pz",
+      "label": "معرفی‌کننده",
+      "shape": "ref_<کد>"
+    },
+    {
+      "prefix": "prt_",
+      "line": "co",
+      "label": "پارتنر",
+      "shape": "prt_<کد>"
+    },
+    {
+      "prefix": "psyjoin-",
+      "line": "psy",
+      "label": "اتصال روان‌پزشک",
+      "shape": "psyjoin-<توکن>"
+    },
+    {
+      "prefix": "psydr-",
+      "line": "psy",
+      "label": "دعوت روان‌پزشک",
+      "shape": "psydr-<توکن>"
+    },
+    {
+      "prefix": "psy-",
+      "line": "psy",
+      "label": "دعوت روان‌پزشک",
+      "shape": "psy-<توکن>"
+    }
+  ],
+  "builders": [
+    {
+      "file": "site/pages/297-get-therapy.html",
+      "note": "کد از دکمهٔ نیاز در اسکریپت صفحه (gt-<نیاز>)"
+    },
+    {
+      "file": "site/pages/503069-کلینیک-روانکاوی-تهران.html",
+      "note": "کد مکان حضوری در اسکریپت صفحه (inp-<مکان>)"
+    },
+    {
+      "file": "site/pages/505179-partners.html",
+      "note": "کد مکان پارتنر در اسکریپت صفحه (inp-<مکان>)"
+    },
+    {
+      "file": "site/pages/505181-karaj.html",
+      "note": "کد در اسکریپت ساخته می‌شود: مکان حضوری یا پارتنر (inp-<مکان>)"
+    },
+    {
+      "file": "site/pages/505182-nur.html",
+      "note": "کد در اسکریپت ساخته می‌شود: مکان حضوری یا پارتنر (inp-<مکان>)"
+    },
+    {
+      "file": "site/pages/505263-isfahan.html",
+      "note": "کد در اسکریپت ساخته می‌شود: مکان حضوری یا پارتنر (inp-<مکان>)"
+    },
+    {
+      "file": "site/pages/505381-mashhad.html",
+      "note": "کد در اسکریپت ساخته می‌شود: مکان حضوری یا پارتنر (inp-<مکان>)"
+    },
+    {
+      "file": "site/pages/505401-aan.html",
+      "note": "کد در اسکریپت ساخته می‌شود: مکان حضوری یا پارتنر (inp-<مکان>)"
+    },
+    {
+      "file": "site/pages/505402-tajrobeh-isfahan.html",
+      "note": "کد در اسکریپت ساخته می‌شود: مکان حضوری یا پارتنر (inp-<مکان>)"
+    },
+    {
+      "file": "site/pages/505403-janpanah.html",
+      "note": "کد در اسکریپت ساخته می‌شود: مکان حضوری یا پارتنر (inp-<مکان>)"
+    },
+    {
+      "file": "site/pages/505404-miane.html",
+      "note": "کد در اسکریپت ساخته می‌شود: مکان حضوری یا پارتنر (inp-<مکان>)"
+    },
+    {
+      "file": "site/pages/505715-new-zealand.html",
+      "note": "کد در اسکریپت ساخته می‌شود: رودمپ کشوری"
+    },
+    {
+      "file": "site/pages/505918-ebis-playlist.html",
+      "note": "کد در اسکریپت ساخته می‌شود: کمپین ابی (ebi-<نوع>)"
+    },
+    {
+      "file": "site/pages/505919-list.html",
+      "note": "کد در اسکریپت ساخته می‌شود: کمپین ابی (ebi-<نوع>)"
+    },
+    {
+      "file": "site/pages/505921-group.html",
+      "note": "کد در اسکریپت ساخته می‌شود: کمپین ابی (ebi-<نوع>)"
+    },
+    {
+      "file": "site/pages/505922-together.html",
+      "note": "کد در اسکریپت ساخته می‌شود: کمپین ابی (ebi-<نوع>)"
+    },
+    {
+      "file": "site/pages/505923-every-brilliant-thing.html",
+      "note": "کد در اسکریپت ساخته می‌شود: کمپین ابی (ebi-<نوع>)"
+    },
+    {
+      "file": "site/pages/505990-night.html",
+      "note": "کد در اسکریپت ساخته می‌شود: کمپین ابی (ebi-<نوع>)"
+    },
+    {
+      "file": "site/pages/505992-students.html",
+      "note": "کد در اسکریپت ساخته می‌شود: کمپین ابی (ebi-<نوع>)"
+    },
+    {
+      "file": "site/snippets/503540.php",
+      "note": "کد در اسکریپت ساخته می‌شود: مجله (mg-<شناسه>-<نوع>)"
+    },
+    {
+      "file": "site/snippets/504267.php",
+      "note": "کد در اسکریپت ساخته می‌شود: مجله (mg-<شناسه>-<نوع>)"
+    },
+    {
+      "file": "site/snippets/505281.html",
+      "note": "کد در اسکریپت ساخته می‌شود: ویجت انتخاب تراپیست (gt-<نیاز>)"
+    },
+    {
+      "file": "site/snippets/505571.php",
+      "note": "کد در اسکریپت ساخته می‌شود: مجله (mg-<شناسه>-<نوع>)"
+    }
+  ],
+  "forms": {
+    "3": {
+      "line": "org",
+      "label": "درخواست خدمات سازمانی"
+    },
+    "5": {
+      "line": "pz",
+      "label": "تراپی فارسی (خارج از ایران)"
+    },
+    "6": {
+      "line": "sch",
+      "label": "پیش‌ثبت‌نام دوره"
+    },
+    "7": {
+      "line": "pz",
+      "label": "فرم شروع تراپی"
+    },
+    "8": {
+      "line": "sch",
+      "label": "کامیونیتی دانشجویان"
+    },
+    "9": {
+      "line": "pz",
+      "label": "Persian therapy (English)"
+    },
+    "10": {
+      "line": "pz",
+      "label": "فرم تماس با ما"
+    },
+    "11": {
+      "line": "sch",
+      "label": "همکاری انجمن علمی"
+    },
+    "12": {
+      "line": "rm",
+      "label": "ثبت سریع رودمپ"
+    },
+    "13": {
+      "line": "rm",
+      "label": "پروندهٔ ارزیابی رودمپ"
+    },
+    "14": {
+      "line": "co",
+      "label": "اعلام همکاری رودمپ"
+    },
+    "15": {
+      "line": "sch",
+      "label": "ثبت‌نام دورهٔ EFT"
+    },
+    "16": {
+      "line": "sch",
+      "label": "اعلام آمادگی دانش‌آموختگان"
+    },
+    "17": {
+      "line": "sch",
+      "label": "درخواست بورسیه"
+    }
+  },
+  "getTherapy": {
+    "params": [
+      "need",
+      "src"
+    ],
+    "legacy": [
+      "from",
+      "tj_need",
+      "tj_why",
+      "tj_style",
+      "tj_mig"
+    ],
+    "extra": [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "utm_term"
+    ],
+    "note": "need = نیاز (مثل anx)، src = منبع (کد دکمه یا صفحه). from و tj_* همچنان خوانده می‌شوند و به need/src نگاشته می‌شوند."
+  },
+  "ctas": [],
+  "codes": [
+    {
+      "code": "cmp-ebi-voice",
+      "line": "cmp",
+      "label": "کمپین ابی › voice",
+      "aliases": [
+        "ebi-voice"
+      ],
+      "pages": [
+        "site/pages/505922-together.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "co-apply",
+      "line": "co",
+      "label": "همکاری › اپلای درمانگر",
+      "aliases": [
+        "apply"
+      ],
+      "pages": [
+        "site/pages/292-joinus.html"
+      ],
+      "links": 2
+    },
+    {
+      "code": "co-hub-ther",
+      "line": "co",
+      "label": "هاب درمانگران",
+      "aliases": [
+        "hub_ther"
+      ],
+      "pages": [
+        "site/pages/503938-how-to-become-a-therapist.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "co-off",
+      "line": "co",
+      "label": "درمانگر › مرخصی",
+      "aliases": [
+        "off"
+      ],
+      "pages": [
+        "site/pages/503886-app.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "co-partner",
+      "line": "co",
+      "label": "همکاری › پارتنر",
+      "aliases": [
+        "partner"
+      ],
+      "pages": [
+        "site/pages/505179-partners.html",
+        "site/pages/505180-rules.html"
+      ],
+      "links": 3
+    },
+    {
+      "code": "co-voice",
+      "line": "co",
+      "label": "درمانگر › ویس معرفی",
+      "aliases": [
+        "voice"
+      ],
+      "pages": [
+        "site/pages/503886-app.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "co-write",
+      "line": "co",
+      "label": "همکاری › نویسندگی مجله",
+      "aliases": [
+        "write"
+      ],
+      "pages": [
+        "site/pages/293-editorial.html"
+      ],
+      "links": 2
+    },
+    {
+      "code": "psy-book",
+      "line": "psy",
+      "label": "روان‌پزشکی › نوبت",
+      "aliases": [
+        "psybook"
+      ],
+      "pages": [
+        "site/pages/503886-app.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-abroad-au",
+      "line": "pz",
+      "label": "خارج از ایران › au",
+      "aliases": [
+        "pt_au"
+      ],
+      "pages": [
+        "site/pages/503824-australia.html"
+      ],
+      "links": 3
+    },
+    {
+      "code": "pz-abroad-ca",
+      "line": "pz",
+      "label": "خارج از ایران › ca",
+      "aliases": [
+        "pt_ca"
+      ],
+      "pages": [
+        "site/pages/503821-canada.html",
+        "site/pages/505207-toronto.html",
+        "site/pages/505208-vancouver.html",
+        "site/pages/505389-montreal.html"
+      ],
+      "links": 12
+    },
+    {
+      "code": "pz-abroad-de",
+      "line": "pz",
+      "label": "خارج از ایران › de",
+      "aliases": [
+        "pt_de"
+      ],
+      "pages": [
+        "site/pages/503820-germany.html",
+        "site/pages/505204-berlin.html",
+        "site/pages/505205-hamburg.html",
+        "site/pages/505206-munich.html"
+      ],
+      "links": 12
+    },
+    {
+      "code": "pz-abroad-en",
+      "line": "pz",
+      "label": "خارج از ایران › en",
+      "aliases": [
+        "pt_en"
+      ],
+      "pages": [
+        "site/pages/503836-en.html",
+        "site/pages/505396-germany.html"
+      ],
+      "links": 6
+    },
+    {
+      "code": "pz-abroad-hub",
+      "line": "pz",
+      "label": "خارج از ایران › hub",
+      "aliases": [
+        "pt_hub"
+      ],
+      "pages": [
+        "site/pages/500984-persian-therapy.html",
+        "site/pages/505209-students.html",
+        "site/pages/505210-سوگ-مهاجرت.html",
+        "site/pages/505211-تنهایی-مهاجرت.html",
+        "site/pages/505212-اضطراب-مهاجرت.html",
+        "site/pages/505213-زوج-درمانی-مهاجرت.html",
+        "site/pages/505214-فرزندپروری-مهاجرت.html"
+      ],
+      "links": 17
+    },
+    {
+      "code": "pz-abroad-nl",
+      "line": "pz",
+      "label": "خارج از ایران › nl",
+      "aliases": [
+        "pt_nl"
+      ],
+      "pages": [
+        "site/pages/503825-netherlands.html"
+      ],
+      "links": 3
+    },
+    {
+      "code": "pz-abroad-nz",
+      "line": "pz",
+      "label": "خارج از ایران › nz",
+      "aliases": [
+        "pt_nz"
+      ],
+      "pages": [
+        "site/pages/505719-new-zealand.html",
+        "site/pages/505720-auckland.html"
+      ],
+      "links": 6
+    },
+    {
+      "code": "pz-abroad-se",
+      "line": "pz",
+      "label": "خارج از ایران › se",
+      "aliases": [
+        "pt_se"
+      ],
+      "pages": [
+        "site/pages/503826-sweden.html"
+      ],
+      "links": 3
+    },
+    {
+      "code": "pz-abroad-tr",
+      "line": "pz",
+      "label": "خارج از ایران › tr",
+      "aliases": [
+        "pt_tr"
+      ],
+      "pages": [
+        "site/pages/503827-turkey.html",
+        "site/pages/505390-istanbul.html"
+      ],
+      "links": 6
+    },
+    {
+      "code": "pz-abroad-uk",
+      "line": "pz",
+      "label": "خارج از ایران › uk",
+      "aliases": [
+        "pt_uk"
+      ],
+      "pages": [
+        "site/pages/503823-uk.html"
+      ],
+      "links": 3
+    },
+    {
+      "code": "pz-abroad-us",
+      "line": "pz",
+      "label": "خارج از ایران › us",
+      "aliases": [
+        "pt_us"
+      ],
+      "pages": [
+        "site/pages/503822-usa.html"
+      ],
+      "links": 3
+    },
+    {
+      "code": "pz-gt-anx",
+      "line": "pz",
+      "label": "شروع تراپی › anx",
+      "aliases": [
+        "gt-anx"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-gt-child",
+      "line": "pz",
+      "label": "شروع تراپی › child",
+      "aliases": [
+        "gt-child"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-gt-d",
+      "line": "pz",
+      "label": "شروع تراپی › d",
+      "aliases": [
+        "gt-d"
+      ],
+      "pages": [
+        "site/pages/505179-partners.html",
+        "site/pages/505715-new-zealand.html"
+      ],
+      "links": 5
+    },
+    {
+      "code": "pz-gt-dep",
+      "line": "pz",
+      "label": "شروع تراپی › dep",
+      "aliases": [
+        "gt-dep"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-gt-fam",
+      "line": "pz",
+      "label": "شروع تراپی › fam",
+      "aliases": [
+        "gt-fam"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-gt-grief",
+      "line": "pz",
+      "label": "شروع تراپی › grief",
+      "aliases": [
+        "gt-grief"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-gt-k",
+      "line": "pz",
+      "label": "شروع تراپی › k",
+      "aliases": [
+        "gt-k"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-gt-rel",
+      "line": "pz",
+      "label": "شروع تراپی › rel",
+      "aliases": [
+        "gt-rel"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-gt-self",
+      "line": "pz",
+      "label": "شروع تراپی › self",
+      "aliases": [
+        "gt-self"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-gt-unsure",
+      "line": "pz",
+      "label": "شروع تراپی › unsure",
+      "aliases": [
+        "gt-unsure"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 2
+    },
+    {
+      "code": "pz-hdr-menu",
+      "line": "pz",
+      "label": "هدر › منو",
+      "aliases": [
+        "hdr_menu"
+      ],
+      "pages": [
+        "site/template-parts/tj-header.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-home-berry",
+      "line": "pz",
+      "label": "هوم › berry",
+      "aliases": [
+        "home_berry"
+      ],
+      "pages": [
+        "site/pages/503465-home-v2.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-inp-gandhi",
+      "line": "pz",
+      "label": "حضوری › gandhi",
+      "aliases": [
+        "inp-gandhi"
+      ],
+      "pages": [
+        "site/pages/503069-کلینیک-روانکاوی-تهران.html",
+        "site/pages/505179-partners.html"
+      ],
+      "links": 4
+    },
+    {
+      "code": "pz-inp-isfahan",
+      "line": "pz",
+      "label": "حضوری › isfahan",
+      "aliases": [
+        "inp-isfahan"
+      ],
+      "pages": [
+        "site/pages/505179-partners.html",
+        "site/pages/505263-isfahan.html",
+        "site/pages/505402-tajrobeh-isfahan.html"
+      ],
+      "links": 8
+    },
+    {
+      "code": "pz-inp-karaj2",
+      "line": "pz",
+      "label": "حضوری › karaj2",
+      "aliases": [
+        "inp-karaj2"
+      ],
+      "pages": [
+        "site/pages/505179-partners.html",
+        "site/pages/505181-karaj.html",
+        "site/pages/505404-miane.html"
+      ],
+      "links": 6
+    },
+    {
+      "code": "pz-inp-mashhad2",
+      "line": "pz",
+      "label": "حضوری › mashhad2",
+      "aliases": [
+        "inp-mashhad2"
+      ],
+      "pages": [
+        "site/pages/505179-partners.html",
+        "site/pages/505381-mashhad.html",
+        "site/pages/505401-aan.html"
+      ],
+      "links": 8
+    },
+    {
+      "code": "pz-inp-nur2",
+      "line": "pz",
+      "label": "حضوری › nur2",
+      "aliases": [
+        "inp-nur2"
+      ],
+      "pages": [
+        "site/pages/505179-partners.html",
+        "site/pages/505182-nur.html",
+        "site/pages/505403-janpanah.html"
+      ],
+      "links": 7
+    },
+    {
+      "code": "pz-vxc",
+      "line": "pz",
+      "label": "پذیرش › مچ‌میکینگ صوتی",
+      "aliases": [
+        "vxc"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "rm-assess",
+      "line": "rm",
+      "label": "رودمپ › assess",
+      "aliases": [
+        "rm_assess"
+      ],
+      "pages": [
+        "site/pages/504915-assessment.html"
+      ],
+      "links": 2
+    },
+    {
+      "code": "rm-at",
+      "line": "rm",
+      "label": "رودمپ › at",
+      "aliases": [
+        "rm_at"
+      ],
+      "pages": [
+        "site/pages/504918-austria.html"
+      ],
+      "links": 2
+    },
+    {
+      "code": "rm-berry",
+      "line": "rm",
+      "label": "رودمپ › berry",
+      "aliases": [
+        "rm_berry"
+      ],
+      "pages": [
+        "site/pages/504909-psychology-migration.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "rm-campus",
+      "line": "rm",
+      "label": "رودمپ › campus",
+      "aliases": [
+        "rm_campus"
+      ],
+      "pages": [
+        "site/pages/504916-campus.html"
+      ],
+      "links": 4
+    },
+    {
+      "code": "rm-clinician",
+      "line": "rm",
+      "label": "رودمپ › clinician",
+      "aliases": [
+        "rm_clinician"
+      ],
+      "pages": [
+        "site/pages/504909-psychology-migration.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "rm-de",
+      "line": "rm",
+      "label": "رودمپ › de",
+      "aliases": [
+        "rm_de",
+        "roadmap_de"
+      ],
+      "pages": [
+        "site/pages/504910-germany.html"
+      ],
+      "links": 2
+    },
+    {
+      "code": "rm-form",
+      "line": "rm",
+      "label": "رودمپ › form",
+      "aliases": [
+        "rm_form"
+      ],
+      "pages": [
+        "site/pages/504909-psychology-migration.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "rm-hero",
+      "line": "rm",
+      "label": "رودمپ › hero",
+      "aliases": [
+        "rm_hero"
+      ],
+      "pages": [
+        "site/pages/504909-psychology-migration.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "rm-kanape",
+      "line": "rm",
+      "label": "رودمپ › kanape",
+      "aliases": [
+        "rm-kanape"
+      ],
+      "pages": [
+        "site/pages/504926-roadmap.html",
+        "site/pages/504967-kanape.html"
+      ],
+      "links": 9
+    },
+    {
+      "code": "rm-kanape-hub",
+      "line": "rm",
+      "label": "رودمپ › kanape-hub",
+      "aliases": [
+        "rm-kanape-hub"
+      ],
+      "pages": [
+        "site/pages/504926-roadmap.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "rm-kanape-pg",
+      "line": "rm",
+      "label": "رودمپ › kanape-pg",
+      "aliases": [
+        "rm-kanape-pg"
+      ],
+      "pages": [
+        "site/pages/504967-kanape.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "rm-kanape-pre",
+      "line": "rm",
+      "label": "رودمپ › kanape-pre",
+      "aliases": [
+        "rm-kanape-pre"
+      ],
+      "pages": [
+        "site/pages/504967-kanape.html"
+      ],
+      "links": 2
+    },
+    {
+      "code": "rm-kanape-yd",
+      "line": "rm",
+      "label": "رودمپ › kanape-yd",
+      "aliases": [
+        "rm-kanape-yd"
+      ],
+      "pages": [
+        "site/pages/503565-yaserderakhshan.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "rm-mentor",
+      "line": "rm",
+      "label": "رودمپ › mentor",
+      "aliases": [
+        "rm_mentor"
+      ],
+      "pages": [
+        "site/pages/504909-psychology-migration.html",
+        "site/pages/504910-germany.html",
+        "site/pages/504915-assessment.html"
+      ],
+      "links": 3
+    },
+    {
+      "code": "rm-nz",
+      "line": "rm",
+      "label": "رودمپ › nz",
+      "aliases": [
+        "rm_nz"
+      ],
+      "pages": [
+        "site/pages/504919-new-zealand.html"
+      ],
+      "links": 2
+    },
+    {
+      "code": "rm-partner",
+      "line": "rm",
+      "label": "رودمپ › partner",
+      "aliases": [
+        "rm_partner"
+      ],
+      "pages": [
+        "site/pages/504957-collaborate.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "rm-student",
+      "line": "rm",
+      "label": "رودمپ › student",
+      "aliases": [
+        "rm_student"
+      ],
+      "pages": [
+        "site/pages/504909-psychology-migration.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "rm-undecided",
+      "line": "rm",
+      "label": "رودمپ › undecided",
+      "aliases": [
+        "rm_undecided"
+      ],
+      "pages": [
+        "site/pages/504909-psychology-migration.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "sch-comm",
+      "line": "sch",
+      "label": "مدرسه › کامیونیتی",
+      "aliases": [
+        "comm"
+      ],
+      "pages": [
+        "site/pages/294-school.html",
+        "site/pages/503939-community.html",
+        "site/pages/505409-events.html",
+        "site/pages/505441-journal-club.html",
+        "site/pages/505442-book-launch-lacanian-analyst.html",
+        "site/pages/505443-experience-panel.html"
+      ],
+      "links": 6
+    },
+    {
+      "code": "sch-edu",
+      "line": "sch",
+      "label": "مدرسه › اتصال",
+      "aliases": [
+        "edu"
+      ],
+      "pages": [
+        "site/pages/505409-events.html",
+        "site/snippets/504078.php"
+      ],
+      "links": 2
+    },
+    {
+      "code": "sch-join",
+      "line": "sch",
+      "label": "مدرسه › عضویت",
+      "aliases": [
+        "join"
+      ],
+      "pages": [
+        "site/pages/294-school.html",
+        "site/pages/501881-clinical-experience.html",
+        "site/pages/501883-modern-psychoanalysis.html",
+        "site/pages/505706-lacan.html",
+        "site/pages/505751-alumni.html"
+      ],
+      "links": 5
+    }
+  ]
+}
