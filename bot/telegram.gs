@@ -22519,7 +22519,7 @@ function tgLead2Tests() {
     ok('v170.18: مقدار قبلی (وضعیت و دلیل بستن) در یادداشت می‌ماند', TG_OUTBOX.some(function (o) { return o.kind === 'leadnote' && /وضعیت: بسته/.test(o.text) && /دلیل بستن: منصرف شد/.test(o.text); }));
     /* v170.18: حالت «باز» (باگ L-1127): لید باز که هنوز به ارجاع یا معارفه نرسیده هم از نو «جدید» می‌شود */
     TG_MEM['dutypend'] = [];
-    TG_DRY_LEAD = mk(); TG_DRY_LEAD.status = 'پاسخ نداد'; TG_DRY_LEAD.statusRaw = 'پاسخ نداد'; TG_DRY_LEAD.noans = 3; TG_DRY_LEAD.touched = true; TG_DRY_LEAD.owner = 'ژیلا';
+    TG_DRY_LEAD = mk(); TG_DRY_LEAD.status = 'پاسخ نداد'; TG_DRY_LEAD.statusRaw = 'پاسخ نداد'; TG_DRY_LEAD.noans = 3; TG_DRY_LEAD.touched = true; TG_DRY_LEAD.owner = 'پذیرش نمونه';
     TG_DRY_LEAD.phone = '2025550123'; TG_DRY_LEAD.region = 'خارج از ایران'; TG_OUTBOX = [];   // pii:ok ساختگی
     var rb = tgLeadFormAgain_(7, { src: 'سایت › پذیرش › فرم', msg: 'دوباره', phone: '+1 202 555 0123', email: 'x@example.invalid' });   // pii:ok ساختگی
     var fo = sets()[0];
