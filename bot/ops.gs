@@ -161,10 +161,12 @@ function opsRows_() {
   var n = sh.getLastRow(); if (n < 2) return [];
   return sh.getRange(2, 1, n - 1, OPS_HEAD.length).getValues().map(function (r, i) { return opsObj_(r, i + 2); }).filter(function (t) { return t.code; });
 }
+/* v170.29: مهلت نامعتبر (خالی، ۱۹۷۰ یا پیش از ۲۰۰۰) خوانده نمی‌شود */
+function opsDue_(v) { var d = v instanceof Date ? v : (v ? new Date(v) : null); return d && !isNaN(d.getTime()) && d.getFullYear() >= 2000 ? d : null; }
 function opsObj_(r, row) {
   return { row: row, code: String(r[0] || ''), title: String(r[1] || ''), cat: String(r[2] || ''), pri: String(r[3] || ''), st: String(r[4] || ''),
     owner: String(r[5] || ''), by: String(r[6] || ''), resp: String(r[7] || ''), made: String(r[8] || ''), due: String(r[9] || ''),
-    dueAt: r[10] instanceof Date ? r[10] : (r[10] ? new Date(r[10]) : null), src: String(r[11] || ''), ref: String(r[12] || ''), link: String(r[13] || ''),
+    dueAt: opsDue_(r[10]), src: String(r[11] || ''), ref: String(r[12] || ''), link: String(r[13] || ''),
     note: String(r[14] || ''), moved: String(r[15] || ''), ownerChat: String(r[16] || ''), esc: String(r[17] || '') };
 }
 function opsArr_(t) {
@@ -535,6 +537,8 @@ function opsDueIn_(hours) { return new Date(opsNow_().getTime() + hours * 360000
 /* لید تازه به کشیک رسید (tgDutyRun_) */
 function opsAdaptLead_(code, ownerChat, ownerName) {
   return opsSafe_(function () { var b = opsBoss_();
+    /* v170.29: کار بی‌صاحب ساخته نمی‌شود؛ جای خالی را مسئول پذیرش می‌گیرد */
+    if (!ownerChat && !ownerName && b) { ownerName = b.name; ownerChat = opsFirstChat_(b); }
     return opsAdd_({ title: 'تماس اول با لید ' + code, cat: 'لید و پذیرش', pri: 'بالا', ownerChat: String(ownerChat || ''), owner: ownerName || '', resp: b ? b.name : '', due: opsDueIn_(2), src: 'هاب پذیرش', ref: code }); });
 }
 /* لید بسته یا تماس اول گرفته شد */

@@ -36,7 +36,17 @@
     "sitesec.gs",
     "sec.gs",
     "version.gs",
-    "sitepub.gs"
+    "sitepub.gs",
+    "kartable.gs",
+    "ai.gs",
+    "psy2.gs",
+    "psy3.gs",
+    "inbox.gs",
+    "afx.gs",
+    "afx2.gs",
+    "intake.gs",
+    "ctareg.gs",
+    "intake2.gs"
   ],
   "htmlExtensions": [
     ".html"

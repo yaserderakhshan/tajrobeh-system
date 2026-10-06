@@ -2,13 +2,15 @@
  * voice.gs · v166 · ۷ مهر ۱۴۰۵ · موتور صدای تجربه
  *
  * سه مسیر، با یک قاعدهٔ حریم خصوصی روشن:
+ *  v170.23.7 (تصمیم یاسر): Groq کامل حذف شد؛ همه با Gemini (ai.gs). قاعدهٔ حریم خصوصی تازه: صدا و متن مراجع و پیام خصوصی فقط
+ *  با کلید پولی Gemini API (دادهٔ ورودی برای آموزش استفاده نمی‌شود؛ تأیید Cowork در کلید GEMINI_PAID)؛ فایل صدا ذخیره نمی‌شود.
  *  ۱) صدایی که قرار است منتشر شود (صدای نویسندهٔ مجله):
- *     درایو ← Auphonic (نویز، اکو، هم‌سطحی، mp3) ← Groq whisper (زمان‌بندی) + Gemini (اصلاح متن، خلاصه، جملهٔ برجسته)
+ *     درایو ← Auphonic (نویز، اکو، هم‌سطحی، mp3) ← Gemini (متن با زمان‌بندی، خلاصه، جملهٔ برجسته)
  *     ← متن به خود گوینده برمی‌گردد و تأیید می‌کند ← سردبیر ← سایت (tj/v1/mag-voice با امضای HMAC)
- *  ۲) صدای خصوصی (مراجع، پیام به پذیرش، هر ورودی متنی بات): فقط Groq whisper، فایل ذخیره نمی‌شود،
+ *  ۲) صدای خصوصی (مراجع، پیام به پذیرش، هر ورودی متنی بات): Gemini فقط با کلید پولی، فایل ذخیره نمی‌شود،
  *     متن به خود فرستنده برمی‌گردد و با «همین را بفرست» مثل یک پیام متنی وارد همان مسیر بات می‌شود.
- *     هیچ صدای مراجع به Gemini یا Auphonic نمی‌رود.
- *  ۳) مچ‌میکینگ صوتی مراجع (vxc): مراجع حرفش را می‌گوید، Groq متن و برداشت ساختاریافته می‌سازد
+ *     هیچ صدای مراجع به Auphonic نمی‌رود.
+ *  ۳) مچ‌میکینگ صوتی مراجع (vxc): مراجع حرفش را می‌گوید، Gemini (کلید پولی) متن و برداشت ساختاریافته می‌سازد
  *     (موضوع، نیازها، سبک، جنسیت، سن، حالت جلسه)، مراجع تأیید می‌کند و مسیر عادی پذیرش ادامه پیدا می‌کند.
  *
  * و خط لولهٔ اصلاحات بازبینی علمی (بخش پایین فایل): گوگل‌داک/یادداشت بازبین ← فهرست تغییر دقیق
@@ -26,7 +28,6 @@ var VX_HEAD = ['کد', 'زمان', 'کاربرد', 'ارجاع', 'chat_id', 'ن�
 var VX_ST = { Q: 'در صف', ENH: 'در حال تمیزکاری', TXT: 'در حال متن', ASK: 'منتظر تأیید گوینده', OK: 'تأیید شد', DONE: 'تحویل شد', ERR: 'خطا', DROP: 'کنار گذاشته شد' };
 var VX_FOLDER = 'صدا · تمیزشده و متن';
 var VX_GEM_MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest'];
-var VX_GROQ_LLM = 'llama-3.3-70b-versatile';
 var VX_AU_ALGO = { filtering: true, leveler: true, normloudness: true, loudnesstarget: -16, denoise: true, denoisemethod: 'dynamic', denoiseamount: 0, deverbamount: 0 };
 var VX_DRY_JOBS = null;
 var VX_DRY_LLM = null;   // در TG_DRY: پاسخ جعلی مدل برای مچ‌میکینگ صوتی
@@ -43,12 +44,12 @@ function vxClock_(sec) { sec = Math.max(0, Math.round(+sec || 0)); return vxFa_(
 
 /* ================= ترانویسی ================= */
 
-/** خصوصی و سریع: فقط Groq. فایل جایی نوشته نمی‌شود. */
+/** خصوصی: Gemini فقط با کلید پولی (ai.gs). فایل جایی نوشته نمی‌شود. */
 function vxPrivateText_(fileId) {
   if (vxDry_()) return { text: VX_DRY_TEXT || 'متن آزمایشی ویس', segs: [] };
   var f = tgTgFile_(fileId);
   var ext = (String(f.path).split('.').pop() || 'ogg').replace('oga', 'ogg');
-  var tr = tgRmTranscribe_(f.blob.setName('v.' + ext));
+  var tr = tgRmTranscribe_(f.blob.setName('v.' + ext), true);
   return { text: vxNoDash_(String(tr.text || '').trim()), segs: tr.segs || [], note: tr.note || '' };
 }
 
@@ -96,12 +97,11 @@ var VX_TR_SCHEMA_RAW = {
 };
 
 /**
- * متن عمومی: Groq برای زمان‌بندی، Gemini برای اصلاح متن با شنیدن خود صدا.
+ * متن عمومی: Gemini، متن با زمان‌بندی از خود صدا (v170.23.7: بی Groq).
  * خروجی {segs:[[s,e,t]], summary, quote:{i,t,s,e}, engine, text}
  */
 function vxPublicText_(blob, ctx) {
   var segs0 = [];
-  try { var g = tgRmTranscribe_(blob.copyBlob().setName('a.' + (/mpeg/.test(blob.getContentType()) ? 'mp3' : 'ogg'))); segs0 = g.segs || []; } catch (e) { vxErr_('groq', e); }
   var audio = { inline_data: { mime_type: /mpeg/.test(blob.getContentType()) ? 'audio/mp3' : 'audio/ogg', data: Utilities.base64Encode(blob.getBytes()) } };
   var rules = 'قواعد: املای درست فارسی و نیم‌فاصله؛ نشانه‌گذاری طبیعی؛ تکیه‌کلام‌ها (اِم، اِ، یعنی تکراری) را فقط وقتی معنا عوض نمی‌شود حذف کن؛ ' +
     'هیچ چیزی اضافه یا خلاصه نکن؛ نام‌های خاص (فروید، لکان، وینیکات، کلاین و …) را درست بنویس؛ هرگز خط تیره (— یا –) وسط جمله ننویس.\n' +
@@ -616,18 +616,47 @@ var VX_C_SYS = 'تو دستیار پذیرش یک مرکز روان‌درمان
   'summary: دو جملهٔ کوتاه فارسی به دوم شخص محترمانه («شما…») که حرف اصلی مراجع را بدون قضاوت بازگو کند؛ بدون خط تیره\n' +
   'city: نام شهر اگر گفت، وگرنه خالی';
 
+var VX_C_SCHEMA = { type: 'OBJECT', properties: {
+  topic: { type: 'STRING' }, needs: { type: 'ARRAY', items: { type: 'STRING' } }, prefs: { type: 'ARRAY', items: { type: 'STRING' } },
+  gender: { type: 'STRING' }, age: { type: 'STRING' }, mode: { type: 'STRING' }, couple: { type: 'BOOLEAN' }, crisis: { type: 'BOOLEAN' },
+  summary: { type: 'STRING' }, city: { type: 'STRING' } }, required: ['topic', 'summary'] };
+/* v170.23.7: برداشت ساختاریافتهٔ حرف مراجع با Gemini (کلید پولی)؛ نام قبلی برای قلاب‌ها */
 function vxGroqJson_(sys, user) {
   if (vxDry_()) return VX_DRY_LLM || { topic: 'anx', needs: ['n5'], prefs: [], gender: 'x', age: 'x', mode: 'x', crisis: false, summary: 'شما اضطراب دارید.' };
-  var key = vxP_().getProperty('GROQ_KEY') || vxP_().getProperty('groq');
-  var res = UrlFetchApp.fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'post', muteHttpExceptions: true, contentType: 'application/json',
-    headers: { Authorization: 'Bearer ' + key },
-    payload: JSON.stringify({ model: VX_GROQ_LLM, temperature: 0.1, response_format: { type: 'json_object' }, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }] }) });
-  if (res.getResponseCode() !== 200) throw new Error('groq llm ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 120));
-  var j = JSON.parse(res.getContentText());
-  return JSON.parse(j.choices[0].message.content);
+  return aiJson_(sys + '\n\n' + user, VX_C_SCHEMA, { priv: true, temp: 0.1 });
 }
 
-/** بی‌مدل: اگر Groq جواب نداد، حداقل موضوع از کلیدواژه‌ها */
+/* برداشت دوباره برای ویس‌هایی که روی لید فقط «🎙 از صدای مراجع» بی‌برداشت دارند (از #29؛ v170.23.7 با Gemini و فقط با کلید پولی) */
+function vxcRedoNote_(r) {
+  var lbl = function (list, keys) { return list.filter(function (x) { return keys.indexOf(x.k) > -1; }).map(function (x) { return x.label.replace(/^\S+\s/, ''); }).join('، '); };
+  var p = ['🎙 برداشت دوباره از صدای مراجع: ' + (r.summary || '')];
+  p.push('موضوع: ' + lbl(TG_TOPICS, [r.topic]));
+  if ((r.needs || []).length) p.push('گفته‌ها: ' + lbl(TG_NEEDS, r.needs));
+  if ((r.prefs || []).length) p.push('از تراپی: ' + lbl(TG_PREFS, r.prefs));
+  return p.join(' · ');
+}
+var VX_REDO_RX = /^(\d\d-\d\d) \d\d:\d\d [^:\n]*: 🎙 از صدای مراجع \(متن شد؛ فایل صدا نگه داشته نشد\):\s*\| متن: (.+)$/;
+/* فقط یادداشت تازه روی لید (افزودنی)؛ وضعیت و ستون‌ها دست نمی‌خورند. خروجی فقط شمار. */
+function vxcRedo_(since) {
+  if (!aiPaid_()) return 'برداشت دوباره: منتظر تأیید کلید پولی جمنای';
+  var sh = tgSS_().getSheetByName(TG_LEADS), col = tgLeadCol_('یادداشت'), n = sh.getLastRow();
+  var vals = n > 1 ? sh.getRange(2, col, n - 1, 1).getValues() : [], seen = 0, done = 0, bad = 0;
+  for (var i = 0; i < vals.length; i++) {
+    var cell = String(vals[i][0] || '');
+    if (cell.indexOf('🎙 برداشت دوباره') > -1) continue;
+    var lines = cell.split('\n');
+    for (var j = 0; j < lines.length; j++) {
+      var m = lines[j].match(VX_REDO_RX);
+      if (!m || m[1] < since) continue;
+      seen++;
+      try { tgLeadNote_(i + 2, vxcRedoNote_(vxcNormalize_(vxGroqJson_(VX_C_SYS, 'حرف مراجع:\n' + m[2]), m[2])), 'بات'); done++; } catch (e) { bad++; vxErr_('vxcRedo_', e); }
+      break;
+    }
+  }
+  return 'ویس مراجع بی‌برداشت: ' + seen + ' · دوباره: ' + done + ' · ناموفق: ' + bad;
+}
+
+/** بی‌مدل: اگر Gemini جواب نداد (یا کلید پولی تأیید نشده)، حداقل موضوع از کلیدواژه‌ها */
 function vxcGuess_(text) {
   var t = String(text);
   var map = [['rel', /همسر|شوهر|زوج|رابطه|نامزد|دوست ?پسر|دوست ?دختر|طلاق|خیانت/], ['kid', /بچه|فرزند|پسرم|دخترم|نوجوان|کودک/], ['psy', /دارو|روان ?پزشک|قرص/],

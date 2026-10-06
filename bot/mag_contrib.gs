@@ -95,7 +95,7 @@ function mcIsEditor_(chat) {
   return tgMagIsEditor_(chat);
 }
 
-/** ترانویسی ویس با همان Groq رودمپ‌ها؛ اگر نشد رشتهٔ خالی. */
+/** ترانویسی ویس با Gemini (ai.gs، صدای عمومی مجله)؛ اگر نشد رشتهٔ خالی. */
 function mcTranscribe_(blob) {
   if (mcDry_()) return 'متن ترانویسی‌شدهٔ آزمایشی برای ویس، به اندازهٔ کافی بلند تا از حداقل رد شود.';
   try { return String((tgRmTranscribe_(blob) || {}).text || '').trim(); } catch (e) { mcLogErr_('transcribe', e); }
@@ -667,7 +667,7 @@ function mcFixIn_(chat, st, text, file) {
   if (file && (file.kind === 'voice' || file.kind === 'audio')) {
     var id = mcSaveTgFile_(file.id, 'review-' + st.c + '-' + Date.now() + '.ogg');
     drive = drive ? drive + ' ' + id : id;
-    /* v169: ویس بازبینی با Gemini و فهرست اصطلاحات بالینی (review.gs)؛ اگر نشد Groq */
+    /* v169: ویس بازبینی با Gemini و فهرست اصطلاحات بالینی (review.gs)؛ اگر نشد مسیر عمومی Gemini */
     add = mcDry_() ? mcTranscribe_(null) : (typeof rvTranscribe_ === 'function' ? rvTranscribe_(DriveApp.getFileById(id).getBlob()) : mcTranscribe_(DriveApp.getFileById(id).getBlob()));
     add = '🎙 ' + (add || '(ویس، متن نشد)');
   } else if (file) {
