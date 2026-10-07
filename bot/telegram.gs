@@ -3397,7 +3397,11 @@ function tgOpenLeadsOf_(v, hm, now) {
       next: String(tgLeadHv_(v[i], hm, 'اقدام بعدی') || '').trim(), nextDate: nextIso,
       code: String(tgLeadHv_(v[i], hm, 'کد لید') || '').trim(),
       stage: tgLeadStage_(touched, idle, nextIso, today),
-      urgent: abroad || booked || crisis, abroad: abroad, booked: booked, crisis: crisis,
+      urgent: (abroad && abInWinNow_(tgLeadHv_(v[i], hm, 'منطقهٔ زمانی') || abTzFromNote_(v[i][12]), tgLeadHv_(v[i], hm, 'زمان مناسب') || abBestFromNote_(v[i][12]), now.getTime())) || booked || crisis,   /* v170.23.22: خارج فقط داخل پنجرهٔ تماسش */
+      abroad: abroad, booked: booked, crisis: crisis,
+      tz: String(tgLeadHv_(v[i], hm, 'منطقهٔ زمانی') || '').trim() || abTzFromNote_(v[i][12]), best: String(tgLeadHv_(v[i], hm, 'زمان مناسب') || '').trim() || abBestFromNote_(v[i][12]),
+      noans: Number(tgLatinDigits_(String(tgLeadHv_(v[i], hm, 'شمار بی‌پاسخ') || '0'))) || 0, pref: String(tgLeadHv_(v[i], hm, 'کانال ترجیحی') || '').trim(),
+      meetDate: tgLeadIso_(v[i][20]) || '', channel: String(v[i][4] || '').trim(),
       /* v170.2 مدل لید */
       type: String(tgLeadHv_(v[i], hm, 'نوع لید') || '').trim() || 'مراجع', mode: String(tgLeadHv_(v[i], hm, 'حالت') || '').trim(),
       out: String(tgLeadHv_(v[i], hm, 'پیامد') || '').trim(), stageOwner: String(tgLeadHv_(v[i], hm, 'مسئول مرحله') || '').trim(),
@@ -3466,7 +3470,8 @@ function tgLeadLine_(l) {
          '\n   سطر ' + tgFa_(l.row) + ' · ' + (l.owner ? tgEsc_(l.owner) : 'بدون مسئول') +
          (l.status && l.status !== 'جدید' ? ' · ' + tgEsc_(l.status) : '') +
          (l.next ? '\n   📌 ' + tgEsc_(l.next) + (l.nextDate ? ' · ' + tgEsc_(tgLeadJ_(l.nextDate)) : '') : '') +
-         (l.note ? '\n   ' + tgEsc_(l.note) : '');
+         (l.note ? '\n   ' + tgEsc_(l.note) : '') +
+         (l.abroad ? (function () { try { return '\n   🕘 پنجرهٔ تماس (تهران): ' + abWinLabel_(abLeadTz_(l), abLeadBest_(l)); } catch (e) { return ''; } })() : '');   /* v170.23.22 */
 }
 
 /* v168 فاز ۳: سطل‌ها از همان «کار امروز» (tgTodayList_) می‌آیند؛ کارتابل، دایجست و کارهای روی زمین یکی‌اند */
@@ -3559,6 +3564,19 @@ function tgSlaTick_() {
     }
 
     const stage = tgSlaStage_(flag);
+    /* v170.23.22: لید خارج بی‌تماس: یادآوری در شروع پنجرهٔ تماس او؛ ۲ ساعت کاری داخل پنجره ← مسئول پذیرش؛ ۴ ساعت ← یاسر */
+    if (l.abroad) {
+      const ws = abSlaStage_(l, now.getTime());
+      if (!ws || ws <= stage) continue;
+      var toA = ws === 1 ? to : boss;
+      if (ws === 3 && TG_OWNER_CHAT) toA = { chat: TG_OWNER_CHAT, name: 'یاسر', style: TG_DESK_STYLES[0] };
+      if (ws < 3 && !tgDeskOnDuty_(toA, now)) continue;
+      const headA = ws === 1 ? '🌍 <b>پنجرهٔ تماس مراجع خارج الان باز است</b>' : (ws === 2 ? '⏰ <b>دو ساعت کاری در پنجرهٔ تماس گذشت، هنوز تماس اول نه</b>' : '🔺 <b>چهار ساعت کاری در پنجرهٔ تماس، لید خارج هنوز بی‌تماس</b>');
+      const lrA = tgLeadRead_(l.row);
+      if (lrA) { if (!lrA.code) lrA.code = tgLeadCode_(l.row); tgNotify_(toA.chat, TG_NK.urgent, headA + '\n\n' + tgLeadCardText_(lrA), { ref: lrA.code, markup: tgLeadKb_(lrA) }); }
+      sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(ws) + ' ' + stamp);
+      continue;
+    }
     if (stage >= 2) continue;
     /* v166.9: تا پیش از این، هر «2» در ساعتِ برچسب مرحلهٔ ۱ (مثل 12:40) مرحلهٔ ۲ خوانده می‌شد و پیگیری دوساعته نمی‌رفت.
        لیدهایی که بیش از TG_SLA_BACKLOG_MIN پیش مرحلهٔ ۱ گرفتند و به همین دلیل گیر ماندند، یک‌جا هشدار نمی‌گیرند (دایجست دارند). */
@@ -3587,8 +3605,8 @@ function tgSlaTick_() {
 /* مرحلهٔ اعلان از ستون «اعلان بات»: فقط «مرحلهٔ N»، نه هر رقمی (برچسب زمان هم رقم دارد) */
 var TG_SLA_BACKLOG_MIN = 48 * 60;
 function tgSlaStage_(flag) {
-  var m = String(flag || '').match(/مرحلهٔ\s*[۱۲12]/g) || [], st = 0;
-  for (var i = 0; i < m.length; i++) { var d = m[i].slice(-1); var n = (d === '۲' || d === '2') ? 2 : 1; if (n > st) st = n; }
+  var m = String(flag || '').match(/مرحلهٔ\s*[۱۲۳123]/g) || [], st = 0;
+  for (var i = 0; i < m.length; i++) { var d = m[i].slice(-1); var n = (d === '۳' || d === '3') ? 3 : ((d === '۲' || d === '2') ? 2 : 1); if (n > st) st = n; }
   return st;
 }
 
@@ -3612,6 +3630,7 @@ function tgDeskDigest_(kind) {
     if (b.stale.length) body += '\n\n<b>↻ نیاز به پیگیری</b>\n' + tgLeadList_(b.stale, 5);
     if (!b.first.length && !b.stale.length) body += '\n\nهمهٔ لیدهای باز تازه پیگیری شده‌اند 🌿';
   }
+  if (kind !== 'eve') { try { body += abDigestIntro_(leads.map(function (o) { return { code: o.code, row: o.row, status: o.status, meetDate: o.meetDate || '' }; })); } catch (eAi) { tgErr_('abDigestIntro_', eAi); } }   /* v170.23.22 */
 
   for (var i = 0; i < team.length; i++) {
     const p = team[i];
@@ -3716,6 +3735,7 @@ function tgDeskMenu_() {
   return {
     keyboard: [
       ['📥 کارهای روی زمین', TG_DUTY_BTN],
+      [AB_PLAN_BTN],
       [TG_PAY_BTN],
       ['✉️ پیام‌های درمانگران'],
       ['⚙️ اعلان‌های من', '📊 خلاصهٔ امروز'],
@@ -3767,6 +3787,7 @@ function tgDeskRoute_(chat, who, text) {
     return tgSend_(chat, T_DESK_SAVED, tgDeskSetMenu_());
   }
 
+  if (text === AB_PLAN_BTN) return abPlanSend_(chat);   /* v170.23.22 */
   if (tgAssignCmd_(chat, who, text) === true) return;
   // کارت لید با کد: «L-1042» یا «لید 0912…» یا «لید مسئول پذیرش»
   if (/^L-?\d{3,6}$/i.test(tgLatinDigits_(text))) { tgLeadFindSend_(chat, text); return; }
@@ -4416,6 +4437,14 @@ function tgOnPhone_(chat, name, uname, phone) {
   try { if (typeof vxcAfterPhone_ === 'function') vxcAfterPhone_(chat); } catch (eVx) {}   /* v166: برداشت مچ‌میکینگ صوتی در یادداشت لید */
 
   if (region === 'خارج از ایران') {
+    /* v170.23.22: لید تازهٔ خارج از بات: دو وقت از استخر خارج به ساعت خود مراجع (اگر ساعتش معلوم است همین حالا، وگرنه بعد از انتخاب منطقه) */
+    if (leadOk && known < 2) {
+      tgSetFlag_('abo1', chat, 3600);
+      if (zk && zk !== 'ir') {
+        var lr0 = null; try { var rw0 = tgFindLead_(chat); lr0 = rw0 >= 2 ? tgLeadRead_(rw0) : null; } catch (eF) {}
+        if (lr0 && abOfferTwo_(chat, lr0.row, { region: region, tz: ztz, best: lr0.best, topic: q.topic, code: lr0.code })) { tgDelFlag_('abo1', chat); return tgSend_(chat, T_SIGNUP_NUDGE, nudgeKb); }
+      }
+    }
     tgSend_(chat, T_SIGNUP_NUDGE, nudgeKb);
     tgSend_(chat, T_OUTSIDE);
     return tgAskZone_(chat);
@@ -4587,6 +4616,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('dq:') === 0 && typeof dqCb_ === 'function') return dqCb_(chat, data);   /* v170: صف ارسال */
   if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);
   if (data.indexOf('ln:') === 0 && typeof tgLenCb_ === 'function') return tgLenCb_(chat, data);   /* v170.23.10: طول جلسه */
+  if (data.indexOf('abk:') === 0 && typeof abOfferCb_ === 'function') return abOfferCb_(chat, data, name);   /* v170.23.22: دو وقت لید خارج */
   if (data.indexOf('as:') === 0 && typeof asCb_ === 'function') return asCb_(chat, data, name);   /* v170.23.11: دستیار */
   if (data.indexOf('ls:') === 0 && typeof lsCb_ === 'function') return lsCb_(chat, data);   /* v170.23.12: زمان مناسب تماس */
   if (data.indexOf('mig:') === 0 && typeof migCb_ === 'function') return migCb_(chat, data);   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ */
@@ -4706,6 +4736,13 @@ function tgScopeOf_(chat) {
 
 function tgOnZone_(chat, key) {
   tgSetVal_('tz', chat, key);
+  if (key !== 'ir' && tgFlag_('abo1', chat)) {   /* v170.23.22: لید تازهٔ خارج: اول دو وقت پیشنهادی */
+    tgDelFlag_('abo1', chat);
+    try {
+      var rw = tgFindLead_(chat), lr = rw >= 2 ? tgLeadRead_(rw) : null, ztz = tgZoneOf_(key).tz;
+      if (lr) { if (!lr.tz) tgLeadSet_(rw, { 'منطقهٔ زمانی': ztz }, 'بات', 'بات', 'منطقهٔ زمانی'); if (abOfferTwo_(chat, rw, { region: 'خارج از ایران', tz: ztz, best: lr.best, topic: lr.topic, code: lr.code })) return; }
+    } catch (eAb) { tgErr_('tgOnZone_ abOfferTwo_', eAb); }
+  }
   tgSend_(chat, T_ASK_BAND, {
     inline_keyboard: TG_BANDS.map(function (b) { return [{ text: b.label, callback_data: 'b:' + b.key }]; })
   });
@@ -6986,6 +7023,7 @@ function tgWatchdog(e) {
   S('migSetupTick_', 'light', typeof migSetupTick_ === 'function' ? migSetupTick_ : null);   /* با MIG_ENABLED خاموش بی‌کار */
   S('migTick_', 'light', typeof migTick_ === 'function' ? migTick_ : null);
   S('ps2FixMaybe_', 'light', typeof ps2FixMaybe_ === 'function' ? ps2FixMaybe_ : null);
+  S('abHourly_', 'light', typeof abHourly_ === 'function' ? abHourly_ : null);   /* v170.23.22: پنجرهٔ تماس و معارفهٔ بی نتیجه */
   S('abDailyMaybe_', 'light', typeof abDailyMaybe_ === 'function' ? abDailyMaybe_ : null);   /* v170.23.21: مبنای ارجاع و اصلاح لیدها، روزی یک بار */
   S('crFixMaybe_', 'light', typeof crFixMaybe_ === 'function' ? crFixMaybe_ : null);   /* v170.23.20: پاک کردن متن لیدهای بحران قدیمی، با «اوکی» Cowork */
   S('ktbRouteMaybe_', 'light', typeof ktbRouteMaybe_ === 'function' ? ktbRouteMaybe_ : null);   /* v170.16: کمپین C-004 */
@@ -21452,7 +21490,8 @@ const TG_LEAD_FIELDS = [
   /* v170.2 کامنت‌ها: ترجیحات برای پیشنهاد درمانگر */ 'ترجیحات', 'حالت جلسه', 'ترجیح جنسیت', 'ترجیح سن',
   /* v170.13 */ 'کد کمپین', 'آفر',
   /* v170.18 برگشت مراجع: زمان ورود تازه، منطقه، اعلان */ 'تاریخ', 'زمان', 'تاریخ شمسی', 'داخل یا خارج', 'اعلان بات',
-  /* v170.23.21 لید خارج */ 'منطقهٔ زمانی', 'زمان مناسب'
+  /* v170.23.21 لید خارج */ 'منطقهٔ زمانی', 'زمان مناسب',
+  /* v170.23.22 */ 'پنجرهٔ تماس (تهران)'
 ];
 
 // ستون‌هایی که تریگر شیت رویشان حساس است
@@ -21717,6 +21756,8 @@ function tgLeadRead_(row) {
     noans: Number(tgLatinDigits_(String(tgLeadHv_(v, hm, 'شمار بی‌پاسخ') || '0'))) || 0,
     reason: String(tgLeadHv_(v, hm, 'دلیل بستن') || '').trim(),
     offer: String(tgLeadHv_(v, hm, 'آفر') || '').trim(),   /* v170.13 */
+    tz: String(tgLeadHv_(v, hm, 'منطقهٔ زمانی') || '').trim(), best: String(tgLeadHv_(v, hm, 'زمان مناسب') || '').trim(),   /* v170.23.22 */
+    country: String(tgLeadHv_(v, hm, 'کشور محل زندگی') || '').trim(), topic: String(tgLeadHv_(v, hm, 'موضوع اصلی') || '').trim(),
     closed: tgStClosed_(statusRaw),
     touched: touched, idle: idle, age: age,
     stage: tgLeadStage_(touched, idle, nextIso, today)
@@ -21743,6 +21784,7 @@ function tgLeadCardText_(l) {
   t += '\n' + tgEsc_(l.src || 'منبع نامعلوم');
   if (l.region) t += ' · ' + tgEsc_(l.region);
   if (l.offer) t += '\n🎁 آفر: ' + tgEsc_(l.offer);   /* v170.13 */
+  if (!l.closed && (String(l.region || '').indexOf('خارج') > -1 || l.tz || l.best)) { try { t += '\n🕘 پنجرهٔ تماس (تهران): ' + abWinLabel_(abLeadTz_(l), abLeadBest_(l)); } catch (eW) {} }   /* v170.23.22 */
   if (l.phone) t += '\n📱 <code>' + tgEsc_(l.phone) + '</code>';
   t += '\n' + (l.stage === 'first'
     ? 'ثبت ' + tgLeadDur_(l.age) + ' پیش، هنوز تماس اول نگرفته'
@@ -21780,6 +21822,7 @@ function tgLeadKb_(l) {
   }
   const rows = [
     [{ text: '☎ تماس گرفتم', callback_data: 'ld:call:' + l.code },
+     { text: '✉️ پیام دادم', callback_data: 'ld:wm:' + l.code },
      { text: '🔕 پاسخ نداد', callback_data: 'ld:noans:' + l.code }],
     [{ text: '📝 یادداشت', callback_data: 'ld:note:' + l.code },
      { text: '👥 واگذاری', callback_data: 'ld:asg:' + l.code }],
@@ -22042,6 +22085,10 @@ function tgOnLead_(cq, rest) {
     const ch = { 'آخرین تماس': today, 'نتیجه': 'پاسخ نداد (' + tgFa_(n) + ')', 'شمار بی‌پاسخ': n };
     if (!l0 || !l0.owner) ch['مسئول'] = me;
     if (!advanced) ch['وضعیت'] = TG_ST.NOANS;
+    /* v170.23.22 چرخهٔ سه‌تماسه: اقدام بعدی و تاریخش خودکار؛ روز ۳ کانال دیگر، روز ۷ پیام «در باز است»، بعد پیشنهاد بستن */
+    const nx = abNoansNext_(n);
+    if (nx) { ch['اقدام بعدی'] = nx.next; ch['تاریخ اقدام بعدی'] = tgLeadDayAdd_(nx.days); }
+    else { ch['اقدام بعدی'] = 'بستن: پاسخ نداد (نهایی)'; ch['تاریخ اقدام بعدی'] = today; }
     tgLeadSet_(row, ch, me, 'تلگرام', 'بی‌پاسخ');
     tgLeadCardEdit_(cq, tgLeadRead_(row));
     if (n >= TG_NOANS_MAX) {
@@ -22051,7 +22098,16 @@ function tgOnLead_(cq, rest) {
          { text: '↩️ کارت', callback_data: 'ld:back:' + code }]
       ] });
     }
-    return nextMenu('🔕 ثبت شد. دوباره کی؟');
+    return tgSend_(chat, '🔕 ثبت شد. اقدام بعدی خودکار: «' + nx.next + '» در ' + tgEsc_(tgLeadJ_(tgLeadDayAdd_(nx.days))) + '.');
+  }
+
+  if (act === 'wm') {   /* v170.23.22: تماس نوشتاری (واتس‌اپ یا تلگرام) مثل تماس ثبت می‌شود */
+    const chW = { 'آخرین تماس': today, 'نتیجه': 'پیام نوشتاری فرستادم (واتس‌اپ یا تلگرام)' };
+    if (!l0 || !l0.owner) chW['مسئول'] = me;
+    if (!advanced && (!l0 || l0.status === TG_ST.NEW || l0.status === TG_ST.NOANS)) chW['وضعیت'] = TG_ST.FOLLOW;
+    tgLeadSet_(row, chW, me, 'تلگرام', 'پیام نوشتاری');
+    tgLeadCardEdit_(cq, tgLeadRead_(row));
+    return nextMenu('✉️ ثبت شد. اقدام بعدی کی؟');
   }
 
   if (act === 'nx') {
@@ -22273,7 +22329,7 @@ function tgLeadBook_(cq, me, row, code, idx) {
         const utc = tgSlotUtc_(s);
         var msg = '🗓 وقت معارفهٔ شما ثبت شد ✅\n\n👤 درمانگر: <b>' + tgEsc_(s.therapist) + '</b>\n' +
           '🗓 ' + tgDay_(Utilities.formatDate(utc, TG_TZ, 'EEE')) + ' ' + tgJDateFull_(utc, TG_TZ) + '\n' +
-          '🕐 ساعت ' + tgFa_(s.hhmm) + ' به وقت تهران، حدود ' + TG_MEET_MIN + ' دقیقه، آنلاین\n' +
+          '🕐 ساعت ' + tgFa_(s.hhmm) + ' به وقت تهران' + (l.tz && l.tz !== TG_TZ ? ' (' + abSlotLocal_(s, l.tz) + ')' : '') + '، حدود ' + TG_MEET_MIN + ' دقیقه، آنلاین\n' +
           (info.meet ? '\n🔗 لینک جلسه:\n' + tgEsc_(info.meet) + '\n' : '\nلینک جلسه را پیش از موعد برایتان می‌فرستیم.\n') +
           '\nاگر نتوانستید بیایید، همین‌جا لغو کنید تا وقت آزاد شود.';
         tgSetVal_('meet', l.chatId, JSON.stringify({ t: s.therapist, d: s.dateIso, h: s.hhmm, row: slotRow, ev: '' }));
@@ -22640,7 +22696,7 @@ function tgLeadTests() {
 
     var kb = tgLeadKb_(TG_DRY_LEAD);
     var flat = JSON.stringify(kb);
-    ok('کارت ده دکمهٔ کار دارد (v151: + روان‌پزشکی، v168: + ⏰ بعداً)', (flat.match(/callback_data/g) || []).length === 10);
+    ok('کارت یازده دکمهٔ کار دارد (v151: + روان‌پزشکی، v168: + ⏰ بعداً، v170.23.22: + ✉️ پیام دادم)', (flat.match(/callback_data/g) || []).length === 11 && flat.indexOf('ld:wm:') > -1);
     ok('همهٔ callback ها زیر ۶۴ بایت‌اند', kb.inline_keyboard.every(function (r) {
       return r.every(function (b) { return b.callback_data.length <= 64; });
     }));
@@ -22768,9 +22824,15 @@ function tgLead2Tests() {
     TG_DRY_LEAD = mk(); TG_OUTBOX = [];
     tgOnLead_(cq(''), 'noans:L-1042');
     ok('بی‌پاسخ اول: شمار ۱، وضعیت پاسخ نداد', TG_DRY_LEAD.noans === 1 && TG_DRY_LEAD.status === 'پاسخ نداد' && !lastMsgWith('ld:cl:L-1042'));
-    tgOnLead_(cq(''), 'noans:L-1042'); TG_OUTBOX = [];
+    ok('v170.23.22 سه‌تماسه: بی‌پاسخ اول ← روز ۳ کانال دیگر، خودکار', /کانال دیگر/.test(TG_DRY_LEAD.next) && TG_DRY_LEAD.nextDate === tgLeadDayAdd_(2), TG_DRY_LEAD.next + ' ' + TG_DRY_LEAD.nextDate);
+    tgOnLead_(cq(''), 'noans:L-1042');
+    ok('v170.23.22 سه‌تماسه: بی‌پاسخ دوم ← روز ۷ پیام «در باز است»', /در باز است/.test(TG_DRY_LEAD.next) && TG_DRY_LEAD.nextDate === tgLeadDayAdd_(4), TG_DRY_LEAD.next + ' ' + TG_DRY_LEAD.nextDate);
+    TG_OUTBOX = [];
     tgOnLead_(cq(''), 'noans:L-1042');
     ok('بی‌پاسخ سوم: پیشنهاد بستن با «پاسخ نداد (نهایی)»', TG_DRY_LEAD.noans === 3 && !!lastMsgWith('ld:cl:L-1042:' + TG_CLOSE_REASONS.indexOf('پاسخ نداد (نهایی)')));
+    TG_DRY_LEAD = mk(); TG_OUTBOX = [];
+    tgOnLead_(cq(''), 'wm:L-1042');
+    ok('v170.23.22 «✉️ پیام دادم»: مثل تماس ثبت می‌شود، لید دیگر بی‌تماس نیست', sets()[0] && sets()[0].changes['آخرین تماس'] === today && /پیام نوشتاری/.test(sets()[0].changes['نتیجه']) && TG_DRY_LEAD.status === 'در پیگیری', JSON.stringify(sets()[0]));
     TG_DRY_LEAD = mk(); TG_DRY_LEAD.status = 'معارفه رزرو شد'; TG_DRY_LEAD.booked = true; TG_OUTBOX = [];
     tgOnLead_(cq(''), 'noans:L-1042');
     ok('بی‌پاسخ روی لید رزروشده وضعیت را عقب نمی‌برد', TG_DRY_LEAD.status === 'معارفه رزرو شد' && TG_DRY_LEAD.noans === 1);

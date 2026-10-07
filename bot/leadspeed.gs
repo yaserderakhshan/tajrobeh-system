@@ -613,3 +613,254 @@ function abTests() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'abTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['لیدهای خارج · مبنای ارجاع و داده (v170.23.21)', 'abTests']); } catch (eAb) {}
+
+/* ═════════════ v170.23.22 · مسیر لیدهای خارج، بخش ب: راهبری پذیرش ═════════════
+   - پنجرهٔ تماس (تهران): «زمان مناسب» به ساعت خود مراجع ∩ ۹:۳۰ تا ۲۲:۰۰ تهران؛ اگر اشتراکی نبود، اولین صبحِ او. با تغییر ساعت خود منطقه.
+     روی کارت لید، اعلان SLA، دایجست، کارتابل و «📞 برنامهٔ تماس امروز». ستون «پنجرهٔ تماس (تهران)» در انتهای «لیدها» هر ساعت تازه می‌شود.
+   - SLA لید خارج: یادآوری در شروع پنجره، نه لحظهٔ رسیدن؛ ۲ ساعت کاری داخل پنجره ← مسئول پذیرش؛ ۴ ساعت ← یاسر (مالک).
+   - لید خارج از بات با chat: همان لحظه دو وقت معارفه از استخر خارج به ساعت خود مراجع، رزرو همان مسیر کارت لید، و «وقت دیگر».
+   - چرخهٔ سه‌تماسه: بی‌پاسخ ۱ ← روز ۳ کانال دیگر؛ بی‌پاسخ ۲ ← روز ۷ پیام «در باز است»؛ بی‌پاسخ ۳ ← پیشنهاد بستن. «✉️ پیام دادم».
+   - بعد از معارفه: ۲۴ ساعت بی نتیجه ← پرسش از درمانگر و کارت پذیرش؛ «رزرو شد» بی‌تاریخ یا گذشته هر روز در دایجست صبح. */
+var AB_TEH_FROM = 570, AB_TEH_TO = 1320;   /* ۹:۳۰ تا ۲۲:۰۰ تهران، دقیقه از نیمه‌شب */
+var AB_WIN_COL = 'پنجرهٔ تماس (تهران)';
+var AB_PLAN_BTN = '📞 برنامهٔ تماس امروز';
+/** اختلاف منطقهٔ زمانی با UTC در لحظهٔ ms (دقیقه)؛ از ساعت دیواری، تا با تغییر ساعت تابستانی خود منطقه درست باشد */
+function abOffMin_(tz, ms) { var w = Utilities.formatDate(new Date(ms), tz, 'yyyy-MM-dd HH:mm'); return Math.round((new Date(w.replace(' ', 'T') + ':00Z').getTime() - Math.floor(ms / 60000) * 60000) / 60000); }
+function abHm_(m) { m = ((Math.round(m) % 1440) + 1440) % 1440; return tgFa_(('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + (m % 60)).slice(-2)); }
+/** پنجرهٔ تماس یک روز: {from, to} دقیقهٔ تهران و همان به ساعت مراجع؛ dayMs یک لحظه از همان روز */
+function abWinTehran_(tz, best, dayMs) {
+  tz = String(tz || '').trim() || TG_TZ;
+  var w = abLocalWin_(best) || abLocalWin_('هر وقت'), shift;
+  try { shift = abOffMin_(TG_TZ, dayMs) - abOffMin_(tz, dayMs); } catch (e) { tz = TG_TZ; shift = 0; }
+  var cut = function (lo, hi) { var a = Math.max(lo * 60 + shift, AB_TEH_FROM), b = Math.min(hi * 60 + shift, AB_TEH_TO); return a < b ? { from: a, to: b } : null; };
+  var r = cut(w[0], w[1]) || cut(9, 12);
+  if (!r) r = { from: Math.max(0, 9 * 60 + shift), to: Math.min(1439, 12 * 60 + shift), edge: true };
+  r.tz = tz; r.shift = shift; return r;
+}
+function abWinLabel_(tz, best, dayMs) {
+  var r = abWinTehran_(tz, best, dayMs || lsNow_()), loc = r.tz !== TG_TZ;
+  return abHm_(r.from) + ' تا ' + abHm_(r.to) + (loc ? ' (به وقت او ' + abHm_(r.from - r.shift) + ' تا ' + abHm_(r.to - r.shift) + ')' : '');
+}
+function abTehMinOf_(ms) { return Number(Utilities.formatDate(new Date(ms), TG_TZ, 'H')) * 60 + Number(Utilities.formatDate(new Date(ms), TG_TZ, 'm')); }
+function abInWinNow_(tz, best, nowMs) { nowMs = nowMs || lsNow_(); var r = abWinTehran_(tz, best, nowMs), m = abTehMinOf_(nowMs); return m >= r.from && m < r.to; }
+/** دقیقه‌های داخل پنجره از fromMs تا toMs (حداکثر ۱۴ روز) */
+function abInWinMin_(fromMs, toMs, tz, best) {
+  if (!fromMs || toMs <= fromMs) return 0;
+  var sum = 0, start = Math.max(fromMs, toMs - 14 * 86400000);
+  for (var d = 0; d <= 14; d++) {
+    var dayMs = start + d * 86400000; if (dayMs > toMs + 86400000) break;
+    var iso = Utilities.formatDate(new Date(dayMs), TG_TZ, 'yyyy-MM-dd'), base = new Date(iso + 'T00:00:00+03:30').getTime();
+    var r = abWinTehran_(tz, best, base + 12 * 3600000), a = Math.max(base + r.from * 60000, start), b = Math.min(base + r.to * 60000, toMs);
+    if (b > a) sum += (b - a) / 60000;
+    if (base + 86400000 > toMs) break;
+  }
+  return Math.round(sum);
+}
+/** شروع نزدیک‌ترین پنجرهٔ امروز یا فردا (ms) */
+function abWinStartMs_(tz, best, nowMs) {
+  for (var d = 0; d < 3; d++) {
+    var iso = Utilities.formatDate(new Date(nowMs + d * 86400000), TG_TZ, 'yyyy-MM-dd'), base = new Date(iso + 'T00:00:00+03:30').getTime();
+    var r = abWinTehran_(tz, best, base + 12 * 3600000), s = base + r.from * 60000, e = base + r.to * 60000;
+    if (e > nowMs) return Math.max(s, nowMs);
+  }
+  return nowMs;
+}
+/** منطقهٔ زمانی و زمان مناسب یک لید (ستون‌های تازه، وگرنه یادداشت قدیمی) */
+function abLeadTz_(l) { return String(l.tz || '').trim() || abTzFromNote_(l.memo || l.note || ''); }
+function abLeadBest_(l) { return String(l.best || '').trim() || abBestFromNote_(l.memo || l.note || ''); }
+
+/* ───── SLA لید خارج ───── */
+/** مرحلهٔ خواسته برای لید خارج بی‌تماس: ۰ هیچ، ۱ شروع پنجره (مسئول)، ۲ دو ساعت کاری (مسئول پذیرش)، ۳ چهار ساعت (یاسر) */
+function abSlaStage_(l, nowMs) {
+  var tz = abLeadTz_(l), best = abLeadBest_(l), arr = nowMs - (l.age || 0) * 60000;
+  var wm = abInWinMin_(arr, nowMs, tz, best);
+  if (wm >= 240) return 3;
+  if (wm >= 120) return 2;
+  return abInWinNow_(tz, best, nowMs) ? 1 : 0;
+}
+
+/* ───── پیشنهاد دو وقت به لید خارج از بات ───── */
+var AB_OFFER_TXT = 'سلام، پیامتان به مرکز تجربه زندگی رسید. برای جلسهٔ معارفهٔ رایگان این وقت‌ها به ساعت شما آزاد است. یکی را انتخاب کنید تا همین‌جا رزرو شود. اگر هیچ‌کدام نشد، «وقت دیگر» را بزنید تا همکاران پذیرش خودشان هماهنگ کنند.';
+/** دو وقت از استخر خارج، فقط درمانگر فعال، ترجیحاً در پنجرهٔ مراجع و از دو درمانگر */
+function abTwoSlots_(lead, topic) {
+  var all = lsDry_() ? (TG_MEM['ab:slots'] || []) : (function () { try { return tgFreeSlots_('خارج از ایران'); } catch (e) { return []; } })();
+  var now = lsNow_(), info = lsDry_() ? null : tgTherapistInfo_();
+  var ok = all.filter(function (s) {
+    if (tgSlotUtc_(s).getTime() - now < (typeof TG_MIN_LEAD_MS !== 'undefined' ? TG_MIN_LEAD_MS : 3 * 3600000)) return false;
+    return info ? abTherOk_(info[s.therapist]) : abTherOkName_(s.therapist);
+  });
+  ok = tgPoolFilter_(ok, null, { topic: topic || '', abroad: true }) || [];
+  var tz = abLeadTz_(lead), best = abLeadBest_(lead);
+  var inW = ok.filter(function (s) { return abSlotInWin_(s, tz, best); });
+  var order = (inW.length ? inW : []).concat(ok.filter(function (s) { return inW.indexOf(s) < 0; })), pick = [], seen = {};
+  order.forEach(function (s) { if (pick.length < 2 && !seen[s.therapist]) { seen[s.therapist] = 1; pick.push(s); } });
+  order.forEach(function (s) { if (pick.length < 2 && pick.indexOf(s) < 0) pick.push(s); });
+  return pick;
+}
+function abSlotLocal_(s, tz) {
+  var utc = tgSlotUtc_(s), z = String(tz || '') || TG_TZ;
+  return tgDay_(Utilities.formatDate(utc, z, 'EEE')) + ' ' + tgFa_(Utilities.formatDate(utc, z, 'HH:mm')) + (z !== TG_TZ ? ' به وقت شما' : ' به وقت تهران');
+}
+/** از tgOnPhone_ بعد از ساخت لید: فقط لید خارج با chat */
+function abOfferTwo_(chat, row, lead) {
+  if (!chat || !/خارج/.test(String(lead.region || ''))) return false;
+  var two = abTwoSlots_(lead, lead.topic);
+  if (!two.length) return false;
+  tgSetVal_('abo', chat, JSON.stringify({ row: row, code: lead.code || '', s: two }));
+  var kb = two.map(function (s, i) { return [{ text: '🗓 ' + abSlotLocal_(s, abLeadTz_(lead)), callback_data: 'abk:' + i }]; });
+  kb.push([{ text: 'وقت دیگر', callback_data: 'abk:x' }]);
+  tgSend_(chat, AB_OFFER_TXT, { inline_keyboard: kb });
+  try { tgLeadNote_(row, 'دو وقت معارفه از استخر خارج پیشنهاد شد', 'بات'); } catch (e) {}
+  return true;
+}
+/** کلیک مراجع روی وقت پیشنهادی یا «وقت دیگر» */
+function abOfferCb_(chat, data, name) {
+  var o = null; try { o = JSON.parse(tgGetVal_('abo', chat) || 'null'); } catch (e) {}
+  if (!o) return tgSend_(chat, 'این پیشنهاد دیگر معتبر نیست. از منو «وقت معارفه» را بزنید.');
+  var a = String(data).split(':')[1];
+  if (a === 'x') {
+    tgDel_('abo', chat);
+    try { tgLeadNote_(o.row, 'مراجع «وقت دیگر» را زد؛ هماهنگی با پذیرش', 'مراجع'); tgLeadSet_(o.row, { 'اقدام بعدی': 'هماهنگی وقت معارفهٔ دیگر', 'تاریخ اقدام بعدی': lsDay_() }, 'بات', 'بات', 'وقت دیگر'); } catch (e2) {}
+    try { if (typeof inbAdd_ === 'function') inbAdd_('lead', o.code || ('row:' + o.row), { chat: String(chat), text: 'مراجع خارج «وقت دیگر» خواست', q: 'پذیرش', type: 'هماهنگی معارفه' }); } catch (e3) {}
+    return tgSend_(chat, 'ثبت شد. همکاران پذیرش برای هماهنگی وقت پیام می‌دهند.');
+  }
+  var s = (o.s || [])[Number(a)];
+  if (!s) return tgSend_(chat, 'این وقت دیگر در دست نیست.');
+  tgDel_('abo', chat);
+  return abBook_(chat, o.row, s);
+}
+/** رزرو مستقیم همان مسیر کارت لید (tgLeadBook_)، با مالک «بات» */
+function abBook_(chat, row, s) {
+  if (lsDry_()) { (TG_MEM['ab:booked'] = TG_MEM['ab:booked'] || []).push({ row: row, s: s }); return true; }
+  tgSetVal_('ldbs', chat, JSON.stringify([s]));
+  return tgLeadBook_({ message: { chat: { id: chat } } }, 'بات', row, '', 0);
+}
+
+/* ───── چرخهٔ سه‌تماسه ───── */
+/** بعد از n امین بی‌پاسخ: {next, days} یا null (پیشنهاد بستن) */
+function abNoansNext_(n) {
+  if (n <= 1) return { next: 'تماس از کانال دیگر (پیام واتس‌اپ یا تلگرام)', days: 2 };
+  if (n === 2) return { next: 'پیام «در باز است»', days: 4 };
+  return null;
+}
+
+/* ───── ستون پنجره، بعد از معارفه، دایجست ───── */
+/** هر ساعت: ستون پنجرهٔ تماس برای لیدهای باز؛ معارفهٔ بی نتیجه ۲۴ ساعت بعد */
+function abHourly_() {
+  if (lsDry_()) return 0;
+  var sh = tgSS_().getSheetByName(TG_LEADS), last = sh ? sh.getLastRow() : 0; if (last < 2) return 0;
+  var hm = tgLeadHeadMap_(sh), wc = tgLeadCol_(AB_WIN_COL), from = Math.max(2, last - 400);
+  var v = sh.getRange(from, 1, last - from + 1, sh.getLastColumn()).getValues(), n = 0;
+  var g = function (r, h) { var i = hm[h]; return (i === undefined || i < 0 || i >= r.length) ? '' : String(r[i] || '').trim(); };
+  v.forEach(function (r, i) {
+    if (tgStClosed_(g(r, 'وضعیت')) || (!String(r[3] || '').trim() && !String(r[5] || '').trim())) return;
+    var tz = g(r, 'منطقهٔ زمانی') || abTzFromNote_(g(r, 'یادداشت')), best = g(r, 'زمان مناسب') || abBestFromNote_(g(r, 'یادداشت'));
+    var lbl = abWinLabel_(tz, best), cur = wc && r[wc - 1] != null ? String(r[wc - 1]) : '';
+    if (wc && lbl !== cur) { sh.getRange(from + i, wc).setValue(lbl); n++; }
+  });
+  try { abAfterIntro_(); } catch (e) { tgErr_('abAfterIntro_', e); }
+  return n;
+}
+/** «معارفه رزرو شد» بی‌تاریخ یا گذشته و بی نتیجه */
+function abIntroGaps_(list, today, nowMs) {
+  return list.filter(function (l) { return l.status === TG_ST.BOOKED; }).map(function (l) {
+    var d = String(l.meetDate || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return { l: l, why: 'رزرو شده ولی تاریخ معارفه ندارد' };
+    var ms = new Date(d + 'T23:59:00+03:30').getTime();
+    if (nowMs - ms >= 0) return { l: l, why: 'تاریخ معارفه گذشته (' + tgLeadJ_(d) + ')، نتیجه ثبت نشده' + (nowMs - ms >= 86400000 ? '' : ' (امروز)') };
+    return null;
+  }).filter(Boolean);
+}
+/** ۲۴ ساعت بعد از معارفهٔ بی نتیجه: یک بار پرسش از درمانگر و کارت پذیرش */
+function abAfterIntro_() {
+  var day = lsDay_(), now = lsNow_(), asked = lsJson_('AB_ASKED', {}), ch = false;
+  abIntroGaps_(lsLeads_(400), day, now).forEach(function (x) {
+    var l = x.l, d = String(l.meetDate || '').slice(0, 10); if (!l.code || asked[l.code]) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || now - new Date(d + 'T23:59:00+03:30').getTime() < 0) return;
+    asked[l.code] = day; ch = true;
+    var th = l.meetTher ? tgTherChatByName_(l.meetTher) : null;
+    if (th) tgSend_(th, '🗓 <b>نتیجهٔ معارفه</b>\n\nمعارفهٔ ' + tgEsc_(l.code) + ' در ' + tgEsc_(tgLeadJ_(d)) + ' ثبت نتیجه ندارد. برگزار شد؟ ادامه می‌دهد؟\nلطفاً همین‌جا بنویسید یا به پذیرش خبر دهید.');
+    lsDeskChats_().slice(0, 1).forEach(function (c) { tgNotify_(c, TG_NK.task, '🗓 <b>معارفهٔ بی نتیجه، ۲۴ ساعت گذشته</b>\n\n' + tgLeadCardText_(l), { ref: l.code, markup: tgLeadKb_(l) }); });
+  });
+  if (ch) { var keys = Object.keys(asked); keys.forEach(function (k) { if (asked[k] < Utilities.formatDate(new Date(now - 30 * 86400000), TG_TZ, 'yyyy-MM-dd')) delete asked[k]; }); lsProp_('AB_ASKED', JSON.stringify(asked)); }
+}
+/** بخش دایجست صبح: معارفه‌های رزروشدهٔ بی‌تاریخ یا گذشته */
+function abDigestIntro_(leads) {
+  var g = abIntroGaps_(leads || [], lsDay_(), lsNow_()); if (!g.length) return '';
+  return '\n\n<b>🗓 معارفهٔ رزروشده بی‌تاریخ یا بی‌نتیجه</b>\n' + g.slice(0, 10).map(function (x) { return '• ' + tgEsc_(x.l.code || ('سطر ' + x.l.row)) + ' · ' + tgEsc_(x.why); }).join('\n');
+}
+
+/* ───── برنامهٔ تماس امروز ───── */
+function abPlanRows_(leads, nowMs) {
+  var today = Utilities.formatDate(new Date(nowMs), TG_TZ, 'yyyy-MM-dd');
+  return (leads || []).filter(function (l) { return !l.closed && l.code && (!l.touched || !l.nextDate || l.nextDate <= today); }).map(function (l) {
+    var tz = abLeadTz_(l), best = abLeadBest_(l), r = abWinTehran_(tz, best, nowMs), inNow = abInWinNow_(tz, best, nowMs);
+    var due = !l.touched || (l.nextDate && l.nextDate <= today);
+    return { l: l, from: r.from, to: r.to, inNow: inNow, late: inNow && due && (!l.touched || (l.nextDate && l.nextDate < today)), label: abWinLabel_(tz, best, nowMs) };
+  }).sort(function (a, b) { return (b.late - a.late) || (b.inNow - a.inNow) || (a.from - b.from) || ((a.l.code < b.l.code) ? -1 : 1); });
+}
+function abPlanText_(rows) {
+  if (!rows.length) return '📞 <b>برنامهٔ تماس امروز</b>\n\nامروز تماسی در صف نیست 🌿';
+  return '📞 <b>برنامهٔ تماس امروز</b> · ' + tgFa_(rows.length) + ' لید (ساعت تهران)\n\n' + rows.slice(0, 30).map(function (x) {
+    return (x.late ? '🔴 ' : (x.inNow ? '🟠 ' : '⚪️ ')) + abHm_(x.from) + ' تا ' + abHm_(x.to) + ' · <b>' + tgEsc_(x.l.code) + '</b> · ' + tgEsc_(String(x.l.name || 'بی‌نام').split(/\s+/)[0]) +
+      (/خارج/.test(x.l.region || '') ? ' 🌍' : '') + (x.l.next ? ' · ' + tgEsc_(x.l.next) : (x.l.touched ? '' : ' · تماس اول'));
+  }).join('\n') + '\n\n🔴 الان داخل پنجره و دیرشده · 🟠 الان داخل پنجره · ⚪️ بیرون از پنجره';
+}
+function abPlanSend_(chat) {
+  var rows = abPlanRows_(lsDry_() ? (TG_MEM['ls:leads'] || []) : tgOpenLeads_().map(function (o) { try { var x = tgLeadRead_(o.row); if (x) { x.tz = o.tz; x.best = o.best; } return x || o; } catch (e) { return o; } }), lsNow_());
+  var kb = rows.slice(0, 8).map(function (x) { return [{ text: '📇 ' + x.l.code, callback_data: 'ld:back:' + x.l.code }]; });
+  return tgSend_(chat, abPlanText_(rows), kb.length ? { inline_keyboard: kb } : null);
+}
+
+/* ───── آزمون: مسیر لیدهای خارج، بخش ب (v170.23.22) ───── */
+function abTests2() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, note: tgLeadNote_, set: tgLeadSet_ };
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = { 'ls:now': new Date('2026-10-08T12:00:00+03:30').getTime() };
+  try {
+    var oct = new Date('2026-10-08T12:00:00+03:30').getTime(), jan = new Date('2027-01-08T12:00:00+03:30').getTime();
+    ok('پنجرهٔ برلین «شب» در مهر: ۱۹:۳۰ تا ۲۲:۰۰ تهران (۱۸ تا ۲۰:۳۰ او)', abWinLabel_('Europe/Berlin', 'شب', oct) === '۱۹:۳۰ تا ۲۲:۰۰ (به وقت او ۱۸:۰۰ تا ۲۰:۳۰)', abWinLabel_('Europe/Berlin', 'شب', oct));
+    ok('همان در دی (ساعت زمستانی): ۲۰:۳۰ تا ۲۲:۰۰', abWinLabel_('Europe/Berlin', 'شب', jan).indexOf('۲۰:۳۰ تا ۲۲:۰۰') === 0, abWinLabel_('Europe/Berlin', 'شب', jan));
+    ok('ونکوور «شب» بیرون از ۹:۳۰ تا ۲۲ است ← اولین صبحِ او', abWinLabel_('America/Vancouver', 'شب', oct).indexOf('۱۹:۳۰ تا ۲۲:۰۰') === 0, abWinLabel_('America/Vancouver', 'شب', oct));
+    ok('بی منطقه و بی زمان مناسب: «هر وقت» به تهران، ۱۰ تا ۲۰', abWinLabel_('', '', oct) === '۱۰:۰۰ تا ۲۰:۰۰');
+    var arr = new Date('2026-10-08T08:00:00+03:30').getTime();
+    ok('دقیقه‌های داخل پنجره: ۸ تا ۱۲ تهران با پنجرهٔ ۱۰ تا ۲۰ ← ۱۲۰', abInWinMin_(arr, oct, '', '') === 120, abInWinMin_(arr, oct, '', ''));
+    ok('SLA خارج: لید رسیده بیرون از پنجره هنوز یادآوری نمی‌گیرد', abSlaStage_({ age: 60, tz: 'Europe/Berlin', best: 'شب' }, oct) === 0);
+    var eve = new Date('2026-10-08T20:00:00+03:30').getTime();
+    ok('SLA خارج: شروع پنجره ← ۱، بعد از ۲ ساعت کاری ← ۲ (مسئول پذیرش)', abSlaStage_({ age: 30, tz: 'Europe/Berlin', best: 'شب' }, eve) === 1 &&
+       abSlaStage_({ age: 24 * 60, tz: 'Europe/Berlin', best: 'شب' }, new Date('2026-10-08T21:45:00+03:30').getTime()) === 2);
+    ok('SLA خارج: ۴ ساعت کاری در پنجره ← ۳ (یاسر)', abSlaStage_({ age: 2 * 24 * 60, tz: 'Europe/Berlin', best: 'شب' }, new Date('2026-10-08T21:45:00+03:30').getTime()) === 3);
+    ok('سه‌تماسه: ۱ کانال دیگر +۲، ۲ «در باز است» +۴، ۳ پیشنهاد بستن', abNoansNext_(1).days === 2 && /در باز است/.test(abNoansNext_(2).next) && abNoansNext_(2).days === 4 && abNoansNext_(3) === null);
+    /* پیشنهاد دو وقت */
+    TG_MEM['ab:ther'] = [{ name: 'درمانگر الف', status: 'فعال' }, { name: 'درمانگر ب', status: 'فعال' }, { name: 'درمانگر ج', status: 'نامعلوم' }];
+    TG_MEM['poolmap'] = {}; ['درمانگر الف', 'درمانگر ب', 'درمانگر ج'].forEach(function (n) { TG_MEM['poolmap'][tgNorm_(n)] = { ind: 2, abroad: true }; }); TG_MEM['poolmap'][tgNorm_('درمانگر د')] = { ind: 2 };
+    TG_MEM['ab:slots'] = [{ therapist: 'درمانگر ج', dateIso: '2026-10-09', hhmm: '20:00' }, { therapist: 'درمانگر د', dateIso: '2026-10-09', hhmm: '20:30' },
+      { therapist: 'درمانگر الف', dateIso: '2026-10-09', hhmm: '11:00' }, { therapist: 'درمانگر ب', dateIso: '2026-10-10', hhmm: '20:00' }, { therapist: 'درمانگر الف', dateIso: '2026-10-10', hhmm: '20:30' }];
+    var two = abTwoSlots_({ tz: 'Europe/Berlin', best: 'شب' }, '');
+    ok('دو وقت: فقط فعال و استخر خارج، اول داخل پنجره، از دو درمانگر', two.length === 2 && two[0].therapist === 'درمانگر ب' && two[1].therapist === 'درمانگر الف' && two[1].hhmm === '20:30', JSON.stringify(two));
+    tgLeadNote_ = function () {}; tgLeadSet_ = function (r, ch) { TG_MEM['ab:set'] = ch; return 'L-7'; };
+    TG_OUTBOX = [];
+    ok('پیام پیشنهاد: متن تأییدشده، دو وقت به ساعت مراجع و «وقت دیگر»', abOfferTwo_('7001', 7, { region: 'خارج از ایران', tz: 'Europe/Berlin', best: 'شب', code: 'L-7' }) &&
+       TG_OUTBOX[0].text === AB_OFFER_TXT && /به وقت شما/.test(JSON.stringify(TG_OUTBOX[0])) && /abk:x/.test(JSON.stringify(TG_OUTBOX[0])), JSON.stringify(TG_OUTBOX[0]).slice(0, 300));
+    ok('لید داخل پیشنهاد نمی‌گیرد', !abOfferTwo_('7002', 8, { region: 'داخل ایران' }));
+    abOfferCb_('7001', 'abk:0', 'مراجع');
+    ok('انتخاب وقت ← رزرو همان مسیر کارت لید', (TG_MEM['ab:booked'] || []).length === 1 && TG_MEM['ab:booked'][0].s.therapist === 'درمانگر ب');
+    abOfferTwo_('7001', 7, { region: 'خارج از ایران', tz: 'Europe/Berlin', best: 'شب', code: 'L-7' }); TG_OUTBOX = [];
+    abOfferCb_('7001', 'abk:x', 'مراجع');
+    ok('«وقت دیگر» ← اقدام بعدی برای پذیرش و پیام کوتاه', /هماهنگی وقت/.test((TG_MEM['ab:set'] || {})['اقدام بعدی'] || '') && /پذیرش/.test(TG_OUTBOX[0].text));
+    /* برنامهٔ تماس و کارتابل */
+    var L = [{ code: 'L-1', name: 'الف', region: 'خارج از ایران', tz: 'Europe/Berlin', best: 'صبح', touched: false, age: 600, closed: false },
+             { code: 'L-2', name: 'ب', region: 'داخل ایران', tz: '', best: '', touched: true, nextDate: '2026-10-07', closed: false },
+             { code: 'L-3', name: 'ج', region: 'خارج از ایران', tz: 'America/Vancouver', best: 'شب', touched: false, age: 60, closed: false }];
+    var P = abPlanRows_(L, oct);
+    ok('برنامهٔ تماس: اول دیرشده‌های داخل پنجره به ترتیب شروع پنجره، بعد بیرون از پنجره', P.map(function (x) { return x.l.code; }).join('|') === 'L-2|L-1|L-3' && P[0].late && P[1].late && !P[2].inNow, P.map(function (x) { return x.l.code + ':' + x.late + ':' + x.inNow; }).join(' '));
+    ok('متن برنامه با ساعت تهران و راهنمای رنگ', /🔴 /.test(abPlanText_(P)) && /⚪️ /.test(abPlanText_(P)) && /ساعت تهران/.test(abPlanText_(P)));
+    ok('دکمهٔ «📞 برنامهٔ تماس امروز» در منوی پذیرش', JSON.stringify(tgDeskMenu_()).indexOf(AB_PLAN_BTN) > -1);
+    /* بعد از معارفه */
+    var G = abIntroGaps_([{ code: 'L-11', status: TG_ST.BOOKED, meetDate: '' }, { code: 'L-12', status: TG_ST.BOOKED, meetDate: '2026-10-01' }, { code: 'L-13', status: TG_ST.BOOKED, meetDate: '2026-10-20' }, { code: 'L-14', status: TG_ST.HELD, meetDate: '' }], '2026-10-08', oct);
+    ok('دایجست: رزرو بی‌تاریخ و گذشتهٔ بی‌نتیجه، نه آینده و نه برگزارشده', G.map(function (x) { return x.l.code; }).join('|') === 'L-11|L-12' && /معارفهٔ رزروشده/.test(abDigestIntro_([{ code: 'L-11', status: TG_ST.BOOKED, meetDate: '' }])));
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; tgLeadNote_ = keep.note; tgLeadSet_ = keep.set; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'abTests2'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['لیدهای خارج · راهبری پذیرش (v170.23.22)', 'abTests2']); } catch (eAb2) {}

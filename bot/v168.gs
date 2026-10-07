@@ -409,7 +409,10 @@ function tgV168NextFill() {
    کار امروز یعنی لید بازی که «تاریخ اقدام بعدی»اش امروز یا گذشته است (اگر تاریخ نداشت: تماس اول نگرفته یا بی‌حرکت).
    ============================================================================ */
 var V168_T_QUEUE = 'کارتابل پیگیری';
-var V168_Q_HEAD = ['کد لید', 'نام', 'منبع', 'مسئول', 'تاریخ اقدام بعدی', 'اقدام بعدی', 'چرا امروز', 'وضعیت', 'شماره', 'تاریخ شمسی', 'نوع لید'];   /* v170.2: نوع لید با فیلتر */
+var V168_Q_HEAD = ['کد لید', 'نام', 'منبع', 'مسئول', 'تاریخ اقدام بعدی', 'اقدام بعدی', 'چرا امروز', 'وضعیت', 'شماره', 'تاریخ شمسی', 'نوع لید',
+  /* v170.23.22 */ 'پنجرهٔ تماس (تهران)', 'تماس بعدی کِی', 'چند بار تماس', 'کانال در دسترس'];   /* v170.2: نوع لید با فیلتر */
+/* v170.23.22: رنگ فقط معنی‌دار: قرمز = الان داخل پنجره و دیرشده، نارنجی = امروز، خاکستری = بیرون از پنجره */
+var V168_Q_COLOR = { late: '#eec3c7', today: '#fde9c9', out: '#f5f5f8' };
 
 function v168DayDiff_(a, b) { return Math.round((new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 86400000); }
 function tgTodayList_(owner, date, list) {
@@ -434,12 +437,22 @@ function tgTodayList_(owner, date, list) {
 }
 /* سطرهای تب کارتابل از همان فهرست؛ خلاصه از همان شمارش دایجست */
 function v168QueueRows_(open, date) {
-  var b = tgLeadBuckets_(open), t = b.today;
+  var b = tgLeadBuckets_(open), now = typeof lsNow_ === 'function' ? lsNow_() : Date.now(), today = Utilities.formatDate(new Date(now), TG_TZ, 'yyyy-MM-dd');
+  /* v170.23.22: پنجرهٔ تماس، ترتیب «الان داخل پنجره و موعدگذشته» اول، و رنگ معنی‌دار */
+  var t = b.today.map(function (l) {
+    var tz = abLeadTz_(l), best = abLeadBest_(l), w = abWinTehran_(tz, best, now), inNow = abInWinNow_(tz, best, now);
+    var late = inNow && (!l.touched || (l.nextDate && l.nextDate < today));
+    return { l: l, w: w, inNow: inNow, late: late, color: late ? 'late' : (inNow ? 'today' : 'out') };
+  }).sort(function (a, b2) { return (b2.late - a.late) || (b2.inNow - a.inNow) || (a.w.from - b2.w.from) || ((a.l.nextDate || '') < (b2.l.nextDate || '') ? -1 : 1); });
   return {
-    open: open.length, today: t.length, first: b.first.length, stale: b.stale.length,
-    rows: t.map(function (l) {
+    open: open.length, today: t.length, first: b.first.length, stale: b.stale.length, colors: t.map(function (x) { return x.color; }),
+    rows: t.map(function (x) {
+      var l = x.l, tz = abLeadTz_(l), best = abLeadBest_(l);
+      var when = (l.nextDate && l.nextDate > today ? tgLeadJ_(l.nextDate) + ' ' : '') + abHm_(x.w.from);
+      var tries = (l.noans || 0) + (l.touched && !/پاسخ نداد/.test(l.result || '') ? 1 : 0);
+      var chan = l.pref || (/بات|تلگرام/.test(l.src + ' ' + l.channel) ? 'تلگرام (بات)' : (/WhatsApp|واتس/.test(l.src + ' ' + l.channel) ? 'واتس‌اپ' : (l.phone ? 'تلفن' : 'نامعلوم')));
       return [l.code || ('سطر ' + l.row), l.name || '', l.src || '', l.owner || 'بی‌مسئول', l.nextDate || '', l.next || '', l.why, l.status || 'جدید', l.phone || '',
-              l.nextDate ? tgLeadJ_(l.nextDate) : '', l.type || 'مراجع'];
+              l.nextDate ? tgLeadJ_(l.nextDate) : '', l.type || 'مراجع', abWinLabel_(tz, best, now), when, String(tries), chan];
     })
   };
 }
@@ -457,7 +470,11 @@ function v168QueueWrite_(open) {
     ['همان فهرست دایجست بات و «📥 کارهای روی زمین». هر ساعت از تب لیدها بازنویسی می‌شود؛ کار را روی کارت لید در بات یا در تب لیدها انجام دهید.']]);
   sh.getRange(1, 1).setFontSize(15).setFontWeight('bold');
   sh.getRange(6, 1, 1, V168_Q_HEAD.length).setValues([V168_Q_HEAD]).setFontWeight('bold').setBackground('#222222').setFontColor('#fefefe');
-  if (q.rows.length) sh.getRange(7, 1, q.rows.length, V168_Q_HEAD.length).setNumberFormat('@').setValues(q.rows);
+  if (q.rows.length) {
+    sh.getRange(7, 1, q.rows.length, V168_Q_HEAD.length).setNumberFormat('@').setValues(q.rows);
+    sh.getRange(7, 1, q.rows.length, V168_Q_HEAD.length).setBackgrounds((q.colors || []).map(function (c) { return V168_Q_HEAD.map(function () { return V168_Q_COLOR[c] || '#fefefe'; }); }));
+  }
+  try { sh.getRange(5, 1).setValue('🔴 قرمز: الان داخل پنجرهٔ تماس و دیرشده · 🟠 نارنجی: الان داخل پنجره، امروز · ⚪️ خاکستری: بیرون از پنجره').setFontColor('#676768'); } catch (eL) {}
   try { sh.getRange(6, 1, Math.max(2, q.rows.length + 1), V168_Q_HEAD.length).createFilter(); } catch (eF2) {}   /* v170.2: فیلتر نوع لید */
   sh.setFrozenRows(6);
   return q;

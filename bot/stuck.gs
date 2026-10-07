@@ -277,7 +277,8 @@ function stkLeadScan_(live, only) {
       stkRaise_({ reason: 'lead_botowner', key: l.code, lead: l.code, type: l.type, owner: own, mode: l.mode || 'لید',
         detail: 'مسئول ' + l.code + ' «' + l.owner + '» است، نه یک نفر از پذیرش' + (l.touched ? '' : '؛ ' + tgFa_(Math.round(l.age / 60)) + ' ساعت است تماسی ثبت نشده') + '.' });
     }
-    if (l.abroad && !l.touched && l.age >= STK_ABROAD_MIN) {
+    /* v170.23.22: آستانهٔ لید خارج بی‌تماس ۴ ساعت داخل پنجرهٔ تماس او (نه ۳۰ دقیقه از رسیدن) */
+    if (l.abroad && !l.touched && (typeof abInWinMin_ === 'function' ? abInWinMin_(now - (l.age || 0) * 60000, now, abLeadTz_(l), abLeadBest_(l)) >= 240 : l.age >= STK_ABROAD_MIN)) {
       live['lead_abroad:' + l.code] = 1;
       stkRaise_({ reason: 'lead_abroad', key: l.code, lead: l.code, type: l.type, owner: own, place: 'خارج از ایران', mode: l.mode || 'لید',
         detail: l.code + ': خارج از ایران، ' + tgFa_(l.age) + ' دقیقه بی تماس' + (l.owner ? ' · مسئول: ' + l.owner : ' · بی مسئول') + '.' });
@@ -441,12 +442,12 @@ function stkTests() {
       r[6] = region; r[8] = 'جدید'; r[9] = owner; r[10] = contact || ''; r[24] = code; return r;
     };
     var hm = {}; hm['کد لید'] = 24;
-    TG_MEM['openrows'] = { v: [mk('L-1250', 'بات — خودرزرو', 'تهران', 300), mk('L-1272', '', 'خارج از ایران', 45), mk('L-1300', '', 'خارج از ایران', 10)], hm: hm, now: now.getTime() };
+    TG_MEM['openrows'] = { v: [mk('L-1250', 'بات — خودرزرو', 'تهران', 300), mk('L-1272', '', 'خارج از ایران', 20 * 60), mk('L-1300', '', 'خارج از ایران', 45)], hm: hm, now: now.getTime() };
     TG_OUTBOX = [];
     stkScan_();
     var b = stkRows_().filter(function (r) { return r.key === 'lead_botowner:L-1250'; })[0], ab = stkRows_().filter(function (r) { return r.key === 'lead_abroad:L-1272'; })[0];
     ok('مسئول «بات — خودرزرو» ← هشدار با دکمهٔ واگذاری', b && b.lead === 'L-1250' && cards('7101').some(function (o) { return JSON.stringify(o.markup).indexOf('ld:asg:L-1250') > -1; }));
-    ok('لید خارج از ایران بیش از ۳۰ دقیقه بی تماس؛ کمتر از ۳۰ دقیقه نه', ab && /۴۵ دقیقه بی تماس/.test(ab.detail) && !stkRows_().some(function (r) { return r.key === 'lead_abroad:L-1300'; }));
+    ok('لید خارج بیش از ۴ ساعت داخل پنجرهٔ تماس بی تماس؛ ۴۵ دقیقه نه (v170.23.22)', ab && /دقیقه بی تماس/.test(ab.detail) && !stkRows_().some(function (r) { return r.key === 'lead_abroad:L-1300'; }));
     ok('نام مراجع در هیچ کارت و ردیفی نیست', !TG_OUTBOX.some(function (o) { return /نام آزمایشی/.test(o.text || ''); }) && JSON.stringify(stkRows_()).indexOf('نام آزمایشی') < 0);
     /* آنلاین */
     TG_OUTBOX = [];
