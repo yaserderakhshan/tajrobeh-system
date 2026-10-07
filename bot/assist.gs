@@ -255,7 +255,8 @@ function asDeskChats_() {
   return (typeof tgDeskRows_ === 'function' ? tgDeskRows_() : []).map(function (d) { return String(d.chat || '').split(/[,،;\s]+/)[0]; }).filter(String);
 }
 function asUrgent_(ctx) {
-  var line = '🚨 <b>هشدار بحران در دستیار</b> · ' + (ctx.channel === 'bot' ? 'تلگرام' : 'وب') + (ctx.chat ? ' · chat در کارت گفت‌وگو' : ' · بی راه تماس');
+  var line = '🚨 <b>هشدار بحران در دستیار</b> · ' + (ctx.channel === 'bot' ? 'تلگرام' : 'وب') + (ctx.chat ? ' · chat در کارت گفت‌وگو' : ' · بی راه تماس') +
+    (/^smoke-/.test(String(ctx.session || '')) ? ' · 🧪 آزمون دود خودکار، اقدام لازم نیست' : '');   /* v170.23.19: هشدار همچنان می‌رود، فقط برچسب دارد */
   try { asDeskChats_().forEach(function (c) { tgNotify_(c, TG_NK.urgent, line, { ref: 'AS-CRISIS', force: true }); }); } catch (e) { tgErr_('asUrgent_', e); }
   if (typeof inbAdd_ === 'function') { try { inbAdd_('as', 'AS-' + (ctx.chat || ctx.session || asNow_()), { chat: ctx.chat || '', text: 'بحران · ' + (ctx.channel || ''), q: 'پذیرش', type: 'بحران', more: true }); } catch (e2) {} }
 }
@@ -1346,6 +1347,9 @@ function asTests7() {
     var ver = ssVerify_; ssVerify_ = function () { return 'ok'; }; var w;
     try { w = JSON.parse(asWeb_({}, '{}', { action: 'assist.ask', channel: 'site', session_id: 'test-s1', text: 'دوره‌های مدرسهٔ تجربه برای دانشجویان؟', audience: 'دانشجو' }).getContent()); } finally { ssVerify_ = ver; }
     ok('خروجی وب: log_id، source و source_url (قرارداد پل)', w.ok && w.log_id && w.source === 'سایت' && w.source_url === S + '/school/', JSON.stringify(w));
+    ok('بحران: گونه‌های «نمی‌خواهم زنده باشم» و «خودم را بکشم»', ['دیگر نمی‌خواهم زنده باشم', 'نمیخوام زنده بمونم', 'می‌خواهم خودم را بکشم'].every(tgIsCrisis_) && !tgIsCrisis_('می‌خواهم زندگی بهتری داشته باشم'));
+    TG_MEM['notify'] = []; asAsk_({ channel: 'site', session: 'smoke-2026-10-08' }, 'دیگر نمی‌خواهم زنده باشم');
+    ok('آزمون دود: هشدار بحران می‌رود ولی برچسب «آزمون دود» دارد', (TG_MEM['notify'] || []).some(function (x) { return x.kind === TG_NK.urgent && /آزمون دود/.test(x.text || x.line || JSON.stringify(x)); }), JSON.stringify(TG_MEM['notify']));
     ok('اکشن kb_index در درگاه، فقط نوشتنی', typeof PB_ACTIONS.kb_index === 'function' && PB_WRITE.indexOf('kb_index') > -1);
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
   finally { asKnownNames_ = keep.names; TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg; AS_IDX_MEMO = null; }

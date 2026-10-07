@@ -82,7 +82,7 @@
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۵ | ۳۳ |
-| `telegram.gs` | ۳۷۷۷۹ | ۲۰۴۱ |
+| `telegram.gs` | ۳۷۷۸۲ | ۲۰۴۱ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -119,7 +119,7 @@
 | `migrate.gs` | ۵۶۲ | ۵۶ |
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
-| `assist.gs` | ۱۳۵۵ | ۱۱۱ |
+| `assist.gs` | ۱۳۵۹ | ۱۱۱ |
 | `leadspeed.gs` | ۲۵۹ | ۲۳ |
 
 ### کارهای زمان‌دار
