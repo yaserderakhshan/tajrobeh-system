@@ -1,0 +1,25 @@
+<script>
+/* Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz و is_abroad) v1
+   منطقهٔ زمانی مرورگر را می‌خواند و به GA4 می‌دهد: هم ویژگی کاربر (user_properties) و هم پارامتر همهٔ رویدادها.
+   is_abroad = «yes» اگر منطقهٔ زمانی Asia/Tehran نباشد، وگرنه «no». هیچ دادهٔ شخصی فرستاده نمی‌شود.
+   فقط دستور set در صف dataLayer می‌گذارد؛ پیش از بارگذاری gtag.js هم امن است و رندر را نگه نمی‌دارد.
+   جای اجرا: سربرگ سراسری، با اولویت کمتر از اسنیپت سربرگ آنالیتیکس تا set پیش از config و page_view در صف باشد. */
+(function (w) {
+  var tz = '';
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+  var abroad = 'unknown';
+  if (tz) {
+    abroad = 'yes';
+    /* «Iran» نام قدیمی همان منطقه است و بعضی مرورگرها هنوز برمی‌گردانند */
+    if (tz === 'Asia/Tehran') { abroad = 'no'; }
+    if (tz === 'Iran') { abroad = 'no'; }
+  } else {
+    tz = 'unknown';
+  }
+  w.dataLayer = w.dataLayer || [];
+  function q() { w.dataLayer.push(arguments); }
+  q('set', 'user_properties', { visitor_tz: tz, is_abroad: abroad });
+  q('set', { visitor_tz: tz, is_abroad: abroad });
+  w.tjVisitorTz = { visitor_tz: tz, is_abroad: abroad };
+})(window);
+</script>
