@@ -19630,7 +19630,7 @@ function tgNotifyTests() {
   function ok(label, cond) { if (cond) { pass++; text.push('✅ ' + label); } else { fail++; text.push('❌ ' + label); } }
   var keepDry = TG_DRY; TG_DRY = true;
   TG_OUTBOX = []; TG_MEM['notify'] = []; TG_MEM['queue'] = []; TG_MEM['capdry'] = {}; TG_MEM['policy'] = {}; TG_MEM['quiet'] = false; TG_MEM['tasks'] = []; TG_MEM['outlog'] = [];
-  ok('شش نوع پیام و سیاست پیش‌فرض', Object.keys(TG_NK).length === 6 && TG_POLICY_DEF.length === 6 && TG_POLICY_DEF.every(function (r) { return r.join(' ').indexOf('—') < 0; }));
+  ok('هفت نوع پیام و سیاست پیش‌فرض (v170.23.12.6: «بازبینی»)', Object.keys(TG_NK).length === 7 && TG_POLICY_DEF.length === 7 && TG_POLICY_DEF.every(function (r) { return r.join(' ').indexOf('—') < 0; }));
   ok('فوری سکوت و سقف ندارد', !tgPolicy_('فوری').quiet && tgPolicy_('فوری').cap === 0);
   ok('کار سقف ۱۰ دارد', tgPolicy_('کار').cap === 10 && tgPolicy_('کار').quiet);
   var r1 = tgNotify_('1', TG_NK.task, 'کار یک', { ref: 'K-1' });
