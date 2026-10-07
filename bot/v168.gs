@@ -1951,23 +1951,38 @@ function v16810SweepDue_() {
   return true;
 }
 
-/* تریگر واحد ۵ دقیقه‌ای. خطای یکی جلوی بقیه را نمی‌گیرد */
+/* تریگر واحد ۵ دقیقه‌ای. خطای یکی جلوی بقیه را نمی‌گیرد.
+   v170.23.12.5 (سهمیهٔ اجرا، bg* ته v168.gs): نوبت‌دار و پیام ۱۰ دقیقه‌ای لید و صف ارسال واجب‌اند؛ کمپین هر ۳۰ دقیقه و فقط با
+   کمپین فعال (بی آن هر ۲ ساعت فقط سنجش وضعیت)؛ صف سوشال هر ۱۰ دقیقه؛ بقیه سبک و زیر سقف ۷۵ دقیقه. */
 function tgTick5(e) {
   e = e || {};
   var calls = TG_DRY ? (TG_MEM['v16810:calls'] = TG_MEM['v16810:calls'] || []) : null;
   var run = function (name, fn) { if (calls) { calls.push(name); return 'dry'; } return fn(e); };
   try { run('tgDutyTick', tgDutyTick); } catch (x1) { tgErr_('tgTick5 tgDutyTick', x1); }
-  if (v16810Due_('V16810_CP_AT', V16810_CP_MIN)) {
+  var cpOn = bgCpActive_();
+  if (cpOn && v16810Due_('V16810_CP_AT', BG_CP_ACTIVE_MIN) && bgOk_('light', 'tgCpTick')) {
     var r;
-    try { r = run('tgCpTick', tgCpTick); } catch (x2) { tgErr_('tgTick5 tgCpTick', x2); }
+    try { r = run('tgCpTick', tgCpTick); if (!calls && r !== 'busy') bgCpSet_(tgCpCamps_()); } catch (x2) { tgErr_('tgTick5 tgCpTick', x2); }
     if (r !== 'busy') v16810Prop_('V16810_CP_AT', v16810Now_());
+  } else if (!cpOn && v16810Due_('V16810_CP_AT', BG_CP_CHECK_MIN) && bgOk_('light', 'tgCpCheck')) {
+    v16810Prop_('V16810_CP_AT', v16810Now_());
+    try { run('tgCpCheck', bgCpCheck_); } catch (x9) { tgErr_('tgTick5 bgCpCheck_', x9); }
   }
-  try { run('soTick', soTick); } catch (x3) { tgErr_('tgTick5 soTick', x3); }
+  if (!cpOn && v16810Due_('BG_TH_AT', BG_TH_MIN) && bgOk_('light', 'tgThPush_')) {
+    v16810Prop_('BG_TH_AT', v16810Now_());
+    try { run('tgThPush_', function () { return tgThPush_(); }); } catch (x10) { tgErr_('tgTick5 tgThPush_', x10); }
+  }
+  if (v16810Due_('BG_SO_AT', BG_SO_MIN)) {
+    v16810Prop_('BG_SO_AT', v16810Now_());
+    try { run('soTick', soTick); } catch (x3) { tgErr_('tgTick5 soTick', x3); }
+  }
+  var t5 = Date.now();
   try { if (typeof dqTick5_ === 'function') run('dqTick5_', dqTick5_); } catch (x5) { tgErr_('tgTick5 dqTick5_', x5); }   /* v170: صف ارسال، هر ۱۰ دقیقه */
-  try { if (typeof cmTick5_ === 'function') run('cmTick5_', cmTick5_); } catch (x6) { tgErr_('tgTick5 cmTick5_', x6); }   /* v170.2: کامنت‌های هاب پذیرش، هر ۱۵ دقیقه (پیش از «اجرا» خاموش) */
+  try { if (typeof cmTick5_ === 'function' && bgOk_('light', 'cmTick5_')) run('cmTick5_', cmTick5_); } catch (x6) { tgErr_('tgTick5 cmTick5_', x6); }   /* v170.2: کامنت‌های هاب پذیرش، هر ۱۵ دقیقه */
   try { if (typeof lsTick_ === 'function') run('lsTick_', lsTick_); } catch (x8) { tgErr_('tgTick5 lsTick_', x8); }   /* v170.23.12: پاسخ زیر ۱۰ دقیقه و اولویت ۹:۳۰ (leadspeed.gs) */
   try { v16810QuotaAlert_(); } catch (x4) { tgErr_('v16810QuotaAlert_', x4); }
-  if (!calls) { try { if (typeof v17013ScholarTick_ === 'function') v17013ScholarTick_(); } catch (x7) { tgErr_('tgTick5 v17013ScholarTick_', x7); } }   /* v170.13: خبر وضعیت بورسیه، هر ۱۵ دقیقه */
+  if (!calls) { try { if (typeof v17013ScholarTick_ === 'function' && bgOk_('light', 'v17013ScholarTick_')) v17013ScholarTick_(); } catch (x7) { tgErr_('tgTick5 v17013ScholarTick_', x7); } }   /* v170.13: خبر وضعیت بورسیه، هر ۱۵ دقیقه */
+  if (!calls) { tgRunStat_('tgTick5+', t5); bgFlush_(); }   /* v170.23.12.5: بقیهٔ تیک (صف، کامنت، لید ۱۰ دقیقه‌ای) هم در سهمیه شمرده می‌شود */
 }
 
 /* جمع زمان اجرای امروز (دقیقه) از RS:<روز تهران> که tgRunStat_ می‌نویسد */
@@ -2015,13 +2030,19 @@ function tgV16810Tests() {
     at(0); tgTick5({});
     ok('tgTick5 همهٔ کارهای ۵ دقیقه‌ای را صدا می‌زند (روی کد قبلی مردود)', calls().join() === 'tgDutyTick,tgCpTick,soTick,dqTick5_,cmTick5_,lsTick_');   /* v170.23.12: lsTick_ */
     at(5); tgTick5({});
-    ok('۵ دقیقه بعد tgCpTick نمی‌رود، بقیه می‌روند', calls().join() === 'tgDutyTick,soTick,dqTick5_,cmTick5_,lsTick_');
+    ok('۵ دقیقه بعد tgCpTick و صف سوشال نمی‌روند، واجب‌ها می‌روند', calls().join() === 'tgDutyTick,dqTick5_,cmTick5_,lsTick_');   /* v170.23.12.5 */
     at(10); tgTick5({});
-    ok('۱۰ دقیقه بعد tgCpTick دوباره می‌رود', calls().indexOf('tgCpTick') > -1);
-    at(14.6); tgTick5({});
-    ok('لغزش تریگر (۴٫۶ دقیقه) نوبت tgCpTick را جا نمی‌اندازد اگر ۹٫۵ دقیقه گذشته باشد', calls().indexOf('tgCpTick') < 0);
-    at(19.6); tgTick5({});
-    ok('بعد از ۹٫۶ دقیقه tgCpTick می‌رود', calls().indexOf('tgCpTick') > -1);
+    var c10 = calls();
+    ok('۱۰ دقیقه بعد صف سوشال می‌رود، کمپین نه (هر ۳۰ دقیقه)', c10.indexOf('soTick') > -1 && c10.indexOf('tgCpTick') < 0);
+    at(29.6); tgTick5({});
+    ok('بعد از ۲۹٫۶ دقیقه (لغزش تریگر) tgCpTick با کمپین فعال می‌رود', calls().indexOf('tgCpTick') > -1);
+    TG_MEM['bgp:BG_CP_ACTIVE'] = '0';
+    at(60); tgTick5({});
+    var c60 = calls();
+    ok('بی کمپین فعال: tgCpTick نمی‌رود، فهرست همکاران ساعتی می‌رود', c60.indexOf('tgCpTick') < 0 && c60.indexOf('tgCpCheck') < 0 && c60.indexOf('tgThPush_') > -1);
+    at(150); tgTick5({});
+    ok('بی کمپین فعال: هر ۲ ساعت فقط سنجش وضعیت کمپین', calls().indexOf('tgCpCheck') > -1);
+    delete TG_MEM['bgp:BG_CP_ACTIVE'];
 
     at(0);
     ok('جاروی v168 بار اول می‌رود', v16810SweepDue_() === true);
@@ -2145,3 +2166,210 @@ function tgV1691Tests() {
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ تجمیع تریگرها درست است'));
   return tgTestTally_(log, fail);
 }
+
+/* ============================================================================ */
+/**
+ * v170.23.12.5 · سهمیهٔ زمان اجرای کارهای زمان‌دار (سقف روزانهٔ ۹۰ دقیقهٔ Apps Script)
+ * (در همین فایل، کنار tgTick5، نه فایل تازه: فایل تازه آزمون کامل روی اپس‌اسکریپت می‌خواهد و آن هم از همین سهمیه می‌خورد)
+ *
+ * هدف: مصرف روزانه زیر ۴۵ دقیقه، و کارهای واجب همیشه.
+ * سه ردهٔ کار:
+ * - must (واجب، هرگز رد نمی‌شود): بحران و لغو و تغییر (وبهوک و onEdit؛ زمان‌دار نیستند)، یادآوری معارفه و جلسه،
+ *   تیک هر دقیقهٔ tgPayTick (این‌جا دست نمی‌خورد)، اعلان لید تازه به نوبت‌دار (tgDutyTick، ۸ تا ۲۴)، پیام ۱۰ دقیقه‌ای لید (lsTick_)، صف ارسال.
+ * - light (سبک، فقط بالای ۷۵ دقیقه رد می‌شود): کارهای ساعتی کوچک.
+ * - heavy (سنگین، بالای ۵۵ دقیقه رد می‌شود): فقط در ساعت‌های BG_HEAVY_HOURS از tgWatchdog.
+ * مصرف امروز همان RS:<روز تهران> است که tgRunStat_ می‌نویسد. زمان هر قدم tgWatchdog در RSW:<روز> و ردشده‌ها در BGS:<روز>.
+ * یک خط مصرف روز در گزارش شبانه (TG_NIGHT_LINES). هشدار ظهر همان v16810QuotaAlert_ است.
+ */
+var BG_SOFT_MIN = 55;    /* بالاتر از این: کارهای سنگین رد می‌شوند */
+var BG_HARD_MIN = 75;    /* بالاتر از این: فقط واجب‌ها */
+var BG_GOAL_MIN = 45;
+/* ساعت‌های تهران که بخش سنگین tgWatchdog می‌رود. پنجره‌های خود کارها (مثلاً ۹ تا ۱۸ یا از ۲۲) در این ساعت‌ها هست */
+var BG_HEAVY_HOURS = [9, 12, 15, 18, 22];
+var BG_DUTY_FROM = 8;    /* tgDutyTick فقط ۸ تا ۲۴ تهران */
+var BG_DUTY_FULL_MIN = 30;   /* با لید در انتظار، دست‌کم هر ۳۰ دقیقه یک خواندن کامل (ثبت تماس اول) */
+var BG_DUTY_SAFE_MIN = 180;  /* بی هیچ نشانه‌ای هم هر ۳ ساعت یک خواندن کامل */
+var BG_CP_ACTIVE_MIN = 30;   /* tgCpTick وقتی کمپین فعال است */
+var BG_CP_CHECK_MIN = 120;   /* بی کمپین فعال: هر ۲ ساعت فقط وضعیت کمپین‌ها (پنجرهٔ تأخیر رویداد ۶ ساعت است) */
+var BG_TH_MIN = 60;          /* فهرست همکاران به سایت، بی کمپین فعال */
+var BG_SO_MIN = 10;          /* صف ارسال سوشال */
+var BG_MEMO = null;
+
+function bgDry_() { return typeof TG_DRY !== 'undefined' && TG_DRY; }
+function bgNow_() { return bgDry_() && TG_MEM['bg:now'] ? Number(TG_MEM['bg:now']) : Date.now(); }
+function bgDay_(ms) { return Utilities.formatDate(new Date(ms || bgNow_()), 'Asia/Tehran', 'yyyy-MM-dd'); }
+function bgHour_() { return Number(Utilities.formatDate(new Date(bgNow_()), 'Asia/Tehran', 'H')); }
+function bgProp_(k, v) {
+  if (bgDry_()) { if (v !== undefined) TG_MEM['bgp:' + k] = String(v); return TG_MEM['bgp:' + k] || ''; }
+  var P = PropertiesService.getScriptProperties(); if (v !== undefined) P.setProperty(k, String(v)); return P.getProperty(k) || '';
+}
+function bgJson_(k) { try { return JSON.parse(bgProp_(k) || '{}') || {}; } catch (e) { return {}; } }
+function bgReset_() { BG_MEMO = null; }
+function bgMemo_() {
+  var day = bgDay_();
+  if (!BG_MEMO || BG_MEMO.day !== day) BG_MEMO = { day: day, used: null, steps: {}, skip: {} };
+  return BG_MEMO;
+}
+/* دقیقه‌های اجراشدهٔ امروز (یک بار در هر اجرا خوانده می‌شود) */
+function bgUsedMin_() {
+  var m = bgMemo_();
+  if (m.used === null) {
+    var o = bgDry_() ? (TG_MEM['bg:rs'] || {}) : bgJson_('RS:' + m.day);
+    m.used = v16810TodayMin_(o);
+  }
+  return m.used;
+}
+function bgLevel_() { var u = bgUsedMin_(); return u >= BG_HARD_MIN ? 2 : u >= BG_SOFT_MIN ? 1 : 0; }
+function bgOk_(tier, name) {
+  if (tier === 'must') return true;
+  var lv = bgLevel_(), ok = tier === 'light' ? lv < 2 : lv < 1;
+  if (!ok) { var s = bgMemo_().skip; s[name] = (s[name] || 0) + 1; }
+  return ok;
+}
+/* یک قدم tgWatchdog: رده، زمان و خطای جدا. true یعنی اجرا شد */
+function bgStep_(name, tier, fn) {
+  if (typeof fn !== 'function' || !bgOk_(tier, name)) return false;
+  var t0 = Date.now(), r;
+  try { r = fn(); } catch (e) { try { tgErr_(name, e); } catch (e2) {} }
+  var st = bgMemo_().steps, x = st[name] || [0, 0]; x[0]++; x[1] += Date.now() - t0; st[name] = x;
+  return r === undefined ? true : r;
+}
+/* زمان قدم‌ها و ردشده‌ها در Property؛ ۴ روز آخر */
+function bgFlush_() {
+  var m = BG_MEMO; if (!m) return;
+  var put = function (pre, add, two) {
+    if (!Object.keys(add).length) return;
+    var k = pre + m.day, o = bgJson_(k);
+    Object.keys(add).forEach(function (n) {
+      if (two) { var x = o[n] || [0, 0]; x[0] += add[n][0]; x[1] += add[n][1]; o[n] = x; } else o[n] = (o[n] || 0) + add[n];
+    });
+    bgProp_(k, JSON.stringify(o));
+  };
+  try {
+    put('RSW:', m.steps, true); put('BGS:', m.skip, false);
+    m.steps = {}; m.skip = {};
+    if (!bgDry_()) {
+      var P = PropertiesService.getScriptProperties();
+      ['RSW:', 'BGS:'].forEach(function (pre) { var ks = P.getKeys().filter(function (k) { return k.indexOf(pre) === 0; }).sort(); while (ks.length > 4) P.deleteProperty(ks.shift()); });
+    }
+  } catch (e) {}
+}
+
+/* ───── tgDutyTick: نشانگر سبک لید تازه ───── */
+/* هر جایی که سطری به لیدها اضافه یا دستی ویرایش شود این را می‌زند؛ tgDutyTick بی آن شیت را نمی‌خواند */
+function bgLeadMark_() { try { bgProp_('BG_LEAD_AT', bgNow_()); } catch (e) {} }
+/* full = باید شیت خوانده شود؛ دلیل برای گزارش */
+function bgDutyPlan_() {
+  var now = bgNow_(), h = bgHour_();
+  if (h < BG_DUTY_FROM) return { run: false, why: 'شب' };
+  var mark = Number(bgProp_('BG_LEAD_AT') || 0), full = Number(bgProp_('BG_DUTY_FULL') || 0);
+  if (mark && mark >= full) return { run: true, why: 'لید تازه' };
+  if (now - full >= BG_DUTY_SAFE_MIN * 60000) return { run: true, why: 'دورهٔ ایمنی' };
+  var pend = [];
+  try { pend = bgDry_() ? (TG_MEM['bg:pend'] || []) : JSON.parse(PropertiesService.getScriptProperties().getProperty('TG_DUTY_PEND') || '[]'); } catch (e) { pend = []; }
+  if (!pend.length) return { run: false, why: 'بی‌کار' };
+  var wait = typeof TG_DUTY_WAIT !== 'undefined' ? TG_DUTY_WAIT : 10;
+  var due = pend.some(function (x) { return !x.n || (x.n === 1 && x.t && (now - x.t) / 60000 >= wait); });
+  if (due) return { run: true, why: 'نوبت اقدام' };
+  if (now - full >= BG_DUTY_FULL_MIN * 60000) return { run: true, why: 'پیگیری در انتظار' };
+  return { run: false, why: 'منتظر' };
+}
+function bgDutyDone_(t) { bgProp_('BG_DUTY_FULL', t || bgNow_()); }   /* زمان شروع خواندن، تا لیدی که وسط کار رسید جا نماند */
+
+/* ───── tgCpTick: فقط با کمپین فعال ───── */
+/* '' یعنی هنوز سنجیده نشده: فعال فرض می‌شود */
+function bgCpActive_() { return bgProp_('BG_CP_ACTIVE') !== '0'; }
+function bgCpSet_(camps) {
+  var on = (camps || []).some(function (c) { return c && c.state !== 'بسته'; });
+  bgProp_('BG_CP_ACTIVE', on ? '1' : '0'); return on;
+}
+
+/* بی کمپین فعال، هر ۲ ساعت: فقط وضعیت کمپین‌ها؛ اگر کمپینی باز شده بود همان دم tgCpTick کامل، وگرنه فقط هل دادن وضعیت سایت (با امضای تغییر) */
+function bgCpCheck_(e) {
+  var rs0 = Date.now();
+  try {
+    TG_CP_MEMO = null;
+    if (bgCpSet_(tgCpCamps_())) return tgCpTick(e || {});
+    try { return tgCpPush_('تیک'); } catch (eP) { tgErr_('tgCpPush_', eP); }
+  } finally { tgRunStat_('tgCpCheck', rs0); }
+}
+
+/* ───── گزارش شبانه ───── */
+function bgNightLine_() {
+  var day = bgDay_(), o = bgDry_() ? (TG_MEM['bg:rs'] || {}) : bgJson_('RS:' + day), used = v16810TodayMin_(o);
+  var top = Object.keys(o).filter(function (k) { return k !== '_c' && Array.isArray(o[k]); }).sort(function (a, b) { return o[b][1] - o[a][1]; }).slice(0, 3)
+    .map(function (k) { return k + ' ' + tgFa_((o[k][1] / 60000).toFixed(1)); });
+  var sk = bgDry_() ? (TG_MEM['bgp:BGS:' + day] ? JSON.parse(TG_MEM['bgp:BGS:' + day]) : {}) : bgJson_('BGS:' + day);
+  var nSk = Object.keys(sk).reduce(function (a, k) { return a + sk[k]; }, 0);
+  if (!bgDry_()) { try { bgDayRow_(day, used, o, sk); } catch (eRow) { tgErr_('bgDayRow_', eRow); } }
+  return '⏱ سهمیهٔ اجرا: ' + tgFa_(used.toFixed(1)) + ' از ۹۰ دقیقه (هدف ' + tgFa_(BG_GOAL_MIN) + ')' +
+    (top.length ? ' · بیشترین: ' + top.join('، ') : '') + (nSk ? ' · ' + tgFa_(nSk) + ' کار غیرواجب رد شد' : '');
+}
+/* یک سطر در روز در تب پنهان «سهمیهٔ اجرا» هاب: جمع، هر تابع، قدم‌های واچ‌داگ و ردشده‌ها (برای سنجش بعد از انتشار) */
+var BG_TAB = 'سهمیهٔ اجرا';
+var BG_HEAD = ['روز', 'دقیقه تا گزارش ۲۱', 'هر تابع (بار/دقیقه)', 'قدم‌های واچ‌داگ (بار/دقیقه)', 'ردشده'];
+function bgDayRow_(day, used, o, sk) {
+  var ss = tgSS_(), sh = ss.getSheetByName(BG_TAB);
+  if (!sh) { sh = ss.insertSheet(BG_TAB); sh.setRightToLeft(true); sh.appendRow(BG_HEAD); sh.setFrozenRows(1); try { sh.hideSheet(); } catch (eH) {} }
+  var fmt = function (m) { return Object.keys(m).filter(function (k) { return k !== '_c' && Array.isArray(m[k]); }).sort(function (a, b) { return m[b][1] - m[a][1]; })
+    .map(function (k) { return k + '=' + m[k][0] + '/' + (m[k][1] / 60000).toFixed(1); }).join(' '); };
+  sh.appendRow([day, Number(used.toFixed(1)), fmt(o), fmt(bgJson_('RSW:' + day)), Object.keys(sk).map(function (k) { return k + '=' + sk[k]; }).join(' ')]);
+}
+try { TG_NIGHT_LINES.push(bgNightLine_); } catch (eNl) {}
+
+/* ───── آزمون ───── */
+function bgTests() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX };
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = {};
+  var at = function (y, mo, d, h, mi) { TG_MEM['bg:now'] = String(pbTehran_(y, mo, d, h, mi).getTime()); TG_MEM['v16810:now'] = TG_MEM['bg:now']; bgReset_(); };
+  try {
+    at(2026, 10, 8, 10, 0);
+    TG_MEM['bg:rs'] = { tgWatchdog: [5, 20 * 60000, 0], _c: 1 };
+    ok('زیر ۵۵ دقیقه همه می‌روند', bgLevel_() === 0 && bgOk_('heavy', 'x') && bgOk_('light', 'y'));
+    TG_MEM['bg:rs'] = { tgWatchdog: [5, 60 * 60000, 0] }; bgReset_();
+    ok('بالای ۵۵: سنگین رد، سبک و واجب می‌روند', bgLevel_() === 1 && !bgOk_('heavy', 'h1') && bgOk_('light', 'l1') && bgOk_('must', 'm1'));
+    TG_MEM['bg:rs'] = { tgWatchdog: [5, 80 * 60000, 0] }; bgReset_();
+    ok('بالای ۷۵: فقط واجب', bgLevel_() === 2 && !bgOk_('heavy', 'h2') && !bgOk_('light', 'l2') && bgOk_('must', 'm2'));
+    var ran = []; bgStep_('s1', 'light', function () { ran.push(1); }); bgStep_('s2', 'must', function () { ran.push(2); });
+    ok('قدم سبک بالای ۷۵ اجرا نمی‌شود، واجب می‌شود', ran.join() === '2');
+    bgStep_('s3', 'must', function () { throw new Error('نمونه'); });
+    ok('خطای یک قدم بقیه را نمی‌شکند', true);
+    bgFlush_();
+    var sk = JSON.parse(TG_MEM['bgp:BGS:2026-10-08'] || '{}'), sw = JSON.parse(TG_MEM['bgp:RSW:2026-10-08'] || '{}');
+    ok('ردشده‌ها و زمان قدم‌ها ثبت می‌شوند', sk.s1 === 1 && sw.s2 && sw.s2[0] === 1);
+    ok('خط گزارش شبانه: مصرف، بیشترین، ردشده', /سهمیهٔ اجرا: ۸۰٫۰|سهمیهٔ اجرا: ۸۰\.۰/.test(bgNightLine_()) || (/سهمیهٔ اجرا/.test(bgNightLine_()) && /رد شد/.test(bgNightLine_())), bgNightLine_());
+    ok('در خط‌های گزارش شبانه ثبت است', TG_NIGHT_LINES.indexOf(bgNightLine_) > -1);
+
+    /* tgDutyTick */
+    at(2026, 10, 8, 3, 0);
+    ok('شب (۳ صبح) tgDutyTick نمی‌رود', bgDutyPlan_().run === false);
+    at(2026, 10, 8, 9, 0); TG_MEM['bg:pend'] = [];
+    ok('بار اول (بی سابقه) خواندن کامل', bgDutyPlan_().run === true);
+    bgDutyDone_();
+    at(2026, 10, 8, 9, 5);
+    ok('بی لید تازه و بی انتظار: بی خواندن شیت', bgDutyPlan_().run === false);
+    bgLeadMark_();
+    ok('لید تازه ← خواندن کامل', bgDutyPlan_().why === 'لید تازه');
+    at(2026, 10, 8, 9, 10); bgDutyDone_();
+    TG_MEM['bg:pend'] = [{ k: 'L-1', n: 1, t: TG_MEM['bg:now'] - 3 * 60000 }];
+    ok('لید در انتظار پیش از موعد یادآوری: بی خواندن', bgDutyPlan_().run === false);
+    TG_MEM['bg:pend'] = [{ k: 'L-1', n: 1, t: TG_MEM['bg:now'] - 25 * 60000 }];
+    ok('موعد یادآوری نوبت‌دار ← خواندن کامل', bgDutyPlan_().why === 'نوبت اقدام');
+    TG_MEM['bg:pend'] = [{ k: 'L-1', n: 0 }];
+    ok('لیدی که هنوز به نوبت‌دار نرسیده ← خواندن کامل', bgDutyPlan_().run === true);
+    TG_MEM['bg:pend'] = [{ k: 'L-1', n: 2, t: TG_MEM['bg:now'] - 60 * 60000 }];
+    at(2026, 10, 8, 9, 50);
+    ok('پیگیری در انتظار: هر ۳۰ دقیقه یک خواندن', bgDutyPlan_().why === 'پیگیری در انتظار');
+    TG_MEM['bg:pend'] = []; at(2026, 10, 8, 13, 0);
+    ok('بی هیچ نشانه، هر ۳ ساعت یک خواندن ایمنی', bgDutyPlan_().why === 'دورهٔ ایمنی');
+
+    /* کمپین */
+    ok('وضعیت کمپین سنجیده نشده: فعال فرض می‌شود', bgCpActive_() === true);
+    ok('همه بسته ← غیرفعال', bgCpSet_([{ state: 'بسته' }]) === false && bgCpActive_() === false);
+    ok('یک کمپین باز ← فعال', bgCpSet_([{ state: 'بسته' }, { state: 'باز' }]) === true && bgCpActive_() === true);
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; bgReset_(); }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'bgTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['سهمیهٔ زمان اجرا (v170.23.12.5)', 'bgTests']); } catch (eBg) {}

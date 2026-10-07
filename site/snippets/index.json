@@ -476,5 +476,14 @@
   "location": "اجرا همه جا",
   "active": true,
   "loc": "everywhere"
+ },
+ {
+  "id": 506148,
+  "file": "506148.php",
+  "title": "Tajrobeh · دستیار پاسخ‌گو، ویجت سایت (بات v170.23.11)",
+  "type": "php",
+  "location": "everywhere",
+  "loc": "everywhere",
+  "active": true
  }
 ]

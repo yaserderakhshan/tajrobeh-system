@@ -127,10 +127,13 @@ function nuTick_() {
   if (!nuOn_()) return 0;
   var h = Number(Utilities.formatDate(new Date(nuNow_()), TG_TZ, 'H')), today = nuDay_();
   if (h < 9 || h >= 21) return 0;
+  /* v170.23.12.5 (سهمیهٔ اجرا): بعد از کارت امروز (بی تأیید)، «امروز نه» یا ارسال امروز، تا فردا بی خواندن شیت */
+  if (nuProp_('NU_DONE_DAY') === today || nuProp_('NU_NO_DAY') === today) return 0;
+  if (!nuApproved_() && nuProp_('NU_CARD_DAY') === today) return 0;
   if (nuProp_('NU_ENR_DAY') !== today) { nuProp_('NU_ENR_DAY', today); try { nuEnroll_(); } catch (e) { tgErr_('nuEnroll_', e); } }
-  var due = nuDue_(); if (!due.length) return 0;
-  if (!nuApproved_()) { if (nuProp_('NU_NO_DAY') !== today) nuCard_(due); return 0; }
-  return nuSend_(due);
+  var due = nuDue_(); if (!due.length) { nuProp_('NU_DONE_DAY', today); return 0; }
+  if (!nuApproved_()) { nuCard_(due); return 0; }
+  var n = nuSend_(due); nuProp_('NU_DONE_DAY', today); return n;
 }
 function nuSend_(due) {
   var t = nuTab_(), n = 0, stamp = Utilities.formatDate(new Date(nuNow_()), TG_TZ, 'yyyy-MM-dd HH:mm');

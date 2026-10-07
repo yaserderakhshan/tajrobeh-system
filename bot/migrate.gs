@@ -458,6 +458,7 @@ function tgV1702361Mig() {
 }
 /** ساعتی و مستقل از MIG_ENABLED: اگر یک‌باره پیش از پر شدن کلیدها اجرا شد، همین‌جا وقتی کلیدها آمد کار را تمام می‌کند (فقط ۹ تا ۲۱ تهران) */
 function migSetupTick_() {
+  if (!migOn_()) return '';   /* v170.23.12.5 (سهمیهٔ اجرا، تصمیم یاسر): تا MIG_ENABLED خاموش است، کار ساعتی مهاجرت کامل بی‌کار */
   var h = Number(Utilities.formatDate(new Date(migNow_()), TG_TZ, 'H')); if (h < 9 || h >= 21) return '';
   var r = [];
   if (!migProp_('MIG_SHARED') && String(cfg_('MIG_HUB', '') || '').trim()) {
