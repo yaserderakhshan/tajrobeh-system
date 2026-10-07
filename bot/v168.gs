@@ -2301,8 +2301,19 @@ function bgNightLine_() {
     .map(function (k) { return k + ' ' + tgFa_((o[k][1] / 60000).toFixed(1)); });
   var sk = bgDry_() ? (TG_MEM['bgp:BGS:' + day] ? JSON.parse(TG_MEM['bgp:BGS:' + day]) : {}) : bgJson_('BGS:' + day);
   var nSk = Object.keys(sk).reduce(function (a, k) { return a + sk[k]; }, 0);
+  if (!bgDry_()) { try { bgDayRow_(day, used, o, sk); } catch (eRow) { tgErr_('bgDayRow_', eRow); } }
   return '⏱ سهمیهٔ اجرا: ' + tgFa_(used.toFixed(1)) + ' از ۹۰ دقیقه (هدف ' + tgFa_(BG_GOAL_MIN) + ')' +
     (top.length ? ' · بیشترین: ' + top.join('، ') : '') + (nSk ? ' · ' + tgFa_(nSk) + ' کار غیرواجب رد شد' : '');
+}
+/* یک سطر در روز در تب پنهان «سهمیهٔ اجرا» هاب: جمع، هر تابع، قدم‌های واچ‌داگ و ردشده‌ها (برای سنجش بعد از انتشار) */
+var BG_TAB = 'سهمیهٔ اجرا';
+var BG_HEAD = ['روز', 'دقیقه تا گزارش ۲۱', 'هر تابع (بار/دقیقه)', 'قدم‌های واچ‌داگ (بار/دقیقه)', 'ردشده'];
+function bgDayRow_(day, used, o, sk) {
+  var ss = tgSS_(), sh = ss.getSheetByName(BG_TAB);
+  if (!sh) { sh = ss.insertSheet(BG_TAB); sh.setRightToLeft(true); sh.appendRow(BG_HEAD); sh.setFrozenRows(1); try { sh.hideSheet(); } catch (eH) {} }
+  var fmt = function (m) { return Object.keys(m).filter(function (k) { return k !== '_c' && Array.isArray(m[k]); }).sort(function (a, b) { return m[b][1] - m[a][1]; })
+    .map(function (k) { return k + '=' + m[k][0] + '/' + (m[k][1] / 60000).toFixed(1); }).join(' '); };
+  sh.appendRow([day, Number(used.toFixed(1)), fmt(o), fmt(bgJson_('RSW:' + day)), Object.keys(sk).map(function (k) { return k + '=' + sk[k]; }).join(' ')]);
 }
 try { TG_NIGHT_LINES.push(bgNightLine_); } catch (eNl) {}
 
