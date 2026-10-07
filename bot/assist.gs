@@ -40,6 +40,9 @@ cfg_('ASSIST_GEMINI_PAID', '');  /* فقط یاسر بعد از فعال شدن 
 cfg_('ASSIST_MATCH_MIN', '');    /* آستانهٔ جست‌وجو، ۰ تا ۱؛ خالی = ۰٫۶ */
 cfg_('ASSIST_EMERGENCY', '');    /* JSON {کد کشور: متن اورژانس}؛ خالی = متن ایران */
 cfg_('ASSIST_RATE', '');         /* سقف پرسش هر session_id در ساعت؛ خالی = ۲۰ */
+cfg_('ASSIST_REWRITE', '');      /* v170.23.18: «بله» (و ASSIST_GEMINI_PAID = بله) = روان کردن پاسخ از روی یک ردیف تأییدشده با گارد */
+cfg_('ASSIST_GEMINI_DAILY', '');  /* v170.23.18: سقف فراخوانی جمنای دستیار در روز؛ خالی = ۲۰۰؛ بالای سقف برگشت به «جستجو» */
+cfg_('ASSIST_GEMINI_DRAFT', '');  /* v170.23.18: «بله» (و PAID) = پیش‌نویس ردیف از پرسش‌های بی‌جواب، فقط متن پاک‌شده، فقط برای صف بازبینی */
 cfg_('ASSIST_WEEKLY', '');       /* v170.23.17: «بله» = گزارش هفتگی هر تیم (پرتکرارهای بی‌جواب و ردیف‌های بازبینی‌نشده) از tgWatchdog */
 cfg_('ASSIST_TOOLS', '');        /* v170.23.16: «بله» = ابزارهای بی هوش مصنوعی (AS_TOOLS: رویدادهای پیش‌رو، مجله، وضعیت من) */
 cfg_('ASSIST_KB_TEAMS', '');     /* v170.23.15: «بله» = /askreview به تفکیک «تیم تأیید» و راه تیم‌های دیگر (مالی، مدرسه، رویداد، مجله)؛ خالی = فقط پذیرش و مالک، همهٔ صف */
@@ -55,9 +58,15 @@ function asPaid_() { return String(cfg_('ASSIST_GEMINI_PAID', '') || '').trim() 
 function asMode_() {
   var m = String(cfg_('ASSIST_MODE', '') || '').trim();
   if (m === AS_MODES.menu) return AS_MODES.menu;
-  if (m === AS_MODES.smart && asPaid_()) return AS_MODES.smart;
+  if (m === AS_MODES.smart && asPaid_() && asGemLeft_() > 0) return AS_MODES.smart;   /* v170.23.18: بالای سقف روزانه برگشت به «جستجو» */
   return AS_MODES.search;
 }
+/* ───── سقف روزانهٔ جمنای دستیار (v170.23.18) ───── */
+function asGemDay_() { return 'AS_GEM:' + Utilities.formatDate(new Date(asNow_()), TG_TZ, 'yyyy-MM-dd'); }
+function asGemCap_() { var n = Number(tgLatinDigits_(String(cfg_('ASSIST_GEMINI_DAILY', '') || ''))); return n > 0 ? n : 200; }
+function asGemUsed_() { return Number(asProp_(asGemDay_()) || 0); }
+function asGemLeft_() { return asGemCap_() - asGemUsed_(); }
+function asGemCount_() { asProp_(asGemDay_(), asGemUsed_() + 1); }
 function asMin_() { var n = Number(tgLatinDigits_(String(cfg_('ASSIST_MATCH_MIN', '') || ''))); return n > 0 && n <= 1 ? n : 0.6; }
 function asFmt_(ms) { return Utilities.formatDate(new Date(ms || asNow_()), TG_TZ, 'yyyy-MM-dd HH:mm'); }
 
@@ -263,13 +272,14 @@ function asTopicBtns_(topics) { return topics.slice(0, 3).map(function (t) { ret
 function asTopicIdx_(t) { return asTopics_().indexOf(t); }
 function asAnswerOut_(ctx, k, mode) {
   var log = asLog_(ctx.channel, k.topic, mode, 'پاسخ', ctx);
-  return { answer: k.answer, topic: k.topic, handoff: false, log: log,
+  return { answer: asRewrite_(ctx, k), topic: k.topic, handoff: false, log: log,
     buttons: [{ id: 'x:' + log, text: 'جوابم را نگرفتم' }, { id: 'y:' + log, text: '👍' }, { id: 'n:' + log, text: '👎' }] };
 }
 /** پرسش آزاد */
 function asAsk_(ctx, text) {
   if (ctx && !ctx.t0) ctx.t0 = Date.now();
   text = String(text || '').trim();
+  if (ctx && text) ctx.lastText = text;
   if (!text) return { answer: AS_WELCOME, topic: '', handoff: false, buttons: asTopicBtns_(asTopics_()).concat([{ id: 'h', text: 'با پذیرش حرف بزنم' }]) };
   /* بحران همیشه اول */
   if (tgIsCrisis_(text)) {
@@ -474,6 +484,7 @@ function asWeekly_() {
   var keys = Object.keys(store).sort(function (a, b) { return (store[b].at || 0) - (store[a].at || 0); }).slice(0, 60), keep = {};
   keys.forEach(function (k) { keep[k] = store[k]; });
   asProp_('AS_WK_Q', JSON.stringify(keep));
+  try { var all = []; Object.keys(by).forEach(function (t) { all = all.concat(by[t].top); }); asDraftUn_(all); } catch (eD) { tgErr_('asDraftUn_', eD); }   /* v170.23.18: فقط با کلید */
   return sent;
 }
 function asTeamAnsCb_(chat, id) {
@@ -512,6 +523,8 @@ function asSmart_(ctx, text, kb) {
 }
 /** فراخوانی جمنای با ثبت توکن در «هزینهٔ جمنای». فقط برای پیش‌نویس دانش (بی دادهٔ کاربر) یا حالت هوشمند. */
 function asGem_(job, prompt, schema) {
+  if (asGemLeft_() <= 0) throw new Error('سقف روزانهٔ جمنای دستیار');
+  asGemCount_();
   if (asDry_()) { var f = TG_MEM['as:gem']; if (f === undefined) throw new Error('dry'); (TG_MEM['as:gemcalls'] = TG_MEM['as:gemcalls'] || []).push({ job: job, prompt: prompt }); return JSON.parse(JSON.stringify(f)); }
   var models = typeof AI_MODELS !== 'undefined' ? AI_MODELS : ['gemini-flash-latest'], last = '';
   for (var i = 0; i < models.length; i++) {
@@ -525,6 +538,63 @@ function asGem_(job, prompt, schema) {
     last = String(res.code);
   }
   throw new Error('جمنای ناموفق: ' + last);
+}
+
+/* ───── روان کردن پاسخ (v170.23.18؛ ASSISTANT.md بند ۶) ─────
+   فقط با ASSIST_REWRITE = بله و ASSIST_GEMINI_PAID = بله و زیر سقف روزانه. ورودی: پرسش پاک‌شده و متن یک ردیف تأییدشده. خروجی رد می‌شود
+   و متن خود ردیف می‌رود اگر عدد، نشانی، لینک، ایمیل، آیدی یا نامی داشته باشد که در ردیف نیست، یا خالی یا خیلی بلند باشد. */
+var AS_RW_SCHEMA = { type: 'OBJECT', properties: { text: { type: 'STRING' } }, required: ['text'] };
+function asRewriteOn_() { return String(cfg_('ASSIST_REWRITE', '') || '').trim() === 'بله' && asPaid_(); }
+function asFacts_(t) {
+  var s = tgLatinDigits_(String(t || '')), out = [];
+  (s.match(/https?:\/\/\S+|www\.\S+|\S+@\S+\.\S+|@[A-Za-z0-9_]{3,}|[A-Za-z0-9-]+\.[A-Za-z]{2,}(?:\/[^\s،.]*)?|\d+(?:[.,٫٬]\d+)*/g) || []).forEach(function (x) { out.push(x.replace(/[.,،؛:)]+$/, '')); });
+  (s.match(/[A-Z][a-z]+/g) || []).forEach(function (x) { out.push(x); });
+  var t2 = AS_TITLES.join('|'), re = new RegExp('(?:' + t2 + ')\\s+([^\\s«»"(),،.!؟?:؛]+)', 'g'), m;
+  while ((m = re.exec(s))) out.push(m[1]);
+  return out;
+}
+/** خروجی امن است اگر هر عدد، لینک، ایمیل، آیدی یا نامش در متن ردیف هم باشد */
+function asRwSafe_(out, src) {
+  var o = String(out || '').trim(); if (!o || o.length > Math.max(400, String(src).length * 2)) return false;
+  var base = tgLatinDigits_(String(src));
+  return asFacts_(o).every(function (f) { return base.indexOf(f) > -1; });
+}
+function asRewrite_(ctx, k) {
+  if (!asRewriteOn_() || asGemLeft_() <= 0) return k.answer;
+  try {
+    var q = asScrub_(ctx.lastText || '', [ctx.name]);
+    var prompt = 'این پاسخ تأییدشده را برای همین پرسش، کوتاه، گرم و روان بازنویسی کن. هیچ عدد، نشانی، لینک، نام یا اطلاعات تازه‌ای اضافه نکن؛ ' +
+      'فقط از همین متن استفاده کن. مشاورهٔ بالینی، تشخیص یا دارو نده. خط تیرهٔ بلند ننویس.\n\nپرسش: ' + q + '\n\nپاسخ تأییدشده:\n' + k.answer;
+    var o = asGem_('روان کردن پاسخ', prompt, AS_RW_SCHEMA);
+    var t = String((o && o.text) || '').replace(/[—–]/g, '،').trim();
+    if (asRwSafe_(t, k.answer)) return t;
+    if (asDry_()) (TG_MEM['as:rwreject'] = TG_MEM['as:rwreject'] || []).push(t);
+  } catch (e) { if (!asDry_()) tgErr_('asRewrite_', e); }
+  return k.answer;
+}
+
+/* ───── پیش‌نویس ردیف از پرسش‌های بی‌جواب (v170.23.18) ─────
+   فقط با ASSIST_GEMINI_DRAFT = بله و PAID و زیر سقف. ورودی فقط متن پاک‌شدهٔ «سؤال‌های بی‌پاسخ» (بی کانال، زمان یا شناسه).
+   خروجی فقط «موضوع» و «پرسش‌های نمونه»؛ «پاسخ» خالی می‌ماند تا تیم بنویسد. ردیف با «تأیید» خالی و منبع «پیش‌نویس از پرسش‌های بی‌جواب». */
+var AS_UNDRAFT_SCHEMA = { type: 'ARRAY', items: { type: 'OBJECT', properties: { topic: { type: 'STRING' }, samples: { type: 'ARRAY', items: { type: 'STRING' } }, dom: { type: 'STRING' } }, required: ['topic', 'samples'] } };
+function asDraftUnOn_() { return String(cfg_('ASSIST_GEMINI_DRAFT', '') || '').trim() === 'بله' && asPaid_(); }
+function asDraftUn_(items) {
+  if (!asDraftUnOn_() || !items || !items.length || asGemLeft_() <= 0) return 0;
+  var qs = items.slice(0, 15).map(function (x) { return asScrub_(x.q); });
+  var o;
+  try {
+    o = asGem_('پیش‌نویس از بی‌جواب‌ها', 'این پرسش‌های بی‌جواب را دسته کن. برای هر دسته یک «موضوع» کوتاه و ۳ تا ۶ شکل پرسش بنویس. پاسخ ننویس. ' +
+      'حوزه را از این فهرست بگذار: ' + AS_DOMAINS.map(function (d) { return d.d; }).join('، ') + '.\n\n' + qs.map(function (q, i) { return (i + 1) + ') ' + q; }).join('\n'), AS_UNDRAFT_SCHEMA);
+  } catch (e) { if (!asDry_()) tgErr_('asDraftUn_', e); return 0; }
+  var t = asTab_(AS_KB_TAB, AS_KB_HEAD), n = 0;
+  (o || []).slice(0, 5).forEach(function (x) {
+    if (!x || !x.topic || !x.samples || !x.samples.length) return;
+    var dom = AS_DOMAINS.some(function (d) { return d.d === x.dom; }) ? x.dom : asGuessDomain_(x.samples.join(' '));
+    t.add({ 'موضوع': asScrub_(x.topic).slice(0, 40), 'پرسش‌های نمونه': x.samples.slice(0, 6).map(function (q) { return asScrub_(q); }).join('\n'), 'پاسخ': '', 'منبع': 'پیش‌نویس از پرسش‌های بی‌جواب',
+      'تأیید': '', 'حوزه': dom, 'تیم تأیید': asDomTeam_(dom), 'نسخه': 1, 'یادداشت بازبینی': 'پاسخ را تیم بنویسد (✏️ اصلاح پاسخ)' });
+    n++;
+  });
+  return n;
 }
 
 /* ───── بات ───── */
@@ -641,6 +711,7 @@ function asReviewCb_(chat, id) {
   if (!asRowFor_(o, teams)) return tgSend_(chat, 'این ردیف مال تیم دیگری است (' + tgEsc_(asRowTeams_(o).join('، ')) + ').');
   if (act === 'ok') {
     if (AS_DENY.test(o['موضوع'] + ' ' + o['پاسخ'])) return tgSend_(chat, 'این ردیف تأیید نمی‌شود؛ اول اصلاحش کن.');
+    if (!String(o['پاسخ'] || '').trim()) return tgSend_(chat, 'این ردیف هنوز پاسخ ندارد؛ اول «✏️ اصلاح پاسخ».');   /* v170.23.18 */
     t.set(r, 'تأیید', 'بله'); t.set(r, 'تاریخ تأیید', asFmt_()); t.set(r, 'تأییدکننده', asStaffName_(chat)); t.set(r, 'تاریخ بازبینی', asFmt_());
     if (!o['نسخه']) t.set(r, 'نسخه', 1);
     return asReviewNext_(chat, r);
@@ -1011,3 +1082,56 @@ function asTests4() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'asTests4'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دستیار ۴ · یادگیری (v170.23.17)', 'asTests4']); } catch (eAs4) {}
+
+/* ───── آزمون دستیار ۵ · جمنای با گارد (v170.23.18) ───── */
+function asTests5() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, cfg: TG_CFG_, own: TG_OWNER_CHAT, names: asKnownNames_ };
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = { 'as:now': new Date('2026-10-10T11:00:00+03:30').getTime(), 'as:desk': ['801'] };
+  TG_CFG_ = { ASSIST_ENABLED: 'بله', ASSIST_MATCH_MIN: '0.3' }; TG_OWNER_CHAT = '9001';
+  try {
+    asKnownNames_ = function () { return []; };
+    TG_MEM['as:' + AS_KB_TAB] = [{ 'موضوع': 'معارفه', 'پرسش‌های نمونه': 'جلسهٔ معارفه چیست\nمعارفه رایگان است', 'پاسخ': 'معارفه ۲۰ دقیقه و رایگان است. نمونهٔ پاسخ تأییدشده.', 'تأیید': 'بله' }];
+    var ask = function () { return asAsk_({ channel: 'bot', chat: '601', name: 'مراجع نمونه' }, 'معارفه رایگان است؟ من خانم نمونه‌پور هستم'); };
+    TG_MEM['as:gem'] = { text: 'معارفه رایگان است و ۲۰ دقیقه طول می‌کشد.' }; TG_MEM['as:gemcalls'] = [];
+    ok('کلیدها خاموش: متن خود ردیف، بی جمنای', ask().answer === 'معارفه ۲۰ دقیقه و رایگان است. نمونهٔ پاسخ تأییدشده.' && TG_MEM['as:gemcalls'].length === 0);
+    TG_CFG_.ASSIST_REWRITE = 'بله';
+    ok('ASSIST_REWRITE بی PAID: هنوز بی جمنای', ask().answer.indexOf('نمونهٔ پاسخ تأییدشده') > -1 && TG_MEM['as:gemcalls'].length === 0);
+    TG_CFG_.ASSIST_GEMINI_PAID = 'بله';
+    ok('روان کردن مجاز: همان عدد ۲۰، بی چیز تازه', ask().answer === 'معارفه رایگان است و ۲۰ دقیقه طول می‌کشد.');
+    var sent = TG_MEM['as:gemcalls'][0].prompt;
+    ok('به جمنای فقط پرسش پاک‌شده و متن ردیف', sent.indexOf('نمونه‌پور') < 0 && sent.indexOf('معارفه ۲۰ دقیقه') > -1, sent);
+    TG_MEM['as:gem'] = { text: 'معارفه ۳۰ دقیقه و رایگان است.' };
+    ok('خروجی جعلی با عدد تازه رد می‌شود، متن ردیف می‌رود', ask().answer === 'معارفه ۲۰ دقیقه و رایگان است. نمونهٔ پاسخ تأییدشده.' && (TG_MEM['as:rwreject'] || []).length === 1);
+    TG_MEM['as:gem'] = { text: 'معارفه ۲۰ دقیقه است؛ نشانی ما tajrobeh.life/x است.' };
+    ok('نشانی تازه رد می‌شود', ask().answer.indexOf('نمونهٔ پاسخ تأییدشده') > -1);
+    TG_MEM['as:gem'] = { text: 'معارفه ۲۰ دقیقه با دکتر آزمونی است.' };
+    ok('نام تازه بعد از عنوان رد می‌شود', ask().answer.indexOf('نمونهٔ پاسخ تأییدشده') > -1);
+    TG_MEM['as:gem'] = { text: 'Contact Sample for the 20 minute session.' };
+    ok('نام لاتین تازه رد می‌شود', ask().answer.indexOf('نمونهٔ پاسخ تأییدشده') > -1);
+    ok('گارد مستقیم: عدد تازه ناامن، همان عدد امن', !asRwSafe_('هزینه ۹۹۰ هزار است', 'هزینه در تماس گفته می‌شود') && asRwSafe_('۲۰ دقیقه است', 'جلسه 20 دقیقه است'));
+    /* سقف روزانه */
+    TG_CFG_.ASSIST_GEMINI_DAILY = '3'; TG_MEM['as:gem'] = { text: 'معارفه رایگان است و ۲۰ دقیقه طول می‌کشد.' };
+    var used = asGemUsed_();
+    ok('شمار فراخوانی‌های امروز ثبت می‌شود', used >= 3, used);
+    TG_MEM['as:gemcalls'] = [];
+    ok('بالای سقف: متن ردیف، بی فراخوانی', ask().answer.indexOf('نمونهٔ پاسخ تأییدشده') > -1 && TG_MEM['as:gemcalls'].length === 0);
+    TG_CFG_.ASSIST_MODE = 'هوشمند';
+    ok('بالای سقف: «هوشمند» به «جستجو» برمی‌گردد', asMode_() === AS_MODES.search);
+    TG_CFG_.ASSIST_GEMINI_DAILY = '50'; TG_CFG_.ASSIST_MODE = '';
+    /* پیش‌نویس از بی‌جواب‌ها */
+    TG_MEM['as:gem'] = [{ topic: 'رسید پرداخت', samples: ['رسید می‌خواهم', 'فاکتور جلسه'], dom: 'پرداخت' }];
+    var items = [{ q: 'رسید پرداخت خانم نمونه‌پور را می‌خواهم' }, { q: 'فاکتور جلسه' }];
+    ok('پیش‌نویس بی کلید نمی‌سازد', asDraftUn_(items) === 0);
+    TG_CFG_.ASSIST_GEMINI_DRAFT = 'بله'; TG_MEM['as:gemcalls'] = [];
+    var n0 = TG_MEM['as:' + AS_KB_TAB].length, made = asDraftUn_(items), nr = TG_MEM['as:' + AS_KB_TAB][n0] || {};
+    ok('پیش‌نویس: موضوع و پرسش‌ها، پاسخ خالی، تأیید خالی، تیم مالی', made === 1 && nr['پاسخ'] === '' && nr['تأیید'] === '' && nr['تیم تأیید'] === 'مالی' && nr['منبع'] === 'پیش‌نویس از پرسش‌های بی‌جواب', JSON.stringify(nr));
+    ok('به جمنای فقط متن پاک‌شده', TG_MEM['as:gemcalls'][0].prompt.indexOf('نمونه‌پور') < 0);
+    TG_MEM['deskwho'] = null; TG_OUTBOX = []; asReviewCb_('9001', 'ok:' + nr._row);
+    ok('ردیف بی پاسخ تأیید نمی‌شود', nr['تأیید'] === '' && /هنوز پاسخ ندارد/.test(TG_OUTBOX[0].text));
+    ok('ردیف بی پاسخ هرگز جواب نمی‌دهد', asKb_().every(function (k) { return k.answer; }));
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { asKnownNames_ = keep.names; TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg; TG_OWNER_CHAT = keep.own; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'asTests5'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دستیار ۵ · جمنای با گارد (v170.23.18)', 'asTests5']); } catch (eAs5) {}
