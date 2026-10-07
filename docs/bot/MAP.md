@@ -77,14 +77,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.19`
+نسخهٔ کد: `v170.23.20`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۵ | ۳۳ |
-| `telegram.gs` | ۳۷۷۶۷ | ۲۰۴۱ |
+| `telegram.gs` | ۳۷۸۴۵ | ۲۰۴۷ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -161,6 +161,7 @@
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
 | `CM_FIX_TAB` | «اصلاح کامنت‌ها · پیش‌نمایش» | `comments.gs` |
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
+| `CR_FX_TAB` | «لیدهای بحران · پیش‌نمایش» | `telegram.gs` |
 | `DQ_TAB` | «صف ارسال» | `dq.gs` |
 | `EBI_MIRROR_TAB` | «پلی‌لیست ابی · ثبت‌نام‌ها» | `ebi.gs` |
 | `HUB_GUIDE` | «راهنما» | `ops.gs` |
@@ -359,6 +360,7 @@
 | امنیت ورودی سایت | `ssTests` |
 | اصلی ۱ از ۳ | `tgRunTests1` |
 | اصلی ۲ از ۳ | `tgRunTests2` |
+| لیدهای بحران قدیمی و 🆘 (v170.23.20) | `crTests` |
 | اصلی ۳ از ۳ | `tgRunTests3` |
 | دایرکتوری صفحهٔ اصلی p3 (v170.23.2) | `tgDirP3Tests` |
 | دادهٔ دکمه (v170.9.2) | `tgCbTests` |

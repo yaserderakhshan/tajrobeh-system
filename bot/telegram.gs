@@ -3386,7 +3386,7 @@ function tgOpenLeadsOf_(v, hm, now) {
     const idle = touched ? Math.max(0, Math.round((now - ld) / 60000)) : age;
     const abroad = String(v[i][6] || '').indexOf('خارج') > -1;
     const booked = String(v[i][19] || '').trim() === 'بله';
-    const crisis = /بحران|هشدار/.test(String(v[i][7] || ''));
+    const crisis = false;   /* v170.23.20 (تصمیم یاسر): بحران دیگر فوری و 🆘 ندارد؛ تجربه خدمات بحران نیست */
     const nextIso = tgLeadIso_(tgLeadHv_(v[i], hm, 'تاریخ اقدام بعدی'));
     out.push({
       row: i + 2, name: name, phone: String(v[i][5] || '').trim(),
@@ -3573,7 +3573,7 @@ function tgSlaTick_() {
     if (!duty || !styleOk) continue;   // بیرون از ساعت یا سبک جمع‌بندی: می‌ماند برای دایجست
 
     const head = l.urgent
-      ? (l.crisis ? '🆘 <b>پیام با کلمهٔ بحران</b>' : (l.booked ? '📅 <b>یک معارفه رزرو شد</b>' : '🌍 <b>مراجع خارج از ایران</b>'))
+      ? (l.booked ? '📅 <b>یک معارفه رزرو شد</b>' : '🌍 <b>مراجع خارج از ایران</b>')
       : (wantStage === 2 ? '⏰ <b>دو ساعت است تماس اول گرفته نشده</b>' : '⏳ <b>نیم ساعت است تماس اول گرفته نشده</b>');
     const lr2 = tgLeadRead_(l.row);
     const kind2 = l.urgent ? TG_NK.urgent : TG_NK.task;
@@ -4488,6 +4488,83 @@ function tgOnCrisis_(chat, name, uname, text) {
   /* v170.23.19 (تصمیم یاسر): فقط پیام ثابت اورژانس. بی کارت فوری، بی سطر لید، بی ذخیرهٔ متن. */
   tgSend_(chat, T_CRISIS, { remove_keyboard: true });
 }
+
+/* ───── v170.23.20 (تصمیم یاسر): پاک کردن متن پیام از لیدهای بحران قدیمی ─────
+   لیدهای ساخته‌شده با tgOnCrisis_ پیش از v170.23.19 در ستون یادداشت «chat_id: … · متن: …» دارند. متن پیام پاک می‌شود و خود سطر
+   (برای شمارش) می‌ماند. اول فقط پیش‌نمایش (بی کپی متن)، بعد با «اوکی» Cowork در B1 یک بار اعمال؛ قدم سبک واچ‌داگ، بی تریگر تازه. */
+var CR_FX_TAB = 'لیدهای بحران · پیش‌نمایش';
+var CR_FIRST_RX = /^هشدار: کلمهٔ بحران/;
+var CR_NOTE_RX = /\s*·\s*متن: [\s\S]*$/;
+var CR_NOTE_DONE = ' · متن پاک شد (v170.23.20)';
+function crProp_(k, v) {
+  if (TG_DRY) { if (v !== undefined) TG_MEM['crp:' + k] = String(v); return TG_MEM['crp:' + k] || ''; }
+  var P = PropertiesService.getScriptProperties(); if (v !== undefined) P.setProperty(k, String(v)); return P.getProperty(k) || '';
+}
+/** [{row, h, m}] همهٔ سطرهای «لیدها» (ستون H متن اول، M یادداشت) */
+function crLeadCells_() {
+  if (TG_DRY) return TG_MEM['cr:leads'] || [];
+  var sh = tgSS_().getSheetByName(TG_LEADS), n = sh ? sh.getLastRow() : 0;
+  if (n < 2) return [];
+  return sh.getRange(2, 8, n - 1, 6).getValues().map(function (r, i) { return { row: i + 2, h: String(r[0] || ''), m: String(r[5] || '') }; });
+}
+function crFixRows_() {
+  return crLeadCells_().filter(function (c) { return CR_FIRST_RX.test(c.h) && CR_NOTE_RX.test(c.m); })
+    .map(function (c) { return { row: c.row, cut: c.m.match(CR_NOTE_RX)[0].length, to: c.m.replace(CR_NOTE_RX, CR_NOTE_DONE) }; });
+}
+function crFixPreview_() {
+  var rows = crFixRows_(), all = crLeadCells_().filter(function (c) { return CR_FIRST_RX.test(c.h); }).length;
+  var sum = 'لید بحران: ' + all + ' · متن برای پاک کردن: ' + rows.length;
+  crProp_('CR_FX_PREV', '1');
+  if (TG_DRY) { TG_MEM['cr:fx'] = rows; return sum; }
+  var ss = tgSS_(), sh = ss.getSheetByName(CR_FX_TAB) || ss.insertSheet(CR_FX_TAB);
+  sh.clear(); sh.setRightToLeft(true);
+  sh.getRange(1, 1, 1, 3).setValues([['بررسی Cowork: بعد از بررسی، Cowork در B1 «اوکی» می‌نویسد', '', 'v170.23.20 · ' + sum]]).setFontWeight('bold');
+  sh.getRange(2, 1, 1, 4).setValues([['تب', 'سطر', 'نویسه‌های متن که پاک می‌شود', 'یادداشت بعد از پاک کردن']]).setFontWeight('bold').setBackground('#f5f5f8');
+  /* خود متن پیام اینجا کپی نمی‌شود؛ فقط طولش و یادداشت بعدی */
+  if (rows.length) sh.getRange(3, 1, rows.length, 4).setNumberFormat('@').setValues(rows.map(function (r) { return [TG_LEADS, String(r.row), String(r.cut), r.to]; }));
+  return sum;
+}
+/** قدم سبک واچ‌داگ: بار اول پیش‌نمایش، بعد فقط با «اوکی» یک بار اعمال */
+function crFixMaybe_() {
+  if (crProp_('CR_FX_DONE') === '1') return 0;
+  if (crProp_('CR_FX_PREV') !== '1') { crFixPreview_(); return 0; }
+  var ok = TG_DRY ? TG_MEM['cr:fxok'] : (function () { var sh = tgSS_().getSheetByName(CR_FX_TAB); return sh ? String(sh.getRange(1, 2).getValue() || '').trim() : ''; })();
+  if (ok !== 'اوکی') return 0;
+  crProp_('CR_FX_DONE', '1');
+  var n = 0, sh = TG_DRY ? null : tgSS_().getSheetByName(TG_LEADS);
+  crFixRows_().forEach(function (r) {   /* دوباره از خود سطر؛ اگر سطر جابه‌جا شده باشد الگو نمی‌خورد و دست نمی‌خورد */
+    if (TG_DRY) { TG_MEM['cr:leads'].forEach(function (c) { if (c.row === r.row) c.m = r.to; }); n++; return; }
+    sh.getRange(r.row, 13).setValue(r.to); n++;
+  });
+  if (!TG_DRY) { try { tgSS_().getSheetByName(CR_FX_TAB).getRange(1, 2).setValue('اعمال شد ' + Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm') + ' · ' + n); } catch (e) {} }
+  return n;
+}
+
+function crTests() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX };
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = {};
+  try {
+    TG_MEM['cr:leads'] = [
+      { row: 2, h: 'هشدار: کلمهٔ بحران در پیام کاربر', m: 'chat_id: 7001 · متن: متن ساختگی آزمون' },
+      { row: 3, h: 'سلام، وقت معارفه می‌خواهم', m: 'یادداشت عادی · متن: بماند' },
+      { row: 4, h: 'هشدار: کلمهٔ بحران در پیام کاربر', m: 'chat_id: 7002' }];
+    ok('بار اول فقط پیش‌نمایش، بی تغییر', crFixMaybe_() === 0 && crProp_('CR_FX_PREV') === '1' && TG_MEM['cr:leads'][0].m.indexOf('متن ساختگی') > -1);
+    ok('پیش‌نمایش: فقط لید بحران با متن، بی کپی خود متن', (TG_MEM['cr:fx'] || []).length === 1 && TG_MEM['cr:fx'][0].row === 2 && JSON.stringify(TG_MEM['cr:fx']).indexOf('متن ساختگی') < 0, JSON.stringify(TG_MEM['cr:fx']));
+    ok('بی «اوکی» Cowork تغییری نیست', crFixMaybe_() === 0 && TG_MEM['cr:leads'][0].m.indexOf('متن ساختگی') > -1);
+    TG_MEM['cr:fxok'] = 'اوکی';
+    ok('با «اوکی»: متن پاک، سطر برای شمارش می‌ماند', crFixMaybe_() === 1 && TG_MEM['cr:leads'][0].m === 'chat_id: 7001' + CR_NOTE_DONE && TG_MEM['cr:leads'].length === 3, TG_MEM['cr:leads'][0].m);
+    ok('لید غیربحران و لید بی متن دست نخوردند', TG_MEM['cr:leads'][1].m === 'یادداشت عادی · متن: بماند' && TG_MEM['cr:leads'][2].m === 'chat_id: 7002');
+    ok('فقط یک بار', crFixMaybe_() === 0);
+    var row = ['2026-10-01', '10:00', 'Telegram bot', 'مراجع نمونه', 'تلگرام', '7001', '', 'هشدار: کلمهٔ بحران در پیام کاربر', 'جدید', '', '', '', 'chat_id: 7001', '', '', '', '', '', '', ''];
+    var L = tgOpenLeadsOf_([row], {}, new Date('2026-10-01T12:00:00+03:30'));
+    ok('کارت روزانهٔ پذیرش: لید بحران دیگر فوری و 🆘 نیست', L.length === 1 && L[0].crisis === false && L[0].urgent === false, JSON.stringify(L[0]));
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'crTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['لیدهای بحران قدیمی و 🆘 (v170.23.20)', 'crTests']); } catch (eCr) {}
 
 function tgOnCallback_(cq) {
   if (cq.id && !cq._ans) { cq._ans = 1; tgApi_('answerCallbackQuery', { callback_query_id: cq.id }); }
@@ -6905,6 +6982,7 @@ function tgWatchdog(e) {
   S('migSetupTick_', 'light', typeof migSetupTick_ === 'function' ? migSetupTick_ : null);   /* با MIG_ENABLED خاموش بی‌کار */
   S('migTick_', 'light', typeof migTick_ === 'function' ? migTick_ : null);
   S('ps2FixMaybe_', 'light', typeof ps2FixMaybe_ === 'function' ? ps2FixMaybe_ : null);
+  S('crFixMaybe_', 'light', typeof crFixMaybe_ === 'function' ? crFixMaybe_ : null);   /* v170.23.20: پاک کردن متن لیدهای بحران قدیمی، با «اوکی» Cowork */
   S('ktbRouteMaybe_', 'light', typeof ktbRouteMaybe_ === 'function' ? ktbRouteMaybe_ : null);   /* v170.16: کمپین C-004 */
   S('tgErrDigest_', 'light', tgErrDigest_);
   S('rvDeadlineTick_', 'light', typeof rvDeadlineTick_ === 'function' ? rvDeadlineTick_ : null);   /* v169: مهلت بازبینی */
