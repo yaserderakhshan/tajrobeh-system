@@ -405,17 +405,23 @@ function migEmailOf_(name) {
   for (var i = 0; i < v.length; i++) if (tgNorm_(v[i][ni]) === tgNorm_(name)) { var e = String(v[i][ci] || '').trim(); if (/@/.test(e)) return e; }
   return '';
 }
+function migTransient_(e) { return /Service error|Service unavailable|temporarily unavailable|timed out|Internal error|backend error/i.test(String(e && e.message || e)); }
 function migShare_() {
   if (migDry_()) return 'dry';
   var id = String(cfg_('MIG_HUB', '') || '').trim(); if (!id) return 'MIG_HUB خالی است';
   var boss = typeof tgDutyBoss_ === 'function' ? tgDutyBoss_() : null;
   var want = [migEmailOf_(tgNm_('v2dev')), migEmailOf_(boss && boss.name)].filter(String).map(function (e) { return e.toLowerCase(); });
+  /* v170.23.12.3: تا ایمیلی نیست یا فهرست عوض نشده، درایو را هر ساعت صدا نزن */
+  var sig = want.slice().sort().join(',');
+  if (!want.length) return 'اشتراک هاب مهاجرت: ایمیلی در «افراد» پیدا نشد';
+  if (migProp_('MIG_SHARE_SIG') === sig) return 'اشتراک هاب مهاجرت: بی‌تغییر';
   var f = DriveApp.getFileById(id), owner = (f.getOwner() && f.getOwner().getEmail() || '').toLowerCase(), added = 0, removed = 0;
   f.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
   f.getEditors().forEach(function (u) { var e = u.getEmail().toLowerCase(); if (e !== owner && want.indexOf(e) < 0) { f.removeEditor(u); removed++; } });
   f.getViewers().forEach(function (u) { var e = u.getEmail().toLowerCase(); if (e !== owner && want.indexOf(e) < 0) { f.removeViewer(u); removed++; } });
   var have = f.getEditors().map(function (u) { return u.getEmail().toLowerCase(); });
   want.forEach(function (e) { if (have.indexOf(e) < 0) { f.addEditor(e); added++; } });
+  migProp_('MIG_SHARE_SIG', sig);
   if (want.length === 2) migProp_('MIG_SHARED', String(migNow_()));
   return 'اشتراک هاب مهاجرت: ' + added + ' ویرایشگر تازه · ' + removed + ' دسترسی اضافه برداشته شد · ایمیل پیدا‌شده ' + want.length + ' از ۲';
 }
@@ -454,7 +460,10 @@ function tgV1702361Mig() {
 function migSetupTick_() {
   var h = Number(Utilities.formatDate(new Date(migNow_()), TG_TZ, 'H')); if (h < 9 || h >= 21) return '';
   var r = [];
-  if (!migProp_('MIG_SHARED') && String(cfg_('MIG_HUB', '') || '').trim()) { r.push(migShare_()); }
+  if (!migProp_('MIG_SHARED') && String(cfg_('MIG_HUB', '') || '').trim()) {
+    /* v170.23.12.3: خطای گذرای درایو («Service error: Drive») ساعت بعد دوباره امتحان می‌شود و خطای تازه نمی‌سازد؛ پایش دیپلوی یک بار برای همین برگشت زد */
+    try { r.push(migShare_()); } catch (eSh) { if (!migTransient_(eSh)) throw eSh; r.push('درایو موقتاً جواب نداد'); }
+  }
   if (!migProp_('MIG_V2DEV_SENT') && String(cfg_('MIG_V2DEV_MSG', '') || '').trim() && tgNm_('v2dev')) r.push(migV2Send_());
   return r.join(' · ');
 }
@@ -541,6 +550,7 @@ function migTests() {
     TG_OUTBOX = []; migSetupTick_(); migSetupTick_();
     ok('پیام یک‌باره فقط یک بار و با متن تنظیمات', TG_OUTBOX.filter(function (x) { return x.chat === '609' && x.text === 'پیام نمونه'; }).length === 1);
     ok('پاسخ همکار نسخهٔ ۲ برای مالک می‌رود', migRoute_('609', { text: 'پاسخ نمونه' }) === true && TG_OUTBOX.some(function (x) { return x.chat === String(TG_OWNER_CHAT) && /پاسخ نمونه/.test(x.text); }));
+    ok('خطای گذرای درایو شناخته می‌شود و خطای واقعی نه', migTransient_(new Error('Service error: Drive')) && !migTransient_(new Error('No item with the given ID could be found')));   /* v170.23.12.3 */
     TG_CFG_ = { MIG_ENABLED: '' };
     ok('پرچم خاموش ← دکمه و مسیر نیست', migMenuRow_().length === 0 && migRoute_('501', { text: MIG_BTN }) === false);
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
