@@ -223,10 +223,12 @@ function tgLenTests() {
     TG_MEM['sessrows'] = [];
     ok('اولین نوبت روان‌پزشک ← ویزیت اول', tgLenBookKind_(P, '501', '2026-10-20') === 'ویزیت اول' && tgLenBook_(P, '501', '2026-10-20') === 30);
     TG_MEM['sessrows'] = [{ name: P, dateIso: '2026-10-13', hhmm: '10:00', len: 30, chat: '501', status: 'رزرو شده' }];
+    TG_MEM['ps3:visits'] = [{ 'chat مراجع': '501', 'روان‌پزشک': P, 'انجام': 'انجام شد' }];   /* با psy3: نوع از ویزیت انجام‌شده */
     tgLenSet_(P, 'پیگیری', 25, 'آزمون');
     ok('نوبت بعدی همان مراجع ← پیگیری با طول تازه', tgLenBook_(P, '501', '2026-10-20') === 25);
     ok('طول نوبت رزروشده عوض نشد', TG_MEM['sessrows'][0].len === 30);
     ok('نوبت درمانگر عادی ← درمان', tgLenBookKind_(D, '501', '2026-10-20') === 'درمان');
+    ok('ویزیت روان‌پزشکی (psy3) همان طول تنظیم‌شده را می‌گیرد', typeof ps3OnBook_ !== 'function' || (function () { TG_MEM['ps3:visits'] = []; var o = ps3OnBook_({ code: 'PS-T' }, { therapist: P, dateIso: '2026-10-21', hhmm: '10:00' }, '777'); return o && String(o['مدت']) === '30'; })());
     /* دسترسی و کارت */
     TG_DRY_THER = { name: D, chat: '700' };
     TG_OUTBOX = []; tgLenStart_('700');

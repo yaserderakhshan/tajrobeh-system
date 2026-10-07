@@ -34,10 +34,14 @@ var CFG_NOTE = {
   TG_CONTRACT_VER: 'نسخهٔ قرارداد همکاری برای ستون «پشتوانهٔ انتشار» پروفایل‌ها، مثل «۱» (v170.23.6؛ با امضای الکترونیک نسخهٔ تازه به‌روز می‌شود)',
   TG_ROUTE: 'جدول مسیریابی منتظرها: {"تیکت" | "باگ" | دستهٔ کار | "پیش‌فرض": "کلید TG_NAMES"} (JSON، اختیاری؛ v170.23.5؛ بی آن: مدیر عملیات ops)',
   CM_FIX_FORCE: 'دور دوم اصلاح کامنت‌ها: لیدهایی که با وجود قاعدهٔ «فقط مهاجرت» به این وضعیت برمی‌گردند: {"کد لید": "وضعیت"} (JSON، اختیاری؛ v170.23.4)',
-  CM_FIX_CALL: 'کد لیدهای وضعیت مبهم برای کار «بررسی تلفنی وضعیت» پذیرش: ["کد لید", …] (JSON، اختیاری؛ v170.23.4)'
+  CM_FIX_CALL: 'کد لیدهای وضعیت مبهم برای کار «بررسی تلفنی وضعیت» پذیرش: ["کد لید", …] (JSON، اختیاری؛ v170.23.4)',
+  PSY_WELCOME: 'متن کامل پیام خوشامد روان‌پزشک با دکمهٔ «تکمیل اطلاعات» (نام‌ها فقط اینجا؛ v170.23.9؛ خالی = خوشامد نمی‌رود)',
+  PSY_NATIONAL_NET: '«بله» در روزهای اینترنت ملی: لینک‌های ویزیت به بستر جایگزین (الوکام یا اسکای‌روم) می‌رود (v170.23.9)',
+  PSY_FIRST_MIN: 'مدت ویزیت اول روان‌پزشکی به دقیقه، بین ۳۰ و ۴۰ (v170.23.9؛ پیش‌فرض ۴۰)',
+  PSY_FOLLOW_MIN: 'مدت ویزیت پیگیری روان‌پزشکی به دقیقه (v170.23.9؛ پیش‌فرض ۲۰)'
 };
 /* کلیدهایی که خالی بودنشان مجاز است (جایگزین دارند) */
-var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'MIG_HUB', 'MIG_ENABLED', 'MIG_CHECKLIST', 'MIG_INVITE_TEXT', 'MIG_V2_LOGIN_URL', 'MIG_V2DEV_MSG', 'GEMINI_PAID'];
+var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'MIG_HUB', 'MIG_ENABLED', 'MIG_CHECKLIST', 'MIG_INVITE_TEXT', 'MIG_V2_LOGIN_URL', 'MIG_V2DEV_MSG', 'GEMINI_PAID', 'PSY_WELCOME', 'PSY_NATIONAL_NET', 'PSY_FIRST_MIN', 'PSY_FOLLOW_MIN'];
 /* v170.9: کلیدهای لازمی که در Property خالی‌اند (فقط نام). روی دیپلوی آزمایشی سنجیده می‌شود؛ هر کدام خالی = انتشار متوقف */
 function cfgMissing_() {
   var o = cfgPropGet_();
