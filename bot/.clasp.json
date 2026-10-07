@@ -42,7 +42,8 @@
     "psy2.gs",
     "migrate.gs",
     "psy3.gs",
-    "sesslen.gs"
+    "sesslen.gs",
+    "assist.gs"
   ],
   "htmlExtensions": [
     ".html"

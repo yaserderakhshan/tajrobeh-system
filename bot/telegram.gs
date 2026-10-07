@@ -2495,6 +2495,7 @@ function tgPrivate_(m) {
   /* v170.23.10: طول جلسه (sesslen.gs): عدد دلخواه، /sesslen و دکمهٔ میز پذیرش */
   if (m.text && typeof tgLenText_ === 'function' && tgGetVal_('lnc', chat) && tgLenText_(chat, m.text)) return;
   if (m.text && typeof tgLenPick_ === 'function' && (String(m.text).trim() === '/sesslen' || String(m.text).trim() === TG_LEN_DESK_BTN)) { if (tgLenCanOthers_(chat)) { tgDel_('lnt', chat); tgLenPick_(chat, 0); } else tgLenStart_(chat); return; }
+  if (typeof asRoute_ === 'function' && asRoute_(chat, m)) return;   /* v170.23.11: دستیار پاسخ‌گو (assist.gs)؛ بحران را خودش اول می‌سنجد */
   if (m.text && typeof migOwnerCmd_ === 'function' && migOwnerCmd_(chat, String(m.text).trim())) return;
 
   if (m.contact && m.contact.phone_number) {
@@ -2750,6 +2751,7 @@ function tgPrivate_(m) {
       ]
     });
   }
+  if (typeof asFallback_ === 'function' && asFallback_(chat, text, name)) return;   /* v170.23.11: متن آزادی که هیچ جریان دیگری نگرفت */
   tgSend_(chat, T_FALLBACK, tgMenu_());
 }
 
@@ -4518,6 +4520,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('dq:') === 0 && typeof dqCb_ === 'function') return dqCb_(chat, data);   /* v170: صف ارسال */
   if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);
   if (data.indexOf('ln:') === 0 && typeof tgLenCb_ === 'function') return tgLenCb_(chat, data);   /* v170.23.10: طول جلسه */
+  if (data.indexOf('as:') === 0 && typeof asCb_ === 'function') return asCb_(chat, data, name);   /* v170.23.11: دستیار */
   if (data.indexOf('mig:') === 0 && typeof migCb_ === 'function') return migCb_(chat, data);   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ */
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
@@ -6351,7 +6354,7 @@ function tgCmd_(text) {
 // یادداشت درون‌اجرایی کش: هر رفت‌وبرگشت CacheService حدود ۵۰ تا ۱۰۰ میلی‌ثانیه است؛
 // tgCachePrime_ همهٔ کلیدهای رایج این چت را با یک getAll می‌گیرد و بقیهٔ خواندن‌ها از حافظه می‌آید
 var TG_CMEMO = null;
-const TG_MEMO_KEYS = ['sign', 'await', 'ft', 'seen', 'qt', 'qg', 'nd', 'pf', 'qa', 'qm', 'tz', 'bd', 'helped', 'ts', 'pfd', 'ct', 'mzw', 'mzt', 'mzu', 'mzl', 'mzn', 'esign', 'pq', 'pr', 'em', 'emask', 'ldn', 'ldr', 'war', 'sfh', 'scg', 'sln', 'sli', 'sfl', 'alw', 'apw', 'pzw', 'rmw', 'rmv', 'cpv', 'cpp', 'cpn', 'cpl', 'apmsg', 'apreply', 'ldx', 'ldf', 'ldb', 'ldbs', 'vxc', 'vxe', 'vxu', 'mig', 'qcity', 'qpid', 'lnc', 'lnt'];
+const TG_MEMO_KEYS = ['sign', 'await', 'ft', 'seen', 'qt', 'qg', 'nd', 'pf', 'qa', 'qm', 'tz', 'bd', 'helped', 'ts', 'pfd', 'ct', 'mzw', 'mzt', 'mzu', 'mzl', 'mzn', 'esign', 'pq', 'pr', 'em', 'emask', 'ldn', 'ldr', 'war', 'sfh', 'scg', 'sln', 'sli', 'sfl', 'alw', 'apw', 'pzw', 'rmw', 'rmv', 'cpv', 'cpp', 'cpn', 'cpl', 'apmsg', 'apreply', 'ldx', 'ldf', 'ldb', 'ldbs', 'vxc', 'vxe', 'vxu', 'mig', 'qcity', 'qpid', 'lnc', 'lnt', 'asq', 'asr', 'aslast'];
 const TG_MEMO_LISTS = ['wlist', 'drows', 'trows', 'faq', 'scols'];
 function tgCachePrime_(chat) {
   if (TG_DRY || TG_CMEMO) return;
@@ -6405,7 +6408,7 @@ function tgMenu_() {
       [{ text: '🍓 شروع درمان' }, { text: '🗓 رزرو سریع وقت', web_app: { url: TG_APP_URL } }],
       [{ text: '🩺 رزرو جلسهٔ درمان' }],
       [{ text: '🧭 تست سبک درمانی من' }, { text: '📚 محتوای تجربه' }],
-      [{ text: '❓ سؤال‌های متداول' }, { text: '🧑‍⚕️ خدمات ما' }],
+      [{ text: (typeof asOn_ === 'function' && asOn_()) ? AS_BTN : '❓ سؤال‌های متداول' }, { text: '🧑‍⚕️ خدمات ما' }],
       [{ text: '🌍 خارج از ایران هستم' }, { text: '🎓 مدرسهٔ تجربه' }],
       [{ text: 'ℹ️ دربارهٔ تجربه' }, { text: '📞 صحبت با همکار' }]
     ].concat(tgRoleRow_()),
@@ -10181,6 +10184,13 @@ function tgDaySecRows_(d) {
   return out;
 }
 
+/* v170.23.11: خط‌های افزودنی ماژول‌ها در گزارش شبانه. هر ماژول تابعش را push می‌کند؛ تابع یک خط (یا '') برمی‌گرداند. */
+var TG_NIGHT_LINES = [];
+function tgNightLines_() {
+  var out = [];
+  for (var i = 0; i < TG_NIGHT_LINES.length; i++) { try { var l = TG_NIGHT_LINES[i](); if (l) out.push(l); } catch (e) { try { tgErr_('tgNightLines_', e); } catch (e2) {} } }
+  return out;
+}
 function tgDayReport_(d) {
   const L = [];
   const acts = tgActions_(d);
@@ -10226,6 +10236,9 @@ function tgDayReport_(d) {
   if (d.bugNew || d.bugOpen) L.push('باگ و پیشنهاد: ' + tgFa_(d.bugNew) + ' تازه، ' + tgFa_(d.bugOpen) + ' باز');
   L.push('');
   }
+
+  var nl = tgNightLines_();
+  if (nl.length) { L.push('<b>ابزارها</b>'); for (var n0 = 0; n0 < nl.length; n0++) L.push(nl[n0]); L.push(''); }
 
   L.push('<b>کاری که با توست</b>');
   if (!acts.length) L.push('چیزی نیست که لازم باشد امروز وارد شوی.');
