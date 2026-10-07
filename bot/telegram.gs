@@ -10187,8 +10187,13 @@ function tgDaySecRows_(d) {
 
 /* v170.23.11: خط‌های افزودنی ماژول‌ها در گزارش شبانه. هر ماژول تابعش را push می‌کند؛ تابع یک خط (یا '') برمی‌گرداند. */
 var TG_NIGHT_LINES = [];
+/* v170.23.12.1: خط‌ها دادهٔ واقعی می‌خوانند؛ یک بار در هر اجرا (گزارش هر ناظر جدا ساخته می‌شود) و در آزمون خشک هرگز
+   (آزمون «دامنهٔ گزارش» چهار بار tgDayReport_ می‌سازد و دیپلوی v170.23.13 روی همین ۵۵ دقیقه ماند) */
+var TG_NIGHT_MEMO = null;
 function tgNightLines_() {
-  var out = [];
+  if (typeof TG_DRY !== 'undefined' && TG_DRY) return [];
+  if (TG_NIGHT_MEMO) return TG_NIGHT_MEMO;
+  var out = TG_NIGHT_MEMO = [];
   for (var i = 0; i < TG_NIGHT_LINES.length; i++) { try { var l = TG_NIGHT_LINES[i](); if (l) out.push(l); } catch (e) { try { tgErr_('tgNightLines_', e); } catch (e2) {} } }
   return out;
 }
@@ -11046,6 +11051,7 @@ function tgScopeTests() {
   ok('متن دامنه را اعلام می‌کند', txt.indexOf('دامنهٔ این گزارش') > -1);
   ok('تفکیک بخش در متن هست', txt.indexOf('به تفکیک بخش') > -1 && txt.indexOf('پذیرش') > -1);
 
+  ok('خط‌های شبانه در آزمون خشک دادهٔ واقعی نمی‌خوانند', tgNightLines_().length === 0);   /* v170.23.12.1 */
   const full = tgDayReport_(d);
   ok('گزارش کامل مدرسه را دارد', full.indexOf('مدرسه') > -1);
   ok('گزارش کامل سربرگ دامنه ندارد', full.indexOf('دامنهٔ این گزارش') < 0);
