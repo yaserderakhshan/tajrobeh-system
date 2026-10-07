@@ -4521,6 +4521,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);
   if (data.indexOf('ln:') === 0 && typeof tgLenCb_ === 'function') return tgLenCb_(chat, data);   /* v170.23.10: طول جلسه */
   if (data.indexOf('as:') === 0 && typeof asCb_ === 'function') return asCb_(chat, data, name);   /* v170.23.11: دستیار */
+  if (data.indexOf('ls:') === 0 && typeof lsCb_ === 'function') return lsCb_(chat, data);   /* v170.23.12: زمان مناسب تماس */
   if (data.indexOf('mig:') === 0 && typeof migCb_ === 'function') return migCb_(chat, data);   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ */
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */

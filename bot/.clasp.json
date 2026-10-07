@@ -43,7 +43,8 @@
     "migrate.gs",
     "psy3.gs",
     "sesslen.gs",
-    "assist.gs"
+    "assist.gs",
+    "leadspeed.gs"
   ],
   "htmlExtensions": [
     ".html"

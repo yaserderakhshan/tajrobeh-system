@@ -1965,6 +1965,7 @@ function tgTick5(e) {
   try { run('soTick', soTick); } catch (x3) { tgErr_('tgTick5 soTick', x3); }
   try { if (typeof dqTick5_ === 'function') run('dqTick5_', dqTick5_); } catch (x5) { tgErr_('tgTick5 dqTick5_', x5); }   /* v170: صف ارسال، هر ۱۰ دقیقه */
   try { if (typeof cmTick5_ === 'function') run('cmTick5_', cmTick5_); } catch (x6) { tgErr_('tgTick5 cmTick5_', x6); }   /* v170.2: کامنت‌های هاب پذیرش، هر ۱۵ دقیقه (پیش از «اجرا» خاموش) */
+  try { if (typeof lsTick_ === 'function') run('lsTick_', lsTick_); } catch (x8) { tgErr_('tgTick5 lsTick_', x8); }   /* v170.23.12: پاسخ زیر ۱۰ دقیقه و اولویت ۹:۳۰ (leadspeed.gs) */
   try { v16810QuotaAlert_(); } catch (x4) { tgErr_('v16810QuotaAlert_', x4); }
   if (!calls) { try { if (typeof v17013ScholarTick_ === 'function') v17013ScholarTick_(); } catch (x7) { tgErr_('tgTick5 v17013ScholarTick_', x7); } }   /* v170.13: خبر وضعیت بورسیه، هر ۱۵ دقیقه */
 }
@@ -2012,9 +2013,9 @@ function tgV16810Tests() {
     var at = function (min) { TG_MEM['v16810:now'] = String(t0 + min * 60000); };
     var calls = function () { var c = TG_MEM['v16810:calls'] || []; TG_MEM['v16810:calls'] = []; return c; };
     at(0); tgTick5({});
-    ok('tgTick5 همهٔ کارهای ۵ دقیقه‌ای را صدا می‌زند (روی کد قبلی مردود)', calls().join() === 'tgDutyTick,tgCpTick,soTick,dqTick5_,cmTick5_');
+    ok('tgTick5 همهٔ کارهای ۵ دقیقه‌ای را صدا می‌زند (روی کد قبلی مردود)', calls().join() === 'tgDutyTick,tgCpTick,soTick,dqTick5_,cmTick5_,lsTick_');   /* v170.23.12: lsTick_ */
     at(5); tgTick5({});
-    ok('۵ دقیقه بعد tgCpTick نمی‌رود، بقیه می‌روند', calls().join() === 'tgDutyTick,soTick,dqTick5_,cmTick5_');
+    ok('۵ دقیقه بعد tgCpTick نمی‌رود، بقیه می‌روند', calls().join() === 'tgDutyTick,soTick,dqTick5_,cmTick5_,lsTick_');
     at(10); tgTick5({});
     ok('۱۰ دقیقه بعد tgCpTick دوباره می‌رود', calls().indexOf('tgCpTick') > -1);
     at(14.6); tgTick5({});
