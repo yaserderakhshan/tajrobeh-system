@@ -43,13 +43,28 @@ if (!function_exists('tj_assist_ask')) {
 			'tap'        => preg_replace('/[^A-Za-z0-9:_-]/', '', substr((string) ($p['tap'] ?? ''), 0, 40)),
 			'country'    => substr($country, 0, 2),
 		));
+		/* Apps Script بعد از doPost با ۳۰۲ به نشانی echo می‌فرستد و پاسخ JSON فقط با GET همان نشانی خوانده می‌شود.
+		   دنبال کردن خودکار POST را دوباره به echo می‌فرستد و صفحهٔ HTML با ۴۰۵ می‌گیرد (همان error=bad). مثل 501143 ریدایرکت
+		   خودکار دنبال نمی‌شود و فقط نشانی echo خود گوگل با GET خوانده می‌شود. */
 		$r = wp_remote_post(tajrobeh_leads_signed_url($body), array(
-			'timeout' => 15,
-			'headers' => array('Content-Type' => 'application/json'),
-			'body'    => $body,
+			'timeout'     => 15,
+			'redirection' => 0,
+			'headers'     => array('Content-Type' => 'application/json'),
+			'body'        => $body,
 		));
 		if (is_wp_error($r)) {
 			return new WP_REST_Response(array('ok' => false, 'error' => 'net'), 503);
+		}
+		$code = (int) wp_remote_retrieve_response_code($r);
+		$loc  = (string) wp_remote_retrieve_header($r, 'location');
+		if (in_array($code, array(301, 302, 303, 307), true)) {
+			if (strpos($loc, 'https://script.googleusercontent.com/macros/echo') !== 0) {
+				return new WP_REST_Response(array('ok' => false, 'error' => 'bad'), 502);
+			}
+			$r = wp_remote_get($loc, array('timeout' => 15, 'redirection' => 0));
+			if (is_wp_error($r)) {
+				return new WP_REST_Response(array('ok' => false, 'error' => 'net'), 503);
+			}
 		}
 		$j = json_decode(wp_remote_retrieve_body($r), true);
 		if (!is_array($j)) {
