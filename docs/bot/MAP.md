@@ -116,7 +116,7 @@
 | `kartable.gs` | ۴۴۷ | ۳۴ |
 | `ai.gs` | ۲۱۱ | ۱۵ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
-| `migrate.gs` | ۵۵۱ | ۵۵ |
+| `migrate.gs` | ۵۶۱ | ۵۶ |
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۵۶۷ | ۵۰ |
