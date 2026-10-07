@@ -6,6 +6,7 @@
  *   - aiJson_: خروجی ساختاریافتهٔ JSON با schema (برداشت صوتی مراجع، خلاصه، …).
  *   - aiRoute_: تشخیص نوع و منظور، صاحب، خلاصه، کارها و پیش‌نویس پاسخ؛ زیر آستانهٔ اطمینان به آدم می‌رود.
  * زمینه: AI_CONTEXT (همان docs/ai/context.md، بی اسم و شماره).
+ * بحران (v170.23.19): پیش از جمنای با tgIsCrisis_ و بعد با نوع «بحران» ← فقط پیام ثابت T_CRISIS، human = false، بی کار و بی صف.
  *
  * قاعدهٔ حریم خصوصی (جای قاعدهٔ قبلی voice.gs): همه با جمنای، ولی صدا یا متنِ مراجع و پیام خصوصی فقط وقتی به مدل می‌رود که
  * کلید Gemini API پولی باشد (Paid tier: دادهٔ ورودی برای آموزش مدل استفاده نمی‌شود). از خود کلید نمی‌شود فهمید پولی است یا نه؛
@@ -85,7 +86,7 @@ var AI_CONTEXT = [
     'مدرسه (کلاس، ثبت‌نام، سوپرویژن آموزشی)، حضوری (اتاق و ساعت حضوری)، پارتنر، فنی (اشکال بات و سایت)، مدیریت (بقیه).',
   'وضعیت رشته: تازه، در دست، منتظر طرف، بسته. «بسته» فقط با پاسخ واقعی یا علت بستن.',
   'واژگان: معارفه = جلسهٔ آشنایی اول؛ رودمپ = مسیر همراهی مهاجران؛ هاب = شیت عملیات؛ کارتابل = فهرست کارهای هر نفر.',
-  'حریم خصوصی: نام، شماره، ایمیل یا هر دادهٔ شناسایی مراجع را در خلاصه، کار یا پیش‌نویس تکرار نکن. تشخیص بالینی نده. بحران (آسیب به خود یا دیگری) = نوع «بحران» و اطمینان پایین برای اینکه آدم فوری ببیند.',
+  'حریم خصوصی: نام، شماره، ایمیل یا هر دادهٔ شناسایی مراجع را در خلاصه، کار یا پیش‌نویس تکرار نکن. تشخیص بالینی نده. بحران (فکر یا قصد صریح خودکشی یا آسیب به خود) = نوع «بحران»؛ پیش‌نویس و کار نساز، پاسخ ثابت را خود بات می‌فرستد.',
   'پیش‌نویس پاسخ: کوتاه، محترمانه، دوم شخص جمع، بی وعدهٔ زمانی که نمی‌دانی، بی خط تیرهٔ بلند وسط جمله.',
   'اطمینان: عدد ۰ تا ۱. هر جا مطمئن نیستی پایین بده؛ زیر ۰٫۷ را آدم بررسی می‌کند.'
 ].join('\n');
@@ -95,8 +96,11 @@ var AI_ROUTE_SCHEMA = { type: 'OBJECT', properties: {
   draft: { type: 'STRING' }, confidence: { type: 'NUMBER' } }, required: ['type', 'owner', 'summary', 'confidence'] };
 var AI_QUEUES = ['پذیرش', 'مالی', 'روان‌پزشکی', 'مدرسه', 'حضوری', 'پارتنر', 'فنی', 'مدیریت'];
 /** {type, owner (یکی از AI_QUEUES), summary, tasks, draft, confidence, human} */
+/* v170.23.19 (تصمیم یاسر): تجربه خدمات بحران نیست. بحران فقط پیام ثابت اورژانس T_CRISIS است، بی ارجاع به آدم و بی کار. */
+function aiCrisisOut_() { return { type: 'بحران', owner: '', summary: '', tasks: [], draft: T_CRISIS, confidence: 1, human: false, crisis: true }; }
 function aiRoute_(text, meta) {
   meta = meta || {};
+  if (tgIsCrisis_(text)) return aiCrisisOut_();   /* پیش از جمنای؛ متن پیام بحران به هیچ مدلی نمی‌رود */
   var o;
   try {
     o = aiJson_(AI_CONTEXT + '\n\nیک پیام ورودی آمده' + (meta.role ? ' از «' + meta.role + '»' : '') + (meta.kind ? ' (نوع اولیه: ' + meta.kind + ')' : '') +
@@ -107,7 +111,8 @@ function aiRoute_(text, meta) {
   o.confidence = Math.max(0, Math.min(1, Number(o.confidence) || 0));
   o.tasks = (o.tasks || []).slice(0, 5);
   o.draft = String(o.draft || '').replace(/\s*[—–]\s*/g, '، ');
-  o.human = o.confidence < AI_MIN_CONF || !o.owner || /بحران/.test(o.type || '');
+  if (/بحران/.test(o.type || '')) return aiCrisisOut_();
+  o.human = o.confidence < AI_MIN_CONF || !o.owner;
   return o;
 }
 
@@ -191,8 +196,12 @@ function aiTests() {
     ok('مسیریاب: JSON ساختاریافته و صف معتبر', r.owner === 'پذیرش' && r.tasks.length === 1 && !r.human && r.draft.indexOf('—') < 0, JSON.stringify(r));
     TG_MEM['ai:json'].confidence = 0.4;
     ok('مسیریاب: زیر آستانه ← آدم', aiRoute_('x').human === true);
-    TG_MEM['ai:json'] = { type: 'بحران', owner: 'پذیرش', summary: 's', confidence: 0.99 };
-    ok('مسیریاب: بحران همیشه ← آدم', aiRoute_('x').human === true);
+    TG_MEM['ai:json'] = { type: 'بحران', owner: 'پذیرش', summary: 's', tasks: [{ title: 'تماس فوری' }], confidence: 0.99 };
+    var rc = aiRoute_('x');
+    ok('مسیریاب: بحران فقط پیام ثابت اورژانس، بی ارجاع به آدم و بی کار (v170.23.19)', rc.crisis && rc.human === false && rc.draft === T_CRISIS && !rc.tasks.length && !rc.owner && !rc.summary, JSON.stringify(rc));
+    TG_MEM['ai:calls'] = [];
+    var rc2 = aiRoute_('می‌خواهم خودکشی کنم', { role: 'مراجع' });
+    ok('مسیریاب: جملهٔ صریح بحران پیش از جمنای، هیچ فراخوانی', rc2.crisis && rc2.draft === T_CRISIS && !rc2.human && !(TG_MEM['ai:calls'] || []).length);
     TG_MEM['ai:json'] = { type: 'x', owner: 'صف من‌درآوردی', summary: 's', confidence: 0.99 };
     ok('مسیریاب: صف ناشناخته ← آدم', aiRoute_('x').human === true && aiRoute_('x').owner === '');
     ok('زمینه بی اسم و شماره', !/[0-9۰-۹]{6,}|@/.test(AI_CONTEXT) && AI_QUEUES.every(function (q) { return AI_CONTEXT.indexOf(q) > -1; }));
