@@ -19417,7 +19417,7 @@ function tgPtV148Setup() {
    v149 · فاز ۲: موتور پیام. هر پیام یک نوع دارد؛ سیاست (سکوت شب، سقف روز) از تب «سیاست پیام» هاب پیام؛
    پیام شب در «صف پیام» می‌ماند و صبح می‌رود؛ پیام تیمی کار می‌سازد؛ گزارش فقط با خبر.
    ================================================================== */
-var TG_NK = { urgent: 'فوری', task: 'کار', remind: 'یادآوری', report: 'گزارش', invite: 'دعوت', sys: 'سیستم' };
+var TG_NK = { urgent: 'فوری', task: 'کار', remind: 'یادآوری', report: 'گزارش', invite: 'دعوت', sys: 'سیستم', review: 'بازبینی' };
 var TG_POLICY_TAB = 'سیاست پیام';
 var TG_POLICY_HEAD = ['نوع', 'سکوت شب', 'سقف روز', 'چه کسی خاموش می‌کند', 'فعال', 'توضیح'];
 var TG_POLICY_DEF = [
@@ -19426,7 +19426,8 @@ var TG_POLICY_DEF = [
   ['یادآوری', 'بله', 3, 'خود گیرنده', 'بله', 'مصاحبهٔ فردا، موعد تحویل، کلاس فردا'],
   ['گزارش', 'بله', 1, 'خود گیرنده', 'بله', 'گزارش‌های دوره‌ای؛ فقط اگر خبری هست'],
   ['دعوت', 'بله', 1, 'خود گیرنده', 'بله', 'آنبوردینگ، محتوا، کمپین'],
-  ['سیستم', 'بله', 1, 'مالک', 'بله', 'خلاصهٔ خطاها، سلامت، آمار']
+  ['سیستم', 'بله', 1, 'مالک', 'بله', 'خلاصهٔ خطاها، سلامت، آمار'],
+  ['بازبینی', 'خیر', 0, 'مالک', 'بله', 'اعلان داخلی بازبینی (فهرست ابی): مستقیم به راهبر کمپین و یاسر، بی سکوت شب و سقف (v170.23.12.6)']
 ];
 var TG_QUIET_FROM = 22, TG_QUIET_TO = 9;   /* سکوت شب به وقت تهران */
 var TG_QUEUE_TAB = 'صف پیام';
@@ -19629,7 +19630,7 @@ function tgNotifyTests() {
   function ok(label, cond) { if (cond) { pass++; text.push('✅ ' + label); } else { fail++; text.push('❌ ' + label); } }
   var keepDry = TG_DRY; TG_DRY = true;
   TG_OUTBOX = []; TG_MEM['notify'] = []; TG_MEM['queue'] = []; TG_MEM['capdry'] = {}; TG_MEM['policy'] = {}; TG_MEM['quiet'] = false; TG_MEM['tasks'] = []; TG_MEM['outlog'] = [];
-  ok('شش نوع پیام و سیاست پیش‌فرض', Object.keys(TG_NK).length === 6 && TG_POLICY_DEF.length === 6 && TG_POLICY_DEF.every(function (r) { return r.join(' ').indexOf('—') < 0; }));
+  ok('هفت نوع پیام و سیاست پیش‌فرض (v170.23.12.6: «بازبینی»)', Object.keys(TG_NK).length === 7 && TG_POLICY_DEF.length === 7 && TG_POLICY_DEF.every(function (r) { return r.join(' ').indexOf('—') < 0; }));
   ok('فوری سکوت و سقف ندارد', !tgPolicy_('فوری').quiet && tgPolicy_('فوری').cap === 0);
   ok('کار سقف ۱۰ دارد', tgPolicy_('کار').cap === 10 && tgPolicy_('کار').quiet);
   var r1 = tgNotify_('1', TG_NK.task, 'کار یک', { ref: 'K-1' });
