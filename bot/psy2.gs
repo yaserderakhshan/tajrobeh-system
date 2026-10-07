@@ -37,7 +37,7 @@ function ps2DocName_(chat) {
 }
 
 /* ───── میز روان‌پزشک ───── */
-function ps2Menu_() { return { keyboard: [[TG_PSY_BTN_WEEK, PS2_DESK_BTN], ['↩️ بازگشت']], resize_keyboard: true }; }
+function ps2Menu_() { return { keyboard: [[TG_PSY_BTN_WEEK, PS2_DESK_BTN]].concat(typeof PS3_INFO_BTN !== 'undefined' ? [[PS3_INFO_BTN]] : []).concat([['↩️ بازگشت']]), resize_keyboard: true }; }
 function ps2Desk_(chat, text) {
   var t = String(text || '').trim();
   if (t === TG_PSY_BTN_WEEK) return tgPsyWeeklyStart_(chat);
