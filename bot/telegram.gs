@@ -3834,7 +3834,8 @@ function tgPoolMap_() {
   for (var i = 0; i < v.length; i++) {
     const name = String(v[i][0]).trim();
     if (!name) continue;
-    const rec = { abroad: /بله/.test(String(v[i][TG_POOL_ABROAD - 1])),
+    const abv = tgLatinDigits_(String(v[i][TG_POOL_ABROAD - 1] || '')).trim();
+    const rec = { abroad: !!abv && !/^(خیر|نه|no|0)$/i.test(abv),   /* v170.23.21: «بله» یا اولویت ۱ تا ۳ */
                   inperson: /بله/.test(String(v[i][TG_POOL_INPERSON - 1])) };
     for (var j = 0; j < TG_POOL_DEFS.length; j++) {
       const p = tgPoolPri_(v[i][TG_POOL_DEFS[j].col - 1]);
@@ -3903,8 +3904,7 @@ function tgBuildPools() {
     const p = prof.rows[nm] || null;
     if (p) matched++;
 
-    let status = String(rows[r][1]).trim();
-    if (prof.ended[nm]) status = 'پایان همکاری';
+    let status = String(rows[r][1]).trim();   /* v170.23.21: تنها منبع ستون B «درمانگران»؛ پروفایل وضعیت را عوض نمی‌کند */
 
     const line = [
       name,
@@ -3919,7 +3919,7 @@ function tgBuildPools() {
 
     const prev = keep[nm];
     const sp = p ? tgSrvPools_(p.services) : {};
-    const active = status === 'فعال' || (p && !prof.ended[nm]);
+    const active = status === 'فعال';
 
     for (var d2 = 0; d2 < TG_POOL_DEFS.length; d2++) {
       const key = TG_POOL_DEFS[d2].key;
@@ -3996,8 +3996,8 @@ function tgPoolFilter_(slots, chat, over) {
 
   // ۲) اگر مراجع خارج از ایران است، درمانگرانی که این را پذیرفته‌اند
   if (abroad) {
-    const ok = cand.filter(function (s) { const r = rec(s); return r && r.abroad; });
-    if (distinct(ok) >= 2) cand = ok;
+    /* v170.23.21 (تصمیم یاسر): لید خارج فقط از استخر «خارج از ایران»، حتی اگر کسی نماند */
+    cand = cand.filter(function (s) { const r = rec(s); return r && r.abroad; });
   }
 
   // ۳) اولویت مسئول پذیرش: اول صف اول، و اگر کم بود ردهٔ بعدی هم اضافه شود
@@ -4362,7 +4362,8 @@ function tgAskPhone_(chat) {
 
 function tgOnPhone_(chat, name, uname, phone) {
   const p = tgLatinDigits_(phone).replace(/[^\d+]/g, '');
-  const region = tgRegion_(p);
+  const zk = tgGetVal_('tz', chat), ztz = zk ? tgZoneOf_(zk).tz : '';
+  const region = abRegion_(p, ztz, '');   /* v170.23.21: انتخاب ساعت در بات مثل منطقهٔ زمانی مرورگر */
   /* v166.12: «seen» (۶ ساعت) دیگر شمارهٔ تازه را گم نمی‌کند. همان متن T_PHONE_AGAIN به مراجع می‌رود، ولی:
      شمارهٔ دیگر روی پروندهٔ همین مراجع یادداشت می‌شود، و اگر پرونده اصلاً ساخته نشده بود (نوشتن قبلی شکست خورد) ساخته می‌شود. */
   if (tgFlag_('seen', chat)) {
@@ -4379,6 +4380,7 @@ function tgOnPhone_(chat, name, uname, phone) {
   const want = tgGenderWant_(chat);
   const sc = tgScales_(chat);
   const extra = tgLeadExtras_(sc, tk, region);
+  if (ztz) extra['منطقهٔ زمانی'] = ztz;   /* v170.23.21 */
   if (typeof v168ModeExtras_ === 'function') v168ModeExtras_(chat, extra);   /* v168 فاز ۶ */
   if (typeof v1689Extras_ === 'function') v1689Extras_(chat, extra);   /* v168.9: کشور و آشنایی */
   if (typeof v17013Extras_ === 'function') v17013Extras_(chat, extra);   /* v170.13: آفر کمپین */
@@ -4739,8 +4741,7 @@ function tgOfferSlots_(chat, z, band, scope, intro) {
 
   // درمانگری که همکاری‌اش تمام شده هیچ‌وقت پیشنهاد نمی‌شود
   const active = usable.filter(function (x) {
-    const t = info[x.therapist];
-    return !(t && t.status && t.status.indexOf('پایان') > -1);
+    return abTherOk_(info[x.therapist]);   /* v170.23.21: فقط «فعال» (ستون B درمانگران)؛ نامعلوم، مرخصی و پایان همکاری هرگز دیده نمی‌شوند */
   });
 
   const fits = function (x) {
@@ -6555,6 +6556,9 @@ function tgIsCrisis_(text) {
 function tgRegion_(phone) {
   const p = phoneDigits_(phone);
   if (!p) return '';
+  /* v170.23.21: chat_id یا شناسه (بی + و بی صفر اول، کوتاه‌تر از شمارهٔ بین‌المللی) شماره نیست؛ قبلاً «خارج» می‌خورد */
+  const raw = tgLatinDigits_(String(phone == null ? '' : phone)).trim();
+  if (!/^\+/.test(raw) && !/^0/.test(p) && p.length <= 10 && !(p.charAt(0) === '9' && p.length === 10)) return '';
   if (p.indexOf('0098') === 0) return 'داخل ایران';
   if (p.indexOf('98') === 0 && p.length >= 12) return 'داخل ایران';
   if (p.indexOf('09') === 0 && p.length === 11) return 'داخل ایران';
@@ -6982,6 +6986,7 @@ function tgWatchdog(e) {
   S('migSetupTick_', 'light', typeof migSetupTick_ === 'function' ? migSetupTick_ : null);   /* با MIG_ENABLED خاموش بی‌کار */
   S('migTick_', 'light', typeof migTick_ === 'function' ? migTick_ : null);
   S('ps2FixMaybe_', 'light', typeof ps2FixMaybe_ === 'function' ? ps2FixMaybe_ : null);
+  S('abDailyMaybe_', 'light', typeof abDailyMaybe_ === 'function' ? abDailyMaybe_ : null);   /* v170.23.21: مبنای ارجاع و اصلاح لیدها، روزی یک بار */
   S('crFixMaybe_', 'light', typeof crFixMaybe_ === 'function' ? crFixMaybe_ : null);   /* v170.23.20: پاک کردن متن لیدهای بحران قدیمی، با «اوکی» Cowork */
   S('ktbRouteMaybe_', 'light', typeof ktbRouteMaybe_ === 'function' ? ktbRouteMaybe_ : null);   /* v170.16: کمپین C-004 */
   S('tgErrDigest_', 'light', tgErrDigest_);
@@ -21446,7 +21451,8 @@ const TG_LEAD_FIELDS = [
   /* v170.2 مدل لید */ 'نوع لید', 'پیشنهاد کاربر', 'پیامد', 'مسئول مرحله', 'مهلت مرحله', 'منبع جزئیات',
   /* v170.2 کامنت‌ها: ترجیحات برای پیشنهاد درمانگر */ 'ترجیحات', 'حالت جلسه', 'ترجیح جنسیت', 'ترجیح سن',
   /* v170.13 */ 'کد کمپین', 'آفر',
-  /* v170.18 برگشت مراجع: زمان ورود تازه، منطقه، اعلان */ 'تاریخ', 'زمان', 'تاریخ شمسی', 'داخل یا خارج', 'اعلان بات'
+  /* v170.18 برگشت مراجع: زمان ورود تازه، منطقه، اعلان */ 'تاریخ', 'زمان', 'تاریخ شمسی', 'داخل یا خارج', 'اعلان بات',
+  /* v170.23.21 لید خارج */ 'منطقهٔ زمانی', 'زمان مناسب'
 ];
 
 // ستون‌هایی که تریگر شیت رویشان حساس است
@@ -22234,6 +22240,7 @@ function tgLeadBook_(cq, me, row, code, idx) {
   var list = []; try { list = JSON.parse(raw || '[]'); } catch (e) {}
   const s = list[idx];
   if (!s) return tgSend_(chat, 'این وقت دیگر در دست نیست. دوباره «معارفه» را بزنید.');
+  if (!abTherOkName_(s.therapist)) { tgDel_('ldbs', chat); return tgSend_(chat, '⛔ وضعیت همکاری این درمانگر «فعال» نیست؛ وقتش رزرو نمی‌شود. دوباره «معارفه» را بزنید.'); }   /* v170.23.21 */
   const l = tgLeadRead_(row);
   if (!l) return tgSend_(chat, 'این لید خوانده نشد.');
   const today = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd');
@@ -22941,6 +22948,7 @@ function tgReferSend_(chat, code, therName, uname, force) {
   if (row < 2) return tgSend_(chat, 'این لید پیدا نشد.');
   const l = tgLeadRead_(row);
   if (!l) return tgSend_(chat, 'این لید خوانده نشد.');
+  if (!abTherOkName_(therName)) return tgSend_(chat, '⛔ ارجاع انجام نشد: وضعیت همکاری ' + tgEsc_(therName) + ' در تب «درمانگران» «فعال» نیست. اول وضعیت را آنجا درست کنید.');   /* v170.23.21: گارد سخت، حتی با «بفرست» */
   if (!force) { var kk = tgLeadKind_(row), gd = tgReferGuard_(therName, kk[0], kk[1]); if (gd) return tgReferWarn_(chat, code, therName, gd); }
   const who = tgWhoDesk_(chat, uname);
   const me = (who && who.name) ? who.name : 'پذیرش';

@@ -813,10 +813,19 @@ function v168SuggestCtx_() {
   });
   return { ther: ther, pool: tgPoolMap_(), free: free };
 }
+/* v170.23.21: زمینهٔ ترتیب لید خارج، یک بار برای هر دور */
+function v168AbCtx_(ctx) {
+  if (ctx.ab) return ctx.ab;
+  if (TG_DRY) return (ctx.ab = TG_MEM['v168abctx'] || { info: {}, stats: {}, slots: [] });
+  var slots = []; try { slots = tgFreeSlots_('خارج از ایران'); } catch (e) {}
+  return (ctx.ab = { info: tgTherapistInfo_(), stats: abStats_(abLeadRows_(), Date.now(), AB_DAYS), slots: slots });
+}
 /* یک لید: سه پیشنهاد و رویداد «پیشنهاد خودکار». برمی‌گرداند نام‌ها یا [] */
 function v168SuggestLead_(row, l, ctx) {
   if (!v168Ready_(l) || l.ref1 || l.ref2 || l.ref3) return [];
-  var pick = v168Pick_(v168Candidates_(l, ctx), 3, v168Cfg_('explore_slot', 1));
+  var cands = v168Candidates_(l, ctx);
+  /* v170.23.21 (تصمیم یاسر): لید خارج: مقیم همان کشور، بعد وقت در «زمان مناسب» مراجع، بعد نرخ تبدیل خارج */
+  var pick = /خارج/.test(String(l.region || '')) ? abRank_(cands, l, v168AbCtx_(ctx)).slice(0, 3) : v168Pick_(cands, 3, v168Cfg_('explore_slot', 1));
   if (!pick.length) return [];
   var ch = {};
   pick.forEach(function (c, j) { ch[V168_SUG[j]] = c.name; c.sug++; });
@@ -836,7 +845,8 @@ function v168SuggestSweep_(max) {
     var r = v[i], st = g(r, 'وضعیت');
     if (!String(r[3] || r[5] || '').trim() || tgStClosed_(st) || st === TG_ST.BOOKED || st === TG_ST.HELD) continue;
     var l = { kind: g(r, 'نوع درخواست'), topic: g(r, 'موضوع اصلی'), region: g(r, 'داخل یا خارج'), mode: g(r, 'حالت') || g(r, 'حالت جلسه'),
-              ref1: g(r, V168_SUG[0]), ref2: g(r, V168_SUG[1]), ref3: g(r, V168_SUG[2]) };
+              ref1: g(r, V168_SUG[0]), ref2: g(r, V168_SUG[1]), ref3: g(r, V168_SUG[2]),
+              country: g(r, 'کشور محل زندگی'), tz: g(r, 'منطقهٔ زمانی') || abTzFromNote_(g(r, 'یادداشت')), best: g(r, 'زمان مناسب') || abBestFromNote_(g(r, 'یادداشت')) };
     if (!v168Ready_(l) || l.ref1 || l.ref2 || l.ref3) continue;
     if (!ctx) ctx = v168SuggestCtx_();
     if (v168SuggestLead_(i + 2, l, ctx).length) n++;
@@ -851,7 +861,8 @@ function v168LeadFull_(row, l0) {
     var sh = tgSS_().getSheetByName(TG_LEADS), hm = tgLeadHeadMap_(sh), r = sh.getRange(row, 1, 1, sh.getLastColumn()).getValues()[0];
     var g = function (h) { var i = hm[h]; return (i === undefined || i < 0 || i >= r.length) ? '' : String(r[i] || '').trim(); };
     return { kind: g('نوع درخواست'), topic: g('موضوع اصلی'), region: g('داخل یا خارج'), mode: g('حالت') || g('حالت جلسه'),
-             ref1: g(V168_SUG[0]), ref2: g(V168_SUG[1]), ref3: g(V168_SUG[2]) };
+             ref1: g(V168_SUG[0]), ref2: g(V168_SUG[1]), ref3: g(V168_SUG[2]),
+             country: g('کشور محل زندگی'), tz: g('منطقهٔ زمانی') || abTzFromNote_(g('یادداشت')), best: g('زمان مناسب') || abBestFromNote_(g('یادداشت')) };
   } catch (e) { return l0 || {}; }
 }
 function v168Suggest_(cq, chat, me, row, code, act, arg, l0) {

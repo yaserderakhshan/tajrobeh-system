@@ -77,16 +77,16 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.20`
+نسخهٔ کد: `v170.23.21`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۴۱۵ | ۳۳ |
-| `telegram.gs` | ۳۷۸۴۵ | ۲۰۴۷ |
+| `Code.gs` | ۴۲۱ | ۳۳ |
+| `telegram.gs` | ۳۷۸۵۳ | ۲۰۴۷ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
-| `social.gs` | ۳۳۸ | ۲۵ |
+| `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
 | `maint.gs` | ۴ | ۱ |
 | `v162.gs` | ۷۹۹ | ۶۴ |
@@ -99,10 +99,10 @@
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۵۷۶ | ۱۲۰ |
-| `v168.gs` | ۲۳۷۶ | ۱۴۸ |
+| `v168.gs` | ۲۳۸۷ | ۱۴۹ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۸ | ۳۴ |
-| `leadmodel.gs` | ۷۷۷ | ۴۱ |
+| `leadmodel.gs` | ۷۷۸ | ۴۱ |
 | `comments.gs` | ۱۰۳۶ | ۶۵ |
 | `dq.gs` | ۶۰۲ | ۴۹ |
 | `cfg.gs` | ۱۸۳ | ۱۴ |
@@ -122,7 +122,7 @@
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۱۳۴۸ | ۱۱۰ |
-| `leadspeed.gs` | ۲۵۹ | ۲۳ |
+| `leadspeed.gs` | ۶۱۶ | ۵۰ |
 
 ### کارهای زمان‌دار
 
@@ -156,6 +156,8 @@
 
 | ثابت | نام تب | فایل‌ها |
 |---|---|---|
+| `AB_FX_TAB` | «اصلاح دادهٔ لیدها · پیش‌نمایش» | `leadspeed.gs` |
+| `AB_PV_TAB` | «مبنای ارجاع · پیش‌نمایش» | `leadspeed.gs` |
 | `AS_IDX_TAB` | «نمایهٔ دانش» | `assist.gs` |
 | `BG_TAB` | «سهمیهٔ اجرا» | `v168.gs` |
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
@@ -249,7 +251,7 @@
 | `TG_STAT_TAB` | «آمار روزانهٔ بات» | `telegram.gs` |
 | `TG_SUP_TAB` | «درخواست سوپرویژن» | `telegram.gs` |
 | `TG_TEST_TAB` | «تست‌ها» | `telegram.gs` |
-| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` `psy2.gs` `sesslen.gs` |
+| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` `psy2.gs` `sesslen.gs` `leadspeed.gs` |
 | `TG_TK_TAB` | «پیام‌های درمانگران» | `telegram.gs` `kartable.gs` |
 | `TG_TSK_TAB` | «کارها» | `telegram.gs` |
 | `TG_USERS_TAB` | «کاربران بات» | `telegram.gs` `ebi.gs` |
@@ -392,6 +394,7 @@
 | دستیار ۵ · جمنای با گارد (v170.23.18) | `asTests5` |
 | دستیار ۷ · نمایهٔ سایت (v170.23.19) | `asTests7` |
 | پاسخ زیر ۱۰ دقیقه و اولویت روزانه (v170.23.12) | `lsTests` |
+| لیدهای خارج · مبنای ارجاع و داده (v170.23.21) | `abTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)

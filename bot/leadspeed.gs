@@ -256,3 +256,360 @@ function lsTests() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'lsTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['پاسخ زیر ۱۰ دقیقه و اولویت روزانه (v170.23.12)', 'lsTests']); } catch (eLs) {}
+
+/* ═════════════ v170.23.21 · مسیر لیدهای خارج از ایران، بخش الف: مبنای ارجاع و دادهٔ لید ═════════════
+   تصمیم یاسر (۱۵ مهر ۱۴۰۵). عدد پایه در توضیح PR است؛ داوری ۱۵ آبان.
+   - «داخل یا خارج» از سه چیز: کشور (صریح) ← منطقهٔ زمانی مرورگر یا انتخاب ساعت در بات ← پیش‌شمارهٔ تلفن (abRegion_).
+   - گارد سخت: درمانگری که وضعیت همکاری‌اش (ستون B «درمانگران»، تنها منبع) «فعال» نیست نه ارجاع می‌گیرد، نه کارت، نه وقتش دیده می‌شود.
+   - لید خارج فقط از استخر «خارج از ایران»؛ ترتیب: مقیم همان کشور، وقت هفتگی در «زمان مناسب» مراجع، نرخ تبدیل خارج (abRank_).
+   - مبنای ارجاع: پیشنهاد، معارفه، شروع و نرخ‌ها در پنجرهٔ ۶۰ روزه، جدا برای داخل و خارج؛ رده، نزدیک‌ترین وقت، ارجاع باز و
+     پیشنهاد سیستم از دادهٔ واقعی (abStats_). اول پیش‌نمایش؛ بعد از «اوکی» Cowork هر روز یک بار در «درمانگران» نوشته می‌شود.
+   - اصلاح دادهٔ لیدها (داخل یا خارج، نوع لید درخواست زوج، تاریخ‌های قاطی): پیش‌نمایش و «اوکی» Cowork. */
+var AB_DAYS = 60;
+var AB_ZONE_TZ = {
+  de: /^Europe\/(Berlin|Vienna|Zurich|Amsterdam|Brussels|Luxembourg|Copenhagen|Stockholm|Oslo|Paris|Rome|Madrid|Prague|Budapest|Warsaw|Helsinki|Athens|Lisbon)/,
+  uk: /^Europe\/(London|Dublin)/, na: /^America\//, ae: /^Asia\/(Dubai|Qatar|Muscat|Kuwait|Bahrain|Riyadh)/, tr: /^(Europe\/Istanbul|Asia\/Istanbul)/,
+  au: /^(Australia|Pacific\/Auckland)/, af: /^Asia\/Kabul/, ir: /^(Asia\/Tehran|Iran)$/
+};
+var AB_ZONE_FA = [
+  ['ir', /^\s*(🇮🇷\s*)?(ایران|iran|ir)\s*$/i],
+  ['de', /آلمان|اتریش|سوئیس|هلند|بلژیک|دانمارک|سوئد|نروژ|فرانسه|ایتالیا|اسپانیا|فنلاند|اروپای مرکزی|germany|austria|switzerland|netherlands|sweden|europe/i],
+  ['uk', /انگلیس|انگلستان|بریتانیا|ایرلند|united kingdom|england|britain|ireland|\buk\b/i],
+  ['na', /آمریکا|امریکا|کانادا|usa|united states|canada|america/i],
+  ['ae', /امارات|دبی|قطر|عمان|کویت|بحرین|عربستان|emirates|dubai|qatar/i],
+  ['tr', /ترکیه|استانبول|turkey|türkiye|istanbul/i],
+  ['au', /استرالیا|نیوزیلند|australia|new zealand/i],
+  ['af', /افغانستان|afghanistan/i]
+];
+function abZoneOfTz_(tz) { var t = String(tz || '').trim(); for (var k in AB_ZONE_TZ) if (AB_ZONE_TZ[k].test(t)) return k; return t ? 'x' : ''; }
+/** کشور (متن فارسی یا انگلیسی) یا برچسب TG_ZONES یا نام IANA ← کلید منطقه */
+function abZoneOf_(s) {
+  var t = String(s || '').trim(); if (!t) return '';
+  if (/^[A-Za-z_]+\/[A-Za-z_\/-]+$/.test(t) || t === 'Iran') return abZoneOfTz_(t);
+  for (var i = 0; i < AB_ZONE_FA.length; i++) if (AB_ZONE_FA[i][1].test(t)) return AB_ZONE_FA[i][0];
+  return 'x';
+}
+/** «داخل ایران» | «خارج از ایران» | '' ؛ کشور صریح ← منطقهٔ زمانی ← شماره */
+function abRegion_(phone, tz, country) {
+  var c = abZoneOf_(country);
+  if (c) return c === 'ir' ? 'داخل ایران' : 'خارج از ایران';
+  var z = abZoneOfTz_(tz);
+  if (z) return z === 'ir' ? 'داخل ایران' : 'خارج از ایران';
+  return tgRegion_(phone);
+}
+/** منطقهٔ زمانی و «زمان مناسب» از یادداشت فرم‌های قدیمی (پل سایت هر دو را در یادداشت می‌گذاشت) */
+function abTzFromNote_(memo) { var m = String(memo || '').match(/\b((?:Europe|America|Asia|Australia|Africa|Pacific|Atlantic)\/[A-Za-z_]+(?:\/[A-Za-z_]+)?)\b/); return m ? m[1] : ''; }
+function abBestFromNote_(memo) { var m = String(memo || '').match(/زمان مناسب(?: تماس)?:\s*([^·\n]+)/); return m ? m[1].trim() : ''; }
+/** تاریخ قاطی (Date، ۹/۱۶/۲۰۲۶، ۱۴۰۵/۰۶/۳۱، ISO) ← yyyy-MM-dd یا '' */
+function abIso_(x) {
+  if (x === '' || x == null) return '';
+  if (!(x instanceof Date)) {
+    var s = tgLatinDigits_(String(x)).trim(), m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m && Number(m[3]) >= 1990) return m[3] + '-' + ('0' + m[1]).slice(-2) + '-' + ('0' + m[2]).slice(-2);
+  }
+  return tgLeadIso_(x);
+}
+/* ───── گارد سخت: فقط «فعال» (ستون B «درمانگران» تنها منبع) ───── */
+function abTherOk_(t) { return !!t && String(t.status || '').trim() === 'فعال'; }
+function abTherOkName_(name) {
+  if (lsDry_() && !TG_MEM['ab:ther']) return true;   /* آزمون‌های قدیمی بی فهرست درمانگر */
+  if (lsDry_()) return TG_MEM['ab:ther'].some(function (t) { return tgNorm_(t.name) === tgNorm_(name) && abTherOk_(t); });
+  try { var info = tgTherapistInfo_(); var t = info[String(name || '').trim()]; if (!t) { for (var k in info) if (tgNorm_(k) === tgNorm_(name)) { t = info[k]; break; } } return abTherOk_(t); } catch (e) { return false; }
+}
+
+/* ───── پنجرهٔ ساعت محلی مراجع («زمان مناسب») ───── */
+/* تصمیم یاسر: صبح ۹ تا ۱۲، بعدازظهر ۱۳ تا ۱۷، شب ۱۸ تا ۲۱، «هر وقت» ۱۰ تا ۲۰. دکمه‌های قدیمی بات: «ظهر» = بعدازظهر، «عصر» = ۱۶ تا ۲۰ */
+var AB_WIN = [[/صبح|morning/i, 9, 12], [/بعد ?از ?ظهر|ظهر|afternoon/i, 13, 17], [/عصر/, 16, 20], [/شب|evening|night/i, 18, 21], [/هر وقت|هر موقع|فرقی|any/i, 10, 20]];
+/** [ساعت شروع، ساعت پایان] به وقت خود مراجع، یا null */
+function abLocalWin_(best) {
+  var s = String(best || ''); if (!s.trim()) return null;
+  var lo = 24, hi = 0, hit = false;
+  AB_WIN.forEach(function (w) { if (w[0].test(s)) { hit = true; lo = Math.min(lo, w[1]); hi = Math.max(hi, w[2]); } });
+  if (!hit) { var n = s.match(/(\d{1,2})/); if (n) { var h = Number(tgLatinDigits_(n[1])); if (h >= 6 && h <= 23) return [h, Math.min(23, h + 3)]; } return null; }
+  return [lo, hi];
+}
+/** ساعت محلی یک لحظه در منطقهٔ زمانی (با تغییر ساعت تابستانی خود منطقه) */
+function abLocalHour_(ms, tz) { var d = new Date(ms); return Number(Utilities.formatDate(d, tz, 'H')) + Number(Utilities.formatDate(d, tz, 'm')) / 60; }
+function abSlotInWin_(s, tz, best) {
+  var w = abLocalWin_(best); if (!w || !tz) return false;
+  var h = abLocalHour_(tgSlotUtc_(s).getTime(), tz); return h >= w[0] && h < w[1];
+}
+
+/* ───── ترتیب ارجاع لید خارج ───── */
+/** نامزدها (با name) ← مرتب: مقیم همان کشور، وقت در پنجرهٔ مراجع، نرخ تبدیل خارج. ctx: {info, stats, slots} */
+function abRank_(cands, lead, ctx) {
+  var lz = abZoneOf_(lead.country) || abZoneOfTz_(lead.tz), tz = lead.tz || '';
+  var sc = cands.map(function (c) {
+    var t = (ctx.info || {})[c.name] || {}, st = (ctx.stats || {})[c.name] || {};
+    var tz2 = abZoneOf_(t.tz) || abZoneOf_(t.city);
+    var same = lz && lz !== 'x' && lz !== 'ir' && tz2 === lz ? 1 : 0;
+    var win = (ctx.slots || []).some(function (s) { return tgNorm_(s.therapist) === tgNorm_(c.name) && abSlotInWin_(s, tz, lead.best); }) ? 1 : 0;
+    var rate = st.sugAb ? st.introAb / st.sugAb : 0;
+    return { c: c, same: same, win: win, rate: rate };
+  });
+  sc.sort(function (a, b) { return (b.same - a.same) || (b.win - a.win) || (b.rate - a.rate) || (a.c.name < b.c.name ? -1 : 1); });
+  return sc.map(function (x) { x.c.why = [x.same ? 'مقیم همان کشور' : '', x.win ? 'وقت در زمان مناسب مراجع' : '', x.rate ? 'نرخ خارج ' + tgFa_(Math.round(100 * x.rate)) + '٪' : ''].filter(String).join('، '); return x.c; });
+}
+
+/* ───── مبنای ارجاع از دادهٔ واقعی ───── */
+/** leads: [{date, region, refs[], refDate, introTher, introDate, booked, started, status, closed}] ← {نام: آمار} */
+function abStats_(leads, nowMs, days) {
+  var from = Utilities.formatDate(new Date(nowMs - (days || AB_DAYS) * 86400000), TG_TZ, 'yyyy-MM-dd'), out = {};
+  var S = function (n) { n = String(n || '').trim(); if (!n) return null; if (!out[n]) out[n] = { sug: 0, intro: 0, start: 0, sugIn: 0, introIn: 0, startIn: 0, sugAb: 0, introAb: 0, startAb: 0, open: 0, last: '' }; return out[n]; };
+  leads.forEach(function (l) {
+    var ab = /خارج/.test(l.region || ''), when = l.refDate || l.date, seen = {};
+    (l.refs || []).forEach(function (n) {
+      var s = S(n); if (!s || seen[tgNorm_(n)]) return; seen[tgNorm_(n)] = 1;
+      if (!l.closed) s.open++;
+      if (l.refDate && l.refDate > s.last) s.last = l.refDate;
+      if (when && when >= from) { s.sug++; if (ab) s.sugAb++; else s.sugIn++; }
+    });
+    var t = S(l.introTher);
+    if (t) {
+      if (!l.closed && !seen[tgNorm_(l.introTher)]) t.open++;
+      var met = l.booked || l.introDate || [TG_ST.BOOKED, TG_ST.HELD, TG_ST.START].indexOf(l.status) > -1;
+      var w2 = l.introDate || when;
+      if (met && w2 && w2 >= from) { t.intro++; if (ab) t.introAb++; else t.introIn++; }
+      if ((l.started || l.status === TG_ST.START) && w2 && w2 >= from) { t.start++; if (ab) t.startAb++; else t.startIn++; }
+    }
+  });
+  return out;
+}
+/** کف اطمینان ۸۰٪ (ویلسون، کران پایین) */
+function abWilson_(k, n) { if (!n) return 0; var z = 1.2816, p = k / n, d = 1 + z * z / n; return Math.max(0, (p + z * z / (2 * n) - z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))) / d); }
+/** ردهٔ ارجاع با مبنای کل مرکز */
+function abTier_(s, base) {
+  if (!s || s.sug < 3) return 'داده کم، نیاز به تست';
+  if (abWilson_(s.intro, s.sug) >= base) return '۱ اول لیست';
+  if (s.intro / s.sug >= base) return '۲ گزینهٔ خوب';
+  return s.intro > 0 ? '۳ کم‌بازده' : '۴ تا الان صفر معارفه';
+}
+function abSuggest_(t, s, tier, near, base) {
+  var st = String(t.status || '').trim();
+  if (st !== 'فعال') return '⛔ ارجاع نده: وضعیت همکاری «' + (st || 'خالی') + '» است';
+  if (!near) return '⏳ وقت معارفهٔ آزاد ندارد؛ اول از او وقت بگیر';
+  if (s && s.open >= 6) return '🟠 بار زیاد: ' + tgFa_(s.open) + ' ارجاع باز؛ فقط با تناسب ویژه';
+  var r = tier.charAt(0);
+  if (r === '۱') return '⭐ اول لیست · نزدیک‌ترین وقت ' + tgFa_(near.slice(5));
+  if (r === '۲') return '✅ گزینهٔ خوب · نزدیک‌ترین وقت ' + tgFa_(near.slice(5));
+  if (r === '۳') return 'فقط با تناسب تخصصی · نرخ زیر مبنای مرکز (' + tgFa_(Math.round(100 * base)) + '٪)';
+  if (r === '۴') return '⚠ هنوز معارفه نگرفته؛ اول لیست نگذار';
+  return '🔬 داده کم: یک ارجاع برای سنجش' + (s && s.open ? ' · ' + tgFa_(s.open) + ' ارجاع باز' : '');
+}
+/** لیدها از «لیدها» به شکل abStats_ */
+function abLeadRows_() {
+  if (lsDry_()) return TG_MEM['ab:leads'] || [];
+  var sh = tgSS_().getSheetByName(TG_LEADS), last = sh ? sh.getLastRow() : 0; if (last < 2) return [];
+  var hm = tgLeadHeadMap_(sh), v = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
+  var g = function (r, h) { var i = hm[h]; return (i === undefined || i < 0 || i >= r.length) ? '' : r[i]; };
+  return v.map(function (r) {
+    var st = tgStOf_(String(g(r, 'وضعیت') || '').trim()) || String(g(r, 'وضعیت') || '').trim();
+    return { date: abIso_(r[0]), region: String(g(r, 'داخل یا خارج') || ''), refs: [g(r, 'درمانگر پیشنهادی ۱'), g(r, 'درمانگر پیشنهادی ۲'), g(r, 'درمانگر پیشنهادی ۳')].map(function (x) { return String(x || '').trim(); }).filter(String),
+      refDate: abIso_(g(r, 'تاریخ ارجاع')), introTher: String(g(r, 'درمانگر معارفه') || '').trim(), introDate: abIso_(g(r, 'تاریخ معارفه')),
+      booked: String(g(r, 'معارفه هماهنگ شد؟') || '').trim() === 'بله', started: /بله|شروع/.test(String(g(r, 'شروع درمان؟') || '')), status: st, closed: tgStClosed_(String(g(r, 'وضعیت') || '')) };
+  }).filter(function (l) { return l.date || l.refs.length; });
+}
+/** نزدیک‌ترین وقت آزاد هر درمانگر (yyyy-MM-dd HH:mm تهران) */
+function abNearest_(slots) {
+  var out = {}, now = lsNow_();
+  (slots || []).forEach(function (s) { if (tgSlotUtc_(s).getTime() <= now) return; var k = s.therapist, v = s.dateIso + ' ' + ('0' + s.hhmm).slice(-5); if (!out[k] || v < out[k]) out[k] = v; });
+  return out;
+}
+var AB_TH_COLS = ['پیشنهاد داخل', 'معارفه داخل', 'شروع داخل', 'پیشنهاد خارج', 'معارفه خارج', 'شروع خارج', 'نرخ معارفه خارج', 'بازهٔ آمار'];
+/** سطرهای «درمانگران» با همهٔ ستون‌های حساب‌شده؛ برای پیش‌نمایش و نوشتن */
+function abThRows_() {
+  var ther = lsDry_() ? (TG_MEM['ab:ther'] || []) : tgTherapistRows_();
+  var slots = lsDry_() ? (TG_MEM['ab:slots'] || []) : (function () { try { return tgFreeSlots_(''); } catch (e) { return []; } })();
+  var st = abStats_(abLeadRows_(), lsNow_(), AB_DAYS), near = abNearest_(slots);
+  var tot = Object.keys(st).reduce(function (a, k) { a.s += st[k].sug; a.i += st[k].intro; return a; }, { s: 0, i: 0 });
+  var base = tot.s ? tot.i / tot.s : 0.07;
+  var span = Utilities.formatDate(new Date(lsNow_() - AB_DAYS * 86400000), TG_TZ, 'yyyy-MM-dd') + ' تا ' + lsDay_();
+  return { base: base, tot: tot, span: span, rows: ther.map(function (t) {
+    var s = st[t.name] || null, tier = abTier_(s, base), nr = abTherOk_(t) ? (near[t.name] || '') : '';
+    var r = function (a, b) { return b ? Math.round(1000 * a / b) / 1000 : ''; };
+    return { name: t.name, row: t.row, status: t.status, sug: s ? s.sug : 0, intro: s ? s.intro : 0, rate: s ? r(s.intro, s.sug) : '', floor: s ? Math.round(1000 * abWilson_(s.intro, s.sug)) / 1000 : '',
+      tier: tier, near: nr, open: s ? s.open : 0, last: s && s.last ? s.last : '—', sys: abSuggest_(t, s, tier, nr, base), start: s ? s.start : 0, rate2: s ? r(s.start, s.intro) : '',
+      split: s ? [s.sugIn, s.introIn, s.startIn, s.sugAb, s.introAb, s.startAb, r(s.introAb, s.sugAb), span] : [0, 0, 0, 0, 0, 0, '', span] };
+  }) };
+}
+var AB_PV_TAB = 'مبنای ارجاع · پیش‌نمایش';
+var AB_FX_TAB = 'اصلاح دادهٔ لیدها · پیش‌نمایش';
+/** پیش‌نمایش مبنای ارجاع (بی نام مراجع؛ فقط درمانگر و عدد) */
+function abStatsPreview_() {
+  var R = abThRows_(), sum = 'مبنای مرکز ' + tgFa_(Math.round(1000 * R.base) / 10) + '٪ (' + tgFa_(R.tot.i) + ' معارفه از ' + tgFa_(R.tot.s) + ' پیشنهاد، ' + R.span + ')';
+  if (lsDry_()) { TG_MEM['ab:pv'] = R; return sum; }
+  var ss = tgSS_(), sh = ss.getSheetByName(AB_PV_TAB) || ss.insertSheet(AB_PV_TAB);
+  sh.clear(); sh.setRightToLeft(true);
+  sh.getRange(1, 1, 1, 3).setValues([['بررسی Cowork: بعد از بررسی، Cowork در B1 «اوکی» می‌نویسد تا هر روز در «درمانگران» نوشته شود', '', 'v170.23.21 · ' + sum]]).setFontWeight('bold');
+  var head = ['درمانگر', 'وضعیت', 'پیشنهاد', 'معارفه', 'نرخ معارفه', 'کف ۸۰٪', 'ردهٔ ارجاع', 'نزدیک‌ترین وقت', 'ارجاع باز الان', 'آخرین ارجاع', 'پیشنهاد سیستم', 'شروع تراپی', 'نرخ معارفه به شروع'].concat(AB_TH_COLS);
+  sh.getRange(2, 1, 1, head.length).setValues([head]).setFontWeight('bold').setBackground('#f5f5f8');
+  var vals = R.rows.map(function (x) { return [x.name, x.status, x.sug, x.intro, x.rate, x.floor, x.tier, x.near, x.open, x.last, x.sys, x.start, x.rate2].concat(x.split); });
+  if (vals.length) sh.getRange(3, 1, vals.length, head.length).setValues(vals);
+  return sum;
+}
+/** نوشتن در «درمانگران»: ستون‌های I تا R (جز N)، «شروع تراپی»، «نرخ معارفه به شروع» و ستون‌های داخل و خارج در انتها */
+function abStatsWrite_() {
+  var R = abThRows_();
+  if (lsDry_()) { TG_MEM['ab:written'] = R; return R.rows.length; }
+  var sh = tgSS_().getSheetByName(TG_THER), lc = sh.getLastColumn(), hd = sh.getRange(3, 1, 1, lc).getValues()[0].map(function (h) { return String(h).trim(); });
+  AB_TH_COLS.forEach(function (h) { if (hd.indexOf(h) < 0) { sh.getRange(3, hd.length + 1).setValue(h).setFontWeight('bold').setBackground('#dfdfe2'); hd.push(h); } });
+  var col = function (h) { return hd.indexOf(h) + 1; };
+  if (hd[8] !== 'پیشنهاد (۶۰ روز)') sh.getRange(3, 9).setValue('پیشنهاد (۶۰ روز)');
+  try { sh.getRange(2, 1).setValue('زرد = تو پر می‌کنی · خاکستری = خودکار، دست نزن · ستون‌های پیشنهاد، معارفه، نرخ، رده، نزدیک‌ترین وقت، ارجاع باز، پیشنهاد سیستم و شروع را بات هر روز از «لیدها» در پنجرهٔ ۶۰ روزه حساب می‌کند (' + R.span + '). مبنای کل مرکز: ' + tgFa_(Math.round(1000 * R.base) / 10) + '٪.'); } catch (e) {}
+  var by = {}; R.rows.forEach(function (x) { by[x.row] = x; });
+  var n = sh.getLastRow() - 3; if (n < 1) return 0;
+  var blockA = [], cS = col('شروع تراپی'), cR2 = col('نرخ معارفه به شروع'), split = [], st2 = [];
+  for (var i = 0; i < n; i++) {
+    var x = by[i + 4];
+    blockA.push(x ? [x.sug, x.intro, x.rate, x.floor, x.tier] : ['', '', '', '', '']);
+    split.push(x ? x.split : AB_TH_COLS.map(function () { return ''; }));
+    st2.push(x ? [x.near, x.open, x.last, x.sys] : ['', '', '', '']);
+  }
+  sh.getRange(4, 9, n, 5).setValues(blockA);                 /* I..M */
+  sh.getRange(4, 15, n, 4).setNumberFormat('@').setValues(st2);   /* O..R (N فرمول خودش می‌ماند) */
+  if (cS > 0) sh.getRange(4, cS, n, 1).setValues(blockA.map(function (_, i) { var x = by[i + 4]; return [x ? x.start : '']; }));
+  if (cR2 > 0) sh.getRange(4, cR2, n, 1).setValues(blockA.map(function (_, i) { var x = by[i + 4]; return [x ? x.rate2 : '']; }));
+  sh.getRange(4, col(AB_TH_COLS[0]), n, AB_TH_COLS.length).setValues(split);
+  try { CacheService.getScriptCache().remove('trows'); } catch (e2) {}
+  return n;
+}
+
+/* ───── اصلاح دادهٔ لیدها: داخل یا خارج، نوع لید درخواست زوج، تاریخ‌ها ───── */
+var AB_DATE_COLS = ['آخرین تماس', 'تاریخ ارجاع', 'تاریخ معارفه'];
+function abFixRows_() {
+  var src = lsDry_() ? (TG_MEM['ab:raw'] || { head: [], rows: [] }) : (function () {
+    var sh = tgSS_().getSheetByName(TG_LEADS), last = sh.getLastRow();
+    return { head: sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String), rows: last > 1 ? sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues() : [] };
+  })();
+  var hx = function (h) { return src.head.indexOf(h); }, out = [];
+  var iPh = hx('شماره / شناسه'), iRg = hx('داخل یا خارج'), iMemo = hx('یادداشت'), iCt = hx('کشور محل زندگی'), iTp = hx('نوع لید'), iSrc = hx('منبع'), iTx = hx('متن اولیه'), iKind = hx('نوع درخواست'), iCode = hx('کد لید');
+  src.rows.forEach(function (r, i) {
+    var row = i + 2, code = iCode > -1 ? String(r[iCode] || '') : '';
+    if (iRg > -1) {
+      var memo = iMemo > -1 ? r[iMemo] : '', ph = String(iPh > -1 ? r[iPh] : '');
+      var want = abRegion_(/^@/.test(ph) ? '' : ph, abTzFromNote_(memo), iCt > -1 ? r[iCt] : '');
+      var cur = String(r[iRg] || '').trim();
+      if (want && cur && want !== cur) out.push({ row: row, code: code, col: 'داخل یا خارج', from: cur, to: want, why: 'کشور، منطقهٔ زمانی یا پیش‌شماره' });
+    }
+    if (iTp > -1 && String(r[iTp] || '').trim() === LM_T.P) {
+      var guess = lmGuessType_(iSrc > -1 ? r[iSrc] : '', iTx > -1 ? r[iTx] : ''), kind = iKind > -1 ? String(r[iKind] || '') : '';
+      if (guess !== LM_T.P || /زوج/.test(kind)) out.push({ row: row, code: code, col: 'نوع لید', from: LM_T.P, to: LM_T.C, why: 'درخواست مراجع (زوج یا فردی)، نه پارتنر' });
+    }
+    AB_DATE_COLS.forEach(function (h) {
+      var j = hx(h); if (j < 0) return;
+      var v = r[j]; if (v === '' || v == null) return;
+      var iso = abIso_(v), raw = v instanceof Date ? 'Date' : String(v).trim();
+      if (iso && raw !== iso && !/^\d{4}-\d{2}-\d{2}( \d{1,2}:\d{2})?$/.test(raw)) out.push({ row: row, code: code, col: h, from: raw === 'Date' ? 'تاریخ خام' : raw, to: iso, why: 'یکدست ISO' });
+    });
+  });
+  return out;
+}
+function abFixPreview_() {
+  var rows = abFixRows_(), c = {}; rows.forEach(function (r) { c[r.col] = (c[r.col] || 0) + 1; });
+  var sum = 'اصلاح لیدها: ' + rows.length + ' (' + Object.keys(c).map(function (k) { return k + ' ' + c[k]; }).join('، ') + ')';
+  lsProp_('AB_FX_PREV', '1');
+  if (lsDry_()) { TG_MEM['ab:fx'] = rows; return sum; }
+  var ss = tgSS_(), sh = ss.getSheetByName(AB_FX_TAB) || ss.insertSheet(AB_FX_TAB);
+  sh.clear(); sh.setRightToLeft(true);
+  sh.getRange(1, 1, 1, 3).setValues([['بررسی Cowork: بعد از بررسی، Cowork در B1 «اوکی» می‌نویسد', '', 'v170.23.21 · ' + sum]]).setFontWeight('bold');
+  sh.getRange(2, 1, 1, 6).setValues([['کد لید', 'سطر', 'ستون', 'فعلی', 'درست', 'دلیل']]).setFontWeight('bold').setBackground('#f5f5f8');
+  if (rows.length) sh.getRange(3, 1, rows.length, 6).setNumberFormat('@').setValues(rows.map(function (r) { return [r.code, String(r.row), r.col, r.from, r.to, r.why]; }));
+  return sum;
+}
+function abOk_(tab, mem) {
+  if (lsDry_()) return TG_MEM[mem] === 'اوکی';
+  var sh = tgSS_().getSheetByName(tab); return !!sh && String(sh.getRange(1, 2).getValue() || '').trim() === 'اوکی';
+}
+function abFixApply_() {
+  var n = 0, sh = lsDry_() ? null : tgSS_().getSheetByName(TG_LEADS);
+  abFixRows_().forEach(function (r) {   /* دوباره از خود سطر حساب می‌شود؛ سطر جابه‌جاشده الگو نمی‌خورد */
+    if (lsDry_()) { (TG_MEM['ab:applied'] = TG_MEM['ab:applied'] || []).push(r); n++; return; }
+    var c = tgLeadCol_(r.col); if (!c) return;
+    var cell = sh.getRange(r.row, c); if (AB_DATE_COLS.indexOf(r.col) > -1) cell.setNumberFormat('@'); cell.setValue(r.to); n++;
+  });
+  if (!lsDry_()) { try { tgSS_().getSheetByName(AB_FX_TAB).getRange(1, 2).setValue('اعمال شد ' + Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm') + ' · ' + n); } catch (e) {} }
+  return n;
+}
+/** قدم سبک واچ‌داگ، روزی یک بار از ۶ صبح: پیش‌نمایش‌ها، اعمال با «اوکی»، و نوشتن روزانهٔ مبنای ارجاع */
+function abDailyMaybe_() {
+  var h = lsHour_(), day = lsDay_(); if (h < 6) return 0;
+  var did = 0;
+  if (lsProp_('AB_FX_DONE') !== '1') {
+    if (lsProp_('AB_FX_PREV') !== '1') { abFixPreview_(); did++; }
+    else if (abOk_(AB_FX_TAB, 'ab:fxok')) { lsProp_('AB_FX_DONE', '1'); abFixApply_(); did++; }
+  }
+  if (lsProp_('AB_ST_DAY') === day) return did;
+  lsProp_('AB_ST_DAY', day);
+  if (lsProp_('AB_ST_ON') === '1' || abOk_(AB_PV_TAB, 'ab:pvok')) { lsProp_('AB_ST_ON', '1'); abStatsWrite_(); }
+  else abStatsPreview_();
+  return did + 1;
+}
+
+/* ───── آزمون: مسیر لیدهای خارج، بخش الف (v170.23.21) ───── */
+function abTests() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, lead: TG_DRY_LEAD, by: tgLeadByCode_, info: tgTherapistInfo_ };
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = { 'ls:now': new Date('2026-10-08T10:00:00+03:30').getTime() };
+  try {
+    /* الف۵: داخل یا خارج */
+    ok('شمارهٔ +۹۸ بی کشور و منطقه: داخل', abRegion_('+989121112233', '', '') === 'داخل ایران');   // pii:ok ساختگی
+    ok('کشور افغانستان با شمارهٔ محلی: خارج', abRegion_('0791112233', '', 'افغانستان') === 'خارج از ایران');   // pii:ok ساختگی
+    ok('منطقهٔ زمانی برلین با شمارهٔ ایران: خارج', abRegion_('09121112233', 'Europe/Berlin', '') === 'خارج از ایران');   // pii:ok ساختگی
+    ok('کشور ایران از منطقهٔ زمانی مهم‌تر است', abRegion_('', 'Europe/London', 'ایران') === 'داخل ایران');
+    ok('chat_id شماره نیست (روی کد قبلی «خارج» بود)', tgRegion_('5367159854') === '' && tgRegion_('+491701112233') === 'خارج از ایران');   // pii:ok ساختگی
+    ok('منطقه و زمان مناسب از یادداشت قدیمی', abTzFromNote_('زمان مناسب: هر وقت · Europe/Berlin') === 'Europe/Berlin' && abBestFromNote_('زمان مناسب: هر وقت · Europe/Berlin') === 'هر وقت');
+    /* الف۶: تاریخ و نوع لید */
+    ok('تاریخ‌های قاطی ISO می‌شوند', abIso_('9/16/2026') === '2026-09-16' && abIso_('1405/06/31') === '2026-09-22' && abIso_(new Date('2026-10-03T10:00:00Z')) === '2026-10-03' && abIso_('2026-10-01') === '2026-10-01');
+    ok('درخواست زوج با «پارتنرم» مراجع است، نه پارتنر', lmGuessType_('سایت › پذیرش › تراپی فارسی', 'زوج‌درمانی با پارتنرم') === LM_T.C && lmGuessType_('سایت › پارتنر › فضا', 'اتاق می‌خواهم') === LM_T.P);
+    /* ب۸: صف ارسال با chat_id عددی */
+    ok('صف ارسال: چند chat_id عددی با کاما', JSON.stringify(soResolve_('368181539,5367159854, 1369595367')) === JSON.stringify(['368181539', '5367159854', '1369595367']));   // pii:ok ساختگی
+    /* الف۳: گارد سخت */
+    TG_MEM['ab:ther'] = [{ name: 'درمانگر الف', status: 'فعال', row: 4 }, { name: 'درمانگر ب', status: 'پایان همکاری', row: 5 }, { name: 'درمانگر ج', status: 'نامعلوم', row: 6 }];
+    ok('فقط «فعال»', abTherOkName_('درمانگر الف') && !abTherOkName_('درمانگر ب') && !abTherOkName_('درمانگر ج') && !abTherOkName_('ناشناس'));
+    TG_DRY_LEAD = { row: 9, code: 'L-9', name: 'مراجع نمونه' }; tgLeadByCode_ = function () { return 9; }; TG_OUTBOX = [];
+    tgReferSend_('801', 'L-9', 'درمانگر ج', '', true);
+    ok('ارجاع به غیرفعال حتی با «بفرست» انجام نمی‌شود', TG_OUTBOX.length === 1 && /⛔/.test(TG_OUTBOX[0].text), JSON.stringify(TG_OUTBOX));
+    /* الف۴: استخر خارج سخت */
+    TG_MEM['poolmap'] = {}; TG_MEM['poolmap'][tgNorm_('درمانگر الف')] = { ind: 2, abroad: true }; TG_MEM['poolmap'][tgNorm_('درمانگر د')] = { ind: 2 }; TG_MEM['poolmap'][tgNorm_('درمانگر ه')] = { ind: 2 };
+    var sl = [{ therapist: 'درمانگر الف', dateIso: '2026-10-10', hhmm: '20:00' }, { therapist: 'درمانگر د', dateIso: '2026-10-10', hhmm: '10:00' }, { therapist: 'درمانگر ه', dateIso: '2026-10-11', hhmm: '10:00' }];
+    var f = tgPoolFilter_(sl, null, { topic: 'anx', abroad: true });
+    ok('لید خارج فقط از استخر خارج، حتی وقتی یک نفر می‌ماند (قبلاً همه)', f.length === 1 && f[0].therapist === 'درمانگر الف', JSON.stringify(f));
+    /* پنجرهٔ مراجع و تغییر ساعت */
+    ok('ساعت ۲۰ تهران در مهر برای برلین ۱۸:۳۰ است (تابستانی)، در «شب»', abSlotInWin_(sl[0], 'Europe/Berlin', 'شب'));
+    ok('همان ساعت در دی برای برلین ۱۷:۳۰ است، بیرون از «شب»', !abSlotInWin_({ therapist: 'x', dateIso: '2026-12-26', hhmm: '20:00' }, 'Europe/Berlin', 'شب'));
+    var R = abRank_([{ name: 'درمانگر الف' }, { name: 'درمانگر د' }, { name: 'درمانگر ه' }], { country: 'آلمان', tz: 'Europe/Berlin', best: 'شب' },
+      { info: { 'درمانگر ه': { tz: '🇩🇪 آلمان و اروپای مرکزی' }, 'درمانگر الف': {}, 'درمانگر د': {} }, stats: { 'درمانگر د': { sugAb: 4, introAb: 2 } }, slots: sl });
+    ok('ترتیب خارج: مقیم همان کشور، بعد وقت در زمان مناسب، بعد نرخ خارج', R.map(function (x) { return x.name; }).join('|') === 'درمانگر ه|درمانگر الف|درمانگر د', R.map(function (x) { return x.name; }).join('|'));
+    /* الف۱: آمار ۶۰ روزه */
+    var L = [{ date: '2026-09-20', region: 'خارج از ایران', refs: ['درمانگر الف', 'درمانگر د'], refDate: '2026-09-20', introTher: 'درمانگر الف', introDate: '2026-09-25', booked: true, started: true, status: TG_ST.START, closed: false },
+             { date: '2026-09-21', region: 'داخل ایران', refs: ['درمانگر الف'], refDate: '2026-09-21', introTher: '', introDate: '', booked: false, started: false, status: TG_ST.REF, closed: false },
+             { date: '2026-07-01', region: 'داخل ایران', refs: ['درمانگر الف'], refDate: '2026-07-01', introTher: 'درمانگر الف', introDate: '2026-07-03', booked: true, started: false, status: TG_ST.HELD, closed: true }];
+    var st = abStats_(L, TG_MEM['ls:now'], 60), a = st['درمانگر الف'];
+    ok('پیشنهاد، معارفه و شروع در ۶۰ روز، جدا داخل و خارج', a.sug === 2 && a.intro === 1 && a.start === 1 && a.sugAb === 1 && a.sugIn === 1 && a.introAb === 1 && a.startAb === 1, JSON.stringify(a));
+    ok('ارجاع باز الان و آخرین ارجاع', a.open === 2 && a.last === '2026-09-21', JSON.stringify(a));
+    ok('رده: داده کم زیر ۳ پیشنهاد؛ با داده، کف ۸۰٪ با مبنا', /داده کم/.test(abTier_(a, 0.07)) && abTier_({ sug: 10, intro: 5 }, 0.07).charAt(0) === '۱' && abTier_({ sug: 20, intro: 0 }, 0.07).charAt(0) === '۴');
+    ok('پیشنهاد سیستم: غیرفعال و بی‌وقت', /⛔/.test(abSuggest_({ status: 'نامعلوم' }, a, '۱', '2026-10-10 20:00', 0.07)) && /وقت معارفهٔ آزاد ندارد/.test(abSuggest_({ status: 'فعال' }, a, '۱', '', 0.07)) && /⭐/.test(abSuggest_({ status: 'فعال' }, a, '۱ اول', '2026-10-10 20:00', 0.07)));
+    /* الف۱ و ۲: پیش‌نمایش، «اوکی»، نوشتن */
+    TG_MEM['ab:leads'] = L; TG_MEM['ab:slots'] = sl.concat([{ therapist: 'درمانگر ج', dateIso: '2026-10-09', hhmm: '10:00' }]);
+    var R2 = abThRows_(), rj = R2.rows.filter(function (x) { return x.name === 'درمانگر ج'; })[0], ra = R2.rows.filter(function (x) { return x.name === 'درمانگر الف'; })[0];
+    ok('نزدیک‌ترین وقت تاریخ واقعی است (نه ۱۸۹۹) و برای غیرفعال خالی', ra.near === '2026-10-10 20:00' && rj.near === '' && /⛔/.test(rj.sys), JSON.stringify([ra.near, rj.near]));
+    ok('روز اول فقط پیش‌نمایش؛ بعد از «اوکی» نوشتن', abDailyMaybe_() >= 1 && !!TG_MEM['ab:pv'] && !TG_MEM['ab:written']);
+    TG_MEM['ab:pvok'] = 'اوکی'; TG_MEM['lsp:AB_ST_DAY'] = '';
+    abDailyMaybe_();
+    ok('با «اوکی» در «درمانگران» نوشته شد', !!TG_MEM['ab:written'] && TG_MEM['lsp:AB_ST_ON'] === '1');
+    /* الف۵ و ۶: اصلاح داده با پیش‌نمایش */
+    TG_MEM['ab:raw'] = { head: ['تاریخ', 'شماره / شناسه', 'داخل یا خارج', 'یادداشت', 'کشور محل زندگی', 'نوع لید', 'منبع', 'متن اولیه', 'نوع درخواست', 'کد لید', 'آخرین تماس', 'تاریخ ارجاع'],
+      rows: [['2026-10-01', "'+989121112233", 'خارج از ایران', 'chat_id: 1', '', LM_T.C, 'Telegram bot', '', '', 'L-1', '9/16/2026', '1405/06/31'],   // pii:ok ساختگی
+             ['2026-10-02', "'0791112233", 'داخل ایران', '', 'افغانستان', LM_T.C, 'سایت', '', '', 'L-2', '2026-10-02', ''],   // pii:ok ساختگی
+             ['2026-10-03', "'+491701112233", 'خارج از ایران', '', '', LM_T.P, 'سایت › پذیرش › تراپی فارسی', 'زوج‌درمانی', 'زوج‌درمانی', 'L-3', '', '']] };   // pii:ok ساختگی
+    var fx = abFixRows_(), has = function (code, col, to) { return fx.some(function (r) { return r.code === code && r.col === col && r.to === to; }); };
+    ok('اصلاح: +۹۸ داخل، افغانستان خارج، زوج مراجع، تاریخ ISO', has('L-1', 'داخل یا خارج', 'داخل ایران') && has('L-2', 'داخل یا خارج', 'خارج از ایران') && has('L-3', 'نوع لید', LM_T.C) &&
+      has('L-1', 'آخرین تماس', '2026-09-16') && has('L-1', 'تاریخ ارجاع', '2026-09-22') && !fx.some(function (r) { return r.code === 'L-2' && r.col === 'آخرین تماس'; }), JSON.stringify(fx));
+    ok('اصلاح فقط بعد از «اوکی»', !(TG_MEM['ab:applied'] || []).length);
+    TG_MEM['ab:fxok'] = 'اوکی'; TG_MEM['lsp:AB_ST_DAY'] = lsDay_(); abDailyMaybe_();
+    ok('با «اوکی» یک بار اعمال شد', (TG_MEM['ab:applied'] || []).length === fx.length && TG_MEM['lsp:AB_FX_DONE'] === '1');
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_DRY_LEAD = keep.lead; tgLeadByCode_ = keep.by; tgTherapistInfo_ = keep.info; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'abTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['لیدهای خارج · مبنای ارجاع و داده (v170.23.21)', 'abTests']); } catch (eAb) {}
