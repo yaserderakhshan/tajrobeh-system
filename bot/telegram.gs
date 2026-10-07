@@ -5271,6 +5271,7 @@ function tgAppendLead_(o, isRetry) {
     });
     const mm = String(o.note || '').match(/chat_id: (\d+)/);
     if (mm) CacheService.getScriptCache().remove('lr' + mm[1]);
+    try { bgLeadMark_(); } catch (eBg) {}   /* v170.23.12.5: نشانگر سبک برای tgDutyTick */
     return row || true;
   } catch (e) {
     tgErr_('tgAppendLead_: ' + e);
@@ -6894,60 +6895,66 @@ function tgWatchdog(e) {
       tgRelayPing_(r.url);
     } else if (!hasPoll) tgUsePolling();
   } catch (e) { tgErr_('tgWatchdog: ' + e); }
-  /* v169.1: کارهای هفتگی و ساعتی که تریگر جدا داشتند. اگر کار هفتگی سنگین (tgTherWeekly، تا ۲۶۶ ثانیه) همین ساعت رفت،
-     بقیهٔ کارهای این ساعت به ساعت بعد می‌رود تا اجرای واچ‌داگ از سقف ۶ دقیقه نگذرد. */
-  try { if (typeof v1691Hourly_ === 'function') v1691Hourly_(e); } catch (eH) { tgErr_('v1691Hourly_', eH); }
-  try { if (typeof ebiHourly_ === 'function') ebiHourly_(); } catch (eEb) { tgErr_('ebiHourly_', eEb); }
-  try { if (typeof aiRetryTick_ === 'function') aiRetryTick_(); } catch (eAr) { tgErr_('aiRetryTick_', eAr); }   /* v170.23.7: ویس‌های بی‌متن */
-  try { if (typeof ktbHourly_ === 'function') ktbHourly_(); } catch (eKt) { tgErr_('ktbHourly_', eKt); }
-  try { if (typeof migSetupTick_ === 'function') migSetupTick_(); } catch (eMs) { tgErr_('migSetupTick_', eMs); }
-  try { if (typeof migTick_ === 'function') migTick_(); } catch (eMg) { tgErr_('migTick_', eMg); }   /* v170.23.6.3: یادآوری، گزارش ۲۱ و پرسش موج مهاجرت */   /* v170.23.5: کارتابل یاسر (تلاش دوباره، رزومهٔ سبک، یادآوری ۹) */
-  try { if (typeof ps2FixMaybe_ === 'function') ps2FixMaybe_(); } catch (eP2) { tgErr_('ps2FixMaybe_', eP2); }
-  try { if (typeof ps3Tick_ === 'function') ps3Tick_(); } catch (eP3) { tgErr_('ps3Tick_', eP3); }   /* v170.23.9: یادآوری ویزیت و فرم بعد از ویزیت */
-  try { if (typeof ktbRouteMaybe_ === 'function') ktbRouteMaybe_(); } catch (eKr) { tgErr_('ktbRouteMaybe_', eKr); }   /* v170.16: کمپین C-004 */
-  try { if (typeof v1691Weekly_ === 'function' && v1691Weekly_(e)) return; } catch (eW) { tgErr_('v1691Weekly_', eW); }
-  // ستون‌های تاریخ شمسی خودشان پر می‌شوند؛ کسی نباید دستی اجرا کند
-  try { tgFillJalali_(false); } catch (e) { tgErr_('tgFillJalali_: ' + e); }
-  try { tgErrDigest_(); } catch (eEd) {}
-  try { tgQueueFlush_(); } catch (eQf) {}
-  /* v168 فاز ۲: لید باز بی اقدام بعدی (فرم سایت و هر جای دیگر)، ساعتی یک بار */
-  /* v168.10 (سهمیه، تأیید یاسر): جاروهای v168 هر سه ساعت، نه هر ساعت (v16810SweepDue_ با Script Property، نه کش) */
-  try { if (typeof v168NextSweep_ === 'function') { if (v16810SweepDue_()) { v168NextSweep_(40);
-    /* v168 فاز ۵: پیشنهاد خودکار درمانگر و بازسازی ماهانهٔ I و J */
-    try { if (typeof v168SuggestSweep_ === 'function') v168SuggestSweep_(15); } catch (eSg) { tgErr_('v168SuggestSweep_', eSg); }
-    try { if (typeof v168MonthlyStats_ === 'function') v168MonthlyStats_(); } catch (eMs) { tgErr_('v168MonthlyStats_', eMs); }
-    try { if (typeof v168InpSla_ === 'function') v168InpSla_(); } catch (eIs) { tgErr_('v168InpSla_', eIs); }
-    try { if (typeof v168MonthTick_ === 'function') v168MonthTick_(); } catch (eMc) { tgErr_('tgMonthClose', eMc); } } } } catch (eNs) { tgErr_('v168NextSweep_', eNs); }
-  try { tgSessRemindTick_(); } catch (eSr) {}
-  try { if (typeof rvDeadlineTick_ === 'function') rvDeadlineTick_(); } catch (eRv) { tgErr_('rvDeadlineTick_', eRv); }   /* v169: مهلت بازبینی */
-  try { if (typeof dqHourly_ === 'function') dqHourly_(); } catch (eDq) { tgErr_('dqHourly_', eDq); }   /* v170: پیگیری صف ارسال و وضعیت تیکت */
-  try { if (typeof opsHourly_ === 'function') opsHourly_(); } catch (eOp) { tgErr_('opsHourly_', eOp); }   /* v169.2: کار امروز ۹:۰۰، ارجاع، تازه‌کردن هاب‌ها */
-  try { if (typeof stkHourly_ === 'function') stkHourly_(); } catch (eSk) { tgErr_('stkHourly_', eSk); }   /* v170.2: اسکن درخواست‌های متوقف و خلاصهٔ ۹ صبح */
-  try { if (typeof cfgHourly_ === 'function') cfgHourly_(); } catch (eCf) { tgErr_('cfgHourly_', eCf); }   /* v170.8: تب «تنظیمات تیم» ← Script Property TG_CFG */
-  try { if (typeof splHourly_ === 'function') splHourly_(); } catch (eSp) { tgErr_('splHourly_', eSp); }   /* v170.23.3: صف تلاش دوبارهٔ انتشار سایت و آشتی شبانه */
-  try { if (Number(Utilities.formatDate(new Date(), TG_TZ, 'm')) < 10) tgApMirror_(); } catch (eAm) {}
-  try { tgWeeklyConfirmTick_(); } catch (eWc) {}
-  try { tgAssignTick_(); } catch (eAs) {}
-  try { tgTkSla_(); } catch (eTk) {}
-  try { tgBugNotify_(); } catch (eBg) {}
-  try { tgSlaTick_(); } catch (e) { tgErr_('sla: ' + e); }
-  try { tgMeetRemindTick_(); } catch (eMr) { tgErr_('remind: ' + eMr); }
-  try { tgFollowTick_(); } catch (eF) { tgErr_('follow: ' + eF); }
-  try { tgFeedTick_(); } catch (eFd) { tgErr_('feed: ' + eFd); }
-  try { tgMagTick_(); } catch (eMz) { tgErr_('mag: ' + eMz); }
-  try { if (typeof mcTick_ === 'function') mcTick_(); } catch (eMc) { tgErr_('magcontrib: ' + eMc); }
-  try { tgRmTick_(); } catch (eRm) { tgErr_('rm: ' + eRm); }
-  try { tgRmChTick_(); } catch (eRmCh) { tgErr_('rmch: ' + eRmCh); }
-  try { tgEvFlush_(); } catch (eEvF) { tgErr_('ev: ' + eEvF); }
-  try { tgEvAfterTick_(); } catch (eEa) { tgErr_('evafter: ' + eEa); }
-  try { tgRmStatTick_(); } catch (eRs) { tgErr_('rmstat: ' + eRs); }
-  try { tgClsTick_(); } catch (eCl) { tgErr_('cls: ' + eCl); }
-  try { tgCrmTick_(); } catch (eCrm) { tgErr_('crm: ' + eCrm); }
-  try { tgInpTick_(); } catch (eIp) { tgErr_('inp: ' + eIp); }
-  try { tgPrTick_(); } catch (ePr) { tgErr_('pr: ' + ePr); }
-  try { tgSchDailyTick_(); } catch (eSd) { tgErr_('schdaily: ' + eSd); }
-  try { tgStatTick_(); } catch (eSt) { tgErr_('stat: ' + eSt); }
-  } finally { tgRunStat_('tgWatchdog', rs0); }
+  /* v170.23.12.5 (سهمیهٔ اجرا، bg* ته v168.gs): هر قدم رده و زمان جدا دارد (RSW:<روز>). واجب‌ها هر ساعت؛ سبک‌ها هر ساعت مگر
+     مصرف امروز از ۷۵ دقیقه گذشته باشد؛ سنگین‌ها فقط در BG_HEAVY_HOURS و تا ۵۵ دقیقه. پیش از این همه هر ساعت می‌رفتند
+     (۲۲ اجرا، ۴۹ دقیقه در روز، تا ۳۰۵ ثانیه هر بار). */
+  var S = bgStep_;
+  var heavyHour = BG_HEAVY_HOURS.indexOf(bgHour_()) > -1;
+  /* واجب: یادآوری معارفه و جلسه، صف ارسال */
+  S('tgQueueFlush_', 'must', tgQueueFlush_);
+  S('tgMeetRemindTick_', 'must', tgMeetRemindTick_);
+  S('tgSessRemindTick_', 'must', tgSessRemindTick_);
+  S('ps3Tick_', 'must', typeof ps3Tick_ === 'function' ? ps3Tick_ : null);   /* v170.23.9: یادآوری ویزیت و فرم بعد از ویزیت */
+  S('dqHourly_', 'must', typeof dqHourly_ === 'function' ? dqHourly_ : null);   /* v170: پیگیری صف ارسال و وضعیت تیکت */
+  S('tgEvFlush_', 'must', tgEvFlush_);   /* بافر رویدادها در کش فقط ۱۷۰ دقیقه می‌ماند */
+  /* سبک */
+  S('cfgHourly_', 'light', typeof cfgHourly_ === 'function' ? cfgHourly_ : null);   /* v170.8: تب «تنظیمات خصوصی بات» ← TG_CFG */
+  S('v1691Hourly_', 'light', typeof v1691Hourly_ === 'function' ? function () { return v1691Hourly_(e); } : null);
+  S('ebiHourly_', 'light', typeof ebiHourly_ === 'function' ? ebiHourly_ : null);
+  S('aiRetryTick_', 'light', typeof aiRetryTick_ === 'function' ? aiRetryTick_ : null);   /* v170.23.7: ویس‌های بی‌متن */
+  S('ktbHourly_', 'light', typeof ktbHourly_ === 'function' ? ktbHourly_ : null);
+  S('migSetupTick_', 'light', typeof migSetupTick_ === 'function' ? migSetupTick_ : null);   /* با MIG_ENABLED خاموش بی‌کار */
+  S('migTick_', 'light', typeof migTick_ === 'function' ? migTick_ : null);
+  S('ps2FixMaybe_', 'light', typeof ps2FixMaybe_ === 'function' ? ps2FixMaybe_ : null);
+  S('ktbRouteMaybe_', 'light', typeof ktbRouteMaybe_ === 'function' ? ktbRouteMaybe_ : null);   /* v170.16: کمپین C-004 */
+  S('tgErrDigest_', 'light', tgErrDigest_);
+  S('rvDeadlineTick_', 'light', typeof rvDeadlineTick_ === 'function' ? rvDeadlineTick_ : null);   /* v169: مهلت بازبینی */
+  S('opsHourly_', 'light', typeof opsHourly_ === 'function' ? opsHourly_ : null);   /* v169.2: کار امروز ۹:۰۰، ارجاع، تازه‌کردن هاب‌ها */
+  S('stkHourly_', 'light', typeof stkHourly_ === 'function' ? stkHourly_ : null);   /* v170.2: درخواست‌های متوقف و خلاصهٔ ۹ صبح */
+  S('splHourly_', 'light', typeof splHourly_ === 'function' ? splHourly_ : null);   /* v170.23.3: صف تلاش دوبارهٔ انتشار سایت و آشتی ۳ بامداد */
+  S('tgWeeklyConfirmTick_', 'light', tgWeeklyConfirmTick_);
+  S('tgAssignTick_', 'light', tgAssignTick_);
+  S('tgTkSla_', 'light', tgTkSla_);
+  S('tgBugNotify_', 'light', tgBugNotify_);
+  S('tgSlaTick_', 'light', tgSlaTick_);
+  S('tgFollowTick_', 'light', tgFollowTick_);
+  /* سنگین: فقط ساعت‌های BG_HEAVY_HOURS */
+  if (heavyHour) {
+    /* v169.1: اگر کار هفتگی سنگین (tgTherWeekly، تا ۲۶۶ ثانیه) همین ساعت رفت، بقیهٔ سنگین‌ها به نوبت بعد می‌رود */
+    if (S('v1691Weekly_', 'heavy', typeof v1691Weekly_ === 'function' ? function () { return v1691Weekly_(e) ? 'heavy' : false; } : null) === 'heavy') return;
+    S('tgFillJalali_', 'heavy', function () { tgFillJalali_(false); });
+    /* v168.10: جاروهای v168 هر سه ساعت (v16810SweepDue_) */
+    S('v168Sweeps_', 'heavy', typeof v168NextSweep_ === 'function' ? function () { if (!v16810SweepDue_()) return; v168NextSweep_(40);
+      try { if (typeof v168SuggestSweep_ === 'function') v168SuggestSweep_(15); } catch (eSg) { tgErr_('v168SuggestSweep_', eSg); }
+      try { if (typeof v168MonthlyStats_ === 'function') v168MonthlyStats_(); } catch (eMs) { tgErr_('v168MonthlyStats_', eMs); }
+      try { if (typeof v168InpSla_ === 'function') v168InpSla_(); } catch (eIs) { tgErr_('v168InpSla_', eIs); }
+      try { if (typeof v168MonthTick_ === 'function') v168MonthTick_(); } catch (eMc) { tgErr_('tgMonthClose', eMc); } } : null);
+    S('tgApMirror_', 'heavy', function () { if (Number(Utilities.formatDate(new Date(), TG_TZ, 'm')) < 10) tgApMirror_(); });
+    S('tgFeedTick_', 'heavy', tgFeedTick_);
+    S('tgMagTick_', 'heavy', tgMagTick_);
+    S('mcTick_', 'heavy', typeof mcTick_ === 'function' ? mcTick_ : null);
+    S('tgRmTick_', 'heavy', tgRmTick_);
+    S('tgRmChTick_', 'heavy', tgRmChTick_);
+    S('tgEvAfterTick_', 'heavy', tgEvAfterTick_);
+    S('tgRmStatTick_', 'heavy', tgRmStatTick_);
+    S('tgClsTick_', 'heavy', tgClsTick_);
+    S('tgCrmTick_', 'heavy', tgCrmTick_);
+    S('tgInpTick_', 'heavy', tgInpTick_);
+    S('tgPrTick_', 'heavy', tgPrTick_);
+    S('tgSchDailyTick_', 'heavy', tgSchDailyTick_);
+    S('tgStatTick_', 'heavy', tgStatTick_);
+  }
+  } finally { bgFlush_(); tgRunStat_('tgWatchdog', rs0); }
 }
 
 /* v166.29.1: رلهٔ کلادفلر به تلگرام همیشه فوری «ok» می‌دهد و بعد آپدیت را به Apps Script می‌فرستد؛ پس getWebhookInfo
@@ -22340,6 +22347,7 @@ function tgOnEdit_(e) {
     const sh = e.range.getSheet();
     if (sh && typeof TG_APM_TAB !== 'undefined' && sh.getName() === TG_APM_TAB) { tgApmEdited_(e); return; }   /* v162 */
     if (!sh || sh.getName() !== TG_LEADS) return;
+    try { bgLeadMark_(); } catch (eBg) {}   /* v170.23.12.5: سطر دستی پذیرش هم tgDutyTick را بیدار می‌کند */
     const row = e.range.getRow();
     const nRows = e.range.getNumRows();
     if (row < 2 || nRows > 20) return;
@@ -23616,6 +23624,7 @@ function tgMtAskStart_(r) {
 // تیک زمان‌دار
 function tgMeetTick(e) {
   if (ciPaused_(e, 'tgMeetTick', 'skip')) return;
+  if (!TG_DRY && !bgOk_('light', 'tgMeetTick')) { bgFlush_(); return 0; }   /* v170.23.12.5: پرسش بعد از معارفه، زیر سقف ۷۵ دقیقه (یادآوری پیش از جلسه در tgWatchdog واجب است) */
   var rs0 = Date.now(); try {   /* v166.18: سنجش زمان اجرا (بدنه بی‌تغییر) */
   if (TG_DRY) return 0;
   var asked = 0, t0 = Date.now();
@@ -31742,10 +31751,14 @@ function tgDutyTick(e) {
   if (ciPaused_(e, 'tgDutyTick', 'skip')) return;
   var rs0 = Date.now(); try {   /* v166.18: سنجش زمان اجرا (بدنه بی‌تغییر) */
   if (TG_DRY) return 'dry';
+  /* v170.23.12.5 (سهمیهٔ اجرا): فقط ۸ تا ۲۴ تهران، و بی لید تازه (نشانگر BG_LEAD_AT) یا کار موعددار، بی خواندن شیت */
+  var plan = bgDutyPlan_();
+  if (!plan.run) { try { tgLeadRetry_(); } catch (eR0) { tgErr_('tgLeadRetry_', eR0); } return plan.why; }
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(3000)) return 'busy';
   TG_LOCK_HELD = true;
-  try { try { tgLeadRetry_(); } catch (eR) { tgErr_('tgLeadRetry_', eR); } return tgDutyRun_(new Date()); } finally { TG_LOCK_HELD = false; lock.releaseLock(); }
+  var t0 = bgNow_();
+  try { try { tgLeadRetry_(); } catch (eR) { tgErr_('tgLeadRetry_', eR); } var out = tgDutyRun_(new Date()); bgDutyDone_(t0); return out; } finally { TG_LOCK_HELD = false; lock.releaseLock(); }
   } finally { tgRunStat_('tgDutyTick', rs0); }
 }
 /* v166.10: لیدها با «کد لید» دنبال می‌شوند، نه شمارهٔ سطر. پیش از این «آخرین سطر دیده‌شده» نگه داشته می‌شد و هر حذف
@@ -31755,7 +31768,7 @@ function tgDutyTick(e) {
    کد می‌گیرد و با همان کد پیگیری می‌شود. */
 /* v166.10: صدازننده‌ای که قفل اسکریپت را دارد این را true می‌کند تا tgLeadCode_ قفل او را رها نکند */
 var TG_LOCK_HELD = false;
-var TG_DUTY_SCAN = 80;
+var TG_DUTY_SCAN = 40;   /* v170.23.12.5: ۴۰ سطر آخر یک‌جا (لید یک روز کمتر از این است) */
 var TG_DUTY_NEW_MIN = 24 * 60;
 var TG_DUTY_SEEN_MAX = 400;
 function tgDutyAge_(d0, t0, now) {
@@ -31790,11 +31803,13 @@ function tgDutyRun_(now) {
   }).filter(function (x) { return x.k; });
 
   /* لیدهای تازه */
+  var codeRow = {};
   if (last >= 2) {
     var from = Math.max(2, last - TG_DUTY_SCAN + 1), w0 = Math.max(codeCol, 6);
     var block = sh.getRange(from, 1, last - from + 1, w0).getValues();
     for (var j = 0; j < block.length; j++) {
       var v = block[j], row = from + j;
+      var cj = String(v[codeCol - 1] || '').trim(); if (cj) codeRow[cj] = row;   /* v170.23.12.5: سطر لیدهای در انتظار از همین بلوک */
       if (!(String(v[3] || '').trim() || String(v[5] || '').trim())) continue;
       var fp = tgDutyFp_(v), code = String(v[codeCol - 1] || '').trim();
       if ((code && seen[code]) || seen[fp]) continue;
@@ -31810,7 +31825,7 @@ function tgDutyRun_(now) {
   var keep = [], sent = 0;
   var boss = tgDutyBoss_();
   for (var i = 0; i < pend.length; i++) {
-    var x = pend[i], r = tgLeadByCode_(x.k);
+    var x = pend[i], r = codeRow[x.k] || tgLeadByCode_(x.k);
     if (r < 2) continue;   /* لید حذف شد */
     var l = tgLeadRead_(r);
     if (!l || !(l.name || l.phone)) continue;
