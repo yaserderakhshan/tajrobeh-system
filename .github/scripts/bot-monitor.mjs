@@ -116,6 +116,12 @@ if (mode === 'promote') {
       const o = st.days[d];
       console.log(`RS ${d} ` + Object.keys(o).sort((a, b) => o[b][1] - o[a][1]).map((f) => `${f}=${o[f][0]}x/${(o[f][1] / 60000).toFixed(1)}m/${(o[f][2] / 1000).toFixed(0)}s`).join(' '));
     }
+    // v170.23.12.5: ریز قدم‌های tgWatchdog (RSW) و کارهای غیرواجبی که نگهبان سهمیه رد کرد (BGS)
+    for (const d of Object.keys(st.steps || {}).sort().slice(-3)) {
+      const o = st.steps[d];
+      console.log(`RSW ${d} ` + Object.keys(o).sort((a, b) => o[b][1] - o[a][1]).slice(0, 15).map((f) => `${f}=${o[f][0]}x/${(o[f][1] / 60000).toFixed(1)}m`).join(' '));
+    }
+    for (const d of Object.keys(st.skip || {}).sort().slice(-3)) console.log(`BGS ${d} ` + Object.keys(st.skip[d]).map((f) => `${f}=${st.skip[d][f]}`).join(' '));
   }
   process.exit(0);
 }

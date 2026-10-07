@@ -240,7 +240,7 @@ function soTick(e) {
   } finally { lock.releaseLock(); }
   return n;
   } finally {
-    try { if (typeof pbTick_ === 'function') pbTick_(); } catch (ePb) { tgErr_('pbTick_', ePb); }   /* v167: صف انتشار، پایش سایت، پیام هفتگی (بی تریگر تازه) */
+    try { if (typeof pbTick_ === 'function' && (typeof bgOk_ !== 'function' || bgOk_('light', 'pbTick_'))) pbTick_(); } catch (ePb) { tgErr_('pbTick_', ePb); }   /* v170.23.12.5: زیر سقف ۷۵ دقیقه */   /* v167: صف انتشار، پایش سایت، پیام هفتگی (بی تریگر تازه) */
     tgRunStat_('soTick', rs0);
   }
 }

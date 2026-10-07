@@ -275,11 +275,12 @@ function ciRunStatTrim_(p, day) {
   while (keys.length > 10) p.deleteProperty(keys.shift());
 }
 function ciStats_() {
-  var p = PropertiesService.getScriptProperties(), out = {};
-  p.getKeys().filter(function (k) { return k.indexOf('RS:') === 0; }).sort().forEach(function (k) {
-    try { var o = JSON.parse(p.getProperty(k) || '{}'); delete o._c; out[k.slice(3)] = o; } catch (e) {}
-  });
-  return { ok: true, days: out };
+  var p = PropertiesService.getScriptProperties(), out = {}, steps = {}, skip = {}, keys = p.getKeys();
+  var grab = function (pre, to) { keys.filter(function (k) { return k.indexOf(pre) === 0; }).sort().forEach(function (k) {
+    try { var o = JSON.parse(p.getProperty(k) || '{}'); delete o._c; to[k.slice(pre.length)] = o; } catch (e) {}
+  }); };
+  grab('RS:', out); grab('RSW:', steps); grab('BGS:', skip);   /* v170.23.12.5: قدم‌های tgWatchdog و ردشده‌های نگهبان سهمیه */
+  return { ok: true, days: out, steps: steps, skip: skip };
 }
 
 /* ---------- خلاصهٔ تب «خطاها» برای پایش بعد از دیپلوی (v166.8) ---------- */
