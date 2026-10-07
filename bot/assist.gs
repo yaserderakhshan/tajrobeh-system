@@ -804,7 +804,7 @@ function asWeb_(e, raw, body) {
   if (!pbRate_('as:' + sid, max)) return asJson_({ ok: false, error: 'rate' });
   var ctx = { channel: String(body.channel || 'web').replace(/[^\w-]/g, '').slice(0, 20) || 'web', session: sid, country: String(body.country || '').slice(0, 2), audience: String(body.audience || '').slice(0, 30), t0: Date.now() };
   var out = body.tap ? asTap_(ctx, String(body.tap), String(body.text || '')) : asAsk_(ctx, String(body.text || '').slice(0, 500));
-  return asJson_({ ok: true, answer: out.answer, topic: out.topic || '', handoff: !!out.handoff, buttons: out.buttons || [] });
+  return asJson_({ ok: true, answer: out.answer, topic: out.topic || '', handoff: !!out.handoff, buttons: out.buttons || [], log_id: out.log || '', source: out.crisis || out.handoff ? '' : (ctx.src || ''), source_url: ctx.src === 'سایت' ? (out.source || '') : '' });   /* v170.23.19: قرارداد پل بخش ۹ */
 }
 
 /* ───── بازبینی دانش در بات ─────
@@ -1343,6 +1343,9 @@ function asTests7() {
     var n0 = TG_MEM['as:' + AS_KB_TAB].length, made = asDraftFromIdx_([{ q: 'دوره‌های مدرسهٔ تجربه برای دانشجویان روان‌شناسی' }, { q: 'سؤال بی‌ربط درباره هوا' }]), nr = TG_MEM['as:' + AS_KB_TAB][n0] || {};
     ok('پیش‌نویس از نمایه: «تأیید» خالی و منبع روشن', made === 1 && nr['تأیید'] === '' && nr['منبع'] === S + '/school/' && /پیش‌نویس از نمایهٔ سایت/.test(nr['یادداشت بازبینی']), JSON.stringify(nr));
     ok('پیش‌نویس تأییدنشده جواب نمی‌دهد', asKb_().every(function (k) { return k.topic !== nr['موضوع']; }));
+    var ver = ssVerify_; ssVerify_ = function () { return 'ok'; }; var w;
+    try { w = JSON.parse(asWeb_({}, '{}', { action: 'assist.ask', channel: 'site', session_id: 'test-s1', text: 'دوره‌های مدرسهٔ تجربه برای دانشجویان؟', audience: 'دانشجو' }).getContent()); } finally { ssVerify_ = ver; }
+    ok('خروجی وب: log_id، source و source_url (قرارداد پل)', w.ok && w.log_id && w.source === 'سایت' && w.source_url === S + '/school/', JSON.stringify(w));
     ok('اکشن kb_index در درگاه، فقط نوشتنی', typeof PB_ACTIONS.kb_index === 'function' && PB_WRITE.indexOf('kb_index') > -1);
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
   finally { asKnownNames_ = keep.names; TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg; AS_IDX_MEMO = null; }

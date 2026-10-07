@@ -119,7 +119,7 @@
 | `migrate.gs` | ۵۶۲ | ۵۶ |
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
-| `assist.gs` | ۱۳۵۲ | ۱۱۱ |
+| `assist.gs` | ۱۳۵۵ | ۱۱۱ |
 | `leadspeed.gs` | ۲۵۹ | ۲۳ |
 
 ### کارهای زمان‌دار
