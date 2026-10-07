@@ -77,7 +77,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.22`
+نسخهٔ کد: `v170.23.23`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -122,7 +122,7 @@
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۱۳۴۸ | ۱۱۰ |
-| `leadspeed.gs` | ۸۶۷ | ۷۵ |
+| `leadspeed.gs` | ۹۵۶ | ۸۰ |
 
 ### کارهای زمان‌دار
 
@@ -156,6 +156,7 @@
 
 | ثابت | نام تب | فایل‌ها |
 |---|---|---|
+| `AB_FN_TAB` | «قیف خارج از ایران» | `leadspeed.gs` |
 | `AB_FX_TAB` | «اصلاح دادهٔ لیدها · پیش‌نمایش» | `leadspeed.gs` |
 | `AB_PV_TAB` | «مبنای ارجاع · پیش‌نمایش» | `leadspeed.gs` |
 | `AS_IDX_TAB` | «نمایهٔ دانش» | `assist.gs` |
@@ -211,7 +212,7 @@
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
 | `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` |
-| `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` |
+| `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
 | `TG_MIG_TAB` | «تست مهاجرت» | `mig.gs` |
@@ -396,6 +397,7 @@
 | پاسخ زیر ۱۰ دقیقه و اولویت روزانه (v170.23.12) | `lsTests` |
 | لیدهای خارج · مبنای ارجاع و داده (v170.23.21) | `abTests` |
 | لیدهای خارج · راهبری پذیرش (v170.23.22) | `abTests2` |
+| لیدهای خارج · قیف هفتگی (v170.23.23) | `abTests3` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)

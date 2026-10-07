@@ -538,6 +538,7 @@ function abDailyMaybe_() {
     if (lsProp_('AB_FX_PREV') !== '1') { abFixPreview_(); did++; }
     else if (abOk_(AB_FX_TAB, 'ab:fxok')) { lsProp_('AB_FX_DONE', '1'); abFixApply_(); did++; }
   }
+  try { if (abFunnelMaybe_()) did++; } catch (eFn) { tgErr_('abFunnelMaybe_', eFn); }   /* v170.23.23 */
   if (lsProp_('AB_ST_DAY') === day) return did;
   lsProp_('AB_ST_DAY', day);
   if (lsProp_('AB_ST_ON') === '1' || abOk_(AB_PV_TAB, 'ab:pvok')) { lsProp_('AB_ST_ON', '1'); abStatsWrite_(); }
@@ -864,3 +865,91 @@ function abTests2() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'abTests2'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['لیدهای خارج · راهبری پذیرش (v170.23.22)', 'abTests2']); } catch (eAb2) {}
+
+/* ═════════════ v170.23.23 · قیف خارج از ایران (اندازه‌گیری، د۲) ═════════════
+   تب «قیف خارج از ایران» در هاب آمار، هفتگی (شنبه تا جمعه، تهران)، از «لیدها»، «رویدادهای لید» و «کلیک‌های تماس»، با همان هشت مرحلهٔ
+   چارچوب لید. مرحلهٔ ۱ (رسیدن) از لوکر با دایمنشن is_abroad است و ۸ (ماندگاری) هنوز اندازه گرفته نمی‌شود؛ هر دو «—».
+   هر شنبه (یا اگر تب نیست) از نو ساخته می‌شود؛ فقط شمارش، بی نام و شماره. */
+var AB_FN_TAB = 'قیف خارج از ایران';
+var AB_FN_HEAD = ['هفته (شنبه)', '۱ رسیدن', '۲ اقدام', '۳ لید', '۴ تماس اول', 'تماس اول تا ۲ ساعت', '۵ ارجاع', '۶ معارفه', '۷ شروع درمان', '۸ ماندگاری', 'بی‌پاسخ نهایی', 'نرخ تماس ۲ ساعته'];
+/** شنبهٔ هفتهٔ یک تاریخ ISO */
+function abWeekOf_(iso) { var d = new Date(iso + 'T12:00:00+03:30'), w = Number(Utilities.formatDate(d, TG_TZ, 'u')); var back = (w + 1) % 7; return Utilities.formatDate(new Date(d.getTime() - back * 86400000), TG_TZ, 'yyyy-MM-dd'); }
+/** leads: [{code, date, time, region, refs, booked, introDate, started, status, closed, reason}]، firstMs: {کد: ms اولین تماس}، clicks: [iso] */
+function abFunnelRows_(leads, firstMs, clicks, weeks, nowMs) {
+  var start = abWeekOf_(Utilities.formatDate(new Date(nowMs - (weeks - 1) * 7 * 86400000), TG_TZ, 'yyyy-MM-dd')), W = {}, order = [];
+  for (var i = 0; i < weeks; i++) { var k = abWeekOf_(Utilities.formatDate(new Date(new Date(start + 'T12:00:00+03:30').getTime() + i * 7 * 86400000), TG_TZ, 'yyyy-MM-dd')); if (!W[k]) { W[k] = { act: 0, lead: 0, first: 0, fast: 0, ref: 0, intro: 0, start: 0, noans: 0 }; order.push(k); } }
+  (clicks || []).forEach(function (d) { var k = abWeekOf_(d); if (W[k]) W[k].act++; });
+  leads.forEach(function (l) {
+    if (!/خارج/.test(l.region || '') || !l.date) return;
+    var k = abWeekOf_(l.date), w = W[k]; if (!w) return;
+    w.lead++;
+    var arr = new Date(l.date + 'T' + (/^\d{1,2}:\d{2}$/.test(l.time || '') ? ('0' + l.time).slice(-5) : '00:00') + ':00+03:30').getTime(), f = firstMs[l.code];
+    if (f || l.touched) w.first++;
+    if (f && f - arr <= 2 * 3600000) w.fast++;
+    if ((l.refs || []).length || [TG_ST.REF, TG_ST.BOOKED, TG_ST.HELD, TG_ST.START].indexOf(l.status) > -1) w.ref++;
+    if (l.booked || l.introDate || [TG_ST.BOOKED, TG_ST.HELD, TG_ST.START].indexOf(l.status) > -1) w.intro++;
+    if (l.started || l.status === TG_ST.START) w.start++;
+    if (l.closed && /پاسخ نداد/.test(l.reason || '')) w.noans++;
+  });
+  return order.map(function (k) { var w = W[k]; return [k, '—', w.act, w.lead, w.first, w.fast, w.ref, w.intro, w.start, '—', w.noans, w.lead ? Math.round(1000 * w.fast / w.lead) / 10 + '٪' : '']; });
+}
+function abFunnelBuild_() {
+  if (lsDry_()) return TG_MEM['ab:fn'] = abFunnelRows_(TG_MEM['ab:fnleads'] || [], TG_MEM['ab:fnfirst'] || {}, TG_MEM['ab:fnclicks'] || [], 8, lsNow_());
+  var sh = tgSS_().getSheetByName(TG_LEADS), last = sh.getLastRow(), hm = tgLeadHeadMap_(sh);
+  var v = last > 1 ? sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues() : [];
+  var g = function (r, h) { var i = hm[h]; return (i === undefined || i < 0 || i >= r.length) ? '' : r[i]; };
+  var leads = v.map(function (r) {
+    var st = tgStOf_(String(g(r, 'وضعیت') || '').trim()) || String(g(r, 'وضعیت') || '').trim();
+    return { code: String(g(r, 'کد لید') || '').trim(), date: abIso_(r[0]), time: tgLatinDigits_(String(r[1] || '').trim()), region: String(r[6] || ''), touched: !!String(r[10] || '').trim(),
+      refs: [g(r, 'درمانگر پیشنهادی ۱'), g(r, 'درمانگر پیشنهادی ۲'), g(r, 'درمانگر پیشنهادی ۳')].filter(function (x) { return String(x || '').trim(); }),
+      booked: String(g(r, 'معارفه هماهنگ شد؟') || '').trim() === 'بله', introDate: abIso_(g(r, 'تاریخ معارفه')), started: /بله|شروع/.test(String(g(r, 'شروع درمان؟') || '')),
+      status: st, closed: tgStClosed_(String(g(r, 'وضعیت') || '')), reason: String(g(r, 'دلیل بستن') || '') };
+  });
+  var first = {}, ev = tgSS_().getSheetByName(TG_LEAD_EV_TAB);
+  if (ev && ev.getLastRow() > 1) ev.getRange(2, 1, ev.getLastRow() - 1, 8).getValues().forEach(function (e) {
+    var code = String(e[1] || '').trim(), what = String(e[5] || ''), t = e[0] instanceof Date ? e[0].getTime() : 0;
+    if (!code || !t || !/تماس|بی‌پاسخ|پیام نوشتاری|آخرین تماس/.test(what + ' ' + String(e[7] || ''))) return;
+    if (!first[code] || t < first[code]) first[code] = t;
+  });
+  var clicks = [];
+  try { var cs = tgSS_().getSheetByName('کلیک‌های تماس'); if (cs && cs.getLastRow() > 1) cs.getRange(2, 1, cs.getLastRow() - 1, 7).getValues().forEach(function (c) { if (/persian-therapy|PT-|abroad/i.test(String(c[3]) + ' ' + String(c[4]) + ' ' + String(c[6]))) clicks.push(c[0] instanceof Date ? lsDay_(c[0].getTime()) : abIso_(c[0])); }); } catch (eC) {}
+  var rows = abFunnelRows_(leads, first, clicks.filter(String), 12, lsNow_());
+  var ss = tgStatSS_(), t = ss.getSheetByName(AB_FN_TAB) || ss.insertSheet(AB_FN_TAB);
+  t.clear(); t.setRightToLeft(true);
+  t.getRange(1, 1).setValue('🌍 قیف خارج از ایران · هفتگی · ساخت ' + lsDay_() + ' · ۱ رسیدن: لوکر با is_abroad · ۸ ماندگاری: هنوز اندازه گرفته نمی‌شود').setFontWeight('bold');
+  t.getRange(2, 1, 1, AB_FN_HEAD.length).setValues([AB_FN_HEAD]).setFontWeight('bold').setBackground('#222222').setFontColor('#fefefe');
+  if (rows.length) t.getRange(3, 1, rows.length, AB_FN_HEAD.length).setValues(rows);
+  t.setFrozenRows(2);
+  return rows;
+}
+/** از abDailyMaybe_: شنبه‌ها، یا اگر تب نیست */
+function abFunnelMaybe_() {
+  var day = lsDay_(); if (lsProp_('AB_FN_DAY') === day) return false;
+  var sat = Utilities.formatDate(new Date(lsNow_()), TG_TZ, 'u') === '6';
+  var missing = !lsDry_() && !tgStatSS_().getSheetByName(AB_FN_TAB);
+  if (!sat && !missing) return false;
+  lsProp_('AB_FN_DAY', day); abFunnelBuild_(); return true;
+}
+
+function abTests3() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM };
+  TG_DRY = true; TG_MEM = { 'ls:now': new Date('2026-10-10T10:00:00+03:30').getTime() };
+  try {
+    ok('شنبهٔ هفته', abWeekOf_('2026-10-08') === '2026-10-03' && abWeekOf_('2026-10-03') === '2026-10-03' && abWeekOf_('2026-10-09') === '2026-10-03');
+    var t0 = new Date('2026-10-04T10:00:00+03:30').getTime();
+    TG_MEM['ab:fnleads'] = [
+      { code: 'L-1', date: '2026-10-04', time: '10:00', region: 'خارج از ایران', refs: ['x'], booked: true, introDate: '2026-10-06', started: true, status: TG_ST.START, closed: false, touched: true },
+      { code: 'L-2', date: '2026-10-05', time: '9:00', region: 'خارج از ایران', refs: [], booked: false, introDate: '', started: false, status: TG_ST.CLOSED, closed: true, reason: 'پاسخ نداد (نهایی)', touched: true },
+      { code: 'L-3', date: '2026-10-05', time: '9:00', region: 'داخل ایران', refs: ['x'], booked: true, introDate: '2026-10-06', started: true, status: TG_ST.START, closed: false, touched: true }];
+    TG_MEM['ab:fnfirst'] = { 'L-1': t0 + 30 * 60000, 'L-2': new Date('2026-10-05T15:00:00+03:30').getTime() };
+    TG_MEM['ab:fnclicks'] = ['2026-10-04', '2026-10-05', '2026-09-20'];
+    var R = abFunnelBuild_(), w = R.filter(function (r) { return r[0] === '2026-10-03'; })[0];
+    ok('هفته: اقدام ۲، لید خارج ۲ (داخل نه)، تماس اول ۲، تا ۲ ساعت ۱، ارجاع ۱، معارفه ۱، شروع ۱، بی‌پاسخ نهایی ۱', w && w[2] === 2 && w[3] === 2 && w[4] === 2 && w[5] === 1 && w[6] === 1 && w[7] === 1 && w[8] === 1 && w[10] === 1 && w[11] === '50٪', JSON.stringify(w));
+    ok('رسیدن و ماندگاری «—» (لوکر و هنوز نه)', w[1] === '—' && w[9] === '—' && AB_FN_HEAD.length === 12);
+    ok('فقط شنبه یا وقتی تب نیست', abFunnelMaybe_() === true && abFunnelMaybe_() === false);
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'abTests3'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['لیدهای خارج · قیف هفتگی (v170.23.23)', 'abTests3']); } catch (eAb3) {}
