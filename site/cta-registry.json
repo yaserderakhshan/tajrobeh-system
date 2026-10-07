@@ -530,6 +530,30 @@
       "links": 3
     },
     {
+      "code": "pz-guide-hub",
+      "line": "pz",
+      "label": "راهنما › رزرو معارفه در تلگرام",
+      "aliases": [
+        "guide_hub"
+      ],
+      "pages": [
+        "site/pages/504776-guide.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-guide-berry",
+      "line": "pz",
+      "label": "راهنما › سؤال در تلگرام",
+      "aliases": [
+        "guide_berry"
+      ],
+      "pages": [
+        "site/pages/504776-guide.html"
+      ],
+      "links": 1
+    },
+    {
       "code": "pz-gt-anx",
       "line": "pz",
       "label": "شروع تراپی › anx",
