@@ -10187,8 +10187,13 @@ function tgDaySecRows_(d) {
 
 /* v170.23.11: خط‌های افزودنی ماژول‌ها در گزارش شبانه. هر ماژول تابعش را push می‌کند؛ تابع یک خط (یا '') برمی‌گرداند. */
 var TG_NIGHT_LINES = [];
+/* v170.23.12.1: خط‌ها دادهٔ واقعی می‌خوانند؛ یک بار در هر اجرا (گزارش هر ناظر جدا ساخته می‌شود) و در آزمون خشک هرگز
+   (آزمون «دامنهٔ گزارش» چهار بار tgDayReport_ می‌سازد و دیپلوی v170.23.13 روی همین ۵۵ دقیقه ماند) */
+var TG_NIGHT_MEMO = null;
 function tgNightLines_() {
-  var out = [];
+  if (typeof TG_DRY !== 'undefined' && TG_DRY) return [];
+  if (TG_NIGHT_MEMO) return TG_NIGHT_MEMO;
+  var out = TG_NIGHT_MEMO = [];
   for (var i = 0; i < TG_NIGHT_LINES.length; i++) { try { var l = TG_NIGHT_LINES[i](); if (l) out.push(l); } catch (e) { try { tgErr_('tgNightLines_', e); } catch (e2) {} } }
   return out;
 }
@@ -11040,6 +11045,11 @@ function tgScopeTests() {
   ok('دامنهٔ مدرسه کار درمان را نمی‌بیند', school.care === false);
   ok('دامنهٔ مدرسه عرضه را صفر می‌کند', school.free7 === 0 && school.ther === 0);
 
+  /* v170.23.12.2: آزمون دیپلوی آزمایشی خشک نیست؛ خط‌های شبانه (دادهٔ واقعی) در این آزمون ساخته نمی‌شوند */
+  const keepDryN = TG_DRY, keepMemoN = TG_NIGHT_MEMO;
+  TG_DRY = true; TG_NIGHT_MEMO = null;
+  ok('خط‌های شبانه در آزمون خشک دادهٔ واقعی نمی‌خوانند', tgNightLines_().length === 0);
+  TG_DRY = keepDryN; TG_NIGHT_MEMO = [];
   const txt = tgDayReport_(v);
   const body = txt.split('\n').filter(function (x) { return x.indexOf('دامنهٔ این گزارش') < 0; }).join('\n');
   ok('متن دامنهٔ محدود، خط مدرسه ندارد', body.indexOf('مدرسه') < 0);
@@ -11059,6 +11069,7 @@ function tgScopeTests() {
   ok('چندنقشی در ناظر دکمه دارد', JSON.stringify(tgWatchMenu_()).indexOf('تغییر نقش') > -1);
   ok('چندنقشی در پذیرش دکمه دارد', JSON.stringify(tgDeskMenu_()).indexOf('تغییر نقش') > -1);
   ok('چندنقشی در درمانگر دکمه دارد', JSON.stringify(tgTherMenu_()).indexOf('تغییر نقش') > -1);
+  TG_NIGHT_MEMO = keepMemoN;
   TG_MULTI = false;
 
   return out.join('\n') + '\n(' + out.filter(function (x) { return x.indexOf('✅') === 0; }).length + ' از ' + out.length + ')';
