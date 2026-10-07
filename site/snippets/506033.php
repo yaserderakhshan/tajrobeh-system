@@ -1,4 +1,4 @@
-/* Tajrobeh · پلی‌لیست ابی · ویجت کوچک سراسری (tjeb v1.1، ۱۴ مهر ۱۴۰۵)
+/* Tajrobeh · پلی‌لیست ابی · ویجت کوچک سراسری (tjeb v1.2، ۱۵ مهر ۱۴۰۵؛ عنوان «نمایش» و «تئاتر در عمارت هما» تا کاربر آن را با پلی‌لیست موسیقی اشتباه نگیرد)
    v1.1 (قرارداد صفحه‌ها، site/contracts.json): جای ویجت در هوم و مدرسه فقط نشانگر ثابت <!-- tj:slot:ebi --> است، نه id بخش‌های طراحی.
    بی نشانگر (یا بیش از یکی) ویجت آن برگه نمی‌نشیند؛ site-check و site-mirror همان را قرمز می‌کنند.
    یک کارت جمع‌وجور که فهرست جمعی ابی را زنده نشان می‌دهد (شماره و آخرین موردها، چرخشی) و همان‌جا می‌شود یک مورد اضافه کرد.
@@ -25,7 +25,7 @@ if (!function_exists('tj_ebi_mini_html')) {
     $h  = '<aside class="tjeb" data-place="' . esc_attr($place) . '" data-count="' . (int) $d['count'] . '" data-items="' . esc_attr(wp_json_encode($items, JSON_UNESCAPED_UNICODE)) . '" aria-label="پلی‌لیست ابی">';
     $h .= '<div class="tjeb-row">';
     $h .= '<a class="tjeb-berry" href="' . esc_url($url) . '" aria-hidden="true" tabindex="-1"><img src="' . esc_url(home_url('/wp-content/uploads/2026/09/tjl-berry.webp')) . '" alt="" width="44" height="44" loading="lazy"></a>';
-    $h .= '<div class="tjeb-body"><p class="tjeb-k"><a href="' . esc_url($url) . '">پلی‌لیستِ ابی</a><span>فهرستی که با هم می‌نویسیم</span></p>';
+    $h .= '<div class="tjeb-body"><p class="tjeb-k"><a href="' . esc_url($url) . '">نمایش «پلی‌لیستِ ابی»</a><span>تئاتر در عمارت هما · فهرستش را با هم می‌نویسیم</span></p>';
     $h .= '<p class="tjeb-tick" aria-live="polite">';
     if ($first) { $h .= '<b class="tjeb-n">' . (int) $first[0] . '.</b> <span class="tjeb-t">' . esc_html($first[1]) . '</span>'; }
     else { $h .= '<span class="tjeb-t">اولین چیز درخشان فهرست را شما بنویسید</span>'; }
