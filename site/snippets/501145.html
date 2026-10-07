@@ -15,6 +15,31 @@
       </span>
     </a>
 
+    <button class="tj-fab-item tj-fab-item--ask" type="button" id="tjFabAsk">
+      <span class="tj-fab-item-icon tj-fab-item-icon--ask">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.2a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.4-2.7 4"/><path d="M12 17.2h.01"/></svg>
+      </span>
+      <span class="tj-fab-item-text">
+        <span class="tj-fab-item-label">سؤال دارم</span>
+        <span class="tj-fab-item-status">دستیار تجربه همین‌جا جواب می‌دهد</span>
+      </span>
+    </button>
+
+    <div class="tj-fab-as" id="tjFabAs" hidden>
+      <div class="tj-fab-as-head">
+        <button type="button" class="tj-fab-as-back" id="tjFabAsBack" aria-label="بازگشت به راه‌های ارتباط">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+        <b>سؤال دارم</b>
+      </div>
+      <div class="tj-fab-as-log" id="tjFabAsLog" aria-live="polite"></div>
+      <form class="tj-fab-as-f" id="tjFabAsF">
+        <input id="tjFabAsIn" maxlength="500" autocomplete="off" enterkeyhint="send" placeholder="سؤالت را بنویس" aria-label="سؤالت را بنویس">
+        <button type="submit">بفرست</button>
+      </form>
+      <small class="tj-fab-as-note">اطلاعات کاربر فقط در اختیار مسئول مربوطه در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت او منتشر یا با کسی به اشتراک گذاشته نمی‌شود.</small>
+    </div>
+
     <a class="tj-fab-item" href="tel:+982191008867">
       <span class="tj-fab-item-icon tj-fab-item-icon--tel">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>
@@ -132,6 +157,31 @@
     .tj-fab-btn{ transition: transform .15s ease, opacity .15s ease; }
     #tjFabRoot.is-open .tj-fab-btn{ opacity: 0; pointer-events: none; transform: scale(.8); }
   }
+
+  /* tj-fab v3 (دستیار، بات v170.23.11 به بعد): «سؤال دارم» داخل همین منو؛ در موبایل همان پنل پایین. رنگ‌ها از --tj-* سراسری (docs/brand/tokens.css) */
+  .tj-fab-item--ask{ inline-size: 100%; border: 0; background: none; font: inherit; text-align: start; cursor: pointer; }
+  .tj-fab-item-icon--ask{ background: var(--tj-ink, #222222); }
+  .tj-fab-as{ display: flex; flex-direction: column; gap: 8px; }
+  .tj-fab-as[hidden]{ display: none; }
+  #tjFabRoot.is-as .tj-fab-menu-title, #tjFabRoot.is-as .tj-fab-item{ display: none; }
+  #tjFabRoot.is-as .tj-fab-menu{ inline-size: min(360px, calc(100vw - 28px)); }
+  .tj-fab-as-head{ display: flex; align-items: center; gap: 8px; padding-block: 2px; padding-inline: 4px; font-size: 15px; color: var(--tj-ink, #222222); }
+  .tj-fab-as-back{ inline-size: 36px; block-size: 36px; border: 0; border-radius: 999px; background: var(--tj-soft, #f5f5f8); color: var(--tj-ink, #222222); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .tj-fab-as-back svg{ inline-size: 18px; block-size: 18px; }
+  .tj-fab-as-log{ display: flex; flex-direction: column; gap: 8px; min-block-size: 140px; max-block-size: min(46vh, 380px); overflow-y: auto; overscroll-behavior: contain; padding: 10px; border-radius: 12px; background: var(--tj-soft, #f5f5f8); }
+  .tj-fab-as-m{ max-inline-size: 88%; padding-block: 8px; padding-inline: 12px; border-radius: 12px; white-space: pre-wrap; font-size: 14px; line-height: 1.5; }
+  .tj-fab-as-m.bot{ align-self: flex-start; background: var(--tj-white, #fefefe); border: 1px solid var(--tj-line, #dfdfe2); color: #0e0e0e; }
+  .tj-fab-as-m.me{ align-self: flex-end; background: var(--tj-ink, #222222); color: var(--tj-white, #fefefe); }
+  .tj-fab-as-bs{ display: flex; flex-wrap: wrap; gap: 6px; }
+  .tj-fab-as-bs button, .tj-fab-as-bs a{ font: inherit; font-size: 13px; line-height: 1.5; padding-block: 5px; padding-inline: 10px; border-radius: 999px; border: 1px solid var(--tj-ink, #222222); background: var(--tj-white, #fefefe); color: var(--tj-ink, #222222); cursor: pointer; text-decoration: none; }
+  .tj-fab-as-f{ display: flex; gap: 6px; }
+  .tj-fab-as-f input{ flex: 1; min-inline-size: 0; font: inherit; font-size: 16px; line-height: 1.5; padding-block: 8px; padding-inline: 10px; border: 1px solid var(--tj-line, #dfdfe2); border-radius: 10px; background: var(--tj-white, #fefefe); color: #0e0e0e; }
+  .tj-fab-as-f button{ font: inherit; font-size: 14px; border: 0; border-radius: 10px; background: var(--tj-ink, #222222); color: var(--tj-white, #fefefe); padding-inline: 14px; cursor: pointer; }
+  .tj-fab-as-note{ display: block; font-size: 11px; line-height: 1.5; color: var(--tj-mut, #676768); padding-inline: 4px; }
+  @media (max-width:640px){
+    #tjFabRoot.is-as .tj-fab-menu{ inline-size: auto; }
+    .tj-fab-as-log{ max-block-size: 52vh; }
+  }
 </style>
 
 <script>
@@ -179,6 +229,48 @@
     menu.addEventListener('touchstart', function(e){ if (!mq.matches) return; y0 = e.touches[0].clientY; dy = 0; menu.style.transition = 'none'; }, { passive: true });
     menu.addEventListener('touchmove', function(e){ if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); menu.style.transform = 'translateY(' + dy + 'px)'; }, { passive: true });
     menu.addEventListener('touchend', function(){ if (y0 === null) return; menu.style.transition = ''; menu.style.transform = ''; if (dy > 70) setOpen(false); y0 = null; });
+  }
+
+  // tj-fab v3: دستیار داخل همین منو. پاسخ از مسیر سرور /wp-json/tj/v1/assist (اسنیپت 506148) که درخواست را امضا می‌کند و به بات می‌فرستد.
+  var askBtn = document.getElementById('tjFabAsk'), as = document.getElementById('tjFabAs');
+  if (askBtn && as && window.fetch) {
+    var asLog = document.getElementById('tjFabAsLog'), asIn = document.getElementById('tjFabAsIn'), asLast = '', asStarted = false, sid = '';
+    try { if (sessionStorage.getItem('tjasoff') === '1') askBtn.style.display = 'none'; sid = sessionStorage.getItem('tjas') || ''; } catch (e0) {}
+    if (!sid) { sid = 'w' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); try { sessionStorage.setItem('tjas', sid); } catch (e1) {} }
+    var add = function (t, who) { var d = document.createElement('div'); d.className = 'tj-fab-as-m ' + who; d.textContent = t; asLog.appendChild(d); asLog.scrollTop = asLog.scrollHeight; return d; };
+    var btns = function (list) {
+      if (!list || !list.length) return;
+      var w = document.createElement('div'); w.className = 'tj-fab-as-bs';
+      list.forEach(function (b) {
+        var el;
+        if (b.url) { el = document.createElement('a'); el.href = b.url; el.target = '_blank'; el.rel = 'noopener'; }
+        else { el = document.createElement('button'); el.type = 'button'; el.onclick = function () { w.remove(); ask('', b.id, b.text); }; }
+        el.textContent = b.text; w.appendChild(el);
+      });
+      asLog.appendChild(w); asLog.scrollTop = asLog.scrollHeight;
+    };
+    var ask = function (text, tap, label) {
+      if (text) { add(text, 'me'); asLast = text; } else if (label && tap && !/^[yn]:/.test(tap)) add(label, 'me');
+      var wait = add('…', 'bot');
+      fetch('/wp-json/tj/v1/assist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sid, text: text || asLast, tap: tap || '', audience: '' }) })
+        .then(function (r) { return r.json(); }).then(function (j) {
+          if (!j || !j.ok) {
+            if (j && j.error === 'off') { try { sessionStorage.setItem('tjasoff', '1'); } catch (e2) {} wait.textContent = 'دستیار فعلاً در دسترس نیست. از بات تجربه بپرس.'; btns([{ url: 'https://t.me/tajrobehlife_bot?start=pz-assist', text: 'بات تجربه' }]); return; }
+            wait.textContent = j && j.error === 'rate' ? 'کمی صبر کن و دوباره بپرس.' : 'الان جواب نرسید. کمی بعد دوباره امتحان کن.'; return;
+          }
+          wait.textContent = j.answer; btns(j.buttons);
+        }).catch(function () { wait.textContent = 'الان جواب نرسید. کمی بعد دوباره امتحان کن.'; });
+    };
+    var showAs = function (on) {
+      root.classList.toggle('is-as', on); as.hidden = !on;
+      if (on) { if (!asStarted) { asStarted = true; ask('', '', ''); } setTimeout(function () { try { asIn.focus({ preventScroll: true }); } catch (e3) {} }, 60); }
+    };
+    askBtn.addEventListener('click', function () { showAs(true); });
+    document.getElementById('tjFabAsBack').addEventListener('click', function () { showAs(false); });
+    document.getElementById('tjFabAsF').addEventListener('submit', function (e) { e.preventDefault(); var t = asIn.value.trim(); if (!t) return; asIn.value = ''; ask(t, '', ''); });
+    new MutationObserver(function () { if (!root.classList.contains('is-open')) showAs(false); }).observe(root, { attributes: true, attributeFilter: ['class'] });
+    // کشیدن پنل برای بستن فقط از سر پنل، نه از روی گفت‌وگو و ورودی
+    as.addEventListener('touchstart', function (e) { if (e.target.closest && !e.target.closest('.tj-fab-as-head')) e.stopPropagation(); }, { passive: true });
   }
 })();
 </script>

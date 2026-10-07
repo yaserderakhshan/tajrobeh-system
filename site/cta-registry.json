@@ -530,6 +530,16 @@
       "links": 3
     },
     {
+      "code": "pz-assist",
+      "line": "pz",
+      "label": "دستیار › سؤال دارم",
+      "aliases": [],
+      "pages": [
+        "site/snippets/501145.html"
+      ],
+      "links": 1
+    },
+    {
       "code": "pz-gt-anx",
       "line": "pz",
       "label": "شروع تراپی › anx",
