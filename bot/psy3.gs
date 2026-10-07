@@ -79,9 +79,15 @@ function ps3DocChat_(name) {
   return p ? String(p.chat || '').split(/[,،;\s]+/).filter(String)[0] || '' : '';
 }
 /** قلاب بعد از ثبت نوبت (tgPsyOnBook_): ردیف ویزیت، نوع و مدت، خبر به پزشک و مراجع */
+/** نوع ویزیت تازه از سابقهٔ همان مراجع با همان پزشک (رزرو و sesslen.gs هم همین را می‌خوانند تا نوبت، تقویم و ویزیت یک عدد داشته باشند) */
+function ps3KindFor_(name, chat) {
+  var prev = ps3Rows_().filter(function (o) { return o['chat مراجع'] === String(chat) && tgNorm_(o['روان‌پزشک']) === tgNorm_(name) && o['انجام'] === 'انجام شد'; }).length;
+  return prev ? 'پیگیری' : 'ویزیت اول';
+}
 function ps3OnBook_(a, s, chat) {
-  var prev = ps3Rows_().filter(function (o) { return o['chat مراجع'] === String(chat) && tgNorm_(o['روان‌پزشک']) === tgNorm_(s.therapist) && o['انجام'] === 'انجام شد'; }).length;
-  var kind = prev ? 'پیگیری' : 'ویزیت اول', min = prev ? (Number(cfg_('PSY_FOLLOW_MIN', '')) || 20) : (Number(cfg_('PSY_FIRST_MIN', '')) || 40);
+  var kind = ps3KindFor_(s.therapist, chat);
+  /* v170.23.10: مدت از طول جلسهٔ خود پزشک (sesslen.gs)؛ خالی یعنی پیش‌فرض ۴۰ و ۲۰ یا PSY_FIRST_MIN و PSY_FOLLOW_MIN */
+  var min = typeof tgLenFor_ === 'function' ? tgLenFor_(s.therapist, kind) : (kind === 'پیگیری' ? (Number(cfg_('PSY_FOLLOW_MIN', '')) || 20) : (Number(cfg_('PSY_FIRST_MIN', '')) || 40));
   var pl = ps3Platform_(s.therapist);
   var o = ps3Put_({ 'کد نوبت': a.code, 'روان‌پزشک': s.therapist, 'chat مراجع': String(chat), 'تاریخ': s.dateIso, 'ساعت': s.hhmm }, { 'نوع ویزیت': kind, 'مدت': String(min), 'بستر': pl.label }, 'بات');
   ps3Ev_(a.code, 'نوبت', 'مراجع', '', s.dateIso + ' ' + s.hhmm, kind);

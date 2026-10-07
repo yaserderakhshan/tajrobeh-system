@@ -2492,6 +2492,9 @@ function tgPrivate_(m) {
   if (typeof tgAuRoute_ === 'function' && tgAuRoute_(chat, m)) return;
   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ (migrate.gs): start=v2mig، شمارهٔ مراجع، «مراجعان من»، پاسخ همکار نسخهٔ ۲ */
   if (typeof migRoute_ === 'function' && migRoute_(chat, m)) return;
+  /* v170.23.10: طول جلسه (sesslen.gs): عدد دلخواه، /sesslen و دکمهٔ میز پذیرش */
+  if (m.text && typeof tgLenText_ === 'function' && tgGetVal_('lnc', chat) && tgLenText_(chat, m.text)) return;
+  if (m.text && typeof tgLenPick_ === 'function' && (String(m.text).trim() === '/sesslen' || String(m.text).trim() === TG_LEN_DESK_BTN)) { if (tgLenCanOthers_(chat)) { tgDel_('lnt', chat); tgLenPick_(chat, 0); } else tgLenStart_(chat); return; }
   if (m.text && typeof migOwnerCmd_ === 'function' && migOwnerCmd_(chat, String(m.text).trim())) return;
 
   if (m.contact && m.contact.phone_number) {
@@ -3724,7 +3727,7 @@ function tgDeskMenu_() {
       ['❓ راهنما', '↩️ بازگشت'],
       [TG_DASH_BTN, TG_TSK_BTN],
       [TG_BOX_BTN]
-    ].concat(typeof opsDeskRow_ === 'function' ? opsDeskRow_() : []).concat(tgDeskLeadRow_()).concat(tgRoleRow_()),
+    ].concat(typeof opsDeskRow_ === 'function' ? opsDeskRow_() : []).concat(typeof TG_LEN_DESK_BTN !== 'undefined' ? [[TG_LEN_DESK_BTN]] : []).concat(tgDeskLeadRow_()).concat(tgRoleRow_()),
     resize_keyboard: true
   };
 }
@@ -4514,6 +4517,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('vx:') === 0 && typeof vxOnCb_ === 'function') return vxOnCb_(chat, data, cq, name, uname);   /* v166: موتور صدا */
   if (data.indexOf('dq:') === 0 && typeof dqCb_ === 'function') return dqCb_(chat, data);   /* v170: صف ارسال */
   if (data.indexOf('sk:') === 0 && typeof stkCb_ === 'function') return stkCb_(chat, data);
+  if (data.indexOf('ln:') === 0 && typeof tgLenCb_ === 'function') return tgLenCb_(chat, data);   /* v170.23.10: طول جلسه */
   if (data.indexOf('mig:') === 0 && typeof migCb_ === 'function') return migCb_(chat, data);   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ */
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
@@ -4938,16 +4942,9 @@ function tgWeeklyKindCol_(sh) {
   return lc + 1;
 }
 
-/* طول جلسهٔ درمان همان چیزی است که خود درمانگر اعلام کرده */
+/* طول جلسهٔ درمان همان چیزی است که خود درمانگر اعلام کرده؛ از v170.23.10 از sesslen.gs (بازهٔ ۱۵ تا ۱۲۰، خالی یعنی پیش‌فرض) */
 function tgTherSlen_(name) {
-  try {
-    const rows = tgTherapistRows_(), key = tgNorm_(name);
-    for (var i = 0; i < rows.length; i++) {
-      if (tgNorm_(rows[i].name) !== key) continue;
-      const n = Number(String(tgLatinDigits_(rows[i].slen || '')).replace(/[^0-9]/g, ''));
-      if (n >= 30 && n <= 90) return n;
-    }
-  } catch (e) {}
+  if (typeof tgLenFor_ === 'function') return tgLenFor_(name, 'درمان');
   return TG_SESS_MIN_DEF;
 }
 
@@ -6037,7 +6034,7 @@ function tgAskPoolFirst_(chat, who, kind) {
   if (mine.length >= cap) return tgSend_(chat, T_THER_MAX.replace('{n}', tgFa_(cap)), tgTherMenu_());
   const what = knd === TG_KIND_SESS ? 'وقت‌های درمان' : 'وقت‌های معارفه';
   const head = (knd === TG_KIND_SESS
-      ? '🩺 <b>وقت درمان</b>\nاین وقت‌ها برای جلسهٔ درمان است، نه معارفه. طول هر جلسه ' + tgFa_(tgTherSlen_(who.name)) + ' دقیقه در نظر گرفته می‌شود.\n\n'
+      ? '🩺 <b>وقت درمان</b>\nاین وقت‌ها برای جلسهٔ درمان است، نه معارفه. طول هر جلسه ' + tgFa_(typeof tgLenSlot_ === 'function' ? tgLenSlot_(who.name) : tgTherSlen_(who.name)) + ' دقیقه در نظر گرفته می‌شود.\n\n'
       : '') +
     (mine.length
       ? what + ' فعلی شما:\n' + mine.map(function (r) {
@@ -6237,7 +6234,7 @@ function tgMySlots_(chat, who) {
   });
   let head = '';
   if (meet.length) head += '<b>معارفه</b>\n' + meet.map(line).join('\n') + '\n\n';
-  if (sess.length) head += '<b>درمان</b> · ' + tgFa_(tgTherSlen_(who.name)) + ' دقیقه\n' + sess.map(line).join('\n');
+  if (sess.length) head += '<b>درمان</b> · ' + tgFa_(typeof tgLenSlot_ === 'function' ? tgLenSlot_(who.name) : tgTherSlen_(who.name)) + ' دقیقه\n' + sess.map(line).join('\n');
   head = head.replace(/\n+$/, '');
   head += who.meet ? '\n\n🔗 لینک جلسهٔ شما:\n' + tgEsc_(who.meet) : '\n\n⚠️ ' + T_THER_MEET_NONE;
   tgSend_(chat, head, { inline_keyboard: btns });
@@ -6354,7 +6351,7 @@ function tgCmd_(text) {
 // یادداشت درون‌اجرایی کش: هر رفت‌وبرگشت CacheService حدود ۵۰ تا ۱۰۰ میلی‌ثانیه است؛
 // tgCachePrime_ همهٔ کلیدهای رایج این چت را با یک getAll می‌گیرد و بقیهٔ خواندن‌ها از حافظه می‌آید
 var TG_CMEMO = null;
-const TG_MEMO_KEYS = ['sign', 'await', 'ft', 'seen', 'qt', 'qg', 'nd', 'pf', 'qa', 'qm', 'tz', 'bd', 'helped', 'ts', 'pfd', 'ct', 'mzw', 'mzt', 'mzu', 'mzl', 'mzn', 'esign', 'pq', 'pr', 'em', 'emask', 'ldn', 'ldr', 'war', 'sfh', 'scg', 'sln', 'sli', 'sfl', 'alw', 'apw', 'pzw', 'rmw', 'rmv', 'cpv', 'cpp', 'cpn', 'cpl', 'apmsg', 'apreply', 'ldx', 'ldf', 'ldb', 'ldbs', 'vxc', 'vxe', 'vxu', 'mig', 'qcity', 'qpid'];
+const TG_MEMO_KEYS = ['sign', 'await', 'ft', 'seen', 'qt', 'qg', 'nd', 'pf', 'qa', 'qm', 'tz', 'bd', 'helped', 'ts', 'pfd', 'ct', 'mzw', 'mzt', 'mzu', 'mzl', 'mzn', 'esign', 'pq', 'pr', 'em', 'emask', 'ldn', 'ldr', 'war', 'sfh', 'scg', 'sln', 'sli', 'sfl', 'alw', 'apw', 'pzw', 'rmw', 'rmv', 'cpv', 'cpp', 'cpn', 'cpl', 'apmsg', 'apreply', 'ldx', 'ldf', 'ldb', 'ldbs', 'vxc', 'vxe', 'vxu', 'mig', 'qcity', 'qpid', 'lnc', 'lnt'];
 const TG_MEMO_LISTS = ['wlist', 'drows', 'trows', 'faq', 'scols'];
 function tgCachePrime_(chat) {
   if (TG_DRY || TG_CMEMO) return;
@@ -12119,7 +12116,7 @@ function tgOnSessBook_(chat, idx) {
     var b = tgSessBlocks_();
     if (b.taken[s.therapist + '|' + s.dateIso + '|' + s.hhmm]) { tgSend_(chat, 'این وقت همین الان پر شد.'); tgDel_('soff', chat); return tgSessStart_(chat); }
     var lead = tgLeadInfo_(chat);
-    var len = tgTherSlen_(s.therapist);
+    var len = typeof tgLenBook_ === 'function' ? tgLenBook_(s.therapist, chat, s.dateIso) : tgTherSlen_(s.therapist);   /* v170.23.10: روان‌پزشک ویزیت اول یا پیگیری */
     var info = tgTherapistInfo_()[s.therapist] || {};
     var utc = tgSlotUtc_(s);
     var z = tgZoneOf_(tgGetVal_('tz', chat) || 'ir');
@@ -23336,8 +23333,7 @@ function tgScGap_(name) {
 // طول خود جلسه، بدون استراحت
 function tgScLen_(name, kind) {
   if (kind !== TG_KIND_SESS) return TG_SLOT_MIN;
-  const own = tgScTherNum_(name, TG_HEAD_LEN);
-  if (own >= 20 && own <= 120) return own;
+  if (typeof tgLenSlot_ === 'function') return tgLenSlot_(name);   /* v170.23.10: روان‌پزشک با طول ویزیت اول */
   return tgTherSlen_(name);
 }
 
@@ -23421,6 +23417,7 @@ function tgScClash_(name, day, hhmm, kind) {
 
 function tgScSetStart_(chat, who) {
   if (!who) return null;
+  if (typeof tgLenStart_ === 'function') return tgLenStart_(chat);   /* v170.23.10: کارت طول هر نوع جلسه با دکمه‌ها */
   tgSetVal_('scg', chat, 'len');
   const len = tgScLen_(who.name, TG_KIND_SESS), gap = tgScGap_(who.name);
   return tgSend_(chat,
@@ -23441,8 +23438,8 @@ function tgScSetText_(chat, who, text) {
   }
   const n = Number(tgLatinDigits_(t).replace(/[^0-9]/g, ''));
   if (st === 'len') {
-    if (!(n >= 20 && n <= 120)) { tgSend_(chat, 'یک عدد بین ۲۰ تا ۱۲۰ بنویسید.'); return true; }
-    tgScTherSet_(who.name, TG_HEAD_LEN, n);
+    if (!(n >= 15 && n <= 120)) { tgSend_(chat, 'یک عدد بین ۱۵ تا ۱۲۰ بنویسید.'); return true; }
+    if (typeof tgLenSet_ === 'function') tgLenSet_(who.name, 'درمان', n, who.name); else tgScTherSet_(who.name, TG_HEAD_LEN, n);
     tgSetVal_('scg', chat, 'gap');
     tgSend_(chat, '✅ طول جلسه ' + tgFa_(n) + ' دقیقه شد.\n\nحالا فاصلهٔ استراحت بین دو جلسه را بنویسید، بین ۰ تا ۶۰ دقیقه.');
     return true;
@@ -23832,8 +23829,8 @@ function tgScTests() {
     TG_OUTBOX = [];
     tgDel_('scg', 77);
     ok('بدون فلگ، عدد طول جلسه بلعیده نمی‌شود', tgScSetText_(77, { name: 'کسی' }, '۵۰') === false);
-    tgScSetStart_(77, { name: 'کسی' });
-    ok('شروع تنظیم، فلگ می‌گذارد', tgGetVal_('scg', 77) === 'len');
+    tgSetVal_('scg', 77, 'len');   /* v170.23.10: شروع حالا کارت دکمه‌دار است (tgLenTests)؛ مسیر متنی قدیمی هنوز کار می‌کند */
+    ok('مسیر متنی قدیمی طول هنوز فلگ دارد', tgGetVal_('scg', 77) === 'len');
     TG_OUTBOX = [];
     tgScSetText_(77, { name: 'کسی' }, '۱۰');
     ok('طول خارج از بازه رد می‌شود', tgGetVal_('scg', 77) === 'len');
