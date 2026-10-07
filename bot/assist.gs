@@ -11,8 +11,8 @@
  *   «هوشمند»: فقط وقتی ASSIST_GEMINI_PAID = «بله». تا آن موقع هرگز فعال نمی‌شود و به «جستجو» برمی‌گردد. جمنای فقط شمارهٔ ردیف
  *     تأییدشده را انتخاب می‌کند و پاسخ همیشه متن تأییدشده است؛ متن پیش از ارسال بی‌شناسه می‌شود.
  * جمنای رایگان فقط برای یک کار: پیش‌نویس ردیف‌های «دانش دستیار» از «سؤالات متداول» (بی هیچ دادهٔ کاربر)، با «تأیید = خیر».
- * مرزها: مشاورهٔ بالینی، تشخیص یا دارو نه. بحران همیشه پیش از هر تطبیقی با فهرست واژه‌ها (tgIsCrisis_): شمارهٔ اورژانس
- *   کشور کاربر (ASSIST_EMERGENCY، پیش‌فرض متن ایران T_CRISIS) و کارت فوری برای پذیرش بی ساعت سکوت. ویس و فایل به دستیار نمی‌رسد.
+ * مرزها: مشاورهٔ بالینی، تشخیص یا دارو نه. بحران همیشه پیش از هر تطبیق و پیش از جمنای با فهرست جمله‌های صریح (tgIsCrisis_):
+ *   فقط پیام ثابت اورژانس T_CRISIS (از v170.23.19 بی کارت فوری و بی تحویل؛ متن پیام هیچ‌جا نمی‌رود). ویس و فایل به دستیار نمی‌رسد.
  * تحویل به پذیرش: صندوق یکتا (inbAdd_) اگر هست، وگرنه «تماس همکاران» (tgColleague_)؛ کاربر «پیامت به پذیرش رسید» می‌گیرد.
  * رابط وب واحد: doPost با action = assist.ask و امضای HMAC همان سایت (ts و sig در نشانی؛ Apps Script سرآیند نمی‌خواند).
  *   ورودی channel، session_id، text، country؛ خروجی answer، topic، handoff، buttons. نرخ‌گیری برای هر session_id.
@@ -38,7 +38,6 @@ cfg_('ASSIST_ENABLED', '');      /* «بله» = روشن */
 cfg_('ASSIST_MODE', '');         /* منو | جستجو | هوشمند؛ خالی = جستجو */
 cfg_('ASSIST_GEMINI_PAID', '');  /* فقط یاسر بعد از فعال شدن Billing «بله» می‌کند */
 cfg_('ASSIST_MATCH_MIN', '');    /* آستانهٔ جست‌وجو، ۰ تا ۱؛ خالی = ۰٫۶ */
-cfg_('ASSIST_EMERGENCY', '');    /* JSON {کد کشور: متن اورژانس}؛ خالی = متن ایران */
 cfg_('ASSIST_RATE', '');         /* سقف پرسش هر session_id در ساعت؛ خالی = ۲۰ */
 cfg_('ASSIST_REWRITE', '');      /* v170.23.18، v170.23.19: «بله» = روان کردن پاسخ و پاسخ از روی منبع سایت با جمنای (نسخهٔ رایگان هم)، با گارد */
 cfg_('ASSIST_GEMINI_DAILY', '');  /* v170.23.18: سقف فراخوانی جمنای دستیار در روز؛ خالی = ۲۰۰؛ بالای سقف برگشت به «جستجو» */
@@ -243,22 +242,11 @@ function asPurge_() {
 
 /* ───── هستهٔ پاسخ (مشترک بات و وب) ─────
    ctx: {channel, chat, name, country}. خروجی: {answer, topic, handoff, buttons:[{id,text}|{url,text}], crisis, log} */
-function asEmergency_(country) {
-  var m = cfg_('ASSIST_EMERGENCY', '');
-  if (typeof m === 'string' && m) { try { m = JSON.parse(m); } catch (e) { m = {}; } }
-  var c = String(country || '').trim().toUpperCase();
-  return (m && c && m[c]) ? String(m[c]) : T_CRISIS;
-}
+function asEmergency_() { return T_CRISIS; }   /* v170.23.19: پیام ثابت، بی نسخهٔ کشوری (ASSIST_EMERGENCY کنار رفت) */
 /** chat همکاران میز پذیرش */
 function asDeskChats_() {
   if (asDry_()) return TG_MEM['as:desk'] || [];
   return (typeof tgDeskRows_ === 'function' ? tgDeskRows_() : []).map(function (d) { return String(d.chat || '').split(/[,،;\s]+/)[0]; }).filter(String);
-}
-function asUrgent_(ctx) {
-  var line = '🚨 <b>هشدار بحران در دستیار</b> · ' + (ctx.channel === 'bot' ? 'تلگرام' : 'وب') + (ctx.chat ? ' · chat در کارت گفت‌وگو' : ' · بی راه تماس') +
-    (/^smoke-/.test(String(ctx.session || '')) ? ' · 🧪 آزمون دود خودکار، اقدام لازم نیست' : '');   /* v170.23.19: هشدار همچنان می‌رود، فقط برچسب دارد */
-  try { asDeskChats_().forEach(function (c) { tgNotify_(c, TG_NK.urgent, line, { ref: 'AS-CRISIS', force: true }); }); } catch (e) { tgErr_('asUrgent_', e); }
-  if (typeof inbAdd_ === 'function') { try { inbAdd_('as', 'AS-' + (ctx.chat || ctx.session || asNow_()), { chat: ctx.chat || '', text: 'بحران · ' + (ctx.channel || ''), q: 'پذیرش', type: 'بحران', more: true }); } catch (e2) {} }
 }
 function asHandoff_(ctx, text, why) {
   var sum = asScrub_(text, [ctx.name]).replace(/\s+/g, ' ').slice(0, 140);
@@ -284,10 +272,9 @@ function asAsk_(ctx, text) {
   if (ctx && text) ctx.lastText = text;
   if (!text) return { answer: AS_WELCOME, topic: '', handoff: false, buttons: asTopicBtns_(asTopics_()).concat([{ id: 'h', text: 'با پذیرش حرف بزنم' }]) };
   /* بحران همیشه اول */
-  if (tgIsCrisis_(text)) {
-    asUrgent_(ctx);
+  if (tgIsCrisis_(text)) {   /* v170.23.19: فقط پیام ثابت اورژانس؛ بی کارت فوری، بی تحویل، بی جمنای. گزارش فقط شمار، بی متن */
     asLog_(ctx.channel, 'بحران', asMode_(), 'بحران', ctx);
-    return { answer: asEmergency_(ctx.country), topic: 'بحران', handoff: true, crisis: true, buttons: [] };
+    return { answer: asEmergency_(), topic: 'بحران', handoff: false, crisis: true, buttons: [] };
   }
   var mode = asMode_();
   if (mode === AS_MODES.menu) {
@@ -301,7 +288,7 @@ function asAsk_(ctx, text) {
   var kb = asKb_();
   if (mode === AS_MODES.smart) {
     var sm = asSmart_(ctx, text, kb);
-    if (sm && sm.crisis) { asUrgent_(ctx); asLog_(ctx.channel, 'بحران', mode, 'بحران', ctx); return { answer: asEmergency_(ctx.country), topic: 'بحران', handoff: true, crisis: true, buttons: [] }; }
+    if (sm && sm.crisis) { asLog_(ctx.channel, 'بحران', mode, 'بحران', ctx); return { answer: asEmergency_(), topic: 'بحران', handoff: false, crisis: true, buttons: [] }; }
     if (sm && sm.k) return asAnswerOut_(ctx, sm.k, mode);
     mode = AS_MODES.search;   /* اطمینان کم یا خطا: جست‌وجوی داخلی */
   }
@@ -772,7 +759,7 @@ function asRoute_(chat, m) {
   if (tgGetVal_('asa', chat) && t) return asTeamAnsText_(chat, t);
   if (t === '/askreview') { asReviewNext_(chat); return true; }
   if (!tgGetVal_('asq', chat) || !t || t.indexOf('/') === 0 || (typeof tgIsBtnLike_ === 'function' && tgIsBtnLike_(t)) || (typeof tgLooksLikePhone_ === 'function' && tgLooksLikePhone_(t))) return false;
-  if (tgIsCrisis_(t) && typeof tgOnCrisis_ === 'function') { tgDel_('asq', chat); asUrgent_(asCtxBot_(chat, name)); asLog_('bot', 'بحران', asMode_(), 'بحران', asCtxBot_(chat, name)); tgOnCrisis_(chat, name, m.from && m.from.username ? '@' + m.from.username : '', t); return true; }
+  if (tgIsCrisis_(t) && typeof tgOnCrisis_ === 'function') { tgDel_('asq', chat); asLog_('bot', 'بحران', asMode_(), 'بحران', asCtxBot_(chat, name)); tgOnCrisis_(chat, name, m.from && m.from.username ? '@' + m.from.username : '', t); return true; }
   tgSetVal_('aslast', chat, t.slice(0, 500));
   asBotSend_(chat, asAsk_(asCtxBot_(chat, name), t));
   return true;
@@ -982,12 +969,10 @@ function asTests() {
     ok('پرسش پرداخت تأییدنشده جواب نمی‌گیرد', asAsk_({ channel: 'bot' }, 'پرداخت با کارت خارجی').answer.indexOf('تأییدنشده') < 0);
     ok('هیچ متنی به جمنای نرفت (جستجو)', TG_MEM['as:gemcalls'].length === 0);
     /* بحران همیشه اول، حتی با تطبیق */
-    TG_MEM['notify'] = [];
-    var r3 = asAsk_({ channel: 'web', session: 's1' }, 'قیمت جلسه چقدر است، می‌خواهم خودکشی کنم');
-    ok('بحران پیش از تطبیق: شمارهٔ اورژانس و کارت فوری', r3.crisis && /۱۲۳/.test(r3.answer) && (TG_MEM['notify'] || []).some(function (x) { return x.chat === '801' && x.kind === TG_NK.urgent; }));
-    TG_CFG_.ASSIST_EMERGENCY = '{"DE":"Notruf 112"}';
-    ok('اورژانس کشور کاربر', asAsk_({ channel: 'web', session: 's1', country: 'de' }, 'می‌خواهم خودکشی کنم').answer === 'Notruf 112');
-    delete TG_CFG_.ASSIST_EMERGENCY;
+    TG_MEM['notify'] = []; TG_MEM['as:handoff'] = [];
+    var r3 = asAsk_({ channel: 'web', session: 's1', country: 'DE' }, 'قیمت جلسه چقدر است، می‌خواهم خودکشی کنم');
+    ok('بحران پیش از تطبیق: فقط پیام ثابت اورژانس (v170.23.19)', r3.crisis && r3.answer === T_CRISIS && /۱۲۳/.test(r3.answer) && /۱۱۵/.test(r3.answer) && /۱۴۸۰/.test(r3.answer) && !r3.handoff && !r3.buttons.length, JSON.stringify(r3));
+    ok('بحران: بی کارت فوری و بی تحویل به پذیرش', !(TG_MEM['notify'] || []).length && !(TG_MEM['as:handoff'] || []).length, JSON.stringify(TG_MEM['notify']));
     /* منو: متن آزاد مستقیم به پذیرش */
     TG_CFG_.ASSIST_MODE = 'منو'; TG_MEM['as:handoff'] = [];
     var r4 = asAsk_({ channel: 'bot', chat: '502', name: 'مراجع نمونه' }, 'قیمت جلسه چقدر است؟ شماره‌ام 0912' + '3456789');   // pii:ok ساختگی
@@ -1347,9 +1332,13 @@ function asTests7() {
     var ver = ssVerify_; ssVerify_ = function () { return 'ok'; }; var w;
     try { w = JSON.parse(asWeb_({}, '{}', { action: 'assist.ask', channel: 'site', session_id: 'test-s1', text: 'دوره‌های مدرسهٔ تجربه برای دانشجویان؟', audience: 'دانشجو' }).getContent()); } finally { ssVerify_ = ver; }
     ok('خروجی وب: log_id، source و source_url (قرارداد پل)', w.ok && w.log_id && w.source === 'سایت' && w.source_url === S + '/school/', JSON.stringify(w));
-    ok('بحران: گونه‌های «نمی‌خواهم زنده باشم» و «خودم را بکشم»', ['دیگر نمی‌خواهم زنده باشم', 'نمیخوام زنده بمونم', 'می‌خواهم خودم را بکشم'].every(tgIsCrisis_) && !tgIsCrisis_('می‌خواهم زندگی بهتری داشته باشم'));
-    TG_MEM['notify'] = []; asAsk_({ channel: 'site', session: 'smoke-2026-10-08' }, 'دیگر نمی‌خواهم زنده باشم');
-    ok('آزمون دود: هشدار بحران می‌رود ولی برچسب «آزمون دود» دارد', (TG_MEM['notify'] || []).some(function (x) { return x.kind === TG_NK.urgent && /آزمون دود/.test(x.text || x.line || JSON.stringify(x)); }), JSON.stringify(TG_MEM['notify']));
+    ok('بحران: فقط جمله‌های صریح خودکشی و آسیب به خود', ['دیگر نمی‌خواهم زنده باشم', 'نمیخوام زنده بمونم', 'می‌خواهم خودم را بکشم', 'به خودم آسیب می‌زنم', 'به خودکشی فکر می‌کنم', 'I want to kill myself'].every(tgIsCrisis_));
+    var gen = ['نمی‌خواهم زندگی‌ام خراب شود', 'نمیخوام زندگی کنم اینجوری', 'الهی بمیرم برات', 'دیگه نمی‌کشم از این کار', 'قرص خوردم و خوابیدم', 'تمومش کنم این بحث را'].filter(tgIsCrisis_);
+    ok('جمله‌های کلی بحران شناخته نمی‌شوند (از جمله «نمی‌خواهم زندگی‌ام خراب شود»)', gen.length === 0, gen.join(' | '));
+    TG_MEM['notify'] = []; var leads0 = TG_OUTBOX.length, appended = 0, appendK = tgAppendLead_; tgAppendLead_ = function () { appended++; };
+    try { TG_OUTBOX = []; tgOnCrisis_('612', 'مراجع نمونه', '', 'می‌خواهم خودکشی کنم'); } finally { tgAppendLead_ = appendK; }
+    ok('مسیر بحران بات: فقط یک پیام ثابت، بی لید و بی کارت فوری', TG_OUTBOX.length === 1 && TG_OUTBOX[0].text === T_CRISIS && appended === 0 && !(TG_MEM['notify'] || []).length, JSON.stringify(TG_OUTBOX));
+    ok('پیام بحران گروه همان پیام ثابت است', T_CRISIS_GROUP === T_CRISIS && TG_CRISIS_STRONG === TG_CRISIS_WORDS);
     ok('اکشن kb_index در درگاه، فقط نوشتنی', typeof PB_ACTIONS.kb_index === 'function' && PB_WRITE.indexOf('kb_index') > -1);
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
   finally { asKnownNames_ = keep.names; TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg; AS_IDX_MEMO = null; }
