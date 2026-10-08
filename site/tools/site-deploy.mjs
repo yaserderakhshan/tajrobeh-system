@@ -6,7 +6,7 @@
 // وگرنه کسی در وردپرس دستی عوضش کرده (ناهمخوانی) ← آن شیء منتشر نمی‌شود و گردش کار قرمز می‌شود.
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { faDigits, fail, hash, loadEnv, log, maskSecrets, output, readJson, report, sleep, summary, unmaskFrom, warn, wpClient } from './site-lib.mjs';
+import { faDigits, fail, hash, loadEnv, phpJson, log, maskSecrets, output, readJson, report, sleep, summary, unmaskFrom, warn, wpClient } from './site-lib.mjs';
 
 loadEnv();
 const MODE = process.argv[2] || 'plan';
@@ -113,7 +113,7 @@ async function write(it, value) {
   else if (it.kind === 'snippet-active') r = await wp.post(`/wp-json/tj-ops/v1/snippet-active/${it.id}`, { active: value });
   else if (it.kind === 'css') r = await wp.post(`/wp-json/wp/v2/global-styles/${gsId}`, { styles: { ...it.styles, css: value } });
   else if (it.kind === 'templates' || it.kind === 'template-parts') r = await wp.post(`/wp-json/wp/v2/${it.kind}/${it.tid}`, { content: value });
-  else if (it.kind === 'yoast') r = await wp.post(`/wp-json/tj-ops/v1/yoast/${it.id}`, { ...value, expect: hash(JSON.stringify(it.live)) });
+  else if (it.kind === 'yoast') r = await wp.post(`/wp-json/tj-ops/v1/yoast/${it.id}`, { ...value, expect: hash(phpJson(it.live)) });
   if (!r?.ok) throw new Error(`${it.kind} ${it.id}: نوشتن رد شد HTTP ${r?.status} ${(r?.json?.code || '')}`);
   return r.json;
 }
