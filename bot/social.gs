@@ -95,11 +95,14 @@ function soResolve_(to) {
   var t = String(to || '').trim();
   if (!t) return [];
   if (soIsChannel_(t)) { var pc = typeof pbChannel_ === 'function' ? pbChannel_('public') : null; return [pc && pc.chat ? pc.chat : SO_CHANNEL]; }   /* v167: از تب «کانال‌ها» */
-  if (/^-?\d{5,}$/.test(t)) return [t];
-  var sh = tgSS_().getSheetByName(TG_PEOPLE_TAB), out = [];
+  /* v170.23.21: چند chat_id عددی با کاما («123,456») هم پذیرفته می‌شود؛ بخش‌های نام و نقش از تب «افراد» */
+  var parts = t.split(/[،,;\s]+/).map(function (s) { return tgLatinDigits_(s.trim()); }).filter(Boolean), out = [];
+  parts.filter(function (p) { return /^-?\d{5,}$/.test(p); }).forEach(function (p) { if (out.indexOf(p) < 0) out.push(p); });
+  parts = t.split(/[،,]/).map(function (s) { return s.trim(); }).filter(function (p) { return p && !/^-?[\d۰-۹]{5,}$/.test(p); });
+  if (!parts.length) return out;
+  var sh = tgSS_().getSheetByName(TG_PEOPLE_TAB);
   if (!sh) return out;
   var rows = sh.getDataRange().getValues();
-  var parts = t.split(/[،,]/).map(function (s) { return s.trim(); }).filter(Boolean);
   for (var i = 1; i < rows.length; i++) {
     var name = String(rows[i][0] || ''), ids = String(rows[i][2] || ''), roles = String(rows[i][3] || '');
     if (!ids) continue;

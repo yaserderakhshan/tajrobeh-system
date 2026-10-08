@@ -65,6 +65,8 @@
 | مجله | نویسنده، بازبینی، صدا، انتشار | `mag_contrib.gs`، `author.gs`، `voice.gs` |
 | ساختمان | شارژ، پرداخت (کارت از نقش «روان‌پزشکی» در «افراد»)، هزینه، اطلاعیه | `building.gs` |
 | پرداخت | پرداخت تتر برای خارج از ایران | `tgPay*`، `tgPayTick` |
+| هر کس | بحران (v170.23.19، تصمیم یاسر): فقط جمله‌های صریح خودکشی و آسیب به خود (`TG_CRISIS_WORDS`)، پیش از هر تطبیق و پیش از جمنای ← فقط پیام ثابت `T_CRISIS` با ۱۲۳، ۱۱۵ و ۱۴۸۰. بی کارت فوری، بی لید، بی تحویل؛ متن پیام هیچ‌جا نمی‌رود. همین در دستیار، گروه و ویس | `tgIsCrisis_`، `tgOnCrisis_`، `asAsk_` |
+| مراجع | دستیار «سؤال دارم»: ابزارها ← دانش تأییدشده (اولویت مخاطب) ← نمایهٔ سایت و رویدادهای پیش‌رو (برگهٔ پنهان «نمایهٔ دانش»، گردش کار `assist-index.yml`) ← سه موضوع نزدیک و پذیرش | `asAsk_`، `asSiteAnswer_`، `asIdxIngest_` |
 | کمپین C-004 | `ebi<id>-<hex>` اتصال ثبت‌نام سایت · `ebi-<نوع>` نام و شماره ← `/tj/v1/ebi-join` ← اتصال · `ebi-list` نوشتن و دیدن فهرست · `ebi-voice` ویس درمانگر با اجازه ← راهبران. تب‌ها: «پلی‌لیست ابی · ویس‌ها» و «پلی‌لیست ابی · ثبت‌نام‌ها» (هاب پذیرش، بی شماره). راهبران: کلید «راهبران C-004» در «تنظیمات خصوصی بات» | `ebiRoute_`، `ebiCb_`، `ebiHourly_` |
 
 ## ۵. انتشار
@@ -75,16 +77,16 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.12.6`
+نسخهٔ کد: `v170.23.23`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۴۱۵ | ۳۳ |
-| `telegram.gs` | ۳۷۷۷۸ | ۲۰۴۱ |
+| `Code.gs` | ۴۲۱ | ۳۳ |
+| `telegram.gs` | ۳۷۹۲۳ | ۲۰۴۷ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
-| `social.gs` | ۳۳۸ | ۲۵ |
+| `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
 | `maint.gs` | ۴ | ۱ |
 | `v162.gs` | ۷۹۹ | ۶۴ |
@@ -97,13 +99,13 @@
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۵۷۶ | ۱۲۰ |
-| `v168.gs` | ۲۳۷۶ | ۱۴۸ |
+| `v168.gs` | ۲۴۰۴ | ۱۴۹ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
-| `stuck.gs` | ۴۷۸ | ۳۴ |
-| `leadmodel.gs` | ۷۷۷ | ۴۱ |
+| `stuck.gs` | ۴۷۹ | ۳۴ |
+| `leadmodel.gs` | ۷۷۸ | ۴۱ |
 | `comments.gs` | ۱۰۳۶ | ۶۵ |
 | `dq.gs` | ۶۰۲ | ۴۹ |
-| `cfg.gs` | ۱۷۷ | ۱۴ |
+| `cfg.gs` | ۱۹۲ | ۱۴ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -114,13 +116,15 @@
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
 | `kartable.gs` | ۴۴۷ | ۳۴ |
-| `ai.gs` | ۲۱۱ | ۱۵ |
+| `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `migrate.gs` | ۵۶۲ | ۵۶ |
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
-| `assist.gs` | ۵۶۷ | ۵۰ |
-| `leadspeed.gs` | ۲۵۹ | ۲۳ |
+| `assist.gs` | ۱۳۴۸ | ۱۱۰ |
+| `leadspeed.gs` | ۹۵۶ | ۸۰ |
+| `nurture.gs` | ۲۶۵ | ۲۷ |
+| `reactivate.gs` | ۲۲۳ | ۲۲ |
 
 ### کارهای زمان‌دار
 
@@ -154,10 +158,15 @@
 
 | ثابت | نام تب | فایل‌ها |
 |---|---|---|
+| `AB_FN_TAB` | «قیف خارج از ایران» | `leadspeed.gs` |
+| `AB_FX_TAB` | «اصلاح دادهٔ لیدها · پیش‌نمایش» | `leadspeed.gs` |
+| `AB_PV_TAB` | «مبنای ارجاع · پیش‌نمایش» | `leadspeed.gs` |
+| `AS_IDX_TAB` | «نمایهٔ دانش» | `assist.gs` |
 | `BG_TAB` | «سهمیهٔ اجرا» | `v168.gs` |
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
 | `CM_FIX_TAB` | «اصلاح کامنت‌ها · پیش‌نمایش» | `comments.gs` |
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
+| `CR_FX_TAB` | «لیدهای بحران · پیش‌نمایش» | `telegram.gs` |
 | `DQ_TAB` | «صف ارسال» | `dq.gs` |
 | `EBI_MIRROR_TAB` | «پلی‌لیست ابی · ثبت‌نام‌ها» | `ebi.gs` |
 | `HUB_GUIDE` | «راهنما» | `ops.gs` |
@@ -205,7 +214,7 @@
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
 | `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` |
-| `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` |
+| `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
 | `TG_MIG_TAB` | «تست مهاجرت» | `mig.gs` |
@@ -245,7 +254,7 @@
 | `TG_STAT_TAB` | «آمار روزانهٔ بات» | `telegram.gs` |
 | `TG_SUP_TAB` | «درخواست سوپرویژن» | `telegram.gs` |
 | `TG_TEST_TAB` | «تست‌ها» | `telegram.gs` |
-| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` `psy2.gs` `sesslen.gs` |
+| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` `psy2.gs` `sesslen.gs` `leadspeed.gs` |
 | `TG_TK_TAB` | «پیام‌های درمانگران» | `telegram.gs` `kartable.gs` |
 | `TG_TSK_TAB` | «کارها» | `telegram.gs` |
 | `TG_USERS_TAB` | «کاربران بات» | `telegram.gs` `ebi.gs` |
@@ -356,6 +365,7 @@
 | امنیت ورودی سایت | `ssTests` |
 | اصلی ۱ از ۳ | `tgRunTests1` |
 | اصلی ۲ از ۳ | `tgRunTests2` |
+| لیدهای بحران قدیمی و 🆘 (v170.23.20) | `crTests` |
 | اصلی ۳ از ۳ | `tgRunTests3` |
 | دایرکتوری صفحهٔ اصلی p3 (v170.23.2) | `tgDirP3Tests` |
 | دادهٔ دکمه (v170.9.2) | `tgCbTests` |
@@ -381,7 +391,17 @@
 | روان‌پزشکی: ویزیت و فرم اداری (v170.23.9) | `ps3Tests` |
 | طول جلسهٔ قابل ویرایش (v170.23.10) | `tgLenTests` |
 | دستیار پاسخ‌گو (v170.23.11) | `asTests` |
+| دستیار ۲ (v170.23.15) | `asTests2` |
+| دستیار ۳ · ابزارها (v170.23.16) | `asTests3` |
+| دستیار ۴ · یادگیری (v170.23.17) | `asTests4` |
+| دستیار ۵ · جمنای با گارد (v170.23.18) | `asTests5` |
+| دستیار ۷ · نمایهٔ سایت (v170.23.19) | `asTests7` |
 | پاسخ زیر ۱۰ دقیقه و اولویت روزانه (v170.23.12) | `lsTests` |
+| لیدهای خارج · مبنای ارجاع و داده (v170.23.21) | `abTests` |
+| لیدهای خارج · راهبری پذیرش (v170.23.22) | `abTests2` |
+| لیدهای خارج · قیف هفتگی (v170.23.23) | `abTests3` |
+| پیگیری گیرکرده‌ها (v170.23.13) | `nuTests` |
+| بازگرداندن مراجعان قدیمی (v170.23.14) | `reTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)

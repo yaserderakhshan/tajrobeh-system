@@ -173,6 +173,10 @@ function handleWebForm_(body) {
   var pref  = String(pickKey_(flat, ['pref_channel', 'preferred_channel', 'کانال ترجیحی', 'راه ارتباط']) || '').trim();
   // v168.9: «کشور محل زندگی» و «از کجا با ما آشنا شدید؟» (ستون‌های تازهٔ انتهای «لیدها»)
   var lf = typeof v1689WebFields_ === 'function' ? v1689WebFields_(flat) : null;
+  /* v170.23.21: منطقهٔ زمانی مرورگر و «زمان مناسب» که پل سایت جدا می‌فرستد؛ «داخل یا خارج» از کشور، منطقهٔ زمانی و شماره */
+  var wtz = String(pickKey_(flat, ['timezone', 'tz', 'visitor_tz']) || '').trim().slice(0, 60);
+  var best = String(pickKey_(flat, ['best_time', 'contact_time', 'زمان مناسب']) || '').trim().slice(0, 80);
+  var reg = typeof abRegion_ === 'function' ? abRegion_(phone, wtz, lf ? lf.ctry : '') : tgRegion_(phone);
 
   // فرم آزمایشی را وارد کارتابل نکن: نه سطر، نه کارت، نه پیام (پیش از مسیر مدرسه و پرونده‌های تکراری، پس برای همهٔ فرم‌های سایت)
   if (isTestLead_(name, phone, email, flat)) { logError_('فرم تستی نادیده گرفته شد', null); return; }
@@ -219,7 +223,7 @@ function handleWebForm_(body) {
       name,
       'فرم سایت',
       phone ? "'" + phone : '',
-      tgRegion_(phone),
+      reg,
       msg,
       'جدید', '', '', '',
       (email ? 'ایمیل: ' + email + ' · ' : '') + 'صفحه: ' + page
@@ -228,7 +232,9 @@ function handleWebForm_(body) {
     /* v170.20: از نویسندهٔ واحد (tgAppendLead_)؛ قلاب‌های نوع لید، مهلت و اقدام بعدی برای لید سایت هم اجرا می‌شود */
     var ex = {};
     if (pref) ex['کانال ترجیحی'] = pref;
-    var rwL = tgAppendLead_({ source: src, name: name, channel: 'فرم سایت', phone: phone, region: tgRegion_(phone), firstText: msg,
+    if (wtz) ex['منطقهٔ زمانی'] = wtz;
+    if (best) ex['زمان مناسب'] = best;
+    var rwL = tgAppendLead_({ source: src, name: name, channel: 'فرم سایت', phone: phone, region: reg, firstText: msg,
       status: 'جدید', note: rowL[12], extra: ex, country: lf ? lf.ctry : '', heard: lf ? lf.heard : '' });
     if (typeof TG_DRY !== 'undefined' && TG_DRY) return;   /* v166.29.1: حالت خشک (آزمون دود)؛ سطری نوشته نشد */
     if (typeof rwL === 'number' && lf) { try { v1689WebWrite_(tgSS_().getSheetByName(TG_LEADS), rwL, lf); } catch (eLf) { logError_('v1689WebWrite_: ' + eLf, null); } }
