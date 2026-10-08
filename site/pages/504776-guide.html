@@ -536,53 +536,372 @@
 /* == چهار معیار: فشرده روی موبایل == */
 @media (max-width:760px){.tj2 .std>div{flex-direction:row;text-align:start;align-items:center;gap:10px;padding:10px 12px}.tj2 .std>div img{width:32px;height:32px;margin:0;flex:none}.tj2 .std>div b{font-size:13px}.tj2 .std>div span{font-size:11.5px;line-height:1.5}}
 </style>
-<div class="tj2 alignfull" id="tj2">
-<section class="hero" id="hero">
-<div class="wrap">
-<div class="copy">
-<span class="eyebrow">راهنماهای عملی</span>
-<h1>کارهایی که پیش از شروع تراپی<br>باید از <em>سیستم</em> سر دربیاورید</h1>
-<p class="lede">این‌ها صفحه‌های فروش نیستند. راهنمای گام‌به‌گام کارهایی است که فارسی‌زبانان ساکن خارج از ایران پیش از شروع درمان با آن‌ها گیر می‌کنند: نوبت بیمه، بازپرداخت هزینه، پرداخت ارزی و اختلاف ساعت. هر راهنما منبع رسمی دارد و تاریخ بازبینی‌اش روی صفحه است.</p>
-<div class="ctas">
-<a class="btn btn-brand" href="/persian-therapy/">تراپی فارسی خارج از ایران</a>
-<a class="btn btn-ghost" href="/get-therapy/">جلسهٔ معارفهٔ رایگان</a>
-</div>
-</div>
-<div class="art"><img src="/wp-content/uploads/2026/09/tjl-cut-path.webp" alt="دستی که مسیر را روی کاغذ می‌کشد، تصویرسازی راهنماهای مرکز تجربه زندگی" width="1335" height="1259" fetchpriority="high" decoding="async" loading="eager"></div>
-</div>
+<style>
+/* == tj-home v3.0 (مهر ۱۴۰۵) · لایهٔ صفحهٔ اصلی روی استایل home-v2؛ فقط زیر .tj2.v3 == */
+main.tj-page{margin-block-start:0}.wp-block-post-content>.tj2.alignfull{margin-top:0}
+.tj2.v3 section{padding-block:clamp(44px,6vw,80px)}
+.tj2.v3 .center .h2{margin-bottom:6px}
+.tj2.v3 svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* هیرو */
+.tj2.v3 .v3h{padding-block:clamp(28px,4.5vw,56px) 0;background:#fff}
+.tj2.v3 .v3h>.wrap:first-child{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(20px,4vw,56px);align-items:center}
+.tj2.v3 .v3h .copy{min-width:0}
+.tj2.v3 .v3h h1{font-size:clamp(28px,3vw,38px);line-height:1.5;color:var(--tj-ink);margin:14px 0 12px;font-weight:800;max-width:none}
+.tj2.v3 .v3h h1 em{font-style:normal;color:var(--tj-red)}
+.tj2.v3 .v3h .lede{font-size:clamp(15px,1.4vw,17px);max-width:56ch;margin:0 0 18px}
+.tj2.v3 .v3h .art{min-width:0;text-align:center}
+.tj2.v3 .v3h .art img{max-width:100%;height:auto}
+.tj2.v3 .ring{display:inline-flex;align-items:center;gap:8px;margin:0;padding:5px 12px;border:1px solid var(--tj-red-400);border-radius:999px;background:#fff;color:var(--tj-red);font-size:13px;line-height:1.6}
+.tj2.v3 .ring span{flex:none;color:inherit;font-size:13px}
+.tj2.v3 .ring .dot{width:7px;height:7px;border-radius:50%;background:var(--tj-red)}
+
+/* جعبهٔ پرسش (الگوی Command Search از 21st، بازنویسی با توکن‌های tj2) */
+.tj2.v3 .ask{position:relative;max-width:560px;z-index:5}
+.tj2.v3 .ask-f{display:flex;align-items:center;gap:10px;height:54px;padding-inline:16px 10px;border:1.5px solid var(--tj-line);border-radius:16px;background:#fff;box-shadow:0 6px 22px rgba(14,14,14,.06);transition:border-color .2s,box-shadow .2s;cursor:text}
+.tj2.v3 .ask-f:focus-within{border-color:var(--tj-red-400);box-shadow:0 0 0 4px var(--tj-tint)}
+.tj2.v3 .ask-f svg{width:20px;height:20px;flex:none;color:var(--tj-mut)}
+.tj2.v3 .ask-f input{flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;font:inherit;font-size:16px;color:var(--tj-ink);padding:0;-webkit-appearance:none;appearance:none}
+.tj2.v3 .ask-f input::placeholder{color:var(--tj-mut);opacity:1}
+.tj2.v3 .ask-f input::-webkit-search-cancel-button{display:none}
+.tj2.v3 .ask-pop{position:absolute;inset-inline:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--tj-line);border-radius:16px;box-shadow:0 18px 40px rgba(14,14,14,.12);padding:6px;max-height:min(60vh,420px);overflow:auto}
+.tj2.v3 .ask-pop[hidden]{display:none}
+.tj2.v3 .ask-pop ul{list-style:none;margin:0;padding:0}
+.tj2.v3 .ask-pop li a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:var(--tj-ink);text-decoration:none;line-height:1.5}
+.tj2.v3 .ask-pop li a small{display:block;color:var(--tj-mut);font-size:12.5px}
+.tj2.v3 .ask-pop li a .g{margin-inline-start:auto;flex:none;font-size:11.5px;color:var(--tj-red);background:var(--tj-tint);border-radius:999px;padding:1px 9px}
+.tj2.v3 .ask-pop li a:hover,.tj2.v3 .ask-pop li a.on{background:var(--tj-sunk)}
+.tj2.v3 .ask-pop .emp{padding:10px;color:var(--tj-mut);font-size:14px}
+.tj2.v3 .ask-all{display:block;margin-top:4px;padding:9px 10px;border-top:1px solid var(--tj-line);color:var(--tj-red);font-size:14px;text-decoration:none}
+
+/* چیپ‌های نیاز */
+.tj2.v3 .needs{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:14px 0 20px;max-width:600px}
+.tj2.v3 .needs .lbl{font-size:13px;color:var(--tj-mut);margin-inline-end:2px}
+.tj2.v3 .need{display:inline-block;padding:4px 12px;border:1px solid var(--tj-line);border-radius:999px;font-size:13.5px;line-height:1.8;color:var(--tj-soft);background:#fff;text-decoration:none;transition:border-color .2s,color .2s,background .2s}
+.tj2.v3 .need:hover{border-color:var(--tj-red-400);color:var(--tj-red);background:var(--tj-tint)}
+.tj2.v3 .v3h .ctas{display:flex;flex-wrap:wrap;gap:10px;margin:0}
+.tj2.v3 .back{margin:12px 0 0;font-size:13.5px;color:var(--tj-mut)}
+.tj2.v3 .back a{color:var(--tj-ink);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--tj-line)}
+
+/* اعداد */
+.tj2.v3 .v3h .nums{list-style:none;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 18px;margin:clamp(24px,4vw,44px) 0 0;padding:16px 0;border-block:1px solid var(--tj-line)}
+.tj2.v3 .v3h .nums li{display:flex;align-items:baseline;gap:6px;margin:0}
+.tj2.v3 .v3h .nums b{font-size:clamp(18px,2vw,24px);color:var(--tj-ink);font-weight:800}
+.tj2.v3 .v3h .nums span{font-size:13px;color:var(--tj-mut)}
+
+/* مسیرها: تب سگمنتی (الگوی Segmented Tabs از 21st) */
+.tj2.v3 .paths{background:var(--tj-sunk)}
+.tj2.v3 .seg{position:relative;display:flex;gap:4px;width:max-content;max-width:100%;margin:18px auto 22px;padding:5px;border-radius:999px;background:#fff;border:1px solid var(--tj-line);overflow-x:auto;scrollbar-width:none}
+.tj2.v3 .seg::-webkit-scrollbar{display:none}
+.tj2.v3 .seg button{position:relative;z-index:1;flex:none;border:0;background:transparent;font:inherit;font-size:14.5px;line-height:1.6;padding:8px 16px;border-radius:999px;color:var(--tj-soft);cursor:pointer;transition:color .25s;white-space:nowrap}
+.tj2.v3 .seg button[aria-selected="true"]{color:#fff}
+.tj2.v3 .seg button:focus-visible{outline:2px solid var(--tj-red-400);outline-offset:2px}
+.tj2.v3 .seg-ink{position:absolute;z-index:0;top:5px;bottom:5px;left:0;width:0;border-radius:999px;background:var(--tj-ink);transition:left .35s cubic-bezier(.3,.7,.2,1),width .35s cubic-bezier(.3,.7,.2,1)}
+.tj2.v3:not(.js) .seg{display:none}
+.tj2.v3.js .pan{display:none}
+.tj2.v3.js .pan.on{display:block;animation:tjv3in .35s ease}
+@keyframes tjv3in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tj2.v3 .pan+.pan{margin-top:28px}
+.tj2.v3.js .pan+.pan{margin-top:0}
+.tj2.v3 .pan-l{max-width:760px;margin:0 auto 18px;text-align:center;font-size:15.5px;line-height:1.95}
+.tj2.v3 .clk{margin:-8px auto 16px;text-align:center;font-size:13px;color:var(--tj-mut);min-height:1.9em}
+.tj2.v3 .clk b{color:var(--tj-ink);font-weight:600}
+.tj2.v3 .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tj2.v3 .tile{display:grid;grid-template-columns:44px minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;align-items:center;padding:14px 16px;background:#fff;border:1px solid var(--tj-line);border-radius:16px;text-decoration:none;color:var(--tj-soft);transition:border-color .2s,transform .2s,box-shadow .2s;min-width:0}
+.tj2.v3 .tile:hover{border-color:var(--tj-red-400);transform:translateY(-2px);box-shadow:0 10px 24px rgba(14,14,14,.06)}
+.tj2.v3 .tile img{grid-row:1/3;width:44px;height:44px;object-fit:contain}
+.tj2.v3 .tile b{display:block;color:var(--tj-ink);font-size:15.5px;line-height:1.6;font-weight:700}
+.tj2.v3 .tile small{display:block;font-size:13px;line-height:1.7;color:var(--tj-mut)}
+.tj2.v3 .tile.hot{border-color:var(--tj-red-400);background:var(--tj-tint-2)}
+.tj2.v3 .tile.hot b{color:var(--tj-red)}
+.tj2.v3 .tile[dir="ltr"]{text-align:left}
+.tj2.v3 .minis{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 6px;margin-top:16px}
+.tj2.v3 .minis .lbl{font-size:13px;color:var(--tj-mut);margin-inline-end:4px}
+.tj2.v3 .minis a{font-size:13px;line-height:1.8;padding:2px 11px;border-radius:999px;background:#fff;border:1px solid var(--tj-line);color:var(--tj-soft);text-decoration:none}
+.tj2.v3 .minis a:hover{color:var(--tj-red);border-color:var(--tj-red-400)}
+
+/* این روزها */
+.tj2.v3 .now{padding-block:clamp(28px,4vw,44px)}
+.tj2.v3 .now-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.tj2.v3 .now-h h2{font-size:18px;color:var(--tj-ink);margin:0;font-weight:700}
+.tj2.v3 .now-dot{width:8px;height:8px;border-radius:50%;background:var(--tj-red);box-shadow:0 0 0 0 rgba(200,63,73,.5);animation:tjv3pulse 2.4s infinite}
+@keyframes tjv3pulse{0%{box-shadow:0 0 0 0 rgba(200,63,73,.45)}70%{box-shadow:0 0 0 9px rgba(200,63,73,0)}100%{box-shadow:0 0 0 0 rgba(200,63,73,0)}}
+.tj2.v3 .now-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;scrollbar-width:thin}
+.tj2.v3 .nw{scroll-snap-align:start;display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--tj-line);border-radius:14px;background:#fff;text-decoration:none;min-width:0;transition:border-color .2s}
+.tj2.v3 .nw:hover{border-color:var(--tj-red-400)}
+.tj2.v3 .nw img{width:48px;height:48px;flex:none;border-radius:10px;object-fit:cover;background:var(--tj-sunk)}
+.tj2.v3 .nw span{display:block;min-width:0}
+.tj2.v3 .nw em{display:block;font-style:normal;font-size:11.5px;color:var(--tj-red);line-height:1.6}
+.tj2.v3 .nw b{display:block;font-size:13.5px;line-height:1.7;color:var(--tj-ink);font-weight:600}
+.tj2.v3 .nw.gone{display:none}
+
+/* آدم‌ها: مارکی آواتار (الگوی Testimonials Marquee از 21st) */
+.tj2.v3 .people{overflow:hidden}
+.tj2.v3 .crit{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:10px 0 0}
+.tj2.v3 .crit span{font-size:12.5px;padding:2px 10px;border-radius:999px;background:var(--tj-tint);color:var(--tj-red)}
+.tj2.v3 .mq{margin:22px 0 8px;display:grid;gap:10px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.tj2.v3 .mq-row{overflow:hidden}
+.tj2.v3 .mq-track{display:flex;gap:10px;width:max-content}
+.tj2.v3 .mq.go .mq-track{animation:tjv3mq var(--d,70s) linear infinite}
+.tj2.v3 .mq.go .rev .mq-track{animation-direction:reverse}
+.tj2.v3 .mq:hover .mq-track,.tj2.v3 .mq:focus-within .mq-track{animation-play-state:paused}
+@keyframes tjv3mq{from{transform:translateX(0)}to{transform:translateX(50%)}}
+.tj2.v3 .p3{flex:none;display:flex;align-items:center;gap:9px;padding:6px 14px 6px 6px;padding-inline:6px 14px;border:1px solid var(--tj-line);border-radius:999px;background:#fff;text-decoration:none;transition:border-color .2s}
+.tj2.v3 .p3:hover{border-color:var(--tj-red-400)}
+.tj2.v3 .p3 img{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none;background:var(--tj-sunk)}
+.tj2.v3 .p3 span{display:block;line-height:1.5}
+.tj2.v3 .p3 b{display:block;font-size:13.5px;color:var(--tj-ink);font-weight:600;white-space:nowrap}
+.tj2.v3 .p3 small{display:block;font-size:11.5px;color:var(--tj-mut);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.tj2.v3 .mq.go .mq-track{animation:none}.tj2.v3 .mq-row{overflow-x:auto}.tj2.v3 .now-dot{animation:none}}
+.tj2.v3 .fac{display:flex;align-items:center;gap:14px;max-width:760px;margin:18px auto 0;padding:12px 16px;border:1px solid var(--tj-line);border-radius:18px;background:var(--tj-sunk);text-decoration:none;color:var(--tj-soft);transition:border-color .2s}
+.tj2.v3 .fac:hover{border-color:var(--tj-red-400)}
+.tj2.v3 .fac .stack{display:flex;flex:none}
+.tj2.v3 .fac .stack img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #fff;margin-inline-start:-10px;background:#fff;filter:grayscale(1);transition:filter .3s}
+.tj2.v3 .fac .stack img:first-child{margin-inline-start:0}
+.tj2.v3 .fac:hover .stack img{filter:none}
+.tj2.v3 .fac-t{min-width:0;flex:1}
+.tj2.v3 .fac-t b{display:block;color:var(--tj-ink);font-size:15px}
+.tj2.v3 .fac-t small{display:block;font-size:12.5px;line-height:1.7;color:var(--tj-mut)}
+.tj2.v3 .fac>svg{width:18px;height:18px;flex:none;color:var(--tj-red)}
+.tj2.v3 .people .ctas,.tj2.v3 .flow .ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:22px}
+
+/* چهار قدم */
+.tj2.v3 .flow{background:var(--tj-sunk)}
+.tj2.v3 .flow .steps{margin-top:24px}
+.tj2.v3 .promise{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;margin:22px 0 0;padding:0}
+.tj2.v3 .promise li{position:relative;padding-inline-start:20px;font-size:14px;color:var(--tj-soft);margin:0}
+.tj2.v3 .promise li::before{content:"✓";position:absolute;inset-inline-start:0;top:0;color:var(--tj-red);font-weight:700}
+
+/* اکوسیستم: فهرست سبک + نوار اعتماد سازمانی */
+.tj2.v3 .ix{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));margin-top:24px;border-block:1px solid var(--tj-line)}
+.tj2.v3 .ix a{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:18px 10px;text-decoration:none;color:var(--tj-soft);border-inline-start:1px solid var(--tj-line);transition:background .2s;min-width:0}
+.tj2.v3 .ix a:first-child{border-inline-start:0}
+.tj2.v3 .ix a:hover{background:var(--tj-tint-2)}
+.tj2.v3 .ix img{width:34px;height:34px;object-fit:contain;margin-bottom:6px;transition:transform .25s}
+.tj2.v3 .ix a:hover img{transform:translateY(-3px)}
+.tj2.v3 .ix b{display:block;font-size:14.5px;line-height:1.6;color:var(--tj-ink);font-weight:700}
+.tj2.v3 .ix small{display:block;font-size:12px;line-height:1.7;color:var(--tj-mut)}
+.tj2.v3 .trust{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px 18px;margin-top:22px;text-decoration:none;color:var(--tj-mut)}
+.tj2.v3 .trust-t{font-size:13px}
+.tj2.v3 .trust .lg{display:flex;align-items:center;gap:16px}
+.tj2.v3 .trust .lg img{height:22px;width:auto;filter:grayscale(1);opacity:.65;mix-blend-mode:multiply;transition:filter .3s,opacity .3s}
+.tj2.v3 .trust:hover .lg img{filter:none;opacity:1}
+.tj2.v3 .trust-go{font-size:13px;color:var(--tj-red);border-bottom:1px solid var(--tj-red-400)}
+
+@media (max-width:1024px){
+.tj2.v3 .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tj2.v3 .ix{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tj2.v3 .ix a:nth-child(4){border-inline-start:0}
+.tj2.v3 .ix a:nth-child(n+4){border-top:1px solid var(--tj-line)}
+}
+@media (max-width:760px){
+.tj2.v3 section{padding-block:40px}
+.tj2.v3 .v3h{padding-top:18px}
+.tj2.v3 .v3h>.wrap:first-child{grid-template-columns:minmax(0,1fr);gap:0}
+.tj2.v3 .v3h .art{display:none}
+.tj2.v3 .v3h h1{font-size:26px;line-height:1.55;margin:12px 0 8px}
+.tj2.v3 .v3h .lede{font-size:15px;line-height:1.9;margin-bottom:14px}
+.tj2.v3 .ask-f{height:50px;border-radius:14px}
+.tj2.v3 .needs{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:none;margin-block:12px 16px}
+.tj2.v3 .needs::-webkit-scrollbar{display:none}
+.tj2.v3 .needs .lbl{flex:none}
+.tj2.v3 .need{flex:none}
+.tj2.v3 .v3h .ctas .btn{flex:1 1 0;justify-content:center;text-align:center;min-width:0}
+.tj2.v3 .v3h .nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));justify-content:stretch;gap:10px 8px;margin-top:22px}
+.tj2.v3 .v3h .nums li{flex-direction:column;align-items:center;gap:0;text-align:center}
+.tj2.v3 .v3h .nums li:nth-child(n+4){grid-column:span 1}
+.tj2.v3 .v3h .nums span{font-size:12px}
+.tj2.v3 .seg{width:auto;margin-inline:-16px;border-radius:0;border-inline:0;padding-inline:12px;justify-content:flex-start}
+.tj2.v3 .seg button{font-size:14px;padding:7px 13px}
+.tj2.v3 .pan-l{font-size:14.5px;text-align:start}
+.tj2.v3 .clk{text-align:start}
+.tj2.v3 .tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tj2.v3 .tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px}
+.tj2.v3 .tile img{width:34px;height:34px;margin-bottom:2px}
+.tj2.v3 .tile b{font-size:14.5px;line-height:1.55}
+.tj2.v3 .tile small{font-size:12px;line-height:1.65}
+.tj2.v3 .tile[dir="ltr"]{align-items:flex-end}
+.tj2.v3 .minis{justify-content:flex-start}
+.tj2.v3 .now-row{grid-auto-columns:78%;margin-inline:-16px;padding-inline:16px}
+.tj2.v3 .fac{flex-direction:column;align-items:flex-start;gap:8px}
+.tj2.v3 .fac .stack img{width:32px;height:32px}
+.tj2.v3 .fac .stack img:nth-child(n+8){display:none}
+.tj2.v3 .fac>svg{display:none}
+.tj2.v3 .people .ctas .btn,.tj2.v3 .flow .ctas .btn{flex:1 1 100%;justify-content:center}
+.tj2.v3 .ix{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tj2.v3 .ix a{padding:14px 8px;border-inline-start:0;border-top:1px solid var(--tj-line)}
+.tj2.v3 .ix a:nth-child(-n+2){border-top:0}
+.tj2.v3 .ix a:nth-child(even){border-inline-start:1px solid var(--tj-line)}
+.tj2.v3 .trust{flex-direction:column;gap:10px}
+.tj2.v3 .trust .lg img{height:20px}
+}
+</style>
+<style>
+/* == tj-guide v2 (مهر ۱۴۰۵) · فقط اجزای اختصاصی هاب راهنما؛ رنگ‌ها از توکن‌ها == */
+main.tj-page{margin-block-start:0}.wp-block-post-content>.tj2.alignfull{margin-top:0}
+.tj2.v3 .v3h .art img{display:block;margin:0 auto;width:auto;height:auto;max-width:min(100%,420px);max-height:440px;object-fit:contain}
+.tj2 .gds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:26px}
+.tj2 .gd{display:flex;flex-direction:column;gap:10px;padding:22px 22px 18px;background:#fff;border:1px solid var(--tj-line);border-radius:20px;text-decoration:none;color:var(--tj-soft);transition:border-color .2s,transform .2s,box-shadow .2s;min-width:0}
+.tj2 .gd:hover{border-color:var(--tj-red-400);transform:translateY(-2px);box-shadow:0 12px 28px rgba(14,14,14,.06)}
+.tj2 .gd-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.tj2 .gd-tag{font-size:12.5px;line-height:1.8;color:var(--tj-red);background:var(--tj-tint);border-radius:999px;padding:2px 11px}
+.tj2 .gd-top img{width:56px;height:56px;object-fit:contain}
+.tj2 .gd .t{display:block;color:var(--tj-ink);font-size:19px;line-height:1.6;font-weight:800}
+.tj2 .gd p{margin:0;font-size:14.5px;line-height:1.9}
+.tj2 .gd ul{list-style:none;margin:4px 0 0;padding:12px 0 0;border-top:1px dashed var(--tj-line);display:grid;gap:7px}
+.tj2 .gd li{display:grid;grid-template-columns:118px minmax(0,1fr);gap:10px;align-items:baseline;font-size:13.5px;line-height:1.8;margin:0}
+.tj2 .gd li .k{font-weight:700;color:var(--tj-ink);direction:ltr;text-align:right;unicode-bidi:isolate}
+.tj2 .gd .meta{display:block;font-size:12.5px;line-height:1.8;color:var(--tj-mut);margin-top:auto;padding-top:6px}
+.tj2 .gd .go{display:block;color:var(--tj-red);font-weight:700;font-size:14.5px}
+.tj2 #time{background:var(--tj-sunk)}
+.tj2 .tzt{max-width:760px;margin:24px auto 0;background:#fff;border:1px solid var(--tj-line);border-radius:22px;padding:22px;display:grid;gap:16px}
+.tj2 .tzt-in{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px}
+.tj2 .tzt label{display:grid;gap:6px;font-size:13px;line-height:1.7;color:var(--tj-mut)}
+.tj2 .tzt select,.tj2 .tzt input{font:inherit;font-size:16px;color:var(--tj-ink);background:#fff;border:1px solid var(--tj-line);border-radius:12px;padding:10px 12px;min-height:50px;width:100%;box-sizing:border-box;margin:0}
+.tj2 .tzt input{direction:ltr;text-align:center}
+.tj2 .tzt select:focus,.tj2 .tzt input:focus{outline:2px solid var(--tj-red-400);outline-offset:1px}
+.tj2 .tzt-out{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tj2 .tzt-out>div{border-radius:16px;background:var(--tj-tint);padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tj2 .tzt-out>div+div{background:var(--tj-sunk)}
+.tj2 .tzt-out small{display:block;font-size:12.5px;line-height:1.7;color:var(--tj-mut)}
+.tj2 .tzt-out b{display:block;font-size:30px;line-height:1.35;color:var(--tj-ink);font-weight:800}
+.tj2 .tzt-out>div:first-child b{color:var(--tj-red)}
+.tj2 .tzt-out>div+div b{font-size:19px;line-height:1.7;padding-top:6px}
+.tj2 .tzt-note{margin:0;font-size:13.5px;line-height:1.9;color:var(--tj-mut)}
+.tj2 .pan .minis+.minis{margin-top:8px}
+.tj2.v3 .v3h>.wrap+.wrap{display:block}
+.tj2 #guides{background:#fff}.tj2 #before{background:#fff}
+.tj2 .steps span a{color:var(--tj-red);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--tj-red-400)}
+@media (max-width:760px){.tj2 .gds{grid-template-columns:minmax(0,1fr)}.tj2 .gd{padding:18px 16px 16px}.tj2 .gd li{grid-template-columns:minmax(0,1fr);gap:0}.tj2 .gd li .k{text-align:start;direction:rtl}.tj2 .tzt{padding:16px}.tj2 .tzt-in{grid-template-columns:minmax(0,1fr)}.tj2 .tzt-out b{font-size:24px}.tj2 .tzt-out>div+div b{font-size:16px}}
+</style>
+<div class="tj2 alignfull v3" id="tj2" data-page="guide-v2">
+<section class="hero v3h" id="hero"><div class="wrap"><div class="copy">
+<p class="ring"><span class="dot"></span><span>از منابع رسمی، با بازبینی بالینی و تاریخ</span></p>
+<h1>راهنمای عملی تراپی برای فارسی‌زبانان <em>خارج از ایران</em></h1>
+<p class="lede">پیش از شروع درمان در کشوری دیگر، چند سؤال عملی جلوی آدم را می‌گیرد: نوبت را از کجا بگیرم، بیمه کِی هزینه را می‌دهد، بی‌حساب ایرانی چطور پرداخت کنم، ساعت جلسه به وقت من چند می‌شود. هرچه تجربه در پاسخ این‌ها نوشته، اینجا کنار هم است.</p>
+<div class="ctas"><a class="btn btn-brand" href="#start">از وضعیت خودم شروع کنم</a><a class="btn btn-ghost" href="/persian-therapy/">تراپی فارسی خارج از ایران</a></div>
+<p class="back">به انگلیسی راحت‌ترید؟ <a href="/persian-therapy/en/">صفحهٔ انگلیسی تجربه</a></p>
+</div><div class="art"><img src="/wp-content/uploads/2026/09/tjl-persian-path.webp" alt="دستی با مداد قرمز که مسیر را روی کاغذ می‌کشد؛ تصویرسازی راهنماهای مرکز تجربه زندگی" width="1100" height="1037" fetchpriority="high" decoding="async" loading="eager"></div></div>
+<div class="wrap"><ul class="nums" aria-label="آنچه در این راهنما هست"><li><b>۲</b><span>راهنمای کامل آلمان</span></li><li><b>۹</b><span>صفحهٔ کشور</span></li><li><b>۸</b><span>صفحهٔ شهر</span></li><li><b>۵</b><span>موضوع مهاجرت</span></li><li><b>۱</b><span>تست رایگان</span></li></ul></div>
 </section>
-<section class="eco" id="guides">
-<div class="wrap">
-<div class="center rv">
-<span class="eyebrow">آلمان</span>
-<h2 class="h2">دو راهنمایی که به فارسی وجود نداشت</h2>
-<p class="lede">نظام روان‌درمانی آلمان قواعد روشنی دارد، ولی این قواعد تا امروز به فارسی جایی توضیح داده نشده بود. این دو راهنما از منابع رسمی آلمانی نوشته شده‌اند.</p>
+
+<section class="paths" id="start"><div class="wrap">
+<div class="center rv"><span class="eyebrow">از کجا شروع کنم</span><h2 class="h2">سه وضعیت، سه مسیر</h2></div>
+<div class="seg" role="tablist" aria-label="وضعیت شما"><span class="seg-ink" aria-hidden="true"></span>
+<button type="button" role="tab" id="t-un" aria-controls="p-un" aria-selected="true" data-tab="un">هنوز مطمئن نیستم</button>
+<button type="button" role="tab" id="t-de" aria-controls="p-de" aria-selected="false" data-tab="de">در آلمان زندگی می‌کنم</button>
+<button type="button" role="tab" id="t-st" aria-controls="p-st" aria-selected="false" data-tab="st">تراپی فارسی می‌خواهم</button>
 </div>
-<div class="svc-list rv">
-<a class="svc-row" href="/guide/therapieplatz-deutschland/"><img src="/wp-content/uploads/2026/09/tjl-step-1-ink.png" alt="گرفتن نوبت روان‌درمانی در آلمان" loading="lazy"><div><b>چطور در آلمان نوبت روان‌درمانی بگیریم</b><span>Sprechstunde، درمان فوری، جلسات آزمایشی و درمان اصلی</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></a>
-<a class="svc-row" href="/guide/kostenerstattung/"><img src="/wp-content/uploads/2026/09/tjl-step-2.webp" alt="بازپرداخت هزینهٔ روان‌درمانی توسط بیمهٔ آلمان" loading="lazy"><div><b>بیمه کی هزینهٔ مطب خصوصی را می‌دهد</b><span>Kostenerstattung، مدارک لازم، مهلت‌ها و راه اعتراض</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></a>
+<div class="pan" id="p-un" role="tabpanel" aria-labelledby="t-un">
+<p class="pan-l">اگر هنوز نمی‌دانید آنچه از سر می‌گذرانید به تراپی نیاز دارد یا نه، از یک تست سه‌دقیقه‌ای یا از موضوعی که بیشتر درگیرش هستید شروع کنید. هر صفحه نشانه‌ها و نقطهٔ شروع درمان را توضیح می‌دهد.</p>
+<div class="tiles">
+<a class="tile hot" href="/tests/migration/"><img src="/wp-content/uploads/2026/09/tjl-crit-personal.webp" alt="" width="208" height="208" loading="lazy"><b>تست تجربهٔ روانی مهاجرت</b><small>سه دقیقه، بدون ثبت‌نام، با تفسیر</small></a>
+<a class="tile" href="/help/سوگ-مهاجرت/"><img src="/wp-content/uploads/2026/09/tjl-cut-hourglass.webp" alt="" width="280" height="400" loading="lazy"><b>سوگ مهاجرت</b><small>برای آنچه جا ماند و اسمی ندارد</small></a>
+<a class="tile" href="/help/تنهایی-مهاجرت/"><img src="/wp-content/uploads/2026/09/tjl-svc-individual.webp" alt="" width="82" height="82" loading="lazy"><b>تنهایی بعد از مهاجرت</b><small>آدم‌ها هستند، کسی که بفهمد نیست</small></a>
+<a class="tile" href="/help/اضطراب-مهاجرت/"><img src="/wp-content/uploads/2026/09/tjl-icon-match.webp" alt="" width="150" height="152" loading="lazy"><b>اضطراب مهاجرت</b><small>اقامت، کار، و نگرانی برای کسانی که مانده‌اند</small></a>
+<a class="tile" href="/help/زوج-درمانی-مهاجرت/"><img src="/wp-content/uploads/2026/09/tjl-svc-couple.webp" alt="" width="82" height="82" loading="lazy"><b>زوج‌درمانی بعد از مهاجرت</b><small>وقتی رابطه هم با جابه‌جایی عوض می‌شود</small></a>
+<a class="tile" href="/help/فرزندپروری-مهاجرت/"><img src="/wp-content/uploads/2026/09/tjl-svc-child.webp" alt="" width="82" height="82" loading="lazy"><b>فرزندپروری در مهاجرت</b><small>بچه‌هایی که میان دو زبان بزرگ می‌شوند</small></a>
 </div>
+<div class="minis"><span class="lbl">موضوع‌های دیگر:</span><a href="/help/اضطراب/">اضطراب</a><a href="/help/افسردگی/">افسردگی</a><a href="/help/سوگ/">سوگ</a><a href="/help/بی-خوابی/">بی‌خوابی</a><a href="/help/عزت-نفس/">عزت نفس</a><a href="/help/">همهٔ موضوع‌ها</a></div>
 </div>
-</section>
-<section class="faq" id="faq">
-<div class="wrap">
+<div class="pan" id="p-de" role="tabpanel" aria-labelledby="t-de">
+<p class="pan-l">نظام روان‌درمانی آلمان قاعده‌های روشنی دارد، ولی تا امروز به فارسی جایی توضیح داده نشده بود. دو راهنمای کامل از منابع رسمی آلمانی، و صفحه‌های شهرها برای وقتی که نمی‌خواهید ماه‌ها منتظر بمانید.</p>
+<div class="tiles">
+<a class="tile hot" href="/guide/therapieplatz-deutschland/"><img src="/wp-content/uploads/2026/09/tjl-cut-calendar.webp" alt="" width="328" height="304" loading="lazy"><b>نوبت روان‌درمانی در آلمان</b><small>Sprechstunde، شمارهٔ ۱۱۶۱۱۷ و چهار پلهٔ رسمی</small></a>
+<a class="tile hot" href="/guide/kostenerstattung/"><img src="/wp-content/uploads/2026/09/tjl-pay-5.webp" alt="" width="150" height="150" loading="lazy"><b>بازپرداخت هزینه از بیمه</b><small>Kostenerstattung، مدارک لازم و راه اعتراض</small></a>
+<a class="tile" href="/persian-therapy/germany/"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" width="120" height="120" loading="lazy"><b>روانشناس ایرانی در آلمان</b><small>تراپیست مقیم آلمان و جلسهٔ حضوری</small></a>
+<a class="tile" href="/persian-therapy/germany/berlin/"><img src="/wp-content/uploads/2026/09/tjl-cut-armchair.webp" alt="" width="136" height="148" loading="lazy"><b>برلین</b><small>تراپی فارسی برای ساکنان برلین</small></a>
+<a class="tile" href="/persian-therapy/germany/hamburg/"><img src="/wp-content/uploads/2026/09/tjl-cut-armchair.webp" alt="" width="136" height="148" loading="lazy"><b>هامبورگ</b><small>تراپی فارسی برای ساکنان هامبورگ</small></a>
+<a class="tile" href="/persian-therapy/germany/munich/"><img src="/wp-content/uploads/2026/09/tjl-cut-armchair.webp" alt="" width="136" height="148" loading="lazy"><b>مونیخ</b><small>تراپی فارسی برای ساکنان مونیخ</small></a>
+</div>
+<div class="minis"><span class="lbl">برای اطرافیان آلمانی‌زبان یا انگلیسی‌خوان:</span><a href="/persian-therapy/en/germany/" dir="ltr">Iranian psychologist in Germany</a></div>
+</div>
+<div class="pan" id="p-st" role="tabpanel" aria-labelledby="t-st">
+<p class="pan-l">جلسه‌ها آنلاین و به فارسی است. هر جلسه ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه، با Stripe یا PayPal و بدون حساب ایرانی. جلسهٔ معارفه با خودِ تراپیست و رایگان است.</p>
+<div class="tiles">
+<a class="tile hot" href="/persian-therapy/"><img src="/wp-content/uploads/2026/09/tjl-icon-match.webp" alt="" width="150" height="152" loading="lazy"><b>تراپی فارسی خارج از ایران</b><small>تراپیست‌های مقیم، هزینه و فرم تماس</small></a>
+<a class="tile" href="https://t.me/tajrobehlife_bot?start=guide_hub" target="_blank" rel="noopener"><img src="/wp-content/uploads/2026/09/tjl-crit-personal.webp" alt="" width="208" height="208" loading="lazy"><b>رزرو معارفه در تلگرام</b><small>بات تجربه، با پیشنهاد تراپیست همان‌جا</small></a>
+<a class="tile" href="/persian-therapy/students/"><img src="/wp-content/uploads/2026/09/tjl-icon-cap.webp" alt="" width="168" height="168" loading="lazy"><b>دانشجو هستم</b><small>برنامهٔ حمایت دانشجویی، هر جلسه ۲۵ یورو</small></a>
+<a class="tile" href="/help/"><img src="/wp-content/uploads/2026/09/tjl-svc-individual.webp" alt="" width="82" height="82" loading="lazy"><b>با چه چیزی درگیرید؟</b><small>از اضطراب تا سوگ مهاجرت</small></a>
+<a class="tile" href="/tests/"><img src="/wp-content/uploads/2026/09/tjl-icon-standards.webp" alt="" width="150" height="152" loading="lazy"><b>تست‌های رایگان</b><small>بدون ثبت‌نام، با تفسیر</small></a>
+<a class="tile" href="/persian-therapy/en/" dir="ltr" lang="en"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" width="120" height="120" loading="lazy"><b>Persian therapy, explained in English</b><small>For partners, children and friends</small></a>
+</div>
+<div class="minis"><span class="lbl">کشور شما:</span><a href="/persian-therapy/germany/">آلمان</a><a href="/persian-therapy/canada/">کانادا</a><a href="/persian-therapy/usa/">آمریکا</a><a href="/persian-therapy/uk/">انگلیس</a><a href="/persian-therapy/australia/">استرالیا</a><a href="/persian-therapy/new-zealand/">نیوزیلند</a><a href="/persian-therapy/netherlands/">هلند</a><a href="/persian-therapy/sweden/">سوئد</a><a href="/persian-therapy/turkey/">ترکیه</a></div>
+<div class="minis"><span class="lbl">شهرها:</span><a href="/persian-therapy/germany/berlin/">برلین</a><a href="/persian-therapy/germany/hamburg/">هامبورگ</a><a href="/persian-therapy/germany/munich/">مونیخ</a><a href="/persian-therapy/canada/toronto/">تورنتو</a><a href="/persian-therapy/canada/vancouver/">ونکوور</a><a href="/persian-therapy/canada/montreal/">مونترال</a><a href="/persian-therapy/turkey/istanbul/">استانبول</a><a href="/persian-therapy/new-zealand/auckland/">اوکلند</a></div>
+</div>
+</div></section>
+
+<section class="guides" id="guides"><div class="wrap">
+<div class="center rv"><span class="eyebrow">راهنماهای کامل</span><h2 class="h2">دو راهنمایی که به فارسی وجود نداشت</h2><p class="lede">هر دو از متن قانون و منابع رسمی آلمانی نوشته شده‌اند و بازبینی بالینی دارند. اگر بیمهٔ دولتی آلمان دارید، از اولی شروع کنید؛ اگر نوبت پیدا نکرده‌اید، دومی قدم بعدی است.</p></div>
+<div class="gds">
+<a class="gd" href="/guide/therapieplatz-deutschland/"><span class="gd-top"><span class="gd-tag">آلمان · نوبت درمان</span><img src="/wp-content/uploads/2026/09/tjl-cut-calendar.webp" alt="" width="328" height="304" loading="lazy"></span>
+<span class="t">چطور در آلمان نوبت روان‌درمانی بگیریم</span>
+<p>مسیر رسمی چهار پله دارد و نقطهٔ شروعش جلسهٔ مشاورهٔ اولیه است. اگر خودتان وقت پیدا نکردید، مرکز نوبت‌دهی موظف است ارجاع بدهد.</p>
+<ul><li><span class="k">Sprechstunde</span><span>مشاورهٔ اولیه؛ خروجی‌اش فرم <span class="ltr">PTV 11</span></span></li><li><span class="k">116117</span><span>ارجاع ظرف یک هفته، نوبت حداکثر چهار هفته بعد</span></li><li><span class="k">Akutbehandlung</span><span>درمان فوری، بدون تأیید قبلی بیمه</span></li></ul>
+<span class="meta">بازبینی بالینی: دکتر عرفان امیربیگی · آخرین بازبینی ۲۵ شهریور ۱۴۰۵</span><span class="go">خواندن راهنما</span></a>
+<a class="gd" href="/guide/kostenerstattung/"><span class="gd-top"><span class="gd-tag">آلمان · بیمهٔ دولتی</span><img src="/wp-content/uploads/2026/09/tjl-pay-5.webp" alt="" width="150" height="150" loading="lazy"></span>
+<span class="t">بیمهٔ آلمان کِی هزینهٔ درمانگر خصوصی را می‌دهد</span>
+<p>اگر در زمان معقول نوبت پیدا نکنید، بیمه طبق قانون باید هزینهٔ درمانگر خصوصی دارای مجوز را بپردازد؛ به شرط آن‌که درخواست پیش از شروع درمان داده شود.</p>
+<ul><li><span class="k">§ 13 SGB V</span><span>مبنای قانونی بازپرداخت</span></li><li><span class="k">Absagen</span><span>ثبت مکتوب ردها؛ دست‌کم سه تا پنج مورد</span></li><li><span class="k">Krankenkasse</span><span>درخواست کتبی، پیش از اولین جلسه</span></li></ul>
+<span class="meta">بازبینی بالینی: دکتر عرفان امیربیگی · آخرین بازبینی ۲۵ شهریور ۱۴۰۵</span><span class="go">خواندن راهنما</span></a>
+</div>
+</div></section>
+
+<section class="tzs" id="time"><div class="wrap">
+<div class="center rv"><span class="eyebrow">ابزار کوچک</span><h2 class="h2">ساعت جلسه را به وقت تهران ببینید</h2><p class="lede">وقت جلسه همیشه با ساعت محل زندگی شما گذاشته می‌شود. اگر تراپیستتان در ایران است، اینجا ببینید هر ساعتِ شما در تهران چند است.</p></div>
+<div class="tzt" id="tzt">
+<div class="tzt-in"><label for="tzSel">کجا زندگی می‌کنید؟<select id="tzSel">
+<option value="auto">ساعت همین دستگاه</option><option value="Europe/Berlin">آلمان (برلین)</option><option value="Europe/Amsterdam">هلند (آمستردام)</option><option value="Europe/Stockholm">سوئد (استکهلم)</option><option value="Europe/Vienna">اتریش (وین)</option><option value="Europe/Paris">فرانسه (پاریس)</option><option value="Europe/London">انگلیس (لندن)</option><option value="Europe/Istanbul">ترکیه (استانبول)</option><option value="Asia/Dubai">امارات (دبی)</option><option value="America/Toronto">کانادا (تورنتو، مونترال)</option><option value="America/Vancouver">کانادا (ونکوور)</option><option value="America/New_York">آمریکا (نیویورک، واشینگتن)</option><option value="America/Los_Angeles">آمریکا (لس‌آنجلس)</option><option value="Australia/Sydney">استرالیا (سیدنی، ملبورن)</option><option value="Australia/Perth">استرالیا (پرت)</option><option value="Pacific/Auckland">نیوزیلند (اوکلند)</option>
+</select></label>
+<label for="tzIn">ساعت جلسه به وقت شما<input id="tzIn" type="time" value="18:00" step="900"></label></div>
+<div class="tzt-out" aria-live="polite"><div><small>همان لحظه در تهران</small><b id="tzTeh">--:--</b><small id="tzDay">&nbsp;</small></div><div><small>اختلاف شما با تهران</small><b id="tzDiff">&nbsp;</b></div></div>
+<p class="tzt-note" id="tzNote">ساعت از تنظیمات مرورگر خوانده می‌شود و جایی ذخیره نمی‌شود. ایران از ۱۴۰۱ ساعت تابستانی ندارد، پس اختلاف شما با تهران در طول سال ممکن است یک ساعت جابه‌جا شود.</p>
+</div>
+</div></section>
+
+<section class="flow" id="before"><div class="wrap">
+<div class="center rv"><span class="eyebrow">پیش از اولین جلسه</span><h2 class="h2">چهار کار، به همین ترتیب</h2></div>
+<div class="steps">
+<div><i>۱</i><b>حال خودتان را بسنجید</b><span>با <a href="/tests/migration/">تست تجربهٔ روانی مهاجرت</a> یا صفحهٔ موضوعی که درگیرش هستید.</span></div>
+<div><i>۲</i><b>نظام کشورتان را بشناسید</b><span>اگر بیمه یا کارفرما هزینه را برمی‌گرداند، اول همان مسیر را ببینید؛ برای آلمان، <a href="#guides">دو راهنمای بالا</a>.</span></div>
+<div><i>۳</i><b>ساعت و هزینه را روشن کنید</b><span>۲۵ یا ۳۵ یورو با کارت بانکی همان کشور، و ساعت جلسه به وقت خودتان.</span></div>
+<div><i>۴</i><b>معارفهٔ رایگان</b><span>جلسه‌ای کوتاه با خودِ تراپیست تا ببینید با هم راه می‌آیید یا نه.</span></div>
+</div>
+<ul class="promise"><li>پرداخت با یورو، بدون حساب ایرانی</li><li>رسید هر پرداخت به ایمیل شما</li><li>تغییر تراپیست در هر زمان، بدون هزینه</li></ul>
+<div class="ctas center"><a class="btn btn-brand" href="/persian-therapy/">رزرو معارفهٔ رایگان</a></div>
+</div></section>
+
+<section class="paths" id="read"><div class="wrap">
+<div class="center rv"><span class="eyebrow">از مجلهٔ تجربه</span><h2 class="h2">خواندنی برای کسانی که دور از خانه‌اند</h2></div>
+<div class="tiles">
+<a class="tile" href="/mag/سلامت-روان-در-مهاجرت/"><img src="/wp-content/uploads/2026/09/tjl-icon-book.webp" alt="" width="168" height="168" loading="lazy"><b>سلامت روان در مهاجرت</b><small>چرا روانشناس هم‌زبان مهم است</small></a>
+<a class="tile" href="/mag/مهاجرت-از-دیدگاه-روانکاوی/"><img src="/wp-content/uploads/2026/09/tjl-cut-hourglass.webp" alt="" width="280" height="400" loading="lazy"><b>مهاجرت از دیدگاه روانکاوی</b><small>جابه‌جایی‌ای که سوگواری می‌خواهد</small></a>
+<a class="tile" href="/mag/معرفی-کتاب-زبان-مادر؛نگاهی-به-نقش-زبان/"><img src="/wp-content/uploads/2026/09/tjl-crit-personal.webp" alt="" width="208" height="208" loading="lazy"><b>زبان مادر</b><small>چرا از چیزهای عمیق به زبان دوم سخت حرف می‌زنیم</small></a>
+<a class="tile" href="/mag/melancholia-in-war/"><img src="/wp-content/uploads/2026/09/tjl-svc-individual.webp" alt="" width="82" height="82" loading="lazy"><b>ماتم و مالیخولیا در جنگ</b><small>وقتی خبرها از دور می‌رسند</small></a>
+<a class="tile" href="/mag/guidance-to-chose-a-therapist/"><img src="/wp-content/uploads/2026/09/tjl-icon-match.webp" alt="" width="150" height="152" loading="lazy"><b>چطور تراپیست انتخاب کنیم</b><small>پیش از اولین جلسه، این‌ها را بپرسید</small></a>
+<a class="tile" href="/mag/"><img src="/wp-content/uploads/2026/09/tjl-icon-book.webp" alt="" width="168" height="168" loading="lazy"><b>همهٔ مقاله‌های مجله</b><small>نوشته‌های تراپیست‌های تجربه</small></a>
+</div>
+</div></section>
+
+<section class="faq" id="faq"><div class="wrap">
 <div class="center rv"><span class="eyebrow">پرسش‌های پرتکرار</span><h2 class="h2">دربارهٔ این راهنماها</h2></div>
 <div class="faq-list rv">
-<details><summary>این راهنماها مشاورهٔ حقوقی هستند؟</summary><div class="ans"><p>نه. متن‌ها از منابع رسمی آلمانی نوشته شده‌اند و تاریخ بازبینی دارند، ولی جای مشاورهٔ حقوقی یا تماس با خود بیمه را نمی‌گیرند. قواعد ممکن است عوض شوند و مورد هر نفر فرق دارد.</p></div></details>
-<details><summary>تجربه در آلمان چه خدمتی می‌دهد؟</summary><div class="ans"><p>تراپی آنلاین به فارسی با تراپیست‌های مرکز، و جلسهٔ حضوری از راه کلینیک پارتنر در آلمان. هزینهٔ هر جلسه ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه است و جلسهٔ معارفه رایگان است.</p></div></details>
-<details><summary>آیا هزینهٔ جلسه با تجربه را بیمهٔ آلمان می‌پردازد؟</summary><div class="ans"><p>نه. بیمهٔ دولتی آلمان فقط هزینهٔ درمانگرانی را می‌پردازد که مجوز آلمان (Approbation) دارند. جلسات تجربه خارج از این نظام است و مستقیم پرداخت می‌شود. این راهنماها برای همین نوشته شده‌اند که هر دو مسیر را بشناسید و آگاهانه انتخاب کنید.</p></div></details>
-<details><summary>راهنماهای بعدی کِی می‌آیند؟</summary><div class="ans"><p>هزینهٔ تراپی فارسی در هر کشور، قانونی بودن درمان با درمانگر مقیم ایران، روش‌های پرداخت از خارج و جدول اختلاف ساعت، در نوبت انتشارند.</p></div></details>
+<details><summary>این راهنماها جای مشاورهٔ حقوقی یا تماس با بیمه را می‌گیرند؟</summary><div class="ans"><p>نه. متن‌ها از منابع رسمی نوشته شده‌اند و تاریخ بازبینی دارند، ولی قواعد ممکن است عوض شوند و شرایط هر نفر فرق دارد. برای تصمیم نهایی با بیمه یا مشاور حقوقی خودتان هم صحبت کنید.</p></div></details>
+<details><summary>راهنماها را چه کسی می‌نویسد و بازبینی می‌کند؟</summary><div class="ans"><p>تیم محتوای مرکز تجربه زندگی آن‌ها را از متن قانون و منابع رسمی همان کشور می‌نویسد و یکی از روان‌شناس‌های تجربه بازبینی بالینی‌شان را انجام می‌دهد. نام بازبین و تاریخ آخرین بازبینی بالای هر راهنما آمده است.</p></div></details>
+<details><summary>برای کشور من هم راهنما هست؟</summary><div class="ans"><p>راهنمای کامل فعلاً برای آلمان نوشته شده است. برای آلمان، کانادا، آمریکا، انگلیس، استرالیا، نیوزیلند، هلند، سوئد و ترکیه صفحه‌ای جدا داریم که اختلاف ساعت، تراپیست مقیم، شیوهٔ پرداخت و پرسش‌های مراجعان همان کشور را توضیح می‌دهد. اگر کشورتان در فهرست نیست، جلسه‌ها آنلاین است و از هر جایی می‌شود وصل شد.</p></div></details>
+<details><summary>بیمهٔ آلمان هزینهٔ جلسه با تجربه را می‌پردازد؟</summary><div class="ans"><p>نه. بیمهٔ دولتی آلمان فقط هزینهٔ درمانگرانی را می‌پردازد که مجوز آلمان (Approbation) دارند. جلسه‌های تجربه بیرون از این نظام است و مستقیم پرداخت می‌شود. این راهنماها برای همین نوشته شده‌اند که هر دو مسیر را بشناسید و آگاهانه انتخاب کنید.</p></div></details>
+<details><summary>از خارج از ایران چطور پرداخت کنم؟</summary><div class="ans"><p>با Stripe یا PayPal و کارت بانکی همان کشوری که در آن زندگی می‌کنید؛ حساب ایرانی لازم نیست. هر جلسه ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه است و رسید هر پرداخت به ایمیلتان می‌آید. جلسهٔ معارفه رایگان است و پیش از آن چیزی پرداخت نمی‌کنید.</p></div></details>
+<details><summary>با اختلاف ساعت چه می‌شود؟</summary><div class="ans"><p>وقت جلسه با ساعت محل زندگی شما گذاشته می‌شود، نه ساعت تهران. تراپیست‌های مقیم اروپا، آمریکا و استرالیا در ساعت خودتان کار می‌کنند و بازهٔ کاری تراپیست‌های ایران را هم به ساعت شما ترجمه می‌کنیم. با ابزار همین صفحه می‌توانید هر ساعت را به وقت تهران ببینید.</p></div></details>
+<details><summary>تجربه در آلمان چه خدمتی می‌دهد؟</summary><div class="ans"><p>تراپی آنلاین به فارسی با تراپیست‌های مرکز، از جمله تراپیست مقیم آلمان، و جلسهٔ حضوری از راه کلینیک پارتنر در آلمان. جزئیات در صفحهٔ روانشناس ایرانی در آلمان آمده است.</p></div></details>
 </div>
-</div>
-</section>
-<section class="berry" id="berry">
-<div class="wrap rv">
-<img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" loading="lazy">
+</div></section>
+
+<section class="berry" id="berry"><div class="wrap rv">
+<img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" width="120" height="120" loading="lazy">
 <h2 class="h2">تا وقتی نوبت پیدا شود، تنها نمانید</h2>
-<p class="lede">جلسهٔ معارفه رایگان است و با خود تراپیست برگزار می‌شود. هیچ درمانی در آن انجام نمی‌شود؛ فقط می‌بینید که با هم راه می‌آیید یا نه.</p>
-<div class="ctas"><a class="btn btn-brand" href="/get-therapy/">رزرو معارفهٔ رایگان</a><a class="btn btn-ghost" href="/persian-therapy/">صفحهٔ فارسی‌زبانان خارج از ایران</a></div>
-</div>
-</section>
+<p class="lede">جلسهٔ معارفه رایگان است و با خودِ تراپیست برگزار می‌شود. هیچ درمانی در آن انجام نمی‌شود؛ فقط می‌بینید با هم راه می‌آیید یا نه.</p>
+<div class="ctas"><a class="btn btn-brand" href="/persian-therapy/">رزرو معارفهٔ رایگان</a><a class="btn btn-ghost" href="https://t.me/tajrobehlife_bot?start=guide_berry" target="_blank" rel="noopener">سؤال دارم، در تلگرام</a></div>
+</div></section>
 </div>
 <script>
 (function(){
@@ -610,5 +929,45 @@ var tl=document.getElementById('todayLink');if(tl){var day=Math.floor(Date.now()
 })();
 
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","@id":"https://tajrobeh.life/guide/#page","url":"https://tajrobeh.life/guide/","name":"راهنماهای عملی تراپی برای فارسی‌زبانان خارج از ایران","inLanguage":"fa-IR","isPartOf":{"@id":"https://tajrobeh.life/#website"},"about":{"@id":"https://tajrobeh.life/#organization"}}]}</script>
+<script>
+/* == tj-guide v2 (مهر ۱۴۰۵): تب‌های مسیر و ابزار ساعت؛ بدون وابستگی به اسکریپت v3 هوم == */
+(function(){
+var root=document.getElementById('tj2');if(!root){return;}
+root.classList.add('js');
+function ev(n,p){try{window.dataLayer=window.dataLayer||[];var o={event:n};for(var k in p){o[k]=p[k];}window.dataLayer.push(o);}catch(e){}}
+var fa=function(s){return String(s).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});};
+var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
+var seg=root.querySelector('.seg'),ink=root.querySelector('.seg-ink');
+var tabs=seg?[].slice.call(seg.querySelectorAll('button[role=tab]')):[];
+function place(b){if(!ink){return;}if(!b){return;}ink.style.width=b.offsetWidth+'px';ink.style.left=b.offsetLeft+'px';}
+function pick(key,user){var hit=null;tabs.forEach(function(b){var on=b.getAttribute('data-tab')===key;b.setAttribute('aria-selected',on?'true':'false');b.tabIndex=on?0:-1;var p=document.getElementById(b.getAttribute('aria-controls'));if(p){p.classList.toggle('on',on);}if(on){hit=b;}});
+ if(hit){place(hit);if(user){ev('guide_tab',{guide_tab:key});}}}
+if(tabs.length){var start='un';if(/^Europe\/(Berlin|Busingen)$/.test(tz)){start='de';}
+ pick(start,false);
+ tabs.forEach(function(b,i){b.addEventListener('click',function(){pick(b.getAttribute('data-tab'),true);});
+  b.addEventListener('keydown',function(e){var k=e.key,n=-1;if(k==='ArrowLeft'){n=i+1;}if(k==='ArrowRight'){n=i-1;}if(k==='Home'){n=0;}if(k==='End'){n=tabs.length-1;}if(n<0){return;}if(n>=tabs.length){n=0;}e.preventDefault();tabs[n].focus();pick(tabs[n].getAttribute('data-tab'),true);});});
+ var rz;window.addEventListener('resize',function(){clearTimeout(rz);rz=setTimeout(function(){place(seg.querySelector('[aria-selected=true]'));},120);});
+ if(document.fonts){document.fonts.ready.then(function(){place(seg.querySelector('[aria-selected=true]'));});}
+}
+/* ابزار ساعت */
+var sel=document.getElementById('tzSel'),inp=document.getElementById('tzIn');
+if(!sel){return;}if(!inp){return;}
+var oTeh=document.getElementById('tzTeh'),oDay=document.getElementById('tzDay'),oDiff=document.getElementById('tzDiff'),note=document.getElementById('tzNote');
+function off(z,d){try{var f=new Intl.DateTimeFormat('en-US',{timeZone:z,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});var p={};f.formatToParts(d).forEach(function(x){p[x.type]=x.value;});var u=Date.UTC(+p.year,+p.month-1,+p.day,(+p.hour)%24,+p.minute);return Math.round((u-Math.floor(d.getTime()/60000)*60000)/60000);}catch(e){return null;}}
+function zone(){var v=sel.value;if(v==='auto'){return tz||'UTC';}return v;}
+function pad(n){return (n<10?'0':'')+n;}
+function nowIn(z){var o=off(z,new Date());if(o===null){return '18:00';}var m=Math.floor(Date.now()/60000)+o;m=((m%1440)+1440)%1440;m=Math.ceil(m/15)*15%1440;return pad(Math.floor(m/60))+':'+pad(m%60);}
+function dur(m){var h=Math.floor(m/60),r=m%60,s='';if(h){s=fa(h)+' ساعت';}if(r){s+=(s?' و ':'')+fa(r)+' دقیقه';}return s;}
+function calc(){var z=zone(),d=new Date();var oz=off(z,d),ot=off('Asia/Tehran',d);if(oz===null){oTeh.textContent='--:--';return;}
+ var v=(inp.value||'18:00').split(':');var m=(+v[0])*60+(+v[1]||0);var t=m+(ot-oz);var day='همان روز';if(t>=1440){day='روز بعد';}if(t<0){day='روز قبل';}t=((t%1440)+1440)%1440;
+ oTeh.textContent=fa(pad(Math.floor(t/60))+':'+pad(t%60));oDay.textContent=day;
+ var df=ot-oz;if(df===0){oDiff.textContent='هم‌ساعت با تهران';}else{if(df>0){oDiff.textContent='تهران '+dur(df)+' جلوتر است';}else{oDiff.textContent='تهران '+dur(-df)+' عقب‌تر است';}}}
+if(sel.options[0]){if(tz){sel.options[0].textContent='ساعت همین دستگاه ('+tz.split('/').pop().replace(/_/g,' ')+')';}}
+if(tz==='Asia/Tehran'){sel.value='Europe/Berlin';}
+inp.value=nowIn(zone());calc();
+var used=false;function u(){calc();if(!used){used=true;ev('guide_tz',{guide_zone:zone()});}}
+sel.addEventListener('change',function(){inp.value=nowIn(zone());u();});inp.addEventListener('input',u);inp.addEventListener('change',u);
+})();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","@id":"https://tajrobeh.life/guide/#page","url":"https://tajrobeh.life/guide/","name":"راهنمای عملی تراپی برای فارسی‌زبانان خارج از ایران","inLanguage":"fa-IR","description":"راهنماهای عملی برای شروع تراپی در خارج از ایران: نوبت روان‌درمانی و بازپرداخت بیمه در آلمان، اختلاف ساعت، پرداخت با یورو و صفحه‌های کشورها و شهرها.","isPartOf":{"@id":"https://tajrobeh.life/#website"},"publisher":{"@type":"Organization","name":"مرکز تجربه زندگی","url":"https://tajrobeh.life/"},"about":[{"@type":"Thing","name":"روان‌درمانی برای مهاجران فارسی‌زبان"},{"@type":"Thing","name":"Psychotherapie in Deutschland"}],"mainEntity":{"@id":"https://tajrobeh.life/guide/#list"}},{"@type":"ItemList","@id":"https://tajrobeh.life/guide/#list","name":"راهنماهای کامل","itemListElement":[{"@type":"ListItem","position":1,"url":"https://tajrobeh.life/guide/therapieplatz-deutschland/","name":"چطور در آلمان نوبت روان‌درمانی بگیریم"},{"@type":"ListItem","position":2,"url":"https://tajrobeh.life/guide/kostenerstattung/","name":"بازپرداخت هزینهٔ روان‌درمانی در آلمان (Kostenerstattung)"}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"تجربه","item":"https://tajrobeh.life/"},{"@type":"ListItem","position":2,"name":"فارسی‌زبانان خارج از ایران","item":"https://tajrobeh.life/persian-therapy/"},{"@type":"ListItem","position":3,"name":"راهنماهای عملی","item":"https://tajrobeh.life/guide/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"این راهنماها جای مشاورهٔ حقوقی یا تماس با بیمه را می‌گیرند؟","acceptedAnswer":{"@type":"Answer","text":"نه. متن‌ها از منابع رسمی نوشته شده‌اند و تاریخ بازبینی دارند، ولی قواعد ممکن است عوض شوند و شرایط هر نفر فرق دارد. برای تصمیم نهایی با بیمه یا مشاور حقوقی خودتان هم صحبت کنید."}},{"@type":"Question","name":"راهنماها را چه کسی می‌نویسد و بازبینی می‌کند؟","acceptedAnswer":{"@type":"Answer","text":"تیم محتوای مرکز تجربه زندگی آن‌ها را از متن قانون و منابع رسمی همان کشور می‌نویسد و یکی از روان‌شناس‌های تجربه بازبینی بالینی‌شان را انجام می‌دهد. نام بازبین و تاریخ آخرین بازبینی بالای هر راهنما آمده است."}},{"@type":"Question","name":"برای کشور من هم راهنما هست؟","acceptedAnswer":{"@type":"Answer","text":"راهنمای کامل فعلاً برای آلمان نوشته شده است. برای آلمان، کانادا، آمریکا، انگلیس، استرالیا، نیوزیلند، هلند، سوئد و ترکیه صفحه‌ای جدا داریم که اختلاف ساعت، تراپیست مقیم، شیوهٔ پرداخت و پرسش‌های مراجعان همان کشور را توضیح می‌دهد. اگر کشورتان در فهرست نیست، جلسه‌ها آنلاین است و از هر جایی می‌شود وصل شد."}},{"@type":"Question","name":"بیمهٔ آلمان هزینهٔ جلسه با تجربه را می‌پردازد؟","acceptedAnswer":{"@type":"Answer","text":"نه. بیمهٔ دولتی آلمان فقط هزینهٔ درمانگرانی را می‌پردازد که مجوز آلمان (Approbation) دارند. جلسه‌های تجربه بیرون از این نظام است و مستقیم پرداخت می‌شود. این راهنماها برای همین نوشته شده‌اند که هر دو مسیر را بشناسید و آگاهانه انتخاب کنید."}},{"@type":"Question","name":"از خارج از ایران چطور پرداخت کنم؟","acceptedAnswer":{"@type":"Answer","text":"با Stripe یا PayPal و کارت بانکی همان کشوری که در آن زندگی می‌کنید؛ حساب ایرانی لازم نیست. هر جلسه ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه است و رسید هر پرداخت به ایمیلتان می‌آید. جلسهٔ معارفه رایگان است و پیش از آن چیزی پرداخت نمی‌کنید."}},{"@type":"Question","name":"با اختلاف ساعت چه می‌شود؟","acceptedAnswer":{"@type":"Answer","text":"وقت جلسه با ساعت محل زندگی شما گذاشته می‌شود، نه ساعت تهران. تراپیست‌های مقیم اروپا، آمریکا و استرالیا در ساعت خودتان کار می‌کنند و بازهٔ کاری تراپیست‌های ایران را هم به ساعت شما ترجمه می‌کنیم. با ابزار همین صفحه می‌توانید هر ساعت را به وقت تهران ببینید."}},{"@type":"Question","name":"تجربه در آلمان چه خدمتی می‌دهد؟","acceptedAnswer":{"@type":"Answer","text":"تراپی آنلاین به فارسی با تراپیست‌های مرکز، از جمله تراپیست مقیم آلمان، و جلسهٔ حضوری از راه کلینیک پارتنر در آلمان. جزئیات در صفحهٔ روانشناس ایرانی در آلمان آمده است."}}]}]}</script>
 <!-- /wp:html -->
