@@ -2495,6 +2495,8 @@ function tgPrivate_(m) {
   /* v170.23.10: طول جلسه (sesslen.gs): عدد دلخواه، /sesslen و دکمهٔ میز پذیرش */
   if (m.text && typeof tgLenText_ === 'function' && tgGetVal_('lnc', chat) && tgLenText_(chat, m.text)) return;
   if (m.text && typeof tgLenPick_ === 'function' && (String(m.text).trim() === '/sesslen' || String(m.text).trim() === TG_LEN_DESK_BTN)) { if (tgLenCanOthers_(chat)) { tgDel_('lnt', chat); tgLenPick_(chat, 0); } else tgLenStart_(chat); return; }
+  if (typeof nuSeen_ === 'function') { try { nuSeen_(chat); } catch (eNu) { tgErr_('nuSeen_', eNu); } }   /* v170.23.13: پاسخ مراجع دنبالهٔ پیگیری را می‌ایستاند */
+  if (m.text && typeof nuOwnerCmd_ === 'function' && nuOwnerCmd_(chat, String(m.text).trim())) return;
   if (typeof asRoute_ === 'function' && asRoute_(chat, m)) return;   /* v170.23.11: دستیار پاسخ‌گو (assist.gs)؛ بحران را خودش اول می‌سنجد */
   if (m.text && typeof migOwnerCmd_ === 'function' && migOwnerCmd_(chat, String(m.text).trim())) return;
 
@@ -4522,6 +4524,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('ln:') === 0 && typeof tgLenCb_ === 'function') return tgLenCb_(chat, data);   /* v170.23.10: طول جلسه */
   if (data.indexOf('as:') === 0 && typeof asCb_ === 'function') return asCb_(chat, data, name);   /* v170.23.11: دستیار */
   if (data.indexOf('ls:') === 0 && typeof lsCb_ === 'function') return lsCb_(chat, data);   /* v170.23.12: زمان مناسب تماس */
+  if (data.indexOf('nu:') === 0 && typeof nuCb_ === 'function') return nuCb_(chat, data);   /* v170.23.13: پیگیری گیرکرده‌ها */
   if (data.indexOf('mig:') === 0 && typeof migCb_ === 'function') return migCb_(chat, data);   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ */
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
@@ -6913,6 +6916,7 @@ function tgWatchdog(e) {
   S('ebiHourly_', 'light', typeof ebiHourly_ === 'function' ? ebiHourly_ : null);
   S('aiRetryTick_', 'light', typeof aiRetryTick_ === 'function' ? aiRetryTick_ : null);   /* v170.23.7: ویس‌های بی‌متن */
   S('ktbHourly_', 'light', typeof ktbHourly_ === 'function' ? ktbHourly_ : null);
+  S('nuTick_', 'light', typeof nuTick_ === 'function' ? nuTick_ : null);   /* v170.23.13: پیگیری گیرکرده‌ها */
   S('migSetupTick_', 'light', typeof migSetupTick_ === 'function' ? migSetupTick_ : null);   /* با MIG_ENABLED خاموش بی‌کار */
   S('migTick_', 'light', typeof migTick_ === 'function' ? migTick_ : null);
   S('ps2FixMaybe_', 'light', typeof ps2FixMaybe_ === 'function' ? ps2FixMaybe_ : null);
@@ -21644,6 +21648,7 @@ function tgLeadRead_(row) {
     noans: Number(tgLatinDigits_(String(tgLeadHv_(v, hm, 'شمار بی‌پاسخ') || '0'))) || 0,
     reason: String(tgLeadHv_(v, hm, 'دلیل بستن') || '').trim(),
     offer: String(tgLeadHv_(v, hm, 'آفر') || '').trim(),   /* v170.13 */
+    follow: String(tgLeadHv_(v, hm, 'پیگیری خودکار') || '').trim(),   /* v170.23.13: دنبالهٔ پیگیری و «دیگر پیام نده» */
     closed: tgStClosed_(statusRaw),
     touched: touched, idle: idle, age: age,
     stage: tgLeadStage_(touched, idle, nextIso, today)
