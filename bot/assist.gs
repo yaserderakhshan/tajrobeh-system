@@ -515,7 +515,7 @@ function asNightLine_() {
       if (o['حالت'] === AS_MODES.search || o['حالت'] === AS_MODES.smart) { x.f++; if (o['نتیجه'] === 'پاسخ') x.h++; } });
     return Object.keys(g).sort(function (a, b) { return g[b].n - g[a].n; }).map(function (k) { return asChanFa_(k) + ' ' + tgFa_(g[k].n) + (g[k].f ? ' (' + tgFa_(Math.round(100 * g[k].h / g[k].f)) + '٪)' : ''); }).join('، ');
   };
-  var ms = L.map(function (o) { return Number(o['میلی‌ثانیه']); }).filter(function (x) { return x > 0; }).sort(function (a, b) { return a - b; });
+  var ms = L.filter(function (o) { return String(o['میلی‌ثانیه']) !== ''; }).map(function (o) { return Number(o['میلی‌ثانیه']); }).filter(function (x) { return x >= 0; }).sort(function (a, b) { return a - b; });
   var med = ms.length ? ms[Math.floor(ms.length / 2)] : null;
   return '🤖 دستیار: ' + tgFa_(L.length) + ' پرسش · ' + (free.length ? tgFa_(Math.round(100 * hit / free.length)) + '٪ با جست‌وجو جواب گرفت' : 'بی متن آزاد') +
     ' · ' + tgFa_(hand) + ' تحویل پذیرش' + (cr ? ' · ' + tgFa_(cr) + ' بحران' : '') + ' · 👍 ' + tgFa_(up) + ' 👎 ' + tgFa_(dn) + ' · آستانه ' + tgFa_(asMin_()) +
