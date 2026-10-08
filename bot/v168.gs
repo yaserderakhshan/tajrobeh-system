@@ -2310,6 +2310,16 @@ function bgDutyPlan_() {
 }
 function bgDutyDone_(t) { bgProp_('BG_DUTY_FULL', t || bgNow_()); }   /* زمان شروع خواندن، تا لیدی که وسط کار رسید جا نماند */
 
+/* ───── v170.23.27: گیرکرده‌ها و SLA ───── */
+/* ۹ تا ۲۱ تهران هر ساعت (با tgWatchdog)؛ بیرون از آن هر دو ساعت یک بار */
+var BG_LEADS_NIGHT_MIN = 115;   /* دو ساعت، با حاشیه برای لرزش زمان تریگر */
+function bgLeadsDue_() {
+  var now = bgNow_(), h = bgHour_();
+  if (h >= 9 && h < 21) { bgProp_('BG_LEADS_AT', now); return true; }
+  if (now - Number(bgProp_('BG_LEADS_AT') || 0) < BG_LEADS_NIGHT_MIN * 60000) return false;
+  bgProp_('BG_LEADS_AT', now); return true;
+}
+
 /* ───── tgCpTick: فقط با کمپین فعال ───── */
 /* '' یعنی هنوز سنجیده نشده: فعال فرض می‌شود */
 function bgCpActive_() { return bgProp_('BG_CP_ACTIVE') !== '0'; }
@@ -2403,6 +2413,27 @@ function bgTests() {
     ok('پیگیری در انتظار: هر ۳۰ دقیقه یک خواندن', bgDutyPlan_().why === 'پیگیری در انتظار');
     TG_MEM['bg:pend'] = []; at(2026, 10, 8, 13, 0);
     ok('بی هیچ نشانه، هر ۳ ساعت یک خواندن ایمنی', bgDutyPlan_().why === 'دورهٔ ایمنی');
+
+    /* v170.23.27: گیرکرده‌ها و SLA */
+    at(2026, 10, 8, 20, 10);
+    ok('۹ تا ۲۱ هر ساعت', bgLeadsDue_() === true && bgLeadsDue_() === true);
+    at(2026, 10, 8, 21, 10);
+    ok('بیرون از ۹ تا ۲۱: پیش از دو ساعت نه', bgLeadsDue_() === false);
+    at(2026, 10, 8, 22, 10);
+    ok('بیرون از ۹ تا ۲۱: دو ساعت بعد یک بار', bgLeadsDue_() === true && bgLeadsDue_() === false);
+    at(2026, 10, 8, 23, 10);
+    ok('ساعت بعد نه', bgLeadsDue_() === false);
+    at(2026, 10, 9, 0, 10);
+    ok('دو ساعت بعد دوباره', bgLeadsDue_() === true);
+    TG_MEM['openrows'] = { v: [['2026-10-08', '10:00', 'سایت', 'مراجع نمونه', '', '', '', '', 'جدید', '', '', 'مرحلهٔ ۱ 10-08 10:30']], hm: {}, now: Number(TG_MEM['bg:now']) };
+    TG_MEM['openrows:reads'] = 0;
+    tgOpenLeads_(); tgOpenLeads_();
+    ok('بیرون از پنجره: هر صدا یک خواندن (مثل قبل)', TG_MEM['openrows:reads'] === 2);
+    tgLeadsShare_(true);
+    try { tgOpenLeads_(); tgOpenLeads_(); ok('داخل پنجرهٔ مشترک: یک خواندن برای گیرکرده‌ها و SLA', TG_MEM['openrows:reads'] === 3, TG_MEM['openrows:reads']);
+      ok('ستون اعلان از همان خواندن، بی خواندن تک‌سلولی', tgLeadFlag_(null, 2, 12) === 'مرحلهٔ ۱ 10-08 10:30'); }
+    finally { tgLeadsShare_(false); }
+    ok('پنجره بسته شد', TG_OPEN_MEMO === null);
 
     /* کمپین */
     ok('وضعیت کمپین سنجیده نشده: فعال فرض می‌شود', bgCpActive_() === true);

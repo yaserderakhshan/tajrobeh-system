@@ -3357,13 +3357,30 @@ function tgClosedSet_() {
 
 // وضعیت لید سه حالت دارد: تماس اول نگرفته (first)، پیگیری‌شده و تازه (live)، پیگیری‌شده و بی‌حرکت (stale)
 /* v168 فاز ۳: تنها منبع شمار «لید باز» (کارتابل، دایجست، کارهای روی زمین، داشبورد و گزارش) */
+/* v170.23.27 (سهمیهٔ اجرا): در یک پنجرهٔ کوتاه از tgWatchdog (گیرکرده‌ها و SLA) شیت لیدها یک بار خوانده می‌شود.
+   tgLeadsShare_(true) پنجره را باز و tgLeadsShare_(false) می‌بندد؛ بیرون از آن هر صدا شیت را تازه می‌خواند، مثل قبل. */
+var TG_OPEN_MEMO = null;
+function tgLeadsShare_(on) { TG_OPEN_MEMO = on ? {} : null; }
+function tgLeadsRaw_() {
+  if (TG_OPEN_MEMO && TG_OPEN_MEMO.v) return TG_OPEN_MEMO;
+  var o;
+  if (TG_DRY && TG_MEM && TG_MEM['openrows']) { TG_MEM['openrows:reads'] = (TG_MEM['openrows:reads'] || 0) + 1; o = { v: TG_MEM['openrows'].v, hm: TG_MEM['openrows'].hm, now: TG_MEM['openrows'].now }; }
+  else {
+    const sh = tgSS_().getSheetByName(TG_LEADS);
+    const last = sh.getLastRow();
+    o = last < 2 ? { v: [], hm: {} } : { v: sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues(), hm: tgLeadHeadMap_(sh) };
+  }
+  if (TG_OPEN_MEMO) { TG_OPEN_MEMO.v = o.v; TG_OPEN_MEMO.hm = o.hm; TG_OPEN_MEMO.now = o.now; }
+  return o;
+}
 function tgOpenLeads_() {
-  if (TG_DRY && TG_MEM && TG_MEM['openrows']) return tgOpenLeadsOf_(TG_MEM['openrows'].v, TG_MEM['openrows'].hm, new Date(TG_MEM['openrows'].now || Date.now()));
-  const sh = tgSS_().getSheetByName(TG_LEADS);
-  const last = sh.getLastRow();
-  if (last < 2) return [];
-  const lc = sh.getLastColumn();
-  return tgOpenLeadsOf_(sh.getRange(2, 1, last - 1, lc).getValues(), tgLeadHeadMap_(sh), new Date());
+  const o = tgLeadsRaw_();
+  return o.v.length ? tgOpenLeadsOf_(o.v, o.hm, new Date(o.now || Date.now())) : [];
+}
+/* ستون «اعلان بات» یک سطر: از همان خواندن مشترک اگر باز است، وگرنه از شیت */
+function tgLeadFlag_(sh, row, fc) {
+  if (TG_OPEN_MEMO && TG_OPEN_MEMO.v) { const r = TG_OPEN_MEMO.v[row - 2]; if (r && fc - 1 < r.length) return String(r[fc - 1] || ''); }
+  return String(sh.getRange(row, fc).getValue() || '');
 }
 function tgOpenLeadsOf_(v, hm, now) {
   const today = Utilities.formatDate(now, TG_TZ, 'yyyy-MM-dd');
@@ -3545,7 +3562,7 @@ function tgSlaTick_() {
 
   for (var i = 0; i < leads.length; i++) {
     const l = leads[i];
-    const flag = String(sh.getRange(l.row, fc).getValue() || '');
+    const flag = tgLeadFlag_(sh, l.row, fc);   /* v170.23.27: بی خواندن تک‌سلولی برای هر لید */
 
     // مسئول سطر اگر در تیم باشد، وگرنه مسئول پذیرش
     let to = boss;
@@ -7037,13 +7054,19 @@ function tgWatchdog(e) {
   S('tgErrDigest_', 'light', tgErrDigest_);
   S('rvDeadlineTick_', 'light', typeof rvDeadlineTick_ === 'function' ? rvDeadlineTick_ : null);   /* v169: مهلت بازبینی */
   S('opsHourly_', 'light', typeof opsHourly_ === 'function' ? opsHourly_ : null);   /* v169.2: کار امروز ۹:۰۰، ارجاع، تازه‌کردن هاب‌ها */
-  S('stkHourly_', 'light', typeof stkHourly_ === 'function' ? stkHourly_ : null);   /* v170.2: درخواست‌های متوقف و خلاصهٔ ۹ صبح */
   S('splHourly_', 'light', typeof splHourly_ === 'function' ? splHourly_ : null);   /* v170.23.3: صف تلاش دوبارهٔ انتشار سایت و آشتی ۳ بامداد */
   S('tgWeeklyConfirmTick_', 'light', tgWeeklyConfirmTick_);
   S('tgAssignTick_', 'light', tgAssignTick_);
   S('tgTkSla_', 'light', tgTkSla_);
   S('tgBugNotify_', 'light', tgBugNotify_);
-  S('tgSlaTick_', 'light', tgSlaTick_);
+  /* v170.23.27: گیرکرده‌ها و SLA پشت سر هم با یک خواندن شیت لیدها؛ بیرون از ۹ تا ۲۱ هر دو ساعت (bgLeadsDue_) */
+  if (bgLeadsDue_()) {
+    tgLeadsShare_(true);
+    try {
+      S('stkHourly_', 'light', typeof stkHourly_ === 'function' ? stkHourly_ : null);   /* v170.2: درخواست‌های متوقف و خلاصهٔ ۹ صبح */
+      S('tgSlaTick_', 'light', tgSlaTick_);
+    } finally { tgLeadsShare_(false); }
+  }
   S('tgFollowTick_', 'light', tgFollowTick_);
   /* سنگین: فقط ساعت‌های BG_HEAVY_HOURS */
   if (heavyHour) {
