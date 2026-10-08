@@ -77,7 +77,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.25`
+نسخهٔ کد: `v170.23.26`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -99,7 +99,7 @@
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۵۷۶ | ۱۲۰ |
-| `v168.gs` | ۲۴۰۴ | ۱۴۹ |
+| `v168.gs` | ۲۴۱۶ | ۱۵۰ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۹ | ۳۴ |
 | `leadmodel.gs` | ۷۷۸ | ۴۱ |
@@ -122,7 +122,7 @@
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۱۴۶۲ | ۱۱۴ |
-| `leadspeed.gs` | ۹۵۶ | ۸۰ |
+| `leadspeed.gs` | ۱۰۰۳ | ۸۱ |
 | `nurture.gs` | ۲۸۹ | ۳۰ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 

@@ -2005,11 +2005,12 @@ function tgTick5(e) {
     try { run('soTick', soTick); } catch (x3) { tgErr_('tgTick5 soTick', x3); }
   }
   var t5 = Date.now();
-  try { if (typeof dqTick5_ === 'function') run('dqTick5_', dqTick5_); } catch (x5) { tgErr_('tgTick5 dqTick5_', x5); }   /* v170: صف ارسال، هر ۱۰ دقیقه */
-  try { if (typeof cmTick5_ === 'function' && bgOk_('light', 'cmTick5_')) run('cmTick5_', cmTick5_); } catch (x6) { tgErr_('tgTick5 cmTick5_', x6); }   /* v170.2: کامنت‌های هاب پذیرش، هر ۱۵ دقیقه */
-  try { if (typeof lsTick_ === 'function') run('lsTick_', lsTick_); } catch (x8) { tgErr_('tgTick5 lsTick_', x8); }   /* v170.23.12: پاسخ زیر ۱۰ دقیقه و اولویت ۹:۳۰ (leadspeed.gs) */
-  try { v16810QuotaAlert_(); } catch (x4) { tgErr_('v16810QuotaAlert_', x4); }
-  if (!calls) { try { if (typeof v17013ScholarTick_ === 'function' && bgOk_('light', 'v17013ScholarTick_')) v17013ScholarTick_(); } catch (x7) { tgErr_('tgTick5 v17013ScholarTick_', x7); } }   /* v170.13: خبر وضعیت بورسیه، هر ۱۵ دقیقه */
+  /* v170.23.26: زمان هر بخش جدا (RST:<روز>، ستون «بخش‌های تیک ۵ دقیقه‌ای» تب «سهمیهٔ اجرا») */
+  try { if (typeof dqTick5_ === 'function') bgPart_('dqTick5_', function () { return run('dqTick5_', dqTick5_); }); } catch (x5) { tgErr_('tgTick5 dqTick5_', x5); }   /* v170: صف ارسال، هر ۱۰ دقیقه */
+  try { if (typeof cmTick5_ === 'function' && bgOk_('light', 'cmTick5_')) bgPart_('cmTick5_', function () { return run('cmTick5_', cmTick5_); }); } catch (x6) { tgErr_('tgTick5 cmTick5_', x6); }   /* v170.2: کامنت‌های هاب پذیرش، هر ۱۵ دقیقه */
+  try { if (typeof lsTick_ === 'function') bgPart_('lsTick_', function () { return run('lsTick_', lsTick_); }); } catch (x8) { tgErr_('tgTick5 lsTick_', x8); }   /* v170.23.12: پاسخ زیر ۱۰ دقیقه و اولویت ۹:۳۰ (leadspeed.gs)؛ v170.23.26: شیت فقط با لید تازه */
+  try { bgPart_('quotaAlert', v16810QuotaAlert_); } catch (x4) { tgErr_('v16810QuotaAlert_', x4); }
+  if (!calls) { try { if (typeof v17013ScholarTick_ === 'function' && bgOk_('light', 'v17013ScholarTick_')) bgPart_('v17013ScholarTick_', v17013ScholarTick_); } catch (x7) { tgErr_('tgTick5 v17013ScholarTick_', x7); } }   /* v170.13: خبر وضعیت بورسیه، هر ۱۵ دقیقه */
   if (!calls) { tgRunStat_('tgTick5+', t5); bgFlush_(); }   /* v170.23.12.5: بقیهٔ تیک (صف، کامنت، لید ۱۰ دقیقه‌ای) هم در سهمیه شمرده می‌شود */
 }
 
@@ -2235,7 +2236,7 @@ function bgJson_(k) { try { return JSON.parse(bgProp_(k) || '{}') || {}; } catch
 function bgReset_() { BG_MEMO = null; }
 function bgMemo_() {
   var day = bgDay_();
-  if (!BG_MEMO || BG_MEMO.day !== day) BG_MEMO = { day: day, used: null, steps: {}, skip: {} };
+  if (!BG_MEMO || BG_MEMO.day !== day) BG_MEMO = { day: day, used: null, steps: {}, skip: {}, parts: {} };
   return BG_MEMO;
 }
 /* دقیقه‌های اجراشدهٔ امروز (یک بار در هر اجرا خوانده می‌شود) */
@@ -2262,6 +2263,11 @@ function bgStep_(name, tier, fn) {
   var st = bgMemo_().steps, x = st[name] || [0, 0]; x[0]++; x[1] += Date.now() - t0; st[name] = x;
   return r === undefined ? true : r;
 }
+/* v170.23.26: یک بخش tgTick5 (بعد از سه کار اصلی): بار و زمان، بی رده و بی بلعیدن خطا */
+function bgPart_(name, fn) {
+  var t0 = Date.now();
+  try { return fn(); } finally { var p = bgMemo_().parts, x = p[name] || [0, 0]; x[0]++; x[1] += Date.now() - t0; p[name] = x; }
+}
 /* زمان قدم‌ها و ردشده‌ها در Property؛ ۴ روز آخر */
 function bgFlush_() {
   var m = BG_MEMO; if (!m) return;
@@ -2274,11 +2280,11 @@ function bgFlush_() {
     bgProp_(k, JSON.stringify(o));
   };
   try {
-    put('RSW:', m.steps, true); put('BGS:', m.skip, false);
-    m.steps = {}; m.skip = {};
+    put('RSW:', m.steps, true); put('BGS:', m.skip, false); put('RST:', m.parts || {}, true);
+    m.steps = {}; m.skip = {}; m.parts = {};
     if (!bgDry_()) {
       var P = PropertiesService.getScriptProperties();
-      ['RSW:', 'BGS:'].forEach(function (pre) { var ks = P.getKeys().filter(function (k) { return k.indexOf(pre) === 0; }).sort(); while (ks.length > 4) P.deleteProperty(ks.shift()); });
+      ['RSW:', 'BGS:', 'RST:'].forEach(function (pre) { var ks = P.getKeys().filter(function (k) { return k.indexOf(pre) === 0; }).sort(); while (ks.length > 4) P.deleteProperty(ks.shift()); });
     }
   } catch (e) {}
 }
@@ -2335,13 +2341,14 @@ function bgNightLine_() {
 }
 /* یک سطر در روز در تب پنهان «سهمیهٔ اجرا» هاب: جمع، هر تابع، قدم‌های واچ‌داگ و ردشده‌ها (برای سنجش بعد از انتشار) */
 var BG_TAB = 'سهمیهٔ اجرا';
-var BG_HEAD = ['روز', 'دقیقه تا گزارش ۲۱', 'هر تابع (بار/دقیقه)', 'قدم‌های واچ‌داگ (بار/دقیقه)', 'ردشده'];
+var BG_HEAD = ['روز', 'دقیقه تا گزارش ۲۱', 'هر تابع (بار/دقیقه)', 'قدم‌های واچ‌داگ (بار/دقیقه)', 'ردشده', 'بخش‌های تیک ۵ دقیقه‌ای (بار/دقیقه)'];
 function bgDayRow_(day, used, o, sk) {
   var ss = tgSS_(), sh = ss.getSheetByName(BG_TAB);
   if (!sh) { sh = ss.insertSheet(BG_TAB); sh.setRightToLeft(true); sh.appendRow(BG_HEAD); sh.setFrozenRows(1); try { sh.hideSheet(); } catch (eH) {} }
   var fmt = function (m) { return Object.keys(m).filter(function (k) { return k !== '_c' && Array.isArray(m[k]); }).sort(function (a, b) { return m[b][1] - m[a][1]; })
     .map(function (k) { return k + '=' + m[k][0] + '/' + (m[k][1] / 60000).toFixed(1); }).join(' '); };
-  sh.appendRow([day, Number(used.toFixed(1)), fmt(o), fmt(bgJson_('RSW:' + day)), Object.keys(sk).map(function (k) { return k + '=' + sk[k]; }).join(' ')]);
+  if (sh.getLastColumn() < BG_HEAD.length) sh.getRange(1, 1, 1, BG_HEAD.length).setValues([BG_HEAD]);   /* v170.23.26: ستون بخش‌های تیک */
+  sh.appendRow([day, Number(used.toFixed(1)), fmt(o), fmt(bgJson_('RSW:' + day)), Object.keys(sk).map(function (k) { return k + '=' + sk[k]; }).join(' '), fmt(bgJson_('RST:' + day))]);
 }
 try { TG_NIGHT_LINES.push(bgNightLine_); } catch (eNl) {}
 
@@ -2366,6 +2373,11 @@ function bgTests() {
     bgFlush_();
     var sk = JSON.parse(TG_MEM['bgp:BGS:2026-10-08'] || '{}'), sw = JSON.parse(TG_MEM['bgp:RSW:2026-10-08'] || '{}');
     ok('ردشده‌ها و زمان قدم‌ها ثبت می‌شوند', sk.s1 === 1 && sw.s2 && sw.s2[0] === 1);
+    var pr = bgPart_('lsTick_', function () { return 7; }); bgPart_('lsTick_', function () { return 0; });
+    var thr = false; try { bgPart_('cmTick5_', function () { throw new Error('نمونه'); }); } catch (eP) { thr = true; }
+    bgFlush_(); var st = JSON.parse(TG_MEM['bgp:RST:2026-10-08'] || '{}');
+    ok('بخش‌های تیک ۵ دقیقه‌ای جدا شمرده می‌شوند (v170.23.26)', pr === 7 && thr && st.lsTick_ && st.lsTick_[0] === 2 && st.cmTick5_ && st.cmTick5_[0] === 1, JSON.stringify(st));
+    ok('ستون بخش‌های تیک در سرتیتر تب', BG_HEAD.length === 6 && /تیک ۵/.test(BG_HEAD[5]));
     ok('خط گزارش شبانه: مصرف، بیشترین، ردشده', /سهمیهٔ اجرا: ۸۰٫۰|سهمیهٔ اجرا: ۸۰\.۰/.test(bgNightLine_()) || (/سهمیهٔ اجرا/.test(bgNightLine_()) && /رد شد/.test(bgNightLine_())), bgNightLine_());
     ok('در خط‌های گزارش شبانه ثبت است', TG_NIGHT_LINES.indexOf(bgNightLine_) > -1);
 

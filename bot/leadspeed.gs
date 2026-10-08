@@ -49,7 +49,7 @@ function lsLeads_(lastN) {
 
 /* ───── ۱) پیام ۱۰ دقیقه ───── */
 /** نامزدهای پیام ۱۰ دقیقه: یک خواندن بلوکی از آخرین n سطر، و خواندن کامل فقط برای نامزدها (سهمیهٔ تیک ۵ دقیقه‌ای) */
-function lsFresh_(n, sent) {
+function lsFresh_(n, sent, acc) {
   if (lsDry_()) return lsLeads_();
   var sh = tgSS_().getSheetByName(TG_LEADS), last = sh ? sh.getLastRow() : 0;
   if (last < 2) return [];
@@ -59,20 +59,39 @@ function lsFresh_(n, sent) {
     var code = String(v[i][cc - 1] || '').trim();
     if (!code || sent[code] || String(v[i][10] || '').trim() || tgStClosed_(String(v[i][8] || '').trim())) continue;
     var age = tgDutyAge_(v[i][0], v[i][1], now);
+    if (age < LS_WAIT_MIN && acc) acc.wait = Math.min(acc.wait, LS_WAIT_MIN - Math.max(0, age));   /* v170.23.26: نوبت خواندن بعدی */
     if (age < LS_WAIT_MIN || age > 24 * 60) continue;
     var l = tgLeadRead_(from + i); if (l) out.push(l);
   }
   return out;
 }
 
+/* v170.23.26 (سهمیهٔ اجرا): شیت لیدها فقط وقتی خوانده می‌شود که لازم است، نه هر ۵ دقیقه.
+   نشانگر لید تازه همان BG_LEAD_AT است (bgLeadMark_، هر جا سطری به لیدها اضافه یا دستی ویرایش شود). با هر نشانگر تازه
+   موعد خواندن (LS_DUE) = زمان نشانگر + ۱۰ دقیقه؛ بعد از هر خواندن، موعد بعدی از لیدهای جوان‌تر از ۱۰ دقیقه. بیرون از ۹ تا ۲۱
+   موعد می‌ماند و ساعت ۹ خوانده می‌شود. برای سطری که بی نشانگر آمده باشد، ۹ تا ۲۱ هر LS_SAFE_MIN دقیقه یک خواندن ایمنی. */
+var LS_SAFE_MIN = 60;
+function lsPlan_() {
+  var now = lsNow_(), h = lsHour_();
+  var mark = Number((typeof bgProp_ === 'function' ? bgProp_('BG_LEAD_AT') : '') || 0), seen = Number(lsProp_('LS_MARK') || 0), due = Number(lsProp_('LS_DUE') || 0);
+  if (mark && mark > seen) { var d = mark + LS_WAIT_MIN * 60000; due = due ? Math.min(due, d) : d; lsProp_('LS_DUE', due); lsProp_('LS_MARK', mark); }
+  if (h < 9 || h >= 21) return { run: false, why: 'بیرون از ساعت' };
+  var scan = Number(lsProp_('LS_SCAN_AT') || 0);
+  if (!scan) return { run: true, why: 'اول' };
+  if (due && now >= due) return { run: true, why: 'لید تازه' };
+  if (now - scan >= LS_SAFE_MIN * 60000) return { run: true, why: 'ایمنی' };
+  return { run: false, why: 'بی لید تازه' };
+}
 function lsTick_() {
   if (!lsOn_()) return 0;
   lsBase_();
-  var h = lsHour_(), n = 0;
-  if (h >= 9 && h < 21) {
+  var n = 0, plan = lsPlan_();
+  if (plan.run) {
+    var now = lsNow_(), acc = { wait: Infinity };
     var sent = lsJson_('LS_SENT', {}), changed = false;
-    lsFresh_(80, sent).forEach(function (l) {
+    lsFresh_(80, sent, acc).forEach(function (l) {
       if (!l.code || sent[l.code] || l.closed || l.touched) return;
+      if (l.age < LS_WAIT_MIN && l.age >= 0) acc.wait = Math.min(acc.wait, LS_WAIT_MIN - l.age);
       if (l.age < LS_WAIT_MIN || l.age > 24 * 60) return;
       if (typeof tgDutyClinic_ === 'function' && !tgDutyClinic_(l)) return;
       sent[l.code] = lsNow_(); changed = true; n++;
@@ -82,6 +101,10 @@ function lsTick_() {
       } else lsUrgent_(l);
     });
     if (changed) { var keys = Object.keys(sent), lim = lsNow_() - 3 * 86400000; keys.forEach(function (k) { if (sent[k] < lim) delete sent[k]; }); lsProp_('LS_SENT', JSON.stringify(sent)); }
+    lsProp_('LS_SCAN_AT', now);
+    /* لیدی که هنوز ۱۰ دقیقه‌اش نشده: موعد خواندن بعدی همان لحظه (نیم دقیقه حاشیه) */
+    var cur = Number(lsProp_('LS_DUE') || 0);
+    lsProp_('LS_DUE', acc.wait < Infinity ? now + acc.wait * 60000 + 30000 : (cur > now ? cur : ''));
   }
   try { lsDailyMaybe_(); } catch (e2) { tgErr_('lsDailyMaybe_', e2); }
   return n;
@@ -193,7 +216,7 @@ try { TG_NIGHT_LINES.push(lsNightLine_); } catch (eNl) {}
 /* ───── آزمون ───── */
 function lsTests() {
   var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
-  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, cfg: TG_CFG_ }, st = { clin: tgDutyClinic_, note: tgLeadNote_, card: tgLeadCardText_, kb: tgLeadKb_, by: tgLeadByCode_, rd: tgLeadRead_ };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, cfg: TG_CFG_ }, st = { clin: tgDutyClinic_, note: tgLeadNote_, card: tgLeadCardText_, kb: tgLeadKb_, by: tgLeadByCode_, rd: tgLeadRead_, leads: lsLeads_ };
   TG_DRY = true; TG_OUTBOX = []; TG_CFG_ = { LEAD_SPEED_ENABLED: 'بله' };
   TG_MEM = { 'ls:now': new Date('2026-10-07T10:00:00+03:30').getTime(), 'ls:desk': ['801'], 'ls:duty': { name: 'کشیک نمونه', chat: '802' }, notify: [] };
   try {
@@ -211,6 +234,30 @@ function lsTests() {
     ok('یادداشت لید ثبت شد', notes.some(function (x) { return x[0] === 2 && /۱۰|10/.test(x[1]); }));
     TG_OUTBOX = []; TG_MEM.notify = [];
     ok('هر لید فقط یک بار', lsTick_() === 0 && TG_OUTBOX.length === 0);
+    /* v170.23.26: خواندن شیت فقط با لید تازه */
+    var reads = 0, keepLeads = lsLeads_; lsLeads_ = function () { reads++; return keepLeads(); };
+    var t10 = TG_MEM['ls:now'];
+    ok('لید جوان‌تر از ۱۰ دقیقه موعد خواندن بعدی را می‌سازد', Number(TG_MEM['lsp:LS_DUE']) === t10 + 5 * 60000 + 30000, TG_MEM['lsp:LS_DUE']);
+    TG_MEM['ls:leads'][2].age = 11;   /* لید جوان حالا ۱۰ دقیقه‌اش شده */
+    TG_MEM['ls:now'] = t10 + 2 * 60000; lsTick_();
+    ok('بی لید تازه و پیش از موعد: شیت خوانده نمی‌شود', reads === 0, reads);
+    TG_MEM['ls:now'] = t10 + 6 * 60000; lsTick_();
+    ok('سر موعد لید جوان: یک خواندن', reads === 1, reads);
+    TG_MEM['ls:now'] = t10 + 20 * 60000; lsTick_();
+    ok('بعد از آن، بی نشانگر: خواندنی نیست', reads === 1, reads);
+    TG_MEM['bgp:BG_LEAD_AT'] = String(t10 + 21 * 60000);
+    TG_MEM['ls:now'] = t10 + 25 * 60000; lsTick_();
+    ok('نشانگر لید تازه: پیش از ۱۰ دقیقه خواندنی نیست', reads === 1, reads);
+    TG_MEM['ls:now'] = t10 + 32 * 60000; lsTick_();
+    ok('نشانگر لید تازه: ۱۰ دقیقه بعد یک خواندن', reads === 2, reads);
+    TG_MEM['ls:now'] = t10 + 95 * 60000; lsTick_();
+    ok('هر ۶۰ دقیقه یک خواندن ایمنی (سطر بی نشانگر)', reads === 3, reads);
+    TG_MEM['ls:now'] = t10 + 96 * 60000; lsTick_();
+    ok('بعد از خواندن ایمنی، تا موعد بعدی خواندنی نیست', reads === 3, reads);
+    TG_MEM['bgp:BG_LEAD_AT'] = String(new Date('2026-10-07T23:00:00+03:30').getTime());
+    TG_MEM['ls:now'] = new Date('2026-10-07T23:30:00+03:30').getTime(); lsTick_();
+    ok('شب: نشانگر می‌ماند و شیت خوانده نمی‌شود', reads === 3 && Number(TG_MEM['lsp:LS_DUE']) > 0, reads);
+    lsLeads_ = keepLeads; TG_OUTBOX = []; TG_MEM.notify = [];
     /* بیرون از ساعت کاری، ساعت ۹ */
     TG_MEM['lsp:LS_SENT'] = ''; TG_MEM['ls:now'] = new Date('2026-10-07T22:30:00+03:30').getTime();
     ok('بیرون از ساعت کاری پیامی نمی‌رود', lsTick_() === 0);
@@ -250,7 +297,7 @@ function lsTests() {
     ok('در خط‌های گزارش شبانه ثبت است', TG_NIGHT_LINES.indexOf(lsNightLine_) > -1);
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
   finally {
-    tgDutyClinic_ = st.clin; tgLeadNote_ = st.note; tgLeadCardText_ = st.card; tgLeadKb_ = st.kb; tgLeadByCode_ = st.by; tgLeadRead_ = st.rd;
+    tgDutyClinic_ = st.clin; tgLeadNote_ = st.note; tgLeadCardText_ = st.card; tgLeadKb_ = st.kb; tgLeadByCode_ = st.by; tgLeadRead_ = st.rd; lsLeads_ = st.leads;
     TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg;
   }
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
