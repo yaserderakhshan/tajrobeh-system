@@ -1,0 +1,46 @@
+name: دستیار · آزمون دیداری ویجت
+
+# ۱۶ مهر ۱۴۰۵: ویجت دستیار (اسنیپت 501145) روی خود tajrobeh.life در موبایل ۳۹۰ و دسکتاپ ۱۲۸۰ با Playwright.
+# ویجت زنده با نسخهٔ همین شاخه عوض می‌شود (فقط در مرورگر آزمون، سایت دست نمی‌خورد)، کنتراست هر متن خودکار سنجیده می‌شود
+# (زیر ۴٫۵ به ۱ قرمز) و اسکرین‌شات‌ها در docs/site/assist-widget/ همین شاخه کامیت می‌شوند تا در PR دیده شوند.
+on:
+  pull_request:
+    paths: ['site/snippets/501145.html', 'site/tools/assist-widget-visual.mjs', '.github/workflows/assist-widget-visual.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: assist-widget-visual-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Playwright
+        run: |
+          npm i --no-save --no-package-lock playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: آزمون روی tajrobeh.life
+        id: run
+        env:
+          OUT: docs/site/assist-widget
+        run: node site/tools/assist-widget-visual.mjs
+      - name: اسکرین‌شات‌ها در همین شاخه
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/site/assist-widget/live-*.png docs/site/assist-widget/live-audit.md 2>/dev/null || true
+          if git diff --cached --quiet; then echo "تغییری نیست"; exit 0; fi
+          git commit -m "اسکرین‌شات ویجت دستیار روی tajrobeh.life (۳۹۰ و ۱۲۸۰) [skip ci]"
+          git push origin HEAD:${{ github.head_ref }}
