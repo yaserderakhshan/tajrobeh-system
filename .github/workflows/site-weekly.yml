@@ -23,6 +23,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # تاریخچهٔ site/pages برای بازبینی جواب‌های پرسش‌های پرتکرار (faq-review.mjs)
       - uses: actions/setup-node@v4
         with:
           node-version: 20

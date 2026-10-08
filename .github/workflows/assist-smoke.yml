@@ -1,7 +1,7 @@
 name: دستیار · تست دود
 
-# بات v170.23.19: پنج پرسش از پنج حوزه از مسیر امضاشدهٔ خود سایت (/wp-json/tj/v1/assist).
-# پاسخ‌ها کوتاه و بی شماره و ایمیل در خلاصهٔ اجرا. پرسش بحران در آن نیست (تصمیم یاسر).
+# از ۱۶ مهر ۱۴۰۵: ورکر لبهٔ tj-assist با مورد‌های edge/assist/smoke-cases.mjs (۵۰ پرسش پرتکرار، بی‌ربط‌ها، واژه‌های ممنوع)؛
+# زیر ۹۵٪ درست قرمز. درخواست‌ها با رمز لید سایت امضا می‌شوند (رمزها فقط در محیط production).
 on:
   workflow_dispatch:
 
@@ -10,8 +10,9 @@ permissions:
 
 jobs:
   smoke:
+    environment: production
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,4 +21,5 @@ jobs:
       - name: تست
         env:
           PII_NAMES: ${{ secrets.PII_NAMES }}
+          SITE_LEAD_SECRET: ${{ secrets.SITE_LEAD_SECRET }}
         run: node site/tools/assist-smoke.mjs
