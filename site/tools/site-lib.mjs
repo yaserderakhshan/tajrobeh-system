@@ -136,3 +136,19 @@ export async function report(text, { type = 'گزارش', ref = 'SITE' } = {}) {
 }
 
 // نشانگرهای دایرکتوری و بقیهٔ وابستگی‌های ساختاری برگه‌ها: site/contracts.json و site/tools/contracts.mjs (قرارداد صفحه‌ها).
+
+/* دستیار سایت روی ورکر لبهٔ tj-assist (از ۱۶ مهر ۱۴۰۵). نشانی همان است که ویجت سایت (اسنیپت 501145) صدا می‌زند تا یک جا عوض شود؛
+   ASSIST_EDGE_URL جایش را می‌گیرد. پرسش با مبدأ سایت، مثل مرورگر. خروجی: {status, j, ms, gem} */
+export function assistEdge() {
+  const e = String(process.env.ASSIST_EDGE_URL || '').trim();
+  if (e) return e.replace(/\/+$/, '');
+  try { const m = readFileSync(join(SITE, 'snippets', '501145.html'), 'utf8').match(/EDGE = '(https:\/\/[^']+)'/); return m ? m[1].replace(/\/+$/, '') : ''; } catch { return ''; }
+}
+export async function assistAsk(text, sid, channel = 'smoke') {
+  const t0 = Date.now(); let status = 0, j = null, gem = false;
+  try {
+    const r = await fetch(assistEdge() + '/assist', { method: 'POST', headers: { 'Content-Type': 'text/plain', Origin: 'https://tajrobeh.life', 'User-Agent': 'tajrobeh-site-ops/1' }, body: JSON.stringify({ action: 'assist.ask', channel, session_id: sid, text }) });
+    status = r.status; gem = /gemini/.test(r.headers.get('server-timing') || ''); try { j = JSON.parse(await r.text()); } catch {}
+  } catch {}
+  return { status, j, ms: Date.now() - t0, gem };
+}
