@@ -1450,9 +1450,9 @@ function asTests8() {
     ok('پینگ بی نشانی کاری نمی‌کند', asEdgePing_() === false && !TG_MEM['as:edgeping'].length);
     TG_CFG_.ASSIST_EDGE_URL = 'http://bad.example/x';
     ok('پینگ فقط به نشانی https', asEdgePing_() === false);
-    TG_CFG_.ASSIST_EDGE_URL = 'https://tj-assist.example.workers.dev/';
+    TG_CFG_.ASSIST_EDGE_URL = 'https://edge.example.org/';
     asIdxIngest_({ key: K, run: '202610102300', part: 1, of: 1, chunks: [{ id: 'c2', url: S + '/school/', title: 'مدرسه', text: 'مدرسهٔ تجربه دوره‌های ساختگی برای آزمون نمایه دارد و متن کافی دارد.', dom: 'مدرسه و دوره‌ها', aud: 'دانشجو' }] });
-    ok('تعویض نمایه ورکر را پینگ می‌کند', TG_MEM['as:edgeping'].length === 1 && TG_MEM['as:edgeping'][0] === 'https://tj-assist.example.workers.dev');
+    ok('تعویض نمایه ورکر را پینگ می‌کند', TG_MEM['as:edgeping'].length === 1 && TG_MEM['as:edgeping'][0] === 'https://edge.example.org');
     ok('اکشن‌های درگاه: as_dump خواندنی، as_log نوشتنی', typeof PB_ACTIONS.as_dump === 'function' && PB_WRITE.indexOf('as_dump') < 0 && PB_WRITE.indexOf('as_log') > -1 && PB_RATE_BUCKET.as_log[2] === 400);
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
   finally { asKnownNames_ = keep.names; TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg; AS_IDX_MEMO = null; }
