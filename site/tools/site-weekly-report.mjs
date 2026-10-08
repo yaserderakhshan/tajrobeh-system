@@ -24,5 +24,6 @@ if (a.leads) {
 }
 if (a.links) L.push(`لینک خراب: ${faDigits(a.links.bad.length)} از ${faDigits(a.links.checked)}${a.links.bad.length ? ' (' + a.links.bad.slice(0, 3).map((b) => decodeURI(b.url)).join('، ') + ')' : ''}`);
 L.push(`ناهمخوانی مخزن و سایت: ${faDigits(drift.length)} مورد${drift.length ? ' (ویرایش دستی در وردپرس؛ site-mirror در اجرای ساعتی برمی‌دارد)' : ''}`);
+try { L.push((await import('./faq-review.mjs')).faqReviewLine(7)); } catch (e) { L.push('پرسش‌های پرتکرار دستیار: سنجش صفحه‌های مرجع نشد (' + String(e.message || e).slice(0, 80) + ')'); }
 await report(L.join('\n'), { type: 'گزارش', ref: 'SITE-WEEKLY' });
 console.log(L.join('\n'));
