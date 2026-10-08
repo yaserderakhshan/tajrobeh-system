@@ -113,8 +113,18 @@ jobs:
             echo "- ✅ https://tajrobeh.life/api/assist/health از ورکر جواب داد (پرسش‌های پرتکرار $(echo "$H" | jq -r .faq))" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "::warning::tajrobeh.life/api/assist هنوز به ورکر نمی‌رسد ($(head -1 /tmp/h.txt 2>/dev/null | tr -d '\r'); server: $(grep -i '^server:' /tmp/h.txt | head -1 | tr -d '\r'))"
-            echo "- ⚠️ tajrobeh.life/api/assist به ورکر نمی‌رسد؛ ویجت روی workers.dev می‌ماند" >> "$GITHUB_STEP_SUMMARY"
+            echo "- ⚠️ tajrobeh.life/api/assist به ورکر نمی‌رسد؛ ویجت از مسیر سرور سایت (/wp-json/tj/v1/assist) می‌رود" >> "$GITHUB_STEP_SUMMARY"
           fi
+      - name: مسیر سرور سایت و پروب داخل ایران (اسنیپت 506148)
+        if: steps.gate.outputs.go == '1'
+        run: |
+          B=$(curl -sS -m 20 "https://tajrobeh.life/wp-json/tj/v1/assist/boot" || true)
+          if echo "$B" | jq -e '.ok' >/dev/null 2>&1; then echo "- ✅ /wp-json/tj/v1/assist/boot از راه سرور سایت جواب داد" >> "$GITHUB_STEP_SUMMARY"
+          else echo "- ⚠️ /wp-json/tj/v1/assist/boot جواب نداد (اسنیپت 506148 نسخهٔ ۲ هنوز منتشر نشده؟)" >> "$GITHUB_STEP_SUMMARY"; fi
+          P=$(curl -sS -m 20 "https://tajrobeh.life/wp-json/tj/v1/assist/probe" || true)
+          if echo "$P" | jq -e '.probes | length > 0' >/dev/null 2>&1; then
+            echo "$P" | jq -r '"- پروب سرور سایت (۲۴ ساعت): \(.probes[-24:] | map(select(.ask == 1)) | length) موفق از \(.probes[-24:] | length)؛ آخرین: \(.probes[-1].at) · boot \(.probes[-1].boot_ms)ms · پرسش \(.probes[-1].ask_ms)ms"' >> "$GITHUB_STEP_SUMMARY"
+          else echo "- پروب سرور سایت هنوز نتیجه‌ای ندارد" >> "$GITHUB_STEP_SUMMARY"; fi
       - name: آزمون دود (۵۰ پرسش پرتکرار، بی‌ربط‌ها و واژه‌های ممنوع؛ زیر ۹۵٪ قرمز)
         if: steps.gate.outputs.go == '1'
         env:
