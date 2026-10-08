@@ -487,6 +487,15 @@
   "active": true
  },
  {
+  "id": 506304,
+  "file": "506304.html",
+  "title": "Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz، is_abroad) v1",
+  "type": "html",
+  "location": "site_wide_header",
+  "loc": "site_wide_header",
+  "active": false
+ },
+ {
   "id": null,
   "file": "ga4-visitor-tz.html",
   "title": "Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz، is_abroad) v1",
