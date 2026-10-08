@@ -142,6 +142,27 @@ test('ورکر: جمنای کند نمی‌گذارد پاسخ دیر شود (م
     assert.equal(j.source, 'سایت'); assert.ok(ms < 3200, 'ms=' + ms);
   } finally { globalThis.fetch = realFetch; }
 });
+test('ورکر: چرای جمنای در server-timing (بی مقدار رمز)', async () => {
+  const ask1 = async (e, gem) => {
+    globalThis.fetch = async (u) => String(u).indexOf('generativelanguage') > -1 ? gem() : new Response('{"ok":true}');
+    try {
+      const r = await worker.fetch(new Request('https://w.example.org/assist', { method: 'POST', headers: { Origin: S }, body: JSON.stringify({ session_id: 's-' + Math.random(), text: 'کلینیک حضوری کجاست' }) }), e, ctx());
+      return { st: r.headers.get('server-timing'), j: await r.json() };
+    } finally { globalThis.fetch = realFetch; }
+  };
+  let x = await ask1(env(), () => new Response('{}'));
+  assert.match(x.st, /gem;desc="nokey"/);
+  x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => new Response(JSON.stringify({ error: { code: 400, status: 'INVALID_ARGUMENT', message: 'x' } }), { status: 400 }));
+  assert.match(x.st, /gem;desc="http400-INVALID_ARGUMENT"/); assert.equal(x.j.source, 'سایت');
+  const src = DATA.idx.find((r) => /کلینیک/.test(r[2] + r[3]));
+  x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ text: 'کلینیک حضوری تجربه در تهران است.', i: 0, none: false }) }] } }] })));
+  assert.ok(/gem;desc="(ok|guard)"/.test(x.st), x.st);
+  x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ text: '', i: 0, none: true }) }] } }] })));
+  assert.match(x.st, /gem;desc="none"/);
+  const h = await (await worker.fetch(new Request('https://w.example.org/assist/health'), env({ GEMINI_API_KEY: 'g' }), ctx())).json();
+  assert.ok('gem_last' in h); assert.equal(JSON.stringify(h).indexOf('"g"'), -1);
+  void src;
+});
 test('ورکر: شروع و سلامت', async () => {
   const b = await (await worker.fetch(new Request('https://w.example.org/assist/boot', { headers: { Origin: S } }), env(), ctx())).json();
   assert.equal(b.quick.length, 4);
