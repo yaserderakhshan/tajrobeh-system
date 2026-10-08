@@ -4,7 +4,7 @@
 //  - هر دو با رمز غلط یا بی رمز ← ۴۰۱ یا ۴۰۳
 //  - /camp?code=EFT-1 ← داده با زمان آخرین ارسال بات (pushed)
 //  - دستیار سایت: یک پرسش نمونه به ورکر لبهٔ tj-assist (همان مسیر ویجت 501145 از ۱۶ مهر) ← ۲۰۰، پاسخ، زیر ۵ ثانیه.
-//    مسیر قدیم سرور (/wp-json/tj/v1/assist، اسنیپت 506148) دیگر در مسیر کاربر نیست و اینجا سنجیده نمی‌شود.
+//  - مسیر هم‌دامنهٔ سرور سایت به ورکر (/wp-json/tj/v1/assist، اسنیپت 506148 نسخهٔ ۲؛ راه کاربران داخل ایران) ← ۲۰۰، پاسخ، زیر ۶ ثانیه.
 // رمز فقط از متغیر محیطی CP_WP_SECRET (GitHub Secret) و هرگز چاپ نمی‌شود.
 import { assistAsk, assistEdge, fail, loadEnv, log, summary, wpClient } from './site-lib.mjs';
 
@@ -44,6 +44,10 @@ say(`- دستیار (ورکر لبه): HTTP ${as.status} · ok=${as.j?.ok} · ${
 if (!assistEdge()) errs.push('نشانی ورکر دستیار پیدا نشد (اسنیپت 501145)');
 else if (as.status !== 200 || !as.j?.ok || !as.j?.answer) errs.push(`دستیار سایت پاسخ درست نداد (${as.status} ${as.j?.error || ''})`);
 else if (as.ms > 5000) errs.push(`دستیار سایت کند است (${as.ms} میلی‌ثانیه)`);
+const aw = await assistAsk('هزینه جلسه چقدر است', sid + '-wp', 'smoke', 'https://tajrobeh.life/wp-json/tj/v1');
+say(`- دستیار (مسیر سرور سایت): HTTP ${aw.status} · ok=${aw.j?.ok} · ${aw.ms} میلی‌ثانیه · پاسخ ${aw.j?.answer ? aw.j.answer.length + ' حرف' : 'ندارد'}`);
+if (aw.status !== 200 || !aw.j?.ok || !aw.j?.answer) errs.push(`مسیر سرور سایت دستیار (/wp-json/tj/v1/assist) پاسخ درست نداد (${aw.status} ${aw.j?.error || ''})`);
+else if (aw.ms > 6000) errs.push(`مسیر سرور سایت دستیار کند است (${aw.ms} میلی‌ثانیه)`);
 summary(`## تست دود کمپین\n\n${lines.join('\n')}\n\n${errs.length ? errs.map((e) => `- ⛔ ${e}`).join('\n') : '✅ قبول'}`);
 errs.forEach(fail);
 process.exit(errs.length ? 1 : 0);

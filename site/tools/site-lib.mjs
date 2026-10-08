@@ -142,9 +142,14 @@ export async function report(text, { type = 'گزارش', ref = 'SITE' } = {}) {
 export function assistEdge() {
   const e = String(process.env.ASSIST_EDGE_URL || '').trim();
   if (e) return e.replace(/\/+$/, '');
-  try { const m = readFileSync(join(SITE, 'snippets', '501145.html'), 'utf8').match(/EDGE = '(https:\/\/[^']+)'/); return m ? m[1].replace(/\/+$/, '') : ''; } catch { return ''; }
+  /* از tj-fab v5.3 ویجت فهرست EDGES دارد (هم‌دامنه‌ها، بعد خود ورکر)؛ اینجا نشانی مستقیم ورکر (workers.dev) سنجیده می‌شود */
+  try {
+    const h = readFileSync(join(SITE, 'snippets', '501145.html'), 'utf8');
+    const L = [...((h.match(/EDGES? = (\[[^\]]*\]|'[^']+')/) || [])[1] || '').matchAll(/'(https:\/\/[^']+)'/g)].map((m) => m[1]);
+    return (L.find((u) => /workers\.dev/.test(u)) || L[L.length - 1] || '').replace(/\/+$/, '');
+  } catch { return ''; }
 }
-export async function assistAsk(text, sid, channel = 'smoke') {
+export async function assistAsk(text, sid, channel = 'smoke', base = '') {
   const t0 = Date.now(); let status = 0, j = null, gem = false, why = '';
   const body = JSON.stringify({ action: 'assist.ask', channel, session_id: sid, text });
   const H = { 'Content-Type': 'text/plain', Origin: 'https://tajrobeh.life', 'User-Agent': 'tajrobeh-site-ops/1' };
@@ -152,7 +157,7 @@ export async function assistAsk(text, sid, channel = 'smoke') {
   const sec = process.env.SITE_LEAD_SECRET || process.env.LEAD_SECRET || '';
   if (sec) { const ts = String(Math.floor(Date.now() / 1000)); H['X-Tj-Ts'] = ts; H['X-Tj-Sig'] = createHmac('sha256', sec).update(ts + '.' + body).digest('hex'); }
   try {
-    const r = await fetch(assistEdge() + '/assist', { method: 'POST', headers: H, body });
+    const r = await fetch((base || assistEdge()) + '/assist', { method: 'POST', headers: H, body });
     const stH = r.headers.get('server-timing') || '';
     status = r.status; gem = /gemini/.test(stH); why = (/gem;desc="([^"]*)"/.exec(stH) || [])[1] || ''; try { j = JSON.parse(await r.text()); } catch {}
   } catch {}
