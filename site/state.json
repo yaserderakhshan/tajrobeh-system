@@ -3,36 +3,36 @@
  "base": "https://tajrobeh.life",
  "items": {
   "page:505992": {
-   "hash": "3aae3b7bb92d5d40",
-   "modified": "2026-10-06T11:16:07"
+   "hash": "e57c7383757d3d30",
+   "modified": "2026-10-07T09:55:23"
   },
   "page:505990": {
-   "hash": "0c4f008cc70ba36a",
-   "modified": "2026-10-06T11:16:04"
+   "hash": "84ba7acd6eef3b3b",
+   "modified": "2026-10-07T09:55:18"
   },
   "page:505923": {
-   "hash": "acb75c7a28a5a2e2",
-   "modified": "2026-10-06T11:16:02"
+   "hash": "ec6869b84004ce0b",
+   "modified": "2026-10-07T09:55:14"
   },
   "page:505922": {
-   "hash": "320b7ef1e106438c",
-   "modified": "2026-10-06T11:15:58"
+   "hash": "b0035de10f0c18ce",
+   "modified": "2026-10-07T09:55:10"
   },
   "page:505921": {
-   "hash": "b330b900e4fde917",
-   "modified": "2026-10-06T11:15:56"
+   "hash": "5152ca1b5adaed5e",
+   "modified": "2026-10-07T09:55:05"
   },
   "page:505920": {
    "hash": "ba49d3f1aae08e80",
    "modified": "2026-10-05T14:29:24"
   },
   "page:505919": {
-   "hash": "75aee2bc994b30f0",
-   "modified": "2026-10-06T11:15:51"
+   "hash": "834d85dccbf0a3b3",
+   "modified": "2026-10-07T09:55:01"
   },
   "page:505918": {
-   "hash": "c2cdec1100b7bc20",
-   "modified": "2026-10-06T11:15:47"
+   "hash": "403fb836dd47aed6",
+   "modified": "2026-10-07T09:54:56"
   },
   "page:505908": {
    "hash": "f3ff5cf9e3033111",
@@ -127,12 +127,12 @@
    "modified": "2026-10-03T12:08:38"
   },
   "page:505390": {
-   "hash": "826f9c781a77e506",
-   "modified": "2026-10-03T12:08:29"
+   "hash": "65c4bdd3e218d702",
+   "modified": "2026-10-07T16:47:33"
   },
   "page:505389": {
-   "hash": "d77ef9db23ba3373",
-   "modified": "2026-10-03T12:08:17"
+   "hash": "d8e4ad58b864f058",
+   "modified": "2026-10-07T16:47:23"
   },
   "page:505381": {
    "hash": "714c52ac692074be",
@@ -163,16 +163,16 @@
    "modified": "2026-10-06T16:39:39"
   },
   "page:505209": {
-   "hash": "84d37e7c7d38a839",
-   "modified": "2026-10-03T12:08:07"
+   "hash": "d90d31260e24d0b5",
+   "modified": "2026-10-07T16:47:14"
   },
   "page:505208": {
-   "hash": "22a898705f838f30",
-   "modified": "2026-10-03T12:07:57"
+   "hash": "48be0dac0b59ec47",
+   "modified": "2026-10-07T16:47:05"
   },
   "page:505207": {
-   "hash": "69c694c72f23a916",
-   "modified": "2026-10-03T12:07:47"
+   "hash": "e7521e98d136c1e7",
+   "modified": "2026-10-07T16:46:53"
   },
   "page:505206": {
    "hash": "596a47cb8346e006",
@@ -251,12 +251,12 @@
    "modified": "2026-09-16T10:57:40"
   },
   "page:504777": {
-   "hash": "b4a43bc75ce50cd1",
-   "modified": "2026-09-16T10:57:45"
+   "hash": "dc743856ed5fb8f7",
+   "modified": "2026-10-06T16:41:03"
   },
   "page:504776": {
-   "hash": "d3abac1848e090f1",
-   "modified": "2026-09-16T10:57:50"
+   "hash": "f6cd09d940316534",
+   "modified": "2026-10-06T16:38:25"
   },
   "page:504698": {
    "hash": "573c7b7fb3713fb2",
@@ -307,8 +307,8 @@
    "modified": "2026-10-03T12:24:31"
   },
   "page:504279": {
-   "hash": "109ef86019da8850",
-   "modified": "2026-09-28T15:14:52"
+   "hash": "ebbf6f59fe761898",
+   "modified": "2026-10-07T16:46:39"
   },
   "page:504080": {
    "hash": "69cfe33b85790a0e",
@@ -371,40 +371,40 @@
    "modified": "2026-10-03T22:04:02"
   },
   "page:503836": {
-   "hash": "f5f1f1b76e2a6877",
-   "modified": "2026-10-03T12:07:01"
+   "hash": "4ebc19a49f39421c",
+   "modified": "2026-10-07T16:46:31"
   },
   "page:503827": {
-   "hash": "f066649d51f91e08",
-   "modified": "2026-10-03T12:06:51"
+   "hash": "87441b5dc90a01a6",
+   "modified": "2026-10-07T16:46:22"
   },
   "page:503826": {
-   "hash": "3d51678ef4538070",
-   "modified": "2026-10-03T12:06:41"
+   "hash": "599c15aa0d45d094",
+   "modified": "2026-10-07T16:46:13"
   },
   "page:503825": {
-   "hash": "d2751314422ae299",
-   "modified": "2026-10-03T12:06:32"
+   "hash": "60d5856c86a684de",
+   "modified": "2026-10-07T16:46:03"
   },
   "page:503824": {
-   "hash": "a78f55871c98c1a2",
-   "modified": "2026-10-03T12:06:21"
+   "hash": "41aa8dbbdd862e2d",
+   "modified": "2026-10-07T16:47:49"
   },
   "page:503823": {
-   "hash": "fd112c7a33b5c905",
-   "modified": "2026-10-03T12:05:50"
+   "hash": "d09ac01edcbc0a49",
+   "modified": "2026-10-07T16:45:42"
   },
   "page:503822": {
-   "hash": "6075f6b08ce18a43",
-   "modified": "2026-10-03T12:05:44"
+   "hash": "7ff3b921f5320d67",
+   "modified": "2026-10-07T16:47:44"
   },
   "page:503821": {
-   "hash": "dc58d90dfbf23283",
-   "modified": "2026-10-03T12:05:38"
+   "hash": "85cde9e0709ae619",
+   "modified": "2026-10-07T16:45:22"
   },
   "page:503820": {
-   "hash": "c3e245162fb0e7e8",
-   "modified": "2026-10-03T12:05:31"
+   "hash": "ab0349a2be5a0fa1",
+   "modified": "2026-10-06T16:39:23"
   },
   "page:503648": {
    "hash": "4c1e25dab265d690",
@@ -419,8 +419,8 @@
    "modified": "2026-09-18T06:54:06"
   },
   "page:503465": {
-   "hash": "d4c265e91582d4ee",
-   "modified": "2026-10-06T18:11:47"
+   "hash": "f187c07ad38df947",
+   "modified": "2026-10-07T13:43:46"
   },
   "page:503069": {
    "hash": "d60ec40e2a87b22b",
@@ -459,36 +459,36 @@
    "modified": "2026-09-30T16:49:08"
   },
   "page:501153": {
-   "hash": "0b5251ce3a18c5ef",
-   "modified": "2026-09-29T13:04:23"
+   "hash": "3a798b7373821674",
+   "modified": "2026-10-07T16:45:13"
   },
   "page:297": {
    "hash": "dbee0b2188e7c3e4",
    "modified": "2026-10-03T14:30:30"
   },
   "page:500984": {
-   "hash": "e6ca44f8b7cb6b7c",
-   "modified": "2026-10-03T12:24:37"
+   "hash": "fe4968eec1b4a264",
+   "modified": "2026-10-07T16:47:40"
   },
   "page:308": {
    "hash": "2162735e726a0f94",
    "modified": "2026-10-03T14:44:33"
   },
   "page:307": {
-   "hash": "70fdbcd2a83d76b8",
-   "modified": "2026-09-24T09:37:39"
+   "hash": "15a3efd254ef1948",
+   "modified": "2026-10-07T13:43:45"
   },
   "page:306": {
-   "hash": "fc02bad14d67891f",
-   "modified": "2026-09-28T15:14:35"
+   "hash": "04e5d2e52cbd8201",
+   "modified": "2026-10-07T16:44:56"
   },
   "page:305": {
    "hash": "2e14ba14b3c6c100",
    "modified": "2026-09-16T11:00:15"
   },
   "page:304": {
-   "hash": "84f468c208dc00e4",
-   "modified": "2026-09-24T09:37:39"
+   "hash": "24d6fc7baa62fa93",
+   "modified": "2026-10-07T13:43:45"
   },
   "page:303": {
    "hash": "fc78d54d1b33a182",
@@ -503,20 +503,20 @@
    "modified": "2026-09-16T11:00:16"
   },
   "page:300": {
-   "hash": "6385444ff553e04f",
-   "modified": "2026-10-03T14:32:44"
+   "hash": "61119c2c4b2e5af9",
+   "modified": "2026-10-07T13:43:45"
   },
   "page:299": {
-   "hash": "5c49a38d4ac50c0d",
-   "modified": "2026-10-03T14:32:03"
+   "hash": "9bbb9ec74fcafc5d",
+   "modified": "2026-10-07T16:44:46"
   },
   "page:295": {
    "hash": "b0a3957069534fbb",
    "modified": "2026-09-14T20:17:57"
   },
   "page:294": {
-   "hash": "f2ad10db8935c675",
-   "modified": "2026-10-06T18:31:06"
+   "hash": "a80a356ec3e2f057",
+   "modified": "2026-10-07T16:44:35"
   },
   "page:293": {
    "hash": "65adfc7d24506ecc",
@@ -612,9 +612,9 @@
   },
   "snippet:506031": {
    "hash": "6a5596c3b99bcc7e",
-   "modified": "2026-10-06 12:57:41",
+   "modified": "2026-10-07 10:19:06",
    "active": true,
-   "live": "f3864f33d87c3b11"
+   "live": "1af5faec46406549"
   },
   "snippet:505915": {
    "hash": "1f7b00e7b9912066",
@@ -887,9 +887,9 @@
   },
   "snippet:501145": {
    "hash": "ea56fbafc1984bf8",
-   "modified": "2026-09-26 14:30:47",
+   "modified": "2026-10-07 10:50:09",
    "active": true,
-   "live": "ea56fbafc1984bf8"
+   "live": "abe1a776796010e2"
   },
   "snippet:501143": {
    "hash": "c9135be6c5d4cbae",
@@ -1345,8 +1345,8 @@
    "hash": "2dcd2fb7152b4075"
   },
   "snippet:506033": {
-   "live": "7eb2b771dd371b47",
-   "modified": "2026-10-06 19:06:26",
+   "live": "775b846fb90653eb",
+   "modified": "2026-10-07 09:56:19",
    "active": true
   },
   "snippet:506044": {
@@ -1360,10 +1360,10 @@
    "active": true
   },
   "snippet:506148": {
-   "live": "f35012547dad81d6",
-   "modified": "2026-10-07 09:11:00",
+   "live": "dec9aa0118c90fb4",
+   "modified": "2026-10-07 09:37:04",
    "active": true
   }
  },
- "mirrored_at": "2026-10-07T09:14:50.053Z"
+ "mirrored_at": "2026-10-07T17:25:11.893Z"
 }

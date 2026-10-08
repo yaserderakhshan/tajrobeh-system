@@ -61,6 +61,7 @@ function tj_ebi_moderate($id){
   if ($flag === ''){
     $r = tj_ebibot_call(array('action'=>'ebi_check','text'=>$t,'id'=>(int)$id), 20);
     if (!empty($r['ok']) && !empty($r['received'])){ update_post_meta($id,'tj_review','wait'); update_post_meta($id,'tj_wait_at',time()); return; }
+    if (!empty($r['ok']) && isset($r['data']['verdict']) && $r['data']['verdict'] === 'retry'){ update_post_meta($id,'tj_review','wait'); update_post_meta($id,'tj_wait_at',time()); return; }   /* بات v170.23.12.6: جمنای قطع بود، تلاش دوباره در بات */
     if (!empty($r['ok']) && isset($r['data']['verdict'])){ tj_ebi_apply_verdict($id, $r['data']['verdict'], isset($r['data']['reason']) ? $r['data']['reason'] : ''); return; }
     $why = 'manual';
   }
@@ -71,8 +72,10 @@ function tj_ebi_apply_verdict($id, $verdict, $reason){
   $p = get_post($id); if (!$p || $p->post_type !== 'tj_ebi_item' || $p->post_status !== 'pending') return 'skip';
   update_post_meta($id,'tj_check', sanitize_text_field($verdict.' '.$reason));
   if ($verdict === 'ok'){ wp_update_post(array('ID'=>$id,'post_status'=>'publish')); update_post_meta($id,'tj_by','gemini'); update_post_meta($id,'tj_review','ok'); return 'publish'; }
-  update_post_meta($id,'tj_review','gemini');
-  tj_ebi_notify_queue($id, 'gemini');
+  /* بات v170.23.12.6: «جمنای در دسترس نبود» (بعد از سه تلاش) با «جمنای مطمئن نبود» (پاسخ واقعی جمنای) یکی نیست */
+  $why = strpos((string)$reason, 'جمنای در دسترس نبود') === 0 ? 'gemdown' : 'gemini';
+  update_post_meta($id,'tj_review',$why);
+  tj_ebi_notify_queue($id, $why);
   return 'review';
 }
 function tj_ebi_pending_ids(){ return get_posts(array('post_type'=>'tj_ebi_item','post_status'=>'pending','numberposts'=>200,'fields'=>'ids','orderby'=>'date','order'=>'ASC','suppress_filters'=>true)); }
@@ -82,8 +85,10 @@ function tj_ebi_notify_queue($id, $why){
   update_option('tj_ebi_last_notify', time(), false);
   $n = count(tj_ebi_pending_ids());
   $p = get_post($id);
-  $labels = array('risk'=>'⚠️ نشانهٔ حال بد در متن؛ لطفاً با دقت ببینید','contact'=>'شماره یا لینک در متن','gemini'=>'جمنای مطمئن نبود','manual'=>'بازبینی دستی');
-  $txt = '<b>فهرست ابی · منتظر تأیید</b>'."\n\n".'«'.esc_html($p->post_title).'»'."\n".'<i>'.esc_html(isset($labels[$why]) ? $labels[$why] : $why).'</i>';
+  $labels = array('risk'=>'⚠️ نشانهٔ حال بد در متن؛ لطفاً با دقت ببینید','contact'=>'شماره یا لینک در متن','gemini'=>'جمنای مطمئن نبود','gemdown'=>'جمنای در دسترس نبود؛ بررسی خودکار انجام نشد','manual'=>'بازبینی دستی');
+  $lab = isset($labels[$why]) ? $labels[$why] : $why;
+  if ($why === 'gemini'){ $rs = trim(preg_replace('/^review\s*/', '', (string) get_post_meta($id,'tj_check',true))); if ($rs !== '') $lab .= ': '.$rs; }
+  $txt = '<b>فهرست ابی · منتظر تأیید</b>'."\n\n".'«'.esc_html($p->post_title).'»'."\n".'<i>'.esc_html($lab).'</i>';
   if ($n > 1) $txt .= "\n\n".'در صف: <b>'.tj_ebi_fa($n).'</b> مورد';
   $txt .= "\n\n".'هر کدام از شما بزند کافی است؛ همان لحظه روی سایت می‌آید.';
   $btn = array(array(array('text'=>'✅ انتشار همین','url'=>tj_ebi_modurl('pub',$id)), array('text'=>'✖️ رد','url'=>tj_ebi_modurl('del',$id))));

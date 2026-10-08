@@ -42,6 +42,9 @@ export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // هش یکدست: پایان خط LF، بی فاصلهٔ ته خط و ته فایل. همین تابع در پل وردپرس (ops-bridge.php) هم پیاده شده.
 export function norm(s) { return String(s ?? '').replace(/\r\n?/g, '\n').replace(/[ \t]+$/gm, '').replace(/\s+$/, ''); }
 export function hash(s) { return createHash('sha256').update(norm(s), 'utf8').digest('hex').slice(0, 16); }
+/* پل هش Yoast را روی wp_json_encode می‌سازد: نویسهٔ غیرASCII به \uXXXX و «/» به «\/». JSON.stringify متن فارسی را خام می‌گذارد،
+   پس هش هیچ متای فارسی جور نمی‌شد (۱۵ مهر ۱۴۰۵: انتشار PR ۹۳ با 409 tj_ops_drift برگشت). */
+export const phpJson = (v) => JSON.stringify(v).replace(/[\u0080-\uffff]/g, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).replace(/\//g, '\\/');
 
 // پوشاندن و برگرداندن رمزها: site/tools/secrets.mjs
 export { maskSecrets, unmaskFrom } from './secrets.mjs';

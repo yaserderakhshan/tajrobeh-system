@@ -82,7 +82,7 @@
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۵ | ۳۳ |
-| `telegram.gs` | ۳۷۷۸۲ | ۲۰۴۱ |
+| `telegram.gs` | ۳۷۷۸۳ | ۲۰۴۱ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -96,18 +96,18 @@
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۵۷۴ | ۱۲۰ |
+| `publish.gs` | ۱۵۷۶ | ۱۲۰ |
 | `v168.gs` | ۲۳۷۶ | ۱۴۸ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۸ | ۳۴ |
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۱۰۳۶ | ۶۵ |
-| `dq.gs` | ۵۹۳ | ۴۹ |
+| `dq.gs` | ۶۰۲ | ۴۹ |
 | `cfg.gs` | ۱۸۴ | ۱۴ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
-| `ebi.gs` | ۹۹۶ | ۷۱ |
+| `ebi.gs` | ۱۱۱۵ | ۸۲ |
 | `ci.gs` | ۵۴۳ | ۳۱ |
 | `sitesec.gs` | ۲۷۵ | ۲۲ |
 | `sec.gs` | ۱۰۵ | ۱ |
