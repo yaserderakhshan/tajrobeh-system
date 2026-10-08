@@ -5,7 +5,7 @@
 //   GET  /assist/health   نسخهٔ داده و سن آن (بی هیچ محتوا).
 // داده: خروجی اکشن as_dump بات در KV (کلید dump)، هر ۳۰ دقیقه با cron و با پینگ تازه می‌شود. گزارش‌ها با ctx.waitUntil (اکشن as_log).
 // رمزها فقط secret ورکر: BOT_URL، BOT_KEY (کلید دوم درگاه)، LEAD_SECRET (امضای سرور، همان رمز لید سایت)، GEMINI_API_KEY (اختیاری).
-import { prepare, ask, tap, boot, composePrompt, applyCompose, COMPOSE_SCHEMA, nearTopics } from './engine.js';
+import { prepare, ask, tap, boot, composePrompt, applyCompose, COMPOSE_SCHEMA, nearTopics, siteEventsFrom } from './engine.js';
 
 const ORIGINS = ['https://tajrobeh.life', 'https://www.tajrobeh.life', 'https://new.tajrobeh.life'];
 const GEM_MODEL = 'gemini-flash-lite-latest';
@@ -22,7 +22,7 @@ export default {
     const path = url.pathname.replace(/\/+$/, '');
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
     try {
-      if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false, gem_last: await env.KV.get('gem:last', 'json') }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
+      if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, events: d ? d.siteEvents.length : 0, gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false, gem_last: await env.KV.get('gem:last', 'json') }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
       if (path === '/assist/refresh' && req.method === 'POST') { ctx.waitUntil(refresh(env, true)); return json({ ok: true }); }
       if (path === '/assist/boot' && req.method === 'GET') {
         const P = await data(env, ctx);
@@ -86,20 +86,31 @@ export default {
 /* ───── داده ───── */
 async function data(env, ctx) {
   if (MEM && Date.now() - MEM.at < 60000) return MEM.P;
-  const hitKv = await env.KV.get('dump', 'json');
+  const [hitKv, ev] = await Promise.all([env.KV.get('dump', 'json'), env.KV.get('site_events', 'json')]);
+  const withEv = (d) => Object.assign({}, d, { siteEvents: (ev && ev.list) || [] });
   if (hitKv && hitKv.data) {
-    MEM = { at: Date.now(), P: prepare(hitKv.data) };
+    MEM = { at: Date.now(), P: prepare(withEv(hitKv.data)) };
     if (Date.now() - (hitKv.at || 0) > 45 * 60000) ctx.waitUntil(refresh(env, false));
     return MEM.P;
   }
   const d = await refresh(env, true);
-  return d ? (MEM = { at: Date.now(), P: prepare(d) }).P : null;
+  return d ? (MEM = { at: Date.now(), P: prepare(withEv(d)) }).P : null;
+}
+/* تقویم منتشرشدهٔ صفحهٔ رویدادهای سایت (همان دادهٔ evData که بازدیدکننده می‌بیند)؛ فقط با cron و پینگ، نه در مسیر کاربر */
+async function siteEvents(env) {
+  try {
+    const r = await fetch('https://tajrobeh.life/school/events/', { headers: { 'user-agent': 'tj-assist-worker' }, cf: { cacheTtl: 600 } });
+    if (!r.ok) return;
+    const today = new Date(Date.now() + 3.5 * 3600000).toISOString().slice(0, 10), list = siteEventsFrom(await r.text(), today, 60);
+    if (list) await env.KV.put('site_events', JSON.stringify({ at: Date.now(), list }));
+  } catch (e) {}
 }
 async function refresh(env, ping) {
   if (ping) {
     const last = await env.KV.get('pull_at');
     if (last && Date.now() - Number(last) < 60000) return null;
   }
+  await siteEvents(env);
   try {
     const r = await fetch(env.BOT_URL, { method: 'POST', headers: { 'content-type': 'text/plain' }, redirect: 'follow', body: JSON.stringify({ api: 1, key: env.BOT_KEY, action: 'as_dump' }) });
     const j = await r.json();
