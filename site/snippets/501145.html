@@ -34,7 +34,7 @@
       </div>
       <div class="tj-fab-as-log" id="tjFabAsLog" aria-live="polite"></div>
       <form class="tj-fab-as-f" id="tjFabAsF">
-        <input id="tjFabAsIn" maxlength="500" autocomplete="off" enterkeyhint="send" placeholder="سؤالت را بنویس…" aria-label="سؤالت را بنویس">
+        <input id="tjFabAsIn" maxlength="500" autocomplete="off" enterkeyhint="send" placeholder="سؤالت را بنویس" aria-label="سؤالت را بنویس">
         <button type="submit" aria-label="بفرست"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></button>
       </form>
       <small class="tj-fab-as-note" id="tjFabAsNote" tabindex="0" title="اطلاعات کاربر فقط در اختیار مسئول مربوطه در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت او منتشر یا با کسی به اشتراک گذاشته نمی‌شود.">🔒 اطلاعات کاربر فقط در اختیار مسئول مربوطه در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت او منتشر یا با کسی به اشتراک گذاشته نمی‌شود.</small>
@@ -158,55 +158,79 @@
     #tjFabRoot.is-open .tj-fab-btn{ opacity: 0; pointer-events: none; transform: scale(.8); }
   }
 
-  /* tj-fab v4 (دستیار روی ورکر لبه، ۱۶ مهر ۱۴۰۵): زمینهٔ روشن، حباب‌های سبک، پرسش‌های پرتکرار، «بیشتر بخوانید»، نشانگر نوشتن.
-     رنگ و فونت از --tj-* سراسری (docs/brand/tokens.css) با پشتیبان همان مقدار توکن. فقط ویژگی‌های منطقی. */
-  .tj-fab-item--ask{ inline-size: 100%; border: 0; background: none; font: inherit; text-align: start; cursor: pointer; }
-  .tj-fab-item-icon--ask{ background: var(--tj-ink, #222222); }
+  /* tj-fab v5 (۱۶ مهر ۱۴۰۵، خوانایی): رنگ‌ها جدا از CSS سایت، با پیشوند یکتای --tjas- و مقدار مستقیم docs/brand/tokens.css؛
+     همهٔ قاعده‌ها زیر #tjFabRoot تا قاعدهٔ دکمه و لینک قالب سایت رویشان ننشیند. کنتراست متن همه‌جا دست‌کم ۴٫۵ به ۱
+     (آزمون: site/tools/assist-widget-visual.mjs). حباب جواب کرم روشن با متن مشکی، پرسش کاربر قرمز برند با متن سفید. */
+  #tjFabRoot{
+    --tjas-white: #fefefe; --tjas-black: #222222; --tjas-text: #0e0e0e; --tjas-mut: #676768; --tjas-line: #dfdfe2; --tjas-soft: #f5f5f8;
+    --tjas-cream: #faeced; --tjas-brand: #c83f49; --tjas-brand-dark: #8e2d34; --tjas-ok: #67aa82;
+  }
+  /* پاک کردن سبک دکمه و لینک قالب سایت فقط داخل پنل دستیار؛ هر عنصر پایین‌تر رنگ و زمینهٔ خودش را دارد */
+  #tjFabRoot .tj-fab-as button, #tjFabRoot .tj-fab-as a, #tjFabRoot .tj-fab-as input{ margin: 0; box-shadow: none; text-transform: none; letter-spacing: normal; text-decoration: none; min-block-size: 0; inline-size: auto; font-family: 'Anjoman Max','Vazirmatn',system-ui,sans-serif; font-weight: 400; cursor: pointer; -webkit-appearance: none; appearance: none; }
+  #tjFabRoot .tj-fab-as input{ cursor: text; border: 0; outline: 0; }
+  #tjFabRoot .tj-fab-as button:focus-visible, #tjFabRoot .tj-fab-as a:focus-visible{ outline: 2px solid var(--tjas-brand); outline-offset: 2px; }
+  /* منوی اصلی: فقط رنگ‌ها جدا از سایت؛ چیدمان همان قاعده‌های بالا */
+  #tjFabRoot .tj-fab-btn{ background: var(--tjas-brand); color: var(--tjas-white); }
+  #tjFabRoot .tj-fab-menu{ background: var(--tjas-white); }
+  #tjFabRoot .tj-fab-menu-title{ color: var(--tjas-mut); }
+  #tjFabRoot .tj-fab-item{ color: var(--tjas-text); }
+  #tjFabRoot .tj-fab-item-label{ color: var(--tjas-text); }
+  #tjFabRoot .tj-fab-item-status{ color: var(--tjas-mut); }
+  #tjFabRoot .tj-fab-item-icon{ color: var(--tjas-white); }
+  #tjFabRoot .tj-fab-item-icon--ask{ background: var(--tjas-black); }
+
+  /* دستیار */
   .tj-fab-as{ display: flex; flex-direction: column; gap: 10px; }
   .tj-fab-as[hidden]{ display: none; }
   #tjFabRoot.is-as .tj-fab-menu-title, #tjFabRoot.is-as .tj-fab-item{ display: none; }
-  #tjFabRoot.is-as .tj-fab-menu{ inline-size: 372px; padding: 12px; border-radius: 18px; }
-  .tj-fab-as-head{ display: flex; align-items: center; gap: 10px; padding-block-end: 10px; border-block-end: 1px solid var(--tj-line, #dfdfe2); }
-  .tj-fab-as-back{ flex: none; inline-size: 34px; block-size: 34px; border: 0; border-radius: 999px; background: var(--tj-soft, #f5f5f8); color: var(--tj-ink, #222222); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .tj-fab-as-back svg{ inline-size: 17px; block-size: 17px; }
-  .tj-fab-as-title{ display: flex; flex-direction: column; line-height: 1.5; }
-  .tj-fab-as-title b{ font-size: 15px; font-weight: 700; color: #0e0e0e; }
-  .tj-fab-as-title small{ font-size: 11px; color: var(--tj-mut, #676768); }
-  .tj-fab-as-title small::before{ content: ""; display: inline-block; inline-size: 6px; block-size: 6px; border-radius: 50%; background: #67aa82; margin-inline-end: 5px; vertical-align: 1px; }
-  .tj-fab-as-log{ display: flex; flex-direction: column; gap: 10px; min-block-size: 200px; max-block-size: min(52vh, 420px); overflow-y: auto; overscroll-behavior: contain; padding-block: 4px; scroll-behavior: smooth; }
-  .tj-fab-as-m{ max-inline-size: 86%; padding-block: 9px; padding-inline: 13px; border-radius: 16px; white-space: pre-wrap; font-size: 14px; line-height: 1.5; animation: tjAsIn .18s ease both; }
-  .tj-fab-as-m.bot{ align-self: flex-start; background: var(--tj-soft, #f5f5f8); color: #0e0e0e; border-start-start-radius: 6px; }
-  .tj-fab-as-m.me{ align-self: flex-end; background: var(--tj-ink, #222222); color: var(--tj-white, #fefefe); border-start-end-radius: 6px; }
-  .tj-fab-as-hi{ font-size: 14px; line-height: 1.5; color: #0e0e0e; margin: 4px 2px 2px; }
-  .tj-fab-as-q{ display: flex; flex-direction: column; gap: 6px; }
-  .tj-fab-as-q button{ display: flex; align-items: center; justify-content: space-between; gap: 8px; font: inherit; font-size: 14px; line-height: 1.5; text-align: start; padding-block: 9px; padding-inline: 12px; border-radius: 12px; border: 1px solid var(--tj-line, #dfdfe2); background: var(--tj-white, #fefefe); color: #0e0e0e; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
-  .tj-fab-as-q button::after{ content: "←"; color: var(--tj-mut, #676768); font-size: 13px; }
-  .tj-fab-as-q button:hover{ border-color: var(--tj-ink, #222222); background: var(--tj-soft, #f5f5f8); }
-  .tj-fab-as-bs{ display: flex; flex-wrap: wrap; gap: 6px; align-items: center; animation: tjAsIn .18s ease both; }
-  .tj-fab-as-bs button, .tj-fab-as-bs a{ font: inherit; font-size: 13px; line-height: 1.5; padding-block: 5px; padding-inline: 11px; border-radius: 999px; border: 1px solid var(--tj-line, #dfdfe2); background: var(--tj-white, #fefefe); color: var(--tj-ink, #222222); cursor: pointer; text-decoration: none; }
-  .tj-fab-as-bs button:hover, .tj-fab-as-bs a:hover{ border-color: var(--tj-ink, #222222); }
-  .tj-fab-as-bs a.is-more{ background: var(--tj-ink, #222222); border-color: var(--tj-ink, #222222); color: var(--tj-white, #fefefe); }
-  .tj-fab-as-bs a.is-more::after{ content: " ↖"; }
-  .tj-fab-as-bs .is-rate{ border: 0; background: none; padding-inline: 6px; color: var(--tj-mut, #676768); font-size: 12px; }
-  .tj-fab-as-bs .is-rate.is-emoji{ font-size: 15px; filter: grayscale(.2); }
-  .tj-fab-as-typing{ align-self: flex-start; display: flex; gap: 4px; padding-block: 12px; padding-inline: 14px; border-radius: 16px; border-start-start-radius: 6px; background: var(--tj-soft, #f5f5f8); }
-  .tj-fab-as-typing i{ inline-size: 6px; block-size: 6px; border-radius: 50%; background: #aeaeb0; animation: tjAsDot 1s infinite ease-in-out; }
-  .tj-fab-as-typing i:nth-child(2){ animation-delay: .15s; } .tj-fab-as-typing i:nth-child(3){ animation-delay: .3s; }
+  #tjFabRoot.is-as .tj-fab-menu{ inline-size: 380px; padding: 12px; border-radius: 18px; background: var(--tjas-white); }
+  /* سربرگ: بی دایرهٔ تیره؛ فلش بازگشت ساده و نام دستیار */
+  #tjFabRoot .tj-fab-as-head{ display: flex; align-items: center; gap: 6px; padding-block-end: 10px; border-block-end: 1px solid var(--tjas-line); }
+  #tjFabRoot .tj-fab-as-back{ border: 0; padding: 0; flex: none; display: flex; align-items: center; justify-content: center; inline-size: 36px; block-size: 36px; border-radius: 10px; background: transparent; color: var(--tjas-text); }
+  #tjFabRoot .tj-fab-as-back:hover{ background: var(--tjas-soft); }
+  #tjFabRoot .tj-fab-as-back svg{ inline-size: 20px; block-size: 20px; }
+  #tjFabRoot .tj-fab-as-title{ display: flex; flex-direction: column; line-height: 1.5; }
+  #tjFabRoot .tj-fab-as-title b{ font-size: 15px; font-weight: 700; color: var(--tjas-text); }
+  #tjFabRoot .tj-fab-as-title small{ font-size: 12px; color: var(--tjas-mut); }
+  #tjFabRoot .tj-fab-as-title small::before{ content: ""; display: inline-block; inline-size: 6px; block-size: 6px; border-radius: 50%; background: var(--tjas-ok); margin-inline-end: 5px; vertical-align: 1px; }
+  #tjFabRoot .tj-fab-as-log{ display: flex; flex-direction: column; gap: 10px; min-block-size: 200px; max-block-size: min(54vh, 440px); overflow-y: auto; overscroll-behavior: contain; padding-block: 4px; scroll-behavior: smooth; }
+  /* حباب‌ها */
+  #tjFabRoot .tj-fab-as-m{ max-inline-size: 88%; padding-block: 10px; padding-inline: 14px; border-radius: 16px; white-space: pre-wrap; font-size: 14.5px; line-height: 1.5; animation: tjAsIn .18s ease both; overflow-wrap: anywhere; }
+  #tjFabRoot .tj-fab-as-m.bot{ align-self: flex-start; background: var(--tjas-cream); color: var(--tjas-black); border-start-start-radius: 6px; }
+  #tjFabRoot .tj-fab-as-m.me{ align-self: flex-end; background: var(--tjas-brand); color: var(--tjas-white); border-start-end-radius: 6px; }
+  #tjFabRoot .tj-fab-as-hi{ font-size: 14.5px; line-height: 1.5; color: var(--tjas-text); margin: 4px 2px 2px; }
+  /* پرسش‌های پرتکرار و دکمه‌های جواب */
+  #tjFabRoot .tj-fab-as-q{ display: flex; flex-direction: column; gap: 6px; }
+  #tjFabRoot .tj-fab-as-q button{ inline-size: 100%; border-style: solid; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; line-height: 1.5; text-align: start; padding-block: 9px; padding-inline: 12px; border-radius: 12px; border: 1px solid var(--tjas-line); background: var(--tjas-white); color: var(--tjas-text); }
+  #tjFabRoot .tj-fab-as-q button::after{ content: "←"; color: var(--tjas-mut); font-size: 13px; }
+  #tjFabRoot .tj-fab-as-q button:hover{ border-color: var(--tjas-black); background: var(--tjas-soft); }
+  #tjFabRoot .tj-fab-as-bs{ display: flex; flex-wrap: wrap; gap: 6px; align-items: center; animation: tjAsIn .18s ease both; }
+  #tjFabRoot .tj-fab-as-bs button, #tjFabRoot .tj-fab-as-bs a{ display: inline-flex; border-style: solid; align-items: center; font-size: 13px; line-height: 1.5; padding-block: 6px; padding-inline: 12px; border-radius: 999px; border: 1px solid var(--tjas-line); background: var(--tjas-white); color: var(--tjas-text); }
+  #tjFabRoot .tj-fab-as-bs button:hover, #tjFabRoot .tj-fab-as-bs a:hover{ border-color: var(--tjas-black); }
+  #tjFabRoot .tj-fab-as-bs a.is-more{ background: var(--tjas-black); border-color: var(--tjas-black); color: var(--tjas-white); }
+  #tjFabRoot .tj-fab-as-bs a.is-more::after{ content: " ↖"; }
+  #tjFabRoot .tj-fab-as-bs .is-rate{ border-color: transparent; background: transparent; padding-inline: 6px; color: var(--tjas-mut); font-size: 12.5px; }
+  #tjFabRoot .tj-fab-as-bs .is-rate.is-emoji{ font-size: 15px; }
+  #tjFabRoot .tj-fab-as-typing{ align-self: flex-start; display: flex; gap: 4px; padding-block: 12px; padding-inline: 14px; border-radius: 16px; border-start-start-radius: 6px; background: var(--tjas-cream); }
+  #tjFabRoot .tj-fab-as-typing i{ inline-size: 6px; block-size: 6px; border-radius: 50%; background: var(--tjas-mut); animation: tjAsDot 1s infinite ease-in-out; }
+  #tjFabRoot .tj-fab-as-typing i:nth-child(2){ animation-delay: .15s; } #tjFabRoot .tj-fab-as-typing i:nth-child(3){ animation-delay: .3s; }
   @keyframes tjAsDot{ 0%, 80%, 100%{ opacity: .35; transform: translateY(0); } 40%{ opacity: 1; transform: translateY(-2px); } }
   @keyframes tjAsIn{ from{ opacity: 0; transform: translateY(4px); } to{ opacity: 1; transform: none; } }
-  .tj-fab-as-f{ display: flex; align-items: center; gap: 6px; padding: 4px; padding-inline-start: 12px; border: 1px solid var(--tj-line, #dfdfe2); border-radius: 999px; background: var(--tj-white, #fefefe); transition: border-color .15s ease; }
-  .tj-fab-as-f:focus-within{ border-color: var(--tj-ink, #222222); }
-  .tj-fab-as-f input{ flex: 1; min-inline-size: 0; font: inherit; font-size: 16px; line-height: 1.5; padding-block: 6px; border: 0; outline: 0; background: none; color: #0e0e0e; }
-  .tj-fab-as-f button{ flex: none; inline-size: 36px; block-size: 36px; border: 0; border-radius: 999px; background: var(--tj-ink, #222222); color: var(--tj-white, #fefefe); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .tj-fab-as-f button svg{ inline-size: 18px; block-size: 18px; }
-  .tj-fab-as-note{ display: block; font-size: 10.5px; line-height: 1.5; color: var(--tj-mut, #676768); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding-inline: 4px; }
-  .tj-fab-as-note.is-open{ white-space: normal; }
+  /* ورودی */
+  #tjFabRoot .tj-fab-as-f{ display: flex; align-items: center; gap: 6px; padding: 4px; padding-inline-start: 14px; border: 1px solid var(--tjas-line); border-radius: 999px; background: var(--tjas-white); }
+  #tjFabRoot .tj-fab-as-f:focus-within{ border-color: var(--tjas-black); }
+  #tjFabRoot .tj-fab-as-f input{ inline-size: auto; padding-inline: 0; flex: 1; min-inline-size: 0; font-size: 16px; line-height: 1.5; padding-block: 6px; background: transparent; color: var(--tjas-text); }
+  #tjFabRoot .tj-fab-as-f input::placeholder{ color: var(--tjas-mut); opacity: 1; }
+  #tjFabRoot .tj-fab-as-f button{ border: 0; padding: 0; flex: none; display: flex; align-items: center; justify-content: center; inline-size: 38px; block-size: 38px; border-radius: 999px; background: var(--tjas-black); color: var(--tjas-white); }
+  #tjFabRoot .tj-fab-as-f button svg{ inline-size: 18px; block-size: 18px; }
+  /* یادداشت حریم خصوصی: یک خط کامل و کوتاه، بی «…» */
+  #tjFabRoot .tj-fab-as-note{ display: block; font-size: 11.5px; line-height: 1.5; color: var(--tjas-mut); padding-inline: 4px; }
   @media (max-width:640px){
     #tjFabRoot.is-as .tj-fab-menu{ inline-size: auto; padding-inline: 14px; border-radius: 22px 22px 0 0; max-block-size: 88vh; display: flex; flex-direction: column; }
     #tjFabRoot.is-as .tj-fab-as{ flex: 1; min-block-size: 0; }
-    .tj-fab-as-log{ max-block-size: none; flex: 1; min-block-size: 46vh; }
+    #tjFabRoot .tj-fab-as-log{ max-block-size: none; flex: 1; min-block-size: 46vh; }
   }
-  @media (prefers-reduced-motion: reduce){ .tj-fab-as-m, .tj-fab-as-bs, .tj-fab-as-typing i{ animation: none; } }
+  @media (prefers-reduced-motion: reduce){ #tjFabRoot .tj-fab-as-m, #tjFabRoot .tj-fab-as-bs, #tjFabRoot .tj-fab-as-typing i{ animation: none; } }
 </style>
 
 <script>
