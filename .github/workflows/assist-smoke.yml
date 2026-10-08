@@ -1,0 +1,23 @@
+name: دستیار · تست دود
+
+# بات v170.23.19: پنج پرسش از پنج حوزه از مسیر امضاشدهٔ خود سایت (/wp-json/tj/v1/assist).
+# پاسخ‌ها کوتاه و بی شماره و ایمیل در خلاصهٔ اجرا. پرسش بحران در آن نیست (تصمیم یاسر).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: تست
+        env:
+          PII_NAMES: ${{ secrets.PII_NAMES }}
+        run: node site/tools/assist-smoke.mjs

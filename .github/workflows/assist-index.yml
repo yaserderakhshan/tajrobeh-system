@@ -1,0 +1,33 @@
+name: دستیار · نمایهٔ دانش سایت
+
+# بات v170.23.19 (فاز ۷ ASSISTANT.md، تصمیم یاسر): روزی دو بار متن منتشرشدهٔ سایت (برگه‌ها و مجله، از REST عمومی وردپرس) تمیز و
+# تکه‌تکه می‌شود و با کلید دوم درگاه (اکشن kb_index) به بات می‌رود تا در برگهٔ پنهان «نمایهٔ دانش» بنشیند. هیچ نوشتنی روی سایت،
+# هیچ فایل در مخزن، هیچ مدل هوش مصنوعی. نگهبان اطلاعات شخصی مخزن روی هر تکه اجرا می‌شود. بی سهمیهٔ تریگرهای اپس‌اسکریپت.
+on:
+  schedule:
+    - cron: '23 3,15 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assist-index
+  cancel-in-progress: false
+
+jobs:
+  index:
+    environment: production   # رمزها فقط در Environment «production» (فقط main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: ساخت و ارسال نمایه
+        env:
+          BOT_API_URL: ${{ secrets.BOT_API_URL }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+          PII_NAMES: ${{ secrets.PII_NAMES }}
+        run: node site/tools/assist-index.mjs

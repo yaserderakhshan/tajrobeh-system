@@ -11,8 +11,8 @@
  *   «هوشمند»: فقط وقتی ASSIST_GEMINI_PAID = «بله». تا آن موقع هرگز فعال نمی‌شود و به «جستجو» برمی‌گردد. جمنای فقط شمارهٔ ردیف
  *     تأییدشده را انتخاب می‌کند و پاسخ همیشه متن تأییدشده است؛ متن پیش از ارسال بی‌شناسه می‌شود.
  * جمنای رایگان فقط برای یک کار: پیش‌نویس ردیف‌های «دانش دستیار» از «سؤالات متداول» (بی هیچ دادهٔ کاربر)، با «تأیید = خیر».
- * مرزها: مشاورهٔ بالینی، تشخیص یا دارو نه. بحران همیشه پیش از هر تطبیقی با فهرست واژه‌ها (tgIsCrisis_): شمارهٔ اورژانس
- *   کشور کاربر (ASSIST_EMERGENCY، پیش‌فرض متن ایران T_CRISIS) و کارت فوری برای پذیرش بی ساعت سکوت. ویس و فایل به دستیار نمی‌رسد.
+ * مرزها: مشاورهٔ بالینی، تشخیص یا دارو نه. بحران همیشه پیش از هر تطبیق و پیش از جمنای با فهرست جمله‌های صریح (tgIsCrisis_):
+ *   فقط پیام ثابت اورژانس T_CRISIS (از v170.23.19 بی کارت فوری و بی تحویل؛ متن پیام هیچ‌جا نمی‌رود). ویس و فایل به دستیار نمی‌رسد.
  * تحویل به پذیرش: صندوق یکتا (inbAdd_) اگر هست، وگرنه «تماس همکاران» (tgColleague_)؛ کاربر «پیامت به پذیرش رسید» می‌گیرد.
  * رابط وب واحد: doPost با action = assist.ask و امضای HMAC همان سایت (ts و sig در نشانی؛ Apps Script سرآیند نمی‌خواند).
  *   ورودی channel، session_id، text، country؛ خروجی answer، topic، handoff، buttons. نرخ‌گیری برای هر session_id.
@@ -23,7 +23,7 @@ var AS_KB_TAB = 'دانش دستیار';
 var AS_KB_HEAD = ['موضوع', 'پرسش‌های نمونه', 'پاسخ', 'منبع', 'تأیید', 'تاریخ تأیید', 'تأییدکننده',
   'مخاطب', 'حوزه', 'تیم تأیید', 'نسخه', 'تاریخ بازبینی', 'یادداشت بازبینی'];   /* v170.23.15: ستون‌های ته جدول (ASSISTANT.md بند ۵)؛ با نام سرستون خوانده می‌شوند */
 var AS_LOG_TAB = 'دستیار · گزارش';
-var AS_LOG_HEAD = ['زمان', 'کانال', 'موضوع', 'حالت', 'نتیجه', 'رضایت', 'شناسه', 'مخاطب', 'میلی‌ثانیه'];   /* v170.23.15: مخاطب و زمان پاسخ */
+var AS_LOG_HEAD = ['زمان', 'کانال', 'موضوع', 'حالت', 'نتیجه', 'رضایت', 'شناسه', 'مخاطب', 'میلی‌ثانیه', 'منبع پاسخ'];   /* v170.23.19: دانش | سایت | ابزار */   /* v170.23.15: مخاطب و زمان پاسخ */
 var AS_UN_TAB = 'سؤال‌های بی‌پاسخ';
 var AS_UN_HEAD = ['زمان', 'کانال', 'متن', 'حوزه', 'نوع', 'مخاطب'];   /* v170.23.17: حوزهٔ حدس‌زده (بی جمنای)، نوع و مخاطب */
 var AS_COST_TAB = 'هزینهٔ جمنای';
@@ -38,11 +38,10 @@ cfg_('ASSIST_ENABLED', '');      /* «بله» = روشن */
 cfg_('ASSIST_MODE', '');         /* منو | جستجو | هوشمند؛ خالی = جستجو */
 cfg_('ASSIST_GEMINI_PAID', '');  /* فقط یاسر بعد از فعال شدن Billing «بله» می‌کند */
 cfg_('ASSIST_MATCH_MIN', '');    /* آستانهٔ جست‌وجو، ۰ تا ۱؛ خالی = ۰٫۶ */
-cfg_('ASSIST_EMERGENCY', '');    /* JSON {کد کشور: متن اورژانس}؛ خالی = متن ایران */
 cfg_('ASSIST_RATE', '');         /* سقف پرسش هر session_id در ساعت؛ خالی = ۲۰ */
-cfg_('ASSIST_REWRITE', '');      /* v170.23.18: «بله» (و ASSIST_GEMINI_PAID = بله) = روان کردن پاسخ از روی یک ردیف تأییدشده با گارد */
+cfg_('ASSIST_REWRITE', '');      /* v170.23.18، v170.23.19: «بله» = روان کردن پاسخ و پاسخ از روی منبع سایت با جمنای (نسخهٔ رایگان هم)، با گارد */
 cfg_('ASSIST_GEMINI_DAILY', '');  /* v170.23.18: سقف فراخوانی جمنای دستیار در روز؛ خالی = ۲۰۰؛ بالای سقف برگشت به «جستجو» */
-cfg_('ASSIST_GEMINI_DRAFT', '');  /* v170.23.18: «بله» (و PAID) = پیش‌نویس ردیف از پرسش‌های بی‌جواب، فقط متن پاک‌شده، فقط برای صف بازبینی */
+cfg_('ASSIST_GEMINI_DRAFT', '');  /* v170.23.18: «بله» = پیش‌نویس ردیف از پرسش‌های بی‌جواب، فقط متن پاک‌شده، فقط برای صف بازبینی */
 cfg_('ASSIST_WEEKLY', '');       /* v170.23.17: «بله» = گزارش هفتگی هر تیم (پرتکرارهای بی‌جواب و ردیف‌های بازبینی‌نشده) از tgWatchdog */
 cfg_('ASSIST_TOOLS', '');        /* v170.23.16: «بله» = ابزارهای بی هوش مصنوعی (AS_TOOLS: رویدادهای پیش‌رو، مجله، وضعیت من) */
 cfg_('ASSIST_KB_TEAMS', '');     /* v170.23.15: «بله» = /askreview به تفکیک «تیم تأیید» و راه تیم‌های دیگر (مالی، مدرسه، رویداد، مجله)؛ خالی = فقط پذیرش و مالک، همهٔ صف */
@@ -97,7 +96,7 @@ function asKb_() {
   asTab_(AS_KB_TAB, AS_KB_HEAD).rows.forEach(function (o) {
     if (String(o['تأیید'] || '').trim() !== 'بله') return;
     if (!o['پاسخ'] || AS_DENY.test(o['موضوع'] + ' ' + o['پاسخ'])) return;
-    out.push({ row: o._row, topic: String(o['موضوع'] || 'عمومی').trim(), samples: String(o['پرسش‌های نمونه'] || '').split(/\n|؛/).map(function (s) { return s.trim(); }).filter(String), answer: String(o['پاسخ']).trim() });
+    out.push({ row: o._row, topic: String(o['موضوع'] || 'عمومی').trim(), samples: String(o['پرسش‌های نمونه'] || '').split(/\n|؛/).map(function (s) { return s.trim(); }).filter(String), answer: String(o['پاسخ']).trim(), aud: String(o['مخاطب'] || '').trim(), dom: String(o['حوزه'] || '').trim() });
   });
   return out;
 }
@@ -177,7 +176,7 @@ function asScrub_(text, extra) {
 function asLog_(channel, topic, mode, result, ctx) {
   var id = 'A-' + asNow_().toString(36) + Math.floor(Math.random() * 1296).toString(36);
   var ms = ctx && ctx.t0 ? Math.max(0, Date.now() - ctx.t0) : '';
-  try { asTab_(AS_LOG_TAB, AS_LOG_HEAD).add({ 'زمان': asFmt_(), 'کانال': channel, 'موضوع': topic || '', 'حالت': mode, 'نتیجه': result, 'رضایت': '', 'شناسه': id, 'مخاطب': asAud_(ctx), 'میلی‌ثانیه': ms }); } catch (e) { tgErr_('asLog_', e); }
+  try { asTab_(AS_LOG_TAB, AS_LOG_HEAD).add({ 'زمان': asFmt_(), 'کانال': channel, 'موضوع': topic || '', 'حالت': mode, 'نتیجه': result, 'رضایت': '', 'شناسه': id, 'مخاطب': asAud_(ctx), 'میلی‌ثانیه': ms, 'منبع پاسخ': (ctx && ctx.src) || '' }); } catch (e) { tgErr_('asLog_', e); }
   return id;
 }
 /* مخاطب: از ورودی وب (فهرست AS_AUDS) یا در بات از نقش chat؛ وگرنه «کاربر عمومی» */
@@ -243,21 +242,11 @@ function asPurge_() {
 
 /* ───── هستهٔ پاسخ (مشترک بات و وب) ─────
    ctx: {channel, chat, name, country}. خروجی: {answer, topic, handoff, buttons:[{id,text}|{url,text}], crisis, log} */
-function asEmergency_(country) {
-  var m = cfg_('ASSIST_EMERGENCY', '');
-  if (typeof m === 'string' && m) { try { m = JSON.parse(m); } catch (e) { m = {}; } }
-  var c = String(country || '').trim().toUpperCase();
-  return (m && c && m[c]) ? String(m[c]) : T_CRISIS;
-}
+function asEmergency_() { return T_CRISIS; }   /* v170.23.19: پیام ثابت، بی نسخهٔ کشوری (ASSIST_EMERGENCY کنار رفت) */
 /** chat همکاران میز پذیرش */
 function asDeskChats_() {
   if (asDry_()) return TG_MEM['as:desk'] || [];
   return (typeof tgDeskRows_ === 'function' ? tgDeskRows_() : []).map(function (d) { return String(d.chat || '').split(/[,،;\s]+/)[0]; }).filter(String);
-}
-function asUrgent_(ctx) {
-  var line = '🚨 <b>هشدار بحران در دستیار</b> · ' + (ctx.channel === 'bot' ? 'تلگرام' : 'وب') + (ctx.chat ? ' · chat در کارت گفت‌وگو' : ' · بی راه تماس');
-  try { asDeskChats_().forEach(function (c) { tgNotify_(c, TG_NK.urgent, line, { ref: 'AS-CRISIS', force: true }); }); } catch (e) { tgErr_('asUrgent_', e); }
-  if (typeof inbAdd_ === 'function') { try { inbAdd_('as', 'AS-' + (ctx.chat || ctx.session || asNow_()), { chat: ctx.chat || '', text: 'بحران · ' + (ctx.channel || ''), q: 'پذیرش', type: 'بحران', more: true }); } catch (e2) {} }
 }
 function asHandoff_(ctx, text, why) {
   var sum = asScrub_(text, [ctx.name]).replace(/\s+/g, ' ').slice(0, 140);
@@ -271,6 +260,7 @@ function asHandoff_(ctx, text, why) {
 function asTopicBtns_(topics) { return topics.slice(0, 3).map(function (t) { return { id: 't:' + asTopicIdx_(t), text: t }; }); }
 function asTopicIdx_(t) { return asTopics_().indexOf(t); }
 function asAnswerOut_(ctx, k, mode) {
+  ctx.src = 'دانش';
   var log = asLog_(ctx.channel, k.topic, mode, 'پاسخ', ctx);
   return { answer: asRewrite_(ctx, k), topic: k.topic, handoff: false, log: log,
     buttons: [{ id: 'x:' + log, text: 'جوابم را نگرفتم' }, { id: 'y:' + log, text: '👍' }, { id: 'n:' + log, text: '👎' }] };
@@ -282,10 +272,9 @@ function asAsk_(ctx, text) {
   if (ctx && text) ctx.lastText = text;
   if (!text) return { answer: AS_WELCOME, topic: '', handoff: false, buttons: asTopicBtns_(asTopics_()).concat([{ id: 'h', text: 'با پذیرش حرف بزنم' }]) };
   /* بحران همیشه اول */
-  if (tgIsCrisis_(text)) {
-    asUrgent_(ctx);
+  if (tgIsCrisis_(text)) {   /* v170.23.19: فقط پیام ثابت اورژانس؛ بی کارت فوری، بی تحویل، بی جمنای. گزارش فقط شمار، بی متن */
     asLog_(ctx.channel, 'بحران', asMode_(), 'بحران', ctx);
-    return { answer: asEmergency_(ctx.country), topic: 'بحران', handoff: true, crisis: true, buttons: [] };
+    return { answer: asEmergency_(), topic: 'بحران', handoff: false, crisis: true, buttons: [] };
   }
   var mode = asMode_();
   if (mode === AS_MODES.menu) {
@@ -299,12 +288,18 @@ function asAsk_(ctx, text) {
   var kb = asKb_();
   if (mode === AS_MODES.smart) {
     var sm = asSmart_(ctx, text, kb);
-    if (sm && sm.crisis) { asUrgent_(ctx); asLog_(ctx.channel, 'بحران', mode, 'بحران', ctx); return { answer: asEmergency_(ctx.country), topic: 'بحران', handoff: true, crisis: true, buttons: [] }; }
+    if (sm && sm.crisis) { asLog_(ctx.channel, 'بحران', mode, 'بحران', ctx); return { answer: asEmergency_(), topic: 'بحران', handoff: false, crisis: true, buttons: [] }; }
     if (sm && sm.k) return asAnswerOut_(ctx, sm.k, mode);
     mode = AS_MODES.search;   /* اطمینان کم یا خطا: جست‌وجوی داخلی */
   }
   var res = asSearch_(text, kb), top = res[0];
+  /* v170.23.19: اولویت مخاطب پرسنده بین ردیف‌های تأییدشده (ناشناس یعنی عمومی و مراجع) */
+  if (res.length > 1) { var aud = asAud_(ctx), mine = function (k) { return !k.aud || k.aud.indexOf(aud) > -1 || (aud === 'کاربر عمومی' && /مراجع|عمومی/.test(k.aud)); };
+    res.forEach(function (r) { if (mine(r.k)) r.score = Math.min(1, r.score + 0.05); }); res.sort(function (a, b) { return b.score - a.score; }); top = res[0]; }
   if (top && top.score >= asMin_()) return asAnswerOut_(ctx, top.k, mode);
+  /* v170.23.19: بعد نمایهٔ سایت (منتشرشده) و رویدادهای بات */
+  var site = asSiteAnswer_(ctx, text);
+  if (site) return site;
   var near = [], seen = {};
   res.forEach(function (r) { if (!seen[r.k.topic] && near.length < 3) { seen[r.k.topic] = 1; near.push(r.k.topic); } });
   if (near.length < 3) asTopics_(kb).forEach(function (t) { if (!seen[t] && near.length < 3) { seen[t] = 1; near.push(t); } });
@@ -355,7 +350,7 @@ function asToolFor_(ctx, text) {
     if (typeof f !== 'function') continue;
     var out = null;
     try { out = f(ctx, text); } catch (e) { tgErr_('asTool ' + t.id, e); }
-    if (out) { out.tool = t.id; out.log = asLog_(ctx.channel, 'ابزار ' + t.id, asMode_(), out.handoff ? 'تحویل' : 'ابزار', ctx); return out; }
+    if (out) { ctx.src = 'ابزار'; out.tool = t.id; out.log = asLog_(ctx.channel, 'ابزار ' + t.id, asMode_(), out.handoff ? 'تحویل' : 'ابزار', ctx); return out; }
   }
   return null;
 }
@@ -484,7 +479,7 @@ function asWeekly_() {
   var keys = Object.keys(store).sort(function (a, b) { return (store[b].at || 0) - (store[a].at || 0); }).slice(0, 60), keep = {};
   keys.forEach(function (k) { keep[k] = store[k]; });
   asProp_('AS_WK_Q', JSON.stringify(keep));
-  try { var all = []; Object.keys(by).forEach(function (t) { all = all.concat(by[t].top); }); asDraftUn_(all); } catch (eD) { tgErr_('asDraftUn_', eD); }   /* v170.23.18: فقط با کلید */
+  try { var all = []; Object.keys(by).forEach(function (t) { all = all.concat(by[t].top); }); asDraftFromIdx_(all); asDraftUn_(all); } catch (eD) { tgErr_('asDraftUn_', eD); }   /* v170.23.18: فقط با کلید؛ v170.23.19: اول از نمایهٔ سایت */
   return sent;
 }
 function asTeamAnsCb_(chat, id) {
@@ -544,7 +539,8 @@ function asGem_(job, prompt, schema) {
    فقط با ASSIST_REWRITE = بله و ASSIST_GEMINI_PAID = بله و زیر سقف روزانه. ورودی: پرسش پاک‌شده و متن یک ردیف تأییدشده. خروجی رد می‌شود
    و متن خود ردیف می‌رود اگر عدد، نشانی، لینک، ایمیل، آیدی یا نامی داشته باشد که در ردیف نیست، یا خالی یا خیلی بلند باشد. */
 var AS_RW_SCHEMA = { type: 'OBJECT', properties: { text: { type: 'STRING' } }, required: ['text'] };
-function asRewriteOn_() { return String(cfg_('ASSIST_REWRITE', '') || '').trim() === 'بله' && asPaid_(); }
+/* v170.23.19 (تصمیم یاسر): روان کردن و پاسخ از روی منبع روی نسخهٔ رایگان جمنای، بی وابستگی به ASSIST_GEMINI_PAID؛ گاردها همان */
+function asRewriteOn_() { return String(cfg_('ASSIST_REWRITE', '') || '').trim() === 'بله'; }
 function asFacts_(t) {
   var s = tgLatinDigits_(String(t || '')), out = [];
   (s.match(/https?:\/\/\S+|www\.\S+|\S+@\S+\.\S+|@[A-Za-z0-9_]{3,}|[A-Za-z0-9-]+\.[A-Za-z]{2,}(?:\/[^\s،.]*)?|\d+(?:[.,٫٬]\d+)*/g) || []).forEach(function (x) { out.push(x.replace(/[.,،؛:)]+$/, '')); });
@@ -574,10 +570,10 @@ function asRewrite_(ctx, k) {
 }
 
 /* ───── پیش‌نویس ردیف از پرسش‌های بی‌جواب (v170.23.18) ─────
-   فقط با ASSIST_GEMINI_DRAFT = بله و PAID و زیر سقف. ورودی فقط متن پاک‌شدهٔ «سؤال‌های بی‌پاسخ» (بی کانال، زمان یا شناسه).
+   فقط با ASSIST_GEMINI_DRAFT = بله و زیر سقف (از v170.23.19 بی PAID). ورودی فقط متن پاک‌شدهٔ «سؤال‌های بی‌پاسخ» (بی کانال، زمان یا شناسه).
    خروجی فقط «موضوع» و «پرسش‌های نمونه»؛ «پاسخ» خالی می‌ماند تا تیم بنویسد. ردیف با «تأیید» خالی و منبع «پیش‌نویس از پرسش‌های بی‌جواب». */
 var AS_UNDRAFT_SCHEMA = { type: 'ARRAY', items: { type: 'OBJECT', properties: { topic: { type: 'STRING' }, samples: { type: 'ARRAY', items: { type: 'STRING' } }, dom: { type: 'STRING' } }, required: ['topic', 'samples'] } };
-function asDraftUnOn_() { return String(cfg_('ASSIST_GEMINI_DRAFT', '') || '').trim() === 'بله' && asPaid_(); }
+function asDraftUnOn_() { return String(cfg_('ASSIST_GEMINI_DRAFT', '') || '').trim() === 'بله'; }   /* v170.23.19: بی PAID؛ فقط متن پاک‌شده */
 function asDraftUn_(items) {
   if (!asDraftUnOn_() || !items || !items.length || asGemLeft_() <= 0) return 0;
   var qs = items.slice(0, 15).map(function (x) { return asScrub_(x.q); });
@@ -596,6 +592,149 @@ function asDraftUn_(items) {
   });
   return n;
 }
+
+/* ───── نمایهٔ دانش سایت (v170.23.19؛ فاز ۷) ─────
+   منبع «منتشرشده»: متن همین حالای سایت (گردش کار assist-index روزی دو بار، اکشن kb_index با کلید دوم درگاه) و رویدادهایی که بات
+   همین حالا نشان می‌دهد. در برگهٔ پنهان «نمایهٔ دانش» هاب پذیرش؛ بات با کش ۶ ساعته می‌خواند. هر دور تازه جای دور قبلی را می‌گیرد،
+   پس صفحهٔ تازه وارد و صفحهٔ حذف‌شده یا پیش‌نویس‌شده بیرون می‌رود. هر تکه با سهم، تسویه، حقوق یا قرارداد، یا شماره و ایمیل، رد می‌شود. */
+var AS_IDX_TAB = 'نمایهٔ دانش';
+var AS_IDX_HEAD = ['شناسه', 'نشانی', 'عنوان', 'متن', 'حوزه', 'مخاطب', 'منبع', 'تاریخ', 'دور'];
+var AS_IDX_MONEY = /درصد سهم|سهم(?: درمانگر| شما| همکار)|تسویه|کمیسیون|حقوق(?: ماه| ماهانه| ماهیانه| پایه| دریافتی| و مزایا)|فیش حقوقی|قرارداد/;
+var AS_IDX_PII = /(?:\+98|0098|0)9\d{9}|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|\bIR\d{24}\b/;
+cfg_('ASSIST_IDX_MIN', '');      /* v170.23.19: آستانهٔ پاسخ از نمایهٔ سایت، ۰ تا ۱؛ خالی = ۰٫۵ */
+function asIdxMin_() { var n = Number(tgLatinDigits_(String(cfg_('ASSIST_IDX_MIN', '') || ''))); return n > 0 && n <= 1 ? n : 0.5; }
+function asIdxOk_(c) {
+  var t = String((c && c.title) || '') + ' ' + String((c && c.text) || '');
+  return !!(c && c.id && /^https:\/\/tajrobeh\.life\//.test(String(c.url || '')) && String(c.text || '').length >= 30 && !AS_IDX_MONEY.test(t) && !AS_DENY.test(t) && !AS_IDX_PII.test(tgLatinDigits_(t)));
+}
+/* اکشن درگاه kb_index (فقط کلید دوم): {run, part, of, chunks} */
+function asIdxIngest_(p, dry) {
+  if (typeof ebiKey2Ok_ === 'function' && !ebiKey2Ok_(p && p.key)) return { ok: false, error: 'key2_only' };
+  var run = String(p.run || '').replace(/\D/g, '').slice(0, 14), part = Number(p.part) || 0, of = Number(p.of) || 0;
+  var list = Array.isArray(p.chunks) ? p.chunks : [];
+  if (!run || part < 1 || of < part) return { ok: false, error: 'run/part/of' };
+  var ok = list.filter(asIdxOk_), rows = ok.map(function (c) { return [String(c.id).slice(0, 20), String(c.url).slice(0, 300), String(c.title || '').slice(0, 160), String(c.text).slice(0, 600),
+    String(c.dom || '').slice(0, 40), String(c.aud || '').slice(0, 40), String(c.src || 'سایت').slice(0, 10), String(c.mod || '').slice(0, 10), run]; });
+  if (dry) return { ok: true, data: { would: rows.length, dropped: list.length - rows.length, part: part, of: of } };
+  asIdxAppend_(rows);
+  if (part < of) return { ok: true, data: { part: part, of: of, rows: rows.length, dropped: list.length - rows.length } };
+  var st = asIdxSwap_(run);
+  return { ok: true, data: st };
+}
+function asIdxSheet_() {
+  var ss = tgSS_(), sh = ss.getSheetByName(AS_IDX_TAB);
+  if (!sh) { sh = ss.insertSheet(AS_IDX_TAB); sh.setRightToLeft(true); sh.getRange(1, 1, 1, AS_IDX_HEAD.length).setValues([AS_IDX_HEAD]).setFontWeight('bold'); sh.setFrozenRows(1); try { sh.hideSheet(); } catch (e) {} }
+  return sh;
+}
+function asIdxAppend_(rows) {
+  if (!rows.length) return;
+  if (asDry_()) { TG_MEM['as:idxrows'] = (TG_MEM['as:idxrows'] || []).concat(rows); return; }
+  var sh = asIdxSheet_(); sh.getRange(sh.getLastRow() + 1, 1, rows.length, AS_IDX_HEAD.length).setNumberFormat('@').setValues(rows);
+}
+/** پایان دور: دور قبلی بیرون، شمار تازه‌ها و حذف‌شده‌ها */
+function asIdxSwap_(run) {
+  var all;
+  if (asDry_()) all = TG_MEM['as:idxrows'] || [];
+  else { var sh = asIdxSheet_(), n = sh.getLastRow(); all = n > 1 ? sh.getRange(2, 1, n - 1, AS_IDX_HEAD.length).getValues() : []; }
+  var cur = all.filter(function (r) { return String(r[8]) === run; }), old = {}, now = {};
+  all.forEach(function (r) { if (String(r[8]) !== run) old[r[0]] = 1; });
+  cur.forEach(function (r) { now[r[0]] = 1; });
+  var added = Object.keys(now).filter(function (k) { return !old[k]; }).length, removed = Object.keys(old).filter(function (k) { return !now[k]; }).length;
+  if (!cur.length && all.length) return { n: all.length, added: 0, removed: 0, error: 'دور خالی؛ نمایهٔ قبلی ماند' };
+  if (asDry_()) TG_MEM['as:idxrows'] = cur;
+  else { var sh2 = asIdxSheet_(), m = sh2.getLastRow(); if (m > 1) sh2.getRange(2, 1, m - 1, AS_IDX_HEAD.length).clearContent(); if (cur.length) sh2.getRange(2, 1, cur.length, AS_IDX_HEAD.length).setValues(cur); if (sh2.getLastRow() > cur.length + 1) { try { sh2.deleteRows(cur.length + 2, sh2.getLastRow() - cur.length - 1); } catch (e) {} } }
+  var st = { n: cur.length, added: Object.keys(old).length ? added : cur.length, removed: removed, run: run, at: asFmt_() };
+  asProp_('AS_IDX_STAT', JSON.stringify(st));
+  asIdxCacheClear_();
+  return st;
+}
+var AS_IDX_MEMO = null;
+function asIdxCacheClear_() { AS_IDX_MEMO = null; if (asDry_()) return; try { var c = CacheService.getScriptCache(), n = Number(c.get('askidx:n') || 0), ks = ['askidx:n']; for (var i = 0; i < n; i++) ks.push('askidx:' + i); c.removeAll(ks); } catch (e) {} }
+/** تکه‌های نمایه: [{id,url,title,text,dom,aud,src}] با کش ۶ ساعته (تکه‌تکه، هر کلید زیر ۹۰ کیلوبایت) */
+function asIdx_() {
+  if (AS_IDX_MEMO) return AS_IDX_MEMO;
+  var rows = null;
+  if (asDry_()) rows = TG_MEM['as:idxrows'] || [];
+  else {
+    var c = CacheService.getScriptCache();
+    try { var n = Number(c.get('askidx:n') || 0); if (n) { var ks = []; for (var i = 0; i < n; i++) ks.push('askidx:' + i); var got = c.getAll(ks); if (Object.keys(got).length === n) rows = ks.map(function (k) { return got[k]; }).join(''); rows = rows ? JSON.parse(rows) : null; } } catch (e) { rows = null; }
+    if (!rows) {
+      var sh = tgSS_().getSheetByName(AS_IDX_TAB), m = sh ? sh.getLastRow() : 0;
+      rows = m > 1 ? sh.getRange(2, 1, m - 1, 7).getValues().map(function (r) { return r.map(String); }) : [];
+      try { var j = JSON.stringify(rows), parts = {}, k = 0; for (var o = 0; o < j.length; o += 90000) parts['askidx:' + (k++)] = j.slice(o, o + 90000); parts['askidx:n'] = String(k); c.putAll(parts, 21600); } catch (e2) {}
+    }
+  }
+  AS_IDX_MEMO = rows.map(function (r) { return { id: r[0], url: r[1], title: r[2], text: r[3], dom: r[4], aud: r[5], src: r[6] || 'سایت' }; }).filter(function (x) { return asIdxOk_(x); });
+  return AS_IDX_MEMO;
+}
+/** رویدادهای پیش‌روی بات به شکل تکه (همان دادهٔ tgApiEvents162_، کش ۱۵ دقیقه‌ای خودش) */
+function asEvChunks_() {
+  try {
+    var r = asDry_() && TG_MEM['as:events'] ? { events: TG_MEM['as:events'] } : tgApiEvents162_({}), today = asToday_();
+    return ((r && r.events) || []).filter(function (e) { return e.dateIso && e.dateIso >= today; }).map(function (e) {
+      return { id: 'ev-' + e.code, url: AS_SITE + '/school/events/#ev=' + encodeURIComponent(e.code), title: e.title, text: [e.title, e.date, e.time ? 'ساعت ' + e.time : '', e.desc || '', e.intro || ''].filter(String).join(' · ').slice(0, 600), dom: 'رویدادها', aud: 'کاربر عمومی', src: 'رویداد' };
+    }).filter(asIdxOk_);
+  } catch (e) { return []; }
+}
+/** پاسخ از منبع منتشرشده: سه تکهٔ برتر؛ جمنای (اگر ASSIST_REWRITE) پاسخ کوتاه با گارد می‌سازد، وگرنه بخشی از متن تکهٔ اول */
+var AS_COMPOSE_SCHEMA = { type: 'OBJECT', properties: { text: { type: 'STRING' }, i: { type: 'INTEGER' }, none: { type: 'BOOLEAN' } }, required: ['text', 'i', 'none'] };
+function asSiteAnswer_(ctx, text) {
+  var docs = asIdx_().concat(asEvChunks_()); if (!docs.length) return null;
+  var kb = docs.map(function (d, i) { return { row: i, topic: d.title, samples: [d.text], answer: '' }; });
+  var res = asSearch_(text, kb).filter(function (r) { return r.score >= asIdxMin_(); }).slice(0, 3);
+  if (!res.length) return null;
+  var top = res.map(function (r) { return docs[r.k.row]; }), pick = top[0], ans = '';
+  if (asRewriteOn_() && asGemLeft_() > 0) {
+    try {
+      var q = asScrub_(text, [ctx.name]);
+      var prompt = 'به پرسش زیر فقط از روی این متن‌های منتشرشدهٔ سایت مرکز تجربه زندگی، کوتاه (حداکثر سه جمله) و فارسی جواب بده. ' +
+        'هیچ عدد، نشانی، لینک، نام یا اطلاعاتی که در متن‌ها نیست اضافه نکن. مشاورهٔ بالینی، تشخیص یا دارو نده. خط تیرهٔ بلند ننویس. ' +
+        'اگر متن‌ها جواب نمی‌دهند none = true. i شمارهٔ متنی است که بیشتر از آن استفاده کردی.\n\nپرسش: ' + q + '\n\n' +
+        top.map(function (d, i) { return i + ') ' + d.title + '\n' + d.text; }).join('\n\n');
+      var o = asGem_('پاسخ از منبع سایت', prompt, AS_COMPOSE_SCHEMA);
+      var t = String((o && o.text) || '').replace(/[—–]/g, '،').trim();
+      if (o && o.none) return null;
+      if (t && asRwSafe_(t, top.map(function (d) { return d.title + ' ' + d.text; }).join(' '))) { ans = t; if (o.i >= 0 && o.i < top.length) pick = top[o.i]; }
+      else if (asDry_()) (TG_MEM['as:rwreject'] = TG_MEM['as:rwreject'] || []).push(t);
+    } catch (e) { if (!asDry_()) tgErr_('asSiteAnswer_', e); }
+  }
+  if (!ans) { ans = pick.text.length > 360 ? pick.text.slice(0, 360).replace(/\s+\S*$/, '') + '…' : pick.text; }
+  ctx.src = pick.src === 'رویداد' ? 'سایت' : 'سایت';
+  var log = asLog_(ctx.channel, pick.dom || 'سایت', asMode_(), 'پاسخ', ctx);
+  return { answer: ans, topic: pick.dom || '', handoff: false, log: log, source: pick.url,
+    buttons: [{ url: pick.url, text: ('📖 ' + String(pick.title).split(' › ')[0]).slice(0, 40) }, { id: 'x:' + log, text: 'جوابم را نگرفتم' }, { id: 'y:' + log, text: '👍' }, { id: 'n:' + log, text: '👎' }] };
+}
+/** خط شبانهٔ نمایه: شمار، تازه، حذف‌شده و درصد پاسخ‌های امروز از سایت و از دانش تأییدشده */
+function asIdxNightLine_() {
+  var st = {}; try { st = JSON.parse(asProp_('AS_IDX_STAT') || '{}') || {}; } catch (e) {}
+  var day = Utilities.formatDate(new Date(asNow_()), TG_TZ, 'yyyy-MM-dd');
+  var L = asTab_(AS_LOG_TAB, AS_LOG_HEAD).rows.filter(function (o) { return String(o['زمان'] || '').slice(0, 10) === day && o['نتیجه'] === 'پاسخ'; });
+  var site = L.filter(function (o) { return o['منبع پاسخ'] === 'سایت'; }).length, kb = L.filter(function (o) { return o['منبع پاسخ'] === 'دانش'; }).length;
+  if (!st.n && !L.length) return '';
+  return '📚 نمایهٔ دانش: ' + tgFa_(st.n || 0) + ' تکه' + (st.at ? ' (' + tgFa_(String(st.at).slice(5)) + ')' : '') + ' · تازه ' + tgFa_(st.added || 0) + ' · حذف‌شده ' + tgFa_(st.removed || 0) +
+    (L.length ? ' · پاسخ‌های امروز: ' + tgFa_(Math.round(100 * site / L.length)) + '٪ از سایت، ' + tgFa_(Math.round(100 * kb / L.length)) + '٪ از دانش تأییدشده' : '');
+}
+try { TG_NIGHT_LINES.push(asIdxNightLine_); } catch (eNl2) {}
+/** پیش‌نویس ردیف «دانش دستیار» از پرتکرارهای بی‌جواب و نزدیک‌ترین تکهٔ نمایه (بی جمنای)؛ «تأیید» خالی، منبع همان نشانی */
+function asDraftFromIdx_(items) {
+  var docs = asIdx_(); if (!docs.length || !items || !items.length) return 0;
+  var kb = docs.map(function (d, i) { return { row: i, topic: d.title, samples: [d.text], answer: '' }; }), t = asTab_(AS_KB_TAB, AS_KB_HEAD), have = {}, n = 0;
+  t.rows.forEach(function (o) { have[asQKey_(String(o['پرسش‌های نمونه'] || '').split('\n')[0])] = 1; });
+  items.slice(0, 10).forEach(function (x) {
+    var q = asScrub_(x.q), k = asQKey_(q); if (!k || have[k]) return;
+    var top = asSearch_(q, kb)[0]; if (!top || top.score < asIdxMin_()) return;
+    var d = docs[top.k.row];
+    t.add({ 'موضوع': q.slice(0, 40), 'پرسش‌های نمونه': q, 'پاسخ': d.text, 'منبع': d.url, 'تأیید': '', 'حوزه': d.dom || x.dom || '', 'تیم تأیید': asDomTeam_(d.dom || x.dom || ''), 'نسخه': 1,
+      'یادداشت بازبینی': 'پیش‌نویس از نمایهٔ سایت (متن منتشرشده)؛ بخوان، کوتاه کن و تأیید کن' });
+    have[k] = 1; n++;
+  });
+  return n;
+}
+try {
+  PB_ACTIONS.kb_index = function (p, dry) { return asIdxIngest_(p, dry); };
+  PB_RATE_BUCKET.kb_index = ['kbi', 'kb_index_hourly_max', 40];
+  if (PB_WRITE.indexOf('kb_index') < 0) PB_WRITE.push('kb_index');
+} catch (eKbi) {}
 
 /* ───── بات ───── */
 function asKb2_(out) {
@@ -620,7 +759,7 @@ function asRoute_(chat, m) {
   if (tgGetVal_('asa', chat) && t) return asTeamAnsText_(chat, t);
   if (t === '/askreview') { asReviewNext_(chat); return true; }
   if (!tgGetVal_('asq', chat) || !t || t.indexOf('/') === 0 || (typeof tgIsBtnLike_ === 'function' && tgIsBtnLike_(t)) || (typeof tgLooksLikePhone_ === 'function' && tgLooksLikePhone_(t))) return false;
-  if (tgIsCrisis_(t) && typeof tgOnCrisis_ === 'function') { tgDel_('asq', chat); asUrgent_(asCtxBot_(chat, name)); asLog_('bot', 'بحران', asMode_(), 'بحران', asCtxBot_(chat, name)); tgOnCrisis_(chat, name, m.from && m.from.username ? '@' + m.from.username : '', t); return true; }
+  if (tgIsCrisis_(t) && typeof tgOnCrisis_ === 'function') { tgDel_('asq', chat); asLog_('bot', 'بحران', asMode_(), 'بحران', asCtxBot_(chat, name)); tgOnCrisis_(chat, name, m.from && m.from.username ? '@' + m.from.username : '', t); return true; }
   tgSetVal_('aslast', chat, t.slice(0, 500));
   asBotSend_(chat, asAsk_(asCtxBot_(chat, name), t));
   return true;
@@ -653,7 +792,7 @@ function asWeb_(e, raw, body) {
   if (!pbRate_('as:' + sid, max)) return asJson_({ ok: false, error: 'rate' });
   var ctx = { channel: String(body.channel || 'web').replace(/[^\w-]/g, '').slice(0, 20) || 'web', session: sid, country: String(body.country || '').slice(0, 2), audience: String(body.audience || '').slice(0, 30), t0: Date.now() };
   var out = body.tap ? asTap_(ctx, String(body.tap), String(body.text || '')) : asAsk_(ctx, String(body.text || '').slice(0, 500));
-  return asJson_({ ok: true, answer: out.answer, topic: out.topic || '', handoff: !!out.handoff, buttons: out.buttons || [] });
+  return asJson_({ ok: true, answer: out.answer, topic: out.topic || '', handoff: !!out.handoff, buttons: out.buttons || [], log_id: out.log || '', source: out.crisis || out.handoff ? '' : (ctx.src || ''), source_url: ctx.src === 'سایت' ? (out.source || '') : '' });   /* v170.23.19: قرارداد پل بخش ۹ */
 }
 
 /* ───── بازبینی دانش در بات ─────
@@ -830,12 +969,10 @@ function asTests() {
     ok('پرسش پرداخت تأییدنشده جواب نمی‌گیرد', asAsk_({ channel: 'bot' }, 'پرداخت با کارت خارجی').answer.indexOf('تأییدنشده') < 0);
     ok('هیچ متنی به جمنای نرفت (جستجو)', TG_MEM['as:gemcalls'].length === 0);
     /* بحران همیشه اول، حتی با تطبیق */
-    TG_MEM['notify'] = [];
-    var r3 = asAsk_({ channel: 'web', session: 's1' }, 'قیمت جلسه چقدر است، می‌خواهم خودکشی کنم');
-    ok('بحران پیش از تطبیق: شمارهٔ اورژانس و کارت فوری', r3.crisis && /۱۲۳/.test(r3.answer) && (TG_MEM['notify'] || []).some(function (x) { return x.chat === '801' && x.kind === TG_NK.urgent; }));
-    TG_CFG_.ASSIST_EMERGENCY = '{"DE":"Notruf 112"}';
-    ok('اورژانس کشور کاربر', asAsk_({ channel: 'web', session: 's1', country: 'de' }, 'می‌خواهم خودکشی کنم').answer === 'Notruf 112');
-    delete TG_CFG_.ASSIST_EMERGENCY;
+    TG_MEM['notify'] = []; TG_MEM['as:handoff'] = [];
+    var r3 = asAsk_({ channel: 'web', session: 's1', country: 'DE' }, 'قیمت جلسه چقدر است، می‌خواهم خودکشی کنم');
+    ok('بحران پیش از تطبیق: فقط پیام ثابت اورژانس (v170.23.19)', r3.crisis && r3.answer === T_CRISIS && /۱۲۳/.test(r3.answer) && /۱۱۵/.test(r3.answer) && /۱۴۸۰/.test(r3.answer) && !r3.handoff && !r3.buttons.length, JSON.stringify(r3));
+    ok('بحران: بی کارت فوری و بی تحویل به پذیرش', !(TG_MEM['notify'] || []).length && !(TG_MEM['as:handoff'] || []).length, JSON.stringify(TG_MEM['notify']));
     /* منو: متن آزاد مستقیم به پذیرش */
     TG_CFG_.ASSIST_MODE = 'منو'; TG_MEM['as:handoff'] = [];
     var r4 = asAsk_({ channel: 'bot', chat: '502', name: 'مراجع نمونه' }, 'قیمت جلسه چقدر است؟ شماره‌ام 0912' + '3456789');   // pii:ok ساختگی
@@ -1095,9 +1232,7 @@ function asTests5() {
     var ask = function () { return asAsk_({ channel: 'bot', chat: '601', name: 'مراجع نمونه' }, 'معارفه رایگان است؟ من خانم نمونه‌پور هستم'); };
     TG_MEM['as:gem'] = { text: 'معارفه رایگان است و ۲۰ دقیقه طول می‌کشد.' }; TG_MEM['as:gemcalls'] = [];
     ok('کلیدها خاموش: متن خود ردیف، بی جمنای', ask().answer === 'معارفه ۲۰ دقیقه و رایگان است. نمونهٔ پاسخ تأییدشده.' && TG_MEM['as:gemcalls'].length === 0);
-    TG_CFG_.ASSIST_REWRITE = 'بله';
-    ok('ASSIST_REWRITE بی PAID: هنوز بی جمنای', ask().answer.indexOf('نمونهٔ پاسخ تأییدشده') > -1 && TG_MEM['as:gemcalls'].length === 0);
-    TG_CFG_.ASSIST_GEMINI_PAID = 'بله';
+    TG_CFG_.ASSIST_REWRITE = 'بله';   /* v170.23.19: بی PAID هم (نسخهٔ رایگان) */
     ok('روان کردن مجاز: همان عدد ۲۰، بی چیز تازه', ask().answer === 'معارفه رایگان است و ۲۰ دقیقه طول می‌کشد.');
     var sent = TG_MEM['as:gemcalls'][0].prompt;
     ok('به جمنای فقط پرسش پاک‌شده و متن ردیف', sent.indexOf('نمونه‌پور') < 0 && sent.indexOf('معارفه ۲۰ دقیقه') > -1, sent);
@@ -1123,6 +1258,7 @@ function asTests5() {
     TG_MEM['as:gem'] = [{ topic: 'رسید پرداخت', samples: ['رسید می‌خواهم', 'فاکتور جلسه'], dom: 'پرداخت' }];
     var items = [{ q: 'رسید پرداخت خانم نمونه‌پور را می‌خواهم' }, { q: 'فاکتور جلسه' }];
     ok('پیش‌نویس بی کلید نمی‌سازد', asDraftUn_(items) === 0);
+    TG_CFG_.ASSIST_GEMINI_PAID = '';   /* v170.23.19: پیش‌نویس هم بی PAID */
     TG_CFG_.ASSIST_GEMINI_DRAFT = 'بله'; TG_MEM['as:gemcalls'] = [];
     var n0 = TG_MEM['as:' + AS_KB_TAB].length, made = asDraftUn_(items), nr = TG_MEM['as:' + AS_KB_TAB][n0] || {};
     ok('پیش‌نویس: موضوع و پرسش‌ها، پاسخ خالی، تأیید خالی، تیم مالی', made === 1 && nr['پاسخ'] === '' && nr['تأیید'] === '' && nr['تیم تأیید'] === 'مالی' && nr['منبع'] === 'پیش‌نویس از پرسش‌های بی‌جواب', JSON.stringify(nr));
@@ -1135,3 +1271,77 @@ function asTests5() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'asTests5'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دستیار ۵ · جمنای با گارد (v170.23.18)', 'asTests5']); } catch (eAs5) {}
+
+/* ───── آزمون دستیار ۷ · نمایهٔ سایت (v170.23.19) ───── */
+function asTests7() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, cfg: TG_CFG_, names: asKnownNames_, memo: AS_IDX_MEMO };
+  TG_DRY = true; TG_OUTBOX = []; AS_IDX_MEMO = null;
+  TG_MEM = { 'as:now': new Date('2026-10-10T11:00:00+03:30').getTime(), 'as:desk': ['801'], 'pb:key2': 'k2-ساختگی-برای-آزمون-خشک-0123456789', 'as:events': [] };
+  TG_CFG_ = { ASSIST_ENABLED: 'بله', ASSIST_MATCH_MIN: '0.6' };
+  try {
+    asKnownNames_ = function () { return []; };
+    TG_MEM['as:' + AS_KB_TAB] = [{ 'موضوع': 'معارفه', 'پرسش‌های نمونه': 'جلسهٔ معارفه چیست', 'پاسخ': 'معارفه رایگان است. نمونهٔ پاسخ تأییدشده.', 'تأیید': 'بله' }];
+    var K = TG_MEM['pb:key2'], S = 'https://tajrobeh.life';
+    var clinic = { id: 'c1', url: S + '/clinic/', title: 'کلینیک حضوری', text: 'کلینیک حضوری تجربه در تهران است و جلسه‌های حضوری از شنبه تا پنجشنبه برگزار می‌شود. نمونهٔ متن ساختگی.', dom: 'حضوری', aud: 'مراجع' };
+    var course = { id: 's1', url: S + '/school/', title: 'مدرسهٔ تجربه', text: 'دوره‌های مدرسهٔ تجربه برای دانشجویان روان‌شناسی با سوپرویژن گروهی برگزار می‌شود. نمونهٔ متن ساختگی.', dom: 'مدرسه و دوره‌ها', aud: 'دانشجو' };
+    var money = { id: 'm1', url: S + '/joinus/', title: 'همکاری', text: 'درصد سهم درمانگر از هر جلسه و زمان تسویه در قرارداد همکاری آمده است. نمونهٔ متن ساختگی.', dom: 'همکاری درمانگران و پارتنرها', aud: 'متقاضی همکاری' };
+    var foreign = { id: 'f1', url: 'https://example.com/x', title: 'بیرونی', text: 'متن بیرونی که نباید وارد شود چون نشانی‌اش بیرون از سایت است. ساختگی.', dom: '', aud: '' };
+    ok('کلید اول یا خالی رد می‌شود', asIdxIngest_({ key: 'x', run: '202610101100', part: 1, of: 1, chunks: [clinic] }).error === 'key2_only');
+    var d = asIdxIngest_({ key: K, run: '202610101100', part: 1, of: 2, chunks: [clinic, money, foreign] }, true);
+    ok('اجرای خشک درگاه فقط می‌شمارد', d.ok && d.data.would === 1 && d.data.dropped === 2 && !(TG_MEM['as:idxrows'] || []).length, JSON.stringify(d));
+    var r1 = asIdxIngest_({ key: K, run: '202610101100', part: 1, of: 2, chunks: [clinic, money, foreign] });
+    var r2 = asIdxIngest_({ key: K, run: '202610101100', part: 2, of: 2, chunks: [course] });
+    ok('دور اول دو تکه‌ای: متن مالی و نشانی بیرونی رد، دو تکه تازه', r1.ok && r1.data.dropped === 2 && r2.ok && r2.data.n === 2 && r2.data.added === 2 && r2.data.removed === 0, JSON.stringify([r1, r2]));
+    ok('صفحهٔ تازه جواب می‌دهد، با لینک صفحه', (function () { var a = asAsk_({ channel: 'bot', chat: '601' }, 'کلینیک حضوری کجاست؟'); return a.source === S + '/clinic/' && a.buttons[0].url === S + '/clinic/' && /کلینیک حضوری/.test(a.answer); })());
+    ok('منبع پاسخ در گزارش «سایت» است', TG_MEM['as:' + AS_LOG_TAB].slice(-1)[0]['منبع پاسخ'] === 'سایت');
+    ok('دانش تأییدشده پیش از سایت', asAsk_({ channel: 'bot', chat: '601' }, 'جلسهٔ معارفه چیست').answer.indexOf('نمونهٔ پاسخ تأییدشده') > -1);
+    var r3 = asIdxIngest_({ key: K, run: '202610102300', part: 1, of: 1, chunks: [course] });
+    ok('دور دوم بی کلینیک: حذف‌شده ۱', r3.data.n === 1 && r3.data.removed === 1 && r3.data.added === 0, JSON.stringify(r3));
+    var a2 = asAsk_({ channel: 'bot', chat: '601' }, 'کلینیک حضوری کجاست؟');
+    ok('صفحهٔ حذف‌شده دیگر جواب نمی‌دهد', a2.source !== S + '/clinic/' && /پیدا نکردم/.test(a2.answer), a2.answer);
+    ok('دور خالی نمایهٔ قبلی را پاک نمی‌کند', asIdxIngest_({ key: K, run: '202610110300', part: 1, of: 1, chunks: [] }).data.error && asIdx_().length === 1);
+    TG_MEM['as:idxrows'].push(['m1', money.url, money.title, money.text, money.dom, money.aud, 'سایت', '', '202610102300']); AS_IDX_MEMO = null;
+    var a3 = asAsk_({ channel: 'bot', chat: '601' }, 'درصد سهم درمانگر و تسویه چقدر است؟');
+    ok('متن مالی محرمانه حتی اگر در نمایه بماند جواب داده نمی‌شود', !a3.source && a3.answer.indexOf('درصد') < 0, a3.answer);
+    /* جمنای (نسخهٔ رایگان) با گارد */
+    TG_CFG_.ASSIST_REWRITE = 'بله'; TG_CFG_.ASSIST_GEMINI_DAILY = '20';
+    TG_MEM['as:gem'] = { text: 'دوره‌های مدرسه برای دانشجویان روان‌شناسی با سوپرویژن گروهی است.', i: 0, none: false }; TG_MEM['as:gemcalls'] = [];
+    var g1 = asAsk_({ channel: 'bot', chat: '601', name: 'مراجع نمونه' }, 'دوره‌های مدرسهٔ تجربه برای دانشجویان؟ من خانم نمونه‌پور هستم');
+    ok('پاسخ کوتاه جمنای از سه تکهٔ برتر، با لینک منبع', g1.answer === TG_MEM['as:gem'].text && g1.source === S + '/school/', g1.answer);
+    ok('به جمنای فقط پرسش پاک‌شده و متن منتشرشده', TG_MEM['as:gemcalls'][0].prompt.indexOf('نمونه‌پور') < 0 && TG_MEM['as:gemcalls'][0].prompt.indexOf('سوپرویژن گروهی') > -1);
+    TG_MEM['as:gem'] = { text: 'دوره‌ها ۱۲ جلسه است و با ۰۹۱۲۰۰۰۰۰۰۰ هماهنگ کنید.', i: 0, none: false }; TG_MEM['as:rwreject'] = [];   // pii:ok ساختگی
+    var g2 = asAsk_({ channel: 'bot', chat: '601' }, 'دوره‌های مدرسهٔ تجربه برای دانشجویان؟');
+    ok('پاسخ جعلی با عدد تازه رد می‌شود و متن منبع می‌رود', g2.answer.indexOf('۱۲') < 0 && g2.answer.indexOf('نمونهٔ متن ساختگی') > -1 && TG_MEM['as:rwreject'].length === 1, g2.answer);
+    TG_MEM['as:gemcalls'] = [];
+    var c = asAsk_({ channel: 'bot', chat: '601' }, 'می‌خواهم خودکشی کنم');
+    ok('بحران همیشه اول و هرگز به جمنای نمی‌رود', c.crisis && TG_MEM['as:gemcalls'].length === 0);
+    TG_CFG_.ASSIST_REWRITE = '';
+    /* رویدادهای بات */
+    TG_MEM['as:events'] = [{ code: 'EV-T1', title: 'کارگاه نمونهٔ آزمون', date: '۲۰ مهر', dateIso: '2026-10-12', time: '۱۸:۰۰', desc: 'کارگاه ساختگی برای آزمون نمایهٔ رویدادها در مدرسه.' },
+      { code: 'EV-T0', title: 'کارگاه گذشته', date: '۱ مهر', dateIso: '2026-09-23', desc: 'کارگاه ساختگی گذشته که نباید پاسخ داده شود.' }];
+    var e1 = asAsk_({ channel: 'bot', chat: '601' }, 'کارگاه نمونهٔ آزمون کی است؟');
+    ok('رویداد پیش‌روی بات جواب می‌دهد، رویداد گذشته نه', /#ev=EV-T1$/.test(e1.source || '') && asEvChunks_().length === 1, e1.source);
+    /* خط شبانه */
+    var nl = asIdxNightLine_();
+    ok('خط شبانه: شمار، تازه، حذف‌شده و درصد سایت و دانش', /نمایهٔ دانش: ۱ تکه/.test(nl) && /حذف‌شده ۱/.test(nl) && /٪ از سایت/.test(nl) && /٪ از دانش تأییدشده/.test(nl), nl);
+    /* پیش‌نویس از نمایه */
+    var n0 = TG_MEM['as:' + AS_KB_TAB].length, made = asDraftFromIdx_([{ q: 'دوره‌های مدرسهٔ تجربه برای دانشجویان روان‌شناسی' }, { q: 'سؤال بی‌ربط درباره هوا' }]), nr = TG_MEM['as:' + AS_KB_TAB][n0] || {};
+    ok('پیش‌نویس از نمایه: «تأیید» خالی و منبع روشن', made === 1 && nr['تأیید'] === '' && nr['منبع'] === S + '/school/' && /پیش‌نویس از نمایهٔ سایت/.test(nr['یادداشت بازبینی']), JSON.stringify(nr));
+    ok('پیش‌نویس تأییدنشده جواب نمی‌دهد', asKb_().every(function (k) { return k.topic !== nr['موضوع']; }));
+    var ver = ssVerify_; ssVerify_ = function () { return 'ok'; }; var w;
+    try { w = JSON.parse(asWeb_({}, '{}', { action: 'assist.ask', channel: 'site', session_id: 'test-s1', text: 'دوره‌های مدرسهٔ تجربه برای دانشجویان؟', audience: 'دانشجو' }).getContent()); } finally { ssVerify_ = ver; }
+    ok('خروجی وب: log_id، source و source_url (قرارداد پل)', w.ok && w.log_id && w.source === 'سایت' && w.source_url === S + '/school/', JSON.stringify(w));
+    ok('بحران: فقط جمله‌های صریح خودکشی و آسیب به خود', ['دیگر نمی‌خواهم زنده باشم', 'نمیخوام زنده بمونم', 'می‌خواهم خودم را بکشم', 'به خودم آسیب می‌زنم', 'به خودکشی فکر می‌کنم', 'I want to kill myself'].every(tgIsCrisis_));
+    var gen = ['نمی‌خواهم زندگی‌ام خراب شود', 'نمیخوام زندگی کنم اینجوری', 'الهی بمیرم برات', 'دیگه نمی‌کشم از این کار', 'قرص خوردم و خوابیدم', 'تمومش کنم این بحث را'].filter(tgIsCrisis_);
+    ok('جمله‌های کلی بحران شناخته نمی‌شوند (از جمله «نمی‌خواهم زندگی‌ام خراب شود»)', gen.length === 0, gen.join(' | '));
+    TG_MEM['notify'] = []; var leads0 = TG_OUTBOX.length, appended = 0, appendK = tgAppendLead_; tgAppendLead_ = function () { appended++; };
+    try { TG_OUTBOX = []; tgOnCrisis_('612', 'مراجع نمونه', '', 'می‌خواهم خودکشی کنم'); } finally { tgAppendLead_ = appendK; }
+    ok('مسیر بحران بات: فقط یک پیام ثابت، بی لید و بی کارت فوری', TG_OUTBOX.length === 1 && TG_OUTBOX[0].text === T_CRISIS && appended === 0 && !(TG_MEM['notify'] || []).length, JSON.stringify(TG_OUTBOX));
+    ok('پیام بحران گروه همان پیام ثابت است', T_CRISIS_GROUP === T_CRISIS && TG_CRISIS_STRONG === TG_CRISIS_WORDS);
+    ok('اکشن kb_index در درگاه، فقط نوشتنی', typeof PB_ACTIONS.kb_index === 'function' && PB_WRITE.indexOf('kb_index') > -1);
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { asKnownNames_ = keep.names; TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg; AS_IDX_MEMO = null; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'asTests7'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دستیار ۷ · نمایهٔ سایت (v170.23.19)', 'asTests7']); } catch (eAs7) {}
