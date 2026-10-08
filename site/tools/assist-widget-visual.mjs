@@ -45,7 +45,9 @@ function audit(MIN) {
     seen.push(item); if (ratio < MIN) bad.push(item);
   }
   const answers = [...root.querySelectorAll('.tj-fab-as-m.bot')].map((e) => e.textContent);
-  return { bad, seen: seen.length, ellipsis: answers.filter((t) => /…|\.\.\./.test(t)).map((t) => t.slice(0, 60)) };
+  /* متنی که CSS با «…» بریده (text-overflow: ellipsis و واقعاً بلندتر از جایش) */
+  const cut = all.filter((el) => { const st = getComputedStyle(el); return st.textOverflow === 'ellipsis' && el.scrollWidth > el.clientWidth + 1 && el.getBoundingClientRect().width > 0; }).map((el) => '[بریده] ' + el.textContent.trim().slice(0, 50));
+  return { bad, seen: seen.length, ellipsis: answers.filter((t) => /…|\.\.\./.test(t)).map((t) => t.slice(0, 60)).concat(cut) };
 }
 
 const browser = await chromium.launch(process.env.PW_EXE ? { executablePath: process.env.PW_EXE } : {});   /* PW_EXE: مرورگر نصب‌شدهٔ محلی */
@@ -58,6 +60,8 @@ for (const [name, vp] of [['390', { width: 390, height: 844, isMobile: true, has
   /* ویجت زنده بیرون، نسخهٔ این شاخه درون (همان HTML، CSS و اسکریپت اسنیپت) */
   await page.evaluate(({ css, markup, js }) => {
     document.querySelectorAll('#tjFabRoot').forEach((e) => e.remove());
+    /* CSS نسخهٔ زندهٔ اسنیپت هم برداشته می‌شود، مثل وقتی اسنیپت روی سایت عوض شود */
+    document.querySelectorAll('style').forEach((e) => { if (/tjFabRoot|tj-fab-/.test(e.textContent)) e.remove(); });
     const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     const w = document.createElement('div'); w.innerHTML = markup; while (w.firstChild) document.body.appendChild(w.firstChild);
     (0, eval)(js);
