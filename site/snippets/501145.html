@@ -299,15 +299,32 @@
   }
 
   // tj-fab v4: دستیار داخل همین منو، مستقیم از مرورگر به ورکر لبهٔ tj-assist (مسیر سرور وردپرس و اپس‌اسکریپت در کار نیست).
-  // اگر پاسخ در ۴ ثانیه نیامد، بی پیام خطا سه موضوع نزدیک و «با پذیرش حرف بزنم» می‌آید.
+  // tj-fab v5.3: برای دسترسی از داخل ایران اول نشانی‌های هم‌دامنهٔ سایت: route ورکر (tajrobeh.life/api/assist، وقتی دامنه روی کلادفلر بیاید)
+  // و مسیر سرور سایت به ورکر (/wp-json/tj/v1/assist، اسنیپت 506148)؛ اگر هیچ‌کدام نرسید workers.dev؛
+  // نشانیِ جواب‌داده در همین نشست می‌ماند. اگر هیچ‌کدام در ۴ ثانیه نرسید: «الان به دستیار وصل نمی‌شوم»، سه موضوع نزدیک و «با پذیرش حرف بزنم».
+  // شمار وصل‌نشدن‌ها در نشست می‌ماند و با درخواست موفق بعدی (miss) به ورکر می‌رود تا در گزارش جدا از «جواب نداشت» ثبت شود.
   var askBtn = document.getElementById('tjFabAsk'), as = document.getElementById('tjFabAs');
   if (askBtn && as && window.fetch) {
-    var EDGE = 'https://tj-assist.yaserderakhshan.workers.dev', BOT = 'https://t.me/tajrobehlife_bot?start=pz-assist', WAIT_MS = 4000;
+    var EDGES = ['https://tajrobeh.life/api', 'https://tajrobeh.life/wp-json/tj/v1', 'https://tj-assist.yaserderakhshan.workers.dev'], BOT = 'https://t.me/tajrobehlife_bot?start=pz-assist', WAIT_MS = 4000;
     /* tj-fab v5.1: دکمهٔ پرسش متنش دقیقاً question همان مورد content/assist/faq.json است و با id جواب می‌گیرد (tap f:<id>)، نه جست‌وجوی دوباره.
        فهرست از /assist/boot ورکر؛ این چهار تا فقط اگر ورکر در دسترس نبود. */
     var QUICK = [{ id: 'start', text: 'چطور تراپی را شروع کنم؟' }, { id: 'price', text: 'هزینهٔ هر جلسه چقدر است؟' }, { id: 'intro', text: 'جلسهٔ معارفه چیست؟' }, { id: 'clinic', text: 'کلینیک حضوری تجربه کجاست؟' }];
     var asLog = document.getElementById('tjFabAsLog'), asIn = document.getElementById('tjFabAsIn'), asLast = '', asStarted = false, sid = '', boot = null, busy = false;
     try { sid = sessionStorage.getItem('tjas') || ''; boot = JSON.parse(sessionStorage.getItem('tjasboot2') || 'null'); } catch (e0) {}
+    var ss = function (k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (eS) {} return null; };
+    var ei = Math.max(0, EDGES.indexOf(ss('tjasedge'))), miss = parseInt(ss('tjasmiss'), 10) || 0;
+    /* درخواست به نشانی فعلی؛ اگر خطای شبکه یا پاسخ ناسالم داد، نشانی بعدی تا پایان مهلت. نشانیِ جواب‌داده در نشست می‌ماند. */
+    var call = function (path, body, signal) {
+      var i = ei, tried = 0;
+      var go = function () {
+        var base = EDGES[i];
+        return fetch(base + path, body ? { method: 'POST', headers: { 'Content-Type': 'text/plain' }, signal: signal, body: body } : { signal: signal })
+          .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+          .then(function (j) { if (ei !== i) { ei = i; ss('tjasedge', base); } return j; })
+          .catch(function (er) { tried++; if (tried >= EDGES.length || (signal && signal.aborted)) throw er; i = (i + 1) % EDGES.length; return go(); });
+      };
+      return go();
+    };
     if (!sid) { sid = 'w' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); try { sessionStorage.setItem('tjas', sid); } catch (e1) {} }
     var el = function (tag, cls, txt) { var d = document.createElement(tag); if (cls) d.className = cls; if (txt != null) d.textContent = txt; return d; };
     var put = function (n) { asLog.appendChild(n); asLog.scrollTop = asLog.scrollHeight; return n; };
@@ -335,7 +352,7 @@
       w.querySelectorAll('.is-rate').forEach(function (r) { r.disabled = true; });
       x.classList.add('is-done');
       w.appendChild(el('span', 'tj-fab-as-ok', 'ثبت شد'));
-      try { fetch(EDGE + '/assist', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, keepalive: true, body: JSON.stringify({ action: 'assist.ask', channel: 'site', session_id: sid, text: asLast, tap: id }) }).catch(function () {}); } catch (eF) {}
+      try { fetch(EDGES[ei] + '/assist', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, keepalive: true, body: JSON.stringify({ action: 'assist.ask', channel: 'site', session_id: sid, text: asLast, tap: id }) }).catch(function () {}); } catch (eF) {}
       if (/^x:/.test(id)) { var h = el('button', 'is-hand', 'با پذیرش حرف بزنم'); h.type = 'button'; h.onclick = function () { h.remove(); send('', 'h', 'با پذیرش حرف بزنم'); }; w.appendChild(h); }
       try { x.blur(); } catch (eB) {}
       asLog.scrollTop = asLog.scrollHeight;
@@ -357,8 +374,10 @@
       return pool.filter(function (p) { return p.text !== t; }).map(function (p) { return { p: p, s: ws.filter(function (w) { return p.text.indexOf(w) > -1; }).length }; })
         .sort(function (a, b) { return b.s - a.s; }).slice(0, 3).map(function (x) { return x.p; });
     };
-    var fallback = function (t) {
-      say('شاید یکی از این‌ها همان چیزی باشد که دنبالش هستی:', 'bot');
+    /* off: ورکر در دسترس نبود (شبکه یا مهلت)، نه «جواب نداشت» */
+    var fallback = function (t, off) {
+      if (off) { miss = Math.min(20, miss + 1); ss('tjasmiss', String(miss)); }
+      say(off ? 'الان به دستیار وصل نمی‌شوم. شاید یکی از این‌ها کمک کند:' : 'شاید یکی از این‌ها همان چیزی باشد که دنبالش هستی:', 'bot');
       var w = el('div', 'tj-fab-as-q');
       near(t).forEach(function (q) { qBtn(w, q); });
       put(w);
@@ -371,20 +390,22 @@
       var dots = null, dt = setTimeout(function () { dots = put(el('div', 'tj-fab-as-typing')); dots.innerHTML = '<i></i><i></i><i></i>'; }, 250);
       var ac = window.AbortController ? new AbortController() : null, done = false;
       var finish = function () { done = true; busy = false; clearTimeout(dt); clearTimeout(to); if (dots) dots.remove(); };
-      var to = setTimeout(function () { if (done) return; finish(); if (ac) ac.abort(); fallback(text || asLast); }, WAIT_MS);
-      fetch(EDGE + '/assist', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, signal: ac ? ac.signal : undefined, body: JSON.stringify({ action: 'assist.ask', channel: 'site', session_id: sid, text: text || asLast, tap: tap || '' }) })
-        .then(function (r) { return r.json(); }).then(function (j) {
+      var to = setTimeout(function () { if (done) return; finish(); if (ac) ac.abort(); fallback(text || asLast, true); }, WAIT_MS);
+      var m = miss;
+      call('/assist', JSON.stringify({ action: 'assist.ask', channel: 'site', session_id: sid, text: text || asLast, tap: tap || '', miss: m }), ac ? ac.signal : undefined)
+        .then(function (j) {
+          if (m) { miss = Math.max(0, miss - m); ss('tjasmiss', String(miss)); }
           if (done) return; finish();
           if (!j || !j.ok) { fallback(text || asLast); return; }
           if (j.answer) say(j.answer, 'bot');
           btns(j.buttons);
-        }).catch(function () { if (done) return; finish(); fallback(text || asLast); });
+        }).catch(function () { if (done) return; finish(); fallback(text || asLast, true); });
     };
     var start = function () {
       var shown = false, show = function () { if (shown) return; shown = true; say((boot && boot.welcome) || 'سلام، من دستیار تجربه هستم. سؤالت را بپرس یا یکی از این‌ها را انتخاب کن.', 'bot'); quick(); };
       if (boot) { show(); return; }
       var tb = setTimeout(show, 1200);
-      fetch(EDGE + '/assist/boot').then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok) { boot = j; try { sessionStorage.setItem('tjasboot2', JSON.stringify(j)); } catch (e2) {} } clearTimeout(tb); show(); }).catch(function () { clearTimeout(tb); show(); });
+      call('/assist/boot').then(function (j) { if (j && j.ok) { boot = j; try { sessionStorage.setItem('tjasboot2', JSON.stringify(j)); } catch (e2) {} } clearTimeout(tb); show(); }).catch(function () { clearTimeout(tb); show(); });
     };
     var showAs = function (on) {
       root.classList.toggle('is-as', on); as.hidden = !on;

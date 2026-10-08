@@ -1,7 +1,7 @@
 // آزمون دیداری اسنیپت شناور 501145 روی خود tajrobeh.life (Playwright، موبایل ۳۹۰ و دسکتاپ ۱۲۸۰): منوی اول و پنجرهٔ دستیار، هر دو.
 // منوی اول با بلندترین متن ممکن؛ هر عنصر بریده (scrollWidth > clientWidth)، بیرون از کادر منو، بیش از یک خط، یا آیتم ناهم‌عرض قرمز است.
 // ویجت زندهٔ صفحه برداشته و نسخهٔ همین شاخه (site/snippets/501145.html) جایش گذاشته می‌شود؛ بعد دستیار باز می‌شود، یک پرسش
-// پرتکرار و یک پرسش نامعلوم پرسیده می‌شود و از هر حالت اسکرین‌شات گرفته می‌شود. کنتراست هر متن دیده‌شدهٔ ویجت خودکار سنجیده
+// پرتکرار و یک پرسش نامعلوم پرسیده می‌شود، بعد ورکر بسته می‌شود (حالت «وصل نمی‌شوم») و از هر حالت اسکرین‌شات گرفته می‌شود. کنتراست هر متن دیده‌شدهٔ ویجت خودکار سنجیده
 // می‌شود (رنگ متن روی نخستین زمینهٔ نیمه‌شفاف‌نشدهٔ نیاکان): زیر ۴٫۵ به ۱، یا «…» در جواب‌ها، یعنی قرمز.
 //   OUT=docs/site/assist-widget node site/tools/assist-widget-visual.mjs
 import { chromium } from 'playwright';
@@ -137,7 +137,27 @@ for (const [name, vp] of [['390', { width: 390, height: 844, isMobile: true, has
   await page.waitForTimeout(5500);
   await page.screenshot({ path: join(OUT, `live-${name}-fallback.png`) });
   const a3 = await page.evaluate(audit, MIN);
-  for (const [k, a] of [['start', a1], ['answer', a2], ['fallback', a3]]) {
+  /* ورکر در دسترس نیست (مثل فیلتر workers.dev در ایران): هر سه نشانی بسته؛ پیام «الان به دستیار وصل نمی‌شوم»،
+     سه دکمهٔ پرسش و «با پذیرش حرف بزنم» باید بیاید، نه «شاید یکی از این‌ها…» */
+  await page.route(/tajrobeh\.life\/(api\/assist|wp-json\/tj\/v1\/assist)|workers\.dev/, (r) => r.abort('failed'));
+  await page.fill('#tjFabAsIn', 'ساعت کاری پذیرش');
+  await page.press('#tjFabAsIn', 'Enter');
+  await page.waitForTimeout(5000);
+  const off = await page.evaluate(() => {
+    const L = document.querySelectorAll('#tjFabRoot .tj-fab-as-m.bot'), q = document.querySelectorAll('#tjFabRoot .tj-fab-as-q');
+    const qs = q.length ? q[q.length - 1].querySelectorAll('button').length : 0;
+    const bs = document.querySelectorAll('#tjFabRoot .tj-fab-as-bs'), last = bs.length ? bs[bs.length - 1].textContent : '';
+    let miss = ''; try { miss = sessionStorage.getItem('tjasmiss') || ''; } catch (e) {}
+    return { msg: L.length ? L[L.length - 1].textContent : '', qs, hand: /با پذیرش حرف بزنم/.test(last), miss };
+  });
+  if (!/الان به دستیار وصل نمی‌شوم/.test(off.msg)) fails.push(`${name}px وصل‌نشدن: پیام «الان به دستیار وصل نمی‌شوم» نیامد («${off.msg}»)`);
+  if (off.qs !== 3) fails.push(`${name}px وصل‌نشدن: ${off.qs} دکمهٔ پرسش به جای ۳`);
+  if (!off.hand) fails.push(`${name}px وصل‌نشدن: «با پذیرش حرف بزنم» نیامد`);
+  if (off.miss !== '1') fails.push(`${name}px وصل‌نشدن: شمار وصل‌نشدن ثبت نشد (${off.miss || 'خالی'})`);
+  await page.screenshot({ path: join(OUT, `live-${name}-offline.png`) });
+  const a4 = await page.evaluate(audit, MIN);
+  await page.unroute(/tajrobeh\.life\/(api\/assist|wp-json\/tj\/v1\/assist)|workers\.dev/);
+  for (const [k, a] of [['start', a1], ['answer', a2], ['fallback', a3], ['offline', a4]]) {
     report.push(`${name}px · ${k}: ${a.seen} متن سنجیده شد، ${a.bad.length} زیر ${MIN}${a.ellipsis.length ? ' · «…» در جواب' : ''}`);
     for (const b of a.bad) fails.push(`${name}px ${k}: «${b.text}» ${b.ratio} (${b.fg} روی ${b.bg})`);
     for (const e of a.ellipsis) fails.push(`${name}px ${k}: «…» در جواب «${e}»`);
