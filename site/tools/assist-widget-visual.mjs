@@ -50,8 +50,9 @@ function audit(MIN) {
   return { bad, seen: seen.length, ellipsis: answers.filter((t) => /…|\.\.\./.test(t)).map((t) => t.slice(0, 60)).concat(cut) };
 }
 
+const fails = [];
 const browser = await chromium.launch(process.env.PW_EXE ? { executablePath: process.env.PW_EXE } : {});   /* PW_EXE: مرورگر نصب‌شدهٔ محلی */
-const report = [], fails = [];
+const report = [];
 for (const [name, vp] of [['390', { width: 390, height: 844, isMobile: true, hasTouch: true }], ['1280', { width: 1280, height: 800 }]]) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, isMobile: !!vp.isMobile, hasTouch: !!vp.hasTouch, deviceScaleFactor: 1, locale: 'fa-IR' });
   const page = await ctx.newPage();
@@ -72,6 +73,30 @@ for (const [name, vp] of [['390', { width: 390, height: 844, isMobile: true, has
   await page.waitForTimeout(600);
   await page.screenshot({ path: join(OUT, `live-${name}-start.png`) });
   const a1 = await page.evaluate(audit, MIN);
+  /* دکمهٔ پرسش شروع: متن دکمه همان پرسش و جواب مستقیم (نه «پیدا نکردم») */
+  const qText = await page.$eval('#tjFabRoot .tj-fab-as-q button', (b) => b.textContent.trim()).catch(() => '');
+  if (qText) {
+    await page.click('#tjFabRoot .tj-fab-as-q button');
+    await page.waitForFunction(() => document.querySelectorAll('#tjFabRoot .tj-fab-as-m.bot').length >= 2 && !document.querySelector('#tjFabRoot .tj-fab-as-typing'), null, { timeout: 15000 }).catch(() => {});
+    const last = await page.$$eval('#tjFabRoot .tj-fab-as-m.bot', (L) => L[L.length - 1].textContent);
+    if (/پیدا نکردم|شاید یکی از این‌ها/.test(last)) fails.push(`${name}px: دکمهٔ «${qText}» جواب مستقیم نگرفت`);
+    /* بازخورد 👍: پیام گفت‌وگو نمی‌سازد؛ «ثبت شد» کوچک */
+    const n0 = await page.$$eval('#tjFabRoot .tj-fab-as-m', (L) => L.length);
+    await page.click('#tjFabRoot .tj-fab-as-bs .is-rate.is-emoji').catch(() => fails.push(`${name}px: دکمهٔ 👍 نبود`));
+    await page.waitForTimeout(900);
+    const fb = await page.evaluate(() => ({ n: document.querySelectorAll('#tjFabRoot .tj-fab-as-m').length, ok: !!document.querySelector('#tjFabRoot .tj-fab-as-ok'), done: !!document.querySelector('#tjFabRoot .is-rate.is-done') }));
+    if (fb.n !== n0 || !fb.ok || !fb.done) fails.push(`${name}px: بازخورد 👍 پیام ساخت یا «ثبت شد» نیامد`);
+    /* «جوابم را نگرفتم»: بی پیام، با پیشنهاد «با پذیرش حرف بزنم» */
+    await page.fill('#tjFabAsIn', 'جلسهٔ معارفه چیست؟'); await page.press('#tjFabAsIn', 'Enter');
+    await page.waitForFunction((k) => document.querySelectorAll('#tjFabRoot .tj-fab-as-bs .is-rate:not([disabled])').length > 0 && !document.querySelector('#tjFabRoot .tj-fab-as-typing'), null, { timeout: 15000 }).catch(() => {});
+    const n1 = await page.$$eval('#tjFabRoot .tj-fab-as-m', (L) => L.length);
+    const xs = await page.$$('#tjFabRoot .tj-fab-as-bs .is-rate:not(.is-emoji):not([disabled])');
+    if (xs.length) await xs[xs.length - 1].click(); else fails.push(`${name}px: «جوابم را نگرفتم» نبود`);
+    await page.waitForTimeout(900);
+    const fx = await page.evaluate(() => ({ n: document.querySelectorAll('#tjFabRoot .tj-fab-as-m').length, hand: [...document.querySelectorAll('#tjFabRoot .is-hand')].some((b) => /با پذیرش حرف بزنم/.test(b.textContent)) }));
+    if (fx.n !== n1 || !fx.hand) fails.push(`${name}px: «جوابم را نگرفتم» پیام ساخت یا «با پذیرش حرف بزنم» نیامد`);
+    await page.screenshot({ path: join(OUT, `live-${name}-feedback.png`) });
+  }
   /* پرسش پرتکرار با تایپ (همان مسیر کاربر) */
   await page.fill('#tjFabAsIn', 'هزینه جلسه چقدر است');
   await page.press('#tjFabAsIn', 'Enter');

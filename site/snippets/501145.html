@@ -211,6 +211,10 @@
   #tjFabRoot .tj-fab-as-bs a.is-more::after{ content: " ↖"; }
   #tjFabRoot .tj-fab-as-bs .is-rate{ border-color: transparent; background: transparent; padding-inline: 6px; color: var(--tjas-mut); font-size: 12.5px; }
   #tjFabRoot .tj-fab-as-bs .is-rate.is-emoji{ font-size: 15px; }
+  #tjFabRoot .tj-fab-as-bs .is-rate:disabled{ cursor: default; }
+  #tjFabRoot .tj-fab-as-bs .is-rate.is-done{ opacity: .45; }
+  #tjFabRoot .tj-fab-as-ok{ font-size: 12px; line-height: 1.5; color: var(--tjas-mut); padding-inline: 4px; }
+  #tjFabRoot .tj-fab-as-bs .is-hand{ border-color: var(--tjas-black); color: var(--tjas-text); background: var(--tjas-white); }
   #tjFabRoot .tj-fab-as-typing{ align-self: flex-start; display: flex; gap: 4px; padding-block: 12px; padding-inline: 14px; border-radius: 16px; border-start-start-radius: 6px; background: var(--tjas-cream); }
   #tjFabRoot .tj-fab-as-typing i{ inline-size: 6px; block-size: 6px; border-radius: 50%; background: var(--tjas-mut); animation: tjAsDot 1s infinite ease-in-out; }
   #tjFabRoot .tj-fab-as-typing i:nth-child(2){ animation-delay: .15s; } #tjFabRoot .tj-fab-as-typing i:nth-child(3){ animation-delay: .3s; }
@@ -285,9 +289,11 @@
   var askBtn = document.getElementById('tjFabAsk'), as = document.getElementById('tjFabAs');
   if (askBtn && as && window.fetch) {
     var EDGE = 'https://tj-assist.yaserderakhshan.workers.dev', BOT = 'https://t.me/tajrobehlife_bot?start=pz-assist', WAIT_MS = 4000;
-    var QUICK = [{ text: 'هزینهٔ جلسه چقدر است؟', q: 'هزینه جلسه چقدر است' }, { text: 'چطور درمان را شروع کنم؟', q: 'چطور تراپی را شروع کنم' }, { text: 'جلسهٔ معارفه چیست؟', q: 'جلسه معارفه چیست' }, { text: 'رویدادهای پیش رو', q: 'رویدادهای پیش رو' }];
+    /* tj-fab v5.1: دکمهٔ پرسش متنش دقیقاً question همان مورد content/assist/faq.json است و با id جواب می‌گیرد (tap f:<id>)، نه جست‌وجوی دوباره.
+       فهرست از /assist/boot ورکر؛ این چهار تا فقط اگر ورکر در دسترس نبود. */
+    var QUICK = [{ id: 'start', text: 'چطور تراپی را شروع کنم؟' }, { id: 'price', text: 'هزینهٔ هر جلسه چقدر است؟' }, { id: 'intro', text: 'جلسهٔ معارفه چیست؟' }, { id: 'clinic', text: 'کلینیک حضوری تجربه کجاست؟' }];
     var asLog = document.getElementById('tjFabAsLog'), asIn = document.getElementById('tjFabAsIn'), asLast = '', asStarted = false, sid = '', boot = null, busy = false;
-    try { sid = sessionStorage.getItem('tjas') || ''; boot = JSON.parse(sessionStorage.getItem('tjasboot') || 'null'); } catch (e0) {}
+    try { sid = sessionStorage.getItem('tjas') || ''; boot = JSON.parse(sessionStorage.getItem('tjasboot2') || 'null'); } catch (e0) {}
     if (!sid) { sid = 'w' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); try { sessionStorage.setItem('tjas', sid); } catch (e1) {} }
     var el = function (tag, cls, txt) { var d = document.createElement(tag); if (cls) d.className = cls; if (txt != null) d.textContent = txt; return d; };
     var put = function (n) { asLog.appendChild(n); asLog.scrollTop = asLog.scrollHeight; return n; };
@@ -301,28 +307,44 @@
         else {
           var rate = /^[ynx]:/.test(b.id || '');
           x = el('button', rate ? 'is-rate' + (/^[yn]:/.test(b.id) ? ' is-emoji' : '') : '', b.text); x.type = 'button';
-          x.onclick = function () { w.remove(); if (/^[yn]:/.test(b.id)) { send('', b.id, ''); return; } send('', b.id, rate ? '' : b.text); };
+          if (rate) x.onclick = function () { feedback(w, x, b.id); };
+          else x.onclick = function () { w.remove(); send('', b.id, b.text); };
         }
         w.appendChild(x);
       });
       put(w);
     };
+    /* بازخورد (👍، 👎، «جوابم را نگرفتم») پیام گفت‌وگو نمی‌سازد: همان دکمه کم‌رنگ، «ثبت شد» کوچک کنار دکمه‌ها؛
+       بعد از «جوابم را نگرفتم»، پیشنهاد «با پذیرش حرف بزنم» */
+    var feedback = function (w, x, id) {
+      if (w.getAttribute('data-done')) return; w.setAttribute('data-done', '1');
+      w.querySelectorAll('.is-rate').forEach(function (r) { r.disabled = true; });
+      x.classList.add('is-done');
+      w.appendChild(el('span', 'tj-fab-as-ok', 'ثبت شد'));
+      try { fetch(EDGE + '/assist', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, keepalive: true, body: JSON.stringify({ action: 'assist.ask', channel: 'site', session_id: sid, text: asLast, tap: id }) }).catch(function () {}); } catch (eF) {}
+      if (/^x:/.test(id)) { var h = el('button', 'is-hand', 'با پذیرش حرف بزنم'); h.type = 'button'; h.onclick = function () { h.remove(); send('', 'h', 'با پذیرش حرف بزنم'); }; w.appendChild(h); }
+    };
+    var qBtn = function (w, q) {
+      var b = el('button', '', q.text); b.type = 'button';
+      b.onclick = function () { w.remove(); if (q.id) send('', 'f:' + q.id, q.text); else send(q.q || q.text, '', q.text); };
+      w.appendChild(b);
+    };
     var quick = function () {
       var w = el('div', 'tj-fab-as-q');
-      ((boot && boot.quick) || QUICK).slice(0, 4).forEach(function (q) { var b = el('button', '', q.text); b.type = 'button'; b.onclick = function () { w.remove(); send(q.q, '', q.text); }; w.appendChild(b); });
+      ((boot && boot.quick) || QUICK).slice(0, 4).forEach(function (q) { qBtn(w, q); });
       put(w);
     };
     /* جست‌وجوی سبک محلی برای بازگشت: هم‌پوشانی واژه با موضوع‌ها و پرسش‌های پرتکرار */
     var near = function (t) {
       var ws = String(t || '').replace(/[؟?،.!]/g, ' ').split(/\s+/).filter(function (w) { return w.length > 2; });
-      var pool = ((boot && boot.topics) || []).map(function (x) { return { text: x, q: x }; }).concat((boot && boot.quick) || QUICK);
-      return pool.filter(function (p) { return p.q !== t && p.text !== t; }).map(function (p) { return { p: p, s: ws.filter(function (w) { return p.text.indexOf(w) > -1; }).length }; })
+      var pool = (boot && boot.faq && boot.faq.length) ? boot.faq : QUICK;
+      return pool.filter(function (p) { return p.text !== t; }).map(function (p) { return { p: p, s: ws.filter(function (w) { return p.text.indexOf(w) > -1; }).length }; })
         .sort(function (a, b) { return b.s - a.s; }).slice(0, 3).map(function (x) { return x.p; });
     };
     var fallback = function (t) {
       say('شاید یکی از این‌ها همان چیزی باشد که دنبالش هستی:', 'bot');
       var w = el('div', 'tj-fab-as-q');
-      near(t).forEach(function (q) { var b = el('button', '', q.text); b.type = 'button'; b.onclick = function () { w.remove(); send(q.q, '', q.text); }; w.appendChild(b); });
+      near(t).forEach(function (q) { qBtn(w, q); });
       put(w);
       btns([{ url: BOT, text: 'با پذیرش حرف بزنم' }]);
     };
@@ -343,9 +365,10 @@
         }).catch(function () { if (done) return; finish(); fallback(text || asLast); });
     };
     var start = function () {
-      say((boot && boot.welcome) || 'سلام، من دستیار تجربه هستم. سؤالت را بپرس یا یکی از این‌ها را انتخاب کن.', 'bot');
-      quick();
-      if (!boot) fetch(EDGE + '/assist/boot').then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok) { boot = j; try { sessionStorage.setItem('tjasboot', JSON.stringify(j)); } catch (e2) {} } }).catch(function () {});
+      var shown = false, show = function () { if (shown) return; shown = true; say((boot && boot.welcome) || 'سلام، من دستیار تجربه هستم. سؤالت را بپرس یا یکی از این‌ها را انتخاب کن.', 'bot'); quick(); };
+      if (boot) { show(); return; }
+      var tb = setTimeout(show, 1200);
+      fetch(EDGE + '/assist/boot').then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok) { boot = j; try { sessionStorage.setItem('tjasboot2', JSON.stringify(j)); } catch (e2) {} } clearTimeout(tb); show(); }).catch(function () { clearTimeout(tb); show(); });
     };
     var showAs = function (on) {
       root.classList.toggle('is-as', on); as.hidden = !on;
