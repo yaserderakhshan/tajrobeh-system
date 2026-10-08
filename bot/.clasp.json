@@ -45,7 +45,8 @@
     "sesslen.gs",
     "assist.gs",
     "leadspeed.gs",
-    "nurture.gs"
+    "nurture.gs",
+    "reactivate.gs"
   ],
   "htmlExtensions": [
     ".html"
