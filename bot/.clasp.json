@@ -44,8 +44,7 @@
     "psy3.gs",
     "sesslen.gs",
     "assist.gs",
-    "leadspeed.gs",
-    "nurture.gs"
+    "leadspeed.gs"
   ],
   "htmlExtensions": [
     ".html"
