@@ -57,11 +57,21 @@ jobs:
         if: steps.gate.outputs.go == '1' && github.event_name != 'schedule'
         working-directory: edge/assist
         run: |
-          set -e
+          set -e -o pipefail
           ID=$(npx -y $WRANGLER kv namespace list | jq -r '.[] | select(.title=="tj-assist") | .id' | head -1)
           [ -n "$ID" ] || { echo "::error::فضای KV با نام tj-assist پیدا نشد"; exit 1; }
           sed -i "s/__KV_ID__/$ID/" wrangler.toml
-          npx -y $WRANGLER deploy | tee /tmp/deploy.txt
+          # route دامنهٔ سایت (tajrobeh.life/api/assist*). اگر دامنه در این حساب نیست یا توکن اجازهٔ route ندارد، بی route منتشر و هشدار
+          Z=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/zones?name=tajrobeh.life" | jq -r '.result[0].status // "نیست یا توکن اجازهٔ خواندن ندارد"' 2>/dev/null || echo "خوانده نشد")
+          echo "دامنهٔ tajrobeh.life در کلادفلر: $Z" | tee -a "$GITHUB_STEP_SUMMARY"
+          if npx -y $WRANGLER deploy 2>&1 | tee /tmp/deploy.txt; then
+            echo "- ورکر با مسیر tajrobeh.life/api/assist منتشر شد" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::انتشار با route دامنهٔ سایت نشد (دامنه در این حساب کلادفلر نیست یا توکن اجازهٔ Workers Routes ندارد). بی route منتشر می‌شود؛ ویجت از workers.dev استفاده می‌کند."
+            echo "- ⚠️ route دامنهٔ سایت نشد؛ فقط workers.dev" >> "$GITHUB_STEP_SUMMARY"
+            sed -i '/^routes = /d' wrangler.toml
+            npx -y $WRANGLER deploy | tee /tmp/deploy.txt
+          fi
       - name: رمزهای ورکر
         if: steps.gate.outputs.go == '1' && github.event_name != 'schedule'
         working-directory: edge/assist
@@ -95,6 +105,16 @@ jobs:
             [ -n "$V" ] && { echo "داده رسید: $V"; echo "- نسخهٔ داده: $V · جمنای در ورکر: $(echo "$H" | jq -r 'if .gemini then "روشن" else "خاموش" end') · ASSIST_REWRITE: $(echo "$H" | jq -r 'if .rewrite then "بله" else "خیر" end')" >> "$GITHUB_STEP_SUMMARY"; break; }
             sleep 10
           done
+      - name: مسیر دامنهٔ سایت (tajrobeh.life/api/assist)
+        if: steps.gate.outputs.go == '1'
+        run: |
+          H=$(curl -sS -m 15 -D /tmp/h.txt "https://tajrobeh.life/api/assist/health" || true)
+          if echo "$H" | jq -e '.ok and .faq > 0' >/dev/null 2>&1; then
+            echo "- ✅ https://tajrobeh.life/api/assist/health از ورکر جواب داد (پرسش‌های پرتکرار $(echo "$H" | jq -r .faq))" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::tajrobeh.life/api/assist هنوز به ورکر نمی‌رسد ($(head -1 /tmp/h.txt 2>/dev/null | tr -d '\r'); server: $(grep -i '^server:' /tmp/h.txt | head -1 | tr -d '\r'))"
+            echo "- ⚠️ tajrobeh.life/api/assist به ورکر نمی‌رسد؛ ویجت روی workers.dev می‌ماند" >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: آزمون دود (۵۰ پرسش پرتکرار، بی‌ربط‌ها و واژه‌های ممنوع؛ زیر ۹۵٪ قرمز)
         if: steps.gate.outputs.go == '1'
         env:

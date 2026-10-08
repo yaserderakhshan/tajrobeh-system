@@ -221,6 +221,20 @@ test('ورکر: جمنای فقط دسته‌بند (یک id یا none)، چرا
   const h = await (await worker.fetch(new Request('https://w.example.org/assist/health'), env({ GEMINI_API_KEY: 'g' }), ctx())).json();
   assert.ok('gem_last' in h); assert.equal(h.faq, FAQ_DATA.faq.length); assert.equal(JSON.stringify(h).indexOf('"g"'), -1);
 });
+test('ورکر: مسیر دامنهٔ سایت (/api/assist) و گزارش جدای «وصل نشد»', async () => {
+  const sent = []; globalThis.fetch = async (u, o) => { if (o && o.body) sent.push(JSON.parse(o.body)); return new Response('{"ok":true}'); };
+  try {
+    const c = ctx();
+    const r = await worker.fetch(new Request('https://tajrobeh.life/api/assist', { method: 'POST', headers: { Origin: S }, body: JSON.stringify({ session_id: 's-api', text: 'هزینه جلسه چقدر است', miss: 2 }) }), env(), c);
+    const j = await r.json(); await c.all();
+    assert.equal(r.status, 200); assert.equal(j.ref, 'price');
+    const logs = sent.filter((b) => b.action === 'as_log').flatMap((b) => b.entries);
+    assert.ok(logs.some((e) => e.k === 'log' && e.res === 'وصل نشد ×2'), JSON.stringify(logs));
+    assert.ok(logs.some((e) => e.k === 'log' && e.res === 'پاسخ'));
+    const b = await worker.fetch(new Request('https://tajrobeh.life/api/assist/boot', { headers: { Origin: S } }), env(), ctx());
+    assert.equal(b.status, 200); assert.equal((await b.json()).ok, true);
+  } finally { globalThis.fetch = realFetch; }
+});
 test('ورکر: شروع و سلامت', async () => {
   const b = await (await worker.fetch(new Request('https://w.example.org/assist/boot', { headers: { Origin: S } }), env(), ctx())).json();
   assert.equal(b.quick.length, 4);

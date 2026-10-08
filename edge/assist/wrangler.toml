@@ -3,6 +3,9 @@ name = "tj-assist"
 main = "src/index.js"
 compatibility_date = "2025-06-01"
 workers_dev = true
+# از ۱۷ مهر ۱۴۰۵: همان ورکر روی مسیر دامنهٔ خود سایت (workers.dev از ایران مسدود یا کند است).
+# اگر دامنه در همین حساب کلادفلر نباشد یا توکن اجازهٔ route نداشته باشد، گردش کار بی این بخش منتشر می‌کند و هشدار می‌دهد.
+routes = [{ pattern = "tajrobeh.life/api/assist*", zone_name = "tajrobeh.life" }]
 
 [[kv_namespaces]]
 binding = "KV"
