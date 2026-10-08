@@ -99,9 +99,10 @@ test('سرعت: هزار و صد تکه زیر ۵۰ میلی‌ثانیه', () =
 });
 
 /* ───── ورکر با KV و fetch ساختگی ───── */
+const TEST_SECRET = globalThis.crypto.randomUUID();   /* رمز ساختگی همان لحظه، نه رشتهٔ ثابت در مخزن */
 function env(extra) {
   const store = new Map([['dump', JSON.stringify({ at: Date.now(), data: DATA })]]);
-  return Object.assign({ BOT_URL: 'https://bot.example.org/exec', BOT_KEY: 'k', LEAD_SECRET: 's3cret-ساختگی',
+  return Object.assign({ BOT_URL: 'https://bot.example.org/exec', BOT_KEY: 'k', LEAD_SECRET: TEST_SECRET,
     KV: { get: async (k, t) => { const v = store.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, put: async (k, v) => { store.set(k, v); } } }, extra || {});
 }
 function ctx() { const w = []; return { waitUntil: (p) => w.push(p), all: () => Promise.all(w) }; }
@@ -124,7 +125,7 @@ test('ورکر: مبدأ بیگانه بی امضا رد می‌شود، با ا
     const bad = await worker.fetch(new Request('https://w.example.org/assist', { method: 'POST', headers: { Origin: 'https://evil.example.org' }, body }), env(), ctx());
     assert.equal(bad.status, 403);
     const ts = String(Math.floor(Date.now() / 1000)), { createHmac } = await import('node:crypto');
-    const sig = createHmac('sha256', 's3cret-ساختگی').update(ts + '.' + body).digest('hex');
+    const sig = createHmac('sha256', TEST_SECRET).update(ts + '.' + body).digest('hex');
     const ok = await worker.fetch(new Request('https://w.example.org/assist', { method: 'POST', headers: { 'X-Tj-Ts': ts, 'X-Tj-Sig': sig }, body }), env(), ctx());
     assert.equal(ok.status, 200); assert.equal((await ok.json()).source, 'دانش');
   } finally { globalThis.fetch = realFetch; }

@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 22
       - name: آزمون موتور و ورکر
-        run: node --test edge/assist/test/
+        run: node --test 'edge/assist/test/*.test.mjs'
 
   deploy:
     needs: test
