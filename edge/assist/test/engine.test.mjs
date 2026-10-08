@@ -146,5 +146,7 @@ test('ورکر: شروع و سلامت', async () => {
   const b = await (await worker.fetch(new Request('https://w.example.org/assist/boot', { headers: { Origin: S } }), env(), ctx())).json();
   assert.equal(b.quick.length, 4);
   const h = await (await worker.fetch(new Request('https://w.example.org/assist/health'), env(), ctx())).json();
-  assert.equal(h.v, 'v-test'); assert.equal(h.kb, 2);
+  assert.equal(h.v, 'v-test'); assert.equal(h.kb, 2); assert.equal(h.gemini, false); assert.equal(h.rewrite, true);
+  const hg = await (await worker.fetch(new Request('https://w.example.org/assist/health'), env({ GEMINI_API_KEY: 'g' }), ctx())).json();
+  assert.equal(hg.gemini, true); assert.equal(JSON.stringify(hg).indexOf('"g"'), -1);
 });
