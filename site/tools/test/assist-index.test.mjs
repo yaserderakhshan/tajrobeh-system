@@ -1,7 +1,7 @@
 // بات v170.23.19: نمایهٔ دانش سایت برای دستیار (assist-index.mjs). دادهٔ ساختگی.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { pageChunks, clean, MONEY } from '../assist-index.mjs';
+import { pageChunks, clean, MONEY, MAX_PAGE, MAX_POST } from '../assist-index.mjs';
 const S = 'https://tajrobeh.life';
 const pg = (link, html, extra = {}) => ({ link, title: { rendered: 'عنوان نمونه' }, content: { rendered: html }, modified: '2026-10-01T00:00:00', ...extra });
 const long = '<h2>جلسهٔ اول</h2><p>' + 'جلسهٔ معارفه رایگان است و بیست دقیقه طول می‌کشد. '.repeat(6) + '</p><h2>هزینه</h2><p>' + 'هزینهٔ هر جلسه در صفحهٔ شروع تراپی آمده است. '.repeat(5) + '</p>';
@@ -20,3 +20,6 @@ t('تکه با شمارهٔ تلفن بیرون (نگهبان مخزن)', pii.le
 t('مقاله حوزهٔ مجله و مخاطب خواننده', pageChunks(pg(S + '/mag/sample/', long), 'post')[0].dom === 'مجله');
 t('خط تیرهٔ بلند به ویرگول', !/[\u2014\u2013]/.test(clean('<p>الف \u2014 ب</p>')));
 t('شناسهٔ پایدار', pageChunks(pg(S + '/get-therapy/', long), 'page')[0].id === a[0].id);
+const big = Array.from({ length: 12 }, (_, i) => '<h2>بخش ' + i + '</h2><p>' + 'این بخش دربارهٔ روند کار تجربه است و توضیح کوتاهی دارد. '.repeat(6) + '</p>').join('');
+t('سقف تکهٔ هر برگه', pageChunks(pg(S + '/school/', big), 'page').length === MAX_PAGE);
+t('مقاله فقط تکهٔ اول', pageChunks(pg(S + '/mag/long/', big), 'post').length === MAX_POST);
