@@ -7,7 +7,8 @@
 //
 // رمز: خط‌های define که site-deploy هنگام انتشار پر می‌کند (SITE_SECRET_<نام> در site-deploy.yml) خالی نوشته می‌شوند.
 // هر چیز دیگری شبیه رمز (define با SECRET/KEY/TOKEN/PASS، رشتهٔ هگز یا base64 بلند، توکن تلگرام، کلید API، Application Password)
-// یعنی آن فایل نوشته نمی‌شود و فقط شناسه و نوع در خلاصه می‌آید. اطلاعات شخصی (pii-scan با PII_NAMES) هم همین‌طور.
+// یعنی آن فایل نوشته نمی‌شود و فقط شناسه و نوع در خلاصه می‌آید. اطلاعات شخصی (pii-scan با PII_NAMES) هم همین‌طور؛
+// تنها استثنا نام همکار در برگهٔ منتشرشده است، وقتی همان نام از پیش منتشر شده (publishedNames). شماره، ایمیل و شناسه هرگز.
 import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
 import { SITE, ROOT, hash, lf, loadEnv, log, warn, fail, summary, output, maskSecrets, pageFiles, readJson, report, wpClient } from './site-lib.mjs';
@@ -43,13 +44,32 @@ export function secretKinds(code) {
 /* اطلاعات شخصی: همان قاعده‌های pii-scan، با نام همکاران از PII_NAMES روی هر فایل */
 const FA_LETTER = '\\u0620-\\u064A\\u066E-\\u06D3\\u06FA-\\u06FF\\u200c';
 const nameRx = (n) => new RegExp(`(?<![${FA_LETTER}\\w])${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![${FA_LETTER}\\w])`);
-export function piiKinds(code, names) {
-  const out = new Set();
+/* allowed: نام‌هایی که از پیش روی سایت منتشر شده‌اند (فقط برای برگه‌ها، publishedNames). شماره، ایمیل و شناسه هیچ استثنایی ندارند. */
+export function piiKinds(code, names, allowed = []) {
+  const out = new Set(), check = names.filter((n) => !allowed.includes(n));
   for (const l of String(code).split('\n')) {
-    for (const k of piiLine(l)) out.add(k);
-    if (!/pii:ok/.test(l) && names.some((n) => nameRx(n).test(l))) out.add('نام همکار (PII_NAMES)');
+    for (const k of piiLine(l, '', [])) out.add(k);
+    if (!/pii:ok/.test(l) && check.some((n) => nameRx(n).test(l))) out.add('نام همکار (PII_NAMES)');
   }
   return [...out];
+}
+/* نام‌های فهرست که در متن هستند (خط pii:ok حساب نیست). خروجی فقط برای سنجش است و هرگز چاپ نمی‌شود. */
+export function namesIn(text, names) {
+  const lines = String(text || '').split('\n').filter((l) => !/pii:ok/.test(l)).join('\n');
+  return names.filter((n) => nameRx(n).test(lines));
+}
+/* نام همکار در برگهٔ منتشرشده (CLAUDE.md: نام فقط در محتوای منتشرشدهٔ سایت مجاز است).
+   نامی پذیرفته می‌شود که در نسخهٔ قبلی همین برگه در مخزن بوده، یا همین حالا در HTML عمومی همین برگه (بی ورود) دیده می‌شود.
+   نام تازه‌ای که هنوز روی صفحهٔ عمومی نیست (مثلاً فقط در متن خام یا کامنت پنهان) رد می‌ماند.
+   fetchPublic فقط وقتی صدا زده می‌شود که نامی در نسخهٔ قبلی نبوده باشد. */
+export async function publishedNames(raw, names, prev, fetchPublic) {
+  const found = namesIn(raw, names);
+  if (!found.length) return [];
+  const before = namesIn(prev, found);
+  let pub = '';
+  if (before.length < found.length) { try { pub = String((await fetchPublic()) || ''); } catch { pub = ''; } }
+  const live = namesIn(pub, found);
+  return found.filter((n) => before.includes(n) || live.includes(n));
 }
 
 export function mirrorSelfTest() {
@@ -154,10 +174,16 @@ async function main() {
   const S = JSON.parse(JSON.stringify(st0)); S.items = S.items || {};
   const changed = [], added = [], skipped = [], notes = [];
   const put = (path, text) => { writeFileSync(path, text); };
-  const okToWrite = (label, text) => {
+  const okToWrite = (label, text, allowed = []) => {
     const sk = secretKinds(text); if (sk.length) { skipped.push(`${label}: شبیه رمز (${sk.join('، ')})`); return false; }
-    const pk = piiKinds(text, NAMES); if (pk.length) { skipped.push(`${label}: اطلاعات شخصی (${pk.join('، ')})`); return false; }
+    const pk = piiKinds(text, NAMES, allowed); if (pk.length) { skipped.push(`${label}: اطلاعات شخصی (${pk.join('، ')})`); return false; }
     return true;
+  };
+  /* HTML عمومی برگه بی ورود؛ فقط ۲۰۰ حساب است */
+  const publicHtml = async (link) => {
+    if (!link) return '';
+    const r = await wp.get(link, { authed: false, timeout: 30000, retries: 2 });
+    return r.status === 200 ? r.text || '' : '';
   };
 
   /* ---------- ۱. اسنیپت‌ها و متای Yoast از پل tj-ops ---------- */
@@ -232,7 +258,9 @@ async function main() {
       liveHtml[p.id] = raw;
       const repo = cur ? readFileSync(join(SITE, 'pages', cur), 'utf8') : null;
       if (repo === null || hash(repo) !== hash(raw) || cur !== fname) {
-        if (okToWrite(`برگهٔ ${p.id}`, raw)) {
+        const allowed = await publishedNames(raw, NAMES, repo, () => publicHtml(p.link));
+        if (allowed.length) notes.push(`برگهٔ ${p.id}: ${allowed.length} نام همکار پذیرفته شد، چون از پیش منتشر شده بود (نسخهٔ قبلی برگه یا صفحهٔ عمومی آن؛ نام چاپ نمی‌شود).`);
+        if (okToWrite(`برگهٔ ${p.id}`, raw, allowed)) {
           if (cur && cur !== fname) renameSync(join(SITE, 'pages', cur), join(SITE, 'pages', fname));
           if (repo === null || hash(repo) !== hash(raw)) put(join(SITE, 'pages', fname), raw);
           (cur ? changed : added).push(`برگهٔ ${p.id}${cur ? '' : ` (${fname})`}`);
