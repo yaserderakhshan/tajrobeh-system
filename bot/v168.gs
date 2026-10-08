@@ -2390,6 +2390,7 @@ function bgTests() {
     ok('ستون بخش‌های تیک در سرتیتر تب', BG_HEAD.length === 6 && /تیک ۵/.test(BG_HEAD[5]));
     ok('خط گزارش شبانه: مصرف، بیشترین، ردشده', /سهمیهٔ اجرا: ۸۰٫۰|سهمیهٔ اجرا: ۸۰\.۰/.test(bgNightLine_()) || (/سهمیهٔ اجرا/.test(bgNightLine_()) && /رد شد/.test(bgNightLine_())), bgNightLine_());
     ok('در خط‌های گزارش شبانه ثبت است', TG_NIGHT_LINES.indexOf(bgNightLine_) > -1);
+    ok('همگام‌سازی تب تنظیمات خصوصی واجب است و بالای ۷۵ دقیقه هم می‌رود (v170.23.28)', /S\('cfgHourly_', 'must'/.test(String(tgWatchdog)));
 
     /* tgDutyTick */
     at(2026, 10, 8, 3, 0);
