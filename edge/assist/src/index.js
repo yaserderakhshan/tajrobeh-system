@@ -22,7 +22,7 @@ export default {
     const path = url.pathname.replace(/\/+$/, '');
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
     try {
-      if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, events: d ? d.siteEvents.length : 0, gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false, gem_last: await env.KV.get('gem:last', 'json') }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
+      if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, events: d ? d.siteEvents.length : 0, events_src: await env.KV.get('site_events', 'json').then((x) => x ? (x.src || '') + (x.why ? ' ' + x.why : '') : '').catch(() => ''), gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false, gem_last: await env.KV.get('gem:last', 'json') }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
       if (path === '/assist/refresh' && req.method === 'POST') { ctx.waitUntil(refresh(env, true)); return json({ ok: true }); }
       if (path === '/assist/boot' && req.method === 'GET') {
         const P = await data(env, ctx);
@@ -98,12 +98,25 @@ async function data(env, ctx) {
 }
 /* تقویم منتشرشدهٔ صفحهٔ رویدادهای سایت (همان دادهٔ evData که بازدیدکننده می‌بیند)؛ فقط با cron و پینگ، نه در مسیر کاربر */
 async function siteEvents(env) {
-  try {
-    const r = await fetch('https://tajrobeh.life/school/events/', { headers: { 'user-agent': 'tj-assist-worker' }, cf: { cacheTtl: 600 } });
-    if (!r.ok) return;
-    const today = new Date(Date.now() + 3.5 * 3600000).toISOString().slice(0, 10), list = siteEventsFrom(await r.text(), today, 60);
-    if (list) await env.KV.put('site_events', JSON.stringify({ at: Date.now(), list }));
-  } catch (e) {}
+  const today = new Date(Date.now() + 3.5 * 3600000).toISOString().slice(0, 10), H = { 'user-agent': 'Mozilla/5.0 (compatible; tj-assist-worker)', accept: 'text/html,application/json' };
+  const tries = [
+    ['page', 'https://tajrobeh.life/school/events/', (t) => t],
+    /* اگر خود برگه نرسید (دیوار امنیتی یا کش)، همان محتوای منتشرشده از REST وردپرس */
+    ['rest', 'https://tajrobeh.life/wp-json/wp/v2/pages/505409?_fields=content', (t) => { try { return JSON.parse(t).content.rendered; } catch (e) { return ''; } }]
+  ];
+  let why = [];
+  for (const [name, url, pick] of tries) {
+    try {
+      const r = await fetch(url, { headers: H, cf: { cacheTtl: 600 } });
+      if (!r.ok) { why.push(name + ':' + r.status); continue; }
+      const list = siteEventsFrom(pick(await r.text()), today, 60);
+      if (!list) { why.push(name + ':noevdata'); continue; }
+      await env.KV.put('site_events', JSON.stringify({ at: Date.now(), list, src: name, why: why.join(' ') }));
+      return;
+    } catch (e) { why.push(name + ':err'); }
+  }
+  const old = await env.KV.get('site_events', 'json');
+  await env.KV.put('site_events', JSON.stringify(Object.assign({}, old || { list: [] }, { why: why.join(' '), tried: Date.now() })));
 }
 async function refresh(env, ping) {
   if (ping) {
