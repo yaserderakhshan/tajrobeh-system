@@ -4,7 +4,7 @@
 //  - هر دو با رمز غلط یا بی رمز ← ۴۰۱ یا ۴۰۳
 //  - /camp?code=EFT-1 ← داده با زمان آخرین ارسال بات (pushed)
 //  - دستیار سایت: یک پرسش نمونه به ورکر لبهٔ tj-assist (همان مسیر ویجت 501145 از ۱۶ مهر) ← ۲۰۰، پاسخ، زیر ۵ ثانیه.
-//    مسیر قدیم سرور (/wp-json/tj/v1/assist، اسنیپت 506148) دیگر در مسیر کاربر نیست و اینجا سنجیده نمی‌شود.
+//    مسیر قدیم سرور (/wp-json/tj/v1/assist، اسنیپت 506148) خاموش است.
 // رمز فقط از متغیر محیطی CP_WP_SECRET (GitHub Secret) و هرگز چاپ نمی‌شود.
 import { assistAsk, assistEdge, fail, loadEnv, log, summary, wpClient } from './site-lib.mjs';
 
