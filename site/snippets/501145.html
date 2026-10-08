@@ -30,14 +30,14 @@
         <button type="button" class="tj-fab-as-back" id="tjFabAsBack" aria-label="بازگشت به راه‌های ارتباط">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
         </button>
-        <b>سؤال دارم</b>
+        <span class="tj-fab-as-title"><b>دستیار تجربه</b><small>پاسخ در چند ثانیه</small></span>
       </div>
       <div class="tj-fab-as-log" id="tjFabAsLog" aria-live="polite"></div>
       <form class="tj-fab-as-f" id="tjFabAsF">
-        <input id="tjFabAsIn" maxlength="500" autocomplete="off" enterkeyhint="send" placeholder="سؤالت را بنویس" aria-label="سؤالت را بنویس">
-        <button type="submit">بفرست</button>
+        <input id="tjFabAsIn" maxlength="500" autocomplete="off" enterkeyhint="send" placeholder="سؤالت را بنویس…" aria-label="سؤالت را بنویس">
+        <button type="submit" aria-label="بفرست"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></button>
       </form>
-      <small class="tj-fab-as-note">اطلاعات کاربر فقط در اختیار مسئول مربوطه در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت او منتشر یا با کسی به اشتراک گذاشته نمی‌شود.</small>
+      <small class="tj-fab-as-note" id="tjFabAsNote" tabindex="0" title="اطلاعات کاربر فقط در اختیار مسئول مربوطه در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت او منتشر یا با کسی به اشتراک گذاشته نمی‌شود.">🔒 اطلاعات کاربر فقط در اختیار مسئول مربوطه در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت او منتشر یا با کسی به اشتراک گذاشته نمی‌شود.</small>
     </div>
 
     <a class="tj-fab-item" href="tel:+982191008867">
@@ -158,30 +158,55 @@
     #tjFabRoot.is-open .tj-fab-btn{ opacity: 0; pointer-events: none; transform: scale(.8); }
   }
 
-  /* tj-fab v3 (دستیار، بات v170.23.11 به بعد): «سؤال دارم» داخل همین منو؛ در موبایل همان پنل پایین. رنگ‌ها از --tj-* سراسری (docs/brand/tokens.css) */
+  /* tj-fab v4 (دستیار روی ورکر لبه، ۱۶ مهر ۱۴۰۵): زمینهٔ روشن، حباب‌های سبک، پرسش‌های پرتکرار، «بیشتر بخوانید»، نشانگر نوشتن.
+     رنگ و فونت از --tj-* سراسری (docs/brand/tokens.css) با پشتیبان همان مقدار توکن. فقط ویژگی‌های منطقی. */
   .tj-fab-item--ask{ inline-size: 100%; border: 0; background: none; font: inherit; text-align: start; cursor: pointer; }
   .tj-fab-item-icon--ask{ background: var(--tj-ink, #222222); }
-  .tj-fab-as{ display: flex; flex-direction: column; gap: 8px; }
+  .tj-fab-as{ display: flex; flex-direction: column; gap: 10px; }
   .tj-fab-as[hidden]{ display: none; }
   #tjFabRoot.is-as .tj-fab-menu-title, #tjFabRoot.is-as .tj-fab-item{ display: none; }
-  #tjFabRoot.is-as .tj-fab-menu{ inline-size: min(360px, calc(100vw - 28px)); }
-  .tj-fab-as-head{ display: flex; align-items: center; gap: 8px; padding-block: 2px; padding-inline: 4px; font-size: 15px; color: var(--tj-ink, #222222); }
-  .tj-fab-as-back{ inline-size: 36px; block-size: 36px; border: 0; border-radius: 999px; background: var(--tj-soft, #f5f5f8); color: var(--tj-ink, #222222); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .tj-fab-as-back svg{ inline-size: 18px; block-size: 18px; }
-  .tj-fab-as-log{ display: flex; flex-direction: column; gap: 8px; min-block-size: 140px; max-block-size: min(46vh, 380px); overflow-y: auto; overscroll-behavior: contain; padding: 10px; border-radius: 12px; background: var(--tj-soft, #f5f5f8); }
-  .tj-fab-as-m{ max-inline-size: 88%; padding-block: 8px; padding-inline: 12px; border-radius: 12px; white-space: pre-wrap; font-size: 14px; line-height: 1.5; }
-  .tj-fab-as-m.bot{ align-self: flex-start; background: var(--tj-white, #fefefe); border: 1px solid var(--tj-line, #dfdfe2); color: #0e0e0e; }
-  .tj-fab-as-m.me{ align-self: flex-end; background: var(--tj-ink, #222222); color: var(--tj-white, #fefefe); }
-  .tj-fab-as-bs{ display: flex; flex-wrap: wrap; gap: 6px; }
-  .tj-fab-as-bs button, .tj-fab-as-bs a{ font: inherit; font-size: 13px; line-height: 1.5; padding-block: 5px; padding-inline: 10px; border-radius: 999px; border: 1px solid var(--tj-ink, #222222); background: var(--tj-white, #fefefe); color: var(--tj-ink, #222222); cursor: pointer; text-decoration: none; }
-  .tj-fab-as-f{ display: flex; gap: 6px; }
-  .tj-fab-as-f input{ flex: 1; min-inline-size: 0; font: inherit; font-size: 16px; line-height: 1.5; padding-block: 8px; padding-inline: 10px; border: 1px solid var(--tj-line, #dfdfe2); border-radius: 10px; background: var(--tj-white, #fefefe); color: #0e0e0e; }
-  .tj-fab-as-f button{ font: inherit; font-size: 14px; border: 0; border-radius: 10px; background: var(--tj-ink, #222222); color: var(--tj-white, #fefefe); padding-inline: 14px; cursor: pointer; }
-  .tj-fab-as-note{ display: block; font-size: 11px; line-height: 1.5; color: var(--tj-mut, #676768); padding-inline: 4px; }
+  #tjFabRoot.is-as .tj-fab-menu{ inline-size: 372px; padding: 12px; border-radius: 18px; }
+  .tj-fab-as-head{ display: flex; align-items: center; gap: 10px; padding-block-end: 10px; border-block-end: 1px solid var(--tj-line, #dfdfe2); }
+  .tj-fab-as-back{ flex: none; inline-size: 34px; block-size: 34px; border: 0; border-radius: 999px; background: var(--tj-soft, #f5f5f8); color: var(--tj-ink, #222222); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .tj-fab-as-back svg{ inline-size: 17px; block-size: 17px; }
+  .tj-fab-as-title{ display: flex; flex-direction: column; line-height: 1.5; }
+  .tj-fab-as-title b{ font-size: 15px; font-weight: 700; color: #0e0e0e; }
+  .tj-fab-as-title small{ font-size: 11px; color: var(--tj-mut, #676768); }
+  .tj-fab-as-title small::before{ content: ""; display: inline-block; inline-size: 6px; block-size: 6px; border-radius: 50%; background: #67aa82; margin-inline-end: 5px; vertical-align: 1px; }
+  .tj-fab-as-log{ display: flex; flex-direction: column; gap: 10px; min-block-size: 200px; max-block-size: min(52vh, 420px); overflow-y: auto; overscroll-behavior: contain; padding-block: 4px; scroll-behavior: smooth; }
+  .tj-fab-as-m{ max-inline-size: 86%; padding-block: 9px; padding-inline: 13px; border-radius: 16px; white-space: pre-wrap; font-size: 14px; line-height: 1.5; animation: tjAsIn .18s ease both; }
+  .tj-fab-as-m.bot{ align-self: flex-start; background: var(--tj-soft, #f5f5f8); color: #0e0e0e; border-start-start-radius: 6px; }
+  .tj-fab-as-m.me{ align-self: flex-end; background: var(--tj-ink, #222222); color: var(--tj-white, #fefefe); border-start-end-radius: 6px; }
+  .tj-fab-as-hi{ font-size: 14px; line-height: 1.5; color: #0e0e0e; margin: 4px 2px 2px; }
+  .tj-fab-as-q{ display: flex; flex-direction: column; gap: 6px; }
+  .tj-fab-as-q button{ display: flex; align-items: center; justify-content: space-between; gap: 8px; font: inherit; font-size: 14px; line-height: 1.5; text-align: start; padding-block: 9px; padding-inline: 12px; border-radius: 12px; border: 1px solid var(--tj-line, #dfdfe2); background: var(--tj-white, #fefefe); color: #0e0e0e; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+  .tj-fab-as-q button::after{ content: "←"; color: var(--tj-mut, #676768); font-size: 13px; }
+  .tj-fab-as-q button:hover{ border-color: var(--tj-ink, #222222); background: var(--tj-soft, #f5f5f8); }
+  .tj-fab-as-bs{ display: flex; flex-wrap: wrap; gap: 6px; align-items: center; animation: tjAsIn .18s ease both; }
+  .tj-fab-as-bs button, .tj-fab-as-bs a{ font: inherit; font-size: 13px; line-height: 1.5; padding-block: 5px; padding-inline: 11px; border-radius: 999px; border: 1px solid var(--tj-line, #dfdfe2); background: var(--tj-white, #fefefe); color: var(--tj-ink, #222222); cursor: pointer; text-decoration: none; }
+  .tj-fab-as-bs button:hover, .tj-fab-as-bs a:hover{ border-color: var(--tj-ink, #222222); }
+  .tj-fab-as-bs a.is-more{ background: var(--tj-ink, #222222); border-color: var(--tj-ink, #222222); color: var(--tj-white, #fefefe); }
+  .tj-fab-as-bs a.is-more::after{ content: " ↖"; }
+  .tj-fab-as-bs .is-rate{ border: 0; background: none; padding-inline: 6px; color: var(--tj-mut, #676768); font-size: 12px; }
+  .tj-fab-as-bs .is-rate.is-emoji{ font-size: 15px; filter: grayscale(.2); }
+  .tj-fab-as-typing{ align-self: flex-start; display: flex; gap: 4px; padding-block: 12px; padding-inline: 14px; border-radius: 16px; border-start-start-radius: 6px; background: var(--tj-soft, #f5f5f8); }
+  .tj-fab-as-typing i{ inline-size: 6px; block-size: 6px; border-radius: 50%; background: #aeaeb0; animation: tjAsDot 1s infinite ease-in-out; }
+  .tj-fab-as-typing i:nth-child(2){ animation-delay: .15s; } .tj-fab-as-typing i:nth-child(3){ animation-delay: .3s; }
+  @keyframes tjAsDot{ 0%, 80%, 100%{ opacity: .35; transform: translateY(0); } 40%{ opacity: 1; transform: translateY(-2px); } }
+  @keyframes tjAsIn{ from{ opacity: 0; transform: translateY(4px); } to{ opacity: 1; transform: none; } }
+  .tj-fab-as-f{ display: flex; align-items: center; gap: 6px; padding: 4px; padding-inline-start: 12px; border: 1px solid var(--tj-line, #dfdfe2); border-radius: 999px; background: var(--tj-white, #fefefe); transition: border-color .15s ease; }
+  .tj-fab-as-f:focus-within{ border-color: var(--tj-ink, #222222); }
+  .tj-fab-as-f input{ flex: 1; min-inline-size: 0; font: inherit; font-size: 16px; line-height: 1.5; padding-block: 6px; border: 0; outline: 0; background: none; color: #0e0e0e; }
+  .tj-fab-as-f button{ flex: none; inline-size: 36px; block-size: 36px; border: 0; border-radius: 999px; background: var(--tj-ink, #222222); color: var(--tj-white, #fefefe); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .tj-fab-as-f button svg{ inline-size: 18px; block-size: 18px; }
+  .tj-fab-as-note{ display: block; font-size: 10.5px; line-height: 1.5; color: var(--tj-mut, #676768); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding-inline: 4px; }
+  .tj-fab-as-note.is-open{ white-space: normal; }
   @media (max-width:640px){
-    #tjFabRoot.is-as .tj-fab-menu{ inline-size: auto; }
-    .tj-fab-as-log{ max-block-size: 52vh; }
+    #tjFabRoot.is-as .tj-fab-menu{ inline-size: auto; padding-inline: 14px; border-radius: 22px 22px 0 0; max-block-size: 88vh; display: flex; flex-direction: column; }
+    #tjFabRoot.is-as .tj-fab-as{ flex: 1; min-block-size: 0; }
+    .tj-fab-as-log{ max-block-size: none; flex: 1; min-block-size: 46vh; }
   }
+  @media (prefers-reduced-motion: reduce){ .tj-fab-as-m, .tj-fab-as-bs, .tj-fab-as-typing i{ animation: none; } }
 </style>
 
 <script>
@@ -231,43 +256,81 @@
     menu.addEventListener('touchend', function(){ if (y0 === null) return; menu.style.transition = ''; menu.style.transform = ''; if (dy > 70) setOpen(false); y0 = null; });
   }
 
-  // tj-fab v3: دستیار داخل همین منو. پاسخ از مسیر سرور /wp-json/tj/v1/assist (اسنیپت 506148) که درخواست را امضا می‌کند و به بات می‌فرستد.
+  // tj-fab v4: دستیار داخل همین منو، مستقیم از مرورگر به ورکر لبهٔ tj-assist (مسیر سرور وردپرس و اپس‌اسکریپت در کار نیست).
+  // اگر پاسخ در ۴ ثانیه نیامد، بی پیام خطا سه موضوع نزدیک و «با پذیرش حرف بزنم» می‌آید.
   var askBtn = document.getElementById('tjFabAsk'), as = document.getElementById('tjFabAs');
   if (askBtn && as && window.fetch) {
-    var asLog = document.getElementById('tjFabAsLog'), asIn = document.getElementById('tjFabAsIn'), asLast = '', asStarted = false, sid = '';
-    try { if (sessionStorage.getItem('tjasoff') === '1') askBtn.style.display = 'none'; sid = sessionStorage.getItem('tjas') || ''; } catch (e0) {}
+    var EDGE = 'https://tj-assist.yaserderakhshan.workers.dev', BOT = 'https://t.me/tajrobehlife_bot?start=pz-assist', WAIT_MS = 4000;
+    var QUICK = [{ text: 'هزینهٔ جلسه چقدر است؟', q: 'هزینه جلسه چقدر است' }, { text: 'چطور درمان را شروع کنم؟', q: 'چطور تراپی را شروع کنم' }, { text: 'جلسهٔ معارفه چیست؟', q: 'جلسه معارفه چیست' }, { text: 'رویدادهای پیش رو', q: 'رویدادهای پیش رو' }];
+    var asLog = document.getElementById('tjFabAsLog'), asIn = document.getElementById('tjFabAsIn'), asLast = '', asStarted = false, sid = '', boot = null, busy = false;
+    try { sid = sessionStorage.getItem('tjas') || ''; boot = JSON.parse(sessionStorage.getItem('tjasboot') || 'null'); } catch (e0) {}
     if (!sid) { sid = 'w' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); try { sessionStorage.setItem('tjas', sid); } catch (e1) {} }
-    var add = function (t, who) { var d = document.createElement('div'); d.className = 'tj-fab-as-m ' + who; d.textContent = t; asLog.appendChild(d); asLog.scrollTop = asLog.scrollHeight; return d; };
+    var el = function (tag, cls, txt) { var d = document.createElement(tag); if (cls) d.className = cls; if (txt != null) d.textContent = txt; return d; };
+    var put = function (n) { asLog.appendChild(n); asLog.scrollTop = asLog.scrollHeight; return n; };
+    var say = function (t, who) { return put(el('div', 'tj-fab-as-m ' + who, t)); };
     var btns = function (list) {
       if (!list || !list.length) return;
-      var w = document.createElement('div'); w.className = 'tj-fab-as-bs';
+      var w = el('div', 'tj-fab-as-bs');
       list.forEach(function (b) {
-        var el;
-        if (b.url) { el = document.createElement('a'); el.href = b.url; el.target = '_blank'; el.rel = 'noopener'; }
-        else { el = document.createElement('button'); el.type = 'button'; el.onclick = function () { w.remove(); ask('', b.id, b.text); }; }
-        el.textContent = b.text; w.appendChild(el);
+        var x;
+        if (b.url) { x = el('a', b.text === 'بیشتر بخوانید' ? 'is-more' : '', b.text); x.href = b.url; if (b.url.indexOf('https://tajrobeh.life/') !== 0) { x.target = '_blank'; x.rel = 'noopener'; } }
+        else {
+          var rate = /^[ynx]:/.test(b.id || '');
+          x = el('button', rate ? 'is-rate' + (/^[yn]:/.test(b.id) ? ' is-emoji' : '') : '', b.text); x.type = 'button';
+          x.onclick = function () { w.remove(); if (/^[yn]:/.test(b.id)) { send('', b.id, ''); return; } send('', b.id, rate ? '' : b.text); };
+        }
+        w.appendChild(x);
       });
-      asLog.appendChild(w); asLog.scrollTop = asLog.scrollHeight;
+      put(w);
     };
-    var ask = function (text, tap, label) {
-      if (text) { add(text, 'me'); asLast = text; } else if (label && tap && !/^[yn]:/.test(tap)) add(label, 'me');
-      var wait = add('…', 'bot');
-      fetch('/wp-json/tj/v1/assist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sid, text: text || asLast, tap: tap || '', audience: '' }) })
+    var quick = function () {
+      var w = el('div', 'tj-fab-as-q');
+      ((boot && boot.quick) || QUICK).slice(0, 4).forEach(function (q) { var b = el('button', '', q.text); b.type = 'button'; b.onclick = function () { w.remove(); send(q.q, '', q.text); }; w.appendChild(b); });
+      put(w);
+    };
+    /* جست‌وجوی سبک محلی برای بازگشت: هم‌پوشانی واژه با موضوع‌ها و پرسش‌های پرتکرار */
+    var near = function (t) {
+      var ws = String(t || '').replace(/[؟?،.!]/g, ' ').split(/\s+/).filter(function (w) { return w.length > 2; });
+      var pool = ((boot && boot.topics) || []).map(function (x) { return { text: x, q: x }; }).concat((boot && boot.quick) || QUICK);
+      return pool.filter(function (p) { return p.q !== t && p.text !== t; }).map(function (p) { return { p: p, s: ws.filter(function (w) { return p.text.indexOf(w) > -1; }).length }; })
+        .sort(function (a, b) { return b.s - a.s; }).slice(0, 3).map(function (x) { return x.p; });
+    };
+    var fallback = function (t) {
+      say('شاید یکی از این‌ها همان چیزی باشد که دنبالش هستی:', 'bot');
+      var w = el('div', 'tj-fab-as-q');
+      near(t).forEach(function (q) { var b = el('button', '', q.text); b.type = 'button'; b.onclick = function () { w.remove(); send(q.q, '', q.text); }; w.appendChild(b); });
+      put(w);
+      btns([{ url: BOT, text: 'با پذیرش حرف بزنم' }]);
+    };
+    var send = function (text, tap, label) {
+      if (busy) return; busy = true;
+      if (label) say(label, 'me'); else if (text) say(text, 'me');
+      if (text) asLast = text;
+      var dots = null, dt = setTimeout(function () { dots = put(el('div', 'tj-fab-as-typing')); dots.innerHTML = '<i></i><i></i><i></i>'; }, 250);
+      var ac = window.AbortController ? new AbortController() : null, done = false;
+      var finish = function () { done = true; busy = false; clearTimeout(dt); clearTimeout(to); if (dots) dots.remove(); };
+      var to = setTimeout(function () { if (done) return; finish(); if (ac) ac.abort(); fallback(text || asLast); }, WAIT_MS);
+      fetch(EDGE + '/assist', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, signal: ac ? ac.signal : undefined, body: JSON.stringify({ action: 'assist.ask', channel: 'site', session_id: sid, text: text || asLast, tap: tap || '' }) })
         .then(function (r) { return r.json(); }).then(function (j) {
-          if (!j || !j.ok) {
-            if (j && j.error === 'off') { try { sessionStorage.setItem('tjasoff', '1'); } catch (e2) {} wait.textContent = 'دستیار فعلاً در دسترس نیست. از بات تجربه بپرس.'; btns([{ url: 'https://t.me/tajrobehlife_bot?start=pz-assist', text: 'بات تجربه' }]); return; }
-            wait.textContent = j && j.error === 'rate' ? 'کمی صبر کن و دوباره بپرس.' : 'الان جواب نرسید. کمی بعد دوباره امتحان کن.'; return;
-          }
-          wait.textContent = j.answer; btns(j.buttons);
-        }).catch(function () { wait.textContent = 'الان جواب نرسید. کمی بعد دوباره امتحان کن.'; });
+          if (done) return; finish();
+          if (!j || !j.ok) { fallback(text || asLast); return; }
+          if (j.answer) say(j.answer, 'bot');
+          btns(j.buttons);
+        }).catch(function () { if (done) return; finish(); fallback(text || asLast); });
+    };
+    var start = function () {
+      say((boot && boot.welcome) || 'سلام، من دستیار تجربه هستم. سؤالت را بپرس یا یکی از این‌ها را انتخاب کن.', 'bot');
+      quick();
+      if (!boot) fetch(EDGE + '/assist/boot').then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok) { boot = j; try { sessionStorage.setItem('tjasboot', JSON.stringify(j)); } catch (e2) {} } }).catch(function () {});
     };
     var showAs = function (on) {
       root.classList.toggle('is-as', on); as.hidden = !on;
-      if (on) { if (!asStarted) { asStarted = true; ask('', '', ''); } setTimeout(function () { try { asIn.focus({ preventScroll: true }); } catch (e3) {} }, 60); }
+      if (on) { if (!asStarted) { asStarted = true; start(); } if (!mq.matches) setTimeout(function () { try { asIn.focus({ preventScroll: true }); } catch (e3) {} }, 60); }
     };
     askBtn.addEventListener('click', function () { showAs(true); });
     document.getElementById('tjFabAsBack').addEventListener('click', function () { showAs(false); });
-    document.getElementById('tjFabAsF').addEventListener('submit', function (e) { e.preventDefault(); var t = asIn.value.trim(); if (!t) return; asIn.value = ''; ask(t, '', ''); });
+    document.getElementById('tjFabAsF').addEventListener('submit', function (e) { e.preventDefault(); var t = asIn.value.trim(); if (!t || busy) return; asIn.value = ''; send(t, '', ''); });
+    var note = document.getElementById('tjFabAsNote'); if (note) note.addEventListener('click', function () { note.classList.toggle('is-open'); });
     new MutationObserver(function () { if (!root.classList.contains('is-open')) showAs(false); }).observe(root, { attributes: true, attributeFilter: ['class'] });
     // کشیدن پنل برای بستن فقط از سر پنل، نه از روی گفت‌وگو و ورودی
     as.addEventListener('touchstart', function (e) { if (e.target.closest && !e.target.closest('.tj-fab-as-head')) e.stopPropagation(); }, { passive: true });
