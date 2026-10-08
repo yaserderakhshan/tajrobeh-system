@@ -1,0 +1,92 @@
+name: دستیار · ورکر لبه
+
+# موتور پاسخ دستیار در ورکر کلادفلر tj-assist (edge/assist). آزمون روی هر PR؛ انتشار با مرج روی main یا اجرای دستی.
+# رمزهای لازم در GitHub Secrets (Environment «production»): CLOUDFLARE_API_TOKEN (دسترسی Workers Scripts و Workers KV)،
+# CLOUDFLARE_ACCOUNT_ID. اختیاری: GEMINI_API_KEY. بقیه از رمزهای موجود: BOT_API_URL، BOT_API_KEY، SITE_LEAD_SECRET.
+on:
+  push:
+    branches: [main]
+    paths: ['edge/assist/**', '.github/workflows/assist-edge.yml']
+  pull_request:
+    paths: ['edge/assist/**', '.github/workflows/assist-edge.yml']
+  workflow_dispatch:
+  schedule:
+    - cron: '17 4 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assist-edge
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: آزمون موتور و ورکر
+        run: node --test 'edge/assist/test/*.test.mjs'
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER: wrangler@4.20.0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: رمزهای کلادفلر هست؟
+        id: gate
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN یا CLOUDFLARE_ACCOUNT_ID در Secrets نیست؛ انتشار ورکر انجام نشد."
+            echo "go=0" >> "$GITHUB_OUTPUT"
+          else echo "go=1" >> "$GITHUB_OUTPUT"; fi
+      - name: انتشار ورکر
+        if: steps.gate.outputs.go == '1' && github.event_name != 'schedule'
+        working-directory: edge/assist
+        run: |
+          set -e
+          ID=$(npx -y $WRANGLER kv namespace list | jq -r '.[] | select(.title=="tj-assist") | .id' | head -1)
+          [ -n "$ID" ] || { echo "::error::فضای KV با نام tj-assist پیدا نشد"; exit 1; }
+          sed -i "s/__KV_ID__/$ID/" wrangler.toml
+          npx -y $WRANGLER deploy | tee /tmp/deploy.txt
+      - name: رمزهای ورکر
+        if: steps.gate.outputs.go == '1' && github.event_name != 'schedule'
+        working-directory: edge/assist
+        env:
+          BOT_URL: ${{ secrets.BOT_API_URL }}
+          BOT_KEY: ${{ secrets.BOT_API_KEY }}
+          LEAD_SECRET: ${{ secrets.SITE_LEAD_SECRET }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          node -e 'const o={BOT_URL:process.env.BOT_URL,BOT_KEY:process.env.BOT_KEY,LEAD_SECRET:process.env.LEAD_SECRET};if(process.env.GEMINI_API_KEY)o.GEMINI_API_KEY=process.env.GEMINI_API_KEY;require("fs").writeFileSync("/tmp/sec.json",JSON.stringify(o))'
+          npx -y $WRANGLER secret bulk /tmp/sec.json
+          rm -f /tmp/sec.json
+      - name: نشانی ورکر و تازه کردن داده
+        if: steps.gate.outputs.go == '1'
+        id: url
+        run: |
+          SUB=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain')
+          URL="https://tj-assist.$SUB.workers.dev"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          curl -fsS -X POST "$URL/assist/refresh" >/dev/null || true
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            V=$(curl -fsS "$URL/assist/health" | jq -r '.v // empty' || true)
+            [ -n "$V" ] && { echo "داده رسید: $V"; break; }
+            sleep 10
+          done
+      - name: آزمون دود (پنج پرسش واقعی با زمان)
+        if: steps.gate.outputs.go == '1'
+        run: node edge/assist/smoke.mjs "${{ steps.url.outputs.url }}"
