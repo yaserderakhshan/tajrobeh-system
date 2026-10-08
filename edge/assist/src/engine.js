@@ -125,8 +125,11 @@ export const QUICK = [
   { text: 'رویدادهای پیش رو', q: 'رویدادهای پیش رو' }
 ];
 export function boot(P) {
-  const fq = ['start', 'price', 'intro', 'clinic'].map((k) => P.faq.byId.get(k)).filter(Boolean).map((f) => ({ text: f.question, q: f.question }));
-  return { ok: true, welcome: P.texts.welcome, quick: fq.length >= 3 ? fq : QUICK.map((x) => ({ text: x.text, q: x.q })), topics: P.topics.slice(0, 6), privacy: PRIVACY, bot: P.texts.bot, on: P.on };
+  /* دکمه‌های شروع: متن دقیقاً question همان مورد فایل و id برای جواب مستقیم (tap f:<id>)، نه جست‌وجوی دوباره.
+     faq: همهٔ id و question برای بازگشت محلی ویجت (اگر ورکر دیر جواب داد، سه پرسش نزدیک همین فایل) */
+  const fq = ['start', 'price', 'intro', 'clinic'].map((k) => P.faq.byId.get(k)).filter(Boolean).map((f) => ({ id: f.id, text: f.question, q: f.question }));
+  return { ok: true, welcome: P.texts.welcome, quick: fq.length >= 3 ? fq : QUICK.map((x) => ({ text: x.text, q: x.q })), faq: P.faq.items.map((f) => ({ id: f.id, text: f.question })),
+    topics: P.topics.slice(0, 6), privacy: PRIVACY, bot: P.texts.bot, on: P.on };
 }
 
 /* ───── پاسخ ───── */
@@ -298,10 +301,15 @@ export function tap(P, idStr, lastText, ctx) {
     const f = P.faq.byId.get(String(arg)); if (!f) return ask(P, '', ctx);
     return faqOut(f, newLogId(ctx.now), ch, aud, 'منو', 'دکمه');
   }
-  if (act === 'y' || act === 'n') return { res: out({ answer: 'ممنون از بازخوردت.' }), extra: [{ k: 'rate', id: String(arg || '').slice(0, 20), good: act === 'y' }] };
-  if (act === 'x' || act === 'h') {
-    const extra = [{ k: 'handoff', ch, sid: ctx.session || '', text: scrub(lastText || ''), why: act === 'x' ? 'جوابم را نگرفتم' : 'خواست با پذیرش حرف بزند' }];
-    if (act === 'x') { extra.push({ k: 'rate', id: String(arg || '').slice(0, 20), good: false }); if (lastText) extra.push({ k: 'un', ch, text: scrub(lastText), kind: 'جوابم را نگرفتم', au: aud }); }
+  if (act === 'y' || act === 'n') return { res: out({ answer: '' }), extra: [{ k: 'rate', id: String(arg || '').slice(0, 20), good: act === 'y' }] };   /* بازخورد بی پیام گفت‌وگو */
+  /* «جوابم را نگرفتم» فقط بازخورد است (بی پیام گفت‌وگو و بی تحویل)؛ ویجت بعدش «با پذیرش حرف بزنم» (h) را پیشنهاد می‌دهد */
+  if (act === 'x') {
+    const extra = [{ k: 'rate', id: String(arg || '').slice(0, 20), good: false }];
+    if (lastText) extra.push({ k: 'un', ch, text: scrub(lastText), kind: 'جوابم را نگرفتم', au: aud });
+    return { res: out({ answer: '' }), extra };
+  }
+  if (act === 'h') {
+    const extra = [{ k: 'handoff', ch, sid: ctx.session || '', text: scrub(lastText || ''), why: 'خواست با پذیرش حرف بزند' }];
     return { res: out({ answer: P.texts.handed, handoff: true, buttons: [{ url: P.texts.bot, text: 'ادامه در تلگرام' }] }), log: { k: 'log', ch, id: newLogId(ctx.now), topic: '', res: 'تحویل', au: aud }, extra };
   }
   return ask(P, '', ctx);
