@@ -6,9 +6,9 @@ name: دستیار · ورکر لبه
 on:
   push:
     branches: [main]
-    paths: ['edge/assist/**', '.github/workflows/assist-edge.yml']
+    paths: ['edge/assist/**', 'content/assist/**', '.github/workflows/assist-edge.yml']
   pull_request:
-    paths: ['edge/assist/**', '.github/workflows/assist-edge.yml']
+    paths: ['edge/assist/**', 'content/assist/**', '.github/workflows/assist-edge.yml']
   workflow_dispatch:
   schedule:
     - cron: '17 4 * * *'
@@ -95,6 +95,8 @@ jobs:
             [ -n "$V" ] && { echo "داده رسید: $V"; echo "- نسخهٔ داده: $V · جمنای در ورکر: $(echo "$H" | jq -r 'if .gemini then "روشن" else "خاموش" end') · ASSIST_REWRITE: $(echo "$H" | jq -r 'if .rewrite then "بله" else "خیر" end')" >> "$GITHUB_STEP_SUMMARY"; break; }
             sleep 10
           done
-      - name: آزمون دود (پنج پرسش واقعی با زمان)
+      - name: آزمون دود (۵۰ پرسش پرتکرار، بی‌ربط‌ها و واژه‌های ممنوع؛ زیر ۹۵٪ قرمز)
         if: steps.gate.outputs.go == '1'
+        env:
+          LEAD_SECRET: ${{ secrets.SITE_LEAD_SECRET }}
         run: node edge/assist/smoke.mjs "${{ steps.url.outputs.url }}"

@@ -3,7 +3,7 @@
 // (پیش‌فرض ~/.config/tajrobeh/site.env، یا SITE_ENV_FILE، یا .env ریشهٔ مخزن که در .gitignore است).
 // هیچ تابعی اینجا رمز را چاپ نمی‌کند؛ log() هر مقدار حساس را می‌پوشاند.
 import { appendFileSync, existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -145,10 +145,16 @@ export function assistEdge() {
   try { const m = readFileSync(join(SITE, 'snippets', '501145.html'), 'utf8').match(/EDGE = '(https:\/\/[^']+)'/); return m ? m[1].replace(/\/+$/, '') : ''; } catch { return ''; }
 }
 export async function assistAsk(text, sid, channel = 'smoke') {
-  const t0 = Date.now(); let status = 0, j = null, gem = false;
+  const t0 = Date.now(); let status = 0, j = null, gem = false, why = '';
+  const body = JSON.stringify({ action: 'assist.ask', channel, session_id: sid, text });
+  const H = { 'Content-Type': 'text/plain', Origin: 'https://tajrobeh.life', 'User-Agent': 'tajrobeh-site-ops/1' };
+  /* با رمز لید سایت امضا می‌شود (همان روش سرور)، تا آزمون ۶۰ پرسشی به سقف نرخ هر IP نخورد */
+  const sec = process.env.SITE_LEAD_SECRET || process.env.LEAD_SECRET || '';
+  if (sec) { const ts = String(Math.floor(Date.now() / 1000)); H['X-Tj-Ts'] = ts; H['X-Tj-Sig'] = createHmac('sha256', sec).update(ts + '.' + body).digest('hex'); }
   try {
-    const r = await fetch(assistEdge() + '/assist', { method: 'POST', headers: { 'Content-Type': 'text/plain', Origin: 'https://tajrobeh.life', 'User-Agent': 'tajrobeh-site-ops/1' }, body: JSON.stringify({ action: 'assist.ask', channel, session_id: sid, text }) });
-    status = r.status; gem = /gemini/.test(r.headers.get('server-timing') || ''); try { j = JSON.parse(await r.text()); } catch {}
+    const r = await fetch(assistEdge() + '/assist', { method: 'POST', headers: H, body });
+    const stH = r.headers.get('server-timing') || '';
+    status = r.status; gem = /gemini/.test(stH); why = (/gem;desc="([^"]*)"/.exec(stH) || [])[1] || ''; try { j = JSON.parse(await r.text()); } catch {}
   } catch {}
-  return { status, j, ms: Date.now() - t0, gem };
+  return { status, j, ms: Date.now() - t0, gem, why };
 }

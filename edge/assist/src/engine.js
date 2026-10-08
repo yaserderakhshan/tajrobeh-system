@@ -2,6 +2,8 @@
 // همان منطق bot/assist.gs (v170.23.19): بحران اول، ابزارها، دانش تأییدشده، بعد نمایهٔ منتشرشدهٔ سایت.
 // داده (data) همان خروجی اکشن درگاه as_dump بات است: {kb, topics, idx, events, crisis, texts, deny, money, min, idx_min, tools, rewrite, on, mode}.
 
+import { loadFaq, faqMatch, faqNear, classifyPick } from './faq.js';
+
 export const SITE = 'https://tajrobeh.life';
 export const PRIVACY = 'اطلاعات کاربر فقط در اختیار مسئول مربوطه در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت او منتشر یا با کسی به اشتراک گذاشته نمی‌شود.';
 const HANDOFF_BTN = { id: 'h', text: 'با پذیرش حرف بزنم' };
@@ -73,7 +75,7 @@ export function search(text, ix) {
 }
 
 /* ───── آماده‌سازی داده (یک بار برای هر نسخهٔ داده) ───── */
-export function prepare(data) {
+export function prepare(data, faqData) {
   data = data || {};
   const deny = safeRe(data.deny, /درصد|سهم درمانگر|کمیسیون|تسویه|قرارداد همکاری|شرایط قرارداد/);
   const money = safeRe(data.money, /درصد سهم|تسویه|کمیسیون|قرارداد/);
@@ -84,8 +86,9 @@ export function prepare(data) {
   const cw = data.crisis && data.crisis.words && data.crisis.words.length ? data.crisis.words : CRISIS_WORDS;
   /* هیچ تکه‌ای با واژهٔ بحران یا خودکشی جواب نمی‌شود؛ بحران فقط پیام ثابت است */
   const safe = idx.filter((d) => !isCrisis(d.title + ' ' + d.text, cw));
-  safe.forEach((d) => { d.camp = isCampaign(d); });
-  const site = safe.filter((d) => d.src !== 'مجله'), mag = safe.filter((d) => d.src === 'مجله');
+  /* صفحه‌های کمپین کلاً بیرون. متن سایت فقط از مقاله‌ها و صفحه‌های help جواب می‌شود (بقیه را پرسش‌های پرتکرار پوشش می‌دهند) */
+  const live = safe.filter((d) => !isCampaign(d));
+  const site = live.filter((d) => d.src === 'مجله' || /^\/help\//.test(pathOf(d.url))), mag = live.filter((d) => d.src === 'مجله');
   const topics = (data.topics && data.topics.length ? data.topics : [...new Set(kb.map((k) => k.topic))]).slice(0, 12);
   return {
     raw: data, kb, topics, deny, money,
@@ -97,6 +100,7 @@ export function prepare(data) {
     crisisWords: data.crisis && data.crisis.words && data.crisis.words.length ? data.crisis.words : CRISIS_WORDS,
     crisisText: data.crisis && data.crisis.text ? data.crisis.text : CRISIS_TEXT,
     texts: Object.assign({ welcome: 'سلام، من دستیار تجربه هستم. سؤالت را بپرس یا یکی از موضوع‌ها را انتخاب کن.', handed: 'پیامت به پذیرش رسید. همکارم در پذیرش همین‌جا جواب می‌دهد.', bot: 'https://t.me/tajrobehlife_bot?start=pz-assist' }, data.texts || {}),
+    faq: loadFaq(faqData || data.faq || []),
     min: num(data.min, 0.6), idxMin: num(data.idx_min, 0.5), tools: data.tools !== false, rewrite: data.rewrite === true, on: data.on !== false, gemDaily: num(data.gem_daily, 100)
   };
 }
@@ -109,36 +113,8 @@ export function isCampaign(d) {
   let path = ''; try { path = decodeURIComponent(new URL(d.url).pathname + new URL(d.url).search); } catch (e) { path = d.url; }
   return CAMP_URL.test(path) || CAMP_WORDS.test(norm(d.title + ' ' + d.text));
 }
-export function asksCampaign(text) { return CAMP_WORDS.test(norm(text)); }
+function pathOf(u) { try { return decodeURIComponent(new URL(u).pathname); } catch (e) { return String(u || ''); } }
 
-/* ───── پاسخ‌های ثابت پرسش‌های پرتکرار (پشتیبان، تا ردیف‌های دانش تأیید شوند) ─────
-   متن فقط از صفحه‌های اصلی منتشرشدهٔ سایت (شروع تراپی، تراپی، کلینیک ونک، رویکرد روانکاوی، مدرسه، خانه)، کوتاه، با لینک همان صفحه.
-   بی درصد سهم و تسویه. ترتیب مهم است: اولی که بخورد جواب است. */
-const CLINIC_URL = SITE + '/' + encodeURIComponent('کلینیک-روانکاوی-تهران').toLowerCase() + '/';
-export const FAQ = [
-  { key: 'school', topic: 'دوره‌های مدرسه', url: SITE + '/school/',
-    re: /مدرسه|دوره ?(?:ها|های)? ?(?:آموزشی|ی)?|آموزش (?:روانکاوی|روان ?درمانی|درمانگر)|کلاس|ترم|درمانگر شو|سوپرویژن/, not: /هزینه جلسه|تراپی|مراجع/,
-    a: 'مدرسهٔ تجربه یک مسیر پیوسته است: دوره، تراپی فردی، سوپرویژن و در پایان، کار با مراجع در کلینیک تجربه. دوره‌ها: تجربهٔ بالینی (روانکاوی و روان‌درمانی تحلیلی، سه ترم)، درمان هیجان‌مدار EFT (سطح ۱ تا ۳، ۱۲۳ ساعت، آنلاین) و روانکاوی مدرن (۱۲ جلسه، پذیرش با مصاحبه). سوپرویژن گروهی، کیس‌خوانی فروید، ژورنال کلاب و منتورینگ هم هست.' },
-  { key: 'cost', topic: 'هزینهٔ جلسه', url: SITE + '/get-therapy/',
-    re: /هزینه|قیمت|تعرفه|چند ?(?:تومان|یورو|دلار)|پول جلسه|نرخ جلسه|گرون|ارزون/, not: /روان ?پزشک|دوره|مدرسه|کلاس|ثبت ?نام/,
-    a: 'هزینهٔ هر جلسهٔ تراپی برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست و نوع خدمت بستگی دارد؛ عدد دقیق پیش از شروع به شما گفته می‌شود. برای فارسی‌زبانان ساکن خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسهٔ معارفه در هر دو حالت رایگان است.' },
-  { key: 'intro', topic: 'جلسهٔ معارفه', url: SITE + '/get-therapy/',
-    re: /معارفه/,
-    a: 'معارفه یک جلسهٔ کوتاه با خودِ تراپیست (نه پذیرش) است تا ببینید ارتباطتان شکل می‌گیرد یا نه. رایگان است و حدود بیست دقیقه طول می‌کشد. بعد از آن اگر خواستید، تراپی شروع می‌شود؛ اگر نخواستید، تراپیست دیگری معرفی می‌شود.' },
-  { key: 'psa', topic: 'روانکاوی', url: SITE + '/approaches/psychoanalysis/',
-    re: /روانکاو|روان ?تحلیل/, not: /آموزش|دوره|مدرسه|کلاس/,
-    a: 'روانکاوی به‌جای آنکه سریع‌ترین راه را برای خاموش‌کردن یک نشانه پیدا کند، سراغ چیزی می‌رود که آن نشانه را می‌سازد و نگه می‌دارد: الگوهایی که بارها تکرار می‌شوند. این رویکرد، ستون فقرات کار بالینی در مرکز تجربه زندگی است. فرکانس جلسات و طول دوره در جلسه‌های اول و در گفت‌وگو با روانکاو تعیین می‌شود و از فردی به فرد دیگر فرق دارد.' },
-  { key: 'clinic', topic: 'کلینیک ونک', url: CLINIC_URL,
-    re: /کلینیک|حضوری|ونک|آدرس|نشانی|مطب|کجا(?:ست| هستید| هستین)/, not: /کرج|مشهد|اصفهان|نور|آلمان|پارتنر/,
-    a: 'کلینیک خود تجربه در تهران، میدان ونک است: شش اتاق روشن، همان تراپیست‌های تأییدشدهٔ تجربه و همان پذیرش. جلسهٔ معارفهٔ اول آنلاین و رایگان است و از جلسهٔ بعد می‌توانید در کلینیک ونک بیایید. برای وقت حضوری در ونک وارد بات تجربه شوید یا فرم شروع تراپی را پر کنید؛ پذیرش ساعت اتاق را هماهنگ می‌کند.' },
-  { key: 'start', topic: 'شروع تراپی', url: SITE + '/get-therapy/',
-    re: /شروع|وقت (?:بگیرم|میخوام|می خوام)|نوبت (?:بگیرم|میخوام|می خوام)|تراپیست (?:میخوام|می خوام|پیدا)|مشاوره (?:میخوام|می خوام|بگیرم)|ثبت ?نام کنم/, not: /دوره|مدرسه|کلاس|ترم/,
-    a: 'در صفحهٔ «شروع تراپی» سه سؤال کوتاه جواب بدهید تا تراپیست‌های هم‌خوان با شما و نزدیک‌ترین وقت معارفهٔ رایگان را همان‌جا ببینید. بدون ثبت‌نام و بدون کد تأیید. جلسهٔ معارفه رایگان است و حدود بیست دقیقه طول می‌کشد.' }
-];
-export function faqFor(text) {
-  const n = norm(text);
-  return FAQ.find((f) => f.re.test(n) && !(f.not && f.not.test(n))) || null;
-}
 function num(v, d) { const n = Number(v); return n > 0 ? n : d; }
 
 /* ───── پرسش‌های شروع (۳ تا ۴ دکمه، بی تایپ) ───── */
@@ -149,7 +125,11 @@ export const QUICK = [
   { text: 'رویدادهای پیش رو', q: 'رویدادهای پیش رو' }
 ];
 export function boot(P) {
-  return { ok: true, welcome: P.texts.welcome, quick: QUICK.map((x) => ({ text: x.text, q: x.q })), topics: P.topics.slice(0, 6), privacy: PRIVACY, bot: P.texts.bot, on: P.on };
+  /* دکمه‌های شروع: متن دقیقاً question همان مورد فایل و id برای جواب مستقیم (tap f:<id>)، نه جست‌وجوی دوباره.
+     faq: همهٔ id و question برای بازگشت محلی ویجت (اگر ورکر دیر جواب داد، سه پرسش نزدیک همین فایل) */
+  const fq = ['start', 'price', 'intro', 'clinic'].map((k) => P.faq.byId.get(k)).filter(Boolean).map((f) => ({ id: f.id, text: f.question, q: f.question }));
+  return { ok: true, welcome: P.texts.welcome, quick: fq.length >= 3 ? fq : QUICK.map((x) => ({ text: x.text, q: x.q })), faq: P.faq.items.map((f) => ({ id: f.id, text: f.question })),
+    topics: P.topics.slice(0, 6), privacy: PRIVACY, bot: P.texts.bot, on: P.on };
 }
 
 /* ───── پاسخ ───── */
@@ -159,7 +139,7 @@ const TOOL_STATUS = /وضعیت (?:درخواست|پرونده)م|وضعیتم|�
 const MAG_DROP = /مجله|مقاله(?:ای)?|مطلبی?|نوشته|درباره|دربارهٔ|در مورد|چیزی|بخونم|بخوانم|دارید|هست|می ?خوام|میخواهم|برام|بفرست/g;
 
 export function newLogId(now) { return 'A-' + Math.floor(now || Date.now()).toString(36) + Math.floor(Math.random() * 1296).toString(36).padStart(2, '0'); }
-function out(o) { return Object.assign({ ok: true, answer: '', topic: '', handoff: false, buttons: [], log_id: '', source: '', source_url: '' }, o); }
+function out(o) { return Object.assign({ ok: true, answer: '', topic: '', handoff: false, buttons: [], log_id: '', source: '', source_url: '', ref: '' }, o); }
 function rateBtns(id) { return [{ id: 'x:' + id, text: 'جوابم را نگرفتم' }, { id: 'y:' + id, text: '👍' }, { id: 'n:' + id, text: '👎' }]; }
 function topicBtns(P, list) { return list.slice(0, 3).map((t) => ({ id: 't:' + P.topics.indexOf(t), text: t })).filter((b) => !/:-1$/.test(b.id)); }
 /* سه موضوع نزدیک از جست‌وجوی سبک، برای بی‌پاسخ (و برای بازگشت ۴ ثانیه‌ای ویجت) */
@@ -167,7 +147,7 @@ export function nearTopics(P, text) {
   const seen = new Set(), near = [];
   for (const r of search(text, P.kbIx)) { if (!seen.has(r.k.topic) && near.length < 3) { seen.add(r.k.topic); near.push(r.k.topic); } }
   for (const t of P.topics) { if (!seen.has(t) && near.length < 3) { seen.add(t); near.push(t); } }
-  for (const f of FAQ) { if (!seen.has(f.topic) && near.length < 3) { seen.add(f.topic); near.push(f.topic); } }
+  for (const f of faqNear(P.faq, text, 3)) { if (!seen.has(f.question) && near.length < 3) { seen.add(f.question); near.push(f.question); } }
   return near;
 }
 function audBoost(res, aud) {
@@ -176,11 +156,19 @@ function audBoost(res, aud) {
   for (const r of res) if (mine(r.k)) r.score = Math.min(1, r.score + 0.05);
   return res.sort((a, b) => b.score - a.score);
 }
-function excerpt(t) { return t.length > 360 ? t.slice(0, 360).replace(/\s+\S*$/, '') + '…' : t; }
+/* جواب کوتاه و کامل: تا ۳۶۰ حرف، فقط تا پایان یک جمله، بی «…» */
+function excerpt(t) {
+  t = String(t || '').replace(/\s*…\s*/g, ' ').trim();
+  if (t.length <= 360) return t;
+  const parts = t.match(/[^.!؟?]+[.!؟?]+/g) || [];
+  let o = ''; for (const p of parts) { if ((o + p).length > 360) break; o += p; }
+  return (o || parts[0] || t.slice(0, 360)).trim();
+}
 
 /**
- * پرسش آزاد. خروجی {res, log, compose?}: res پاسخ قرارداد assist.ask، log مورد گزارش برای بات (بی متن پرسش، جز بی‌پاسخ پاک‌شده)،
- * compose (اختیاری) یعنی پاسخ از سایت است و می‌شود با جمنای کوتاه و روانش کرد؛ ورکر خودش با مهلت تصمیم می‌گیرد.
+ * پرسش آزاد. خروجی {res, log, un?, classify?}: res پاسخ قرارداد assist.ask (ref = id پرسش پرتکرار اگر از فایل آمد)،
+ * log مورد گزارش برای بات (بی متن پرسش، جز بی‌پاسخ پاک‌شده)، classify یعنی تطبیق مطمئن نبود و ورکر می‌تواند از جمنای
+ * فقط یک id یا none بخواهد؛ جمنای هیچ متن جوابی نمی‌سازد.
  */
 export function ask(P, text, ctx) {
   ctx = ctx || {};
@@ -193,43 +181,50 @@ export function ask(P, text, ctx) {
   const n = norm(text);
   if (TOOL_STATUS.test(n) || TOOL_STATUS.test(text))
     return { res: out({ answer: 'برای دیدن وضعیت درخواستت، در بات تجربه ادامه بده.', topic: 'وضعیت من', buttons: [{ url: P.texts.bot, text: 'ادامه در تلگرام' }], source: 'ابزار', log_id: id }), log: { k: 'log', ch, id, topic: 'ابزار status', res: 'ابزار', src: 'ابزار', au: aud } };
+  /* جملهٔ کامل یکی از شکل‌های فایل (مثلاً «رویداد» یا «مقاله») پیش از ابزارها */
+  const m = faqMatch(P.faq, text);
+  if (m.exact) return faqOut(m.best.f, id, ch, aud, '', 'دقیق');
   if (P.tools && (TOOL_EVENTS.test(n) || TOOL_EVENTS.test(text))) return toolEvents(P, ctx, id, ch, aud);
   if (P.tools && (TOOL_MAG.test(n) || TOOL_MAG.test(text))) return toolMag(P, text, id, ch, aud);
-  /* دانش تأییدشده */
+  /* ۱) پرسش‌های پرتکرار (content/assist/faq.json): BM25 مطمئن ← همان متن فایل */
+  if (m.sure) return faqOut(m.best.f, id, ch, aud, '', 'BM25');
+  /* ۲) دانش تأییدشدهٔ تیم */
   const res = audBoost(search(text, P.kbIx), aud), top = res[0];
   if (top && top.score >= P.min) {
     return { res: out({ answer: top.k.answer, topic: top.k.topic, buttons: rateBtns(id), log_id: id, source: 'دانش' }), log: { k: 'log', ch, id, topic: top.k.topic, res: 'پاسخ', src: 'دانش', au: aud } };
   }
-  /* پاسخ ثابت پرسش‌های پرتکرار، از صفحه‌های اصلی */
-  const f = faqFor(text);
-  if (f) return faqOut(f, id, ch, aud);
-  /* متن منتشرشدهٔ سایت و رویدادهای پیش‌رو */
+  /* ۳) مطمئن نبود: ورکر از جمنای فقط یک id یا none می‌خواهد (classify). تا آن موقع پاسخ پشتیبان: مقاله یا صفحهٔ help با آستانهٔ سخت،
+     وگرنه سه پرسش نزدیک از همین فایل و «با پذیرش حرف بزنم» */
+  const classify = P.faq.N ? { q: scrub(text) } : null;
   const site = siteAnswer(P, text);
   if (site) {
     const d = site.top[0];
     return {
       res: out({ answer: excerpt(d.text), topic: d.dom || 'سایت', log_id: id, source: 'سایت', source_url: d.url, buttons: [{ url: d.url, text: 'بیشتر بخوانید' }].concat(rateBtns(id)) }),
-      log: { k: 'log', ch, id, topic: d.dom || 'سایت', res: 'پاسخ', src: 'سایت', au: aud },
-      compose: { q: scrub(text), top: site.top }
+      log: { k: 'log', ch, id, topic: d.dom || 'سایت', res: 'پاسخ', src: 'سایت', au: aud }, classify
     };
   }
   return {
     res: out({ answer: FALLBACK_TEXT, buttons: nearBtns(P, text).concat([HANDOFF_BTN]) }),
     log: { k: 'log', ch, id, topic: '', res: 'بی‌پاسخ', au: aud },
-    un: { k: 'un', ch, text: scrub(text), kind: 'بی‌پاسخ', au: aud }
+    un: { k: 'un', ch, text: scrub(text), kind: 'بی‌پاسخ', au: aud }, classify
   };
 }
-function faqOut(f, id, ch, aud, mode) {
-  return { res: out({ answer: f.a, topic: f.topic, log_id: id, source: 'ثابت', source_url: f.url, buttons: [{ url: f.url, text: 'بیشتر بخوانید' }].concat(rateBtns(id)) }),
-    log: Object.assign({ k: 'log', ch, id, topic: f.topic, res: 'پاسخ', src: 'ثابت', au: aud }, mode ? { mode } : {}) };
+/** پاسخ گزینش جمنای (یک id از فایل) روی پاسخ پشتیبان می‌نشیند؛ گزارش بی‌پاسخ حذف می‌شود */
+export function classified(P, r, outObj, ctx) {
+  const f = classifyPick(P.faq, outObj); if (!f) return null;
+  ctx = ctx || {};
+  const x = faqOut(f, r.res.log_id || newLogId(ctx.now), ctx.channel || 'site', ctx.audience || 'کاربر عمومی', '', 'جمنای');
+  return x;
+}
+function faqOut(f, id, ch, aud, mode, how) {
+  const links = (f.links || []).filter((l) => l && l.url && String(l.url).indexOf(SITE) === 0).map((l) => ({ url: l.url, text: String(l.text || 'بیشتر بخوانید').slice(0, 40) }));
+  return { res: out({ answer: f.answer, topic: f.question, ref: f.id, log_id: id, source: 'پرسش‌های پرتکرار', source_url: links[0] ? links[0].url : '', buttons: links.concat(rateBtns(id)) }),
+    log: Object.assign({ k: 'log', ch, id, topic: f.question, res: 'پاسخ', src: 'پرسش‌های پرتکرار', au: aud, faq: f.id, how: how || '' }, mode ? { mode } : {}) };
 }
 /* سه دکمهٔ نزدیک برای بی‌پاسخ: موضوع‌های دانش اگر هست، بعد پرسش‌های پرتکرار ثابت (f:<کلید>) */
 export function nearBtns(P, text) {
-  const btns = topicBtns(P, nearTopics(P, text).filter((t) => P.kb.some((k) => k.topic === t)));
-  const q = new Set(tokens(text));
-  const rank = FAQ.map((f, i) => ({ f, s: tokens(f.topic + ' ' + f.a).filter((t) => q.has(t)).length * 10 - i })).sort((a, b) => b.s - a.s);
-  for (const r of rank) { if (btns.length >= 3) break; btns.push({ id: 'f:' + r.f.key, text: r.f.topic }); }
-  return btns.slice(0, 3);
+  return faqNear(P.faq, text, 3).map((f) => ({ id: 'f:' + f.id, text: f.question }));
 }
 /* هم‌پوشانی واقعی: با پرسش دو واژه‌ای یا بیشتر، دست‌کم دو واژهٔ پرسش باید در تکه باشد */
 function overlap(text, d) {
@@ -237,13 +232,13 @@ function overlap(text, d) {
   const set = new Set(tokens(d.title + ' ' + d.text));
   return q.filter((t) => set.has(t)).length >= 2;
 }
-export const SITE_MIN = 0.6;
+export const SITE_MIN = 0.72;
 function siteAnswer(P, text) {
   const evDocs = (P.events || []).map((e) => ({ topic: e.title, samples: [[e.title, e.date, e.time ? 'ساعت ' + e.time : ''].filter(Boolean).join(' · ')],
     doc: { url: SITE + '/school/events/#ev=' + encodeURIComponent(e.code), title: e.title, text: [e.title, e.date, e.time ? 'ساعت ' + e.time : ''].filter(Boolean).join(' · '), dom: 'رویدادها', src: 'رویداد' } }));
-  const camp = asksCampaign(text), min = Math.max(P.idxMin, SITE_MIN);
+  const min = Math.max(P.idxMin, SITE_MIN);
   const hits = search(text, P.siteIx).concat(evDocs.length ? search(text, buildIndex(evDocs)) : [])
-    .filter((r) => r.score >= min && (camp || !r.k.doc.camp) && overlap(text, r.k.doc)).sort((a, b) => b.score - a.score).slice(0, 3);
+    .filter((r) => r.score >= min && overlap(text, r.k.doc)).sort((a, b) => b.score - a.score).slice(0, 3);
   return hits.length ? { top: hits.map((r) => r.k.doc) } : null;
 }
 /* رویدادهای پیش‌رو: تقویم منتشرشدهٔ صفحهٔ رویدادهای سایت (siteEvents، از ورکر) و رویدادهای بات (events). اول برنامه‌های باز؛
@@ -256,8 +251,8 @@ function toolEvents(P, ctx, id, ch, aud) {
   const seen = new Set(), uniq = all.filter((e) => { const k = e.iso + '|' + e.title; if (seen.has(k)) return false; seen.add(k); return true; });
   const open = uniq.filter((e) => e.open).slice(0, 3), L = open.length ? open : uniq.slice(0, 3);
   const log = { k: 'log', ch, id, topic: 'ابزار events', res: 'ابزار', src: 'ابزار', au: aud };
-  const page = { url: SITE + '/school/events/', text: 'تقویم رویدادها' };
-  if (!L.length) return { res: out({ answer: 'در تقویم سایت برنامهٔ تازه‌ای برای روزهای پیش رو ثبت نشده است. تقویم کامل در صفحهٔ رویدادهاست.', topic: 'رویدادها', source: 'ابزار', log_id: id, buttons: [page] }), log };
+  const page = { url: SITE + '/school/events/', text: 'تقویم کامل مدرسه' };
+  if (!L.length) return { res: out({ answer: 'برنامه‌های مدرسه، کلاس‌ها و رویدادهای باز در تقویم کامل مدرسه است.', topic: 'رویدادها', source: 'ابزار', log_id: id, buttons: [{ url: SITE + '/school/events/', text: 'تقویم کامل مدرسه' }] }), log };
   const head = open.length ? 'برنامه‌های پیش‌رو:' : 'برنامهٔ عمومی تازه‌ای ثبت نشده؛ نزدیک‌ترین جلسه‌های مدرسه (ویژهٔ اعضای مدرسه):';
   return { res: out({ answer: head + '\n' + L.map((e) => '• ' + e.title + (e.when ? ' · ' + e.when : '')).join('\n'), topic: 'رویدادها', source: 'ابزار', log_id: id,
     buttons: L.map((e) => ({ url: e.url, text: String(e.title).slice(0, 40) })).concat([page]) }), log };
@@ -303,13 +298,18 @@ export function tap(P, idStr, lastText, ctx) {
     return { res: out({ answer: k.answer, topic: k.topic, buttons: rateBtns(id), log_id: id, source: 'دانش' }), log: { k: 'log', ch, id, topic: k.topic, mode: 'منو', res: 'پاسخ', src: 'دانش', au: aud } };
   }
   if (act === 'f') {
-    const f = FAQ.find((x) => x.key === arg); if (!f) return ask(P, '', ctx);
-    return faqOut(f, newLogId(ctx.now), ch, aud, 'منو');
+    const f = P.faq.byId.get(String(arg)); if (!f) return ask(P, '', ctx);
+    return faqOut(f, newLogId(ctx.now), ch, aud, 'منو', 'دکمه');
   }
-  if (act === 'y' || act === 'n') return { res: out({ answer: 'ممنون از بازخوردت.' }), extra: [{ k: 'rate', id: String(arg || '').slice(0, 20), good: act === 'y' }] };
-  if (act === 'x' || act === 'h') {
-    const extra = [{ k: 'handoff', ch, sid: ctx.session || '', text: scrub(lastText || ''), why: act === 'x' ? 'جوابم را نگرفتم' : 'خواست با پذیرش حرف بزند' }];
-    if (act === 'x') { extra.push({ k: 'rate', id: String(arg || '').slice(0, 20), good: false }); if (lastText) extra.push({ k: 'un', ch, text: scrub(lastText), kind: 'جوابم را نگرفتم', au: aud }); }
+  if (act === 'y' || act === 'n') return { res: out({ answer: '' }), extra: [{ k: 'rate', id: String(arg || '').slice(0, 20), good: act === 'y' }] };   /* بازخورد بی پیام گفت‌وگو */
+  /* «جوابم را نگرفتم» فقط بازخورد است (بی پیام گفت‌وگو و بی تحویل)؛ ویجت بعدش «با پذیرش حرف بزنم» (h) را پیشنهاد می‌دهد */
+  if (act === 'x') {
+    const extra = [{ k: 'rate', id: String(arg || '').slice(0, 20), good: false }];
+    if (lastText) extra.push({ k: 'un', ch, text: scrub(lastText), kind: 'جوابم را نگرفتم', au: aud });
+    return { res: out({ answer: '' }), extra };
+  }
+  if (act === 'h') {
+    const extra = [{ k: 'handoff', ch, sid: ctx.session || '', text: scrub(lastText || ''), why: 'خواست با پذیرش حرف بزند' }];
     return { res: out({ answer: P.texts.handed, handoff: true, buttons: [{ url: P.texts.bot, text: 'ادامه در تلگرام' }] }), log: { k: 'log', ch, id: newLogId(ctx.now), topic: '', res: 'تحویل', au: aud }, extra };
   }
   return ask(P, '', ctx);
@@ -326,36 +326,4 @@ export function scrub(text) {
   s = s.replace(/(^|[^A-Za-z])[A-Z][a-z]+(?:[-'][A-Za-z]+)*/g, '$1[نام]');
   s = s.replace(/(?:اسمم|نامم|من)\s+([^\s،.!؟?]{2,})\s+(?:هستم|ام)/g, (m, w) => m.replace(w, '[نام]'));
   return s.slice(0, 400);
-}
-
-/* ───── گارد خروجی جمنای (همان asFacts_ و asRwSafe_) ───── */
-export function facts(t) {
-  const s = latin(String(t || '')), outL = [];
-  for (const x of (s.match(/https?:\/\/\S+|www\.\S+|\S+@\S+\.\S+|@[A-Za-z0-9_]{3,}|[A-Za-z0-9-]+\.[A-Za-z]{2,}(?:\/[^\s،.]*)?|\d+(?:[.,٫٬]\d+)*/g) || [])) outL.push(x.replace(/[.,،؛:)]+$/, ''));
-  for (const x of (s.match(/[A-Z][a-z]+/g) || [])) outL.push(x);
-  const re = new RegExp('(?:' + TITLES.join('|') + ')\\s+([^\\s«»"(),،.!؟?:؛]+)', 'g'); let m;
-  while ((m = re.exec(s))) outL.push(m[1]);
-  return outL;
-}
-const META = /متن(?:‌|\s)?(?:های)?\s*(?:بالا|داده‌شده|ارائه‌شده)|در متن‌ها|بر اساس متن|طبق متن|به طور مستقیم (?:توضیح|اشاره)/;
-export function safeOut(o, src) {
-  o = String(o || '').trim();
-  if (!o || o.length > Math.max(400, String(src).length * 2) || META.test(o) || /[—–]/.test(o)) return false;
-  const base = latin(String(src));
-  return facts(o).every((f) => base.indexOf(f) > -1);
-}
-export function composePrompt(c) {
-  return 'به پرسش زیر فقط از روی این متن‌های منتشرشدهٔ سایت مرکز تجربه زندگی، کوتاه (حداکثر سه جمله)، گرم و فارسی جواب بده؛ مستقیم با خواننده حرف بزن. ' +
-    'هیچ عدد، نشانی، لینک، نام یا اطلاعاتی که در متن‌ها نیست اضافه نکن. از «متن» یا «منبع» حرف نزن. مشاورهٔ بالینی، تشخیص یا دارو نده. خط تیرهٔ بلند ننویس. ' +
-    'اگر متن‌ها جواب نمی‌دهند none = true. i شمارهٔ متنی است که بیشتر از آن استفاده کردی.\n\nپرسش: ' + c.q + '\n\n' +
-    c.top.map((d, i) => i + ') ' + d.title + '\n' + d.text).join('\n\n');
-}
-export const COMPOSE_SCHEMA = { type: 'OBJECT', properties: { text: { type: 'STRING' }, i: { type: 'INTEGER' }, none: { type: 'BOOLEAN' } }, required: ['text', 'i', 'none'] };
-/** خروجی جمنای را روی پاسخ سایت می‌نشاند اگر از گارد بگذرد؛ وگرنه همان متن منبع */
-export function applyCompose(res, c, g) {
-  if (!g || g.none) return res;
-  const t = String(g.text || '').replace(/[—–]/g, '،').trim(), src = c.top.map((d) => d.title + ' ' + d.text).join(' ');
-  if (!safeOut(t, src)) return res;
-  const pick = c.top[g.i >= 0 && g.i < c.top.length ? g.i : 0];
-  return Object.assign({}, res, { answer: t, source_url: pick.url, buttons: [{ url: pick.url, text: 'بیشتر بخوانید' }].concat(res.buttons.filter((b) => b.id)) });
 }

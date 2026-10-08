@@ -5,11 +5,16 @@
 //   GET  /assist/health   نسخهٔ داده و سن آن (بی هیچ محتوا).
 // داده: خروجی اکشن as_dump بات در KV (کلید dump)، هر ۳۰ دقیقه با cron و با پینگ تازه می‌شود. گزارش‌ها با ctx.waitUntil (اکشن as_log).
 // رمزها فقط secret ورکر: BOT_URL، BOT_KEY (کلید دوم درگاه)، LEAD_SECRET (امضای سرور، همان رمز لید سایت)، GEMINI_API_KEY (اختیاری).
-import { prepare, ask, tap, boot, composePrompt, applyCompose, COMPOSE_SCHEMA, nearTopics, siteEventsFrom } from './engine.js';
+import { prepare, ask, tap, boot, nearTopics, siteEventsFrom, classified } from './engine.js';
+import { classifyPrompt, CLASSIFY_SCHEMA, faTokens } from './faq.js';
+import FAQ_DATA from '../../../content/assist/faq.json' with { type: 'json' };
 
 const ORIGINS = ['https://tajrobeh.life', 'https://www.tajrobeh.life', 'https://new.tajrobeh.life'];
 const GEM_MODEL = 'gemini-flash-lite-latest';
-const GEM_BUDGET_MS = 2500;      /* جمنای فقط تا این مهلت؛ بعد همان متن منبع می‌رود (هدف کل زیر ۵ ثانیه) */
+const GEM_ALT = 'gemini-flash-latest';   /* اگر مدل اول شلوغ بود (۵۰۳ یا ۴۲۹)، یک بار همین (مثل AI_MODELS بات) */
+const GEM_BUDGET_MS = 1500;      /* جمنای فقط دسته‌بند است و فقط تا این مهلت؛ بعد پاسخ پشتیبان (سه پرسش نزدیک) می‌رود */
+const GEM_BG_MS = 12000;         /* دیر شد؟ همان فراخوان در پس‌زمینه تمام می‌شود و نتیجه برای همین پرسش کش می‌شود */
+const CLS_CACHE_S = 14 * 86400;
 const RATE_IP = 30, RATE_SID = 20;   /* در ساعت */
 let MEM = null;                  /* {at, P} داده در حافظهٔ همین نمونه، ۶۰ ثانیه */
 const HITS = new Map();
@@ -22,7 +27,7 @@ export default {
     const path = url.pathname.replace(/\/+$/, '');
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
     try {
-      if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, events: d ? d.siteEvents.length : 0, events_src: await env.KV.get('site_events', 'json').then((x) => x ? (x.src || '') + (x.why ? ' ' + x.why : '') : '').catch(() => ''), gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false, gem_last: await env.KV.get('gem:last', 'json') }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
+      if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, faq: d ? d.faq.N : 0, faq_v: d ? d.faq.version : '', events: d ? d.siteEvents.length : 0, events_src: await env.KV.get('site_events', 'json').then((x) => x ? (x.src || '') + (x.why ? ' ' + x.why : '') : '').catch(() => ''), gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false, gem_last: await env.KV.get('gem:last', 'json') }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
       if (path === '/assist/refresh' && req.method === 'POST') { ctx.waitUntil(refresh(env, true)); return json({ ok: true }); }
       if (path === '/assist/boot' && req.method === 'GET') {
         const P = await data(env, ctx);
@@ -44,26 +49,34 @@ export default {
         const c = { channel: String(body.channel || 'site').replace(/[^\w-]/g, '').slice(0, 20) || 'site', audience: String(body.audience || '').slice(0, 30), session: sid };
         const r = body.tap ? tap(P, String(body.tap), String(body.text || ''), c) : ask(P, String(body.text || ''), c);
         let res = r.res, model = '', why = 'na', gms = 0;
-        /* چرای جمنای در هر پاسخ (فقط کد کوتاه، بی هیچ مقدار رمز): na بی متن سایت · off ASSIST_REWRITE خاموش · nokey · cap سقف روزانه ·
-           timeout · http<کد>-<وضعیت گوگل> · parse · none (متن‌ها جواب نمی‌دهند) · guard (از گارد خروجی رد شد) · ok */
-        if (r.compose) {
-          if (!P.rewrite) why = 'off';
+        /* چرای جمنای در هر پاسخ (فقط کد کوتاه، بی هیچ مقدار رمز): na لازم نبود (تطبیق مطمئن یا ابزار) · off ASSIST_REWRITE خاموش · nokey · cap سقف روزانه ·
+           cache جواب کش‌شدهٔ همین پرسش · ok-<id> · none · timeout · http<کد>-<وضعیت گوگل> · parse */
+        if (r.classify) {
+          const ck = 'cls:' + P.faq.version + ':' + faTokens(r.classify.q).join(' ').slice(0, 200);
+          const g0 = Date.now(), hitC = await env.KV.get(ck, 'json');
+          let g = null;
+          if (hitC) { g = { http: 200, out: hitC, cached: true }; }
+          else if (!P.rewrite) why = 'off';
           else if (!env.GEMINI_API_KEY) why = 'nokey';
           else if (!(await gemLeft(env, P))) why = 'cap';
           else {
-            const g0 = Date.now(), g = await gemini(env, composePrompt(r.compose), COMPOSE_SCHEMA, GEM_BUDGET_MS);
-            gms = Date.now() - g0;
-            if (!g) why = 'timeout';
-            else if (g.http !== 200) why = 'http' + g.http + (g.err ? '-' + g.err : '');
-            else if (!g.out) why = 'parse';
-            else if (g.out.none) why = 'none';
-            else {
-              const res2 = applyCompose(res, r.compose, g.out);
-              if (res2 !== res) { res = res2; model = GEM_MODEL; why = 'ok'; ctx.waitUntil(gemCount(env)); } else why = 'guard';
-            }
-            if (g && g.usage) (r.extra = r.extra || []).push({ k: 'gem', job: 'پاسخ از منبع سایت', model: GEM_MODEL, tin: g.usage.promptTokenCount || 0, tout: g.usage.candidatesTokenCount || 0 });
-            ctx.waitUntil(env.KV.put('gem:last', JSON.stringify({ at: new Date().toISOString(), why, ms: gms }), { expirationTtl: 7 * 86400 }));
+            const p = gemini(env, classifyPrompt(P.faq, r.classify.q), CLASSIFY_SCHEMA, GEM_BG_MS);
+            ctx.waitUntil(gemCount(env));
+            g = await Promise.race([p, new Promise((res2) => setTimeout(() => res2('late'), GEM_BUDGET_MS))]);
+            if (g === 'late') { ctx.waitUntil(p.then((x) => { if (x && x.http === 200 && x.out) return env.KV.put(ck, JSON.stringify(x.out), { expirationTtl: CLS_CACHE_S }); }).catch(() => {})); g = null; why = 'timeout'; }
           }
+          gms = Date.now() - g0;
+          if (g) {
+            if (g.http !== 200) why = 'http' + g.http + (g.err ? '-' + g.err : '');
+            else if (!g.out) why = 'parse';
+            else {
+              if (!g.cached) ctx.waitUntil(env.KV.put(ck, JSON.stringify(g.out), { expirationTtl: CLS_CACHE_S }));
+              const x = classified(P, r, g.out, c);
+              if (x) { res = x.res; r.log = x.log; r.un = null; model = GEM_MODEL; why = (g.cached ? 'cache-' : 'ok-') + x.res.ref; } else why = g.cached ? 'cache-none' : 'none';
+            }
+            if (g.usage) (r.extra = r.extra || []).push({ k: 'gem', job: 'دسته‌بندی پرسش دستیار', model: GEM_MODEL, tin: g.usage.promptTokenCount || 0, tout: g.usage.candidatesTokenCount || 0 });
+          }
+          if (!hitC && why !== 'off' && why !== 'nokey' && why !== 'cap') ctx.waitUntil(env.KV.put('gem:last', JSON.stringify({ at: new Date().toISOString(), why, ms: gms }), { expirationTtl: 7 * 86400 }));
         }
         const ms = Date.now() - t0;
         const logs = [].concat(r.log ? [Object.assign({ ms }, r.log)] : [], r.un ? [r.un] : [], r.extra || []);
@@ -88,13 +101,14 @@ async function data(env, ctx) {
   if (MEM && Date.now() - MEM.at < 60000) return MEM.P;
   const [hitKv, ev] = await Promise.all([env.KV.get('dump', 'json'), env.KV.get('site_events', 'json')]);
   const withEv = (d) => Object.assign({}, d, { siteEvents: (ev && ev.list) || [] });
+  const prep = (d) => prepare(withEv(d), FAQ_DATA);
   if (hitKv && hitKv.data) {
-    MEM = { at: Date.now(), P: prepare(withEv(hitKv.data)) };
+    MEM = { at: Date.now(), P: prep(hitKv.data) };
     if (Date.now() - (hitKv.at || 0) > 45 * 60000) ctx.waitUntil(refresh(env, false));
     return MEM.P;
   }
   const d = await refresh(env, true);
-  return d ? (MEM = { at: Date.now(), P: prepare(withEv(d)) }).P : null;
+  return d ? (MEM = { at: Date.now(), P: prep(d) }).P : null;
 }
 /* تقویم منتشرشدهٔ صفحهٔ رویدادهای سایت (همان دادهٔ evData که بازدیدکننده می‌بیند)؛ فقط با cron و پینگ، نه در مسیر کاربر */
 async function siteEvents(env) {
@@ -174,10 +188,10 @@ async function gemCount(env) { const k = 'gem:' + day(), n = Number(await env.KV
    (۱۶ مهر: thinkingBudget: 0 روی مدلی که نام latest حالا به آن اشاره می‌کند ۴۰۰ INVALID_ARGUMENT می‌داد) */
 async function gemini(env, prompt, schema, ms) {
   const ac = new AbortController(), tm = setTimeout(() => ac.abort(), ms);
-  const call = async (thinking) => {
+  const call = async (thinking, model) => {
     const gc = { temperature: 0.2, responseMimeType: 'application/json', responseSchema: schema };
     if (thinking) gc.thinkingConfig = thinking;
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent', {
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + (model || GEM_MODEL) + ':generateContent', {
       method: 'POST', signal: ac.signal, headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
       body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: gc })
     });
@@ -190,6 +204,7 @@ async function gemini(env, prompt, schema, ms) {
   try {
     let g = await call({ thinkingLevel: 'minimal' });
     if (g.http === 400) g = await call(null);
+    if (g.http === 503 || g.http === 429) { g = await call({ thinkingLevel: 'minimal' }, GEM_ALT); if (g.http === 400) g = await call(null, GEM_ALT); g.alt = true; }
     return g;
   } catch (e) { return null; } finally { clearTimeout(tm); }
 }

@@ -7036,7 +7036,7 @@ function tgWatchdog(e) {
   S('dqHourly_', 'must', typeof dqHourly_ === 'function' ? dqHourly_ : null);   /* v170: پیگیری صف ارسال و وضعیت تیکت */
   S('tgEvFlush_', 'must', tgEvFlush_);   /* بافر رویدادها در کش فقط ۱۷۰ دقیقه می‌ماند */
   /* سبک */
-  S('cfgHourly_', 'light', typeof cfgHourly_ === 'function' ? cfgHourly_ : null);   /* v170.8: تب «تنظیمات خصوصی بات» ← TG_CFG */
+  S('cfgHourly_', 'must', typeof cfgHourly_ === 'function' ? cfgHourly_ : null);   /* v170.8: تب «تنظیمات خصوصی بات» ← TG_CFG. v170.23.28: واجب (حدود ۰٫۱ دقیقه در روز)؛ با ردهٔ سبک بالای ۷۵ دقیقه رد می‌شد و کلیدی که تیم در تب عوض کرده بود (مثل ASSIST_REWRITE) تا فردا به بات نمی‌رسید */
   S('v1691Hourly_', 'light', typeof v1691Hourly_ === 'function' ? function () { return v1691Hourly_(e); } : null);
   S('ebiHourly_', 'light', typeof ebiHourly_ === 'function' ? ebiHourly_ : null);
   S('aiRetryTick_', 'light', typeof aiRetryTick_ === 'function' ? aiRetryTick_ : null);   /* v170.23.7: ویس‌های بی‌متن */
