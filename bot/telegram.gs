@@ -6361,7 +6361,7 @@ function tgCmd_(text) {
 // یادداشت درون‌اجرایی کش: هر رفت‌وبرگشت CacheService حدود ۵۰ تا ۱۰۰ میلی‌ثانیه است؛
 // tgCachePrime_ همهٔ کلیدهای رایج این چت را با یک getAll می‌گیرد و بقیهٔ خواندن‌ها از حافظه می‌آید
 var TG_CMEMO = null;
-const TG_MEMO_KEYS = ['sign', 'await', 'ft', 'seen', 'qt', 'qg', 'nd', 'pf', 'qa', 'qm', 'tz', 'bd', 'helped', 'ts', 'pfd', 'ct', 'mzw', 'mzt', 'mzu', 'mzl', 'mzn', 'esign', 'pq', 'pr', 'em', 'emask', 'ldn', 'ldr', 'war', 'sfh', 'scg', 'sln', 'sli', 'sfl', 'alw', 'apw', 'pzw', 'rmw', 'rmv', 'cpv', 'cpp', 'cpn', 'cpl', 'apmsg', 'apreply', 'ldx', 'ldf', 'ldb', 'ldbs', 'vxc', 'vxe', 'vxu', 'mig', 'qcity', 'qpid', 'lnc', 'lnt', 'asq', 'asr', 'aslast'];
+const TG_MEMO_KEYS = ['sign', 'await', 'ft', 'seen', 'qt', 'qg', 'nd', 'pf', 'qa', 'qm', 'tz', 'bd', 'helped', 'ts', 'pfd', 'ct', 'mzw', 'mzt', 'mzu', 'mzl', 'mzn', 'esign', 'pq', 'pr', 'em', 'emask', 'ldn', 'ldr', 'war', 'sfh', 'scg', 'sln', 'sli', 'sfl', 'alw', 'apw', 'pzw', 'rmw', 'rmv', 'cpv', 'cpp', 'cpn', 'cpl', 'apmsg', 'apreply', 'ldx', 'ldf', 'ldb', 'ldbs', 'vxc', 'vxe', 'vxu', 'mig', 'qcity', 'qpid', 'lnc', 'lnt', 'asq', 'asr', 'aslast', 'asa'];
 const TG_MEMO_LISTS = ['wlist', 'drows', 'trows', 'faq', 'scols'];
 function tgCachePrime_(chat) {
   if (TG_DRY || TG_CMEMO) return;
@@ -6918,6 +6918,7 @@ function tgWatchdog(e) {
   S('ebiHourly_', 'light', typeof ebiHourly_ === 'function' ? ebiHourly_ : null);
   S('aiRetryTick_', 'light', typeof aiRetryTick_ === 'function' ? aiRetryTick_ : null);   /* v170.23.7: ویس‌های بی‌متن */
   S('ktbHourly_', 'light', typeof ktbHourly_ === 'function' ? ktbHourly_ : null);
+  S('asWeeklyMaybe_', 'light', typeof asWeeklyMaybe_ === 'function' ? asWeeklyMaybe_ : null);   /* v170.23.17: گزارش هفتگی تیم‌های دستیار، شنبه یک بار */
   S('nuTick_', 'light', typeof nuTick_ === 'function' ? nuTick_ : null);   /* v170.23.13: پیگیری گیرکرده‌ها */
   S('reTick_', 'light', typeof reTick_ === 'function' ? reTick_ : null);   /* v170.23.14: کارت دستهٔ بازگرداندن */
   S('migSetupTick_', 'light', typeof migSetupTick_ === 'function' ? migSetupTick_ : null);   /* با MIG_ENABLED خاموش بی‌کار */
