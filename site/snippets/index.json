@@ -485,5 +485,14 @@
   "location": "everywhere",
   "loc": "everywhere",
   "active": true
+ },
+ {
+  "id": null,
+  "file": "ga4-visitor-tz.html",
+  "title": "Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz، is_abroad) v1",
+  "type": "html",
+  "location": "سربرگ عریض سایت",
+  "loc": "site_wide_header",
+  "active": false
  }
 ]
