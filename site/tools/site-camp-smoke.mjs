@@ -3,9 +3,10 @@
 //  - /thers-push با رمز تازه و فهرست خالی ← ۴۰۰ «empty» (رمز پذیرفته شد، فهرست قبلی دست نخورد)
 //  - هر دو با رمز غلط یا بی رمز ← ۴۰۱ یا ۴۰۳
 //  - /camp?code=EFT-1 ← داده با زمان آخرین ارسال بات (pushed)
-//  - /assist (ویجت دستیار، اسنیپت 506148): یک پرسش نمونه که سایت خودش امضا می‌کند ← ۲۰۰ و JSON از بات (نه 502 «bad»)
+//  - دستیار سایت: یک پرسش نمونه به ورکر لبهٔ tj-assist (همان مسیر ویجت 501145 از ۱۶ مهر) ← ۲۰۰، پاسخ، زیر ۵ ثانیه.
+//    مسیر قدیم سرور (/wp-json/tj/v1/assist، اسنیپت 506148) دیگر در مسیر کاربر نیست و اینجا سنجیده نمی‌شود.
 // رمز فقط از متغیر محیطی CP_WP_SECRET (GitHub Secret) و هرگز چاپ نمی‌شود.
-import { fail, loadEnv, log, summary, wpClient } from './site-lib.mjs';
+import { assistAsk, assistEdge, fail, loadEnv, log, summary, wpClient } from './site-lib.mjs';
 
 loadEnv();
 const wp = wpClient();
@@ -38,10 +39,11 @@ const age = c.json?.pushed ? Math.round((Date.now() / 1000 - c.json.pushed) / 60
 say(`- /camp?code=EFT-1: HTTP ${c.status}${age != null ? ` · آخرین ارسال بات ${age} دقیقه پیش` : ''}`);
 if (c.status !== 200) errs.push('دادهٔ کمپین EFT-1 در دسترس نیست');
 const sid = 'smoke-' + new Date().toISOString().slice(0, 10);
-const ar = await fetch(wp.base + '/wp-json/tj/v1/assist', { method: 'POST', headers: { 'Content-Type': 'application/json', 'User-Agent': 'tajrobeh-site-ops/1', Origin: wp.base, Referer: wp.base + '/' }, body: JSON.stringify({ session_id: sid, text: 'هزینهٔ جلسه چقدر است' }) });
-let aj = null; try { aj = JSON.parse(await ar.text()); } catch {}
-say(`- /assist: HTTP ${ar.status} · ok=${aj?.ok} · error=${aj?.error || '-'} · پاسخ ${aj?.answer ? aj.answer.length + ' حرف' : 'ندارد'} · دکمه ${(aj?.buttons || []).length} · تحویل ${aj?.handoff ? 'بله' : 'خیر'}`);
-if (ar.status !== 200 || !aj || aj.error === 'bad' || aj.error === 'sig') errs.push(`ویجت دستیار پاسخ درست نداد (${ar.status} ${aj?.error || ''})`);
+const as = await assistAsk('هزینه جلسه چقدر است', sid);
+say(`- دستیار (ورکر لبه): HTTP ${as.status} · ok=${as.j?.ok} · ${as.ms} میلی‌ثانیه · پاسخ ${as.j?.answer ? as.j.answer.length + ' حرف' : 'ندارد'} · منبع ${as.j?.source || '-'}`);
+if (!assistEdge()) errs.push('نشانی ورکر دستیار پیدا نشد (اسنیپت 501145)');
+else if (as.status !== 200 || !as.j?.ok || !as.j?.answer) errs.push(`دستیار سایت پاسخ درست نداد (${as.status} ${as.j?.error || ''})`);
+else if (as.ms > 5000) errs.push(`دستیار سایت کند است (${as.ms} میلی‌ثانیه)`);
 summary(`## تست دود کمپین\n\n${lines.join('\n')}\n\n${errs.length ? errs.map((e) => `- ⛔ ${e}`).join('\n') : '✅ قبول'}`);
 errs.forEach(fail);
 process.exit(errs.length ? 1 : 0);
