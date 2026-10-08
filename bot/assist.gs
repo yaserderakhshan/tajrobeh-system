@@ -40,6 +40,7 @@ cfg_('ASSIST_GEMINI_PAID', '');  /* فقط یاسر بعد از فعال شدن 
 cfg_('ASSIST_MATCH_MIN', '');    /* آستانهٔ جست‌وجو، ۰ تا ۱؛ خالی = ۰٫۶ */
 cfg_('ASSIST_EMERGENCY', '');    /* JSON {کد کشور: متن اورژانس}؛ خالی = متن ایران */
 cfg_('ASSIST_RATE', '');         /* سقف پرسش هر session_id در ساعت؛ خالی = ۲۰ */
+cfg_('ASSIST_TOOLS', '');        /* v170.23.16: «بله» = ابزارهای بی هوش مصنوعی (AS_TOOLS: رویدادهای پیش‌رو، مجله، وضعیت من) */
 cfg_('ASSIST_KB_TEAMS', '');     /* v170.23.15: «بله» = /askreview به تفکیک «تیم تأیید» و راه تیم‌های دیگر (مالی، مدرسه، رویداد، مجله)؛ خالی = فقط پذیرش و مالک، همهٔ صف */
 /* تیم‌های تأیید (ASSISTANT.md بند ۲) و نقش‌هایی که هر تیم را می‌سازند (نقش میز پذیرش یا تب افراد) */
 var AS_TEAMS = { 'پذیرش': /پذیرش/, 'مالی': /مالی/, 'مدرسه': /مدرسه|استاد|هیئت علمی|منتور|سوپروایزر/, 'رویداد': /رویداد|کامیونیتی|کمپین/, 'مجله': /مجله|سردبیر/ };
@@ -253,6 +254,9 @@ function asAsk_(ctx, text) {
     asLog_(ctx.channel, '', mode, 'تحویل', ctx);
     return { answer: AS_HANDED, topic: '', handoff: true, buttons: ctx.channel === 'bot' ? [] : [{ url: AS_BOT_LINK, text: 'ادامه در تلگرام' }] };
   }
+  /* v170.23.16: ابزارها پیش از دانش (بعد از بحران و حالت منو) */
+  var tool = asToolFor_(ctx, text);
+  if (tool) return tool;
   var kb = asKb_();
   if (mode === AS_MODES.smart) {
     var sm = asSmart_(ctx, text, kb);
@@ -289,6 +293,87 @@ function asTap_(ctx, id, lastText) {
     return { answer: AS_HANDED, topic: '', handoff: true, buttons: ctx.channel === 'bot' ? [] : [{ url: AS_BOT_LINK, text: 'ادامه در تلگرام' }] };
   }
   return asAsk_(ctx, '');
+}
+
+/* ───── ابزارها (v170.23.16، بی هوش مصنوعی؛ ASSISTANT.md بند ۷) ─────
+   هر ابزار یک سطر: id، الگوی تشخیص روی متن یکسان‌شده، تابع (ctx، متن) ← خروجی همان شکل asAsk_ یا null، و کانال‌های مجاز.
+   کانال نامجاز: ابزار با deny همان کانال جواب می‌دهد (مثلاً «در بات ادامه بده»). افزودن ابزار تازه یعنی یک سطر. */
+var AS_SITE = 'https://tajrobeh.life';
+var AS_ALL_CH = ['bot', 'site', 'web', 'instagram', 'v2'];
+var AS_TOOLS = [
+  { id: 'events', re: /رویداد|کارگاه|وبینار|ایونت|دورهمی|برنامه(?:های)? پیش ?رو|جلسه(?:ی)? عمومی/, fn: asToolEvents_, ch: AS_ALL_CH },
+  { id: 'mag', re: /مجله|مقاله|مطلبی? (?:درباره|دربارهٔ|در مورد)|چیزی بخونم|چیزی بخوانم/, fn: asToolMag_, ch: AS_ALL_CH },
+  { id: 'status', re: /وضعیت (?:درخواست|پرونده)م|وضعیتم|وضعیت من|درخواستم چی شد|درخواستم کجاست|کی (?:با من |باهام )?تماس میگیر|پیگیری درخواست/, fn: asToolStatus_, ch: ['bot'], deny: asToolStatusWeb_ }
+];
+function asToolsOn_() { return String(cfg_('ASSIST_TOOLS', '') || '').trim() === 'بله'; }
+/** ابزار مناسب متن یا null */
+function asToolFor_(ctx, text) {
+  if (!asToolsOn_()) return null;
+  var n = asNorm_(text);
+  for (var i = 0; i < AS_TOOLS.length; i++) {
+    var t = AS_TOOLS[i]; if (!t.re.test(n) && !t.re.test(String(text))) continue;
+    var allowed = t.ch.indexOf(ctx.channel || 'web') > -1, f = allowed ? t.fn : t.deny;
+    if (typeof f !== 'function') continue;
+    var out = null;
+    try { out = f(ctx, text); } catch (e) { tgErr_('asTool ' + t.id, e); }
+    if (out) { out.tool = t.id; out.log = asLog_(ctx.channel, 'ابزار ' + t.id, asMode_(), out.handoff ? 'تحویل' : 'ابزار', ctx); return out; }
+  }
+  return null;
+}
+function asToday_() { return Utilities.formatDate(new Date(asNow_()), TG_TZ, 'yyyy-MM-dd'); }
+/* رویدادهای پیش‌رو: از همان دادهٔ tgApiEvents162_، سه مورد نزدیک با لینک صفحهٔ رویدادها */
+function asToolEvents_(ctx) {
+  var r = asDry_() && TG_MEM['as:events'] ? { ok: true, events: TG_MEM['as:events'] } : tgApiEvents162_({});
+  var today = asToday_();
+  var L = ((r && r.events) || []).filter(function (e) { return e.dateIso && e.dateIso >= today; }).sort(function (a, b) { return a.dateIso < b.dateIso ? -1 : a.dateIso > b.dateIso ? 1 : 0; }).slice(0, 3);
+  if (!L.length) return { answer: 'فعلاً رویداد تازه‌ای در برنامه نیست. صفحهٔ رویدادها را ببین.', topic: 'رویدادها', handoff: false, buttons: [{ url: AS_SITE + '/school/events/', text: 'صفحهٔ رویدادها' }] };
+  return { answer: 'رویدادهای پیش‌رو:\n' + L.map(function (e) { return '• ' + e.title + (e.date ? ' · ' + e.date : '') + (e.time ? ' · ساعت ' + e.time : ''); }).join('\n'),
+    topic: 'رویدادها', handoff: false, buttons: L.map(function (e) { return { url: AS_SITE + '/school/events/#ev=' + encodeURIComponent(e.code), text: String(e.title).slice(0, 40) }; }) };
+}
+/* مجله: جست‌وجوی عنوان با REST خود سایت (پرسش پاک‌شده)، سه نتیجه، کش ۶ ساعته */
+var AS_MAG_DROP = /مجله|مقاله(?:ای)?|مطلبی?|نوشته|درباره|دربارهٔ|در مورد|چیزی|بخونم|بخوانم|دارید|هست|می ?خوام|میخواهم|برام|بفرست/g;
+function asMagQuery_(text) { return asNorm_(asScrub_(text).replace(/\[(?:نام|عدد)\]/g, ' ')).replace(/[؟،؛!?.,]/g, ' ').replace(AS_MAG_DROP, ' ').split(' ').filter(function (w) { return w.length >= 2 && !(AS_STOP_SET || (asTokens_(''), AS_STOP_SET))[w]; }).join(' ').slice(0, 60); }
+function asMagSearch_(q) {
+  if (asDry_()) { var f = TG_MEM['as:mag']; (TG_MEM['as:magq'] = TG_MEM['as:magq'] || []).push(q); return typeof f === 'function' ? f(q) : (f || []); }
+  var c = CacheService.getScriptCache(), key = 'asmag:' + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, q)).slice(0, 22);
+  var hit = c.get(key); if (hit) { try { return JSON.parse(hit); } catch (e) {} }
+  var res = UrlFetchApp.fetch(AS_SITE + '/wp-json/wp/v2/posts?search=' + encodeURIComponent(q) + '&per_page=3&_fields=title,link', { muteHttpExceptions: true });
+  if (res.getResponseCode() !== 200) return [];
+  var L = (JSON.parse(res.getContentText()) || []).map(function (p) { return { title: String((p.title && p.title.rendered) || '').replace(/<[^>]+>/g, '').replace(/&#8204;/g, '‌').replace(/&[a-z#0-9]+;/gi, ' ').trim(), link: String(p.link || '') }; })
+    .filter(function (p) { return p.title && p.link.indexOf(AS_SITE + '/') === 0; }).slice(0, 3);
+  try { c.put(key, JSON.stringify(L), 21600); } catch (e2) {}
+  return L;
+}
+function asToolMag_(ctx, text) {
+  var q = asMagQuery_(text);
+  var L = q.length >= 2 ? asMagSearch_(q) : [];
+  if (!L.length) return { answer: 'مطلبی با این عنوان در مجله پیدا نکردم. فهرست مجله را ببین.', topic: 'مجله', handoff: false, buttons: [{ url: AS_SITE + '/mag/', text: 'مجلهٔ تجربه' }] };
+  return { answer: 'از مجلهٔ تجربه:\n' + L.map(function (p) { return '• ' + p.title; }).join('\n'), topic: 'مجله', handoff: false,
+    buttons: L.map(function (p) { return { url: p.link, text: p.title.slice(0, 40) }; }) };
+}
+/* وضعیت من: فقط بات و فقط chat ثبت‌شده روی لید (tgFindLead_). فقط مرحله و قدم بعد؛ بی نام درمانگر، بی شماره */
+var AS_ST_NEXT = {
+  first: 'همکارم در پذیرش به‌زودی برای هماهنگی با تو تماس می‌گیرد.',
+  booked: 'وقت معارفه‌ات ثبت شده؛ یادآوری پیش از جلسه همین‌جا می‌آید.',
+  live: 'درخواستت در پیگیری پذیرش است.',
+  stale: 'درخواستت در صف پیگیری پذیرش است؛ اگر عجله داری «با پذیرش حرف بزنم» را بزن.',
+  closed: 'این درخواست بسته شده است. اگر دوباره کمک می‌خواهی «با پذیرش حرف بزنم» را بزن.'
+};
+function asFindLead_(chat) {
+  if (asDry_()) return TG_DRY_LEAD && String(TG_DRY_LEAD.chatId || '') === String(chat) ? TG_DRY_LEAD.row : -1;
+  return tgFindLead_(chat);
+}
+function asToolStatus_(ctx) {
+  var row = ctx.chat ? asFindLead_(ctx.chat) : -1, l = row > 1 ? tgLeadRead_(row) : null;
+  if (!l) return { answer: 'درخواستی به نام این حساب تلگرام پیدا نکردم. اگر فرم را جای دیگری پر کرده‌ای، با پذیرش حرف بزن.', topic: 'وضعیت من', handoff: false, buttons: [{ id: 'h', text: 'با پذیرش حرف بزنم' }] };
+  var k = l.closed ? 'closed' : l.booked ? 'booked' : (l.stage || 'first');
+  var lines = ['وضعیت درخواست ' + (l.code || '') + ': ' + (l.status || 'در پیگیری')];
+  if (k === 'booked' && l.meetDate) lines.push('تاریخ معارفه: ' + tgFa_(l.meetDate));
+  lines.push('قدم بعد: ' + (AS_ST_NEXT[k] || AS_ST_NEXT.live));
+  return { answer: lines.join('\n'), topic: 'وضعیت من', handoff: false, buttons: [{ id: 'h', text: 'با پذیرش حرف بزنم' }] };
+}
+function asToolStatusWeb_() {
+  return { answer: 'برای دیدن وضعیت درخواستت، در بات تجربه ادامه بده.', topic: 'وضعیت من', handoff: false, buttons: [{ url: AS_BOT_LINK, text: 'ادامه در تلگرام' }] };
 }
 
 /* ───── حالت هوشمند (فقط با ASSIST_GEMINI_PAID = بله) ───── */
@@ -709,3 +794,46 @@ function asTests2() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'asTests2'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دستیار ۲ (v170.23.15)', 'asTests2']); } catch (eAs2) {}
+
+/* ───── آزمون دستیار ۳ · ابزارها (v170.23.16) ───── */
+function asTests3() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, cfg: TG_CFG_, lead: typeof TG_DRY_LEAD !== 'undefined' ? TG_DRY_LEAD : null };
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = { 'as:now': new Date('2026-10-08T12:00:00+03:30').getTime(), 'as:desk': ['801'] };
+  TG_CFG_ = { ASSIST_ENABLED: 'بله' };
+  try {
+    TG_MEM['as:' + AS_KB_TAB] = [{ 'موضوع': 'قیمت', 'پرسش‌های نمونه': 'هزینه جلسه', 'پاسخ': 'پاسخ نمونهٔ قیمت', 'تأیید': 'بله' }];
+    TG_MEM['as:events'] = [
+      { code: 'EV-3', title: 'رویداد نمونهٔ سوم', dateIso: '2026-10-20', date: '۲۸ مهر', time: '۱۸:۰۰' },
+      { code: 'EV-1', title: 'رویداد گذشته', dateIso: '2026-10-01', date: '۹ مهر' },
+      { code: 'EV-2', title: 'رویداد نمونهٔ دوم', dateIso: '2026-10-10', date: '۱۸ مهر' },
+      { code: 'EV-4', title: 'رویداد چهارم', dateIso: '2026-11-01' }, { code: 'EV-5', title: 'رویداد پنجم', dateIso: '2026-12-01' }];
+    ok('کلید خاموش: ابزار نیست، جست‌وجوی معمول', asAsk_({ channel: 'bot', chat: '601' }, 'رویدادهای پیش رو چیه').tool === undefined);
+    TG_CFG_.ASSIST_TOOLS = 'بله';
+    var ev = asAsk_({ channel: 'site', session: 's1' }, 'کارگاه یا رویداد پیش‌رو دارید؟');
+    ok('رویدادها: سه مورد نزدیک، گذشته نه، به ترتیب تاریخ', ev.tool === 'events' && ev.buttons.length === 3 && ev.buttons[0].url === AS_SITE + '/school/events/#ev=EV-2' && ev.answer.indexOf('گذشته') < 0, JSON.stringify(ev));
+    TG_MEM['as:events'] = [{ code: 'EV-1', title: 'رویداد گذشته', dateIso: '2026-10-01' }];
+    ok('رویدادها: بی رویداد آینده، لینک صفحه', asAsk_({ channel: 'bot', chat: '601' }, 'وبینار دارید؟').buttons[0].url === AS_SITE + '/school/events/');
+    TG_MEM['as:mag'] = function (q) { return /اضطراب/.test(q) ? [{ title: 'مطلب نمونه دربارهٔ اضطراب', link: AS_SITE + '/mag/sample-1/' }] : []; };
+    var mg = asAsk_({ channel: 'site', session: 's2' }, 'مقاله‌ای دربارهٔ اضطراب دارید؟ Sample');
+    ok('مجله: نتیجه با لینک سایت', mg.tool === 'mag' && mg.buttons[0].url === AS_SITE + '/mag/sample-1/', JSON.stringify(mg));
+    ok('مجله: پرسش پاک‌شده و بی واژهٔ زائد به جست‌وجو رفت', TG_MEM['as:magq'][0] === 'اضطراب', TG_MEM['as:magq'][0]);
+    ok('مجله: بی نتیجه، لینک مجله', asAsk_({ channel: 'bot', chat: '601' }, 'مقاله درباره چیزی ناشناخته').buttons[0].url === AS_SITE + '/mag/');
+    /* وضعیت من */
+    TG_DRY_LEAD = { row: 7, code: 'L-9001', chatId: '602', status: 'در پیگیری', stage: 'live', booked: false, closed: false, meetTher: 'درمانگر نمونه', phone: '09' + '000000000' };   // pii:ok ساختگی
+    var st = asAsk_({ channel: 'bot', chat: '602' }, 'وضعیت درخواستم چیه؟');
+    ok('وضعیت من: فقط مرحله و قدم بعد، بی نام درمانگر و شماره', st.tool === 'status' && /L-9001/.test(st.answer) && /قدم بعد/.test(st.answer) && st.answer.indexOf('درمانگر نمونه') < 0 && !/\d{6}/.test(st.answer), st.answer);
+    TG_DRY_LEAD.booked = true; TG_DRY_LEAD.meetDate = '2026-10-12';
+    ok('وضعیت من: معارفهٔ ثبت‌شده با تاریخ', /تاریخ معارفه/.test(asAsk_({ channel: 'bot', chat: '602' }, 'وضعیتم چیه').answer));
+    var unk = asAsk_({ channel: 'bot', chat: '699' }, 'وضعیت درخواستم چیه؟');
+    ok('وضعیت من با chat ناشناس: بی هیچ دادهٔ لید', unk.tool === 'status' && unk.answer.indexOf('L-9001') < 0 && unk.buttons[0].id === 'h', unk.answer);
+    var web = asAsk_({ channel: 'site', session: 's3' }, 'وضعیت درخواستم چیه؟');
+    ok('وضعیت من در وب: «در بات ادامه بده» با لینک بات', web.tool === 'status' && web.buttons[0].url === AS_BOT_LINK && web.answer.indexOf('L-') < 0, JSON.stringify(web));
+    ok('ابزارها در گزارش با نام ابزار', TG_MEM['as:' + AS_LOG_TAB].some(function (o) { return o['موضوع'] === 'ابزار status' && o['نتیجه'] === 'ابزار'; }));
+    ok('بحران پیش از ابزار', asAsk_({ channel: 'bot', chat: '602' }, 'رویداد دارید؟ می‌خواهم خودکشی کنم').crisis === true);
+    ok('جدول ابزار: هر سطر id، الگو، تابع و کانال', AS_TOOLS.every(function (t) { return t.id && t.re instanceof RegExp && typeof t.fn === 'function' && t.ch.length; }));
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg; TG_DRY_LEAD = keep.lead; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'asTests3'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دستیار ۳ · ابزارها (v170.23.16)', 'asTests3']); } catch (eAs3) {}
