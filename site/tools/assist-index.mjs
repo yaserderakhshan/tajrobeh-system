@@ -9,6 +9,9 @@ import { piiLine } from '../../.github/scripts/pii-scan.mjs';
 const SITE = (process.env.WORDPRESS_URL || 'https://tajrobeh.life').replace(/\/$/, '');
 const DRY = process.argv.includes('--dry') || !process.env.BOT_API_KEY;
 const CHUNK = 520, MIN = 60, PART = 400;
+/* سقف نمایه: هر پرسش در اپس‌اسکریپت همهٔ تکه‌ها را می‌خواند و می‌سنجد و مسیر سایت فقط ۱۵ ثانیه صبر می‌کند. با ۱۳ هزار تکه
+   (بیشترش مجله) پرسش‌های آزاد به 503 رسید. هر برگه حداکثر ۶ تکه، هر مقاله فقط تکهٔ اول (پرسش مجله ابزار جدای خودش را دارد)، کل ۱۵۰۰. */
+export const MAX_PAGE = 6, MAX_POST = 1, MAX_TOTAL = 1500;
 
 /* مسیرهایی که هرگز وارد نمی‌شوند: ادمین، ورود، حساب، پرداخت، مینی‌اپ، بازبینی و صفحه‌های تأیید راهبران */
 export const SKIP_PATH = /\/(?:wp-admin|wp-login|login|my-account|account|cart|checkout|pay|payment|app|review|thank-you|thanks|tj-ebi-mod|preview|draft|test-page|staging)(?:\/|$)|[?&](?:tj_ebi_mod|preview|p)=/i;
@@ -84,6 +87,7 @@ export function pageChunks(p, kind) {
   const dom = guessDomain(url, text, kind);
   return chunks(title, text)
     .filter((c) => !MONEY.test(c.title + ' ' + c.text) && piiLine(c.title + ' ' + c.text, 'site/index').length === 0)
+    .slice(0, kind === 'post' ? MAX_POST : MAX_PAGE)
     .map((c, i) => ({ id: idOf(url + '#' + i + ':' + c.text.slice(0, 40)), url, title: c.title.slice(0, 160), text: c.text.slice(0, CHUNK), dom, aud: AUD[dom] || 'کاربر عمومی', src: kind === 'post' ? 'مجله' : 'سایت', mod: String(p.modified || '').slice(0, 10) }));
 }
 
@@ -115,7 +119,7 @@ async function main() {
   const pages = await getAll(`/wp-json/wp/v2/pages?status=publish&${F}`);
   const posts = await getAll(`/wp-json/wp/v2/posts?status=publish&${F}`);
   const all = [...pages.flatMap((p) => pageChunks(p, 'page')), ...posts.flatMap((p) => pageChunks(p, 'post'))];
-  const seen = new Set(), list = all.filter((c) => !seen.has(c.id) && seen.add(c.id));
+  const seen = new Set(), list = all.filter((c) => !seen.has(c.id) && seen.add(c.id)).slice(0, MAX_TOTAL);
   const byDom = {}; list.forEach((c) => { byDom[c.dom] = (byDom[c.dom] || 0) + 1; });
   console.log(`صفحه ${pages.length} · مقاله ${posts.length} · تکه ${list.length}`);
   console.log('حوزه‌ها: ' + Object.entries(byDom).map(([d, n]) => `${d} ${n}`).join('، '));
