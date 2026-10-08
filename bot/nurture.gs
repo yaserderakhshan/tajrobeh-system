@@ -111,14 +111,35 @@ function nuApproved_() {
   if (nuProp_('NU_OK_DAY') === today) return true;
   return nuAuto_();
 }
+/* v170.23.25 (یاسر): کارت به فارسی ساده، بی نام کلید؛ هر گروه یک خط با متن پیامی که می‌گیرند */
+var NU_WHO = { 'فرم': 'فرم پر کرده‌اند ولی هنوز معارفه نگرفته‌اند', 'معارفه': 'معارفه رفته‌اند ولی هنوز درمان را شروع نکرده‌اند' };
+var NU_STEP_FA = ['یادآوری اول', 'یادآوری دوم', 'یادآوری آخر'];
+function nuCardText_(due) {
+  var by = {}, order = [];
+  due.forEach(function (x) { var k = x.o['گروه'] + '|' + x.step; if (!by[k]) { by[k] = 0; order.push(k); } by[k]++; });
+  order.sort();
+  var T = ['📨 <b>پیام پیگیری امروز · ' + tgFa_(due.length) + ' نفر</b>', ''];
+  order.forEach(function (k) {
+    var g = k.split('|')[0], step = Number(k.split('|')[1]);
+    T.push('• ' + tgFa_(by[k]) + ' نفر ' + (NU_WHO[g] || g) + ' (' + NU_STEP_FA[step] + ').', '   پیامی که می‌گیرند: «' + tgEsc_(nuText_(g, step, '[نام]')) + '»', '');
+  });
+  T.push('پیام فقط در تلگرام و بین ۹ تا ۲۱ می‌رود. با جواب، اقدام پذیرش یا دکمهٔ «دیگر پیام نده» قطع می‌شود.');
+  return T.join('\n');
+}
+function nuCardKb_(today) {
+  return { inline_keyboard: [[{ text: '✅ امروز بفرست', callback_data: 'nu:go:' + today }, { text: '⏸ امروز نه', callback_data: 'nu:no:' + today }], [{ text: '👀 فهرست نفرات', callback_data: 'nu:ls:' + today }]] };
+}
+/* فهرست نفرات: فقط کد لید و مرحله، بی نام و شماره */
+function nuListText_(due) {
+  if (!due.length) return 'امروز کسی در فهرست پیام پیگیری نیست.';
+  return '👀 <b>فهرست امروز · ' + tgFa_(due.length) + ' نفر</b>\n' + due.map(function (x) {
+    return tgEsc_(String(x.o['کد لید'] || '')) + ' · ' + (x.o['گروه'] === NU_G.intro ? 'معارفه رفته، شروع نکرده' : 'فرم بی معارفه') + ' · ' + NU_STEP_FA[x.step];
+  }).join('\n');
+}
 function nuCard_(due) {
   var today = nuDay_(); if (nuProp_('NU_CARD_DAY') === today) return false;
   nuProp_('NU_CARD_DAY', today);
-  var by = {}; due.forEach(function (x) { var k = nuKey_(x.o['گروه'], x.step); by[k] = (by[k] || 0) + 1; });
-  var T = ['📨 <b>پیگیری گیرکرده‌ها · امروز</b>', tgFa_(due.length) + ' گیرنده، فقط تلگرام، بین ۹ تا ۲۱:', ''];
-  Object.keys(by).sort().forEach(function (k) { T.push('• ' + k + ': ' + tgFa_(by[k]) + ' نفر\n   «' + tgEsc_(nuText_(k.indexOf('INTRO') > -1 ? NU_G.intro : NU_G.form, Number(k.slice(-1)) - 1, '[نام]')) + '»'); });
-  T.push('', 'هر پیام دکمهٔ «دیگر پیام نده» دارد و با هر پاسخ یا اقدام پذیرش دنباله می‌ایستد.', 'بعد از سه «بفرست» پشت‌سرهم، این کارت فقط یک خط در گزارش شبانه می‌شود.');
-  if (TG_OWNER_CHAT) tgNotify_(String(TG_OWNER_CHAT), TG_NK.task, T.join('\n'), { ref: 'NU-' + today, markup: { inline_keyboard: [[{ text: '✅ بفرست', callback_data: 'nu:go:' + today }, { text: '⏸ امروز نه', callback_data: 'nu:no:' + today }]] } });
+  if (TG_OWNER_CHAT) tgNotify_(String(TG_OWNER_CHAT), TG_NK.task, nuCardText_(due), { ref: 'NU-' + today, markup: nuCardKb_(today) });
   return true;
 }
 
@@ -173,9 +194,10 @@ function nuCb_(chat, data) {
     var today = nuDay_(); if (a[2] && a[2] !== today) return tgSend_(chat, 'این کارت مال روز دیگری است.');
     nuProp_('NU_OK_DAY', today); nuProp_('NU_STREAK', String(Number(nuProp_('NU_STREAK') || 0) + 1));
     var n = nuSend_();
-    return tgSend_(chat, '✅ ' + tgFa_(n) + ' پیام رفت.' + (nuAuto_() ? ' از فردا ارسال خودکار است و فقط یک خط در گزارش شبانه می‌آید؛ برای توقف یک روز: /nuno' : ''));
+    return tgSend_(chat, '✅ ' + tgFa_(n) + ' پیام رفت.' + (nuAuto_() ? ' از فردا پیام‌ها خودکار می‌روند و فقط یک خط در گزارش شبانه می‌آید. برای یک روز توقف، /nuno را بفرست.' : ''));
   }
   if (act === 'no') { nuNo_(); return tgSend_(chat, '⏸ امروز پیامی نمی‌رود. فردا دوباره کارت می‌آید.'); }
+  if (act === 'ls') return tgSend_(chat, nuListText_(nuDue_()));
   return null;
 }
 function nuNo_() { nuProp_('NU_NO_DAY', nuDay_()); nuProp_('NU_STREAK', '0'); }
@@ -214,7 +236,9 @@ function nuTests() {
     ok('فقط گیرکرده‌ها با chat وارد دنباله می‌شوند', nuEnroll_() === 2 && TG_MEM['as:' + NU_TAB].map(function (o) { return o['کد لید'] + o['گروه']; }).join() === 'L-1فرم,L-3معارفه');
     /* کارت تأیید پیش از اولین ارسال */
     ok('بی تأیید یاسر هیچ پیامی نمی‌رود؛ کارت با شمار و متن', nuTick_() === 0 && TG_OUTBOX.filter(function (x) { return x.chat === '501'; }).length === 0 &&
-      TG_MEM.notify.some(function (x) { return x.chat === '9001' && /۲ گیرنده/.test(x.text) && x.text.indexOf('[نام]') > -1; }));
+      TG_MEM.notify.some(function (x) { return x.chat === '9001' && /پیام پیگیری امروز · ۲ نفر/.test(x.text) && x.text.indexOf('[نام]') > -1; }));
+    ok('کارت به فارسی ساده: هر گروه یک خط، قاعدهٔ ۹ تا ۲۱، بی نام کلید', (function () { var c = TG_MEM.notify.filter(function (x) { return x.chat === '9001'; })[0] || {}; return /۱ نفر فرم پر کرده‌اند ولی هنوز معارفه نگرفته‌اند/.test(c.text) && /۱ نفر معارفه رفته‌اند ولی هنوز درمان را شروع نکرده‌اند/.test(c.text) && /بین ۹ تا ۲۱ می‌رود/.test(c.text) && !/NURTURE|nu:/.test(c.text); })());
+    ok('فهرست نفرات: فقط کد لید و مرحله', (function () { TG_OUTBOX = []; nuCb_('9001', 'nu:ls:2026-10-10'); var m = TG_OUTBOX.slice(-1)[0] || {}; return /L-1 · فرم بی معارفه · یادآوری اول/.test(m.text) && /L-3 · معارفه رفته، شروع نکرده/.test(m.text) && TG_MEM['as:' + NU_TAB][0]['مرحله'] === 0; })());
     ok('کارت روزی یک بار', nuTick_() === 0 && TG_MEM.notify.filter(function (x) { return x.chat === '9001'; }).length === 1);
     ok('دکمهٔ «بفرست» فقط برای یاسر', (TG_OUTBOX = [], nuCb_('777', 'nu:go:2026-10-10'), TG_MEM['as:' + NU_TAB][0]['مرحله'] === 0));
     nuCb_('9001', 'nu:go:2026-10-10');

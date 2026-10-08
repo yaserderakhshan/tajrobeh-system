@@ -68,6 +68,30 @@ function reQueue_() {
   });
 }
 
+/* v170.23.25 (یاسر): کارت به فارسی ساده، به سبک کارت پیام پیگیری */
+var RE_WHO = { 'مراجع قدیمی': 'مراجع قدیمی‌اند و مدتی است جلسه ندارند', 'لید': 'در ۶ ماه گذشته درخواست داده‌اند ولی به تماس پذیرش جواب نداده‌اند' };
+function reCardText_(b, more) {
+  var by = {}; b.forEach(function (x) { by[x.src] = (by[x.src] || 0) + 1; });
+  var T = ['🔁 <b>پیام بازگشت امروز · ' + tgFa_(b.length) + ' نفر</b>', ''];
+  Object.keys(by).forEach(function (k) { T.push('• ' + tgFa_(by[k]) + ' نفر ' + (RE_WHO[k] || k) + '.'); });
+  T.push('', 'پیامی که می‌گیرند: «' + tgEsc_(reText_('[نام]', '[درمانگر قبلی]')) + '»', '', 'دکمه‌های پیام: «دوباره شروع کنم» و «فعلاً نه».',
+    'پیام فقط در تلگرام و بین ۹ تا ۲۱ می‌رود و هر نفر فقط یک بار می‌گیرد.');
+  if (more > 0) T.push(tgFa_(more) + ' نفر دیگر برای روزهای بعد در صف‌اند.');
+  return T.join('\n');
+}
+function reCardKb_(today) {
+  return { inline_keyboard: [[{ text: '✅ امروز بفرست', callback_data: 're:send:' + today }, { text: '⏸ امروز نه', callback_data: 're:wait:' + today }], [{ text: '👀 فهرست نفرات', callback_data: 're:ls:' + today }]] };
+}
+/* فهرست نفرات: فقط کد و گروه، بی نام و شماره */
+function reListText_() {
+  var raw = {}; try { raw = JSON.parse(reProp_('RE_BATCH') || '{}'); } catch (e) {}
+  var L = raw.day === reDay_() && raw.items ? raw.items : [];
+  if (!L.length) return 'امروز کسی در فهرست پیام بازگشت نیست.';
+  return '👀 <b>فهرست امروز · ' + tgFa_(L.length) + ' نفر</b>\n' + L.map(function (x) {
+    return tgEsc_(String(x.id || '').replace(/^[LM]:/, '')) + ' · ' + (x.src === 'لید' ? 'درخواست بی‌پاسخ' : 'مراجع قدیمی');
+  }).join('\n');
+}
+
 /* ───── دسته و کارت پیش‌نمایش ───── */
 function reTick_() {
   if (!reOn_()) return 0;
@@ -77,11 +101,7 @@ function reTick_() {
   var b = q.slice(0, RE_BATCH);
   reProp_('RE_CARD_DAY', today);
   reProp_('RE_BATCH', JSON.stringify({ day: today, items: b }));
-  var bySrc = {}; b.forEach(function (x) { bySrc[x.src] = (bySrc[x.src] || 0) + 1; });
-  var T = ['🔁 <b>بازگرداندن مراجعان قدیمی · دستهٔ امروز</b>', tgFa_(b.length) + ' نفر (' + Object.keys(bySrc).map(function (k) { return k + ' ' + tgFa_(bySrc[k]); }).join('، ') + ')' +
-    (q.length > b.length ? ' · در صف بعدی: ' + tgFa_(q.length - b.length) : ''), '', 'متن (هر نفر با نام کوچک خودش و درمانگر قبلی اگر داشته):',
-    '«' + tgEsc_(reText_('[نام]', '[درمانگر]')) + '»', '', 'دکمه‌ها: «دوباره شروع کنم» و «فعلاً نه». هر نفر فقط یک بار.'];
-  if (TG_OWNER_CHAT) tgNotify_(String(TG_OWNER_CHAT), TG_NK.task, T.join('\n'), { ref: 'RE-' + today, markup: { inline_keyboard: [[{ text: '✅ بفرست', callback_data: 're:send:' + today }, { text: '⏸ صبر', callback_data: 're:wait:' + today }]] } });
+  if (TG_OWNER_CHAT) tgNotify_(String(TG_OWNER_CHAT), TG_NK.task, reCardText_(b, q.length - b.length), { ref: 'RE-' + today, markup: reCardKb_(today) });
   return b.length;
 }
 function reSend_() {
@@ -127,10 +147,11 @@ function reBook_(chat, ther) {
 }
 function reCb_(chat, data, name, uname) {
   var a = String(data).split(':'), act = a[1], id = a.slice(2).join(':');
-  if (act === 'send' || act === 'wait') {
+  if (act === 'send' || act === 'wait' || act === 'ls') {
     if (String(chat) !== String(TG_OWNER_CHAT)) return tgSend_(chat, 'این دکمه مخصوص یاسر است.');
     if (id !== reDay_()) return tgSend_(chat, 'این کارت مال روز دیگری است.');
-    if (act === 'wait') { reProp_('RE_BATCH', ''); return tgSend_(chat, '⏸ این دسته نرفت. فردا دستهٔ تازه با کارت می‌آید.'); }
+    if (act === 'ls') return tgSend_(chat, reListText_());
+    if (act === 'wait') { reProp_('RE_BATCH', ''); return tgSend_(chat, '⏸ امروز پیامی نرفت. فردا دستهٔ تازه با کارت می‌آید.'); }
     var n = reSend_();
     return tgSend_(chat, n < 0 ? 'الان بیرون از ۹ تا ۲۱ است؛ فردا دوباره کارت می‌آید.' : '✅ ' + tgFa_(n) + ' پیام رفت.');
   }
@@ -187,6 +208,8 @@ function reTests() {
     ok('«منصرف شد»، «دیگر پیام نده» و قدیمی‌تر از ۶ ماه بیرون', !q.some(function (x) { return ['602', '604', '605', '606'].indexOf(x.chat) > -1; }));
     ok('کارت پیش‌نمایش برای یاسر، بی ارسال', reTick_() === 3 && TG_OUTBOX.every(function (x) { return x.chat === '9001'; }) && TG_MEM.notify.some(function (x) { return x.chat === '9001' && /۳ نفر/.test(x.text); }));
     ok('روزی یک کارت', reTick_() === 0);
+    ok('کارت به فارسی ساده، بی نام کلید', (function () { var c = TG_MEM.notify.filter(function (x) { return x.chat === '9001'; })[0] || {}; return /پیام بازگشت امروز · ۳ نفر/.test(c.text) && /بین ۹ تا ۲۱ می‌رود/.test(c.text) && !/REACTIVATE|re:/.test(c.text); })());
+    ok('فهرست نفرات: فقط کد و گروه', (function () { TG_OUTBOX = []; reCb_('9001', 're:ls:2026-10-10'); var m = TG_OUTBOX.slice(-1)[0] || {}; return /فهرست امروز · ۳ نفر/.test(m.text) && !/\d{6,}/.test(m.text); })());
     reCb_('777', 're:send:2026-10-10');
     ok('«بفرست» فقط یاسر', TG_MEM['as:' + RE_TAB] === undefined || TG_MEM['as:' + RE_TAB].length === 0);
     TG_OUTBOX = []; reCb_('9001', 're:send:2026-10-10');

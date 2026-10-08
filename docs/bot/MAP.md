@@ -77,7 +77,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.24`
+نسخهٔ کد: `v170.23.25`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -123,8 +123,8 @@
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۱۴۶۲ | ۱۱۴ |
 | `leadspeed.gs` | ۹۵۶ | ۸۰ |
-| `nurture.gs` | ۲۶۵ | ۲۷ |
-| `reactivate.gs` | ۲۲۳ | ۲۲ |
+| `nurture.gs` | ۲۸۹ | ۳۰ |
+| `reactivate.gs` | ۲۴۶ | ۲۵ |
 
 ### کارهای زمان‌دار
 
