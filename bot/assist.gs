@@ -20,9 +20,10 @@
  * همه پشت ASSIST_ENABLED = «بله».
  */
 var AS_KB_TAB = 'دانش دستیار';
-var AS_KB_HEAD = ['موضوع', 'پرسش‌های نمونه', 'پاسخ', 'منبع', 'تأیید', 'تاریخ تأیید', 'تأییدکننده'];
+var AS_KB_HEAD = ['موضوع', 'پرسش‌های نمونه', 'پاسخ', 'منبع', 'تأیید', 'تاریخ تأیید', 'تأییدکننده',
+  'مخاطب', 'حوزه', 'تیم تأیید', 'نسخه', 'تاریخ بازبینی', 'یادداشت بازبینی'];   /* v170.23.15: ستون‌های ته جدول (ASSISTANT.md بند ۵)؛ با نام سرستون خوانده می‌شوند */
 var AS_LOG_TAB = 'دستیار · گزارش';
-var AS_LOG_HEAD = ['زمان', 'کانال', 'موضوع', 'حالت', 'نتیجه', 'رضایت', 'شناسه'];
+var AS_LOG_HEAD = ['زمان', 'کانال', 'موضوع', 'حالت', 'نتیجه', 'رضایت', 'شناسه', 'مخاطب', 'میلی‌ثانیه'];   /* v170.23.15: مخاطب و زمان پاسخ */
 var AS_UN_TAB = 'سؤال‌های بی‌پاسخ';
 var AS_UN_HEAD = ['زمان', 'کانال', 'متن'];
 var AS_COST_TAB = 'هزینهٔ جمنای';
@@ -39,6 +40,10 @@ cfg_('ASSIST_GEMINI_PAID', '');  /* فقط یاسر بعد از فعال شدن 
 cfg_('ASSIST_MATCH_MIN', '');    /* آستانهٔ جست‌وجو، ۰ تا ۱؛ خالی = ۰٫۶ */
 cfg_('ASSIST_EMERGENCY', '');    /* JSON {کد کشور: متن اورژانس}؛ خالی = متن ایران */
 cfg_('ASSIST_RATE', '');         /* سقف پرسش هر session_id در ساعت؛ خالی = ۲۰ */
+cfg_('ASSIST_KB_TEAMS', '');     /* v170.23.15: «بله» = /askreview به تفکیک «تیم تأیید» و راه تیم‌های دیگر (مالی، مدرسه، رویداد، مجله)؛ خالی = فقط پذیرش و مالک، همهٔ صف */
+/* تیم‌های تأیید (ASSISTANT.md بند ۲) و نقش‌هایی که هر تیم را می‌سازند (نقش میز پذیرش یا تب افراد) */
+var AS_TEAMS = { 'پذیرش': /پذیرش/, 'مالی': /مالی/, 'مدرسه': /مدرسه|استاد|هیئت علمی|منتور|سوپروایزر/, 'رویداد': /رویداد|کامیونیتی|کمپین/, 'مجله': /مجله|سردبیر/ };
+var AS_AUDS = ['مراجع', 'خانواده', 'کاربر عمومی', 'مراجع خارج از ایران', 'درمانگر', 'پارتنر فضا', 'سازمان', 'کارمند سازمان', 'متقاضی همکاری', 'دانشجو', 'علاقه‌مند', 'عضو مدرسه', 'استاد', 'کامیونیتی', 'نویسنده', 'خوانندهٔ مجله', 'روان‌شناس', 'همکار'];
 
 function asDry_() { return typeof TG_DRY !== 'undefined' && TG_DRY; }
 function asNow_() { return asDry_() && TG_MEM['as:now'] ? Number(TG_MEM['as:now']) : Date.now(); }
@@ -138,9 +143,17 @@ function asKnownNames_() {
   try { (typeof tgPeopleList_ === 'function' ? tgPeopleList_() : []).forEach(function (p) { if (p.name) out.push(String(p.name)); }); } catch (e2) {}
   return out;
 }
+/* v170.23.15: واژهٔ بعد از عنوان (خانم، آقای، دکتر، استاد و مانند آن) و هر واژهٔ لاتین حرف‌بزرگ، حتی اگر در فهرست‌های داخلی نباشد */
+var AS_TITLES = ['سرکار خانم', 'جناب آقای', 'خانم', 'آقای', 'آقا', 'دکتر', 'استاد', 'مهندس', 'جناب', 'سرکار', 'دکتری'];
+function asScrubTitles_(s) {
+  var t = AS_TITLES.map(function (x) { return x.replace(/\s+/g, '\\s+'); }).join('|');
+  s = s.replace(new RegExp('(^|[\\s«"(،,.])(' + t + ')\\s+[^\\s«»"(),،.!؟?:؛]+', 'g'), '$1$2 [نام]');
+  return s.replace(/(^|[^A-Za-z])[A-Z][a-z]+(?:[-'][A-Za-z]+)*/g, '$1[نام]');
+}
 function asScrub_(text, extra) {
   var s = cmScrub_(String(text || ''), '');
   s = s.replace(/\d{4,}/g, '[عدد]');
+  s = asScrubTitles_(s);
   var names = asKnownNames_().concat(extra || []), parts = {};
   names.forEach(function (n) { String(n).split(/\s+/).forEach(function (p) { p = p.trim(); if (p.length >= 3) parts[p] = 1; }); });
   names.forEach(function (n) { n = String(n).trim(); if (n.length >= 3) s = s.split(n).join('[نام]'); });
@@ -149,10 +162,30 @@ function asScrub_(text, extra) {
 }
 
 /* ───── گزارش ───── */
-function asLog_(channel, topic, mode, result) {
+/* ctx اختیاری: مخاطب (ctx.audience) و زمان پاسخ از ctx.t0 */
+function asLog_(channel, topic, mode, result, ctx) {
   var id = 'A-' + asNow_().toString(36) + Math.floor(Math.random() * 1296).toString(36);
-  try { asTab_(AS_LOG_TAB, AS_LOG_HEAD).add({ 'زمان': asFmt_(), 'کانال': channel, 'موضوع': topic || '', 'حالت': mode, 'نتیجه': result, 'رضایت': '', 'شناسه': id }); } catch (e) { tgErr_('asLog_', e); }
+  var ms = ctx && ctx.t0 ? Math.max(0, Date.now() - ctx.t0) : '';
+  try { asTab_(AS_LOG_TAB, AS_LOG_HEAD).add({ 'زمان': asFmt_(), 'کانال': channel, 'موضوع': topic || '', 'حالت': mode, 'نتیجه': result, 'رضایت': '', 'شناسه': id, 'مخاطب': asAud_(ctx), 'میلی‌ثانیه': ms }); } catch (e) { tgErr_('asLog_', e); }
   return id;
+}
+/* مخاطب: از ورودی وب (فهرست AS_AUDS) یا در بات از نقش chat؛ وگرنه «کاربر عمومی» */
+function asAud_(ctx) {
+  if (!ctx) return '';
+  if (ctx.aud) return ctx.aud;
+  var a = String(ctx.audience || '').trim();
+  if (AS_AUDS.indexOf(a) > -1) return (ctx.aud = a);
+  if (ctx.channel === 'bot' && ctx.chat) {
+    try {
+      var r = tgRolesOf_(ctx.chat, ''), roles = (r && r.roles) || [];
+      if (r && r.desk) return (ctx.aud = 'همکار');
+      if (roles.indexOf('درمانگر') > -1) return (ctx.aud = 'درمانگر');
+      if (roles.some(function (x) { return /دانشجو/.test(x); })) return (ctx.aud = 'دانشجو');
+      if (roles.some(function (x) { return /استاد|سوپروایزر|منتور/.test(x); })) return (ctx.aud = 'استاد');
+      if (roles.some(function (x) { return /پارتنر/.test(x); })) return (ctx.aud = 'پارتنر فضا');
+    } catch (e) {}
+  }
+  return (ctx.aud = 'کاربر عمومی');
 }
 function asRate_(id, good) {
   var t = asTab_(AS_LOG_TAB, AS_LOG_HEAD), o = t.rows.filter(function (r) { return r['شناسه'] === id; })[0];
@@ -199,30 +232,31 @@ function asHandoff_(ctx, text, why) {
 function asTopicBtns_(topics) { return topics.slice(0, 3).map(function (t) { return { id: 't:' + asTopicIdx_(t), text: t }; }); }
 function asTopicIdx_(t) { return asTopics_().indexOf(t); }
 function asAnswerOut_(ctx, k, mode) {
-  var log = asLog_(ctx.channel, k.topic, mode, 'پاسخ');
+  var log = asLog_(ctx.channel, k.topic, mode, 'پاسخ', ctx);
   return { answer: k.answer, topic: k.topic, handoff: false, log: log,
     buttons: [{ id: 'x:' + log, text: 'جوابم را نگرفتم' }, { id: 'y:' + log, text: '👍' }, { id: 'n:' + log, text: '👎' }] };
 }
 /** پرسش آزاد */
 function asAsk_(ctx, text) {
+  if (ctx && !ctx.t0) ctx.t0 = Date.now();
   text = String(text || '').trim();
   if (!text) return { answer: AS_WELCOME, topic: '', handoff: false, buttons: asTopicBtns_(asTopics_()).concat([{ id: 'h', text: 'با پذیرش حرف بزنم' }]) };
   /* بحران همیشه اول */
   if (tgIsCrisis_(text)) {
     asUrgent_(ctx);
-    asLog_(ctx.channel, 'بحران', asMode_(), 'بحران');
+    asLog_(ctx.channel, 'بحران', asMode_(), 'بحران', ctx);
     return { answer: asEmergency_(ctx.country), topic: 'بحران', handoff: true, crisis: true, buttons: [] };
   }
   var mode = asMode_();
   if (mode === AS_MODES.menu) {
     asHandoff_(ctx, text, 'متن آزاد');
-    asLog_(ctx.channel, '', mode, 'تحویل');
+    asLog_(ctx.channel, '', mode, 'تحویل', ctx);
     return { answer: AS_HANDED, topic: '', handoff: true, buttons: ctx.channel === 'bot' ? [] : [{ url: AS_BOT_LINK, text: 'ادامه در تلگرام' }] };
   }
   var kb = asKb_();
   if (mode === AS_MODES.smart) {
     var sm = asSmart_(ctx, text, kb);
-    if (sm && sm.crisis) { asUrgent_(ctx); asLog_(ctx.channel, 'بحران', mode, 'بحران'); return { answer: asEmergency_(ctx.country), topic: 'بحران', handoff: true, crisis: true, buttons: [] }; }
+    if (sm && sm.crisis) { asUrgent_(ctx); asLog_(ctx.channel, 'بحران', mode, 'بحران', ctx); return { answer: asEmergency_(ctx.country), topic: 'بحران', handoff: true, crisis: true, buttons: [] }; }
     if (sm && sm.k) return asAnswerOut_(ctx, sm.k, mode);
     mode = AS_MODES.search;   /* اطمینان کم یا خطا: جست‌وجوی داخلی */
   }
@@ -231,13 +265,14 @@ function asAsk_(ctx, text) {
   var near = [], seen = {};
   res.forEach(function (r) { if (!seen[r.k.topic] && near.length < 3) { seen[r.k.topic] = 1; near.push(r.k.topic); } });
   if (near.length < 3) asTopics_(kb).forEach(function (t) { if (!seen[t] && near.length < 3) { seen[t] = 1; near.push(t); } });
-  asLog_(ctx.channel, '', mode, 'بی‌پاسخ');
+  asLog_(ctx.channel, '', mode, 'بی‌پاسخ', ctx);
   asUnanswered_(ctx.channel, text, [ctx.name]);
   return { answer: 'جواب دقیقی برای این پیدا نکردم. شاید یکی از این موضوع‌ها باشد، یا مستقیم با پذیرش حرف بزن.', topic: '', handoff: false,
     buttons: asTopicBtns_(near).concat([{ id: 'h', text: 'با پذیرش حرف بزنم' }]) };
 }
 /** کلیک روی دکمه‌ها؛ id بی پیشوند as: */
 function asTap_(ctx, id, lastText) {
+  if (ctx && !ctx.t0) ctx.t0 = Date.now();
   var a = String(id || '').split(':'), act = a[0];
   if (act === 't') {
     var topic = asTopics_()[Number(a[1])]; if (!topic) return asAsk_(ctx, '');
@@ -250,7 +285,7 @@ function asTap_(ctx, id, lastText) {
   if (act === 'x' || act === 'h') {
     if (act === 'x') { asRate_(a[1], false); if (lastText) asUnanswered_(ctx.channel, lastText, [ctx.name]); }
     asHandoff_(ctx, lastText || '', act === 'x' ? 'جوابم را نگرفتم' : 'خواست با پذیرش حرف بزند');
-    asLog_(ctx.channel, '', asMode_(), 'تحویل');
+    asLog_(ctx.channel, '', asMode_(), 'تحویل', ctx);
     return { answer: AS_HANDED, topic: '', handoff: true, buttons: ctx.channel === 'bot' ? [] : [{ url: AS_BOT_LINK, text: 'ادامه در تلگرام' }] };
   }
   return asAsk_(ctx, '');
@@ -310,7 +345,7 @@ function asRoute_(chat, m) {
   if (tgGetVal_('asr', chat) && t) return asReviewText_(chat, t);
   if (t === '/askreview') { asReviewNext_(chat); return true; }
   if (!tgGetVal_('asq', chat) || !t || t.indexOf('/') === 0 || (typeof tgIsBtnLike_ === 'function' && tgIsBtnLike_(t)) || (typeof tgLooksLikePhone_ === 'function' && tgLooksLikePhone_(t))) return false;
-  if (tgIsCrisis_(t) && typeof tgOnCrisis_ === 'function') { tgDel_('asq', chat); asUrgent_(asCtxBot_(chat, name)); asLog_('bot', 'بحران', asMode_(), 'بحران'); tgOnCrisis_(chat, name, m.from && m.from.username ? '@' + m.from.username : '', t); return true; }
+  if (tgIsCrisis_(t) && typeof tgOnCrisis_ === 'function') { tgDel_('asq', chat); asUrgent_(asCtxBot_(chat, name)); asLog_('bot', 'بحران', asMode_(), 'بحران', asCtxBot_(chat, name)); tgOnCrisis_(chat, name, m.from && m.from.username ? '@' + m.from.username : '', t); return true; }
   tgSetVal_('aslast', chat, t.slice(0, 500));
   asBotSend_(chat, asAsk_(asCtxBot_(chat, name), t));
   return true;
@@ -340,56 +375,88 @@ function asWeb_(e, raw, body) {
   if (!sid) return asJson_({ ok: false, error: 'session' });
   var max = Number(cfg_('ASSIST_RATE', '')) || 20;
   if (!pbRate_('as:' + sid, max)) return asJson_({ ok: false, error: 'rate' });
-  var ctx = { channel: String(body.channel || 'web').replace(/[^\w-]/g, '').slice(0, 20) || 'web', session: sid, country: String(body.country || '').slice(0, 2) };
+  var ctx = { channel: String(body.channel || 'web').replace(/[^\w-]/g, '').slice(0, 20) || 'web', session: sid, country: String(body.country || '').slice(0, 2), audience: String(body.audience || '').slice(0, 30), t0: Date.now() };
   var out = body.tap ? asTap_(ctx, String(body.tap), String(body.text || '')) : asAsk_(ctx, String(body.text || '').slice(0, 500));
   return asJson_({ ok: true, answer: out.answer, topic: out.topic || '', handoff: !!out.handoff, buttons: out.buttons || [] });
 }
 
-/* ───── بازبینی دانش در بات (پذیرش و مالک) ───── */
-function asIsStaff_(chat) {
-  if (TG_OWNER_CHAT && String(chat) === String(TG_OWNER_CHAT)) return true;
-  try { return !!tgWhoDesk_(chat, ''); } catch (e) { return false; }
+/* ───── بازبینی دانش در بات ─────
+   ASSIST_KB_TEAMS خاموش (پیش‌فرض): فقط پذیرش و مالک، همهٔ صف (رفتار v170.23.11).
+   روشن (v170.23.15): هر بازبین فقط ردیف‌های «تیم تأیید» خودش؛ تیم از نقش میز پذیرش یا تب افراد (AS_TEAMS)؛ مالک همه را می‌بیند.
+   ردیف بی «تیم تأیید» مال پذیرش است. «تأیید» خالی یا «خیر» یعنی در صف؛ «بله» و «کنار» بیرون از صف. */
+function asTeamsOn_() { return String(cfg_('ASSIST_KB_TEAMS', '') || '').trim() === 'بله'; }
+function asIsOwner_(chat) { return !!(TG_OWNER_CHAT && String(chat) === String(TG_OWNER_CHAT)); }
+/** تیم‌های یک chat؛ ['*'] برای مالک */
+function asReviewTeams_(chat) {
+  if (asIsOwner_(chat)) return ['*'];
+  var out = [], r = null;
+  try { r = tgRolesOf_(chat, ''); } catch (e) {}
+  var desk = null; try { desk = tgWhoDesk_(chat, ''); } catch (e2) {}
+  if (desk) out.push('پذیرش');
+  if (!asTeamsOn_()) return out;
+  var roles = ((r && r.roles) || []).concat(desk && desk.role ? [String(desk.role)] : []).join(' ');
+  Object.keys(AS_TEAMS).forEach(function (t) { if (out.indexOf(t) < 0 && AS_TEAMS[t].test(roles)) out.push(t); });
+  return out;
 }
+function asRowTeams_(o) { var t = String(o['تیم تأیید'] || '').trim(); return t ? t.split(/\s*(?:،|,| و )\s*/).filter(String) : ['پذیرش']; }
+function asRowFor_(o, teams) { if (!teams.length) return false; if (teams.indexOf('*') > -1 || !asTeamsOn_()) return true; return asRowTeams_(o).some(function (t) { return teams.indexOf(t) > -1; }); }
+function asInQueue_(o) { var s = String(o['تأیید'] || '').trim(); return s !== 'بله' && s !== 'کنار'; }
+function asIsStaff_(chat) { return asReviewTeams_(chat).length > 0; }
 function asStaffName_(chat) {
   try { var d = tgWhoDesk_(chat, ''); if (d && d.name) return d.name; } catch (e) {}
-  return TG_OWNER_CHAT && String(chat) === String(TG_OWNER_CHAT) ? 'مالک' : 'نامعلوم';
+  try { var r = tgRolesOf_(chat, ''); if (r && r.name) return r.name; } catch (e2) {}
+  return asIsOwner_(chat) ? 'مالک' : 'نامعلوم';
 }
+var AS_NOT_STAFF = 'این بخش مخصوص پذیرش، تیم‌های تأیید و مالک است.';
 function asReviewNext_(chat, after) {
-  if (!asIsStaff_(chat)) return tgSend_(chat, 'این بخش مخصوص پذیرش و مالک است.');
-  var rows = asTab_(AS_KB_TAB, AS_KB_HEAD).rows.filter(function (o) { var s = String(o['تأیید'] || '').trim(); return s !== 'بله' && s !== 'کنار' && (!after || o._row > after); });
-  if (!rows.length) return tgSend_(chat, '✅ همهٔ ردیف‌های «' + AS_KB_TAB + '» بررسی شده‌اند.');
+  var teams = asReviewTeams_(chat);
+  if (!teams.length) return tgSend_(chat, AS_NOT_STAFF);
+  var rows = asTab_(AS_KB_TAB, AS_KB_HEAD).rows.filter(function (o) { return asInQueue_(o) && asRowFor_(o, teams) && (!after || o._row > after); });
+  if (!rows.length) return tgSend_(chat, '✅ ردیفی در صف بازبینی شما نیست.');
   var o = rows[0], r = o._row, bad = AS_DENY.test(o['موضوع'] + ' ' + o['پاسخ']);
-  var T = ['📚 <b>دانش دستیار</b> · ردیف ' + tgFa_(r) + ' (' + tgFa_(rows.length) + ' مانده)', '', '<b>موضوع:</b> ' + tgEsc_(o['موضوع'] || ''),
+  var T = ['📚 <b>دانش دستیار</b> · ردیف ' + tgFa_(r) + ' (' + tgFa_(rows.length) + ' مانده)' + (o['نسخه'] ? ' · نسخهٔ ' + tgFa_(o['نسخه']) : ''),
+    (o['حوزه'] || o['مخاطب'] || o['تیم تأیید']) ? '<i>' + [o['حوزه'], o['مخاطب'], o['تیم تأیید'] ? 'تیم ' + o['تیم تأیید'] : ''].filter(String).map(tgEsc_).join(' · ') + '</i>' : '',
+    '', '<b>موضوع:</b> ' + tgEsc_(o['موضوع'] || ''),
     '<b>پرسش‌های نمونه:</b>\n' + tgEsc_(o['پرسش‌های نمونه'] || ''), '', '<b>پاسخ:</b>\n' + tgEsc_(o['پاسخ'] || '')];
+  if (o['یادداشت بازبینی']) T.push('', '📝 ' + tgEsc_(o['یادداشت بازبینی']));
   if (bad) T.push('', '⚠️ این پاسخ دربارهٔ درصد، تسویه یا قرارداد است و دستیار هرگز آن را نمی‌گوید. اصلاح یا کنار بگذار.');
   var kb = [[{ text: '✅ تأیید', callback_data: 'as:ok:' + r }, { text: '✏️ اصلاح پاسخ', callback_data: 'as:ed:' + r }],
     [{ text: '✏️ پرسش‌های نمونه', callback_data: 'as:es:' + r }, { text: '🚫 کنار بگذار', callback_data: 'as:no:' + r }], [{ text: '⏭ بعدی', callback_data: 'as:nx:' + r }]];
   if (bad) kb[0].shift();
-  return tgSend_(chat, T.join('\n'), { inline_keyboard: kb });
+  return tgSend_(chat, T.filter(function (x, i) { return x !== '' || i !== 1; }).join('\n'), { inline_keyboard: kb });
 }
 function asReviewCb_(chat, id) {
-  if (!asIsStaff_(chat)) return tgSend_(chat, 'این بخش مخصوص پذیرش و مالک است.');
+  var teams = asReviewTeams_(chat);
+  if (!teams.length) return tgSend_(chat, AS_NOT_STAFF);
   var a = id.split(':'), act = a[0], r = Number(a[1]);
   if (act === 'rv') return asReviewNext_(chat);
   var t = asTab_(AS_KB_TAB, AS_KB_HEAD), o = t.rows.filter(function (x) { return x._row === r; })[0];
   if (!o) return asReviewNext_(chat);
+  if (!asRowFor_(o, teams)) return tgSend_(chat, 'این ردیف مال تیم دیگری است (' + tgEsc_(asRowTeams_(o).join('، ')) + ').');
   if (act === 'ok') {
     if (AS_DENY.test(o['موضوع'] + ' ' + o['پاسخ'])) return tgSend_(chat, 'این ردیف تأیید نمی‌شود؛ اول اصلاحش کن.');
-    t.set(r, 'تأیید', 'بله'); t.set(r, 'تاریخ تأیید', asFmt_()); t.set(r, 'تأییدکننده', asStaffName_(chat));
+    t.set(r, 'تأیید', 'بله'); t.set(r, 'تاریخ تأیید', asFmt_()); t.set(r, 'تأییدکننده', asStaffName_(chat)); t.set(r, 'تاریخ بازبینی', asFmt_());
+    if (!o['نسخه']) t.set(r, 'نسخه', 1);
     return asReviewNext_(chat, r);
   }
-  if (act === 'no') { t.set(r, 'تأیید', 'کنار'); t.set(r, 'تأییدکننده', asStaffName_(chat)); return asReviewNext_(chat, r); }
+  if (act === 'no') { t.set(r, 'تأیید', 'کنار'); t.set(r, 'تأییدکننده', asStaffName_(chat)); t.set(r, 'تاریخ بازبینی', asFmt_()); return asReviewNext_(chat, r); }
   if (act === 'nx') return asReviewNext_(chat, r);
   tgSetVal_('asr', chat, (act === 'ed' ? 'پاسخ' : 'پرسش‌های نمونه') + '|' + r);
   return tgSend_(chat, act === 'ed' ? 'متن تازهٔ پاسخ را بفرست.' : 'پرسش‌های نمونه را بفرست، هر کدام در یک خط.');
 }
+/** نسخهٔ بعدی ردیف: عدد ستون «نسخه» + ۱ (خالی = ۱، پس اولین اصلاح ۲) */
+function asNextVer_(o) { var n = Number(tgLatinDigits_(String(o['نسخه'] || ''))); return (n > 0 ? n : 1) + 1; }
 function asReviewText_(chat, text) {
   var st = String(tgGetVal_('asr', chat) || '').split('|'); tgDel_('asr', chat);
   if (text === 'انصراف' || text.indexOf('/') === 0) { tgSend_(chat, 'لغو شد.'); return true; }
-  var t = asTab_(AS_KB_TAB, AS_KB_HEAD), r = Number(st[1]);
+  var teams = asReviewTeams_(chat), t = asTab_(AS_KB_TAB, AS_KB_HEAD), r = Number(st[1]), o = t.rows.filter(function (x) { return x._row === r; })[0];
+  if (!o || !asRowFor_(o, teams)) { tgSend_(chat, AS_NOT_STAFF); return true; }
+  /* v170.23.15: هر اصلاح نسخه را بالا می‌برد و «تأیید» را خالی می‌کند (دوباره در صف) */
   t.set(r, st[0], text.slice(0, 2000));
-  t.set(r, 'تأیید', 'خیر');
-  tgSend_(chat, '✅ ثبت شد. حالا ردیف را دوباره ببین و تأیید کن.');
+  t.set(r, 'نسخه', asNextVer_(o));
+  t.set(r, 'تأیید', '');
+  t.set(r, 'تاریخ بازبینی', asFmt_());
+  tgSend_(chat, '✅ ثبت شد (نسخهٔ ' + tgFa_(asNextVer_(o)) + '). حالا ردیف را دوباره ببین و تأیید کن.');
   asReviewNext_(chat, r - 1);
   return true;
 }
@@ -442,9 +509,19 @@ function asNightLine_() {
   var hit = free.filter(function (o) { return o['نتیجه'] === 'پاسخ'; }).length;
   var hand = L.filter(function (o) { return o['نتیجه'] === 'تحویل'; }).length, cr = L.filter(function (o) { return o['نتیجه'] === 'بحران'; }).length;
   var up = L.filter(function (o) { return o['رضایت'] === '👍'; }).length, dn = L.filter(function (o) { return o['رضایت'] === '👎'; }).length;
+  /* v170.23.15: به تفکیک کانال و مخاطب (پرسش و درصد جواب)، و میانهٔ زمان پاسخ */
+  var split = function (key) {
+    var g = {}; L.forEach(function (o) { var k = String(o[key] || '').trim() || 'نامعلوم'; var x = g[k] = g[k] || { n: 0, f: 0, h: 0 }; x.n++;
+      if (o['حالت'] === AS_MODES.search || o['حالت'] === AS_MODES.smart) { x.f++; if (o['نتیجه'] === 'پاسخ') x.h++; } });
+    return Object.keys(g).sort(function (a, b) { return g[b].n - g[a].n; }).map(function (k) { return asChanFa_(k) + ' ' + tgFa_(g[k].n) + (g[k].f ? ' (' + tgFa_(Math.round(100 * g[k].h / g[k].f)) + '٪)' : ''); }).join('، ');
+  };
+  var ms = L.filter(function (o) { return String(o['میلی‌ثانیه']) !== ''; }).map(function (o) { return Number(o['میلی‌ثانیه']); }).filter(function (x) { return x >= 0; }).sort(function (a, b) { return a - b; });
+  var med = ms.length ? ms[Math.floor(ms.length / 2)] : null;
   return '🤖 دستیار: ' + tgFa_(L.length) + ' پرسش · ' + (free.length ? tgFa_(Math.round(100 * hit / free.length)) + '٪ با جست‌وجو جواب گرفت' : 'بی متن آزاد') +
-    ' · ' + tgFa_(hand) + ' تحویل پذیرش' + (cr ? ' · ' + tgFa_(cr) + ' بحران' : '') + ' · 👍 ' + tgFa_(up) + ' 👎 ' + tgFa_(dn) + ' · آستانه ' + tgFa_(asMin_());
+    ' · ' + tgFa_(hand) + ' تحویل پذیرش' + (cr ? ' · ' + tgFa_(cr) + ' بحران' : '') + ' · 👍 ' + tgFa_(up) + ' 👎 ' + tgFa_(dn) + ' · آستانه ' + tgFa_(asMin_()) +
+    '\n   کانال: ' + split('کانال') + ' · مخاطب: ' + split('مخاطب') + (med != null ? ' · میانهٔ زمان پاسخ ' + tgFa_(med) + ' میلی‌ثانیه' : '');
 }
+function asChanFa_(k) { return { bot: 'تلگرام', site: 'سایت', web: 'وب', instagram: 'اینستاگرام', v2: 'نسخهٔ ۲' }[k] || k; }
 try { TG_NIGHT_LINES.push(asNightLine_); } catch (eNl) {}
 
 /* ───── آزمون ───── */
@@ -564,3 +641,71 @@ function asTests() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'asTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دستیار پاسخ‌گو (v170.23.11)', 'asTests']); } catch (eAs) {}
+
+/* ───── آزمون دستیار ۲ (v170.23.15: دانش و سنجش) ───── */
+function asTests2() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, cfg: TG_CFG_, own: TG_OWNER_CHAT, names: asKnownNames_ };
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = { 'as:now': new Date('2026-10-08T12:00:00+03:30').getTime(), 'as:desk': ['801'] };
+  TG_CFG_ = { ASSIST_ENABLED: 'بله' }; TG_OWNER_CHAT = '9001';
+  try {
+    asKnownNames_ = function () { return []; };
+    ok('ستون‌های تازهٔ دانش با نام سرستون', ['مخاطب', 'حوزه', 'تیم تأیید', 'نسخه', 'تاریخ بازبینی', 'یادداشت بازبینی'].every(function (h) { return AS_KB_HEAD.indexOf(h) > -1; }) && AS_KB_HEAD[0] === 'موضوع');
+    ok('ستون‌های تازهٔ گزارش', AS_LOG_HEAD.indexOf('مخاطب') > -1 && AS_LOG_HEAD.indexOf('میلی‌ثانیه') > -1);
+    /* بازبینی به تفکیک تیم */
+    var K = TG_MEM['as:' + AS_KB_TAB] = [
+      { 'موضوع': 'قیمت', 'پرسش‌های نمونه': 'هزینه جلسه', 'پاسخ': 'پاسخ نمونهٔ قیمت', 'تأیید': '', 'تیم تأیید': 'پذیرش' },
+      { 'موضوع': 'رسید پرداخت', 'پرسش‌های نمونه': 'رسید', 'پاسخ': 'پاسخ نمونهٔ رسید', 'تأیید': '', 'تیم تأیید': 'مالی' },
+      { 'موضوع': 'پیش‌نیاز دوره', 'پرسش‌های نمونه': 'پیش‌نیاز', 'پاسخ': 'پاسخ نمونهٔ دوره', 'تأیید': 'خیر', 'تیم تأیید': 'مدرسه و پذیرش' },
+      { 'موضوع': 'بی‌تیم', 'پرسش‌های نمونه': 'سؤال', 'پاسخ': 'پاسخ نمونه', 'تأیید': '' },
+      { 'موضوع': 'تأییدشده', 'پرسش‌های نمونه': 'x', 'پاسخ': 'y', 'تأیید': 'بله', 'تیم تأیید': 'پذیرش' }
+    ];
+    asTab_(AS_KB_TAB, AS_KB_HEAD);
+    var queue = function (chat) { return asTab_(AS_KB_TAB, AS_KB_HEAD).rows.filter(function (o) { var t = asReviewTeams_(chat); return t.length && asInQueue_(o) && asRowFor_(o, t); }).map(function (o) { return o['موضوع']; }).join('|'); };
+    TG_MEM['deskwho'] = { name: 'پذیرش نمونه', chat: '801', role: 'پذیرش' };
+    TG_MEM['people'] = [{ id: 'P-7', name: 'مالی نمونه', chat: '802', roles: ['مالی'], status: 'فعال' }];
+    ok('کلید خاموش: پذیرش همهٔ صف را می‌بیند (رفتار قبلی)', queue('801') === 'قیمت|رسید پرداخت|پیش‌نیاز دوره|بی‌تیم', queue('801'));
+    TG_MEM['deskwho'] = null;
+    ok('کلید خاموش: مالی راه ندارد', asReviewTeams_('802').length === 0);
+    TG_CFG_.ASSIST_KB_TEAMS = 'بله';
+    TG_MEM['deskwho'] = { name: 'پذیرش نمونه', chat: '801', role: 'پذیرش' };
+    ok('روشن: پذیرش فقط ردیف‌های پذیرش و بی‌تیم', queue('801') === 'قیمت|پیش‌نیاز دوره|بی‌تیم', queue('801'));
+    TG_MEM['deskwho'] = null;
+    ok('روشن: مالی فقط ردیف مالی (از نقش تب افراد)', queue('802') === 'رسید پرداخت', queue('802'));
+    ok('مالک همه را می‌بیند', queue('9001') === 'قیمت|رسید پرداخت|پیش‌نیاز دوره|بی‌تیم', queue('9001'));
+    ok('بی نقش راه ندارد', asReviewTeams_('7777').length === 0);
+    TG_MEM['deskwho'] = { name: 'پذیرش نمونه', chat: '801', role: 'پذیرش' }; TG_OUTBOX = [];
+    asReviewCb_('801', 'ok:3');
+    ok('پذیرش ردیف مالی را تأیید نمی‌کند', K[1]['تأیید'] === '' && /تیم دیگری/.test(TG_OUTBOX[0].text));
+    asReviewCb_('801', 'ok:2');
+    ok('تأیید با تاریخ بازبینی و نسخهٔ ۱', K[0]['تأیید'] === 'بله' && !!K[0]['تاریخ بازبینی'] && K[0]['نسخه'] === 1);
+    /* اصلاح: نسخه بالا، تأیید خالی */
+    asReviewCb_('801', 'ed:2'); asReviewText_('801', 'پاسخ اصلاح‌شدهٔ نمونه');
+    ok('اصلاح پاسخ: نسخه ۲ و تأیید خالی (دوباره در صف)', K[0]['پاسخ'] === 'پاسخ اصلاح‌شدهٔ نمونه' && K[0]['نسخه'] === 2 && K[0]['تأیید'] === '' && asInQueue_(K[0]));
+    asReviewCb_('801', 'es:2'); asReviewText_('801', 'پرسش یک\nپرسش دو');
+    ok('اصلاح پرسش‌ها: نسخه ۳', K[0]['نسخه'] === 3 && K[0]['تأیید'] === '');
+    TG_CFG_.ASSIST_KB_TEAMS = '';
+    /* گزارش با مخاطب و زمان */
+    K[0]['تأیید'] = 'بله'; TG_MEM['as:' + AS_LOG_TAB] = [];
+    TG_MEM['deskwho'] = null;
+    asAsk_({ channel: 'site', session: 's1', audience: 'دانشجو' }, 'پرسش یک');
+    asAsk_({ channel: 'site', session: 's2', audience: 'نامعتبر' }, 'آب و هوا');
+    TG_MEM['deskwho'] = { name: 'پذیرش نمونه', chat: '801', role: 'پذیرش' };
+    asAsk_({ channel: 'bot', chat: '801' }, 'پرسش دو');
+    var LG = TG_MEM['as:' + AS_LOG_TAB];
+    ok('مخاطب: ورودی وب از فهرست، نامعتبر «کاربر عمومی»، میز «همکار»', LG[0]['مخاطب'] === 'دانشجو' && LG[1]['مخاطب'] === 'کاربر عمومی' && LG[2]['مخاطب'] === 'همکار', JSON.stringify(LG.map(function (o) { return o['مخاطب']; })));
+    ok('میلی‌ثانیه عدد است', LG.every(function (o) { return typeof o['میلی‌ثانیه'] === 'number' && o['میلی‌ثانیه'] >= 0; }));
+    var nl = asNightLine_();
+    ok('خط شبانه به تفکیک کانال و مخاطب', /کانال: سایت ۲/.test(nl) && /تلگرام ۱/.test(nl) && /مخاطب: /.test(nl) && /دانشجو ۱/.test(nl) && /میانهٔ زمان پاسخ/.test(nl), nl);
+    /* پاک‌سازی قوی‌تر (دادهٔ ساختگی) */
+    var sc = function (x) { return asScrub_(x); };
+    ok('واژهٔ بعد از عنوان', sc('خانم نمونه‌پور گفت') === 'خانم [نام] گفت' && sc('با دکتر آزمونی حرف زدم') === 'با دکتر [نام] حرف زدم' && sc('آقای نمونه، سلام') === 'آقای [نام]، سلام', [sc('خانم نمونه‌پور گفت'), sc('با دکتر آزمونی حرف زدم'), sc('آقای نمونه، سلام')].join(' | '));
+    ok('عنوان دوکلمه‌ای و استاد', sc('سرکار خانم آزمون‌زاده') === 'سرکار خانم [نام]' && sc('استاد نمونه‌وند کلاس دارد') === 'استاد [نام] کلاس دارد', sc('سرکار خانم آزمون‌زاده'));
+    ok('واژهٔ لاتین حرف‌بزرگ حذف، کوچک می‌ماند', sc('Sample Person wrote online') === '[نام] [نام] wrote online', sc('Sample Person wrote online'));
+    ok('بی عنوان و بی لاتین دست نمی‌خورد', sc('هزینهٔ جلسه چقدر است') === 'هزینهٔ جلسه چقدر است');
+    ok('مجموعهٔ «دستیار ۲» در TG_SUITES', TG_SUITES.some(function (x) { return x[1] === 'asTests2'; }));
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { asKnownNames_ = keep.names; TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg; TG_OWNER_CHAT = keep.own; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'asTests2'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دستیار ۲ (v170.23.15)', 'asTests2']); } catch (eAs2) {}
