@@ -192,6 +192,10 @@ test('ورکر: جمنای فقط دسته‌بند (یک id یا none)، چرا
   assert.match(x.st, /gem;desc="nokey"/); assert.equal(x.seen.length, 0);
   x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => new Response(JSON.stringify({ error: { status: 'INVALID_ARGUMENT' } }), { status: 400 }));
   assert.match(x.st, /gem;desc="http400-INVALID_ARGUMENT"/); assert.equal(x.j.ref, '');
+  /* ۵۰۳ مدل اول ← یک بار مدل دوم */
+  const seenM = [];
+  x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => (seenM.push(1), seenM.length === 1 ? new Response('{"error":{"status":"UNAVAILABLE"}}', { status: 503 }) : said({ id: 'clinic' })), 'پرسش برای مدل دوم');
+  assert.equal(seenM.length, 2); assert.match(x.st, /gem;desc="ok-clinic"/);
   /* id درست ← همان متن فایل؛ فهرست id و question به جمنای رفت، نه جواب‌ها */
   x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => said({ id: 'clinic' }));
   assert.match(x.st, /gem;desc="ok-clinic"/); assert.match(x.st, /gemini/); assert.equal(x.j.ref, 'clinic');

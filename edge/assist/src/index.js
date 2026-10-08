@@ -11,6 +11,7 @@ import FAQ_DATA from '../../../content/assist/faq.json' with { type: 'json' };
 
 const ORIGINS = ['https://tajrobeh.life', 'https://www.tajrobeh.life', 'https://new.tajrobeh.life'];
 const GEM_MODEL = 'gemini-flash-lite-latest';
+const GEM_ALT = 'gemini-flash-latest';   /* اگر مدل اول شلوغ بود (۵۰۳ یا ۴۲۹)، یک بار همین (مثل AI_MODELS بات) */
 const GEM_BUDGET_MS = 1500;      /* جمنای فقط دسته‌بند است و فقط تا این مهلت؛ بعد پاسخ پشتیبان (سه پرسش نزدیک) می‌رود */
 const GEM_BG_MS = 12000;         /* دیر شد؟ همان فراخوان در پس‌زمینه تمام می‌شود و نتیجه برای همین پرسش کش می‌شود */
 const CLS_CACHE_S = 14 * 86400;
@@ -187,10 +188,10 @@ async function gemCount(env) { const k = 'gem:' + day(), n = Number(await env.KV
    (۱۶ مهر: thinkingBudget: 0 روی مدلی که نام latest حالا به آن اشاره می‌کند ۴۰۰ INVALID_ARGUMENT می‌داد) */
 async function gemini(env, prompt, schema, ms) {
   const ac = new AbortController(), tm = setTimeout(() => ac.abort(), ms);
-  const call = async (thinking) => {
+  const call = async (thinking, model) => {
     const gc = { temperature: 0.2, responseMimeType: 'application/json', responseSchema: schema };
     if (thinking) gc.thinkingConfig = thinking;
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent', {
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + (model || GEM_MODEL) + ':generateContent', {
       method: 'POST', signal: ac.signal, headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
       body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: gc })
     });
@@ -203,6 +204,7 @@ async function gemini(env, prompt, schema, ms) {
   try {
     let g = await call({ thinkingLevel: 'minimal' });
     if (g.http === 400) g = await call(null);
+    if (g.http === 503 || g.http === 429) { g = await call({ thinkingLevel: 'minimal' }, GEM_ALT); if (g.http === 400) g = await call(null, GEM_ALT); g.alt = true; }
     return g;
   } catch (e) { return null; } finally { clearTimeout(tm); }
 }
