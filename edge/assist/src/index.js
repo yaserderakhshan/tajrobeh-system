@@ -5,7 +5,7 @@
 //   GET  /assist/health   نسخهٔ داده و سن آن (بی هیچ محتوا).
 // داده: خروجی اکشن as_dump بات در KV (کلید dump)، هر ۳۰ دقیقه با cron و با پینگ تازه می‌شود. گزارش‌ها با ctx.waitUntil (اکشن as_log).
 // رمزها فقط secret ورکر: BOT_URL، BOT_KEY (کلید دوم درگاه)، LEAD_SECRET (امضای سرور، همان رمز لید سایت)، GEMINI_API_KEY (اختیاری).
-import { prepare, ask, tap, boot, composePrompt, applyCompose, COMPOSE_SCHEMA, nearTopics } from './engine.js';
+import { prepare, ask, tap, boot, composePrompt, applyCompose, COMPOSE_SCHEMA, nearTopics, siteEventsFrom } from './engine.js';
 
 const ORIGINS = ['https://tajrobeh.life', 'https://www.tajrobeh.life', 'https://new.tajrobeh.life'];
 const GEM_MODEL = 'gemini-flash-lite-latest';
@@ -22,7 +22,7 @@ export default {
     const path = url.pathname.replace(/\/+$/, '');
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
     try {
-      if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false, gem_last: await env.KV.get('gem:last', 'json') }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
+      if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, events: d ? d.siteEvents.length : 0, events_src: await env.KV.get('site_events', 'json').then((x) => x ? (x.src || '') + (x.why ? ' ' + x.why : '') : '').catch(() => ''), gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false, gem_last: await env.KV.get('gem:last', 'json') }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
       if (path === '/assist/refresh' && req.method === 'POST') { ctx.waitUntil(refresh(env, true)); return json({ ok: true }); }
       if (path === '/assist/boot' && req.method === 'GET') {
         const P = await data(env, ctx);
@@ -86,20 +86,44 @@ export default {
 /* ───── داده ───── */
 async function data(env, ctx) {
   if (MEM && Date.now() - MEM.at < 60000) return MEM.P;
-  const hitKv = await env.KV.get('dump', 'json');
+  const [hitKv, ev] = await Promise.all([env.KV.get('dump', 'json'), env.KV.get('site_events', 'json')]);
+  const withEv = (d) => Object.assign({}, d, { siteEvents: (ev && ev.list) || [] });
   if (hitKv && hitKv.data) {
-    MEM = { at: Date.now(), P: prepare(hitKv.data) };
+    MEM = { at: Date.now(), P: prepare(withEv(hitKv.data)) };
     if (Date.now() - (hitKv.at || 0) > 45 * 60000) ctx.waitUntil(refresh(env, false));
     return MEM.P;
   }
   const d = await refresh(env, true);
-  return d ? (MEM = { at: Date.now(), P: prepare(d) }).P : null;
+  return d ? (MEM = { at: Date.now(), P: prepare(withEv(d)) }).P : null;
+}
+/* تقویم منتشرشدهٔ صفحهٔ رویدادهای سایت (همان دادهٔ evData که بازدیدکننده می‌بیند)؛ فقط با cron و پینگ، نه در مسیر کاربر */
+async function siteEvents(env) {
+  const today = new Date(Date.now() + 3.5 * 3600000).toISOString().slice(0, 10), H = { 'user-agent': 'Mozilla/5.0 (compatible; tj-assist-worker)', accept: 'text/html,application/json' };
+  const tries = [
+    ['page', 'https://tajrobeh.life/school/events/', (t) => t],
+    /* اگر خود برگه نرسید (دیوار امنیتی یا کش)، همان محتوای منتشرشده از REST وردپرس */
+    ['rest', 'https://tajrobeh.life/wp-json/wp/v2/pages/505409?_fields=content', (t) => { try { return JSON.parse(t).content.rendered; } catch (e) { return ''; } }]
+  ];
+  let why = [];
+  for (const [name, url, pick] of tries) {
+    try {
+      const r = await fetch(url, { headers: H, cf: { cacheTtl: 600 } });
+      if (!r.ok) { why.push(name + ':' + r.status); continue; }
+      const list = siteEventsFrom(pick(await r.text()), today, 60);
+      if (!list) { why.push(name + ':noevdata'); continue; }
+      await env.KV.put('site_events', JSON.stringify({ at: Date.now(), list, src: name, why: why.join(' ') }));
+      return;
+    } catch (e) { why.push(name + ':err'); }
+  }
+  const old = await env.KV.get('site_events', 'json');
+  await env.KV.put('site_events', JSON.stringify(Object.assign({}, old || { list: [] }, { why: why.join(' '), tried: Date.now() })));
 }
 async function refresh(env, ping) {
   if (ping) {
     const last = await env.KV.get('pull_at');
     if (last && Date.now() - Number(last) < 60000) return null;
   }
+  await siteEvents(env);
   try {
     const r = await fetch(env.BOT_URL, { method: 'POST', headers: { 'content-type': 'text/plain' }, redirect: 'follow', body: JSON.stringify({ api: 1, key: env.BOT_KEY, action: 'as_dump' }) });
     const j = await r.json();
@@ -146,17 +170,26 @@ function hit(k, max) {
 function day() { return new Date(Date.now() + 3.5 * 3600000).toISOString().slice(0, 10); }
 async function gemLeft(env, P) { const n = Number(await env.KV.get('gem:' + day()) || 0); return n < P.gemDaily; }
 async function gemCount(env) { const k = 'gem:' + day(), n = Number(await env.KV.get(k) || 0); await env.KV.put(k, String(n + 1), { expirationTtl: 172800 }); }
+/* کمترین فکر (thinkingLevel) برای مدل‌های تازه؛ اگر مدل آن را نپذیرفت (۴۰۰)، همان درخواست بی تنظیم فکر، هر دو در یک مهلت.
+   (۱۶ مهر: thinkingBudget: 0 روی مدلی که نام latest حالا به آن اشاره می‌کند ۴۰۰ INVALID_ARGUMENT می‌داد) */
 async function gemini(env, prompt, schema, ms) {
   const ac = new AbortController(), tm = setTimeout(() => ac.abort(), ms);
-  try {
+  const call = async (thinking) => {
+    const gc = { temperature: 0.2, responseMimeType: 'application/json', responseSchema: schema };
+    if (thinking) gc.thinkingConfig = thinking;
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent', {
       method: 'POST', signal: ac.signal, headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, responseMimeType: 'application/json', responseSchema: schema, thinkingConfig: { thinkingBudget: 0 } } })
+      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: gc })
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) return { http: r.status, err: String(((j || {}).error || {}).status || '').replace(/[^A-Z_]/g, '').slice(0, 40) };   /* فقط کد وضعیت گوگل، نه متن */
     const t = ((((j.candidates || [])[0] || {}).content || {}).parts || []).map((p) => p.text || '').join('');
     let out = null; try { out = JSON.parse(t); } catch (e) {}
     return { http: 200, out, usage: j.usageMetadata || {} };
+  };
+  try {
+    let g = await call({ thinkingLevel: 'minimal' });
+    if (g.http === 400) g = await call(null);
+    return g;
   } catch (e) { return null; } finally { clearTimeout(tm); }
 }

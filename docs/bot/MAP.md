@@ -84,7 +84,7 @@
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۷۹۲۳ | ۲۰۴۷ |
+| `telegram.gs` | ۳۷۹۴۶ | ۲۰۵۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -99,7 +99,7 @@
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۵۷۶ | ۱۲۰ |
-| `v168.gs` | ۲۴۱۷ | ۱۵۰ |
+| `v168.gs` | ۲۴۴۸ | ۱۵۱ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۹ | ۳۴ |
 | `leadmodel.gs` | ۷۷۸ | ۴۱ |

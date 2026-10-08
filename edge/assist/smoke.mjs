@@ -1,19 +1,14 @@
-// آزمون دود ورکر دستیار از runner گیت‌هاب: پنج پرسش واقعی با مبدأ سایت و زمان هر کدام.
+// آزمون دود ورکر دستیار از runner گیت‌هاب: پرسش‌های واقعی با مبدأ سایت، زمان هر کدام و درستی جواب (smoke-cases.mjs).
 // node edge/assist/smoke.mjs <نشانی ورکر>   (پاسخ کامل زیر ۳ ثانیه؛ با جمنای زیر ۵ ثانیه)
 const BASE = (process.argv[2] || process.env.ASSIST_EDGE_URL || '').replace(/\/+$/, '');
 if (!BASE) { console.log('::error::نشانی ورکر داده نشد'); process.exit(1); }
-const Q = [
-  ['هزینهٔ جلسه', 'هزینه جلسه چقدر است'],
-  ['روانکاوی', 'روانکاوی هفته‌ای چند جلسه است؟'],
-  ['شروع تراپی', 'چطور تراپی را در تجربه شروع کنم؟'],
-  ['کلینیک حضوری', 'کلینیک حضوری تجربه کجاست و چطور وقت بگیرم؟'],
-  ['رویدادها', 'رویدادهای پیش رو']
-];
+import { CASES, wrong } from './smoke-cases.mjs';
 const H = { 'content-type': 'application/json', Origin: 'https://tajrobeh.life' };
 const rows = [], bad = [];
 const health = await (await fetch(BASE + '/assist/health')).json().catch(() => ({}));
-console.log(`دادهٔ ورکر: نسخهٔ ${health.v || '?'} · ${health.at || '?'} · دانش ${health.kb ?? '?'} · نمایه ${health.idx ?? '?'} · کلید جمنای ${health.gemini ? 'هست' : 'نیست'} · ASSIST_REWRITE ${health.rewrite ? 'بله' : 'خیر'} · آخرین جمنای ${health.gem_last ? health.gem_last.why + ' ' + health.gem_last.ms + 'ms' : '-'}`);
-for (const [name, text] of Q) {
+console.log(`دادهٔ ورکر: نسخهٔ ${health.v || '?'} · ${health.at || '?'} · دانش ${health.kb ?? '?'} · نمایه ${health.idx ?? '?'} · کلید جمنای ${health.gemini ? 'هست' : 'نیست'} · ASSIST_REWRITE ${health.rewrite ? 'بله' : 'خیر'} · آخرین جمنای ${health.gem_last ? health.gem_last.why + ' ' + health.gem_last.ms + 'ms' : '-'} · رویدادهای تقویم سایت ${health.events ?? '?'} (${health.events_src || '-'})`);
+for (const c of CASES) {
+  const name = c.name, text = c.q;
   const t0 = Date.now();
   let j = {}, st = 0, gem = false, why = '-';
   try { const r = await fetch(BASE + '/assist', { method: 'POST', headers: H, body: JSON.stringify({ action: 'assist.ask', channel: 'smoke', session_id: 'smoke-' + Date.now().toString(36), text }) }); st = r.status; const stH = r.headers.get('server-timing') || ''; gem = /gemini/.test(stH); why = (/gem;desc="([^"]*)"/.exec(stH) || [])[1] || '-'; j = await r.json(); } catch (e) { j = { error: String(e) }; }
@@ -21,6 +16,7 @@ for (const [name, text] of Q) {
   rows.push(`| ${name} | ${st} | ${ms} | ${gem ? 'بله' : 'نه · ' + why} | ${j.source || '-'} | ${String(j.answer || j.error || '').replace(/\n/g, ' ').slice(0, 90)} |`);
   if (st !== 200 || !j.ok || !j.answer) bad.push(`${name}: پاسخ نیامد (${st} ${j.error || ''})`);
   else if (ms > lim) bad.push(`${name}: ${ms} میلی‌ثانیه (بیش از ${lim})`);
+  else { const w = wrong(c, j.answer); if (w) bad.push(w); }
 }
 const table = ['| پرسش | HTTP | میلی‌ثانیه | جمنای | منبع | پاسخ |', '|---|---|---|---|---|---|', ...rows].join('\n');
 console.log(table);

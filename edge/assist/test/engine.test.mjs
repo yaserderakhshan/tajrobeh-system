@@ -1,7 +1,7 @@
 // آزمون موتور و ورکر دستیار با دادهٔ ساختگی: node --test edge/assist/test/
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { prepare, ask, tap, boot, scrub, safeOut, applyCompose, isCrisis, nearTopics } from '../src/engine.js';
+import { prepare, ask, tap, boot, scrub, safeOut, applyCompose, isCrisis, nearTopics, siteEventsFrom, faqFor } from '../src/engine.js';
 import worker from '../src/index.js';
 
 const S = 'https://tajrobeh.life';
@@ -18,6 +18,10 @@ const DATA = {
     ['s1', S + '/school/', 'مدرسهٔ تجربه', 'دوره‌های مدرسهٔ تجربه برای دانشجویان روان‌شناسی با سوپرویژن گروهی برگزار می‌شود. متن ساختگی.', 'مدرسه و دوره‌ها', 'دانشجو', 'سایت'],
     ['m1', S + '/joinus/', 'همکاری', 'درصد سهم درمانگر و زمان تسویه در قرارداد همکاری آمده است. متن ساختگی.', '', '', 'سایت'],
     ['g1', S + '/mag/anxiety/', 'اضطراب در روابط › مقدمه', 'اضطراب در روابط نزدیک یکی از تجربه‌های رایج است و این مقاله دربارهٔ آن است. متن ساختگی.', 'مجله', 'خوانندهٔ مجله', 'مجله'],
+    ['k1', S + '/therapy/child-therapy/', 'تراپی کودک', 'تراپی کودک در تجربه با بازی‌درمانی و گفت‌وگو با والدین انجام می‌شود. متن ساختگی.', 'تراپی و پذیرش', 'مراجع', 'سایت'],
+    ['e1', S + '/ebis-playlist/', 'پلی‌لیستِ ابی', 'شروع تراپی بعد از نمایش پلی‌لیست ابی؛ فهرستی که با هم ادامه‌اش می‌دهیم. متن ساختگی کمپین.', '', '', 'سایت'],
+    ['e2', S + '/ebis-playlist/night/', 'شب تجربه', 'هزینه جلسه و تراپی برای تماشاگران نمایش در شب تجربه. متن ساختگی کمپین.', '', '', 'سایت'],
+    ['z1', S + '/ebis-playlist/talk/', 'گفت‌وگو', 'دربارهٔ خودکشی و امید در نمایش؛ کلینیک حضوری تجربه. متن ساختگی.', '', '', 'سایت'],
     ['x1', 'https://example.com/x', 'بیرونی', 'متن بیرونی که نباید پاسخ داده شود چون بیرون از سایت است. ساختگی.', '', '', 'سایت']
   ],
   events: [{ code: 'EV-T1', title: 'کارگاه نمونه', date: '۲۰ مهر', time: '۱۸:۰۰', iso: '2026-10-12' }],
@@ -45,13 +49,54 @@ test('ردیف مالی تأییدشده هم گفته نمی‌شود', () => {
   assert.equal(r.res.answer.indexOf('درصد'), -1);
 });
 test('متن منتشرشدهٔ سایت با «بیشتر بخوانید» و source_url', () => {
-  const r = ask(P, 'کلینیک حضوری کجاست؟', C);
-  assert.equal(r.res.source, 'سایت'); assert.equal(r.res.source_url, S + '/clinic/');
-  assert.deepEqual(r.res.buttons[0], { url: S + '/clinic/', text: 'بیشتر بخوانید' }); assert.ok(r.compose);
+  const r = ask(P, 'تراپی کودک چطوری است؟', C);
+  assert.equal(r.res.source, 'سایت'); assert.equal(r.res.source_url, S + '/therapy/child-therapy/');
+  assert.deepEqual(r.res.buttons[0], { url: S + '/therapy/child-therapy/', text: 'بیشتر بخوانید' }); assert.ok(r.compose);
 });
 test('ابزار رویدادها از دادهٔ کش‌شده', () => {
   const r = ask(P, 'رویدادهای پیش رو', C);
   assert.equal(r.res.source, 'ابزار'); assert.match(r.res.answer, /کارگاه نمونه/); assert.match(r.res.buttons[0].url, /#ev=EV-T1$/);
+});
+/* ───── کیفیت (۱۶ مهر): همان چهار پرسش آزمون بیرونی Cowork ───── */
+const ABI = /(^|[\s«(])ابی([\s»)،.]|$)/;
+test('چهار پرسش Cowork: کلیدواژهٔ لازم هست، کمپین و بحران و کرج نیست', () => {
+  const cases = [['هزینه جلسه چقدر است', /تومان|هزینه/], ['چطور تراپی را شروع کنم', /معارفه|شروع/], ['کلینیک حضوری تجربه کجاست', /ونک/], ['مدرسه چه دوره‌هایی دارد', /دوره/],
+    ['روانکاوی هفته‌ای چند جلسه است؟', /روانکاو/], ['جلسه معارفه چیست', /معارفه/]];
+  const NoKb = prepare(Object.assign({}, DATA, { kb: [] }));
+  for (const [q, need] of cases) for (const PP of [P, NoKb]) {
+    const a = ask(PP, q, C).res.answer;
+    assert.match(a, need, q); assert.ok(!ABI.test(a) && !/خودکشی|کرج|تخفیف|شهریه/.test(a), q + ' ← ' + a);
+  }
+  assert.equal(ask(NoKb, 'هزینه جلسه چقدر است', C).res.source, 'ثابت');
+  assert.match(ask(NoKb, 'هزینه جلسه چقدر است', C).res.answer, /تومان/);
+  assert.equal(faqFor('هزینه دوره EFT چقدر است').key, 'school');
+  assert.equal(faqFor('کلینیک حضوری کرج کجاست'), null);
+});
+test('صفحهٔ کمپین فقط وقتی پرسش اسم کمپین را دارد؛ تکهٔ خودکشی هرگز', () => {
+  assert.notEqual(ask(P, 'نمایش تماشاگران شب تجربه', C).res.source_url, '');
+  assert.match(ask(P, 'شب تجربه نمایش ابی برای تماشاگران', C).res.source_url, /ebis-playlist/);
+  for (const q of ['تماشاگران شب تجربه', 'امید و کلینیک حضوری']) assert.doesNotMatch(ask(P, q, C).res.source_url, /ebis-playlist/, q);
+  assert.ok(P.siteIx.items.every((x) => !/خودکشی/.test(x.doc.text)));
+});
+test('زیر آستانه: جواب نه؛ سه موضوع نزدیک و «با پذیرش حرف بزنم»', () => {
+  const NoKb = prepare(Object.assign({}, DATA, { kb: [] }));
+  const r = ask(NoKb, 'والدین مهربان', C);
+  assert.equal(r.res.source, ''); assert.equal(r.res.buttons.filter((b) => /^f:/.test(b.id)).length, 3); assert.ok(r.res.buttons.some((b) => b.text === 'با پذیرش حرف بزنم'));
+  const t = tap(NoKb, 'f:clinic', 'کلینیک', C);
+  assert.match(t.res.answer, /ونک/); assert.equal(t.log.mode, 'منو');
+});
+test('رویدادها از تقویم صفحهٔ سایت: تاریخ شمسی، ویژهٔ اعضا وقتی برنامهٔ باز نیست', () => {
+  const html = '<script type="application/json" id="evData">' + JSON.stringify({ months: [[1405, 7, '2026-09-23', 30]], events: [
+    { i: 'old', d: '2026-09-30', t: '18:00', ttl: 'گذشته', a: 'free' }, { i: 'c1', d: '2026-10-14', t: '20:00', ttl: 'دورهٔ نمونه', a: 'members' }, { i: 'c2', d: '2026-10-21', t: '19:00', ttl: 'سوپرویژن نمونه', a: 'members' }] }) + '</script>';
+  const L = siteEventsFrom(html, '2026-10-08', 60);
+  assert.equal(L.length, 2); assert.equal(L[0].date, '۲۲ مهر'); assert.equal(L[0].time, '۲۰:۰۰'); assert.equal(L[0].members, true);
+  const PE = prepare(Object.assign({}, DATA, { events: [], siteEvents: L }));
+  const r = ask(PE, 'رویدادهای پیش رو', C);
+  assert.match(r.res.answer, /ویژهٔ اعضای مدرسه/); assert.match(r.res.answer, /دورهٔ نمونه · ۲۲ مهر · ساعت ۲۰:۰۰/); assert.match(r.res.buttons[0].url, /#ev=c1$/);
+  const PO = prepare(Object.assign({}, DATA, { siteEvents: L }));
+  assert.match(ask(PO, 'رویدادهای پیش رو', C).res.answer, /^برنامه‌های پیش‌رو:\n• کارگاه نمونه/);
+  const P0 = prepare(Object.assign({}, DATA, { events: [], siteEvents: [] }));
+  assert.match(ask(P0, 'رویدادهای پیش رو', C).res.answer, /تقویم/);
 });
 test('ابزار مجله از عنوان مقاله‌ها', () => {
   const r = ask(P, 'مقاله‌ای درباره اضطراب در روابط', C);
@@ -95,7 +140,7 @@ test('سرعت: هزار و صد تکه زیر ۵۰ میلی‌ثانیه', () =
   const BP = prepare(big), t0 = performance.now();
   for (let i = 0; i < 10; i++) ask(BP, 'دوره‌های کلینیک برای دانشجویان چیست', C);
   assert.ok((performance.now() - t0) / 10 < 50, 'ms=' + (performance.now() - t0) / 10);
-  assert.equal(nearTopics(BP, 'هزینه').length, 2);
+  assert.equal(nearTopics(BP, 'هزینه').length, 3);
 });
 
 /* ───── ورکر با KV و fetch ساختگی ───── */
@@ -137,7 +182,7 @@ test('ورکر: جمنای کند نمی‌گذارد پاسخ دیر شود (م
   };
   try {
     const t0 = Date.now();
-    const r = await worker.fetch(new Request('https://w.example.org/assist', { method: 'POST', headers: { Origin: S }, body: JSON.stringify({ session_id: 's-3', text: 'کلینیک حضوری کجاست' }) }), env({ GEMINI_API_KEY: 'g' }), ctx());
+    const r = await worker.fetch(new Request('https://w.example.org/assist', { method: 'POST', headers: { Origin: S }, body: JSON.stringify({ session_id: 's-3', text: 'تراپی کودک چطوری است' }) }), env({ GEMINI_API_KEY: 'g' }), ctx());
     const j = await r.json(), ms = Date.now() - t0;
     assert.equal(j.source, 'سایت'); assert.ok(ms < 3200, 'ms=' + ms);
   } finally { globalThis.fetch = realFetch; }
@@ -146,7 +191,7 @@ test('ورکر: چرای جمنای در server-timing (بی مقدار رمز)'
   const ask1 = async (e, gem) => {
     globalThis.fetch = async (u) => String(u).indexOf('generativelanguage') > -1 ? gem() : new Response('{"ok":true}');
     try {
-      const r = await worker.fetch(new Request('https://w.example.org/assist', { method: 'POST', headers: { Origin: S }, body: JSON.stringify({ session_id: 's-' + Math.random(), text: 'کلینیک حضوری کجاست' }) }), e, ctx());
+      const r = await worker.fetch(new Request('https://w.example.org/assist', { method: 'POST', headers: { Origin: S }, body: JSON.stringify({ session_id: 's-' + Math.random(), text: 'تراپی کودک چطوری است' }) }), e, ctx());
       return { st: r.headers.get('server-timing'), j: await r.json() };
     } finally { globalThis.fetch = realFetch; }
   };
@@ -154,8 +199,12 @@ test('ورکر: چرای جمنای در server-timing (بی مقدار رمز)'
   assert.match(x.st, /gem;desc="nokey"/);
   x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => new Response(JSON.stringify({ error: { code: 400, status: 'INVALID_ARGUMENT', message: 'x' } }), { status: 400 }));
   assert.match(x.st, /gem;desc="http400-INVALID_ARGUMENT"/); assert.equal(x.j.source, 'سایت');
+  /* ۴۰۰ برای تنظیم فکر ← یک بار دیگر بی آن */
+  const bodies = [];
+  x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => { const n = bodies.length; bodies.push(1); return n === 0 ? new Response(JSON.stringify({ error: { status: 'INVALID_ARGUMENT' } }), { status: 400 }) : new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ text: '', i: 0, none: true }) }] } }] })); });
+  assert.equal(bodies.length, 2); assert.match(x.st, /gem;desc="none"/);
   const src = DATA.idx.find((r) => /کلینیک/.test(r[2] + r[3]));
-  x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ text: 'کلینیک حضوری تجربه در تهران است.', i: 0, none: false }) }] } }] })));
+  x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ text: 'تراپی کودک در تجربه با بازی‌درمانی انجام می‌شود.', i: 0, none: false }) }] } }] })));
   assert.ok(/gem;desc="(ok|guard)"/.test(x.st), x.st);
   x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ text: '', i: 0, none: true }) }] } }] })));
   assert.match(x.st, /gem;desc="none"/);
