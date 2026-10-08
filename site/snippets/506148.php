@@ -64,7 +64,7 @@ if (!function_exists('tj_assist_ask')) {
 		set_transient($ipk, $n + 1, 3700);
 		$body = wp_json_encode(array(
 			'action'     => 'assist.ask',
-			'channel'    => 'site',
+			'channel'    => (($p['channel'] ?? '') === 'smoke') ? 'smoke' : 'site',   /* آزمون دود جدا از کاربران در گزارش */
 			'session_id' => $sid,
 			'text'       => mb_substr(wp_strip_all_tags((string) ($p['text'] ?? '')), 0, 500),
 			'tap'        => preg_replace('/[^A-Za-z0-9:_.-]/', '', substr((string) ($p['tap'] ?? ''), 0, 60)),
