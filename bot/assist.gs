@@ -174,7 +174,7 @@ function asScrub_(text, extra) {
 /* ───── گزارش ───── */
 /* ctx اختیاری: مخاطب (ctx.audience) و زمان پاسخ از ctx.t0 */
 function asLog_(channel, topic, mode, result, ctx) {
-  var id = 'A-' + asNow_().toString(36) + Math.floor(Math.random() * 1296).toString(36);
+  var id = ctx && /^A-[0-9a-z]{4,16}$/.test(String(ctx.logId || '')) ? String(ctx.logId) : 'A-' + asNow_().toString(36) + Math.floor(Math.random() * 1296).toString(36);   /* v170.23.24: شناسهٔ ساخت ورکر */
   var ms = ctx && ctx.t0 ? Math.max(0, Date.now() - ctx.t0) : '';
   try { asTab_(AS_LOG_TAB, AS_LOG_HEAD).add({ 'زمان': asFmt_(), 'کانال': channel, 'موضوع': topic || '', 'حالت': mode, 'نتیجه': result, 'رضایت': '', 'شناسه': id, 'مخاطب': asAud_(ctx), 'میلی‌ثانیه': ms, 'منبع پاسخ': (ctx && ctx.src) || '' }); } catch (e) { tgErr_('asLog_', e); }
   return id;
@@ -646,6 +646,7 @@ function asIdxSwap_(run) {
   var st = { n: cur.length, added: Object.keys(old).length ? added : cur.length, removed: removed, run: run, at: asFmt_() };
   asProp_('AS_IDX_STAT', JSON.stringify(st));
   asIdxCacheClear_();
+  asEdgePing_();
   return st;
 }
 var AS_IDX_MEMO = null;
@@ -735,6 +736,69 @@ try {
   PB_RATE_BUCKET.kb_index = ['kbi', 'kb_index_hourly_max', 40];
   if (PB_WRITE.indexOf('kb_index') < 0) PB_WRITE.push('kb_index');
 } catch (eKbi) {}
+
+/* ───── موتور لبه (v170.23.24، تصمیم یاسر) ─────
+   پاسخ زنده از ورکر کلادفلر (edge/assist)، نه از اپس‌اسکریپت: ورکر هر ۳۰ دقیقه و بعد از هر تأیید یا تعویض نمایه، دادهٔ عمومی
+   دستیار را با as_dump می‌گیرد و در KV نگه می‌دارد، و گزارش‌ها را دسته‌ای با as_log پس می‌فرستد. هر دو فقط با کلید دوم درگاه.
+   در as_dump فقط چیزی است که دستیار به هر بازدیدکننده می‌گوید: ردیف‌های تأییدشده، تکه‌های منتشرشدهٔ سایت، رویدادهای پیش‌رو،
+   واژه‌ها و پیام ثابت بحران، و چند تنظیم. بی نام، شماره، chat_id یا شناسهٔ داخلی. «وضعیت من» و هر چیز هویتی فقط در بات. */
+cfg_('ASSIST_EDGE_URL', '');      /* v170.23.24: نشانی ورکر دستیار (https://…)؛ خالی = بی پینگ */
+var AS_EDGE_MAX_LOG = 40;
+function asEdgeDump_(p) {
+  if (typeof ebiKey2Ok_ === 'function' && !ebiKey2Ok_(p && p.key)) return { ok: false, error: 'key2_only' };
+  var today = asToday_(), ev = [];
+  try {
+    var r = asDry_() && TG_MEM['as:events'] ? { events: TG_MEM['as:events'] } : tgApiEvents162_({});
+    ev = ((r && r.events) || []).filter(function (e) { return e.dateIso && e.dateIso >= today; })
+      .sort(function (a, b) { return a.dateIso < b.dateIso ? -1 : a.dateIso > b.dateIso ? 1 : 0; }).slice(0, 12)
+      .map(function (e) { return { code: String(e.code || ''), title: String(e.title || ''), date: String(e.date || ''), time: String(e.time || ''), iso: String(e.dateIso || '') }; });
+  } catch (e) {}
+  var kb = asKb_();
+  return { ok: true, data: {
+    v: typeof TG_CODE_VERSION !== 'undefined' ? TG_CODE_VERSION : '', at: asFmt_(),
+    on: asOn_(), mode: asMode_(), tools: asToolsOn_(), rewrite: asRewriteOn_(), gem_daily: asGemCap_(), min: asMin_(), idx_min: asIdxMin_(),
+    kb: kb.map(function (k) { return { r: k.row, t: k.topic, s: k.samples, a: k.answer, au: k.aud, d: k.dom }; }),
+    topics: asTopics_(kb),
+    idx: asIdx_().map(function (d) { return [d.id, d.url, d.title, d.text, d.dom, d.aud, d.src]; }),
+    events: ev,
+    crisis: { words: TG_CRISIS_WORDS.slice(), text: T_CRISIS },
+    texts: { welcome: AS_WELCOME, handed: AS_HANDED, bot: AS_BOT_LINK },
+    deny: AS_DENY.source, money: AS_IDX_MONEY.source
+  } };
+}
+/* گزارش ورکر: {entries: [{k: 'log'|'un'|'rate'|'handoff'|'gem', ...}]}، حداکثر AS_EDGE_MAX_LOG در هر فراخوان */
+function asEdgeLog_(p, dry) {
+  if (typeof ebiKey2Ok_ === 'function' && !ebiKey2Ok_(p && p.key)) return { ok: false, error: 'key2_only' };
+  var L = Array.isArray(p.entries) ? p.entries.slice(0, AS_EDGE_MAX_LOG) : [], n = 0;
+  if (dry) return { ok: true, data: { would: L.length } };
+  var cl = function (s, m) { return String(s == null ? '' : s).slice(0, m); };
+  L.forEach(function (x) {
+    try {
+      var ch = cl(x.ch || 'site', 20).replace(/[^\w-]/g, '') || 'site';
+      var ctx = { channel: ch, audience: cl(x.au, 30), src: cl(x.src, 10), logId: cl(x.id, 20), t0: Date.now() - Math.max(0, Math.min(60000, Number(x.ms) || 0)) };
+      if (x.k === 'log') { asLog_(ch, cl(x.topic, 80), cl(x.mode || 'لبه', 20), cl(x.res, 20), ctx); n++; }
+      else if (x.k === 'un') { asUnanswered_(ch, cl(x.text, 500), [], cl(x.kind || 'بی‌پاسخ', 30), ctx); n++; }
+      else if (x.k === 'rate') { if (asRate_(cl(x.id, 20), x.good === true)) n++; }
+      else if (x.k === 'handoff') { asHandoff_({ channel: ch, session: cl(x.sid, 64) }, cl(x.text, 500), cl(x.why || 'خواست با پذیرش حرف بزند', 60)); n++; }
+      else if (x.k === 'gem') { if (!asDry_()) asTab_(AS_COST_TAB, AS_COST_HEAD).add({ 'زمان': asFmt_(), 'کار': 'ورکر · ' + cl(x.job, 40), 'مدل': cl(x.model, 40), 'توکن ورودی': Number(x.tin) || 0, 'توکن خروجی': Number(x.tout) || 0 }); n++; }
+    } catch (e) { tgErr_('asEdgeLog_', e); }
+  });
+  return { ok: true, data: { n: n } };
+}
+/* بعد از تأیید و تعویض نمایه: ورکر دادهٔ تازه را بگیرد (بی رمز؛ ورکر خودش دقیقه‌ای یک بار می‌پذیرد) */
+function asEdgePing_() {
+  var u = String(cfg_('ASSIST_EDGE_URL', '') || '').trim().replace(/\/+$/, '');
+  if (!/^https:\/\/[\w.-]+(?:\/[\w./-]*)?$/.test(u)) return false;
+  if (asDry_()) { (TG_MEM['as:edgeping'] = TG_MEM['as:edgeping'] || []).push(u); return true; }
+  try { UrlFetchApp.fetch(u + '/assist/refresh', { method: 'post', muteHttpExceptions: true, followRedirects: false }); return true; } catch (e) { return false; }
+}
+try {
+  PB_ACTIONS.as_dump = function (p) { return asEdgeDump_(p); };
+  PB_ACTIONS.as_log = function (p, dry) { return asEdgeLog_(p, dry); };
+  PB_RATE_BUCKET.as_dump = ['asd', 'as_dump_hourly_max', 30];
+  PB_RATE_BUCKET.as_log = ['asl', 'as_log_hourly_max', 400];
+  if (PB_WRITE.indexOf('as_log') < 0) PB_WRITE.push('as_log');
+} catch (eEdge) {}
 
 /* ───── بات ───── */
 function asKb2_(out) {
@@ -853,9 +917,10 @@ function asReviewCb_(chat, id) {
     if (!String(o['پاسخ'] || '').trim()) return tgSend_(chat, 'این ردیف هنوز پاسخ ندارد؛ اول «✏️ اصلاح پاسخ».');   /* v170.23.18 */
     t.set(r, 'تأیید', 'بله'); t.set(r, 'تاریخ تأیید', asFmt_()); t.set(r, 'تأییدکننده', asStaffName_(chat)); t.set(r, 'تاریخ بازبینی', asFmt_());
     if (!o['نسخه']) t.set(r, 'نسخه', 1);
+    asEdgePing_();
     return asReviewNext_(chat, r);
   }
-  if (act === 'no') { t.set(r, 'تأیید', 'کنار'); t.set(r, 'تأییدکننده', asStaffName_(chat)); t.set(r, 'تاریخ بازبینی', asFmt_()); return asReviewNext_(chat, r); }
+  if (act === 'no') { t.set(r, 'تأیید', 'کنار'); t.set(r, 'تأییدکننده', asStaffName_(chat)); t.set(r, 'تاریخ بازبینی', asFmt_()); asEdgePing_(); return asReviewNext_(chat, r); }
   if (act === 'nx') return asReviewNext_(chat, r);
   tgSetVal_('asr', chat, (act === 'ed' ? 'پاسخ' : 'پرسش‌های نمونه') + '|' + r);
   return tgSend_(chat, act === 'ed' ? 'متن تازهٔ پاسخ را بفرست.' : 'پرسش‌های نمونه را بفرست، هر کدام در یک خط.');
@@ -1345,3 +1410,52 @@ function asTests7() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'asTests7'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دستیار ۷ · نمایهٔ سایت (v170.23.19)', 'asTests7']); } catch (eAs7) {}
+
+/* v170.23.24: دادهٔ عمومی و گزارش ورکر لبه */
+function asTests8() {
+  var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, cfg: TG_CFG_, names: asKnownNames_, memo: AS_IDX_MEMO };
+  TG_DRY = true; TG_OUTBOX = []; AS_IDX_MEMO = null;
+  TG_MEM = { 'as:now': new Date('2026-10-10T11:00:00+03:30').getTime(), 'as:desk': ['801'], 'pb:key2': 'k2-ساختگی-برای-آزمون-خشک-0123456789', 'as:handoff': [] };
+  TG_CFG_ = { ASSIST_ENABLED: 'بله', ASSIST_TOOLS: 'بله' };
+  try {
+    asKnownNames_ = function () { return ['نمونه نمونه‌پور']; };
+    var K = TG_MEM['pb:key2'], S = 'https://tajrobeh.life';
+    TG_MEM['as:' + AS_KB_TAB] = [
+      { 'موضوع': 'هزینه', 'پرسش‌های نمونه': 'هزینه جلسه چقدر است', 'پاسخ': 'پاسخ تأییدشدهٔ ساختگی دربارهٔ هزینه.', 'تأیید': 'بله' },
+      { 'موضوع': 'پیش‌نویس', 'پرسش‌های نمونه': 'سؤال پیش‌نویس', 'پاسخ': 'پاسخ تأییدنشده', 'تأیید': '' },
+      { 'موضوع': 'همکاری', 'پرسش‌های نمونه': 'سهم درمانگر', 'پاسخ': 'درصد سهم درمانگر ساختگی', 'تأیید': 'بله' }];
+    TG_MEM['as:events'] = [{ code: 'EV-T1', title: 'کارگاه نمونه', date: '۲۰ مهر', dateIso: '2026-10-12', time: '۱۸:۰۰' }, { code: 'EV-T0', title: 'کارگاه گذشته', dateIso: '2026-09-01' }];
+    asIdxIngest_({ key: K, run: '202610101100', part: 1, of: 1, chunks: [{ id: 'c1', url: S + '/clinic/', title: 'کلینیک', text: 'کلینیک حضوری تجربه در تهران است و متن ساختگی برای آزمون نمایه.', dom: 'حضوری', aud: 'مراجع' }] });
+    ok('as_dump فقط با کلید دوم', asEdgeDump_({ key: 'x' }).error === 'key2_only');
+    var d = asEdgeDump_({ key: K }).data, j = JSON.stringify(d);
+    ok('as_dump: فقط ردیف تأییدشده، بی متن مالی', d.kb.length === 1 && d.kb[0].t === 'هزینه' && JSON.stringify([d.kb, d.idx, d.topics]).indexOf('تأییدنشده') < 0 && JSON.stringify([d.kb, d.idx, d.topics]).indexOf('درصد سهم') < 0, JSON.stringify(d.kb));
+    ok('as_dump: نمایه، رویداد پیش‌رو، واژه‌ها و پیام ثابت بحران', d.idx.length === 1 && d.idx[0][1] === S + '/clinic/' && d.events.length === 1 && d.events[0].code === 'EV-T1' && d.crisis.text === T_CRISIS && d.crisis.words.indexOf('خودکشی') > -1);
+    ok('as_dump: بی نام شناخته‌شده و بی شماره', j.indexOf('نمونه‌پور') < 0 && !/09\d{9}/.test(tgLatinDigits_(j)) && !/@[\w.-]+\.\w{2,}/.test(j));
+    ok('as_log فقط با کلید دوم', asEdgeLog_({ key: 'x', entries: [] }).error === 'key2_only');
+    ok('as_log اجرای خشک فقط می‌شمارد', asEdgeLog_({ key: K, entries: [{ k: 'log' }, { k: 'log' }] }, true).data.would === 2);
+    var lg = TG_MEM['as:' + AS_LOG_TAB] || [], n0 = lg.length;
+    var r = asEdgeLog_({ key: K, entries: [{ k: 'log', ch: 'site', id: 'A-edge0001', topic: 'هزینه', mode: 'لبه', res: 'پاسخ', ms: 420, src: 'دانش', au: 'مراجع' }, { k: 'rate', id: 'A-edge0001', good: true },
+      { k: 'un', ch: 'site', text: 'سؤال بی‌جواب از نمونه نمونه‌پور با ۰۹۱۲۳۴۵۶۷۸۹', kind: 'بی‌پاسخ' }, { k: 'handoff', ch: 'site', sid: 's-1', text: 'می‌خواهم با پذیرش حرف بزنم' }] });   // pii:ok ساختگی
+    lg = TG_MEM['as:' + AS_LOG_TAB];
+    var row = lg[lg.length - 1] || {};
+    ok('as_log: گزارش با شناسه و زمان ورکر، رضایت روی همان شناسه', r.data.n === 4 && lg.length === n0 + 1 && row['شناسه'] === 'A-edge0001' && row['منبع پاسخ'] === 'دانش' && Number(row['میلی‌ثانیه']) >= 400 && row['رضایت'] === '👍', JSON.stringify(row));
+    var un = (TG_MEM['as:' + AS_UN_TAB] || []).slice(-1)[0] || {};
+    ok('as_log: بی‌پاسخ پاک‌شده (بی نام و شماره)', un['متن'] && un['متن'].indexOf('نمونه‌پور') < 0 && !/\d{6,}/.test(tgLatinDigits_(un['متن'])), un['متن']);
+    ok('as_log: تحویل به پذیرش', TG_MEM['as:handoff'].length === 1);
+    ok('as_log: شناسهٔ نامعتبر جایش شناسهٔ تازه', (asEdgeLog_({ key: K, entries: [{ k: 'log', id: 'x;drop', res: 'پاسخ' }] }), /^A-/.test(TG_MEM['as:' + AS_LOG_TAB].slice(-1)[0]['شناسه']) && TG_MEM['as:' + AS_LOG_TAB].slice(-1)[0]['شناسه'] !== 'x;drop'));
+    var many = []; for (var i = 0; i < 60; i++) many.push({ k: 'log', res: 'پاسخ' });
+    ok('as_log: حداکثر ۴۰ در هر فراخوان', asEdgeLog_({ key: K, entries: many }).data.n === AS_EDGE_MAX_LOG);
+    TG_MEM['as:edgeping'] = [];
+    ok('پینگ بی نشانی کاری نمی‌کند', asEdgePing_() === false && !TG_MEM['as:edgeping'].length);
+    TG_CFG_.ASSIST_EDGE_URL = 'http://bad.example/x';
+    ok('پینگ فقط به نشانی https', asEdgePing_() === false);
+    TG_CFG_.ASSIST_EDGE_URL = 'https://tj-assist.example.workers.dev/';
+    asIdxIngest_({ key: K, run: '202610102300', part: 1, of: 1, chunks: [{ id: 'c2', url: S + '/school/', title: 'مدرسه', text: 'مدرسهٔ تجربه دوره‌های ساختگی برای آزمون نمایه دارد و متن کافی دارد.', dom: 'مدرسه و دوره‌ها', aud: 'دانشجو' }] });
+    ok('تعویض نمایه ورکر را پینگ می‌کند', TG_MEM['as:edgeping'].length === 1 && TG_MEM['as:edgeping'][0] === 'https://tj-assist.example.workers.dev');
+    ok('اکشن‌های درگاه: as_dump خواندنی، as_log نوشتنی', typeof PB_ACTIONS.as_dump === 'function' && PB_WRITE.indexOf('as_dump') < 0 && PB_WRITE.indexOf('as_log') > -1 && PB_RATE_BUCKET.as_log[2] === 400);
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { asKnownNames_ = keep.names; TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = keep.cfg; AS_IDX_MEMO = null; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'asTests8'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['دستیار ۸ · دادهٔ ورکر لبه (v170.23.24)', 'asTests8']); } catch (eAs8) {}
