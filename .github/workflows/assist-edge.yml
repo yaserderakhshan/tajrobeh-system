@@ -71,7 +71,8 @@ jobs:
           LEAD_SECRET: ${{ secrets.SITE_LEAD_SECRET }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          node -e 'const o={BOT_URL:process.env.BOT_URL,BOT_KEY:process.env.BOT_KEY,LEAD_SECRET:process.env.LEAD_SECRET};if(process.env.GEMINI_API_KEY)o.GEMINI_API_KEY=process.env.GEMINI_API_KEY;require("fs").writeFileSync("/tmp/sec.json",JSON.stringify(o))'
+          # کلید جمنای اختیاری است: اگر در محیط production باشد با همین اجرای دستی به ورکر می‌رسد. مقدار هیچ رمزی چاپ نمی‌شود.
+          node -e 'const o={BOT_URL:process.env.BOT_URL,BOT_KEY:process.env.BOT_KEY,LEAD_SECRET:process.env.LEAD_SECRET};if(process.env.GEMINI_API_KEY)o.GEMINI_API_KEY=process.env.GEMINI_API_KEY;require("fs").writeFileSync("/tmp/sec.json",JSON.stringify(o));console.log("کلید جمنای: "+(o.GEMINI_API_KEY?"هست و به ورکر می‌رود":"در Secrets نیست؛ ورکر بی جمنای"))'
           npx -y $WRANGLER secret bulk /tmp/sec.json
           rm -f /tmp/sec.json
       - name: نشانی ورکر و تازه کردن داده
@@ -83,8 +84,8 @@ jobs:
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           curl -fsS -X POST "$URL/assist/refresh" >/dev/null || true
           for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            V=$(curl -fsS "$URL/assist/health" | jq -r '.v // empty' || true)
-            [ -n "$V" ] && { echo "داده رسید: $V"; break; }
+            H=$(curl -fsS "$URL/assist/health" || true); V=$(echo "$H" | jq -r '.v // empty' 2>/dev/null || true)
+            [ -n "$V" ] && { echo "داده رسید: $V"; echo "- نسخهٔ داده: $V · جمنای در ورکر: $(echo "$H" | jq -r 'if .gemini then "روشن" else "خاموش" end') · ASSIST_REWRITE: $(echo "$H" | jq -r 'if .rewrite then "بله" else "خیر" end')" >> "$GITHUB_STEP_SUMMARY"; break; }
             sleep 10
           done
       - name: آزمون دود (پنج پرسش واقعی با زمان)
