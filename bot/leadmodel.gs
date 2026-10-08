@@ -48,7 +48,8 @@ function lmStOf_(out) {
 function lmGuessType_(src, text) {
   var s = String(src || '') + ' ' + String(text || '');
   if (/اپلای|متقاضی همکاری|درمانگر متقاضی/.test(s)) return LM_T.T;
-  if (/پارتنر/.test(s)) return LM_T.P;
+  /* v170.23.21: «پارتنر» فقط از منبع (بخش پارتنر سایت)، نه متن آزاد («با پارتنرم») و نه درخواست زوج */
+  if (/پارتنر/.test(String(src || '')) && !/زوج|رابطه|همسر|تراپی|مراجع/.test(s)) return LM_T.P;
   return LM_T.C;
 }
 
