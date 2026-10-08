@@ -6,7 +6,7 @@ import { CASES, wrong } from './smoke-cases.mjs';
 const H = { 'content-type': 'application/json', Origin: 'https://tajrobeh.life' };
 const rows = [], bad = [];
 const health = await (await fetch(BASE + '/assist/health')).json().catch(() => ({}));
-console.log(`دادهٔ ورکر: نسخهٔ ${health.v || '?'} · ${health.at || '?'} · دانش ${health.kb ?? '?'} · نمایه ${health.idx ?? '?'} · کلید جمنای ${health.gemini ? 'هست' : 'نیست'} · ASSIST_REWRITE ${health.rewrite ? 'بله' : 'خیر'} · آخرین جمنای ${health.gem_last ? health.gem_last.why + ' ' + health.gem_last.ms + 'ms' : '-'}`);
+console.log(`دادهٔ ورکر: نسخهٔ ${health.v || '?'} · ${health.at || '?'} · دانش ${health.kb ?? '?'} · نمایه ${health.idx ?? '?'} · کلید جمنای ${health.gemini ? 'هست' : 'نیست'} · ASSIST_REWRITE ${health.rewrite ? 'بله' : 'خیر'} · آخرین جمنای ${health.gem_last ? health.gem_last.why + ' ' + health.gem_last.ms + 'ms' : '-'} · رویدادهای تقویم سایت ${health.events ?? '?'} (${health.events_src || '-'})`);
 for (const c of CASES) {
   const name = c.name, text = c.q;
   const t0 = Date.now();
