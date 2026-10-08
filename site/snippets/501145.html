@@ -323,6 +323,8 @@
       w.appendChild(el('span', 'tj-fab-as-ok', 'ثبت شد'));
       try { fetch(EDGE + '/assist', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, keepalive: true, body: JSON.stringify({ action: 'assist.ask', channel: 'site', session_id: sid, text: asLast, tap: id }) }).catch(function () {}); } catch (eF) {}
       if (/^x:/.test(id)) { var h = el('button', 'is-hand', 'با پذیرش حرف بزنم'); h.type = 'button'; h.onclick = function () { h.remove(); send('', 'h', 'با پذیرش حرف بزنم'); }; w.appendChild(h); }
+      try { x.blur(); } catch (eB) {}
+      asLog.scrollTop = asLog.scrollHeight;
     };
     var qBtn = function (w, q) {
       var b = el('button', '', q.text); b.type = 'button';
