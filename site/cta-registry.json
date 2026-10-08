@@ -551,6 +551,16 @@
       ],
       "pages": [
         "site/pages/504776-guide.html"
+        ],
+        "links": 1
+      },
+      {
+      "code": "pz-assist",
+      "line": "pz",
+      "label": "دستیار › سؤال دارم",
+      "aliases": [],
+      "pages": [
+        "site/snippets/501145.html"
       ],
       "links": 1
     },
