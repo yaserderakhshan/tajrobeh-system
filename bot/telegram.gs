@@ -2147,20 +2147,15 @@ const T_SCHOOL =
 TG_LINK_SCHOOL + '\n\n' +
 'برای سؤال بیشتر «صحبت با همکار» را بزنید.';
 
+/* v170.23.19 (تصمیم یاسر): تجربه خدمات بحران نیست. مسیر بحران فقط همین پیام کوتاه و ثابت است؛ نه کارت فوری، نه لید، نه پیگیری. */
 const T_CRISIS =
-'چیزی که نوشتید نگرانم کرد و می‌خواهم مستقیم با شما حرف بزنم.\n\n' +
-'این بات برای وضعیت اورژانسی ساخته نشده. اگر در خطر فوری هستید یا به فکر آسیب زدن به خودتان افتاده‌اید، همین حالا:\n\n' +
+'تجربه خدمات بحران و اورژانس ندارد. اگر در خطر فوری هستید یا به آسیب زدن به خودتان فکر می‌کنید، همین حالا تماس بگیرید:\n\n' +
 '☎️ اورژانس اجتماعی: ۱۲۳\n' +
 '☎️ اورژانس پزشکی: ۱۱۵\n' +
 '☎️ صدای مشاور بهزیستی: ۱۴۸۰\n\n' +
-'اگر خارج از ایران هستید با شمارهٔ اورژانس همان کشور تماس بگیرید.\n\n' +
-'و اگر می‌توانید همین حالا به کسی که به او اعتماد دارید زنگ بزنید و تنها نمانید.\n\n' +
-'پیام شما برای تیم ما فوری علامت خورد و در اولین فرصت تماس می‌گیرند.';
+'خارج از ایران: شمارهٔ اورژانس همان کشور.';
 
-const T_CRISIS_GROUP =
-'اگر حالتان خیلی بد است لطفاً همین حالا تماس بگیرید:\n' +
-'☎️ اورژانس اجتماعی ۱۲۳ · اورژانس پزشکی ۱۱۵ · صدای مشاور ۱۴۸۰\n' +
-'و تنها نمانید. اگر خواستید در خصوصی بنویسید تا پذیرش پیگیری کند.';
+const T_CRISIS_GROUP = T_CRISIS;
 
 const T_FALLBACK =
 'این پیام را متوجه نشدم.\n\n' +
@@ -2243,10 +2238,15 @@ const T_COVERAGE_HINT =
 'اگر یک وقت بین ۱۸ تا ۲۱ تهران هم بگذارید، مراجعان آمریکا و کانادا هم می‌توانند شما را انتخاب کنند. ' +
 'بیشترین تقاضای بی‌پاسخ ما همان‌جاست.';
 
+/* v170.23.19 (تصمیم یاسر): فقط جمله‌های صریح خودکشی و آسیب به خود. گونه‌های کلی («نمیخوام زندگی»، «بمیرم» تنها، «دیگه نمیکشم»،
+   «تمومش کنم»، «قرص خوردم») بیرون ماندند. tgNorm_ نیم‌فاصله را فاصله و ی/ک عربی را فارسی می‌کند، پس یک گونه بس است. */
 const TG_CRISIS_WORDS = [
-  'خودکشی','خودکشي','خودزنی','خودزني','بمیرم','بميرم','تمومش کنم','تمومش كنم',
-  'نمیخوام زندگی','نميخوام زندگي','به خودم آسیب','به خودم آسيب','قرص خوردم',
-  'دیگه نمیکشم','ديگه نميكشم','بکشم خودمو','بكشم خودمو','suicide','kill myself','end my life'
+  'خودکشی','خودزنی','به خودم آسیب','رگ زدم','رگمو بزنم','رگم را بزنم',
+  'بکشم خودمو','خودمو بکشم','خودم را بکشم','خودم رو بکشم',
+  'می خواهم بمیرم','میخواهم بمیرم','می خوام بمیرم','میخوام بمیرم',
+  'نمی خواهم زنده باشم','نمیخواهم زنده باشم','نمی خوام زنده باشم','نمیخوام زنده باشم','نمی خوام زنده بمونم','نمیخوام زنده بمونم',
+  'زندگیمو تموم کنم','زندگیم را تمام کنم','به زندگیم پایان بدم','به زندگیم پایان بدهم','قرص زیادی خوردم',
+  'suicide','kill myself','end my life','self harm'
 ];
 
 const TG_TOPIC_WORDS = [
@@ -2264,12 +2264,7 @@ const TG_ABROAD_WORDS = [
 ];
 
 // در گروه فقط این کلمه‌ها بحران حساب می‌شوند تا «الهی بمیرم برات» پاسخ نگیرد
-const TG_CRISIS_STRONG = [
-  'خودکشی','خودکشي','خودزنی','خودزني','تمومش کنم','تمومش كنم','قرص خوردم','قرص خورده',
-  'به خودم آسیب','به خودم آسيب','بکشم خودمو','بكشم خودمو','خودمو بکشم','خودمو بكشم',
-  'دیگه نمیکشم','ديگه نميكشم','نمیخوام زندگی','نميخوام زندگي','رگ زدم',
-  'suicide','kill myself','end my life','self harm'
-];
+const TG_CRISIS_STRONG = TG_CRISIS_WORDS;   /* v170.23.19: همان فهرست صریح (بی «بمیرم» تنها، پس «الهی بمیرم برات» پاسخ نمی‌گیرد) */
 
 // پاسخِ بدون منشن در گروه فقط با این کلمه‌های روشن — «وقت» و «جلسه» به تنهایی کافی نیست
 const TG_TOPIC_STRONG = [
@@ -2495,6 +2490,9 @@ function tgPrivate_(m) {
   /* v170.23.10: طول جلسه (sesslen.gs): عدد دلخواه، /sesslen و دکمهٔ میز پذیرش */
   if (m.text && typeof tgLenText_ === 'function' && tgGetVal_('lnc', chat) && tgLenText_(chat, m.text)) return;
   if (m.text && typeof tgLenPick_ === 'function' && (String(m.text).trim() === '/sesslen' || String(m.text).trim() === TG_LEN_DESK_BTN)) { if (tgLenCanOthers_(chat)) { tgDel_('lnt', chat); tgLenPick_(chat, 0); } else tgLenStart_(chat); return; }
+  if (typeof nuSeen_ === 'function') { try { nuSeen_(chat); } catch (eNu) { tgErr_('nuSeen_', eNu); } }   /* v170.23.13: پاسخ مراجع دنبالهٔ پیگیری را می‌ایستاند */
+  if (typeof reSeen_ === 'function') { try { reSeen_(chat); } catch (eRe) { tgErr_('reSeen_', eRe); } }   /* v170.23.14: پاسخ به پیام بازگرداندن */
+  if (m.text && typeof nuOwnerCmd_ === 'function' && nuOwnerCmd_(chat, String(m.text).trim())) return;
   if (typeof asRoute_ === 'function' && asRoute_(chat, m)) return;   /* v170.23.11: دستیار پاسخ‌گو (assist.gs)؛ بحران را خودش اول می‌سنجد */
   if (m.text && typeof migOwnerCmd_ === 'function' && migOwnerCmd_(chat, String(m.text).trim())) return;
 
@@ -4490,15 +4488,8 @@ function tgColleague_(chat, name, uname, topic) {
 }
 
 function tgOnCrisis_(chat, name, uname, text) {
-  tgSend_(chat, T_CRISIS, {
-    keyboard: [[{ text: '📞 فرستادن شمارهٔ من', request_contact: true }]],
-    resize_keyboard: true, one_time_keyboard: true
-  });
-  tgAppendLead_({
-    source: 'Telegram bot', name: name, channel: 'تلگرام', phone: uname || String(chat), region: '',
-    firstText: 'هشدار: کلمهٔ بحران در پیام کاربر', status: 'جدید',
-    note: 'chat_id: ' + chat + (uname ? ' · ' + uname : '') + ' · متن: ' + text.slice(0, 200)
-  });
+  /* v170.23.19 (تصمیم یاسر): فقط پیام ثابت اورژانس. بی کارت فوری، بی سطر لید، بی ذخیرهٔ متن. */
+  tgSend_(chat, T_CRISIS, { remove_keyboard: true });
 }
 
 function tgOnCallback_(cq) {
@@ -4522,6 +4513,8 @@ function tgOnCallback_(cq) {
   if (data.indexOf('ln:') === 0 && typeof tgLenCb_ === 'function') return tgLenCb_(chat, data);   /* v170.23.10: طول جلسه */
   if (data.indexOf('as:') === 0 && typeof asCb_ === 'function') return asCb_(chat, data, name);   /* v170.23.11: دستیار */
   if (data.indexOf('ls:') === 0 && typeof lsCb_ === 'function') return lsCb_(chat, data);   /* v170.23.12: زمان مناسب تماس */
+  if (data.indexOf('nu:') === 0 && typeof nuCb_ === 'function') return nuCb_(chat, data);   /* v170.23.13: پیگیری گیرکرده‌ها */
+  if (data.indexOf('re:') === 0 && typeof reCb_ === 'function') return reCb_(chat, data, name, uname);   /* v170.23.14: بازگرداندن مراجعان قدیمی */
   if (data.indexOf('mig:') === 0 && typeof migCb_ === 'function') return migCb_(chat, data);   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ */
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
@@ -6356,7 +6349,7 @@ function tgCmd_(text) {
 // یادداشت درون‌اجرایی کش: هر رفت‌وبرگشت CacheService حدود ۵۰ تا ۱۰۰ میلی‌ثانیه است؛
 // tgCachePrime_ همهٔ کلیدهای رایج این چت را با یک getAll می‌گیرد و بقیهٔ خواندن‌ها از حافظه می‌آید
 var TG_CMEMO = null;
-const TG_MEMO_KEYS = ['sign', 'await', 'ft', 'seen', 'qt', 'qg', 'nd', 'pf', 'qa', 'qm', 'tz', 'bd', 'helped', 'ts', 'pfd', 'ct', 'mzw', 'mzt', 'mzu', 'mzl', 'mzn', 'esign', 'pq', 'pr', 'em', 'emask', 'ldn', 'ldr', 'war', 'sfh', 'scg', 'sln', 'sli', 'sfl', 'alw', 'apw', 'pzw', 'rmw', 'rmv', 'cpv', 'cpp', 'cpn', 'cpl', 'apmsg', 'apreply', 'ldx', 'ldf', 'ldb', 'ldbs', 'vxc', 'vxe', 'vxu', 'mig', 'qcity', 'qpid', 'lnc', 'lnt', 'asq', 'asr', 'aslast'];
+const TG_MEMO_KEYS = ['sign', 'await', 'ft', 'seen', 'qt', 'qg', 'nd', 'pf', 'qa', 'qm', 'tz', 'bd', 'helped', 'ts', 'pfd', 'ct', 'mzw', 'mzt', 'mzu', 'mzl', 'mzn', 'esign', 'pq', 'pr', 'em', 'emask', 'ldn', 'ldr', 'war', 'sfh', 'scg', 'sln', 'sli', 'sfl', 'alw', 'apw', 'pzw', 'rmw', 'rmv', 'cpv', 'cpp', 'cpn', 'cpl', 'apmsg', 'apreply', 'ldx', 'ldf', 'ldb', 'ldbs', 'vxc', 'vxe', 'vxu', 'mig', 'qcity', 'qpid', 'lnc', 'lnt', 'asq', 'asr', 'aslast', 'asa'];
 const TG_MEMO_LISTS = ['wlist', 'drows', 'trows', 'faq', 'scols'];
 function tgCachePrime_(chat) {
   if (TG_DRY || TG_CMEMO) return;
@@ -6913,6 +6906,9 @@ function tgWatchdog(e) {
   S('ebiHourly_', 'light', typeof ebiHourly_ === 'function' ? ebiHourly_ : null);
   S('aiRetryTick_', 'light', typeof aiRetryTick_ === 'function' ? aiRetryTick_ : null);   /* v170.23.7: ویس‌های بی‌متن */
   S('ktbHourly_', 'light', typeof ktbHourly_ === 'function' ? ktbHourly_ : null);
+  S('asWeeklyMaybe_', 'light', typeof asWeeklyMaybe_ === 'function' ? asWeeklyMaybe_ : null);   /* v170.23.17: گزارش هفتگی تیم‌های دستیار، شنبه یک بار */
+  S('nuTick_', 'light', typeof nuTick_ === 'function' ? nuTick_ : null);   /* v170.23.13: پیگیری گیرکرده‌ها */
+  S('reTick_', 'light', typeof reTick_ === 'function' ? reTick_ : null);   /* v170.23.14: کارت دستهٔ بازگرداندن */
   S('migSetupTick_', 'light', typeof migSetupTick_ === 'function' ? migSetupTick_ : null);   /* با MIG_ENABLED خاموش بی‌کار */
   S('migTick_', 'light', typeof migTick_ === 'function' ? migTick_ : null);
   S('ps2FixMaybe_', 'light', typeof ps2FixMaybe_ === 'function' ? ps2FixMaybe_ : null);
@@ -7082,7 +7078,7 @@ function tgRunTests() {
   run('صحبت با همکار', [P('📞 صحبت با همکار')], ['تیم پذیرش']);
   run('شروع درمان', [P('🍓 شروع درمان')], ['اذیتتان می‌کند']);
   run('بازگشت', [P('↩️ بازگشت')], ['منوی اصلی']);
-  run('متن نامفهوم', [P('قسقسقسقسقس')], ['متوجه نشدم']);
+  run('متن نامفهوم', [P('قسقسقسقسقس')], ['متوجه نشدم||جواب دقیقی برای این پیدا نکردم']);   /* v170.23.19.1: با دستیار روشن، پاسخ جایگزین دستیار */
   run('سؤال آزاد هزینه', [P('هزینه جلسه چقدره؟')], ['هزینه']);
   run('سؤال آزاد خارج', [P('من کانادا هستم میشه؟')], ['فارسی‌زبانان خارج از ایران', 'کجا زندگی می‌کنید']);
   run('بحران', [P('میخوام خودکشی کنم')], ['۱۲۳', 'اورژانس']);
@@ -21644,6 +21640,7 @@ function tgLeadRead_(row) {
     noans: Number(tgLatinDigits_(String(tgLeadHv_(v, hm, 'شمار بی‌پاسخ') || '0'))) || 0,
     reason: String(tgLeadHv_(v, hm, 'دلیل بستن') || '').trim(),
     offer: String(tgLeadHv_(v, hm, 'آفر') || '').trim(),   /* v170.13 */
+    follow: String(tgLeadHv_(v, hm, 'پیگیری خودکار') || '').trim(),   /* v170.23.13: دنبالهٔ پیگیری و «دیگر پیام نده» */
     closed: tgStClosed_(statusRaw),
     touched: touched, idle: idle, age: age,
     stage: tgLeadStage_(touched, idle, nextIso, today)
