@@ -99,7 +99,7 @@
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۵۷۶ | ۱۲۰ |
-| `v168.gs` | ۲۴۳۵ | ۱۵۰ |
+| `v168.gs` | ۲۴۴۷ | ۱۵۱ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۹ | ۳۴ |
 | `leadmodel.gs` | ۷۷۸ | ۴۱ |
@@ -122,7 +122,7 @@
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۱۴۶۲ | ۱۱۴ |
-| `leadspeed.gs` | ۹۵۶ | ۸۰ |
+| `leadspeed.gs` | ۱۰۰۳ | ۸۱ |
 | `nurture.gs` | ۲۸۹ | ۳۰ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 
