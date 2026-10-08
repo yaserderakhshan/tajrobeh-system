@@ -24,7 +24,8 @@ export default {
     const url = new URL(req.url), origin = req.headers.get('Origin') || '';
     const cors = { 'Access-Control-Allow-Origin': ORIGINS.includes(origin) ? origin : ORIGINS[0], 'Vary': 'Origin', 'Access-Control-Allow-Headers': 'Content-Type, X-Tj-Ts, X-Tj-Sig', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Max-Age': '86400' };
     const json = (o, st, extra) => new Response(JSON.stringify(o), { status: st || 200, headers: Object.assign({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }, cors, extra || {}) });
-    const path = url.pathname.replace(/\/+$/, '');
+    /* از ۱۷ مهر ورکر روی دامنهٔ خود سایت هم هست (route: tajrobeh.life/api/assist*)، چون workers.dev از ایران مسدود یا کند است */
+    const path = url.pathname.replace(/^\/api(?=\/assist(?:\/|$))/, '').replace(/\/+$/, '');
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
     try {
       if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, faq: d ? d.faq.N : 0, faq_v: d ? d.faq.version : '', events: d ? d.siteEvents.length : 0, events_src: await env.KV.get('site_events', 'json').then((x) => x ? (x.src || '') + (x.why ? ' ' + x.why : '') : '').catch(() => ''), gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false, gem_last: await env.KV.get('gem:last', 'json') }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
@@ -80,6 +81,9 @@ export default {
         }
         const ms = Date.now() - t0;
         const logs = [].concat(r.log ? [Object.assign({ ms }, r.log)] : [], r.un ? [r.un] : [], r.extra || []);
+        /* ویجت شمار درخواست‌هایی را که به ورکر نرسید (شبکه یا مهلت ۴ ثانیه) با درخواست بعدی می‌فرستد؛ جدا از «بی‌پاسخ» واقعی */
+        const miss = Math.min(20, Math.max(0, parseInt(body.miss, 10) || 0));
+        if (miss) logs.push({ k: 'log', ch: c.channel, id: '', topic: '', mode: 'وصل نشد', res: 'وصل نشد ×' + miss, au: c.audience || 'کاربر عمومی' });
         if (logs.length) ctx.waitUntil(sendLogs(env, logs));
         return json(res, 200, { 'server-timing': 'assist;dur=' + ms + (model ? ', gemini' : '') + ', gem;desc="' + why + '";dur=' + gms });
       }
