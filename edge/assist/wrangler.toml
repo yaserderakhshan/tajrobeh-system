@@ -1,0 +1,12 @@
+# ورکر دستیار تجربه. شناسهٔ KV در مخزن نیست؛ گردش کار assist-edge.yml آن را با نام «tj-assist» پیدا و جایگزین می‌کند.
+name = "tj-assist"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "KV"
+id = "__KV_ID__"
+
+[triggers]
+crons = ["*/30 * * * *"]
