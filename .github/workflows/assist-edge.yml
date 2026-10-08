@@ -71,10 +71,17 @@ jobs:
           LEAD_SECRET: ${{ secrets.SITE_LEAD_SECRET }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          # کلید جمنای اختیاری است: اگر در محیط production باشد با همین اجرای دستی به ورکر می‌رسد. مقدار هیچ رمزی چاپ نمی‌شود.
-          node -e 'const o={BOT_URL:process.env.BOT_URL,BOT_KEY:process.env.BOT_KEY,LEAD_SECRET:process.env.LEAD_SECRET};if(process.env.GEMINI_API_KEY)o.GEMINI_API_KEY=process.env.GEMINI_API_KEY;require("fs").writeFileSync("/tmp/sec.json",JSON.stringify(o));console.log("کلید جمنای: "+(o.GEMINI_API_KEY?"هست و به ورکر می‌رود":"در Secrets نیست؛ ورکر بی جمنای"))'
+          # کلید جمنای از محیط production؛ با هر اجرای دستی (workflow_dispatch روی main) با wrangler secret put به ورکر می‌رود.
+          # مقدار هیچ رمزی خوانده یا چاپ نمی‌شود: فقط از stdin به wrangler می‌رسد.
+          node -e 'const o={BOT_URL:process.env.BOT_URL,BOT_KEY:process.env.BOT_KEY,LEAD_SECRET:process.env.LEAD_SECRET};require("fs").writeFileSync("/tmp/sec.json",JSON.stringify(o))'
           npx -y $WRANGLER secret bulk /tmp/sec.json
           rm -f /tmp/sec.json
+          if [ -n "$GEMINI_API_KEY" ]; then
+            printf '%s' "$GEMINI_API_KEY" | npx -y $WRANGLER secret put GEMINI_API_KEY
+            echo "کلید جمنای: از محیط production به ورکر رفت"
+          else
+            echo "::warning::GEMINI_API_KEY در محیط production نیست؛ ورکر بی جمنای"
+          fi
       - name: نشانی ورکر و تازه کردن داده
         if: steps.gate.outputs.go == '1'
         id: url

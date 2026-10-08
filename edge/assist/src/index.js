@@ -22,7 +22,7 @@ export default {
     const path = url.pathname.replace(/\/+$/, '');
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
     try {
-      if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
+      if (path === '/assist/health') { const d = await data(env, ctx); return json({ ok: !!d, v: d ? d.raw.v : '', at: d ? d.raw.at : '', kb: d ? d.kb.length : 0, idx: d ? d.siteIx.items.length + d.magIx.items.length : 0, gemini: !!env.GEMINI_API_KEY, rewrite: d ? d.rewrite : false, gem_last: await env.KV.get('gem:last', 'json') }); }   /* فقط بله و نه؛ هیچ مقدار رمز */
       if (path === '/assist/refresh' && req.method === 'POST') { ctx.waitUntil(refresh(env, true)); return json({ ok: true }); }
       if (path === '/assist/boot' && req.method === 'GET') {
         const P = await data(env, ctx);
@@ -43,16 +43,32 @@ export default {
         if (!P) return json({ ok: false, error: 'nodata' }, 503);
         const c = { channel: String(body.channel || 'site').replace(/[^\w-]/g, '').slice(0, 20) || 'site', audience: String(body.audience || '').slice(0, 30), session: sid };
         const r = body.tap ? tap(P, String(body.tap), String(body.text || ''), c) : ask(P, String(body.text || ''), c);
-        let res = r.res, model = '';
-        if (r.compose && P.rewrite && env.GEMINI_API_KEY && await gemLeft(env, P)) {
-          const g = await gemini(env, composePrompt(r.compose), COMPOSE_SCHEMA, GEM_BUDGET_MS);
-          if (g && g.out) { res = applyCompose(res, r.compose, g.out); model = GEM_MODEL; ctx.waitUntil(gemCount(env)); }
-          if (g && g.usage) (r.extra = r.extra || []).push({ k: 'gem', job: 'پاسخ از منبع سایت', model: GEM_MODEL, tin: g.usage.promptTokenCount || 0, tout: g.usage.candidatesTokenCount || 0 });
+        let res = r.res, model = '', why = 'na', gms = 0;
+        /* چرای جمنای در هر پاسخ (فقط کد کوتاه، بی هیچ مقدار رمز): na بی متن سایت · off ASSIST_REWRITE خاموش · nokey · cap سقف روزانه ·
+           timeout · http<کد>-<وضعیت گوگل> · parse · none (متن‌ها جواب نمی‌دهند) · guard (از گارد خروجی رد شد) · ok */
+        if (r.compose) {
+          if (!P.rewrite) why = 'off';
+          else if (!env.GEMINI_API_KEY) why = 'nokey';
+          else if (!(await gemLeft(env, P))) why = 'cap';
+          else {
+            const g0 = Date.now(), g = await gemini(env, composePrompt(r.compose), COMPOSE_SCHEMA, GEM_BUDGET_MS);
+            gms = Date.now() - g0;
+            if (!g) why = 'timeout';
+            else if (g.http !== 200) why = 'http' + g.http + (g.err ? '-' + g.err : '');
+            else if (!g.out) why = 'parse';
+            else if (g.out.none) why = 'none';
+            else {
+              const res2 = applyCompose(res, r.compose, g.out);
+              if (res2 !== res) { res = res2; model = GEM_MODEL; why = 'ok'; ctx.waitUntil(gemCount(env)); } else why = 'guard';
+            }
+            if (g && g.usage) (r.extra = r.extra || []).push({ k: 'gem', job: 'پاسخ از منبع سایت', model: GEM_MODEL, tin: g.usage.promptTokenCount || 0, tout: g.usage.candidatesTokenCount || 0 });
+            ctx.waitUntil(env.KV.put('gem:last', JSON.stringify({ at: new Date().toISOString(), why, ms: gms }), { expirationTtl: 7 * 86400 }));
+          }
         }
         const ms = Date.now() - t0;
         const logs = [].concat(r.log ? [Object.assign({ ms }, r.log)] : [], r.un ? [r.un] : [], r.extra || []);
         if (logs.length) ctx.waitUntil(sendLogs(env, logs));
-        return json(res, 200, { 'server-timing': 'assist;dur=' + ms + (model ? ', gemini' : '') });
+        return json(res, 200, { 'server-timing': 'assist;dur=' + ms + (model ? ', gemini' : '') + ', gem;desc="' + why + '";dur=' + gms });
       }
       /* نزدیک‌ترین موضوع‌ها بی گزارش، برای بازگشت سبک ویجت */
       if (path === '/assist/near' && req.method === 'GET') {
@@ -137,9 +153,10 @@ async function gemini(env, prompt, schema, ms) {
       method: 'POST', signal: ac.signal, headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
       body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, responseMimeType: 'application/json', responseSchema: schema, thinkingConfig: { thinkingBudget: 0 } } })
     });
-    if (!r.ok) return null;
-    const j = await r.json(), t = ((((j.candidates || [])[0] || {}).content || {}).parts || []).map((p) => p.text || '').join('');
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return { http: r.status, err: String(((j || {}).error || {}).status || '').replace(/[^A-Z_]/g, '').slice(0, 40) };   /* فقط کد وضعیت گوگل، نه متن */
+    const t = ((((j.candidates || [])[0] || {}).content || {}).parts || []).map((p) => p.text || '').join('');
     let out = null; try { out = JSON.parse(t); } catch (e) {}
-    return { out, usage: j.usageMetadata || {} };
+    return { http: 200, out, usage: j.usageMetadata || {} };
   } catch (e) { return null; } finally { clearTimeout(tm); }
 }
