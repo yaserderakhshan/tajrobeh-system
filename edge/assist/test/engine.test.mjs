@@ -114,10 +114,15 @@ test('دکمه‌ها: موضوع، پرسش، رضایت، تحویل', () => {
   assert.match(tap(P, 't:0', '', C).res.answer, /هزینه/);
   const q = tap(P, 'q:3', '', C); assert.equal(q.res.source, 'دانش'); assert.match(q.res.answer, /معارفه/);
   assert.deepEqual(tap(P, 'y:A-abc12', '', C).extra, [{ k: 'rate', id: 'A-abc12', good: true }]);
-  const h = tap(P, 'x:A-abc12', 'هزینه چقدر', C); assert.equal(h.res.handoff, true); assert.ok(h.extra.some((e) => e.k === 'handoff') && h.extra.some((e) => e.k === 'un'));
+  assert.equal(tap(P, 'y:A-abc12', '', C).res.answer, '', 'بازخورد پیام گفت‌وگو نمی‌سازد');
+  const x = tap(P, 'x:A-abc12', 'هزینه چقدر', C); assert.equal(x.res.answer, ''); assert.equal(x.res.handoff, false);
+  assert.ok(x.extra.some((e) => e.k === 'rate' && e.good === false) && x.extra.some((e) => e.k === 'un') && !x.extra.some((e) => e.k === 'handoff'));
+  const h = tap(P, 'h', 'هزینه چقدر', C); assert.equal(h.res.handoff, true); assert.ok(h.extra.some((e) => e.k === 'handoff'));
 });
 test('شروع: جملهٔ کوتاه و چهار پرسش پرتکرار', () => {
-  const b = boot(P); assert.equal(b.quick.length, 4); assert.ok(b.privacy.length > 20); assert.equal(b.welcome, DATA.texts.welcome);
+  const b = boot(P); assert.equal(b.quick.length, 4);
+  for (const q of b.quick) { const f = FAQ_DATA.faq.find((x) => x.id === q.id); assert.ok(f, q.id); assert.equal(q.text, f.question, 'متن دکمه دقیقاً question'); assert.equal(tap(P, 'f:' + q.id, q.text, C).res.ref, q.id, 'جواب مستقیم با id'); }
+  assert.equal(b.faq.length, FAQ_DATA.faq.length); assert.ok(b.faq.every((x) => x.id && x.text)); assert.ok(b.privacy.length > 20); assert.equal(b.welcome, DATA.texts.welcome);
 });
 test('بی‌شناسه کردن پیش از جمنای', () => {
   const s = scrub('سلام من سارا هستم، دکتر Ahmadi گفت به ali@example.com یا ۰۹۱۲۱۲۳۴۵۶۷ پیام بدم');   // pii:ok ساختگی
