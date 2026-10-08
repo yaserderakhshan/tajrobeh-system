@@ -1,4 +1,5 @@
-// آزمون دیداری ویجت دستیار روی خود tajrobeh.life (Playwright، موبایل ۳۹۰ و دسکتاپ ۱۲۸۰).
+// آزمون دیداری اسنیپت شناور 501145 روی خود tajrobeh.life (Playwright، موبایل ۳۹۰ و دسکتاپ ۱۲۸۰): منوی اول و پنجرهٔ دستیار، هر دو.
+// منوی اول با بلندترین متن ممکن؛ هر عنصر بریده (scrollWidth > clientWidth)، بیرون از کادر منو، بیش از یک خط، یا آیتم ناهم‌عرض قرمز است.
 // ویجت زندهٔ صفحه برداشته و نسخهٔ همین شاخه (site/snippets/501145.html) جایش گذاشته می‌شود؛ بعد دستیار باز می‌شود، یک پرسش
 // پرتکرار و یک پرسش نامعلوم پرسیده می‌شود و از هر حالت اسکرین‌شات گرفته می‌شود. کنتراست هر متن دیده‌شدهٔ ویجت خودکار سنجیده
 // می‌شود (رنگ متن روی نخستین زمینهٔ نیمه‌شفاف‌نشدهٔ نیاکان): زیر ۴٫۵ به ۱، یا «…» در جواب‌ها، یعنی قرمز.
@@ -68,6 +69,32 @@ for (const [name, vp] of [['390', { width: 390, height: 844, isMobile: true, has
     (0, eval)(js);
   }, { css, markup, js });
   await page.click('#tjFabBtn');
+  /* منوی اول: هر آیتم و هر متنش در کادر خودش و در کادر منو، آیتم‌ها هم‌عرض، کنتراست.
+     بلندترین متن ممکن: ساعت پذیرش در حالت «بسته» (data-tj-label)، هر ساعتی که آزمون اجرا شود */
+  await page.evaluate(() => document.querySelectorAll('#tjFabRoot [data-tj-hours]').forEach((e) => { const l = e.getAttribute('data-tj-label') || ''; if (l.length > e.textContent.length) { e.textContent = l; e.classList.remove('is-online'); e.classList.add('is-offline'); } }));
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: join(OUT, `live-${name}-menu.png`) });
+  const mm = await page.evaluate(() => {
+    const menu = document.querySelector('#tjFabRoot .tj-fab-menu'), mr = menu.getBoundingClientRect(), bad = [];
+    const items = [...menu.querySelectorAll('.tj-fab-item')].filter((e) => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0);
+    for (const it of items) {
+      const nm = (it.querySelector('.tj-fab-item-label') || it).textContent.trim();
+      for (const e of [it, ...it.querySelectorAll('*')]) {
+        if (e.tagName === 'svg' || e.closest('svg')) continue;
+        const r = e.getBoundingClientRect(); if (!r.width) continue;
+        if (e.scrollWidth > e.clientWidth + 1 && e.clientWidth > 0) bad.push(`«${nm}»: ${e.className || e.tagName} بریده (${e.scrollWidth} > ${e.clientWidth})`);
+        if (r.left < mr.left - 0.5 || r.right > mr.right + 0.5) bad.push(`«${nm}»: ${e.className || e.tagName} بیرون از کادر منو`);
+      }
+      for (const t of it.querySelectorAll('.tj-fab-item-label, .tj-fab-item-status')) { const lh = parseFloat(getComputedStyle(t).lineHeight) || 20; if (t.getBoundingClientRect().height > lh * 1.6) bad.push(`«${nm}»: ${t.className} بیش از یک خط`); }
+    }
+    const ws = items.map((e) => Math.round(e.getBoundingClientRect().width));
+    if (Math.max(...ws) - Math.min(...ws) > 1) bad.push('آیتم‌ها هم‌عرض نیستند: ' + ws.join('، '));
+    return { bad, width: Math.round(mr.width), items: items.length };
+  });
+  report.push(`${name}px · منوی اول: عرض ${mm.width}، ${mm.items} آیتم، ${mm.bad.length} ایراد`);
+  for (const b of mm.bad) fails.push(`${name}px منو: ${b}`);
+  const am = await page.evaluate(audit, MIN);
+  for (const b of am.bad) fails.push(`${name}px منو: «${b.text}» ${b.ratio}`);
   await page.click('#tjFabAsk');
   await page.waitForSelector('#tjFabRoot .tj-fab-as-q button', { timeout: 15000 }).catch(() => {});
   await page.waitForTimeout(600);
