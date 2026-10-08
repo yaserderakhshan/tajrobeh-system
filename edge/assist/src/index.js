@@ -170,17 +170,26 @@ function hit(k, max) {
 function day() { return new Date(Date.now() + 3.5 * 3600000).toISOString().slice(0, 10); }
 async function gemLeft(env, P) { const n = Number(await env.KV.get('gem:' + day()) || 0); return n < P.gemDaily; }
 async function gemCount(env) { const k = 'gem:' + day(), n = Number(await env.KV.get(k) || 0); await env.KV.put(k, String(n + 1), { expirationTtl: 172800 }); }
+/* کمترین فکر (thinkingLevel) برای مدل‌های تازه؛ اگر مدل آن را نپذیرفت (۴۰۰)، همان درخواست بی تنظیم فکر، هر دو در یک مهلت.
+   (۱۶ مهر: thinkingBudget: 0 روی مدلی که نام latest حالا به آن اشاره می‌کند ۴۰۰ INVALID_ARGUMENT می‌داد) */
 async function gemini(env, prompt, schema, ms) {
   const ac = new AbortController(), tm = setTimeout(() => ac.abort(), ms);
-  try {
+  const call = async (thinking) => {
+    const gc = { temperature: 0.2, responseMimeType: 'application/json', responseSchema: schema };
+    if (thinking) gc.thinkingConfig = thinking;
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent', {
       method: 'POST', signal: ac.signal, headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, responseMimeType: 'application/json', responseSchema: schema, thinkingConfig: { thinkingBudget: 0 } } })
+      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: gc })
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) return { http: r.status, err: String(((j || {}).error || {}).status || '').replace(/[^A-Z_]/g, '').slice(0, 40) };   /* فقط کد وضعیت گوگل، نه متن */
     const t = ((((j.candidates || [])[0] || {}).content || {}).parts || []).map((p) => p.text || '').join('');
     let out = null; try { out = JSON.parse(t); } catch (e) {}
     return { http: 200, out, usage: j.usageMetadata || {} };
+  };
+  try {
+    let g = await call({ thinkingLevel: 'minimal' });
+    if (g.http === 400) g = await call(null);
+    return g;
   } catch (e) { return null; } finally { clearTimeout(tm); }
 }

@@ -199,6 +199,10 @@ test('ورکر: چرای جمنای در server-timing (بی مقدار رمز)'
   assert.match(x.st, /gem;desc="nokey"/);
   x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => new Response(JSON.stringify({ error: { code: 400, status: 'INVALID_ARGUMENT', message: 'x' } }), { status: 400 }));
   assert.match(x.st, /gem;desc="http400-INVALID_ARGUMENT"/); assert.equal(x.j.source, 'سایت');
+  /* ۴۰۰ برای تنظیم فکر ← یک بار دیگر بی آن */
+  const bodies = [];
+  x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => { const n = bodies.length; bodies.push(1); return n === 0 ? new Response(JSON.stringify({ error: { status: 'INVALID_ARGUMENT' } }), { status: 400 }) : new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ text: '', i: 0, none: true }) }] } }] })); });
+  assert.equal(bodies.length, 2); assert.match(x.st, /gem;desc="none"/);
   const src = DATA.idx.find((r) => /کلینیک/.test(r[2] + r[3]));
   x = await ask1(env({ GEMINI_API_KEY: 'g' }), () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ text: 'تراپی کودک در تجربه با بازی‌درمانی انجام می‌شود.', i: 0, none: false }) }] } }] })));
   assert.ok(/gem;desc="(ok|guard)"/.test(x.st), x.st);
