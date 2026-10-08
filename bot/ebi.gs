@@ -57,13 +57,27 @@ function ebiUse_(ok, err, usage) {
 }
 function ebiTok_() { try { return JSON.parse(pbProp_('EBI_TOK:' + ebiDayKey_()) || '{}') || {}; } catch (e) { return {}; } }
 
+/* v170.23.12.6: قطعی جمنای «مطمئن نبود» نیست. خطا یا تمام شدن زمان ← تا سه بار با فاصلهٔ حدود یک دقیقه (بار سوم با مدل
+   جایگزین AI_MODELS[1] اگر تعریف شده)؛ فقط اگر هر سه بار شکست خورد حکم review با EBI_GEM_DOWN. «مطمئن نبود» فقط وقتی
+   جمنای واقعاً جواب داده و حکمش ok نبوده؛ دلیل خود جمنای در reason می‌آید. */
+var EBI_TRIES = 3, EBI_GAP_MS = 60000;
+var EBI_GEM_DOWN = 'جمنای در دسترس نبود؛ بررسی خودکار انجام نشد';
+var EBI_RETRY_KEY = 'EBI_RETRY', EBI_RETRY_FN = 'ebiRetryRun';
+function ebiModelFor_(attempt) {
+  var alt = typeof AI_MODELS !== 'undefined' && AI_MODELS[1] ? AI_MODELS[1] : '';
+  return attempt >= EBI_TRIES && alt ? alt : EBI_GEM_MODEL;
+}
+
 /* یک فراخوانی جمنای با اسکیما؛ {o, usage} یا خطا */
-function ebiGem_(text) {
+function ebiGem_(text, model) {
   if (TG_DRY) {
-    if (TG_MEM['ebi:gemerr']) throw new Error(TG_MEM['ebi:gemerr']);
+    var fx = TG_MEM['ebi:gemerr'];
+    if (typeof fx === 'function') fx = fx(model || EBI_GEM_MODEL);
+    if (fx) throw new Error(fx);
+    (TG_MEM['ebi:models'] = TG_MEM['ebi:models'] || []).push(model || EBI_GEM_MODEL);
     return { o: TG_MEM['ebi:gem'] || { verdict: 'ok', reason: 'نمونه' }, usage: { promptTokenCount: 200, candidatesTokenCount: 20 } };
   }
-  var res = gemFetch_('models/' + EBI_GEM_MODEL + ':generateContent', {
+  var res = gemFetch_('models/' + (model || EBI_GEM_MODEL) + ':generateContent', {
     contents: [{ role: 'user', parts: [{ text: ebiCheckPrompt_(text) }] }],
     generationConfig: { responseMimeType: 'application/json', responseSchema: EBI_CHECK_SCHEMA, temperature: 0 }
   });
@@ -75,28 +89,109 @@ function ebiGem_(text) {
 /* v170.17.1: سرور سایت (ایران) پاسخ Apps Script را از script.googleusercontent.com نمی‌تواند بخواند؛ فقط می‌داند درخواست رسید (۳۰۲).
    پس اگر id آمده، بات خودش حکم را به سایت می‌فرستد (POST /tj/v1/ebi-verdict با کلید دوم؛ بات به سایت می‌رسد).
    ok یعنی انتشار؛ review یعنی همان پیام تأیید برای راهبران (اسنیپت 506031). */
+function ebiId_(p) { var id = Number(p && p.id); return id > 0 && Math.floor(id) === id ? id : 0; }
 function ebiCheck_(p, dry) {
   var r = ebiCheckRun_(p, dry);
-  var id = Number(p && p.id);
-  if (!dry && r.ok && r.data && r.data.verdict && id > 0 && Math.floor(id) === id) {
-    var w = ebiWp_('POST', 'ebi-verdict', { id: id, verdict: r.data.verdict, reason: r.data.reason || '' });
-    r.data.pushed = !!(w && w.ok);
-  }
+  var id = ebiId_(p);
+  if (!dry && r.ok && r.data && (r.data.verdict === 'ok' || r.data.verdict === 'review') && id) r.data.pushed = ebiPush_(id, r.data.verdict, r.data.reason);
   return r;
+}
+function ebiPush_(id, verdict, reason) {
+  var w = ebiWp_('POST', 'ebi-verdict', { id: id, verdict: verdict, reason: reason || '' });
+  return !!(w && w.ok);
+}
+/* حکم یک پاسخ واقعی جمنای */
+function ebiVerdictOf_(r) {
+  var v = r.o && r.o.verdict === 'ok' ? 'ok' : 'review';
+  var why = String((r.o && r.o.reason) || '').replace(/[—–]/g, '،').trim().slice(0, 200) || (v === 'ok' ? 'مناسب فهرست.' : 'بازبینی دستی.');
+  return { verdict: v, reason: why, by: 'gemini' };
+}
+/* یک تلاش؛ {data} یا {err} */
+function ebiTry_(text, attempt) {
+  try { var r = ebiGem_(text, ebiModelFor_(attempt)); ebiUse_(true, '', r.usage); return { data: ebiVerdictOf_(r) }; }
+  catch (e) { ebiUse_(false, e && e.message || e, null); return { err: String(e && e.message || e) }; }
 }
 function ebiCheckRun_(p, dry) {
   var text = String((p && p.text) || '').trim();
   if (!text) return { ok: false, error: 'text لازم است' };
   if (text.length > EBI_TEXT_MAX) return { ok: true, data: { verdict: 'review', reason: 'متن بلندتر از اندازهٔ فهرست است.' } };
-  if (dry) return { ok: true, data: { would: 'gemini', model: EBI_GEM_MODEL, chars: text.length, used_today: ebiUsed_(), cap: ebiCap_() } };
+  if (dry && /^(ok|review|down)$/.test(String(p.simulate || ''))) return { ok: true, data: ebiSimulate_(text, String(p.simulate)) };   /* v170.23.12.6 */
+  if (dry) return { ok: true, data: { would: 'gemini', model: EBI_GEM_MODEL, chars: text.length, used_today: ebiUsed_(), cap: ebiCap_(), tries: EBI_TRIES } };
   if (ebiUsed_() >= ebiCap_()) return { ok: true, data: { verdict: 'review', reason: 'سقف روزانهٔ بررسی خودکار پر است.' } };
-  var r;
-  try { r = ebiGem_(text); }
-  catch (e) { ebiUse_(false, e && e.message || e, null); return { ok: true, data: { verdict: 'review', reason: 'جمنای در دسترس نبود.' } }; }
-  ebiUse_(true, '', r.usage);
-  var v = r.o && r.o.verdict === 'ok' ? 'ok' : 'review';
-  var why = String((r.o && r.o.reason) || '').replace(/[—–]/g, '،').trim().slice(0, 200) || (v === 'ok' ? 'مناسب فهرست.' : 'بازبینی دستی.');
-  return { ok: true, data: { verdict: v, reason: why } };
+  var t1 = ebiTry_(text, 1);
+  if (t1.data) return { ok: true, data: t1.data };
+  var id = ebiId_(p);
+  /* با id (مسیر سایت): سایت منتظر حکم از ebi-verdict می‌ماند؛ تلاش ۲ و ۳ هر یک دقیقه با تریگر یک‌باره */
+  if (id) { ebiRetryAdd_(id, text, 2); return { ok: true, data: { verdict: 'retry', attempt: 1, next_in_sec: EBI_GAP_MS / 1000, error: t1.err.slice(0, 120) } }; }
+  /* بی id: همین‌جا، با همان فاصله */
+  for (var a = 2; a <= EBI_TRIES; a++) {
+    if (!TG_DRY) Utilities.sleep(EBI_GAP_MS);
+    var t = ebiTry_(text, a); if (t.data) return { ok: true, data: t.data };
+  }
+  return { ok: true, data: { verdict: 'review', reason: EBI_GEM_DOWN, by: 'gemini_down' } };
+}
+
+/* صف تلاش دوباره (Script Property EBI_RETRY) و یک تریگر یک‌باره؛ هیچ تریگر ماندگار تازه‌ای ساخته نمی‌شود */
+function ebiRetryQ_(v) {
+  if (TG_DRY) { if (v !== undefined) TG_MEM['ebi:retry'] = v; return TG_MEM['ebi:retry'] || []; }
+  var P = PropertiesService.getScriptProperties();
+  if (v !== undefined) { if (v.length) P.setProperty(EBI_RETRY_KEY, JSON.stringify(v)); else P.deleteProperty(EBI_RETRY_KEY); return v; }
+  try { return JSON.parse(P.getProperty(EBI_RETRY_KEY) || '[]') || []; } catch (e) { return []; }
+}
+function ebiRetryAdd_(id, text, attempt) {
+  var q = ebiRetryQ_().filter(function (x) { return x.id !== id; });
+  q.push({ id: id, text: String(text).slice(0, EBI_TEXT_MAX), a: attempt, at: pbNow_().getTime() + EBI_GAP_MS });
+  ebiRetryQ_(q.slice(-50));
+  ebiRetryArm_();
+}
+function ebiRetryArm_() {
+  if (TG_DRY) { TG_MEM['ebi:armed'] = (TG_MEM['ebi:armed'] || 0) + 1; return; }
+  try {
+    var has = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === EBI_RETRY_FN; });
+    if (!has) ScriptApp.newTrigger(EBI_RETRY_FN).timeBased().after(EBI_GAP_MS).create();
+  } catch (e) { tgErr_('ebiRetryArm_', e); }
+}
+/* هدف تریگر یک‌باره: تلاش‌های سررسیده؛ شکست سوم ← review با EBI_GEM_DOWN */
+function ebiRetryRun() {
+  if (!TG_DRY) { try { ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === EBI_RETRY_FN) ScriptApp.deleteTrigger(t); }); } catch (e) {} }
+  var lock = TG_DRY ? null : LockService.getScriptLock();
+  if (lock && !lock.tryLock(10000)) { ebiRetryArm_(); return 'busy'; }
+  var log = [];
+  try {
+    var now = pbNow_().getTime(), keep = [];
+    ebiRetryQ_().forEach(function (x) {
+      if (x.at > now + 5000) { keep.push(x); return; }
+      var t = ebiTry_(x.text, x.a);
+      if (t.data) { ebiPush_(x.id, t.data.verdict, t.data.reason); log.push(x.id + ':' + t.data.verdict + '@' + x.a); return; }
+      if (x.a >= EBI_TRIES) { ebiPush_(x.id, 'review', EBI_GEM_DOWN); log.push(x.id + ':down'); return; }
+      keep.push({ id: x.id, text: x.text, a: x.a + 1, at: now + EBI_GAP_MS }); log.push(x.id + ':retry' + (x.a + 1));
+    });
+    ebiRetryQ_(keep);
+    if (keep.length) ebiRetryArm_();
+  } finally { if (lock) lock.releaseLock(); }
+  return log.join(' ');
+}
+
+/* آزمون ساختگی برای dry_run درگاه: simulate = ok | review | down. جمنای و سایت صدا زده نمی‌شوند؛ خروجی همان حکمی است که
+   به ebi-verdict می‌رفت و متن اعلان صف که راهبران می‌دیدند */
+function ebiSimulate_(text, sim) {
+  var keepDry = TG_DRY, keepMem = TG_MEM;
+  TG_DRY = true; TG_MEM = { 'pb:now': pbNow_().getTime() };
+  try {
+    if (sim === 'down') TG_MEM['ebi:gemerr'] = 'Timeout';
+    else TG_MEM['ebi:gem'] = sim === 'review' ? { verdict: 'review', reason: 'نمونهٔ دلیل جمنای برای آزمون' } : { verdict: 'ok', reason: 'نمونهٔ دلیل جمنای برای آزمون' };
+    var pushed = []; TG_MEM['ebi:wp'] = function (m, path, body) { if (path === 'ebi-verdict') pushed.push(body); return { ok: true }; };
+    var r = ebiCheckRun_({ text: text, id: 1 }, false), tries = 1;
+    while (r.data && r.data.verdict === 'retry' && tries < 5) { TG_MEM['pb:now'] += EBI_GAP_MS; ebiRetryRun(); tries++; r = pushed.length ? { data: pushed[pushed.length - 1] } : r; }
+    var v = r.data || {};
+    return { simulate: sim, verdict: v.verdict, reason: v.reason, attempts: sim === 'down' ? EBI_TRIES : 1, models: TG_MEM['ebi:models'] || [], notice: ebiNoticeLabel_(v.verdict, v.reason) };
+  } finally { TG_DRY = keepDry; TG_MEM = keepMem; }
+}
+/* همان برچسبی که اسنیپت 506031 در اعلان صف می‌گذارد (v170.23.12.6) */
+function ebiNoticeLabel_(verdict, reason) {
+  if (verdict === 'ok') return '(منتشر می‌شود؛ اعلانی نمی‌رود)';
+  if (String(reason || '').indexOf(EBI_GEM_DOWN) === 0) return EBI_GEM_DOWN;
+  return 'جمنای مطمئن نبود: ' + String(reason || '');
 }
 
 /* ثبت در درگاه (publish.gs پیش از این فایل بار می‌شود) */
@@ -806,6 +901,30 @@ function ebiTests() {
     TG_MEM['ebi:wp'] = function () { return { ok: false, error: 'not_found', _code: 404 }; };
     var g4 = gw({ text: 'مسیر هنوز نیست', id: 44 });
     ok('v170.17.1: مسیر سایت نبود ← حکم همچنان در پاسخ، بی خطای درگاه', g4.ok && g4.data.verdict === 'review' && g4.data.pushed === false);
+    /* v170.23.12.6: قطعی جمنای با «مطمئن نبود» یکی نیست */
+    vs = []; TG_MEM['ebi:wp'] = function (m, path, body) { if (path === 'ebi-verdict') vs.push(body); return { ok: true }; };
+    var calls6 = 0; TG_MEM['ebi:gemerr'] = function () { calls6++; return calls6 === 1 ? 'Timeout' : ''; };
+    TG_MEM['ebi:gem'] = { verdict: 'ok', reason: 'مهربان' }; TG_MEM['ebi:retry'] = []; TG_MEM['ebi:armed'] = 0;
+    var r6 = gw({ text: 'لبخند مادرم', id: 61 });
+    ok('خطای اول با id ← حکمی نمی‌رود، تلاش دوباره یک دقیقه بعد', r6.data.verdict === 'retry' && vs.length === 0 && TG_MEM['ebi:retry'].length === 1 && TG_MEM['ebi:armed'] === 1, JSON.stringify(r6));
+    ebiRetryRun();
+    ok('پیش از یک دقیقه تلاش نمی‌شود', vs.length === 0 && TG_MEM['ebi:retry'].length === 1);
+    TG_MEM['pb:now'] += EBI_GAP_MS; ebiRetryRun();
+    ok('تلاش دوم موفق ← حکم ok جمنای به سایت', vs.length === 1 && vs[0].id === 61 && vs[0].verdict === 'ok' && TG_MEM['ebi:retry'].length === 0, JSON.stringify(vs));
+    vs = []; TG_MEM['ebi:models'] = []; var seen6 = [];
+    TG_MEM['ebi:gemerr'] = function (mdl) { seen6.push(mdl); return 'HTTP 503'; };
+    gw({ text: 'صدای دریا', id: 62 });
+    TG_MEM['pb:now'] += EBI_GAP_MS; ebiRetryRun();
+    ok('دو شکست ← هنوز حکمی نرفته', vs.length === 0 && TG_MEM['ebi:retry'].length === 1 && TG_MEM['ebi:retry'][0].a === 3);
+    TG_MEM['pb:now'] += EBI_GAP_MS; ebiRetryRun();
+    ok('سه شکست ← review با «جمنای در دسترس نبود؛ بررسی خودکار انجام نشد»', vs.length === 1 && vs[0].verdict === 'review' && vs[0].reason === EBI_GEM_DOWN, JSON.stringify(vs));
+    ok('تلاش سوم با مدل جایگزین', seen6.length === 3 && seen6[0] === EBI_GEM_MODEL && seen6[2] === ebiModelFor_(3) && (typeof AI_MODELS === 'undefined' || !AI_MODELS[1] || seen6[2] === AI_MODELS[1]), JSON.stringify(seen6));
+    ok('«مطمئن نبود» فقط با پاسخ واقعی جمنای و با دلیل خودش', ebiNoticeLabel_('review', 'نشانهٔ حال بد') === 'جمنای مطمئن نبود: نشانهٔ حال بد' && ebiNoticeLabel_('review', EBI_GEM_DOWN) === EBI_GEM_DOWN);
+    delete TG_MEM['ebi:gemerr'];
+    var sOk = gw({ text: 'بوی باران', dry_run: true, simulate: 'review' }).data, sDown = gw({ text: 'بوی باران', dry_run: true, simulate: 'down' }).data;
+    ok('dry_run با simulate: دو حالت، بی جمنای و بی سایت', sOk.verdict === 'review' && /مطمئن نبود: نمونهٔ دلیل/.test(sOk.notice) && sDown.verdict === 'review' && sDown.notice === EBI_GEM_DOWN && vs.length === 1, JSON.stringify([sOk, sDown]));
+    var pr6 = tgPolicy_(TG_NK.review);
+    ok('نوع «بازبینی»: بی سکوت شب و بی سقف روز', pr6.kind === 'بازبینی' && pr6.quiet === false && pr6.cap === 0 && pr6.active === true, JSON.stringify(pr6));
     ok('پرامپت متن را در گیومه دارد و خط تیره ندارد', /«گل سرخ»/.test(ebiCheckPrompt_('گل سرخ')) && !/[—–]/.test(ebiCheckPrompt_('x')));
   } catch (err) { fail++; out.push('❌ خطا: ' + (err.message || err) + ' ' + String(err.stack || '').split('\n')[1]); }
   TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box;

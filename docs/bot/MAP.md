@@ -82,7 +82,7 @@
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۱۵ | ۳۳ |
-| `telegram.gs` | ۳۷۷۵۹ | ۲۰۴۱ |
+| `telegram.gs` | ۳۷۷۸۶ | ۲۰۴۱ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۳۸ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -96,18 +96,18 @@
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۵۷۴ | ۱۲۰ |
-| `v168.gs` | ۲۱۴۸ | ۱۲۶ |
+| `publish.gs` | ۱۵۷۶ | ۱۲۰ |
+| `v168.gs` | ۲۳۷۶ | ۱۴۸ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۸ | ۳۴ |
 | `leadmodel.gs` | ۷۷۷ | ۴۱ |
 | `comments.gs` | ۱۰۳۶ | ۶۵ |
-| `dq.gs` | ۵۹۳ | ۴۹ |
+| `dq.gs` | ۶۰۲ | ۴۹ |
 | `cfg.gs` | ۱۸۶ | ۱۴ |
 | `ops.gs` | ۱۱۱۱ | ۹۹ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
-| `ebi.gs` | ۹۹۶ | ۷۱ |
+| `ebi.gs` | ۱۱۱۵ | ۸۲ |
 | `ci.gs` | ۵۴۳ | ۳۱ |
 | `sitesec.gs` | ۲۷۵ | ۲۲ |
 | `sec.gs` | ۱۰۵ | ۱ |
@@ -116,12 +116,12 @@
 | `kartable.gs` | ۴۴۷ | ۳۴ |
 | `ai.gs` | ۲۱۱ | ۱۵ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
-| `migrate.gs` | ۵۵۱ | ۵۵ |
+| `migrate.gs` | ۵۶۲ | ۵۶ |
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۵۶۷ | ۵۰ |
 | `leadspeed.gs` | ۲۵۹ | ۲۳ |
-| `nurture.gs` | ۲۶۲ | ۲۷ |
+| `nurture.gs` | ۲۶۵ | ۲۷ |
 | `reactivate.gs` | ۲۲۳ | ۲۲ |
 
 ### کارهای زمان‌دار
@@ -156,6 +156,7 @@
 
 | ثابت | نام تب | فایل‌ها |
 |---|---|---|
+| `BG_TAB` | «سهمیهٔ اجرا» | `v168.gs` |
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
 | `CM_FIX_TAB` | «اصلاح کامنت‌ها · پیش‌نمایش» | `comments.gs` |
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
@@ -366,6 +367,7 @@
 | تجربه پارتنرز ۲ | `ptTests` |
 | برنامهٔ من (v118) | `tgV118Tests` |
 | اشغال گاندی (v144) | `tgOccTests` |
+| سهمیهٔ زمان اجرا (v170.23.12.5) | `bgTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |
 | نسخهٔ ۱۶۲ | `tgV162Tests` |

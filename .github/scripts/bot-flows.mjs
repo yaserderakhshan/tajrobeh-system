@@ -21,11 +21,13 @@ function leadsBot(botDir) {
     n++;
     const t = Date.now() - daysAgo * 86400000;
     sh.appendRow([fmt(t, 'yyyy-MM-dd'), daysAgo ? '10:00' : fmt(t, 'HH:mm'), 'بات', name, 'تلگرام', '0912000' + String(1000 + n), 'ایران', '', 'تازه', '', '']);
+    b.run('bgLeadMark_()');   // v170.23.12.5: سطر تازه در بات با tgAppendLead_ یا onEdit نشانگر می‌زند
     return sh.getLastRow();
   };
   b.run(`tgDutyWho_ = function () { return { p: { name: 'کشیک نمونه', chat: '111', role: 'پذیرش' } }; };
          tgDutyBoss_ = function () { return { name: 'مسئول نمونه', chat: '222', role: 'مسئول پذیرش' }; };
          tgDutyClinic_ = function () { return true; };
+         BG_DUTY_FROM = 0;
          var __sent = []; tgSend_ = function (c, t) { __sent.push([String(c), String(t)]); return { ok: true }; };`);
   const tick = () => { b.run('__sent = []'); const r = b.run('tgDutyTick({})'); return { r, alerts: b.run('__sent.map(function (x) { return x[1]; })') }; };
   return { b, sh, add, tick };
@@ -57,6 +59,7 @@ export function runFlows(botDir) {
     for (let r = 2; r <= sh.getLastRow(); r++) if (sh.getRange(r, 4).getValue() === 'تازه الف') rowA = r;
     const codeA = sh.getRange(rowA, codeCol).getValue();
     sh.getRange(rowA, 11).setValue(b.run(`Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd')`));
+    b.run('bgLeadMark_()');   // ویرایش دستی تب لیدها (onEdit)
     tick();
     const pend = JSON.parse(b.props.getProperty('TG_DUTY_PEND') || '[]').map((x) => x.k);
     chk('کشیک: لیدی که تماس اول گرفت از صف بیرون می‌رود', codeA && pend.indexOf(codeA) < 0 && pend.length === 2, JSON.stringify(pend));

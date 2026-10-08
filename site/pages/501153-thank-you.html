@@ -12,7 +12,7 @@
   </ol>
   <div class="tj-ty__cta">
     <p class="tj-ty__ctaq">الان عجله داری؟</p>
-    <a class="tj-ty__btn" id="tjTyWa" target="_blank" rel="noopener">همین حالا در واتس‌اپ بنویس</a>
+    <a class="tj-ty__btn" id="tjTyTg" href="https://t.me/tajrobehlife_bot" target="_blank" rel="noopener">ادامه در تلگرام</a>
     <p class="tj-ty__hours" id="tjTyHours"></p>
   </div>
   <p class="tj-ty__fine">شمارهٔ تو فقط برای همین گفت‌وگو استفاده می‌شود.</p>
@@ -22,17 +22,41 @@
   var q = new URLSearchParams(location.search);
   var from = q.get('from') || '';
   var abroad = from === 'PT-01';
-  var num = abroad ? '905355136950' : '989021110865';
   var disp = abroad ? '+90 535 513 69 50' : '۰۹۰۲۱۱۱۰۸۶۵';
   var el = document.getElementById('tjTyNum'); if (el) el.textContent = disp;
-  var a = document.getElementById('tjTyWa');
-  a.href = 'https://wa.me/' + num + '?text=' + encodeURIComponent('سلام، فرم را پر کردم [' + (from || 'FORM') + '] و عجله دارم');
+  var a = document.getElementById('tjTyTg');
+  if (a) { if (abroad) a.href = 'https://t.me/tajrobehlife_bot?start=pt_hub'; }
   var now = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tehran'}));
   var mins = now.getHours()*60 + now.getMinutes();
-  var open = mins >= 570 && mins <= 1050;
-  document.getElementById('tjTyHours').textContent = open
+  var open = false;
+  if (mins >= 570) { if (mins <= 1050) open = true; }
+  var hoursText = open
     ? 'پذیرش الان پاسخگوست، تا ۱۷:۳۰ به وقت تهران.'
     : 'الان خارج از ساعت کاری است. پیامت را بگذار؛ فردا از ۹:۳۰ به وقت تهران جواب می‌دهیم.';
+  try {
+    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (tz !== 'Asia/Tehran') {
+      var tehParts = function (d) {
+        var o = {};
+        new Intl.DateTimeFormat('en-US', {timeZone: 'Asia/Tehran', hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'})
+          .formatToParts(d).forEach(function (p) { o[p.type] = +p.value; });
+        return o;
+      };
+      var tehOffset = function (d) {
+        var p = tehParts(d);
+        return Date.UTC(p.year, p.month - 1, p.day, p.hour % 24, p.minute, p.second) - Math.floor(d.getTime() / 1000) * 1000;
+      };
+      var today = tehParts(new Date());
+      var tehAt = function (h, m) {
+        var wall = Date.UTC(today.year, today.month - 1, today.day, h, m);
+        var t = wall - tehOffset(new Date(wall));
+        return new Date(wall - tehOffset(new Date(t)));
+      };
+      var fmt = function (d) { return d.toLocaleTimeString('fa-IR', {hour: '2-digit', minute: '2-digit', hourCycle: 'h23'}); };
+      hoursText += ' ساعت کاری پذیرش، ۹:۳۰ تا ۱۷:۳۰ تهران، به وقت شما: ' + fmt(tehAt(9, 30)) + ' تا ' + fmt(tehAt(17, 30)) + '.';
+    }
+  } catch (e) {}
+  document.getElementById('tjTyHours').textContent = hoursText;
 })();
 </script>
 <!-- /wp:html -->

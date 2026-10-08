@@ -1179,6 +1179,8 @@ function pbSendKb_(buttons) {
 }
 function pbSendApi_(p, dry) {
   var chat = String(p.chat || '').trim(), text = String(p.text || '').trim(), type = String(p.type || '').trim(), ref = String(p.ref || '').trim();
+  /* v170.23.12.6: اعلان صف فهرست ابی (اسنیپت 506031، ref با EBI-) اعلان داخلی بازبینی است؛ نوع «بازبینی» بی سکوت شب و سقف «کار» */
+  if (/^EBI-/.test(ref) && type === TG_NK.task) type = TG_NK.review;
   var kinds = Object.keys(TG_NK).map(function (k) { return TG_NK[k]; });
   if (!/^-?\d{4,15}$/.test(chat)) return { ok: false, error: 'chat باید شناسهٔ عددی باشد' };
   if (!text) return { ok: false, error: 'text خالی است' };

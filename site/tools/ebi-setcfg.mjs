@@ -23,6 +23,17 @@ for (let i = 0; i < 5; i++) {
 }
 if (!j.ok) bad(`فهرست راهبران از بات نیامد: ${j.error || '?'} (key2_only یعنی کلید دوم هنوز در بات ننشسته؛ unknown_action یعنی نسخهٔ v170.16.3 منتشر نشده)`);
 const mods = (j.data && j.data.mods || []).map(String);
+
+/* بات v170.23.12.6: آزمون dry_run بررسی خودکار فهرست در دو حالت (جمنای پاسخ داد / در دسترس نبود). جمنای و سایت صدا زده نمی‌شوند */
+for (const sim of ['review', 'down']) {
+  let d = null;
+  try {
+    const rr = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, redirect: 'follow', body: JSON.stringify({ api: 1, key, action: 'ebi_check', text: 'یک مورد آزمایشی فهرست', dry_run: true, simulate: sim }) });
+    d = JSON.parse(await rr.text());
+  } catch (e) { d = { ok: false, error: String(e).slice(0, 80) }; }
+  const x = (d && d.data) || {};
+  log(`ebi_check dry_run (${sim === 'down' ? 'جمنای در دسترس نبود' : 'جمنای پاسخ داد'}): ${d && d.ok ? `حکم ${x.verdict} · تلاش ${x.attempts} · اعلان «${x.notice}»` : 'خطا: ' + ((d && d.error) || '?')}`);
+}
 for (const m of mods) console.log(`::add-mask::${m}`);
 log(`راهبران از بات: ${mods.length}`);
 
