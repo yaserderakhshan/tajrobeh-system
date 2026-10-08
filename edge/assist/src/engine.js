@@ -81,7 +81,11 @@ export function prepare(data) {
     .map((k) => ({ row: k.r, topic: String(k.t || 'عمومی'), samples: (k.s || []).map(String).filter(Boolean), answer: String(k.a), aud: String(k.au || ''), dom: String(k.d || '') }));
   const idx = (data.idx || []).map((r) => ({ id: r[0], url: String(r[1] || ''), title: String(r[2] || ''), text: String(r[3] || ''), dom: String(r[4] || ''), aud: String(r[5] || ''), src: String(r[6] || 'سایت') }))
     .filter((d) => d.url.indexOf(SITE + '/') === 0 && d.text.length >= 30 && !money.test(d.title + ' ' + d.text) && !deny.test(d.title + ' ' + d.text));
-  const site = idx.filter((d) => d.src !== 'مجله'), mag = idx.filter((d) => d.src === 'مجله');
+  const cw = data.crisis && data.crisis.words && data.crisis.words.length ? data.crisis.words : CRISIS_WORDS;
+  /* هیچ تکه‌ای با واژهٔ بحران یا خودکشی جواب نمی‌شود؛ بحران فقط پیام ثابت است */
+  const safe = idx.filter((d) => !isCrisis(d.title + ' ' + d.text, cw));
+  safe.forEach((d) => { d.camp = isCampaign(d); });
+  const site = safe.filter((d) => d.src !== 'مجله'), mag = safe.filter((d) => d.src === 'مجله');
   const topics = (data.topics && data.topics.length ? data.topics : [...new Set(kb.map((k) => k.topic))]).slice(0, 12);
   return {
     raw: data, kb, topics, deny, money,
@@ -89,6 +93,7 @@ export function prepare(data) {
     siteIx: buildIndex(site.map((d) => ({ topic: d.title, samples: [d.text], doc: d }))),
     magIx: buildIndex(mag.map((d) => ({ topic: d.title.split(' › ')[0], samples: [], doc: d }))),
     events: (data.events || []),
+    siteEvents: (data.siteEvents || []),
     crisisWords: data.crisis && data.crisis.words && data.crisis.words.length ? data.crisis.words : CRISIS_WORDS,
     crisisText: data.crisis && data.crisis.text ? data.crisis.text : CRISIS_TEXT,
     texts: Object.assign({ welcome: 'سلام، من دستیار تجربه هستم. سؤالت را بپرس یا یکی از موضوع‌ها را انتخاب کن.', handed: 'پیامت به پذیرش رسید. همکارم در پذیرش همین‌جا جواب می‌دهد.', bot: 'https://t.me/tajrobehlife_bot?start=pz-assist' }, data.texts || {}),
@@ -96,6 +101,44 @@ export function prepare(data) {
   };
 }
 function safeRe(src, d) { try { return src ? new RegExp(src) : d; } catch (e) { return d; } }
+
+/* ───── صفحه‌های کمپین (پلی‌لیست ابی و لندینگ‌های کمپین): از نمایهٔ پاسخ بیرون، مگر پرسش اسم کمپین را داشته باشد ───── */
+const CAMP_URL = /\/(?:ebis-playlist|ebi|webinar|apply|campaign|camp)(?:\/|$)|[?&]utm_campaign=/i;
+const CAMP_WORDS = /(?:^| )ابی(?: |$)|پلی ?لیست|every brilliant|کمپین|وبینار|نمایش/i;
+export function isCampaign(d) {
+  let path = ''; try { path = decodeURIComponent(new URL(d.url).pathname + new URL(d.url).search); } catch (e) { path = d.url; }
+  return CAMP_URL.test(path) || CAMP_WORDS.test(norm(d.title + ' ' + d.text));
+}
+export function asksCampaign(text) { return CAMP_WORDS.test(norm(text)); }
+
+/* ───── پاسخ‌های ثابت پرسش‌های پرتکرار (پشتیبان، تا ردیف‌های دانش تأیید شوند) ─────
+   متن فقط از صفحه‌های اصلی منتشرشدهٔ سایت (شروع تراپی، تراپی، کلینیک ونک، رویکرد روانکاوی، مدرسه، خانه)، کوتاه، با لینک همان صفحه.
+   بی درصد سهم و تسویه. ترتیب مهم است: اولی که بخورد جواب است. */
+const CLINIC_URL = SITE + '/' + encodeURIComponent('کلینیک-روانکاوی-تهران').toLowerCase() + '/';
+export const FAQ = [
+  { key: 'school', topic: 'دوره‌های مدرسه', url: SITE + '/school/',
+    re: /مدرسه|دوره ?(?:ها|های)? ?(?:آموزشی|ی)?|آموزش (?:روانکاوی|روان ?درمانی|درمانگر)|کلاس|ترم|درمانگر شو|سوپرویژن/, not: /هزینه جلسه|تراپی|مراجع/,
+    a: 'مدرسهٔ تجربه یک مسیر پیوسته است: دوره، تراپی فردی، سوپرویژن و در پایان، کار با مراجع در کلینیک تجربه. دوره‌ها: تجربهٔ بالینی (روانکاوی و روان‌درمانی تحلیلی، سه ترم)، درمان هیجان‌مدار EFT (سطح ۱ تا ۳، ۱۲۳ ساعت، آنلاین) و روانکاوی مدرن (۱۲ جلسه، پذیرش با مصاحبه). سوپرویژن گروهی، کیس‌خوانی فروید، ژورنال کلاب و منتورینگ هم هست.' },
+  { key: 'cost', topic: 'هزینهٔ جلسه', url: SITE + '/get-therapy/',
+    re: /هزینه|قیمت|تعرفه|چند ?(?:تومان|یورو|دلار)|پول جلسه|نرخ جلسه|گرون|ارزون/, not: /روان ?پزشک|دوره|مدرسه|کلاس|ثبت ?نام/,
+    a: 'هزینهٔ هر جلسهٔ تراپی برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست و نوع خدمت بستگی دارد؛ عدد دقیق پیش از شروع به شما گفته می‌شود. برای فارسی‌زبانان ساکن خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسهٔ معارفه در هر دو حالت رایگان است.' },
+  { key: 'intro', topic: 'جلسهٔ معارفه', url: SITE + '/get-therapy/',
+    re: /معارفه/,
+    a: 'معارفه یک جلسهٔ کوتاه با خودِ تراپیست (نه پذیرش) است تا ببینید ارتباطتان شکل می‌گیرد یا نه. رایگان است و حدود بیست دقیقه طول می‌کشد. بعد از آن اگر خواستید، تراپی شروع می‌شود؛ اگر نخواستید، تراپیست دیگری معرفی می‌شود.' },
+  { key: 'psa', topic: 'روانکاوی', url: SITE + '/approaches/psychoanalysis/',
+    re: /روانکاو|روان ?تحلیل/, not: /آموزش|دوره|مدرسه|کلاس/,
+    a: 'روانکاوی به‌جای آنکه سریع‌ترین راه را برای خاموش‌کردن یک نشانه پیدا کند، سراغ چیزی می‌رود که آن نشانه را می‌سازد و نگه می‌دارد: الگوهایی که بارها تکرار می‌شوند. این رویکرد، ستون فقرات کار بالینی در مرکز تجربه زندگی است. فرکانس جلسات و طول دوره در جلسه‌های اول و در گفت‌وگو با روانکاو تعیین می‌شود و از فردی به فرد دیگر فرق دارد.' },
+  { key: 'clinic', topic: 'کلینیک ونک', url: CLINIC_URL,
+    re: /کلینیک|حضوری|ونک|آدرس|نشانی|مطب|کجا(?:ست| هستید| هستین)/, not: /کرج|مشهد|اصفهان|نور|آلمان|پارتنر/,
+    a: 'کلینیک خود تجربه در تهران، میدان ونک است: شش اتاق روشن، همان تراپیست‌های تأییدشدهٔ تجربه و همان پذیرش. جلسهٔ معارفهٔ اول آنلاین و رایگان است و از جلسهٔ بعد می‌توانید در کلینیک ونک بیایید. برای وقت حضوری در ونک وارد بات تجربه شوید یا فرم شروع تراپی را پر کنید؛ پذیرش ساعت اتاق را هماهنگ می‌کند.' },
+  { key: 'start', topic: 'شروع تراپی', url: SITE + '/get-therapy/',
+    re: /شروع|وقت (?:بگیرم|میخوام|می خوام)|نوبت (?:بگیرم|میخوام|می خوام)|تراپیست (?:میخوام|می خوام|پیدا)|مشاوره (?:میخوام|می خوام|بگیرم)|ثبت ?نام کنم/, not: /دوره|مدرسه|کلاس|ترم/,
+    a: 'در صفحهٔ «شروع تراپی» سه سؤال کوتاه جواب بدهید تا تراپیست‌های هم‌خوان با شما و نزدیک‌ترین وقت معارفهٔ رایگان را همان‌جا ببینید. بدون ثبت‌نام و بدون کد تأیید. جلسهٔ معارفه رایگان است و حدود بیست دقیقه طول می‌کشد.' }
+];
+export function faqFor(text) {
+  const n = norm(text);
+  return FAQ.find((f) => f.re.test(n) && !(f.not && f.not.test(n))) || null;
+}
 function num(v, d) { const n = Number(v); return n > 0 ? n : d; }
 
 /* ───── پرسش‌های شروع (۳ تا ۴ دکمه، بی تایپ) ───── */
@@ -124,6 +167,7 @@ export function nearTopics(P, text) {
   const seen = new Set(), near = [];
   for (const r of search(text, P.kbIx)) { if (!seen.has(r.k.topic) && near.length < 3) { seen.add(r.k.topic); near.push(r.k.topic); } }
   for (const t of P.topics) { if (!seen.has(t) && near.length < 3) { seen.add(t); near.push(t); } }
+  for (const f of FAQ) { if (!seen.has(f.topic) && near.length < 3) { seen.add(f.topic); near.push(f.topic); } }
   return near;
 }
 function audBoost(res, aud) {
@@ -156,6 +200,9 @@ export function ask(P, text, ctx) {
   if (top && top.score >= P.min) {
     return { res: out({ answer: top.k.answer, topic: top.k.topic, buttons: rateBtns(id), log_id: id, source: 'دانش' }), log: { k: 'log', ch, id, topic: top.k.topic, res: 'پاسخ', src: 'دانش', au: aud } };
   }
+  /* پاسخ ثابت پرسش‌های پرتکرار، از صفحه‌های اصلی */
+  const f = faqFor(text);
+  if (f) return faqOut(f, id, ch, aud);
   /* متن منتشرشدهٔ سایت و رویدادهای پیش‌رو */
   const site = siteAnswer(P, text);
   if (site) {
@@ -167,24 +214,69 @@ export function ask(P, text, ctx) {
     };
   }
   return {
-    res: out({ answer: FALLBACK_TEXT, buttons: topicBtns(P, nearTopics(P, text)).concat([HANDOFF_BTN]) }),
+    res: out({ answer: FALLBACK_TEXT, buttons: nearBtns(P, text).concat([HANDOFF_BTN]) }),
     log: { k: 'log', ch, id, topic: '', res: 'بی‌پاسخ', au: aud },
     un: { k: 'un', ch, text: scrub(text), kind: 'بی‌پاسخ', au: aud }
   };
 }
+function faqOut(f, id, ch, aud, mode) {
+  return { res: out({ answer: f.a, topic: f.topic, log_id: id, source: 'ثابت', source_url: f.url, buttons: [{ url: f.url, text: 'بیشتر بخوانید' }].concat(rateBtns(id)) }),
+    log: Object.assign({ k: 'log', ch, id, topic: f.topic, res: 'پاسخ', src: 'ثابت', au: aud }, mode ? { mode } : {}) };
+}
+/* سه دکمهٔ نزدیک برای بی‌پاسخ: موضوع‌های دانش اگر هست، بعد پرسش‌های پرتکرار ثابت (f:<کلید>) */
+export function nearBtns(P, text) {
+  const btns = topicBtns(P, nearTopics(P, text).filter((t) => P.kb.some((k) => k.topic === t)));
+  const q = new Set(tokens(text));
+  const rank = FAQ.map((f, i) => ({ f, s: tokens(f.topic + ' ' + f.a).filter((t) => q.has(t)).length * 10 - i })).sort((a, b) => b.s - a.s);
+  for (const r of rank) { if (btns.length >= 3) break; btns.push({ id: 'f:' + r.f.key, text: r.f.topic }); }
+  return btns.slice(0, 3);
+}
+/* هم‌پوشانی واقعی: با پرسش دو واژه‌ای یا بیشتر، دست‌کم دو واژهٔ پرسش باید در تکه باشد */
+function overlap(text, d) {
+  const q = tokens(text); if (q.length < 2) return true;
+  const set = new Set(tokens(d.title + ' ' + d.text));
+  return q.filter((t) => set.has(t)).length >= 2;
+}
+export const SITE_MIN = 0.6;
 function siteAnswer(P, text) {
   const evDocs = (P.events || []).map((e) => ({ topic: e.title, samples: [[e.title, e.date, e.time ? 'ساعت ' + e.time : ''].filter(Boolean).join(' · ')],
     doc: { url: SITE + '/school/events/#ev=' + encodeURIComponent(e.code), title: e.title, text: [e.title, e.date, e.time ? 'ساعت ' + e.time : ''].filter(Boolean).join(' · '), dom: 'رویدادها', src: 'رویداد' } }));
-  const hits = search(text, P.siteIx).concat(evDocs.length ? search(text, buildIndex(evDocs)) : []).filter((r) => r.score >= P.idxMin).sort((a, b) => b.score - a.score).slice(0, 3);
+  const camp = asksCampaign(text), min = Math.max(P.idxMin, SITE_MIN);
+  const hits = search(text, P.siteIx).concat(evDocs.length ? search(text, buildIndex(evDocs)) : [])
+    .filter((r) => r.score >= min && (camp || !r.k.doc.camp) && overlap(text, r.k.doc)).sort((a, b) => b.score - a.score).slice(0, 3);
   return hits.length ? { top: hits.map((r) => r.k.doc) } : null;
 }
+/* رویدادهای پیش‌رو: تقویم منتشرشدهٔ صفحهٔ رویدادهای سایت (siteEvents، از ورکر) و رویدادهای بات (events). اول برنامه‌های باز؛
+   اگر برنامهٔ بازی نیست، نزدیک‌ترین جلسه‌های مدرسه با برچسب «ویژهٔ اعضای مدرسه». */
 function toolEvents(P, ctx, id, ch, aud) {
   const today = ctx.today || new Date(Date.now() + 3.5 * 3600000).toISOString().slice(0, 10);
-  const L = (P.events || []).filter((e) => e.iso && e.iso >= today).slice(0, 3);
+  const bot = (P.events || []).filter((e) => e.iso && e.iso >= today).map((e) => ({ title: e.title, when: [e.date, e.time ? 'ساعت ' + e.time : ''].filter(Boolean).join(' · '), iso: e.iso, url: SITE + '/school/events/#ev=' + encodeURIComponent(e.code), open: true }));
+  const site = (P.siteEvents || []).filter((e) => e.iso >= today).map((e) => ({ title: e.title, when: [e.date, e.time ? 'ساعت ' + e.time : ''].filter(Boolean).join(' · '), iso: e.iso, url: SITE + '/school/events/#ev=' + encodeURIComponent(e.id), open: !e.members }));
+  const all = bot.concat(site).sort((a, b) => (a.iso < b.iso ? -1 : a.iso > b.iso ? 1 : 0));
+  const seen = new Set(), uniq = all.filter((e) => { const k = e.iso + '|' + e.title; if (seen.has(k)) return false; seen.add(k); return true; });
+  const open = uniq.filter((e) => e.open).slice(0, 3), L = open.length ? open : uniq.slice(0, 3);
   const log = { k: 'log', ch, id, topic: 'ابزار events', res: 'ابزار', src: 'ابزار', au: aud };
-  if (!L.length) return { res: out({ answer: 'فعلاً رویداد تازه‌ای در برنامه نیست. صفحهٔ رویدادها را ببین.', topic: 'رویدادها', source: 'ابزار', log_id: id, buttons: [{ url: SITE + '/school/events/', text: 'صفحهٔ رویدادها' }] }), log };
-  return { res: out({ answer: 'رویدادهای پیش‌رو:\n' + L.map((e) => '• ' + e.title + (e.date ? ' · ' + e.date : '') + (e.time ? ' · ساعت ' + e.time : '')).join('\n'), topic: 'رویدادها', source: 'ابزار', log_id: id,
-    buttons: L.map((e) => ({ url: SITE + '/school/events/#ev=' + encodeURIComponent(e.code), text: String(e.title).slice(0, 40) })) }), log };
+  const page = { url: SITE + '/school/events/', text: 'تقویم رویدادها' };
+  if (!L.length) return { res: out({ answer: 'در تقویم سایت برنامهٔ تازه‌ای برای روزهای پیش رو ثبت نشده است. تقویم کامل در صفحهٔ رویدادهاست.', topic: 'رویدادها', source: 'ابزار', log_id: id, buttons: [page] }), log };
+  const head = open.length ? 'برنامه‌های پیش‌رو:' : 'برنامهٔ عمومی تازه‌ای ثبت نشده؛ نزدیک‌ترین جلسه‌های مدرسه (ویژهٔ اعضای مدرسه):';
+  return { res: out({ answer: head + '\n' + L.map((e) => '• ' + e.title + (e.when ? ' · ' + e.when : '')).join('\n'), topic: 'رویدادها', source: 'ابزار', log_id: id,
+    buttons: L.map((e) => ({ url: e.url, text: String(e.title).slice(0, 40) })).concat([page]) }), log };
+}
+/* دادهٔ صفحهٔ رویدادهای سایت (<script id="evData">) ← رویدادهای پیش‌رو با تاریخ شمسی. ورکر با cron می‌خواند، نه در مسیر کاربر */
+const JM = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+export function siteEventsFrom(html, today, days) {
+  const m = /<script[^>]*id="evData"[^>]*>([\s\S]*?)<\/script>/.exec(String(html || '')); if (!m) return null;
+  let d; try { d = JSON.parse(m[1]); } catch (e) { return null; }
+  const end = new Date(Date.parse(today + 'T00:00:00Z') + (days || 60) * 86400000).toISOString().slice(0, 10);
+  const jal = (iso) => {
+    for (const [jy, jm, start, n] of d.months || []) {
+      const diff = Math.round((Date.parse(iso + 'T00:00:00Z') - Date.parse(start + 'T00:00:00Z')) / 86400000);
+      if (diff >= 0 && diff < n) return fa(diff + 1) + ' ' + JM[jm - 1];
+    }
+    return '';
+  };
+  return (d.events || []).filter((e) => e && e.d && e.d >= today && e.d <= end && e.ttl).sort((a, b) => (a.d < b.d ? -1 : a.d > b.d ? 1 : 0)).slice(0, 40)
+    .map((e) => ({ id: String(e.i || ''), title: String(e.ttl).slice(0, 120), iso: e.d, date: jal(e.d), time: e.t ? fa(e.t) : '', members: e.a === 'members' }));
 }
 function toolMag(P, text, id, ch, aud) {
   const q = norm(scrub(text).replace(/\[(?:نام|عدد)\]/g, ' ')).replace(MAG_DROP, ' ').split(' ').filter((w) => w.length >= 2 && !STOP_SET.has(w)).join(' ');
@@ -209,6 +301,10 @@ export function tap(P, idStr, lastText, ctx) {
     const k = P.kb.find((x) => String(x.row) === String(arg)); if (!k) return ask(P, '', ctx);
     const id = newLogId(ctx.now);
     return { res: out({ answer: k.answer, topic: k.topic, buttons: rateBtns(id), log_id: id, source: 'دانش' }), log: { k: 'log', ch, id, topic: k.topic, mode: 'منو', res: 'پاسخ', src: 'دانش', au: aud } };
+  }
+  if (act === 'f') {
+    const f = FAQ.find((x) => x.key === arg); if (!f) return ask(P, '', ctx);
+    return faqOut(f, newLogId(ctx.now), ch, aud, 'منو');
   }
   if (act === 'y' || act === 'n') return { res: out({ answer: 'ممنون از بازخوردت.' }), extra: [{ k: 'rate', id: String(arg || '').slice(0, 20), good: act === 'y' }] };
   if (act === 'x' || act === 'h') {
