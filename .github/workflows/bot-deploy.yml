@@ -131,7 +131,8 @@ jobs:
           printf '%s' "$CLASPRC_JSON" > ~/.clasprc.json
           chmod 600 ~/.clasprc.json
           jq -e . ~/.clasprc.json > /dev/null || { echo "::error::CLASPRC_JSON یک JSON معتبر نیست"; exit 1; }
-          npm install -g "@google/clasp@${CLASP_VERSION}" > /dev/null
+          bash .github/scripts/clasp-install.sh   # ۱۸ مهر: پوشهٔ جدا و override وابستگی‌های بی tarball
+          export PATH="$RUNNER_TEMP/clasp-$CLASP_VERSION/node_modules/.bin:$PATH"
           clasp --version
           # v170.9: شناسهٔ پروژه در گیت نیست؛ از سکرت SCRIPT_ID در bot/.clasp.json نوشته می‌شود
           [ -n "$SCRIPT_ID" ] && [ -n "$DEPLOYMENT_ID" ] || { echo "::error::سکرت SCRIPT_ID یا DEPLOYMENT_ID در Environment «production» خالی است"; exit 1; }
@@ -550,7 +551,8 @@ jobs:
         run: |
           printf '%s' "$CLASPRC_JSON" > ~/.clasprc.json
           chmod 600 ~/.clasprc.json
-          npm install -g "@google/clasp@${CLASP_VERSION}" > /dev/null
+          bash .github/scripts/clasp-install.sh   # ۱۸ مهر: پوشهٔ جدا و override وابستگی‌های بی tarball
+          export PATH="$RUNNER_TEMP/clasp-$CLASP_VERSION/node_modules/.bin:$PATH"
           jq --arg id "$SCRIPT_ID" '.scriptId = $id' bot/.clasp.json > /tmp/clasp.json && mv /tmp/clasp.json bot/.clasp.json
 
       - name: کشیدن کد زنده
