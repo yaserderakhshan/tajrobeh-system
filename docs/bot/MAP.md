@@ -80,14 +80,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.32`
+نسخهٔ کد: `v170.23.33`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۷۹۵۹ | ۲۰۵۰ |
+| `telegram.gs` | ۳۷۹۶۰ | ۲۰۵۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -101,7 +101,7 @@
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۵۷۶ | ۱۲۰ |
+| `publish.gs` | ۱۵۷۸ | ۱۲۰ |
 | `v168.gs` | ۲۴۴۸ | ۱۵۱ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۹ | ۳۴ |
@@ -131,6 +131,7 @@
 | `guard.gs` | ۳۳۰ | ۲۵ |
 | `changes.gs` | ۲۶۵ | ۲۸ |
 | `uptime.gs` | ۱۱۲ | ۹ |
+| `agents.gs` | ۲۶۸ | ۲۰ |
 
 ### کارهای زمان‌دار
 
@@ -167,6 +168,8 @@
 | `AB_FN_TAB` | «قیف خارج از ایران» | `leadspeed.gs` |
 | `AB_FX_TAB` | «اصلاح دادهٔ لیدها · پیش‌نمایش» | `leadspeed.gs` |
 | `AB_PV_TAB` | «مبنای ارجاع · پیش‌نمایش» | `leadspeed.gs` |
+| `AG_COST_TAB` | «هزینهٔ ایجنت‌ها» | `agents.gs` |
+| `AG_SEO_TAB` | «تغییرات سئو» | `agents.gs` |
 | `AS_IDX_TAB` | «نمایهٔ دانش» | `assist.gs` |
 | `BG_TAB` | «سهمیهٔ اجرا» | `v168.gs` |
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
@@ -219,7 +222,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` `agents.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -413,6 +416,7 @@
 | نگهبان مهلت | `grdTests` |
 | کنترل تغییر | `chgTests` |
 | پایش سایت | `upTests` |
+| ایجنت‌های کنسول | `agTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
