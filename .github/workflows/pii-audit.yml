@@ -25,4 +25,4 @@ jobs:
       - name: بازرسی
         env:
           PII_NAMES: ${{ secrets.PII_NAMES }}
-        run: node .github/scripts/pii-audit.mjs > /dev/null
+        run: node .github/scripts/pii-audit.mjs
