@@ -87,7 +87,7 @@
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۰۱۰ | ۲۰۵۳ |
+| `telegram.gs` | ۳۸۰۷۰ | ۲۰۵۵ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -101,7 +101,7 @@
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۵۷۶ | ۱۲۰ |
+| `publish.gs` | ۱۵۷۸ | ۱۲۰ |
 | `v168.gs` | ۲۴۴۸ | ۱۵۱ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۹ | ۳۴ |
@@ -115,7 +115,7 @@
 | `ebi.gs` | ۱۱۱۵ | ۸۲ |
 | `ci.gs` | ۵۴۳ | ۳۱ |
 | `sitesec.gs` | ۲۷۵ | ۲۲ |
-| `sec.gs` | ۱۰۶ | ۱ |
+| `sec.gs` | ۱۰۷ | ۱ |
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
 | `kartable.gs` | ۴۴۷ | ۳۴ |
@@ -130,6 +130,8 @@
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 | `guard.gs` | ۳۳۰ | ۲۵ |
 | `changes.gs` | ۲۶۵ | ۲۸ |
+| `uptime.gs` | ۱۱۲ | ۹ |
+| `agents.gs` | ۲۶۸ | ۲۰ |
 
 ### کارهای زمان‌دار
 
@@ -166,6 +168,8 @@
 | `AB_FN_TAB` | «قیف خارج از ایران» | `leadspeed.gs` |
 | `AB_FX_TAB` | «اصلاح دادهٔ لیدها · پیش‌نمایش» | `leadspeed.gs` |
 | `AB_PV_TAB` | «مبنای ارجاع · پیش‌نمایش» | `leadspeed.gs` |
+| `AG_COST_TAB` | «هزینهٔ ایجنت‌ها» | `agents.gs` |
+| `AG_SEO_TAB` | «تغییرات سئو» | `agents.gs` |
 | `AS_IDX_TAB` | «نمایهٔ دانش» | `assist.gs` |
 | `BG_TAB` | «سهمیهٔ اجرا» | `v168.gs` |
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
@@ -218,7 +222,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` `agents.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -266,6 +270,7 @@
 | `TG_UTM_TAB` | «سئو · لینک‌های UTM» | `telegram.gs` |
 | `TG_WEEKLY` | «وقت‌های هفتگی» | `telegram.gs` `v162.gs` |
 | `TG_WF_TAB` | «بازخورد وبینار» | `telegram.gs` |
+| `UP_TAB` | «پایش سایت» | `uptime.gs` |
 | `V168_T_QUEUE` | «کارتابل پیگیری» | `v168.gs` |
 | `V168_T_VOCAB` | «واژگان» | `v168.gs` |
 | `V17013_OF_TAB` | «کمپین‌های مراجعان» | `v17013.gs` |
@@ -389,6 +394,7 @@
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |
 | امنیت ورودی‌ها (v170.9) | `secTests` |
 | امنیت ارجاع لید (v170.23.37) | `secReferTests` |
+| امنیت صندوق پیام (v170.23.35) | `secBoxTests` |
 | نتیجهٔ انتشار سایت و تلاش دوباره (v170.23.3) | `splTests` |
 | کارتابل تأیید یاسر (v170.23.5) | `ktbTests` |
 | جمنای به‌جای گروک (v170.23.7) | `aiTests` |
@@ -411,6 +417,8 @@
 | بازگرداندن مراجعان قدیمی (v170.23.14) | `reTests` |
 | نگهبان مهلت | `grdTests` |
 | کنترل تغییر | `chgTests` |
+| پایش سایت | `upTests` |
+| ایجنت‌های کنسول | `agTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
