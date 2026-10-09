@@ -15,12 +15,13 @@
  *   - کارت تازه فقط پیش از نشانگر ثابت می‌نشیند، نه کلاس طراحی: <!-- tj:dir:home --> در 503465 و <!-- tj:dir:school --> در 294.
  *     بازطراحی این دو صفحه بدون نگه داشتن نشانگر ممنوع است (site-check و site-mirror قرمز می‌شوند).
  *   - کارت تازهٔ صفحهٔ اصلی بی لینک /team/ گذاشته نمی‌شود: اگر صفحهٔ تیم نیست، خطای «no team page».
+ * v1.2 (۱۸ مهر ۱۴۰۵): op «evlite» برای رویداد سبک J-07 (بات v170.23.34): عکس‌ها، رویداد milestone در evData برگهٔ 505409 و آرشیو ایستا؛ undo برای «برگرداندن» یاسر.
  * هر برگه پیش از ذخیره نسخهٔ قبلی‌اش را در revisions دارد و بعد از ذخیره عیناً بازخوانی می‌شود؛
  * اگر چیزی جز همان کارت‌ها عوض شده باشد، محتوای قبلی برمی‌گردد.
  */
 
 if (!defined('TJD_VER')) {
-    define('TJD_VER', '1.1');
+    define('TJD_VER', '1.2');
     define('TJD_MARK_HOME', '<!-- tj:dir:home -->');
     define('TJD_MARK_SCHOOL', '<!-- tj:dir:school -->');
     define('TJD_HOME', 503465);
@@ -101,6 +102,7 @@ function tjd_route(WP_REST_Request $r) {
         if ($op === 'find') return tjd_find($d);
         if ($op === 'preview') return tjd_preview($d);
         if ($op === 'publish') return tjd_publish($d);
+        if ($op === 'evlite') return tjd_evlite($d);   /* v1.2: رویداد سبک J-07 */
         if ($op === 'person') {
             if (!function_exists('tjp_upsert')) throw new Exception('people snippet missing');
             return tjp_upsert(isset($d['person']) ? (array) $d['person'] : array());
@@ -539,6 +541,195 @@ function tjd_publish($d) {
     }
     foreach ($media as $k => $m) $out['media'][$k] = $m;
     return $out;
+}
+
+/* ───── رویداد سبک J-07 (بات v170.23.34): op «evlite» ─────
+ * { ev:{i,d,t,ttl,k:'milestone',c,a,ap,p,pl,s,ig,g,sh,fb}, photos:[{b64,alt}] (حداکثر ۳), arch:{year,md}, dry }
+ * یا { undo:1, i }. عکس‌ها فشرده (عرض حداکثر ۱۶۰۰، webp) و تامنیل «medium» وردپرس؛ یک فایل استوری ۱۰۸۰×۱۹۲۰ از عکس اول.
+ * رویداد در evData برگهٔ 505409 (بی بازچینی بقیه) و دکمهٔ ایستای آرشیو در سال شمسی خودش (بخش ۵ اسکیل tajrobeh-events).
+ * پیش از هر ویرایش، رفت‌وبرگشت JSON سنجیده می‌شود: اگر encode(decode(evData)) عین متن برگه نبود، چیزی نوشته نمی‌شود. */
+if (!defined('TJD_EV_PAGE')) define('TJD_EV_PAGE', 505409);
+function tjd_fa($n) { return strtr((string) $n, array('0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹')); }
+function tjd_unfa($s) { return (int) strtr((string) $s, array('۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9')); }
+function tjd_ev_json($obj) {
+    return str_replace('</', '<\/', wp_json_encode($obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS));
+}
+function tjd_ev_split($html) {
+    if (!preg_match('#(<script type="application/json" id="evData">)(.*?)(</script>)#s', $html, $m, PREG_OFFSET_CAPTURE)) throw new Exception('evData missing');
+    $raw = $m[2][0];
+    $D = json_decode($raw);
+    if (!is_object($D) || !isset($D->events) || !is_array($D->events)) throw new Exception('evData invalid');
+    if (tjd_ev_json($D) !== $raw) throw new Exception('evData roundtrip mismatch');
+    return array('D' => $D, 'start' => $m[2][1], 'len' => strlen($raw));
+}
+function tjd_ev_clean($ev, $D) {
+    $t = function ($v, $n) { return mb_substr(trim(wp_strip_all_tags((string) $v)), 0, $n); };
+    $o = new stdClass();
+    $o->i = (string) (isset($ev['i']) ? $ev['i'] : '');
+    if (!preg_match('/^[a-z0-9][a-z0-9-]{2,60}$/', $o->i)) throw new Exception('bad id');
+    $o->d = (string) (isset($ev['d']) ? $ev['d'] : '');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $o->d)) throw new Exception('bad date');
+    $o->t = '';
+    $o->ttl = $t(isset($ev['ttl']) ? $ev['ttl'] : '', 120);
+    if ($o->ttl === '') throw new Exception('no title');
+    $o->k = 'milestone';
+    $o->c = (string) (isset($ev['c']) ? $ev['c'] : '');
+    if (!isset($D->C->{$o->c})) throw new Exception('unknown course');
+    $o->a = (isset($ev['a']) && in_array($ev['a'], array('free', 'members', 'reg'), true)) ? $ev['a'] : 'members';
+    $o->ap = 'inter';
+    for ($k = count($D->events) - 1; $k >= 0; $k--) { $x = $D->events[$k]; if (isset($x->c, $x->ap) && $x->c === $o->c && isset($D->A->{$x->ap})) { $o->ap = $x->ap; break; } }
+    $o->p = array();
+    foreach ((array) (isset($ev['p']) ? $ev['p'] : array()) as $pk) { if (is_string($pk) && isset($D->P->{$pk})) $o->p[] = $pk; }
+    $o->pl = $t(isset($ev['pl']) ? $ev['pl'] : '', 60);
+    $o->s = $t(isset($ev['s']) ? $ev['s'] : '', 400);
+    $o->ig = array();
+    $o->g = (string) (isset($ev['g']) ? $ev['g'] : '');
+    if (!isset($D->G->{$o->g})) throw new Exception('unknown group');
+    $o->sh = $t(isset($ev['sh']) ? $ev['sh'] : $o->ttl, 60);
+    if (!empty($ev['fb']) && is_array($ev['fb'])) {
+        $o->fb = array();
+        foreach (array_slice($ev['fb'], 0, 3) as $f) {
+            $q = $t(isset($f['text']) ? $f['text'] : '', 300);
+            if ($q !== '') { $x = new stdClass(); $x->name = $t(isset($f['name']) ? $f['name'] : '', 40); $x->text = $q; $o->fb[] = $x; }
+        }
+        if (!$o->fb) unset($o->fb);
+    }
+    return $o;
+}
+function tjd_ev_photo($b64, $slug, $title, $alt) {
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    $bin = base64_decode((string) $b64, true);
+    if ($bin === false || strlen($bin) < 200) throw new Exception('image missing');
+    if (strlen($bin) > 15 * 1024 * 1024) throw new Exception('image too large');
+    $tmp = wp_tempnam('tjd-ev');
+    file_put_contents($tmp, $bin);
+    $ed = wp_get_image_editor($tmp);
+    if (is_wp_error($ed)) { @unlink($tmp); throw new Exception('not an image'); }
+    if (method_exists($ed, 'maybe_exif_rotate')) $ed->maybe_exif_rotate();
+    $sz = $ed->get_size();
+    if ($sz['width'] > 1600) $ed->resize(1600, null, false);
+    $ed->set_quality(82);
+    $saved = $ed->save($tmp . '.webp', 'image/webp');
+    @unlink($tmp);
+    if (is_wp_error($saved)) throw new Exception('save failed');
+    $m = tjd_media($saved['path'], $slug, $title, $alt);
+    $th = wp_get_attachment_image_src($m['id'], 'medium');
+    return array('id' => $m['id'], 'u' => $m['url'], 't' => $th ? wp_make_link_relative($th[0]) : $m['url']);
+}
+function tjd_ev_icon($html, $g, $D = null) {
+    if ($D && isset($D->ICONS->{$g})) return '<span class="ic">' . $D->ICONS->{$g} . '</span>';
+    if (preg_match('#data-g="' . preg_quote($g, '#') . '" data-ev="[^"]*"><time[^>]*>[^<]*</time>(<span class="ic">.*?</span>)<span><b>#s', $html, $m)) return $m[1];
+    if (preg_match('#<span data-g="' . preg_quote($g, '#') . '" title="[^"]*">(<span class="ic">.*?</span>)#s', $html, $m)) return $m[1];
+    return '';
+}
+/* آرشیو ایستا: افزودن یا برداشتن دکمه و شمارها؛ +1 یا -1 */
+function tjd_ev_arch($html, $o, $D, $arch, $dir) {
+    $a0 = strpos($html, 'id="archive"');
+    if ($a0 === false) throw new Exception('archive missing');
+    $a1 = strpos($html, '</section>', $a0);
+    $sec = substr($html, $a0, $a1 - $a0);
+    $label = isset($D->G->{$o->g}[0]) ? $D->G->{$o->g}[0] : '';
+    if ($dir < 0) {
+        $b = preg_quote($o->i, '#');
+        if (!preg_match('#<button type="button" class="ar" data-g="([a-z]+)" data-ev="' . $b . '">.*?</button>#s', $sec, $bm, PREG_OFFSET_CAPTURE)) return $html;
+        $g = $bm[1][0];
+        $ds = strrpos(substr($sec, 0, $bm[0][1]), '<details class="ay">');
+        $de = strpos($sec, '</details>', $bm[0][1]);
+        $det = substr($sec, $ds, $de - $ds);
+        $det = str_replace($bm[0][0], '', $det);
+    } else {
+        $g = $o->g;
+        $year = (string) $arch['year'];
+        $ppl = array();
+        foreach ($o->p as $pk) { $ppl[] = (string) $D->P->{$pk}[0]; }
+        $btn = '<button type="button" class="ar" data-g="' . esc_attr($g) . '" data-ev="' . esc_attr($o->i) . '"><time datetime="' . esc_attr($o->d) . '">' . esc_html((string) $arch['md']) . '</time>' .
+            tjd_ev_icon($sec, $g, $D) . '<span><b>' . esc_html($o->ttl) . '</b><small>' . esc_html($label . ($ppl ? ' · ' . implode('، ', $ppl) : '')) . '</small></span></button>';
+        $ds = strpos($sec, '<details class="ay"><summary><b>' . $year . '</b>');
+        if ($ds === false) {
+            $first = strpos($sec, '<details class="ay">');
+            if ($first === false) throw new Exception('no year block');
+            $chev = preg_match('#<span class="chev">.*?</span>#s', $sec, $cm) ? $cm[0] : '';
+            $new = '<details class="ay"><summary><b>' . $year . '</b><span class="n">۰ برنامه</span><span class="gs"></span>' . $chev . '</summary><div class="ayl"></div></details>' . "\n";
+            $sec = substr($sec, 0, $first) . $new . substr($sec, $first);
+            $ds = $first;
+        }
+        $de = strpos($sec, '</details>', $ds);
+        $det = substr($sec, $ds, $de - $ds);
+        if (strpos($det, 'data-ev="' . $o->i . '"') !== false) return $html;   /* تکرار بی‌ضرر */
+        $at = strrpos($det, '</div>');
+        if (preg_match_all('#<button type="button" class="ar"[^>]*><time datetime="(\d{4}-\d{2}-\d{2})"#', $det, $bs, PREG_OFFSET_CAPTURE)) {
+            foreach ($bs[1] as $k => $hit) { if ($hit[0] <= $o->d) { $at = $bs[0][$k][1]; break; } }
+        }
+        $det = substr($det, 0, $at) . $btn . substr($det, $at);
+    }
+    $det = preg_replace_callback('#<span class="n">([۰-۹0-9]+) برنامه</span>#u', function ($m) use ($dir) { return '<span class="n">' . tjd_fa(max(0, tjd_unfa($m[1]) + $dir)) . ' برنامه</span>'; }, $det, 1);
+    $gq = preg_quote($g, '#');
+    if (preg_match('#(<span data-g="' . $gq . '" title="[^"]*"><span class="ic">.*?</span>)([۰-۹0-9]+)(</span>)#su', $det, $gm)) {
+        $nv = tjd_unfa($gm[2]) + $dir;
+        $det = str_replace($gm[0], $nv > 0 ? $gm[1] . tjd_fa($nv) . $gm[3] : '', $det);
+    } elseif ($dir > 0) {
+        $chip = '<span data-g="' . esc_attr($g) . '" title="' . esc_attr($label) . '">' . tjd_ev_icon($sec, $g, $D) . '۱</span>';
+        $det = preg_replace('#</span><span class="chev">#', $chip . '</span><span class="chev">', $det, 1);
+    }
+    $empty = $dir < 0 && preg_match('#<span class="n">[۰0] برنامه</span>#u', $det);
+    if ($empty) $sec = substr($sec, 0, $ds) . substr($sec, $de + strlen("</details>\n"));   /* سال خالی‌شده (فقط سالی که خودش ساخته بود) برداشته می‌شود */
+    else $sec = substr($sec, 0, $ds) . $det . substr($sec, $de);
+    $sec = preg_replace_callback('#(<div class="ah"><div><h2>[^<]*</h2><p>)([۰-۹0-9]+)( برنامه)#u', function ($m) use ($dir) { return $m[1] . tjd_fa(max(0, tjd_unfa($m[2]) + $dir)) . $m[3]; }, $sec, 1);
+    return substr($html, 0, $a0) . $sec . substr($html, $a1);
+}
+function tjd_evlite($d) {
+    $pid = TJD_EV_PAGE;
+    $old = (string) get_post_field('post_content', $pid, 'raw');
+    if ($old === '') throw new Exception('page missing');
+    $x = tjd_ev_split($old);
+    $D = $x['D'];
+    if (!empty($d['undo'])) {
+        $i = isset($d['i']) ? (string) $d['i'] : '';
+        $keep = array(); $gone = null;
+        foreach ($D->events as $e) { if (isset($e->i) && $e->i === $i) $gone = $e; else $keep[] = $e; }
+        if (!$gone) return array('ok' => true, 'i' => $i, 'gone' => false);
+        $D->events = $keep;
+        $new = substr($old, 0, $x['start']) . tjd_ev_json($D) . substr($old, $x['start'] + $x['len']);
+        $new = tjd_ev_arch($new, $gone, $D, array(), -1);
+        if (!tjd_save_page($pid, $old, $new)) throw new Exception('save failed');
+        return array('ok' => true, 'i' => $i, 'gone' => true);
+    }
+    $o = tjd_ev_clean(isset($d['ev']) ? (array) $d['ev'] : array(), $D);
+    $arch = isset($d['arch']) ? (array) $d['arch'] : array();
+    if (!isset($arch['year'], $arch['md']) || !preg_match('/^[۰-۹]{4}$/u', (string) $arch['year'])) throw new Exception('bad arch');
+    $photos = array_slice(isset($d['photos']) ? (array) $d['photos'] : array(), 0, 3);
+    if (!empty($d['dry'])) return array('ok' => true, 'dry' => true, 'i' => $o->i, 'ev' => $o, 'photos' => count($photos));
+    $made = array(); $story = '';
+    try {
+        $o->ph = array();
+        foreach ($photos as $n => $p) {
+            $alt = mb_substr(wp_strip_all_tags(isset($p['alt']) ? (string) $p['alt'] : $o->sh), 0, 125);
+            $m = tjd_ev_photo(isset($p['b64']) ? $p['b64'] : '', 'tjl-ev-' . $o->i . '-' . ($n + 1), $o->ttl, $alt);
+            $made[] = $m['id'];
+            $ph = new stdClass(); $ph->u = $m['u']; $ph->t = $m['t']; $ph->a = $alt; $o->ph[] = $ph;
+            if ($n === 0) {
+                $img = tjd_image($p['b64'], array('x' => 0.5, 'y' => 0.5, 'z' => 1), 1080, 1920, 'image/jpeg');
+                $sm = tjd_media($img['path'], 'tjl-ev-' . $o->i . '-story', $o->ttl . ' · استوری', $alt);
+                $made[] = $sm['id']; $story = $sm['url'];
+            }
+        }
+        if (!$o->ph) unset($o->ph);
+        $keep = array(); $placed = false;
+        foreach ($D->events as $e) {
+            if (isset($e->i) && $e->i === $o->i) continue;
+            if (!$placed && isset($e->d) && $e->d > $o->d) { $keep[] = $o; $placed = true; }
+            $keep[] = $e;
+        }
+        if (!$placed) $keep[] = $o;
+        $D->events = $keep;
+        $new = substr($old, 0, $x['start']) . tjd_ev_json($D) . substr($old, $x['start'] + $x['len']);
+        $new = tjd_ev_arch($new, $o, $D, $arch, 1);
+        if (!tjd_save_page($pid, $old, $new)) throw new Exception('save failed');
+    } catch (Throwable $e) {
+        foreach ($made as $id) wp_delete_attachment($id, true);
+        throw $e;
+    }
+    return array('ok' => true, 'i' => $o->i, 'story' => $story, 'ph' => isset($o->ph) ? count($o->ph) : 0);
 }
 
 } // function_exists
