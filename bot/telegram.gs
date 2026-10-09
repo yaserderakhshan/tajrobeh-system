@@ -536,9 +536,52 @@ function tgBoxReply_(chat, th, text, name, role) {
   return r;
 }
 
+/* v170.23.35 (امنیت): خواندن، جواب به نام مرکز و بستن رشته فقط برای تیم (tgV1CanCreate_)؛ «جواب می‌دهم» طرف بیرونی فقط برای رشتهٔ خودش.
+   پیش از این هر کس با callback ساختگی (از مینی‌اپ box.act یا کلاینت) رشته‌ها را می‌خواند و به نام مرکز پیام می‌فرستاد. */
+function tgBoxMineOk_(chat, th) {
+  var list = tgBoxThread_(th);
+  return list.length > 0 && tgChatIn_(String(list[0].chat), chat);
+}
+function secBoxTests() {
+  var pass = 0, fail = 0, text = [];
+  function ok(t, c) { if (c) { pass++; text.push('✅ ' + t); } else { fail++; text.push('❌ ' + t); } }
+  var kD = TG_DRY, kO = TG_OUTBOX, kM = TG_MEM, kRows = tgBoxRows_, kCan = tgV1CanCreate_, kSend = tgBoxSend_, kSt = tgBoxThreadSt_;
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = {};
+  var sent = [], closed = [];
+  try {
+    tgBoxRows_ = function () { return [['M-1', 'TH-001', '501', 'مراجع ساختگی', 'مراجع', 'مرکز', 'متن خصوصی رشته', '', 'باز', '900']]; };
+    tgV1CanCreate_ = function (c) { return String(c) === '900'; };
+    tgBoxSend_ = function (to, t) { sent.push([String(to), t]); };
+    tgBoxThreadSt_ = function (th, st) { closed.push(th); };
+    function said(c) { return TG_OUTBOX.filter(function (x) { return x.chat === String(c); }).map(function (x) { return x.text; }).join('\n'); }
+    tgBoxCb_('666', 'bx:open:TH-001', 'غریبه', '');
+    ok('غریبه رشته را نمی‌خواند', said('666').indexOf('متن خصوصی رشته') < 0 && said('666').indexOf('فقط برای تیم') > -1);
+    tgBoxCb_('666', 'bx:us:TH-001', 'غریبه', '');
+    ok('غریبه حالت جواب به نام مرکز نمی‌گیرد', !tgGetVal_('box', '666'));
+    tgSetVal_('box', '666', JSON.stringify({ step: 'us', thread: 'TH-001' }));
+    tgV1BoxState_('666', 'غریبه', '', 'پیام جعلی');
+    ok('حالت جعلی us هم پیام نمی‌فرستد', sent.length === 0);
+    tgBoxCb_('666', 'bx:close:TH-001', 'غریبه', '');
+    ok('غریبه رشته را نمی‌بندد', closed.length === 0);
+    tgBoxCb_('666', 'bx:re:TH-001', 'غریبه', '');
+    ok('غریبه به رشتهٔ دیگری جواب نمی‌دهد', !tgGetVal_('box', '666'));
+    TG_OUTBOX = [];
+    tgBoxCb_('900', 'bx:open:TH-001', 'تیم', '');
+    ok('تیم رشته را می‌خواند', said('900').indexOf('متن خصوصی رشته') > -1);
+    tgBoxCb_('900', 'bx:us:TH-001', 'تیم', ''); tgV1BoxState_('900', 'تیم', '', 'جواب مرکز');
+    ok('تیم به نام مرکز جواب می‌دهد', sent.length === 1 && sent[0][0] === '501');
+    tgBoxCb_('501', 'bx:re:TH-001', 'مراجع', '');
+    ok('طرف خود رشته «جواب می‌دهم» دارد', /reply/.test(tgGetVal_('box', '501')));
+  } catch (e) { fail++; text.push('❌ خطا: ' + (e && e.message)); }
+  finally { TG_DRY = kD; TG_OUTBOX = kO; TG_MEM = kM; tgBoxRows_ = kRows; tgV1CanCreate_ = kCan; tgBoxSend_ = kSend; tgBoxThreadSt_ = kSt; }
+  return { pass: pass, fail: fail, text: text.join('\n') };
+}
+
 function tgBoxCb_(chat, data, name, role) {
   var p = String(data).split(':');
   var act = p[1], th = p[2];
+  if ((act === 'us' || act === 'close' || act === 'open') && !tgV1CanCreate_(chat, '')) { tgSend_(chat, 'این گزینه فقط برای تیم تجربه است.'); return true; }
+  if (act === 're' && !tgBoxMineOk_(chat, th)) { tgSend_(chat, 'این رشته پیدا نشد.'); return true; }
   if (act === 're') {
     tgSetVal_('box', chat, JSON.stringify({ step: 'reply', thread: th }));
     tgSend_(chat, '✍️ پاسخ‌تان را همین‌جا بنویسید. مستقیم به ما می‌رسد.');
@@ -957,6 +1000,7 @@ function tgV1BoxState_(chat, name, uname, text) {
 
   if (st.step === 'reply') {
     tgSetVal_('box', chat, '');
+    if (!tgBoxMineOk_(chat, st.thread)) { tgSend_(chat, 'این رشته پیدا نشد.'); return true; }   /* v170.23.35 */
     var roles = tgV1Roles_(chat, uname);
     tgBoxReply_(chat, st.thread, String(text), name, roles.join(' · '));
     tgSend_(chat, '✅ رسید. جواب‌تان را به ما رساندم.');
@@ -965,6 +1009,7 @@ function tgV1BoxState_(chat, name, uname, text) {
 
   if (st.step === 'us') {
     tgSetVal_('box', chat, '');
+    if (!tgV1CanCreate_(chat, uname)) { tgSend_(chat, 'این گزینه فقط برای تیم تجربه است.'); return true; }   /* v170.23.35 */
     var list = tgBoxThread_(st.thread);
     if (!list.length) { tgSend_(chat, 'این رشته پیدا نشد.'); return true; }
     tgBoxSend_(list[0].chat, String(text), { thread: st.thread, name: list[0].name, role: list[0].role, owner: String(chat) });
@@ -2458,7 +2503,7 @@ function tgPrivate_(m) {
   if (typeof ptRoute_ === 'function' && ptRoute_(m, chat, name, uname)) return;
   /* v170.16: کمپین C-004 (ebi.gs): کدهای ebi، نام و شماره، نوشتن مورد فهرست و ویس، پیش از tgOnPhone_ و کلیدواژه‌ها */
   if (typeof ebiRoute_ === 'function' && ebiRoute_(m, chat, name, uname)) return;
-  if (typeof evlRoute_ === 'function' && evlRoute_(m, chat, name, uname)) return;   /* v170.23.34: رویداد سبک J-07 (evlite.gs)؛ evc- فقط برای کدهای همان تب */
+  if (typeof evlRoute_ === 'function' && evlRoute_(m, chat, name, uname)) return;   /* v170.23.38: رویداد سبک J-07 (evlite.gs)؛ evc- فقط برای کدهای همان تب */
   if (m.text && /^\/start(@\w+)?\s+psyjoin-/.test(m.text) && typeof ps2Join_ === 'function' && ps2Join_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;   /* v170.23.8: اتصال با تأیید مسئول */
   if (m.text && /^\/start(@\w+)?\s+psy(dr)?-/.test(m.text) && typeof tgPsyJoin_ === 'function' && tgPsyJoin_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;
   if (m.text && /^\/start(@\w+)?\s+(psybook|off|voice|psycard)$/.test(m.text)) { var sp0 = m.text.replace(/^\/start(@\w+)?\s+/, '').trim(); if (sp0 === 'psybook') tgPsyBookStart_(chat); else if (sp0 === 'off') tgOffStart_(chat); else if (sp0 === 'voice') tgEnVolunteerStart_(chat); else tgPsyCardStart_(chat); return; }   /* v159: کدهای شروع مینی‌اپ */
@@ -4654,7 +4699,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('re:') === 0 && typeof reCb_ === 'function') return reCb_(chat, data, name, uname);   /* v170.23.14: بازگرداندن مراجعان قدیمی */
   if (data.indexOf('mig:') === 0 && typeof migCb_ === 'function') return migCb_(chat, data);   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ */
   if ((data.indexOf('crq:') === 0 || data.indexOf('vnr:') === 0) && typeof chgCb_ === 'function') return chgCb_(chat, data);   /* v170.23.31: درخواست تغییر و اعلان نسخه (changes.gs) */
-  if (data.indexOf('evl:') === 0 && typeof evlCb_ === 'function') return evlCb_(chat, data, name, uname);   /* v170.23.34: رویداد سبک */
+  if (data.indexOf('evl:') === 0 && typeof evlCb_ === 'function') return evlCb_(chat, data, name, uname);   /* v170.23.38: رویداد سبک */
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
   if (data.indexOf('ps2:') === 0 && typeof ps2Cb_ === 'function') return ps2Cb_(chat, data);   /* v170.23.8: اتصال روان‌پزشک */   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
@@ -7082,7 +7127,7 @@ function tgWatchdog(e) {
   }
   S('tgFollowTick_', 'light', tgFollowTick_);
   S('grdTick_', 'light', typeof grdTick_ === 'function' ? grdTick_ : null);   /* v170.23.30: نگهبان مهلت‌ها J-04، J-02، J-06 (guard.gs) */
-  S('evlTick_', 'light', typeof evlTick_ === 'function' ? evlTick_ : null);   /* v170.23.34: رویداد سبک: بستن ۴۸ ساعته، یادآوری تأیید */
+  S('evlTick_', 'light', typeof evlTick_ === 'function' ? evlTick_ : null);   /* v170.23.38: رویداد سبک: بستن ۴۸ ساعته، یادآوری تأیید */
   S('vnTick_', 'light', typeof vnTick_ === 'function' ? function () { if (typeof grdInHours_ === 'function' && !grdInHours_(Date.now())) return; return vnTick_(); } : null);   /* v170.23.31: اعلان نسخه با «خواندم» (changes.gs) */
   S('agCostTick_', 'light', typeof agCostTick_ === 'function' ? agCostTick_ : null);   /* v170.23.33: خرج ایجنت‌های کنسول، روزی یک بار (agents.gs) */
   /* سنگین: فقط ساعت‌های BG_HEAVY_HOURS */
@@ -17306,7 +17351,10 @@ function tgPayNew_(chat) {
   kb.push([{ text: 'بدون درمانگر (مبلغ دلخواه)', callback_data: 'py:t:-' }]);
   return tgSend_(chat, '💶 <b>فاکتور تتر برای مراجع خارج از ایران</b>\n\nبرای کدام درمانگر؟', { inline_keyboard: kb });
 }
+/* v170.23.35 (امنیت، مرور کار ۸): ساخت فاکتور در هر قدم دوباره سنجیده می‌شود؛ پیش از این callback ساختگی py:t از مینی‌اپ (client.act)
+   بی گذشتن از tgPayNew_ فاکتور می‌ساخت و فهرست قیمت درمانگرها را نشان می‌داد. */
 function tgPayNewCb_(chat, a) {
+  if (!tgPayCanCreate_(chat)) { tgDel_('payn', chat); return tgSend_(chat, 'این بخش برای پذیرش است.'); }
   var st = {}; try { st = JSON.parse(tgGetVal_('payn', chat) || '{}'); } catch (e) {}
   if (a[0] === 't') {
     var ps = tgFinTab_('price').rows().filter(function (r) { return String(r[0]).trim(); });
@@ -17323,6 +17371,7 @@ function tgPayNewCb_(chat, a) {
 }
 function tgPayAskName_(chat) { return tgSend_(chat, 'اسم مراجع؟ (برای دفتر مالی؛ اگر نمی‌خواهید «بدون اسم» را بزنید)', { inline_keyboard: [[{ text: 'بدون اسم', callback_data: 'py:skip' }]] }); }
 function tgPayNewText_(chat, text) {
+  if (!tgPayCanCreate_(chat)) { tgDel_('payn', chat); return false; }
   var st = {}; try { st = JSON.parse(tgGetVal_('payn', chat) || '{}'); } catch (e) { tgDel_('payn', chat); return false; }
   if (!st.s || String(text).charAt(0) === '/' || text.indexOf('بازگشت') > -1 || tgIsBtnLike_(text)) { tgDel_('payn', chat); return false; }
   if (st.s === 'amt') {
@@ -17335,6 +17384,7 @@ function tgPayNewText_(chat, text) {
 }
 function tgPayCreate_(chat, st) {
   tgDel_('payn', chat);
+  if (!tgPayCanCreate_(chat)) return tgSend_(chat, 'این بخش برای پذیرش است.');
   if (!(Number(st && st.eur) > 0)) return tgSend_(chat, 'مبلغ فاکتور معلوم نیست؛ فاکتور ساخته نشد. دوباره «' + TG_PAY_BTN + '» را بزنید.');
   var now = tgPayNow_(), L = tgPayLocal_(now);
   var id = 'P' + L.date.slice(2, 10).replace(/\//g, '') + (TG_DRY ? String(TG_MEM['pn'] = (TG_MEM['pn'] || 0) + 1) : Math.random().toString(36).slice(2, 6).toUpperCase());
@@ -17642,6 +17692,15 @@ function tgPayTests() {
     ok('تاریخ شمسی', tgPayJalali_(2026, 3, 21).join('-') === '1405-1-1' && tgPayJalali_(2026, 9, 11).join('-') === '1405-6-20' && tgPayLocal_(Date.UTC(2026, 8, 12, 6, 0)).month === '1405-06');
     TG_OUTBOX = []; tgPayNew_('55');
     ok('فقط پذیرش و یاسر فاکتور می‌سازند', said().indexOf('برای پذیرش') > -1 && !tgGetVal_('payn', '55'));
+    /* v170.23.35: callback و متن ساختگی از غیرپذیرش */
+    TG_OUTBOX = []; tgPayCb_('55', 't:0');
+    ok('callback ساختگی py:t از غیرپذیرش: نه حالت، نه قیمت درمانگر', !tgGetVal_('payn', '55') && said().indexOf('۶۰ یورو') < 0 && said().indexOf('سیمین') < 0);
+    tgSetVal_('payn', '55', JSON.stringify({ s: 'name', th: '', price: 0, eur: 60 }));
+    ok('حالت جعلی در کش هم فاکتور نمی‌سازد', tgPayNewText_('55', 'نام') === false && !(TG_MEM['fin:inv'] || []).length);
+    tgSetVal_('payn', '55', JSON.stringify({ s: 'name', eur: 60 })); tgPayCb_('55', 'skip');
+    ok('«بدون اسم» ساختگی هم فاکتور نمی‌سازد', !(TG_MEM['fin:inv'] || []).length);
+    tgPayCreate_('55', { eur: 60 });
+    ok('tgPayCreate_ مستقیم برای غیرپذیرش رد', !(TG_MEM['fin:inv'] || []).length);
     TG_OUTBOX = []; tgPayNew_('77');
     ok('ساخت: فهرست درمانگرها با قیمت', said().indexOf('py:t:0') > -1 && said().indexOf('۶۰ یورو') > -1 && said().indexOf('py:t:-') > -1);
     TG_OUTBOX = []; tgPayCb_('77', 't:0');
@@ -23099,6 +23158,11 @@ function tgOnRefer_(cq, rest) {
 
   if (act === 'x') { tgDel_('ldr', chat); return tgSend_(chat, 'باشد، ارجاع انجام نشد.'); }
 
+  /* v170.23.37 (امنیت، مرور کار ۸): فرستادن ارجاع فقط پذیرش، مالک، ناظر یا میز روان‌پزشکی؛ جواب ارجاع فقط درمانگری که همین لید به او ارجاع شده.
+     پیش از این هر درمانگر با rf:f:<کد لید>:<نام خودش> کارت مراجع (نام، منطقه، پیام اول) را به خودش می‌کشید. */
+  if ((act === 'f' || act === 'p') && !tgReferCanSend_(chat, cq.from && cq.from.username)) { tgDel_('ldr', chat); return tgSend_(chat, 'ارجاع با پذیرش است.'); }
+  if ((act === 'ok' || act === 'no') && !tgReferIsMine_(chat, row)) return tgSend_(chat, 'این ارجاع برای شما نیست.');
+
   if (act === 'f') { tgDel_('ldr', chat); return tgReferSend_(chat, code, arg, cq.from && cq.from.username, true); }
 
   if (act === 'p') {
@@ -23128,6 +23192,52 @@ function tgOnRefer_(cq, rest) {
   return null;
 }
 
+function tgReferCanSend_(chat, uname) {
+  if (TG_OWNER_CHAT && String(chat) === String(TG_OWNER_CHAT)) return true;
+  if (tgWhoDesk_(chat, uname)) return true;
+  try { if ((TG_DRY ? (TG_MEM['watchids'] || []) : tgWatchIds_()).some(function (w) { return String(w) === String(chat); })) return true; } catch (e) {}
+  try { if (tgV1Roles_(chat, uname || '').indexOf('روان‌پزشکی') > -1) return true; } catch (e2) {}
+  return false;
+}
+function tgReferIsMine_(chat, row) {
+  var l = tgLeadRead_(row); if (!l) return false;
+  return [l.ref1, l.ref2, l.ref3].some(function (n) {
+    if (!n) return false;
+    var c = TG_DRY ? ((TG_MEM['therchat'] || {})[n] || '') : (tgTherChatByName_(n) || '');
+    return c && tgChatIn_(String(c), chat);
+  });
+}
+function secReferTests() {
+  var pass = 0, fail = 0, out = [];
+  function ok(n, c) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n); }
+  var wD = TG_DRY, wL = TG_DRY_LEAD, wO = TG_OUTBOX, wM = TG_MEM, wOwn = TG_OWNER_CHAT, wSend = tgReferSend_, wSet = tgLeadSet_, wEv = tgLeadEv_, wRoles = tgV1Roles_;
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = { therchat: { 'درمانگر الف': '301' } }; TG_OWNER_CHAT = '900';
+  var sends = [], sets = [];
+  try {
+    TG_DRY_LEAD = { row: 7, code: 'L-1042', name: 'آزمایشی', phone: '', region: 'خارج از ایران', first: 'متن نمونه', status: 'ارجاع', owner: 'پذیرشی',
+      ref1: 'درمانگر الف', ref2: '', ref3: '', booked: false, closed: false };
+    tgReferSend_ = function (c, code, n) { sends.push([String(c), n]); return null; };
+    tgLeadSet_ = function (r, ch) { sets.push(ch); }; tgLeadEv_ = function () {};
+    tgV1Roles_ = function () { return []; };
+    var cq = function (c) { return { message: { chat: { id: c } }, from: { username: '' } }; };
+    tgOnRefer_(cq('302'), 'f:L-1042:درمانگر ب');
+    ok('درمانگر دیگر لید را با rf:f به خودش نمی‌کشد', sends.length === 0);
+    tgOnRefer_(cq('302'), 'p:L-1042:درمانگر ب');
+    ok('rf:p هم از غیرپذیرش رد', sends.length === 0);
+    tgOnRefer_(cq('302'), 'ok:L-1042');
+    ok('درمانگری که ارجاع نگرفته «می‌توانم» نمی‌زند', sets.length === 0);
+    TG_MEM['deskwho'] = { name: 'پذیرشی', chat: '55' };
+    tgOnRefer_(cq('55'), 'p:L-1042:درمانگر الف');
+    ok('پذیرش ارجاع می‌فرستد', sends.length === 1 && sends[0][0] === '55');
+    TG_MEM['deskwho'] = null;
+    tgOnRefer_(cq('900'), 'f:L-1042:درمانگر الف');
+    ok('مالک ارجاع می‌فرستد', sends.length === 2);
+    tgOnRefer_(cq('301'), 'ok:L-1042');
+    ok('درمانگر همان ارجاع می‌پذیرد', sets.length === 1);
+  } catch (e) { fail++; out.push('❌ خطا: ' + (e && e.message)); }
+  finally { TG_DRY = wD; TG_DRY_LEAD = wL; TG_OUTBOX = wO; TG_MEM = wM; TG_OWNER_CHAT = wOwn; tgReferSend_ = wSend; tgLeadSet_ = wSet; tgLeadEv_ = wEv; tgV1Roles_ = wRoles; }
+  return { pass: pass, fail: fail, text: out.join('\n') };
+}
 function tgReferTests() {
   var out = [], pass = 0, fail = 0;
   function ok(n, c) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n); }

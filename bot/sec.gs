@@ -102,3 +102,5 @@ function secTests() {
   return { pass: pass, fail: fail, out: out };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'secTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['امنیت ورودی‌ها (v170.9)', 'secTests']); } catch (eSec) {}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'secReferTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['امنیت ارجاع لید (v170.23.37)', 'secReferTests']); } catch (eSr) {}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'secBoxTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['امنیت صندوق پیام (v170.23.35)', 'secBoxTests']); } catch (eSb) {}
