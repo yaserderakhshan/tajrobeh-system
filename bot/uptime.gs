@@ -4,7 +4,8 @@
  * خود سنجش هر ۵ دقیقه روی ورکر tj-assist است (edge/assist/src/uptime.js، بیرون از ایران) تا سهمیهٔ اجرای اپس‌اسکریپت نسوزد.
  * ورکر از درگاه انتشار (کلید دوم) دو اکشن صدا می‌زند:
  *   up_log   سطرها را در تب «پایش سایت» هاب تجربه می‌نویسد (هر ۳۰ دقیقه نمونه، و هر خطا). فقط ۳۰ روز آخر می‌ماند.
- *   up_alert down: دو خطای پشت سر هم · outside: از خارج نه، از داخل ایران بالا · up: برگشت با مدت قطعی.
+ *   up_alert down: صفحهٔ اصلی و شروع تراپی هر دو در دو سنجش پشت سر هم خطا · outside: از خارج نه، از داخل ایران بالا · up: برگشت.
+ *            v170.23.39: خطای یک صفحه (مثلاً مطلب مجله) فقط یک سطر در تب است و هشدار نمی‌سازد (تصمیم ورکر، uptime.js).
  *            پیام به یاسر (TG_OWNER_CHAT) و هر کس نقش «تیم فنی» دارد (تب «افراد»).
  * تست: upTests (مجموعهٔ «پایش سایت»).
  */
@@ -54,7 +55,7 @@ function upRecipients_() {
 }
 function upAlertText_(a) {
   var bad = (a.bad || []).map(function (b) { return '• ' + (UP_PAGES_FA[b.key] || tgEsc_(String(b.key))) + ' · ' + (b.code ? 'کد ' + tgFa_(String(b.code)) : (b.err === 'timeout' ? 'بی پاسخ در ۱۵ ثانیه' : 'خطای شبکه')) + (b.code === 200 && b.err ? ' · ' + tgEsc_(b.err) : ''); }).join('\n');
-  if (a.kind === 'down') return '🔴 <b>سایت tajrobeh.life جواب درست نمی‌دهد</b>\nدو بار پشت سر هم (هر ۵ دقیقه یک سنجش):\n' + bad;
+  if (a.kind === 'down') return '🔴 <b>سایت tajrobeh.life جواب درست نمی‌دهد</b>\nصفحهٔ اصلی و شروع تراپی هر دو، دو بار پشت سر هم (هر ۵ دقیقه یک سنجش):\n' + bad;
   if (a.kind === 'outside') return '🟠 <b>سایت از خارج ایران در دسترس نیست، ولی از داخل ایران بالاست</b>\nسرور سایت در ۱۵ دقیقهٔ اخیر از داخل ایران ضربان فرستاده، ولی سنجش از بیرون دو بار پشت سر هم ناموفق بود:\n' + bad;
   if (a.kind === 'up') return '🟢 <b>سایت برگشت</b>\nمدت قطعی: ' + tgFa_(String(Math.max(0, Number(a.mins) || 0))) + ' دقیقه';
   return '';
@@ -77,6 +78,37 @@ try {
   if (PB_WRITE.indexOf('up_log') < 0) PB_WRITE.push('up_log');
   if (PB_WRITE.indexOf('up_alert') < 0) PB_WRITE.push('up_alert');
 } catch (eUp) {}
+
+/* v170.23.39 (یک بار، CI_ONCE_AUTO): هشدارهای غلط امروز (۱۸ مهر ۱۴۰۵) در تب علامت می‌خورند. پیش از این، خطای تنها «مطلب مجله»
+   (نشانی ثابتی که ۴۰۴ بود) «سایت پایین» حساب می‌شد. هشدار down یا outside غلط است اگر در ۶ دقیقهٔ دورش صفحهٔ اصلی یا شروع تراپی
+   سالم بوده؛ هشدار up بعد از آن هم «برگشتِ هشدار غلط» است. فقط ستون «خطا» عوض می‌شود. */
+var UP_FALSE_NOTE = 'هشدار غلط: صفحهٔ اصلی یا شروع تراپی سالم بود (v170.23.39)';
+function upMarkFalse_(rows, day) {
+  var fmt = function (d) { return Utilities.formatDate(d, TG_TZ, 'yyyy-MM-dd'); };
+  var marks = [], lastFalse = false;
+  rows.forEach(function (r, i) {
+    if (!(r[0] instanceof Date) || fmt(r[0]) !== day) return;
+    var page = String(r[1]);
+    if (page === 'هشدار down' || page === 'هشدار outside') {
+      var t = r[0].getTime(), mainOk = rows.some(function (x) { return x[0] instanceof Date && Math.abs(x[0].getTime() - t) <= 6 * 60000 &&
+        (x[1] === UP_PAGES_FA.home || x[1] === UP_PAGES_FA['get-therapy']) && x[4] === 'بله'; });
+      lastFalse = mainOk;
+      if (mainOk && String(r[5]).indexOf('هشدار غلط') < 0) marks.push([i, UP_FALSE_NOTE]);
+    } else if (page === 'هشدار up') {
+      if (lastFalse && String(r[5]).indexOf('هشدار غلط') < 0) marks.push([i, 'برگشتِ هشدار غلط (v170.23.39)']);
+      lastFalse = false;
+    }
+  });
+  return marks;
+}
+function tgV1702339UpFalse() {
+  var day = '2026-10-09';
+  if (upDry_()) { var R = TG_MEM['up:rows'] || [], m = upMarkFalse_(R, day); m.forEach(function (x) { R[x[0]][5] = x[1]; }); return { out: m.length + ' سطر' }; }
+  var sh = upSheet_(), n = sh.getLastRow(); if (n < 2) return { out: 'تب خالی' };
+  var v = sh.getRange(2, 1, n - 1, UP_HEAD.length).getValues(), marks = upMarkFalse_(v, day);
+  marks.forEach(function (x) { sh.getRange(x[0] + 2, 6).setValue(x[1]); });
+  return { out: marks.length + ' هشدار غلط علامت خورد' };
+}
 
 function upTests() {
   var pass = 0, fail = 0, text = [];
@@ -103,6 +135,16 @@ function upTests() {
     TG_OUTBOX = []; upAlert_({ key: 'K2', alert: { kind: 'up', mins: 25 } });
     ok('برگشت با مدت قطعی', TG_OUTBOX[0].text.indexOf('برگشت') > -1 && TG_OUTBOX[0].text.indexOf('۲۵') > -1);
     ok('هشدار هم در تب ثبت می‌شود', TG_MEM['up:rows'].some(function (r) { return r[1] === 'هشدار up'; }));
+    /* v170.23.39: علامت هشدارهای غلط امروز */
+    var D = function (hm) { return new Date('2026-10-09T' + hm + ':00+03:30'); };
+    TG_MEM['up:rows'] = [[D('10:00'), 'صفحهٔ اصلی', 200, 300, 'بله', '', 2], [D('10:00'), 'مطلب مجله', 404, 200, 'نه', '', 2],
+      [D('10:05'), 'هشدار down', 0, 0, 'نه', 'down', ''], [D('10:30'), 'هشدار up', 0, 0, 'بله', 'up', ''],
+      [D('12:00'), 'صفحهٔ اصلی', 0, 15000, 'نه', 'timeout', 2], [D('12:00'), 'شروع تراپی', 502, 900, 'نه', '', 2], [D('12:05'), 'هشدار down', 0, 0, 'نه', 'down', '']];
+    var res = tgV1702339UpFalse();
+    var RR = TG_MEM['up:rows'];
+    ok('هشدار غلط امروز علامت خورد و برگشتش هم', res.out === '2 سطر' && RR[2][5] === UP_FALSE_NOTE && /برگشتِ هشدار غلط/.test(RR[3][5]));
+    ok('قطعی واقعی (هر دو صفحهٔ اصلی خطا) علامت نمی‌خورد', RR[6][5] === 'down');
+    ok('اجرای دوباره چیزی را دوباره علامت نمی‌زند', tgV1702339UpFalse().out === '0 سطر');
     ok('اکشن‌ها در درگاه ثبت شده‌اند', typeof PB_ACTIONS.up_log === 'function' && typeof PB_ACTIONS.up_alert === 'function' && PB_WRITE.indexOf('up_alert') > -1);
   } catch (e) { fail++; text.push('❌ خطا: ' + (e && e.message)); }
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.out; TG_OWNER_CHAT = keep.own; if (keep.k2) ebiKey2Ok_ = keep.k2; }

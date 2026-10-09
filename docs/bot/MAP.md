@@ -80,7 +80,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.38`
+نسخهٔ کد: `v170.23.39`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -130,7 +130,7 @@
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 | `guard.gs` | ۳۳۰ | ۲۵ |
 | `changes.gs` | ۲۶۵ | ۲۸ |
-| `uptime.gs` | ۱۱۲ | ۹ |
+| `uptime.gs` | ۱۵۴ | ۱۱ |
 | `agents.gs` | ۲۶۸ | ۲۰ |
 | `evlite.gs` | ۶۹۶ | ۶۰ |
 
