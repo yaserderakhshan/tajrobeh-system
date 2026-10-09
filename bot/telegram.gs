@@ -23155,6 +23155,11 @@ function tgOnRefer_(cq, rest) {
 
   if (act === 'x') { tgDel_('ldr', chat); return tgSend_(chat, 'باشد، ارجاع انجام نشد.'); }
 
+  /* v170.23.37 (امنیت، مرور کار ۸): فرستادن ارجاع فقط پذیرش، مالک، ناظر یا میز روان‌پزشکی؛ جواب ارجاع فقط درمانگری که همین لید به او ارجاع شده.
+     پیش از این هر درمانگر با rf:f:<کد لید>:<نام خودش> کارت مراجع (نام، منطقه، پیام اول) را به خودش می‌کشید. */
+  if ((act === 'f' || act === 'p') && !tgReferCanSend_(chat, cq.from && cq.from.username)) { tgDel_('ldr', chat); return tgSend_(chat, 'ارجاع با پذیرش است.'); }
+  if ((act === 'ok' || act === 'no') && !tgReferIsMine_(chat, row)) return tgSend_(chat, 'این ارجاع برای شما نیست.');
+
   if (act === 'f') { tgDel_('ldr', chat); return tgReferSend_(chat, code, arg, cq.from && cq.from.username, true); }
 
   if (act === 'p') {
@@ -23184,6 +23189,52 @@ function tgOnRefer_(cq, rest) {
   return null;
 }
 
+function tgReferCanSend_(chat, uname) {
+  if (TG_OWNER_CHAT && String(chat) === String(TG_OWNER_CHAT)) return true;
+  if (tgWhoDesk_(chat, uname)) return true;
+  try { if ((TG_DRY ? (TG_MEM['watchids'] || []) : tgWatchIds_()).some(function (w) { return String(w) === String(chat); })) return true; } catch (e) {}
+  try { if (tgV1Roles_(chat, uname || '').indexOf('روان‌پزشکی') > -1) return true; } catch (e2) {}
+  return false;
+}
+function tgReferIsMine_(chat, row) {
+  var l = tgLeadRead_(row); if (!l) return false;
+  return [l.ref1, l.ref2, l.ref3].some(function (n) {
+    if (!n) return false;
+    var c = TG_DRY ? ((TG_MEM['therchat'] || {})[n] || '') : (tgTherChatByName_(n) || '');
+    return c && tgChatIn_(String(c), chat);
+  });
+}
+function secReferTests() {
+  var pass = 0, fail = 0, out = [];
+  function ok(n, c) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n); }
+  var wD = TG_DRY, wL = TG_DRY_LEAD, wO = TG_OUTBOX, wM = TG_MEM, wOwn = TG_OWNER_CHAT, wSend = tgReferSend_, wSet = tgLeadSet_, wEv = tgLeadEv_, wRoles = tgV1Roles_;
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = { therchat: { 'درمانگر الف': '301' } }; TG_OWNER_CHAT = '900';
+  var sends = [], sets = [];
+  try {
+    TG_DRY_LEAD = { row: 7, code: 'L-1042', name: 'آزمایشی', phone: '', region: 'خارج از ایران', first: 'متن نمونه', status: 'ارجاع', owner: 'پذیرشی',
+      ref1: 'درمانگر الف', ref2: '', ref3: '', booked: false, closed: false };
+    tgReferSend_ = function (c, code, n) { sends.push([String(c), n]); return null; };
+    tgLeadSet_ = function (r, ch) { sets.push(ch); }; tgLeadEv_ = function () {};
+    tgV1Roles_ = function () { return []; };
+    var cq = function (c) { return { message: { chat: { id: c } }, from: { username: '' } }; };
+    tgOnRefer_(cq('302'), 'f:L-1042:درمانگر ب');
+    ok('درمانگر دیگر لید را با rf:f به خودش نمی‌کشد', sends.length === 0);
+    tgOnRefer_(cq('302'), 'p:L-1042:درمانگر ب');
+    ok('rf:p هم از غیرپذیرش رد', sends.length === 0);
+    tgOnRefer_(cq('302'), 'ok:L-1042');
+    ok('درمانگری که ارجاع نگرفته «می‌توانم» نمی‌زند', sets.length === 0);
+    TG_MEM['deskwho'] = { name: 'پذیرشی', chat: '55' };
+    tgOnRefer_(cq('55'), 'p:L-1042:درمانگر الف');
+    ok('پذیرش ارجاع می‌فرستد', sends.length === 1 && sends[0][0] === '55');
+    TG_MEM['deskwho'] = null;
+    tgOnRefer_(cq('900'), 'f:L-1042:درمانگر الف');
+    ok('مالک ارجاع می‌فرستد', sends.length === 2);
+    tgOnRefer_(cq('301'), 'ok:L-1042');
+    ok('درمانگر همان ارجاع می‌پذیرد', sets.length === 1);
+  } catch (e) { fail++; out.push('❌ خطا: ' + (e && e.message)); }
+  finally { TG_DRY = wD; TG_DRY_LEAD = wL; TG_OUTBOX = wO; TG_MEM = wM; TG_OWNER_CHAT = wOwn; tgReferSend_ = wSend; tgLeadSet_ = wSet; tgLeadEv_ = wEv; tgV1Roles_ = wRoles; }
+  return { pass: pass, fail: fail, text: out.join('\n') };
+}
 function tgReferTests() {
   var out = [], pass = 0, fail = 0;
   function ok(n, c) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n); }
