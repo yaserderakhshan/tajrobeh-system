@@ -56,6 +56,7 @@ export function piiSelfTest() {
   t('workers.dev با نام حساب در کد', piiLine("const base = 'https://relay.someone.workers.dev';", 'bot/x.gs').includes('نشانی workers.dev با نام حساب'));
   t('workers.dev در محتوای سایت مجاز', piiLine("var EDGE = 'https://edge.someone.workers.dev/x';", 'site/pages/1-x.html').length === 0);
   t('نام همکار از فهرست', piiLine("// به نمونه‌الف بگو", 'bot/x.gs', ['نمونه‌الف']).includes('نام همکار (فهرست PII_NAMES)'));
+  t('متن PR: شماره و نام همکار در توضیح', piiLine('شمارهٔ تماس ۰۹۱۲۱۲۳۴۵۶۷').includes('شمارهٔ تلفن') && piiLine('با نمونه‌الف هماهنگ شد', '', ['نمونه‌الف']).includes('نام همکار (فهرست PII_NAMES)'));
   t('نام فقط کلمهٔ کامل', piiLine("// نمونه‌الفبا", 'bot/x.gs', ['نمونه‌الف']).length === 0);
   t('نام پیش از ویرگول فارسی', piiLine("// نمونه‌الف، و", 'bot/x.gs', ['نمونه‌الف']).length === 1);
   return bad;
