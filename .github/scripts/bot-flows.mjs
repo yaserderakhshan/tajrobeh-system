@@ -27,7 +27,7 @@ function leadsBot(botDir) {
   b.run(`tgDutyWho_ = function () { return { p: { name: 'کشیک نمونه', chat: '111', role: 'پذیرش' } }; };
          tgDutyBoss_ = function () { return { name: 'مسئول نمونه', chat: '222', role: 'مسئول پذیرش' }; };
          tgDutyClinic_ = function () { return true; };
-         BG_DUTY_FROM = 0;
+         BG_DUTY_FROM = 0; BG_DUTY_NIGHT_MIN = 0;   // v170.23.42: آزمون جریان به ساعت روز وابسته نیست
          var __sent = []; tgSend_ = function (c, t) { __sent.push([String(c), String(t)]); return { ok: true }; };`);
   const tick = () => { b.run('__sent = []'); const r = b.run('tgDutyTick({})'); return { r, alerts: b.run('__sent.map(function (x) { return x[1]; })') }; };
   return { b, sh, add, tick };

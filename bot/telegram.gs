@@ -32012,6 +32012,7 @@ function tgDutySetCell_(d, s, name) {
   if (TG_DRY) { var g = tgDutyGrid_(); g[d][s] = name; TG_MEM['duty'] = g; return; }
   tgDutySheet_().getRange(d + 2, s + 2).setValue(name);
   CacheService.getScriptCache().remove('dutyg');
+  try { bgProp_('BG_DUTY_NEXT', '1'); } catch (e) {}   /* v170.23.42: جدول عوض شد؛ تیک بعدی موعدها را از نو می‌سنجد */
 }
 function tgDutyDayIdx_(now) {
   var u = Number(Utilities.formatDate(now, TG_TZ, 'u')); // ۱ دوشنبه … ۷ یکشنبه
@@ -32033,6 +32034,21 @@ function tgDutyWho_(now) {
   if (!nm) { if (d === 6 || s === 2) return null; var b = tgDutyBoss_(); return b ? { p: b, d: d, s: s, fallback: true } : null; }
   var p = tgDeskByName_(nm);
   return p && p.chat ? { p: p, d: d, s: s } : null;
+}
+/* v170.23.42: شروع نزدیک‌ترین نوبتی که کسی دارد (فقط از جدول، بی خواندن افراد)؛ تا ۴۸ ساعت */
+function tgDutySlotOpen_(g, d, s) {
+  var nm = String((g[d] || [])[s] || '');
+  if (nm === '—' || nm === '-') return false;
+  return !!nm || !(d === 6 || s === 2);
+}
+function tgDutyNextSlot_(now) {
+  var g = tgDutyGrid_(), t = new Date(now.getTime());
+  t.setMinutes(0, 0, 0);
+  for (var k = 1; k <= 48; k++) {
+    var x = new Date(t.getTime() + k * 3600000), h = Number(Utilities.formatDate(x, TG_TZ, 'H')), d = tgDutyDayIdx_(x);
+    for (var i = 0; i < TG_DUTY_SLOTS.length; i++) if (TG_DUTY_SLOTS[i][1] === h && tgDutySlotOpen_(g, d, i)) return x.getTime();
+  }
+  return now.getTime() + 3 * 3600000;
 }
 function tgDutyClinic_(l) {
   try { return tgSection_(l.src, l.memo) === 'پذیرش'; } catch (e) { return true; }
@@ -32164,6 +32180,8 @@ function tgDutyRun_(now) {
   P.setProperty('TG_DUTY_SEEN', JSON.stringify(seenList.slice(-TG_DUTY_SEEN_MAX)));
   P.setProperty('TG_DUTY_PEND', JSON.stringify(keep));
   P.setProperty('TG_DUTY_LAST', String(last));   /* فقط برای برگشت به نسخهٔ قبل */
+  /* v170.23.42: موعد بعدی تا tgDutyTick بی خواندن شیت برگردد */
+  try { var wait0 = keep.some(function (x) { return !x.n; }); bgProp_('BG_DUTY_NEXT', String(bgDutyNext_(keep, now.getTime(), wait0 ? tgDutyNextSlot_(now) : 0))); } catch (eN) { tgErr_('bgDutyNext_', eN); }
   return 'sent ' + sent + ' · pending ' + keep.length;
 }
 

@@ -1111,3 +1111,45 @@ function cmQuotaTests() {
   return { pass: pass, fail: fail, text: text.join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'cmQuotaTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['سهمیه: کامنت‌ها فقط با تغییر فایل (v170.23.41)', 'cmQuotaTests']); } catch (eCmq) {}
+
+/* v170.23.42 (سهمیهٔ اجرا ۳ از ۳): tgDutyTick با موعد بعدی ذخیره‌شده و شب هر ۱۰ دقیقه */
+function dutyQuotaTests() {
+  var pass = 0, fail = 0, text = [];
+  function ok(t, c, d) { if (c) { pass++; text.push('✅ ' + t); } else { fail++; text.push('❌ ' + t + (d ? ' · ' + d : '')); } }
+  var kD = TG_DRY, kM = TG_MEM, kO = TG_OUTBOX;
+  TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
+  try {
+    var T = function (d, hm) { return new Date('2026-10-' + d + 'T' + hm + ':00+03:30').getTime(); }, M = 60000;
+    var at = function (ms) { TG_MEM['bg:now'] = ms; };
+    at(T('10', '10:00')); bgDutyDone_(); bgProp_('BG_DUTY_NEXT', '0');
+    TG_MEM['bg:pend'] = [{ k: 'L-1', n: 0 }];
+    at(T('10', '10:05'));
+    ok('موعد ذخیره‌شده ۰: بی خواندن Properties لیدها و بی خواندن شیت', bgDutyPlan_().run === false && bgDutyPlan_().why === 'بی‌کار');
+    bgProp_('BG_DUTY_NEXT', String(T('10', '10:20')));
+    ok('پیش از موعد: برگشت فوری', bgDutyPlan_().run === false);
+    at(T('10', '10:20'));
+    ok('سر موعد: خواندن کامل', bgDutyPlan_().why === 'نوبت اقدام');
+    var now = T('10', '10:00');
+    ok('موعد بعدی: یادآوری ۲۰ دقیقه‌ای', bgDutyNext_([{ n: 1, t: now }], now, 0) === now + TG_DUTY_WAIT * M);
+    ok('موعد بعدی: در انتظار تماس اول هر ۳۰ دقیقه', bgDutyNext_([{ n: 2, t: now - 60 * M }], now, 0) === now + BG_DUTY_FULL_MIN * M);
+    ok('موعد بعدی: لید بی نوبت‌دار تا شروع نوبت بعد', bgDutyNext_([{ n: 0 }], now, T('11', '09:00')) === T('11', '09:00'));
+    ok('بی لید در انتظار: ۰', bgDutyNext_([], now, 0) === 0);
+    TG_MEM['duty'] = TG_DUTY_DAYS.map(function () { return ['', '', '']; });
+    ok('نوبت بعد از ۲۱ پنج‌شنبه: شنبه ۹ (جمعه و ۱۸ تا ۲۲ خالی)', tgDutyNextSlot_(new Date(T('08', '21:30'))) === T('10', '09:00'), new Date(tgDutyNextSlot_(new Date(T('08', '21:30')))).toISOString());
+    TG_MEM['duty'][1][2] = 'نمونه';
+    ok('جدول پر برای ۱۸ یکشنبه: همان ساعت', tgDutyNextSlot_(new Date(T('11', '17:10'))) === T('11', '18:00'));
+    at(T('10', '22:00')); bgDutyDone_(); bgLeadMark_(); at(T('10', '22:05'));
+    ok('شب: لید تازه هم تا ۱۰ دقیقه بعد از خواندن قبلی صبر می‌کند', bgDutyPlan_().run === false);
+    at(T('10', '22:10'));
+    ok('شب: ۱۰ دقیقه بعد خواندن کامل', bgDutyPlan_().why === 'لید تازه');
+    at(T('10', '08:30')); bgDutyDone_(); bgLeadMark_(); at(T('10', '08:35'));
+    ok('۸ تا ۹ هم شب است', bgDutyPlan_().run === false);
+    at(T('10', '12:00')); bgDutyDone_(); bgLeadMark_(); at(T('10', '12:05'));
+    ok('روز: لید تازه همان ۵ دقیقه', bgDutyPlan_().why === 'لید تازه');
+    at(T('10', '03:00'));
+    ok('پیش از ۸ مثل قبل خاموش', bgDutyPlan_().run === false && bgDutyPlan_().why === 'شب');
+  } catch (e) { fail++; text.push('❌ خطا: ' + (e && e.stack || e)); }
+  finally { TG_DRY = kD; TG_MEM = kM; TG_OUTBOX = kO; }
+  return { pass: pass, fail: fail, text: text.join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'dutyQuotaTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['سهمیه: نوبت لید با موعد ذخیره‌شده (v170.23.42)', 'dutyQuotaTests']); } catch (eDq) {}
