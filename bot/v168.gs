@@ -2310,7 +2310,7 @@ function bgDutyPlan_() {
   try { pend = bgDry_() ? (TG_MEM['bg:pend'] || []) : JSON.parse(PropertiesService.getScriptProperties().getProperty('TG_DUTY_PEND') || '[]'); } catch (e) { pend = []; }
   if (!pend.length) return { run: false, why: 'بی‌کار' };
   var wait = typeof TG_DUTY_WAIT !== 'undefined' ? TG_DUTY_WAIT : 10;
-  var due = pend.some(function (x) { return !x.n || (x.n === 1 && x.t && (now - x.t) / 60000 >= wait); });
+  var due = pend.some(function (x) { return (!x.n && !(x.at > now)) || (x.n === 1 && x.t && (now - x.t) / 60000 >= (x.pr || wait)); });   /* v170.23.43: صبح و قول هر لید */
   if (due) return { run: true, why: 'نوبت اقدام' };
   if (now - full >= BG_DUTY_FULL_MIN * 60000) return { run: true, why: 'پیگیری در انتظار' };
   return { run: false, why: 'منتظر' };
@@ -2322,8 +2322,8 @@ function bgDutyNext_(pend, now, slotAt) {
   var wait = typeof TG_DUTY_WAIT !== 'undefined' ? TG_DUTY_WAIT : 10, nx = 0;
   var take = function (t) { if (t && (!nx || t < nx)) nx = t; };
   (pend || []).forEach(function (x) {
-    if (!x.n) take(Math.max(now, slotAt || now));
-    else { if (x.n === 1 && x.t) take(x.t + wait * 60000); take(now + BG_DUTY_FULL_MIN * 60000); }
+    if (!x.n) take(x.at > now ? x.at : Math.max(now, slotAt || now));   /* v170.23.43: لید شب تا ساعت ۹ */
+    else { if (x.n === 1 && x.t) take(x.t + (x.pr || wait) * 60000); take(now + BG_DUTY_FULL_MIN * 60000); }
   });
   return nx;
 }   /* زمان شروع خواندن، تا لیدی که وسط کار رسید جا نماند */

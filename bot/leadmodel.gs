@@ -457,7 +457,7 @@ function lmEvRows_() {
   if (stkDry_()) return TG_MEM['lm:ev'] || [];
   var es = tgLeadEvSheet_(); if (!es || es.getLastRow() < 2) return [];
   var n = Math.min(es.getLastRow() - 1, 20000);
-  return es.getRange(es.getLastRow() - n + 1, 1, n, 6).getValues().map(function (r) { return { t: r[0] instanceof Date ? r[0].getTime() : 0, code: String(r[1] || ''), actor: String(r[3] || ''), ch: String(r[4] || ''), what: String(r[5] || '') }; });
+  return es.getRange(es.getLastRow() - n + 1, 1, n, 9).getValues().map(function (r) { return { t: r[0] instanceof Date ? r[0].getTime() : 0, code: String(r[1] || ''), actor: String(r[3] || ''), ch: String(r[4] || ''), what: String(r[5] || ''), to: r[7], note: String(r[8] || '') }; });   /* v170.23.43: to و note برای قول پاسخ */
 }
 /* بلوک‌های داشبورد (آرایه‌ای از [عنوان، مقدار، …]) */
 function lmDashRows_() {
@@ -482,6 +482,7 @@ function lmDashRows_() {
     var m = lmMedian_(a);
     out.push([t, m === null ? '-' : Math.round(m * 10) / 10, a.length]);
   });
+  try { if (typeof lcDashRows_ === 'function') lcDashRows_(ev, stkNow_().getTime()).forEach(function (r) { out.push(r); }); } catch (eLc) { tgErr_('lcDashRows_', eLc); }   /* v170.23.43 */
   out.push(['']);
   out.push(['نرخ تبدیل بر اساس نوع', 'کل', 'موفق', 'درصد']);
   LM_TYPES.forEach(function (t) {

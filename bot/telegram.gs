@@ -4726,6 +4726,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('ms:') === 0) return tgOnMsg_(cq, data.slice(3));
   if (data.indexOf('fb:') === 0) return tgOnFb_(cq, data.slice(3));
   if (data === 'hm') return tgOnHuman_(chat, name, uname);
+  if (data.indexOf('lq:') === 0 && typeof lcCb_ === 'function') return lcCb_(cq, chat, data);   /* v170.23.43: قول پاسخ لید تازه */
   if (data.indexOf('ld:') === 0) return tgOnLead_(cq, data.slice(3));
   if (data.indexOf('wa:') === 0) return tgOnWa_(cq, data.slice(3));
   if (data.indexOf('mt:') === 0) return tgOnMeet_(cq, data.slice(3));
@@ -5419,6 +5420,7 @@ function tgAppendLead_(o, isRetry) {
   if (!isRetry && typeof igLeadPrefill_ === 'function') o = igLeadPrefill_(o);   /* v168: منبع اینستاگرام و فیلدهای پیش‌پر */
   if (!isRetry && typeof ebiLeadPrefill_ === 'function') o = ebiLeadPrefill_(o);   /* v170.16: منبع «کمپین › C-004 › <نوع>» */
   if (!isRetry && typeof v168NewLeadNext_ === 'function') o = v168NewLeadNext_(o);   /* v168 فاز ۲: لید تازه همان لحظه تکلیف دارد */
+  if (!isRetry && !o.owner && typeof lcOwnerFor_ === 'function') { try { o.owner = lcOwnerFor_(o) || ''; } catch (eLc) { tgErr_('lcOwnerFor_', eLc); } }   /* v170.23.43: صاحب لید از «نوبت پذیرش» */
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'lead', o: o }); return true; }
   if (tgTestLeak_('لید تازه')) return false;
   try {
@@ -22176,6 +22178,7 @@ function tgOnLead_(cq, rest) {
     ] });
   }
 
+  if ((act === 'co' || act === 'noans') && typeof lcOnContact_ === 'function') { try { lcOnContact_(code, me); } catch (eLc) {} }   /* v170.23.43: زمان اولین تماس */
   if (act === 'co') {
     if (arg === 'na') return tgOnLead_(cq, 'noans:' + code);
     const ch = { 'آخرین تماس': today };
@@ -31982,7 +31985,7 @@ var TG_DUTY_LOG = 'نوبت پذیرش · پاسخ‌ها';
 var TG_DUTY_DAYS = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
 var TG_DUTY_SLOTS = [['۹ تا ۱۳', 9, 13], ['۱۳ تا ۱۸', 13, 18], ['۱۸ تا ۲۲', 18, 22]];
 var TG_DUTY_BTN = '🗓 نوبت رسیدگی به لید';
-var TG_DUTY_WAIT = 20;         // دقیقه تا یادآوری دوم و خبر به مسئول پذیرش
+var TG_DUTY_WAIT = 15;         // v170.23.43: قول پاسخ لید تازه (leadclaim.gs)؛ بعدش نفر بعدی و خبر به سرپرست پذیرش
 var TG_DUTY_GIVEUP = 180;      // بعد از این، پیگیری به SLA ساعتی سپرده می‌شود
 var TG_DUTY_LOG_HEAD = ['کد لید', 'نام', 'زمان ثبت لید', 'نوبت با', 'زمان خبر', 'نتیجه', 'دقیقه تا اقدام', 'یادآوری دوم', 'خبر به مسئول پذیرش'];
 
@@ -32145,11 +32148,19 @@ function tgDutyRun_(now) {
     if (!l || !(l.name || l.phone)) continue;
     if (!x.a) x.a = now.getTime() - (l.age || 0) * 60000;
     if (l.closed || l.touched) {
+      if (l.touched && typeof lcOnContact_ === 'function') { try { lcOnContact_(x.k, ''); } catch (eLc) {} }   /* v170.23.43 */
       if (x.n) tgDutyLog_(l, x, l.touched ? 'تماس اول گرفته شد' : 'بسته شد', x.t ? Math.round((now.getTime() - x.t) / 60000) : null);
       if (x.n && typeof opsAdaptLeadDone_ === 'function') opsAdaptLeadDone_(x.k);
       continue;
     }
     if (!tgDutyClinic_(l)) continue;
+    /* v170.23.43: قول پاسخ (leadclaim.gs): کارت با «برداشتم»، رد به نفر بعدی، صبح روز کاری بعد */
+    if (typeof lcStep_ === 'function') {
+      var kp = false; try { kp = lcStep_(x, l, now); } catch (eLs) { tgErr_('lcStep_', eLs, x.k); kp = true; }
+      if (x.sent) { sent++; delete x.sent; }
+      if (kp) keep.push(x);
+      continue;
+    }
     if (x.n === 0) {
       var w = tgDutyWho_(now);
       if (!w) { keep.push(x); continue; }
@@ -32181,7 +32192,7 @@ function tgDutyRun_(now) {
   P.setProperty('TG_DUTY_PEND', JSON.stringify(keep));
   P.setProperty('TG_DUTY_LAST', String(last));   /* فقط برای برگشت به نسخهٔ قبل */
   /* v170.23.42: موعد بعدی تا tgDutyTick بی خواندن شیت برگردد */
-  try { var wait0 = keep.some(function (x) { return !x.n; }); bgProp_('BG_DUTY_NEXT', String(bgDutyNext_(keep, now.getTime(), wait0 ? tgDutyNextSlot_(now) : 0))); } catch (eN) { tgErr_('bgDutyNext_', eN); }
+  try { var wait0 = keep.some(function (x) { return !x.n && !x.at; }); bgProp_('BG_DUTY_NEXT', String(bgDutyNext_(keep, now.getTime(), wait0 ? tgDutyNextSlot_(now) : 0))); } catch (eN) { tgErr_('bgDutyNext_', eN); }
   return 'sent ' + sent + ' · pending ' + keep.length;
 }
 
@@ -32195,7 +32206,7 @@ function tgDutyText_() {
     return '<b>' + d + '</b>: ' + TG_DUTY_SLOTS.map(function (s, j) { return s[0] + ' ' + (g[i][j] === '—' ? 'تعطیل' : (g[i][j] || '·')); }).join(' | ');
   });
   return '🗓 <b>نوبت رسیدگی به لید</b>\n' +
-    'هر لید تازهٔ پذیرش همان لحظه برای کسی می‌رود که نوبت دارد. اگر ' + tgFa_(TG_DUTY_WAIT) + ' دقیقه تماس اول ثبت نشود، یادآوری دوم می‌رود و مسئول پذیرش خبردار می‌شود.\n\n' +
+    'هر لید تازهٔ پذیرش برای کسی می‌رود که نوبت دارد، در ساعت کاری خودش. اگر ' + tgFa_(TG_DUTY_WAIT) + ' دقیقه «برداشتم» نخورد، به نفر بعدی همان نوبت می‌رسد و سرپرست پذیرش خبردار می‌شود. لید شب ساعت ۹ صبح روز کاری بعد می‌رسد. چند نام در یک خانه را با «،» جدا کنید؛ اولی صاحب نوبت است.\n\n' +
     lines.join('\n') + '\n\n· یعنی خالی: در ساعت کاری با مسئول پذیرش.\n' +
     'الان: ' + (w ? tgEsc_(w.p.name) : 'بیرون از ساعت نوبت؛ لیدها برای نوبت بعدی می‌مانند');
 }

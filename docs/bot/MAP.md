@@ -55,7 +55,7 @@
 
 | کیست | مسیر | کجای کد |
 |---|---|---|
-| مراجع | شروع ← پرسش‌های پذیرش ← شماره ← لید در «لیدها» با کد لید ← خبر به کشیک | `tgOnPhone_`، `tgAppendLead_`، `tgDutyTick` |
+| مراجع | شروع ← پرسش‌های پذیرش ← شماره ← لید در «لیدها» با کد لید و صاحب از «نوبت پذیرش» ← کارت «برداشتم» با قول ۱۵ دقیقه (شب: صبح ۹ با قول ۳۰) ← نفر بعدی و سرپرست | `tgOnPhone_`، `tgAppendLead_`، `tgDutyTick`، `lcStep_` (`leadclaim.gs`) |
 | مراجع | وقت معارفه: فهرست وقت‌های خالی ← رزرو (دوباره با شیت سنجیده می‌شود) ← «وقت معارفهٔ من» و لغو | `tgSlotBookable_`، `tgMeetGet_` |
 | مراجع | مینی‌اپ: گالری درمانگران، مچ‌میکینگ، رزرو | `?api=` در `tgApiRoute_` |
 | فرم سایت | فرم وردپرس ← `doPost` ← لید (زیر قفل، تکراری حذف) | `Code.gs` |
@@ -80,14 +80,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.42`
+نسخهٔ کد: `v170.23.43`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۰۹۳ | ۲۰۵۸ |
+| `telegram.gs` | ۳۸۱۰۴ | ۲۰۵۸ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -105,7 +105,7 @@
 | `v168.gs` | ۲۴۶۶ | ۱۵۳ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۹ | ۳۴ |
-| `leadmodel.gs` | ۷۷۸ | ۴۱ |
+| `leadmodel.gs` | ۷۷۹ | ۴۱ |
 | `comments.gs` | ۱۰۷۸ | ۶۸ |
 | `dq.gs` | ۶۰۲ | ۴۹ |
 | `cfg.gs` | ۱۹۳ | ۱۴ |
@@ -126,6 +126,7 @@
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۱۴۶۲ | ۱۱۴ |
 | `leadspeed.gs` | ۱۱۵۶ | ۸۷ |
+| `leadclaim.gs` | ۳۹۶ | ۳۱ |
 | `nurture.gs` | ۲۸۹ | ۳۰ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 | `guard.gs` | ۳۳۰ | ۲۵ |
@@ -224,7 +225,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` `agents.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` `leadclaim.gs` `agents.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -418,6 +419,7 @@
 | سهمیه: پنجرهٔ تماس هر ۳ ساعت (v170.23.40) | `abQuotaTests` |
 | سهمیه: کامنت‌ها فقط با تغییر فایل (v170.23.41) | `cmQuotaTests` |
 | سهمیه: نوبت لید با موعد ذخیره‌شده (v170.23.42) | `dutyQuotaTests` |
+| قول پاسخ لید تازه (v170.23.43) | `lcTests` |
 | پیگیری گیرکرده‌ها (v170.23.13) | `nuTests` |
 | بازگرداندن مراجعان قدیمی (v170.23.14) | `reTests` |
 | نگهبان مهلت | `grdTests` |
