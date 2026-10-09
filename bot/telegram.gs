@@ -637,11 +637,12 @@ function tgDashBoxLine_(chat, isTeam) {
   return tgDashLine_('پیام‌های منتظر پاسخ', wait, list.length ? 'از ' + tgFa_(list.length) + ' رشته' : '');
 }
 
-function tgDashKb_(extra) {
+function tgDashKb_(extra, chat) {
   var rows = [
     [{ text: '✅ کارهای من', callback_data: 'db:task' }, { text: '📬 صندوق پیام', callback_data: 'db:box' }]
   ];
   (extra || []).forEach(function (r) { rows.push(r); });
+  if (chat && typeof chgCan_ === 'function' && chgCan_(chat)) rows.push([{ text: CHG_BTN, callback_data: 'crq:new' }]);   /* v170.23.31 */
   rows.push([{ text: '🔄 تازه کن', callback_data: 'db:me' }]);
   return { inline_keyboard: rows };
 }
@@ -656,7 +657,7 @@ function tgDashDesk_(chat, name, uname, roles) {
   s += tgDashBoxLine_(chat, true) + '\n';
   s += tgDashLine_('پروفایل‌های در انتظار بازبینی', tgDashN_(ss, TG_PQ_TAB, 0, null)) + '\n';
   s += '\n<i>هر عدد یک دکمه در همین منو دارد.</i>';
-  tgSend_(chat, s, tgDashKb_([[{ text: '📥 کارتابل پذیرش', callback_data: 'db:desk' }]]));
+  tgSend_(chat, s, tgDashKb_([[{ text: '📥 کارتابل پذیرش', callback_data: 'db:desk' }]], chat));
 }
 
 /* ---------- مدرسه ---------- */
@@ -670,7 +671,7 @@ function tgDashSch_(chat, name, uname, roles) {
   s += tgDashLine_('استادانی که هنوز به بات نپیوسته‌اند', noBot) + '\n';
   s += tgDashTaskLine_(chat, uname, roles) + '\n';
   s += tgDashBoxLine_(chat, true) + '\n';
-  tgSend_(chat, s, tgDashKb_([[{ text: '🎓 کارهای مدرسه', callback_data: 'db:sch' }]]));
+  tgSend_(chat, s, tgDashKb_([[{ text: '🎓 کارهای مدرسه', callback_data: 'db:sch' }]], chat));
 }
 
 /* ---------- مجله ---------- */
@@ -687,7 +688,7 @@ function tgDashMag_(chat, name, uname, roles) {
   s += tgDashLine_('منتشرشده', pub) + '\n';
   s += tgDashTaskLine_(chat, uname, roles) + '\n';
   s += tgDashBoxLine_(chat, true) + '\n';
-  tgSend_(chat, s, tgDashKb_([[{ text: '✍️ کارتابل مجله', callback_data: 'db:mag' }]]));
+  tgSend_(chat, s, tgDashKb_([[{ text: '✍️ کارتابل مجله', callback_data: 'db:mag' }]], chat));
 }
 
 /* ---------- درمانگر: سبک و ساده ---------- */
@@ -783,7 +784,7 @@ function tgDashOwner_(chat, name, uname, roles) {
   tgSend_(chat, s, tgDashKb_([
     [{ text: '➕ کار تازه', callback_data: 'db:new' }, { text: '✉️ پیام تازه', callback_data: 'db:msg' }],
     [{ text: '📈 آمار روزانه', callback_data: 'db:stat' }]
-  ]));
+  ], chat));
 }
 
 function tgTskToday_() {
@@ -867,7 +868,7 @@ function tgV1Dash_(chat, name, uname) {
   var s = tgDashHead_('خانهٔ شما', name);
   s += tgDashTaskLine_(chat, uname, roles) + '\n';
   s += tgDashBoxLine_(chat, false) + '\n';
-  tgSend_(chat, s, tgDashKb_([]));
+  tgSend_(chat, s, tgDashKb_([], chat));
 }
 
 /* ---------- ساختن کار تازه ---------- */
@@ -2487,6 +2488,7 @@ function tgPrivate_(m) {
   if (typeof tgAuRoute_ === 'function' && tgAuRoute_(chat, m)) return;
   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ (migrate.gs): start=v2mig، شمارهٔ مراجع، «مراجعان من»، پاسخ همکار نسخهٔ ۲ */
   if (typeof migRoute_ === 'function' && migRoute_(chat, m)) return;
+  if (typeof chgRoute_ === 'function' && chgRoute_(chat, m)) return;   /* v170.23.31: درخواست تغییر C-01 (changes.gs) */
   /* v170.23.10: طول جلسه (sesslen.gs): عدد دلخواه، /sesslen و دکمهٔ میز پذیرش */
   if (m.text && typeof tgLenText_ === 'function' && tgGetVal_('lnc', chat) && tgLenText_(chat, m.text)) return;
   if (m.text && typeof tgLenPick_ === 'function' && (String(m.text).trim() === '/sesslen' || String(m.text).trim() === TG_LEN_DESK_BTN)) { if (tgLenCanOthers_(chat)) { tgDel_('lnt', chat); tgLenPick_(chat, 0); } else tgLenStart_(chat); return; }
@@ -4650,6 +4652,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('nu:') === 0 && typeof nuCb_ === 'function') return nuCb_(chat, data);   /* v170.23.13: پیگیری گیرکرده‌ها */
   if (data.indexOf('re:') === 0 && typeof reCb_ === 'function') return reCb_(chat, data, name, uname);   /* v170.23.14: بازگرداندن مراجعان قدیمی */
   if (data.indexOf('mig:') === 0 && typeof migCb_ === 'function') return migCb_(chat, data);   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ */
+  if ((data.indexOf('crq:') === 0 || data.indexOf('vnr:') === 0) && typeof chgCb_ === 'function') return chgCb_(chat, data);   /* v170.23.31: درخواست تغییر و اعلان نسخه (changes.gs) */
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
   if (data.indexOf('ps2:') === 0 && typeof ps2Cb_ === 'function') return ps2Cb_(chat, data);   /* v170.23.8: اتصال روان‌پزشک */   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
@@ -7076,8 +7079,9 @@ function tgWatchdog(e) {
     } finally { tgLeadsShare_(false); }
   }
   S('tgFollowTick_', 'light', tgFollowTick_);
-  S('grdTick_', 'light', typeof grdTick_ === 'function' ? grdTick_ : null);
-  S('agCostTick_', 'light', typeof agCostTick_ === 'function' ? agCostTick_ : null);   /* v170.23.33: خرج ایجنت‌های کنسول، روزی یک بار */   /* v170.23.30: نگهبان مهلت‌ها J-04، J-02، J-06 (guard.gs) */
+  S('grdTick_', 'light', typeof grdTick_ === 'function' ? grdTick_ : null);   /* v170.23.30: نگهبان مهلت‌ها J-04، J-02، J-06 (guard.gs) */
+  S('vnTick_', 'light', typeof vnTick_ === 'function' ? function () { if (typeof grdInHours_ === 'function' && !grdInHours_(Date.now())) return; return vnTick_(); } : null);   /* v170.23.31: اعلان نسخه با «خواندم» (changes.gs) */
+  S('agCostTick_', 'light', typeof agCostTick_ === 'function' ? agCostTick_ : null);   /* v170.23.33: خرج ایجنت‌های کنسول، روزی یک بار (agents.gs) */
   /* سنگین: فقط ساعت‌های BG_HEAVY_HOURS */
   if (heavyHour) {
     /* v169.1: اگر کار هفتگی سنگین (tgTherWeekly، تا ۲۶۶ ثانیه) همین ساعت رفت، بقیهٔ سنگین‌ها به نوبت بعد می‌رود */
