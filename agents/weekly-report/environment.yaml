@@ -1,0 +1,8 @@
+name: tj-weekly-report-env
+config:
+  type: cloud
+  networking:
+    type: limited
+    allow_package_managers: false
+    allowed_hosts:
+      - tj-assist.yaserderakhshan.workers.dev

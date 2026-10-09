@@ -764,6 +764,8 @@ function pbRegisterPost_(o, now) {
   if (seen && seen.indexOf(o.id) < 0) { seen.push(o.id); pbProp_('PB_SEEN', JSON.stringify(seen.slice(-80))); }
   var notif = pbIdList_('PB_NOTIF');
   if (notif && notif.indexOf(o.id) > -1) pbProp_('PB_NOTIF', JSON.stringify(notif.filter(function (x) { return x !== o.id; })));
+  /* v170.23.33: سئوی مطلب تازه با ایجنت کنسول (agents.gs؛ خاموش تا AGENT_SEO_ENABLED = بله) */
+  if (isNew && typeof agStartSeo_ === 'function') { try { agStartSeo_(o.id); } catch (eAg) { tgErr_('agStartSeo_', eAg); } }
   return isNew;
 }
 function pbIdList_(k) { try { var a = JSON.parse(pbProp_(k) || 'null'); return Array.isArray(a) ? a.map(String) : null; } catch (e) { return null; } }
@@ -1515,7 +1517,7 @@ function pbTests() {
     /* سقف فراخوانی */
     var rl = null; for (var i = 0; i < 40; i++) { rl = gw({ action: 'status' }); if (!rl.ok) break; }
     ok('سقف ۳۰ فراخوانی در ساعت', rl.ok === false && rl.error === 'rate_limited');
-    ok('همهٔ اکشن‌های نوشتنی dry_run دارند', PB_WRITE.every(function (a) { return typeof PB_ACTIONS[a] === 'function'; }) && Object.keys(PB_ACTIONS).length === 17 + (PB_ACTIONS.kb_index ? 1 : 0) + (PB_ACTIONS.as_dump ? 2 : 0) && typeof PB_ACTIONS.ebi_check === 'function' && typeof PB_ACTIONS.ebi_mods === 'function' && PB_WRITE.indexOf('ebi_mods') < 0);
+    ok('همهٔ اکشن‌های نوشتنی dry_run دارند', PB_WRITE.every(function (a) { return typeof PB_ACTIONS[a] === 'function'; }) && Object.keys(PB_ACTIONS).length === 17 + (PB_ACTIONS.kb_index ? 1 : 0) + (PB_ACTIONS.as_dump ? 2 : 0) + (PB_ACTIONS.up_log ? 2 : 0) + (PB_ACTIONS.agent_data ? 3 : 0) && typeof PB_ACTIONS.ebi_check === 'function' && typeof PB_ACTIONS.ebi_mods === 'function' && PB_WRITE.indexOf('ebi_mods') < 0);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK;
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ درگاه انتشار درست است'));

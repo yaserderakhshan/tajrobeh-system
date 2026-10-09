@@ -3,11 +3,14 @@
 //   GET  /assist/boot     جملهٔ شروع، پرسش‌های پرتکرار، موضوع‌ها و جملهٔ حریم خصوصی برای ویجت.
 //   POST /assist/refresh  بات بعد از تأیید دانش و تعویض نمایه صدا می‌زند؛ دقیقه‌ای یک بار داده را از بات می‌گیرد.
 //   GET  /assist/health   نسخهٔ داده و سن آن (بی هیچ محتوا).
+//   POST /uptime/beat     ضربان سرور سایت از داخل ایران برای پایش بالا بودن سایت (uptime.js)، با امضای سرور.
+//   POST /agent           رلهٔ ایجنت‌های کنسول Claude به بات (agent_data، agent_report، seo_log)؛ کلید را بات می‌سنجد.
 // داده: خروجی اکشن as_dump بات در KV (کلید dump)، هر ۳۰ دقیقه با cron و با پینگ تازه می‌شود. گزارش‌ها با ctx.waitUntil (اکشن as_log).
 // رمزها فقط secret ورکر: BOT_URL، BOT_KEY (کلید دوم درگاه)، LEAD_SECRET (امضای سرور، همان رمز لید سایت)، GEMINI_API_KEY (اختیاری).
 import { prepare, ask, tap, boot, nearTopics, siteEventsFrom, classified } from './engine.js';
 import { classifyPrompt, CLASSIFY_SCHEMA, faTokens } from './faq.js';
 import FAQ_DATA from '../../../content/assist/faq.json' with { type: 'json' };
+import { upTick, upBeat } from './uptime.js';
 
 const ORIGINS = ['https://tajrobeh.life', 'https://www.tajrobeh.life', 'https://new.tajrobeh.life'];
 const GEM_MODEL = 'gemini-flash-lite-latest';
@@ -18,6 +21,7 @@ const CLS_CACHE_S = 14 * 86400;
 const RATE_IP = 30, RATE_SID = 20;   /* در ساعت */
 let MEM = null;                  /* {at, P} داده در حافظهٔ همین نمونه، ۶۰ ثانیه */
 const HITS = new Map();
+const AGENT_ACTIONS = ['agent_data', 'agent_report', 'seo_log'];
 
 export default {
   async fetch(req, env, ctx) {
@@ -87,6 +91,24 @@ export default {
         if (logs.length) ctx.waitUntil(sendLogs(env, logs));
         return json(res, 200, { 'server-timing': 'assist;dur=' + ms + (model ? ', gemini' : '') + ', gem;desc="' + why + '";dur=' + gms });
       }
+      /* ضربان سرور سایت از داخل ایران (اسنیپت 506148، wp-cron)؛ فقط با امضای سرور */
+      if (path === '/uptime/beat' && req.method === 'POST') {
+        const raw = await req.text();
+        if (!(await verify(req, url, raw, env))) return json({ ok: false, error: 'sig' }, 403);
+        await upBeat(env); return json({ ok: true });
+      }
+      /* رلهٔ ایجنت‌های کنسول Claude به بات (agents/، bot/agents.gs): فقط سه اکشن؛ کلید دوم درگاه را خود بات می‌سنجد.
+         نشانی وب‌اپ بات در مخزن عمومی نمی‌آید و گاوصندوق کنسول رمز را در مسیر نشانی جایگزین نمی‌کند؛ برای همین از اینجا. */
+      if (path === '/agent' && req.method === 'POST') {
+        const raw = await req.text();
+        if (raw.length > 20000) return json({ ok: false, error: 'size' }, 413);
+        let b = {}; try { b = JSON.parse(raw); } catch (e) { return json({ ok: false, error: 'json' }, 400); }
+        if (!AGENT_ACTIONS.includes(String(b.action || ''))) return json({ ok: false, error: 'action' }, 400);
+        if (!env.BOT_URL) return json({ ok: false, error: 'bot' }, 503);
+        const r = await fetch(env.BOT_URL, { method: 'POST', headers: { 'content-type': 'text/plain' }, redirect: 'follow', body: JSON.stringify(Object.assign({}, b, { api: 1 })) });
+        let out = {}; try { out = await r.json(); } catch (e) { out = { ok: false, error: 'bot_reply' }; }
+        return json(out, r.ok ? 200 : 502);
+      }
       /* نزدیک‌ترین موضوع‌ها بی گزارش، برای بازگشت سبک ویجت */
       if (path === '/assist/near' && req.method === 'GET') {
         const P = await data(env, ctx); if (!P) return json({ ok: false }, 503);
@@ -97,7 +119,8 @@ export default {
       return json({ ok: false, error: 'internal' }, 500);
     }
   },
-  async scheduled(ev, env, ctx) { ctx.waitUntil(refresh(env, false)); }
+  /* ۱۸ مهر: cron پنج‌دقیقه‌ای پایش بالا بودن سایت (uptime.js)؛ نیم‌ساعتی همان تازه کردن داده */
+  async scheduled(ev, env, ctx) { ctx.waitUntil(ev.cron === '*/5 * * * *' ? upTick(env) : refresh(env, false)); }
 };
 
 /* ───── داده ───── */

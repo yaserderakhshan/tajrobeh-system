@@ -1,0 +1,10 @@
+name: tj-mag-seo-env
+config:
+  type: cloud
+  networking:
+    type: limited
+    allow_package_managers: false
+    allowed_hosts:
+      - tajrobeh.life
+      - www.tajrobeh.life
+      - tj-assist.yaserderakhshan.workers.dev

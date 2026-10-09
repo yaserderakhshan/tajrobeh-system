@@ -1,0 +1,5 @@
+# فقط ظرف گاوصندوق؛ رمزی اینجا نیست (agents/README.md):
+#   WP_AUTH     سرآیند کامل «Basic …» رمز اپلیکیشن کاربر جدای سئو با نقش ویرایشگر؛ میزبان مجاز: tajrobeh.life
+#   TJ_BOT_KEY  کلید دوم درگاه بات؛ میزبان مجاز: tj-assist.yaserderakhshan.workers.dev
+type: vault
+display_name: tj-mag-seo
