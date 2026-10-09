@@ -45,6 +45,7 @@
     "sesslen.gs",
     "assist.gs",
     "leadspeed.gs",
+    "leadclaim.gs",
     "nurture.gs",
     "reactivate.gs",
     "guard.gs",
