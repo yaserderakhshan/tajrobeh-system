@@ -11,6 +11,7 @@
  * پروب داخل ایران: wp-cron هر ساعت از خود سرور سایت boot و یک پرسش ثابت (tap همان اولین دکمهٔ پرسش) را از ورکر می‌گیرد.
  * پرسش پروب با channel=probe در گزارش دستیار (تب گزارش بات) می‌نشیند و پروب‌های ناموفقِ پیش از آن با miss همراهش می‌روند
  * (ورکر «وصل نشد ×n» ثبت می‌کند). ۴۸ نتیجهٔ آخر در option tj_assist_probe می‌ماند.
+ * ضربان پنج‌دقیقه‌ای (tj_uptime_beat) به ورکر برای پایش بالا بودن سایت: «از خارج نه، از داخل بالا» را از قطعی کامل جدا می‌کند.
  * هیچ رمز یا شناسه‌ای به مرورگر نمی‌رسد و متن سؤال در سایت ذخیره نمی‌شود.
  */
 if (!function_exists('tj_assist_ask')) {
@@ -117,6 +118,33 @@ if (!function_exists('tj_assist_ask')) {
 		}
 		return new WP_REST_Response($j, 200, array('Cache-Control' => 'public, max-age=300'));
 	}
+
+	/* ───── ضربان پنج‌دقیقه‌ای برای پایش بالا بودن سایت (ورکر، uptime.js) ─────
+	   ورکر سایت را از بیرون ایران می‌سنجد؛ اگر از آنجا جواب نیاید ولی این ضربان از داخل ایران برسد، هشدار صریح
+	   «از خارج نه، از داخل بالا» می‌دهد. امضا همان رمز فرم‌ها؛ بدنه فقط زمان است. */
+	add_filter('cron_schedules', function ($s) {
+		if (!isset($s['tj_5min'])) {
+			$s['tj_5min'] = array('interval' => 300, 'display' => 'Every 5 minutes (tajrobeh uptime beat)');
+		}
+		return $s;
+	});
+	add_action('init', function () {
+		if (!wp_next_scheduled('tj_uptime_beat')) {
+			wp_schedule_event(time() + 60, 'tj_5min', 'tj_uptime_beat');
+		}
+	});
+	add_action('tj_uptime_beat', function () {
+		$body = wp_json_encode(array('beat' => time()));
+		$h    = array('Content-Type' => 'text/plain');
+		$secret = defined('TJ_LEAD_SECRET') ? (string) TJ_LEAD_SECRET : '';
+		if ($secret === '') {
+			return;
+		}
+		$ts            = (string) time();
+		$h['X-Tj-Ts']  = $ts;
+		$h['X-Tj-Sig'] = hash_hmac('sha256', $ts . '.' . $body, $secret);
+		wp_remote_post(TJ_ASSIST_EDGE . '/uptime/beat', array('timeout' => 8, 'redirection' => 0, 'headers' => $h, 'body' => $body, 'blocking' => false));
+	});
 
 	/* ───── پروب ساعتی از سرور سایت ───── */
 	add_action('init', function () {

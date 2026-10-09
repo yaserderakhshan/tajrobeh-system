@@ -243,3 +243,21 @@ test('ورکر: شروع و سلامت', async () => {
   const hg = await (await worker.fetch(new Request('https://w.example.org/assist/health'), env({ GEMINI_API_KEY: 'g' }), ctx())).json();
   assert.equal(hg.gemini, true); assert.equal(JSON.stringify(hg).indexOf('"g"'), -1);
 });
+
+test('رلهٔ /agent: فقط سه اکشن ایجنت به بات می‌رود', async () => {
+  const mod = await import('../src/index.js');
+  const sent = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (u, o) => { sent.push({ u, o }); return new Response(JSON.stringify({ ok: true, data: { n: 1 } }), { status: 200 }); };
+  try {
+    const env = { BOT_URL: 'https://bot.example.invalid/exec', KV: { get: async () => null, put: async () => {} } };
+    const call = (body) => mod.default.fetch(new Request('https://w.example.invalid/agent', { method: 'POST', body: JSON.stringify(body) }), env, { waitUntil() {} });
+    const bad = await call({ action: 'send', key: 'k' });
+    assert.equal(bad.status, 400);
+    const good = await call({ action: 'agent_report', key: 'k', agent: 'weekly', text: 'x' });
+    assert.equal(good.status, 200);
+    assert.equal(sent.length, 1);
+    assert.equal(JSON.parse(sent[0].o.body).api, 1);
+    assert.equal(JSON.parse(sent[0].o.body).action, 'agent_report');
+  } finally { globalThis.fetch = realFetch; }
+});
