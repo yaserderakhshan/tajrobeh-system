@@ -460,7 +460,7 @@ function cmTests() {
     TG_MEM['v168ctx'] = { ther: ['درمانگر الف', 'درمانگر ب', 'درمانگر ج', 'درمانگر د', 'درمانگر نمونهٔ چهار'].map(function (n, i) { return { name: n, active: true, sug: i, tier: 1 }; }), pool: pool, free: free };
     TG_MEM['cm:full'] = { kind: 'تراپی فردی', topic: 'سایر', region: 'داخل ایران', mode: 'آنلاین', ref1: 'درمانگر نمونهٔ چهار' };
     TG_MEM['lm:leads'] = [
-      { row: 2, code: 'L-1272', type: 'مراجع', chat: '9001', owner: 'بات — خودرزرو', status: 'در پیگیری', name: 'نام آزمایشی یک', phone: '09120000001', noans: 0, meetTher: 'درمانگر نمونهٔ چهار', date: '2026-09-20', time: '10:00' },
+      { row: 2, code: 'L-1272', type: 'مراجع', chat: '9001', owner: 'بات — خودرزرو', status: 'در پیگیری', name: 'نام آزمایشی یک', phone: '09120000001', noans: 0, meetTher: 'درمانگر نمونهٔ چهار', date: '2026-09-20', time: '10:00' },  // pii:ok ساختگی
       { row: 3, code: 'L-1300', type: 'مراجع', chat: '', owner: 'پذیرشی', status: 'جدید', name: 'نام آزمایشی دو', phone: '09120000002', noans: 2, date: '2026-10-01', time: '9:00' },  // pii:ok ساختگی
       { row: 4, code: 'L-1301', type: 'مراجع', chat: '', owner: 'پذیرشی', status: 'در پیگیری', name: 'نام آزمایشی سه', phone: '09120000003', noans: 0, date: '2026-10-01', time: '9:00' },  // pii:ok ساختگی
       { row: 5, code: 'L-1302', type: 'مراجع', chat: '', owner: 'پذیرشی', status: 'در پیگیری', name: 'نام تکراری', phone: '0912', date: '2026-10-01', time: '9:00' },
