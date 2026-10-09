@@ -3,7 +3,8 @@ name: متن PR بی اطلاعات شخصی
 # ۱۸ مهر ۱۴۰۵ (تصمیم یاسر): همان قاعده‌های pii-scan و فهرست خصوصی نام‌ها (Secret «PII_NAMES») روی تیتر، توضیح،
 # کامنت‌ها و بازبینی‌های هر PR. مخزن عمومی است و متن PR هم عمومی است. یافته = چک قرمز و وضعیت «متن PR بی اطلاعات شخصی»
 # روی آخرین کامیت PR قرمز می‌شود؛ قرمز یعنی مرج نه. مقدار پیداشده هیچ‌جا چاپ نمی‌شود.
-# امنیت: کد PR checkout نمی‌شود (فقط اسکریپت شاخهٔ اصلی) و متن‌ها از API خوانده می‌شوند، نه از ورودی گردش کار.
+# امنیت: رویدادهای کامنت (با دسترسی بیشتر) فقط اسکریپت شاخهٔ اصلی را می‌خوانند؛ رویداد خود PR اسکریپت همان PR را (PR فورک سکرت ندارد).
+# متن‌ها از API خوانده می‌شوند، نه از ورودی گردش کار، پس متن PR راهی به اجرای دستور ندارد.
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize]
@@ -32,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }}
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.repository.default_branch }}
           sparse-checkout: .github/scripts
       - uses: actions/setup-node@v4
         with:
