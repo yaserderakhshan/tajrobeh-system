@@ -27,7 +27,7 @@ function cmNow_() { return stkNow_(); }
 
 /* ---------------- Drive API ---------------- */
 function cmFetch_(sinceIso) {
-  if (stkDry_()) return TG_MEM['cm:list'] || [];
+  if (stkDry_()) { TG_MEM['cm:fetchN'] = (TG_MEM['cm:fetchN'] || 0) + 1; return TG_MEM['cm:list'] || []; }
   var out = [], tok = '', f = 'nextPageToken,comments(id,content,createdTime,modifiedTime,resolved,deleted,author(displayName),quotedFileContent(value),replies(id,content,createdTime,deleted,author(displayName)))';
   do {
     var url = 'https://www.googleapis.com/drive/v3/files/' + TG_SHEET_ID + '/comments?pageSize=100&includeDeleted=false&fields=' + encodeURIComponent(f) +
@@ -412,20 +412,62 @@ function cmPlanText_(r) {
     (rest.length ? '\n\n<b>بقیه:</b>\n' + rest.slice(0, 40).map(ln).join('\n') + (rest.length > 40 ? '\n… و ' + tgFa_(rest.length - 40) + ' مورد دیگر در تب «' + CM_TAB + '»' : '') : '');
 }
 
+/* v170.23.41 (سهمیهٔ اجرا ۲ از ۳): پیش از هر خواندن شیت یا کامنت، زمان آخرین تغییر فایل هاب پذیرش (DriveApp) با CM_FILE_AT
+   سنجیده می‌شود؛ بی تغییر یعنی برگشت فوری. اگر فایل عوض شده بود، یک درخواست کوچک comments با startModifiedTime می‌پرسد
+   از آخرین اجرای کامل کامنت یا پاسخ تازه‌ای (غیر از پاسخ‌های 🤖 خود بات) آمده یا نه. اجرای کامل فقط با کامنت تازه،
+   باقی‌ماندهٔ بیش از CM_MAX_RUN، درخواست طرح، یا دست‌کم هر CM_SAFE_MIN دقیقه (کامنت باز ۳ روزه و پیش‌نمایش روزانهٔ اصلاح). */
+var CM_SAFE_MIN = 120;
+function cmFileAt_() {
+  if (stkDry_()) { TG_MEM['cm:fileAtN'] = (TG_MEM['cm:fileAtN'] || 0) + 1; return Number(TG_MEM['cm:fileAt'] || 0); }
+  return DriveApp.getFileById(TG_SHEET_ID).getLastUpdated().getTime();
+}
+/** کامنت یا پاسخ تازه‌ای که کار تازه می‌سازد (نه پاسخ خود بات) از sinceMs به بعد */
+function cmNewSince_(list, sinceMs) {
+  var fresh = function (t, c) { return t && new Date(t).getTime() > sinceMs && String(c || '').indexOf(CM_MARK) !== 0; };
+  return (list || []).some(function (c) {
+    if (c.deleted || c.resolved) return false;
+    return fresh(c.createdTime, c.content) || (c.replies || []).some(function (r) { return !r.deleted && fresh(r.createdTime, r.content); });
+  });
+}
+function cmChangedSince_(sinceMs) {
+  var since = sinceMs - 60000;
+  if (stkDry_()) { TG_MEM['cm:checkN'] = (TG_MEM['cm:checkN'] || 0) + 1; return cmNewSince_(TG_MEM['cm:list'] || [], since); }
+  var f = 'nextPageToken,comments(createdTime,content,resolved,deleted,replies(createdTime,content,deleted))', out = [], tok = '';
+  do {
+    var url = 'https://www.googleapis.com/drive/v3/files/' + TG_SHEET_ID + '/comments?pageSize=100&includeDeleted=false&fields=' + encodeURIComponent(f) +
+      '&startModifiedTime=' + encodeURIComponent(new Date(since).toISOString()) + (tok ? '&pageToken=' + encodeURIComponent(tok) : '');
+    var r = UrlFetchApp.fetch(url, { headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() }, muteHttpExceptions: true });
+    if (r.getResponseCode() !== 200) return true;   /* خطا: محتاط، اجرای کامل */
+    var b = JSON.parse(r.getContentText());
+    out = out.concat(b.comments || []); tok = b.nextPageToken || '';
+  } while (tok && out.length < 500);
+  return cmNewSince_(out, since);
+}
+
 /* از tgTick5: هر ۱۵ دقیقه. پیش از «✅ اجرا» فقط یک بار طرح آزمایشی (اگر یک‌بارهٔ انتشار خواسته باشد) */
 function cmTick5_() {
   var now = cmNow_().getTime(), last = Number(stkProp_('CM_AT') || 0);
   if (last && now - last < CM_MIN * 60000 - 30000) return 0;
+  var full = Number(stkProp_('CM_FULL_AT') || 0), must = stkProp_('CM_MORE') === '1' || stkProp_('CM_PLAN_REQ') === '1' || !full || now - full >= CM_SAFE_MIN * 60000;
+  var fileAt = 0; try { fileAt = cmFileAt_(); } catch (eF) { tgErr_('cmFileAt_', eF); }
+  if (!must && fileAt && String(fileAt) === stkProp_('CM_FILE_AT')) { stkProp_('CM_AT', String(now)); return 0; }   /* فایل دست نخورده */
+  if (fileAt) stkProp_('CM_FILE_AT', String(fileAt));
   try { cmFixMaybe_(); } catch (eFx) { tgErr_('cmFixMaybe_', eFx); }   /* v170.21: اصلاح یک‌باره فقط با «اوکی» در تب پیش‌نمایش */
   if (!cmOn_()) {
-    if (stkProp_('CM_PLAN_REQ') !== '1') return 0;
+    if (stkProp_('CM_PLAN_REQ') !== '1') { stkProp_('CM_AT', String(now)); return 0; }
     stkProp_('CM_PLAN_REQ', null); stkProp_('CM_AT', String(now));
     return lmPlanSend_();
   }
   stkProp_('CM_AT', String(now));
+  if (!must) { var ch = true; try { ch = cmChangedSince_(full); } catch (eC) { tgErr_('cmChangedSince_', eC); } if (!ch) return 0; }
   var lock = stkDry_() ? null : LockService.getScriptLock();
   if (lock && !lock.tryLock(1000)) return 0;
-  try { return cmRun_(false, CM_MAX_RUN).applied; }
+  try {
+    stkProp_('CM_FULL_AT', String(now));
+    var r = cmRun_(false, CM_MAX_RUN);
+    stkProp_('CM_MORE', r.rows.length >= CM_MAX_RUN ? '1' : null);
+    return r.applied;
+  }
   catch (e) { tgErr_('cmTick5_', e); return 0; }
   finally { if (lock) { try { lock.releaseLock(); } catch (e2) {} } }
 }
