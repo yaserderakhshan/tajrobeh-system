@@ -14,7 +14,7 @@ const MIN = 4.5;
 mkdirSync(OUT, { recursive: true });
 const src = readFileSync('site/pages/505409-events.html', 'utf8');
 const phLine = src.match(/function liveX\(e\)\{var h='';\n([^\n]*)\n/)[1].trim();   /* برگهٔ زنده ممکن است فشرده (بی خط تازه) باشد */
-const cssAdd = src.match(/\n\.evph\{[^\n]*\n\.evph a\{[^\n]*\n\.evph img\{[^}]*\}/)[0];
+const cssAdd = src.match(/\n\.evph\{[^\n]*\n\.evph a\{[^\n]*\n\.evph img\{[^\n]*\n\.tj2 \[data-g=\"class\"\] \.tb\{[^}]*\}/)[0];   /* گالری و رنگ برچسب «کلاس‌ها» (۴٫۲۹ ← ۵٫۰۱) */
 const ID = 'evl-visual-test-2026';
 
 function patch(html) {
