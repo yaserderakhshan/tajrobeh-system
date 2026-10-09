@@ -48,6 +48,7 @@
     "nurture.gs",
     "reactivate.gs",
     "guard.gs",
+    "changes.gs",
     "uptime.gs"
   ],
   "htmlExtensions": [
