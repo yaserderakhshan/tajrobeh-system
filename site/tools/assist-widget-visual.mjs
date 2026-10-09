@@ -137,9 +137,9 @@ for (const [name, vp] of [['390', { width: 390, height: 844, isMobile: true, has
   await page.waitForTimeout(5500);
   await page.screenshot({ path: join(OUT, `live-${name}-fallback.png`) });
   const a3 = await page.evaluate(audit, MIN);
-  /* ورکر در دسترس نیست (مثل فیلتر workers.dev در ایران): هر سه نشانی بسته؛ پیام «الان به دستیار وصل نمی‌شوم»،
+  /* ورکر در دسترس نیست (مثل فیلتر workers.dev در ایران): هر دو نشانی بسته؛ پیام «الان به دستیار وصل نمی‌شوم»،
      سه دکمهٔ پرسش و «با پذیرش حرف بزنم» باید بیاید، نه «شاید یکی از این‌ها…» */
-  await page.route(/tajrobeh\.life\/(api\/assist|wp-json\/tj\/v1\/assist)|workers\.dev/, (r) => r.abort('failed'));
+  await page.route(/tajrobeh\.life\/wp-json\/tj\/v1\/assist|workers\.dev/, (r) => r.abort('failed'));
   await page.fill('#tjFabAsIn', 'ساعت کاری پذیرش');
   await page.press('#tjFabAsIn', 'Enter');
   await page.waitForTimeout(5000);
@@ -156,7 +156,7 @@ for (const [name, vp] of [['390', { width: 390, height: 844, isMobile: true, has
   if (off.miss !== '1') fails.push(`${name}px وصل‌نشدن: شمار وصل‌نشدن ثبت نشد (${off.miss || 'خالی'})`);
   await page.screenshot({ path: join(OUT, `live-${name}-offline.png`) });
   const a4 = await page.evaluate(audit, MIN);
-  await page.unroute(/tajrobeh\.life\/(api\/assist|wp-json\/tj\/v1\/assist)|workers\.dev/);
+  await page.unroute(/tajrobeh\.life\/wp-json\/tj\/v1\/assist|workers\.dev/);
   for (const [k, a] of [['start', a1], ['answer', a2], ['fallback', a3], ['offline', a4]]) {
     report.push(`${name}px · ${k}: ${a.seen} متن سنجیده شد، ${a.bad.length} زیر ${MIN}${a.ellipsis.length ? ' · «…» در جواب' : ''}`);
     for (const b of a.bad) fails.push(`${name}px ${k}: «${b.text}» ${b.ratio} (${b.fg} روی ${b.bg})`);

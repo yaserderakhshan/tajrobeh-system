@@ -299,13 +299,12 @@
   }
 
   // tj-fab v4: دستیار داخل همین منو، مستقیم از مرورگر به ورکر لبهٔ tj-assist (مسیر سرور وردپرس و اپس‌اسکریپت در کار نیست).
-  // tj-fab v5.3: برای دسترسی از داخل ایران اول نشانی‌های هم‌دامنهٔ سایت: route ورکر (tajrobeh.life/api/assist، وقتی دامنه روی کلادفلر بیاید)
-  // و مسیر سرور سایت به ورکر (/wp-json/tj/v1/assist، اسنیپت 506148)؛ اگر هیچ‌کدام نرسید workers.dev؛
-  // نشانیِ جواب‌داده در همین نشست می‌ماند. اگر هیچ‌کدام در ۴ ثانیه نرسید: «الان به دستیار وصل نمی‌شوم»، سه موضوع نزدیک و «با پذیرش حرف بزنم».
+  // tj-fab v5.4: اول مسیر سرور خود سایت به ورکر (/wp-json/tj/v1/assist، اسنیپت 506148؛ راه اصلی، از داخل ایران هم باز است)،
+  // اگر نرسید workers.dev؛ نشانیِ جواب‌داده در همین نشست می‌ماند. اگر هیچ‌کدام در ۴ ثانیه نرسید: «الان به دستیار وصل نمی‌شوم»، سه موضوع نزدیک و «با پذیرش حرف بزنم».
   // شمار وصل‌نشدن‌ها در نشست می‌ماند و با درخواست موفق بعدی (miss) به ورکر می‌رود تا در گزارش جدا از «جواب نداشت» ثبت شود.
   var askBtn = document.getElementById('tjFabAsk'), as = document.getElementById('tjFabAs');
   if (askBtn && as && window.fetch) {
-    var EDGES = ['https://tajrobeh.life/api', 'https://tajrobeh.life/wp-json/tj/v1', 'https://tj-assist.yaserderakhshan.workers.dev'], BOT = 'https://t.me/tajrobehlife_bot?start=pz-assist', WAIT_MS = 4000;
+    var EDGES = ['https://tajrobeh.life/wp-json/tj/v1', 'https://tj-assist.yaserderakhshan.workers.dev'], BOT = 'https://t.me/tajrobehlife_bot?start=pz-assist', WAIT_MS = 4000;
     /* tj-fab v5.1: دکمهٔ پرسش متنش دقیقاً question همان مورد content/assist/faq.json است و با id جواب می‌گیرد (tap f:<id>)، نه جست‌وجوی دوباره.
        فهرست از /assist/boot ورکر؛ این چهار تا فقط اگر ورکر در دسترس نبود. */
     var QUICK = [{ id: 'start', text: 'چطور تراپی را شروع کنم؟' }, { id: 'price', text: 'هزینهٔ هر جلسه چقدر است؟' }, { id: 'intro', text: 'جلسهٔ معارفه چیست؟' }, { id: 'clinic', text: 'کلینیک حضوری تجربه کجاست؟' }];
