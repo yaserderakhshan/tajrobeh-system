@@ -54,14 +54,15 @@ function lsFresh_(n, sent, acc) {
   var sh = tgSS_().getSheetByName(TG_LEADS), last = sh ? sh.getLastRow() : 0;
   if (last < 2) return [];
   var cc = tgLeadCodeCol_(), from = Math.max(2, last - n + 1), now = new Date(lsNow_());
-  var v = sh.getRange(from, 1, last - from + 1, Math.max(cc, 13)).getValues(), out = [];
+  /* v170.23.41: یک خواندن تمام‌عرض و ساختن لید از همان سطر (tgLeadOfRow_)، نه خواندن دوباره برای هر نامزد */
+  var v = sh.getRange(from, 1, last - from + 1, Math.max(cc, 13, sh.getLastColumn())).getValues(), hm = tgLeadHeadMap_(sh), out = [];
   for (var i = 0; i < v.length; i++) {
     var code = String(v[i][cc - 1] || '').trim();
     if (!code || sent[code] || String(v[i][10] || '').trim() || tgStClosed_(String(v[i][8] || '').trim())) continue;
     var age = tgDutyAge_(v[i][0], v[i][1], now);
     if (age < LS_WAIT_MIN && acc) acc.wait = Math.min(acc.wait, LS_WAIT_MIN - Math.max(0, age));   /* v170.23.26: نوبت خواندن بعدی */
     if (age < LS_WAIT_MIN || age > 24 * 60) continue;
-    var l = tgLeadRead_(from + i); if (l) out.push(l);
+    var l = tgLeadOfRow_(v[i], from + i, hm); if (l) out.push(l);
   }
   return out;
 }
@@ -1073,3 +1074,40 @@ function abQuotaTests() {
   return { pass: pass, fail: fail, text: text.join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'abQuotaTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['سهمیه: پنجرهٔ تماس هر ۳ ساعت (v170.23.40)', 'abQuotaTests']); } catch (eAbq) {}
+
+/* v170.23.41 (سهمیهٔ اجرا ۲ از ۳): کامنت‌های هاب پذیرش فقط با تغییر فایل و کامنت تازه */
+function cmQuotaTests() {
+  var pass = 0, fail = 0, text = [];
+  function ok(t, c, d) { if (c) { pass++; text.push('✅ ' + t); } else { fail++; text.push('❌ ' + t + (d ? ' · ' + d : '')); } }
+  var kD = TG_DRY, kM = TG_MEM, kO = TG_OUTBOX;
+  TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
+  try {
+    var t0 = new Date('2026-10-10T10:00:00+03:30').getTime(), M = 60000;
+    var at = function (min) { TG_MEM['stk:now'] = t0 + min * M; };
+    var iso = function (min) { return new Date(t0 + min * M).toISOString(); };
+    var C = function (id, min, text) { return { id: id, content: text, author: { displayName: 'نمونه' }, createdTime: iso(min), quotedFileContent: { value: '' }, replies: [] }; };
+    TG_MEM['stkp:LM_ON'] = '1'; TG_MEM['lm:leads'] = []; TG_MEM['cm:list'] = [C('k1', -600, 'کامنت قدیمی')]; TG_MEM['cm:fileAt'] = 1000;
+    var fetches = function () { return TG_MEM['cm:fetchN'] || 0; }, checks = function () { return TG_MEM['cm:checkN'] || 0; };
+    at(0); cmTick5_();
+    ok('اجرای اول کامل است و زمان فایل ذخیره می‌شود', fetches() === 1 && TG_MEM['stkp:CM_FILE_AT'] === '1000' && Number(TG_MEM['stkp:CM_FULL_AT']) === t0);
+    at(15); cmTick5_();
+    ok('فایل دست نخورده: برگشت فوری، بی خواندن کامنت', fetches() === 1 && checks() === 0 && TG_MEM['cm:fileAtN'] === 2);
+    TG_MEM['cm:fileAt'] = 2000; at(30); cmTick5_();
+    ok('فایل عوض شده ولی کامنت تازه‌ای نیست: فقط یک پرسش کوچک', fetches() === 1 && checks() === 1 && TG_MEM['stkp:CM_FILE_AT'] === '2000');
+    TG_MEM['cm:list'][0].replies.push({ id: 'r1', content: CM_MARK + ' ثبت شد', createdTime: iso(40) });
+    TG_MEM['cm:fileAt'] = 3000; at(45); cmTick5_();
+    ok('پاسخ خود بات کار تازه نیست', fetches() === 1 && checks() === 2);
+    TG_MEM['cm:list'].push(C('k2', 50, 'کامنت تازهٔ پذیرش'));
+    TG_MEM['cm:fileAt'] = 4000; at(60); cmTick5_();
+    ok('کامنت تازه: اجرای کامل', fetches() === 2 && Number(TG_MEM['stkp:CM_FULL_AT']) === t0 + 60 * M);
+    at(70); ok('فاصلهٔ ۱۵ دقیقه همچنان رعایت می‌شود', cmTick5_() === 0 && TG_MEM['cm:fileAtN'] === 5);
+    TG_MEM['stkp:CM_MORE'] = '1'; at(75); cmTick5_();
+    ok('باقی‌مانده بیش از سقف اجرا: اجرای کامل بی انتظار تغییر', fetches() === 3 && !TG_MEM['stkp:CM_MORE']);
+    at(75 + CM_SAFE_MIN); cmTick5_();
+    ok('ایمنی: دست‌کم هر ۲ ساعت یک اجرای کامل', fetches() === 4);
+    ok('cmNewSince_: فقط کامنت یا پاسخ غیر از بات و بعد از زمان داده‌شده', cmNewSince_([C('a', 10, 'x')], t0) && !cmNewSince_([C('a', -10, 'x')], t0) && !cmNewSince_([C('a', 10, CM_MARK + ' x')], t0) && !cmNewSince_([{ createdTime: iso(10), content: 'x', resolved: true }], t0));
+  } catch (e) { fail++; text.push('❌ خطا: ' + (e && e.stack || e)); }
+  finally { TG_DRY = kD; TG_MEM = kM; TG_OUTBOX = kO; }
+  return { pass: pass, fail: fail, text: text.join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'cmQuotaTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['سهمیه: کامنت‌ها فقط با تغییر فایل (v170.23.41)', 'cmQuotaTests']); } catch (eCmq) {}
