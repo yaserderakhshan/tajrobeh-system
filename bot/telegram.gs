@@ -7369,7 +7369,7 @@ function tgRunTests() {
     } else { fail++; log.push('❌ سطر لید: ' + l1 + ' || ' + l2); }
   })();
 
-  TG_DRY_THER = { name: 'دریا نویدی', row: 4, pool: 'هر دو', chat: '777001', about: '', meet: '' };
+  TG_DRY_THER = { name: 'درمانگر نمونهٔ یک', row: 4, pool: 'هر دو', chat: '777001', about: '', meet: '' };
   run('درمانگر: منو', [P('/start')], ['وقت‌های آزادتان']);
   run('درمانگر: وقت‌های من', [P('🗓 وقت‌های من')], ['<b>معارفه</b>||الان هیچ وقت هفتگی']);
   run('درمانگر: اعلام وقت', [P('➕ اعلام وقت معارفه')], ['سقف||به کدام مراجعان']);
@@ -12397,18 +12397,18 @@ function tgMatchTests() {
   try {
     TG_OUTBOX = []; TG_MEM = {};
     var pm = {};
-    pm[tgNorm_('دریا نویدی')] = { ind: 1 };
+    pm[tgNorm_('درمانگر نمونهٔ یک')] = { ind: 1 };
     pm[tgNorm_('زوج‌کار الف')] = { ind: 2, rel: 1 };
     pm[tgNorm_('فردی‌کار ب')] = { ind: 1 };
     TG_MEM['poolmap'] = pm;
-    var slots = [S('دریا نویدی'), S('زوج‌کار الف'), S('فردی‌کار ب')];
+    var slots = [S('درمانگر نمونهٔ یک'), S('زوج‌کار الف'), S('فردی‌کار ب')];
 
     tgSetVal_('qt', 700, 'rel');
     var r1 = tgPoolFilter_(slots, 700);
     ok('زوج: فقط کسی که زوج می‌بیند پیشنهاد می‌شود', names(r1) === 'زوج‌کار الف');
-    ok('زوج: درمانگر بدون زوج‌درمانی حذف می‌شود', names(r1).indexOf('دریا نویدی') < 0);
+    ok('زوج: درمانگر بدون زوج‌درمانی حذف می‌شود', names(r1).indexOf('درمانگر نمونهٔ یک') < 0);
 
-    var r2 = tgPoolFilter_([S('دریا نویدی'), S('فردی‌کار ب')], 700);
+    var r2 = tgPoolFilter_([S('درمانگر نمونهٔ یک'), S('فردی‌کار ب')], 700);
     ok('زوج: بدون زوج‌کار فهرست خالی می‌ماند، نه پر از آدم نامربوط', r2.length === 0);
 
     tgSetVal_('qt', 701, 'kid');
@@ -12419,7 +12419,7 @@ function tgMatchTests() {
 
     tgSetVal_('qt', 702, 'anx');
     var r3 = tgPoolFilter_(slots, 702);
-    ok('فردی: آبشار اولویت سر جایش است', r3.length === 2 && names(r3).indexOf('دریا نویدی') > -1);
+    ok('فردی: آبشار اولویت سر جایش است', r3.length === 2 && names(r3).indexOf('درمانگر نمونهٔ یک') > -1);
 
     ok('استخرهای قطعی همین چهارتا هستند',
        !!TG_POOL_HARD.rel && !!TG_POOL_HARD.fam && !!TG_POOL_HARD.kid && !!TG_POOL_HARD.psy && !TG_POOL_HARD.ind);
@@ -17096,18 +17096,18 @@ function tgInpTests() {
               { p: 'gandhi', room: '۳', kind: 'بزرگسال', days: 'همه روزها', from: '9', to: '22', status: 'فعال' },
               { p: 'gandhi', room: '۶', kind: 'کودک', days: 'همه روزها', from: '9', to: '22', status: 'فعال' }],
       hours: [
-      { p: 'gandhi', who: 'مینا ساحلی زاده', day: 'شنبه', from: '9', to: '15', room: '۲', open: 'دارد' },
-      { p: 'gandhi', who: 'مینا ساحلی زاده', day: 'یکشنبه', from: '17', to: '22', room: '۳', open: 'دارد', me: 'تأیید شد' },
+      { p: 'gandhi', who: 'نمونه آزمونی زاده', day: 'شنبه', from: '9', to: '15', room: '۲', open: 'دارد' },
+      { p: 'gandhi', who: 'نمونه آزمونی زاده', day: 'یکشنبه', from: '17', to: '22', room: '۳', open: 'دارد', me: 'تأیید شد' },
       { p: 'gandhi', who: 'سارا نمونه‌زاده', day: 'شنبه', from: '17', to: '22', room: '۲', open: 'دارد' },
-      { p: 'gandhi', who: 'سها هاشمی', day: 'شنبه', from: '9', to: '22', room: '۳', open: 'دارد' }] };
-    var keepTher = TG_DRY_THER; TG_DRY_THER = { name: 'مینا ساحلی‌زاده' };
+      { p: 'gandhi', who: 'درمانگر نمونهٔ دو', day: 'شنبه', from: '9', to: '22', room: '۳', open: 'دارد' }] };
+    var keepTher = TG_DRY_THER; TG_DRY_THER = { name: 'نمونه آزمونی‌زاده' };
     TG_OUTBOX = []; tgInpMine_(1, TG_DRY_THER);
     ok('حضوری من: ردیف‌های خودش و وضعیت تأیید', said().indexOf('گاندی، شنبه، اتاق ۲، ۹ تا ۱۵') > -1 && said().indexOf('منتظر تأیید شما') > -1 && said().indexOf('iq:ok') > -1 && said().indexOf('سارا') < 0);
     tgInpQCb_(1, 'ok');
-    ok('همه درست است: تأیید درمانگر', TG_MEM['inpme'] === 'مینا ساحلی‌زاده');
+    ok('همه درست است: تأیید درمانگر', TG_MEM['inpme'] === 'نمونه آزمونی‌زاده');
     ok('قانون: پیش‌فرض از «همه»', tgInpRule_('release_hours', 'x', 'gandhi') === '72' && tgInpRule_('cancel_hours', 'x', '') === '48');
     tgInpQCb_(1, 'cs:24');
-    ok('قانون لغو شخصی درمانگر، بقیه دست نمی‌خورند', tgInpRule_('cancel_hours', 'مینا ساحلی زاده', '') === '24' && tgInpRule_('cancel_hours', 'سها هاشمی', '') === '48');
+    ok('قانون لغو شخصی درمانگر، بقیه دست نمی‌خورند', tgInpRule_('cancel_hours', 'نمونه آزمونی زاده', '') === '24' && tgInpRule_('cancel_hours', 'درمانگر نمونهٔ دو', '') === '48');
     TG_OUTBOX = []; tgInpQCb_(1, 'add');
     ok('ساعت تازه: یک مکان، مستقیم روز', said().indexOf('iq:ad:gandhi:0') > -1);
     tgInpQCb_(1, 'ad:gandhi:0');
@@ -17123,13 +17123,13 @@ function tgInpTests() {
     ok('بی‌اتاق: درخواست می‌رود و فهرست انتظار ثبت می‌شود', said().indexOf('اتاق خالی نیست') > -1 && (TG_MEM['tab:' + TG_INP_DEM] || []).some(function (r) { return r[1] === 'درمانگر' && r[4] === 'عصر و شب'; }));
     TG_OUTBOX = []; tgInpQCb_(1, 'chg:1'); tgInpReqText_(1, TG_DRY_THER, 'سه شنبه ۱۰ تا ۱۲');
     var Q = TG_MEM['tab:' + TG_INP_REQ];
-    ok('تغییر: روز و ساعت تازه و کلید ردیف قبلی', Q[2][5] === 'تغییر' && Q[2][6] === 'سه‌شنبه' && Q[2][7] === '10' && Q[2][10].indexOf('gandhi|میناساحلیزاده|یکشنبه') === 0);
-    TG_MEM['tab:' + TG_INP_HOURS] = [['gandhi', 'مینا ساحلی زاده', 'یکشنبه', '17', '22', '۳', 'دارد', '', '', '', '']];
+    ok('تغییر: روز و ساعت تازه و کلید ردیف قبلی', Q[2][5] === 'تغییر' && Q[2][6] === 'سه‌شنبه' && Q[2][7] === '10' && Q[2][10].indexOf('gandhi|نمونهآزمونیزاده|یکشنبه') === 0);
+    TG_MEM['tab:' + TG_INP_HOURS] = [['gandhi', 'نمونه آزمونی زاده', 'یکشنبه', '17', '22', '۳', 'دارد', '', '', '', '']];
     TG_OUTBOX = []; tgInpVCb_('77', 'y:' + Q[2][0]);
     var H2 = TG_MEM['tab:' + TG_INP_HOURS][0];
     ok('تأیید تغییر: همان ردیف عوض می‌شود', H2[2] === 'سه‌شنبه' && H2[3] === '10' && H2[4] === '12' && H2[8] === 'اصلاح شد');
     TG_OUTBOX = []; tgInpQCb_(1, 'del:0');
-    TG_MEM['tab:' + TG_INP_HOURS].push(['gandhi', 'مینا ساحلی زاده', 'شنبه', '9', '15', '۲', 'دارد', '', '', '', '']);
+    TG_MEM['tab:' + TG_INP_HOURS].push(['gandhi', 'نمونه آزمونی زاده', 'شنبه', '9', '15', '۲', 'دارد', '', '', '', '']);
     tgInpDemand_('درمانگر', 'gandhi', '', 'صبح', 'زهرا نمونه‌نون', 'می‌خواهد اتاق بگیرد');
     var qd = TG_MEM['tab:' + TG_INP_REQ].slice(-1)[0];
     TG_OUTBOX = []; tgInpVCb_('77', 'y:' + qd[0]);
@@ -17140,7 +17140,7 @@ function tgInpTests() {
     TG_OUTBOX = []; tgInpVCb_('77', 'n:' + qo[0]);
     ok('رد پذیرش: وضعیت و خبر به درمانگر', TG_MEM['tab:' + TG_INP_REQ].slice(-1)[0][13] === 'رد شد' && TG_OUTBOX.some(function (x) { return x.chat === '1' && x.text.indexOf('تأیید نکرد') > -1; }));
     TG_OUTBOX = []; tgInpQCb_(1, 'wd:gandhi:2');
-    ok('فهرست انتظار درمانگر', tgInpWaitFor_('gandhi', 'دوشنبه', 18).indexOf('مینا') > -1 && TG_OUTBOX.some(function (x) { return x.chat === '77'; }));
+    ok('فهرست انتظار درمانگر', tgInpWaitFor_('gandhi', 'دوشنبه', 18).indexOf('آزمونی') > -1 && TG_OUTBOX.some(function (x) { return x.chat === '77'; }));
     TG_OUTBOX = []; tgInpList_(5, TG_MEM['inp'].places[0], [], 'جمعه');
     ok('تقاضای مراجع بی‌جواب ثبت می‌شود', (TG_MEM['tab:' + TG_INP_DEM] || []).some(function (r) { return r[1] === 'مراجع' && r[3] === 'جمعه'; }));
     var rep = tgInpReportText_();

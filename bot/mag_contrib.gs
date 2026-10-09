@@ -1051,13 +1051,13 @@ function mcTests() {
   MC_DRY_ROWS = [];
   MC_DRY_EDITORS = [E];
   MC_DRY_PERSON = {};
-  MC_DRY_PERSON[A] = { name: 'آرمان دانش‌پژوه', url: 'https://tajrobeh.life/team/arman-daneshpajouh/', job: 'روان‌درمانگر', nz: '' };
+  MC_DRY_PERSON[A] = { name: 'نویسا نمونه‌پژوه', url: 'https://tajrobeh.life/team/sample-writer/', job: 'روان‌درمانگر', nz: '' };
   MC_DRY_PERSON[E] = { name: 'مدیری آرانمونه', url: '', job: 'سردبیر', nz: '70828' };
-  MC_DRY_PERSON[R] = { name: 'مینا ساحلی‌زاده', url: 'https://tajrobeh.life/team/mina/', job: 'روان‌درمانگر', nz: '' };
+  MC_DRY_PERSON[R] = { name: 'رهاورد آزمونی‌زاده', url: 'https://tajrobeh.life/team/sample-reviewer/', job: 'روان‌درمانگر', nz: '' };
   MC_DRY_INDEX = [
-    { id: 73, title: 'انتقال و انتقال متقابل', link: 'https://tajrobeh.life/mag/transference/', author: 'آرمان دانش‌پژوه', h: ['تعریف', 'انواع انتقال', 'جمع‌بندی'] },
+    { id: 73, title: 'انتقال و انتقال متقابل', link: 'https://tajrobeh.life/mag/transference/', author: 'نویسا نمونه‌پژوه', h: ['تعریف', 'انواع انتقال', 'جمع‌بندی'] },
     { id: 27, title: 'سمپتوم', link: 'https://tajrobeh.life/mag/symptom/', author: 'تحریریهٔ تجربه', h: ['سمپتوم چیست'] },
-    { id: 88, title: 'مطلب مشترک', link: 'https://tajrobeh.life/mag/joint/', author: 'نعیمه رضوان‌پور و آرمان دانش‌پژوه', h: ['یک'] }
+    { id: 88, title: 'مطلب مشترک', link: 'https://tajrobeh.life/mag/joint/', author: 'نگار نمونه‌پور و نویسا نمونه‌پژوه', h: ['یک'] }
   ];
   var out = function () { return TG_OUTBOX.filter(function (x) { return x.kind === 'msg' || x.mc; }); };
   var last = function (chat) { var o = out().filter(function (x) { return x.chat === String(chat) && x.kind === 'msg'; }); return o.length ? o[o.length - 1] : { text: '', markup: null }; };
@@ -1150,10 +1150,10 @@ function mcTests() {
   t('دعوت منقضی', last('9006').text.indexOf('باز نیست') >= 0 && mcGet_(old['کد'])['وضعیت'] === MC_ST.EXP);
 
   // بازبینی
-  var rv = mcAdd_({ 'نوع': MC_T.REV, 'شناسهٔ مطلب': '73', 'عنوان مطلب': 'انتقال و انتقال متقابل', 'نام': 'مینا ساحلی‌زاده', 'chat_id': R, 'نقش': 'بازبین', 'وضعیت': MC_ST.NEW, 'ارجاع': 'R-103', 'چه چیزی ببینید': 'تعریف انتقال متقابل', 'صفحهٔ فرد': 'https://tajrobeh.life/team/mina/' });
+  var rv = mcAdd_({ 'نوع': MC_T.REV, 'شناسهٔ مطلب': '73', 'عنوان مطلب': 'انتقال و انتقال متقابل', 'نام': 'رهاورد آزمونی‌زاده', 'chat_id': R, 'نقش': 'بازبین', 'وضعیت': MC_ST.NEW, 'ارجاع': 'R-103', 'چه چیزی ببینید': 'تعریف انتقال متقابل', 'صفحهٔ فرد': 'https://tajrobeh.life/team/sample-reviewer/' });
   var sent = mcSendReviews();
   t('کارت بازبینی رفت', sent.length === 1 && mcGet_(rv['کد'])['وضعیت'] === MC_ST.INV && kbHas(last(R), 'mc:rv:' + rv['کد'] + ':a') && kbHas(last(R), 'mc:doc:' + rv['کد']));
-  t('متن کارت نام کوچک ندارد', last(R).text.indexOf('مینا') < 0);
+  t('متن کارت نام کوچک ندارد', last(R).text.indexOf('رهاورد') < 0);
   t('کارت چه چیزی ببینید دارد', last(R).text.indexOf('تعریف انتقال متقابل') >= 0);
   cb(R, 'mc:rv:' + rv['کد'] + ':b');
   t('حالت اصلاحات', mcState_(R).s === 'fix');
@@ -1213,9 +1213,9 @@ function mcTests() {
   t('mcRoute_ کد شروع دعوت', mcRoute_('9007', { text: '/start co-nonexist1', from: {} }) === true && last('9007').text.indexOf('باز نیست') >= 0);
   t('mcRoute_ پیام بی‌ربط', mcRoute_('9007', { text: 'سلام', from: {} }) === false);
   MC_DRY_REVIEWS = [['کد', 'مقاله', 'لینک مقاله', 'بازبین', 'رویکرد بازبین', 'بیشتر چه چیزی را ببینید'],
-    ['R-101', 'انتقال', 'https://tajrobeh.life/mag/transference', 'آرمان دانش‌پژوه', '', 'بخش دوم'],
+    ['R-101', 'انتقال', 'https://tajrobeh.life/mag/transference', 'نویسا نمونه‌پژوه', '', 'بخش دوم'],
     ['R-102', 'سمپتوم', 'https://tajrobeh.life/mag/symptom/', 'ناشناس نو', '', 'همه']];
-  MC_DRY_PEOPLE = {}; MC_DRY_PEOPLE[mcNorm_('آرمان دانش‌پژوه')] = { chat: '9001', url: '', job: '' };
+  MC_DRY_PEOPLE = {}; MC_DRY_PEOPLE[mcNorm_('نویسا نمونه‌پژوه')] = { chat: '9001', url: '', job: '' };
   var im = mcImportReviews();
   t('وارد کردن بازبینی‌ها', im.length === 2 && im[1].indexOf('chat_id ندارد') >= 0 && im[0].indexOf('مطلب پیدا نشد') < 0, im.join(' | '));
   t('وارد کردن دوباره تکرار نمی‌سازد', mcImportReviews().length === 0);
