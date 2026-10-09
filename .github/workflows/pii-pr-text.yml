@@ -1,0 +1,46 @@
+name: متن PR بی اطلاعات شخصی
+
+# ۱۸ مهر ۱۴۰۵ (تصمیم یاسر): همان قاعده‌های pii-scan و فهرست خصوصی نام‌ها (Secret «PII_NAMES») روی تیتر، توضیح،
+# کامنت‌ها و بازبینی‌های هر PR. مخزن عمومی است و متن PR هم عمومی است. یافته = چک قرمز و وضعیت «متن PR بی اطلاعات شخصی»
+# روی آخرین کامیت PR قرمز می‌شود؛ قرمز یعنی مرج نه. مقدار پیداشده هیچ‌جا چاپ نمی‌شود.
+# امنیت: کد PR checkout نمی‌شود (فقط اسکریپت شاخهٔ اصلی) و متن‌ها از API خوانده می‌شوند، نه از ورودی گردش کار.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+  issue_comment:
+    types: [created, edited]
+  pull_request_review:
+    types: [submitted, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+  statuses: write
+
+concurrency:
+  group: pii-pr-text-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    if: github.event_name != 'issue_comment' || github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: .github/scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: چک تیتر، توضیح و کامنت‌ها
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          PII_NAMES: ${{ secrets.PII_NAMES }}
+        run: node .github/scripts/pii-pr-text.mjs
