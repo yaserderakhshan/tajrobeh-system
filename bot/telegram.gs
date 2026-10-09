@@ -17348,7 +17348,10 @@ function tgPayNew_(chat) {
   kb.push([{ text: 'بدون درمانگر (مبلغ دلخواه)', callback_data: 'py:t:-' }]);
   return tgSend_(chat, '💶 <b>فاکتور تتر برای مراجع خارج از ایران</b>\n\nبرای کدام درمانگر؟', { inline_keyboard: kb });
 }
+/* v170.23.35 (امنیت، مرور کار ۸): ساخت فاکتور در هر قدم دوباره سنجیده می‌شود؛ پیش از این callback ساختگی py:t از مینی‌اپ (client.act)
+   بی گذشتن از tgPayNew_ فاکتور می‌ساخت و فهرست قیمت درمانگرها را نشان می‌داد. */
 function tgPayNewCb_(chat, a) {
+  if (!tgPayCanCreate_(chat)) { tgDel_('payn', chat); return tgSend_(chat, 'این بخش برای پذیرش است.'); }
   var st = {}; try { st = JSON.parse(tgGetVal_('payn', chat) || '{}'); } catch (e) {}
   if (a[0] === 't') {
     var ps = tgFinTab_('price').rows().filter(function (r) { return String(r[0]).trim(); });
@@ -17365,6 +17368,7 @@ function tgPayNewCb_(chat, a) {
 }
 function tgPayAskName_(chat) { return tgSend_(chat, 'اسم مراجع؟ (برای دفتر مالی؛ اگر نمی‌خواهید «بدون اسم» را بزنید)', { inline_keyboard: [[{ text: 'بدون اسم', callback_data: 'py:skip' }]] }); }
 function tgPayNewText_(chat, text) {
+  if (!tgPayCanCreate_(chat)) { tgDel_('payn', chat); return false; }
   var st = {}; try { st = JSON.parse(tgGetVal_('payn', chat) || '{}'); } catch (e) { tgDel_('payn', chat); return false; }
   if (!st.s || String(text).charAt(0) === '/' || text.indexOf('بازگشت') > -1 || tgIsBtnLike_(text)) { tgDel_('payn', chat); return false; }
   if (st.s === 'amt') {
@@ -17377,6 +17381,7 @@ function tgPayNewText_(chat, text) {
 }
 function tgPayCreate_(chat, st) {
   tgDel_('payn', chat);
+  if (!tgPayCanCreate_(chat)) return tgSend_(chat, 'این بخش برای پذیرش است.');
   if (!(Number(st && st.eur) > 0)) return tgSend_(chat, 'مبلغ فاکتور معلوم نیست؛ فاکتور ساخته نشد. دوباره «' + TG_PAY_BTN + '» را بزنید.');
   var now = tgPayNow_(), L = tgPayLocal_(now);
   var id = 'P' + L.date.slice(2, 10).replace(/\//g, '') + (TG_DRY ? String(TG_MEM['pn'] = (TG_MEM['pn'] || 0) + 1) : Math.random().toString(36).slice(2, 6).toUpperCase());
@@ -17684,6 +17689,15 @@ function tgPayTests() {
     ok('تاریخ شمسی', tgPayJalali_(2026, 3, 21).join('-') === '1405-1-1' && tgPayJalali_(2026, 9, 11).join('-') === '1405-6-20' && tgPayLocal_(Date.UTC(2026, 8, 12, 6, 0)).month === '1405-06');
     TG_OUTBOX = []; tgPayNew_('55');
     ok('فقط پذیرش و یاسر فاکتور می‌سازند', said().indexOf('برای پذیرش') > -1 && !tgGetVal_('payn', '55'));
+    /* v170.23.35: callback و متن ساختگی از غیرپذیرش */
+    TG_OUTBOX = []; tgPayCb_('55', 't:0');
+    ok('callback ساختگی py:t از غیرپذیرش: نه حالت، نه قیمت درمانگر', !tgGetVal_('payn', '55') && said().indexOf('۶۰ یورو') < 0 && said().indexOf('سیمین') < 0);
+    tgSetVal_('payn', '55', JSON.stringify({ s: 'name', th: '', price: 0, eur: 60 }));
+    ok('حالت جعلی در کش هم فاکتور نمی‌سازد', tgPayNewText_('55', 'نام') === false && !(TG_MEM['fin:inv'] || []).length);
+    tgSetVal_('payn', '55', JSON.stringify({ s: 'name', eur: 60 })); tgPayCb_('55', 'skip');
+    ok('«بدون اسم» ساختگی هم فاکتور نمی‌سازد', !(TG_MEM['fin:inv'] || []).length);
+    tgPayCreate_('55', { eur: 60 });
+    ok('tgPayCreate_ مستقیم برای غیرپذیرش رد', !(TG_MEM['fin:inv'] || []).length);
     TG_OUTBOX = []; tgPayNew_('77');
     ok('ساخت: فهرست درمانگرها با قیمت', said().indexOf('py:t:0') > -1 && said().indexOf('۶۰ یورو') > -1 && said().indexOf('py:t:-') > -1);
     TG_OUTBOX = []; tgPayCb_('77', 't:0');
