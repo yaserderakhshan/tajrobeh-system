@@ -7105,7 +7105,6 @@ function tgWatchdog(e) {
   S('migSetupTick_', 'light', typeof migSetupTick_ === 'function' ? migSetupTick_ : null);   /* با MIG_ENABLED خاموش بی‌کار */
   S('migTick_', 'light', typeof migTick_ === 'function' ? migTick_ : null);
   S('ps2FixMaybe_', 'light', typeof ps2FixMaybe_ === 'function' ? ps2FixMaybe_ : null);
-  S('abHourly_', 'light', typeof abHourly_ === 'function' ? abHourly_ : null);   /* v170.23.22: پنجرهٔ تماس و معارفهٔ بی نتیجه */
   S('abDailyMaybe_', 'light', typeof abDailyMaybe_ === 'function' ? abDailyMaybe_ : null);   /* v170.23.21: مبنای ارجاع و اصلاح لیدها، روزی یک بار */
   S('crFixMaybe_', 'light', typeof crFixMaybe_ === 'function' ? crFixMaybe_ : null);   /* v170.23.20: پاک کردن متن لیدهای بحران قدیمی، با «اوکی» Cowork */
   S('ktbRouteMaybe_', 'light', typeof ktbRouteMaybe_ === 'function' ? ktbRouteMaybe_ : null);   /* v170.16: کمپین C-004 */
@@ -7123,6 +7122,7 @@ function tgWatchdog(e) {
     try {
       S('stkHourly_', 'light', typeof stkHourly_ === 'function' ? stkHourly_ : null);   /* v170.2: درخواست‌های متوقف و خلاصهٔ ۹ صبح */
       S('tgSlaTick_', 'light', tgSlaTick_);
+      S('abHourly_', 'light', typeof abHourly_ === 'function' ? abHourly_ : null);   /* v170.23.22: پنجرهٔ تماس و معارفهٔ بی نتیجه. v170.23.40: در همان خواندن مشترک، هر ۳ ساعت ۹ تا ۲۱ */
     } finally { tgLeadsShare_(false); }
   }
   S('tgFollowTick_', 'light', tgFollowTick_);
@@ -21821,9 +21821,11 @@ function tgLeadRead_(row) {
   if (TG_DRY) return TG_DRY_LEAD && TG_DRY_LEAD.row === row ? TG_DRY_LEAD : null;
   const sh = tgSS_().getSheetByName(TG_LEADS);
   if (!sh || !row || row < 2 || row > sh.getLastRow()) return null;
+  return tgLeadOfRow_(sh.getRange(row, 1, 1, sh.getLastColumn()).getValues()[0], row, tgLeadHeadMap_(sh));
+}
+/* v170.23.40 (سهمیهٔ اجرا): همان شیء tgLeadRead_ از سطری که از پیش خوانده شده (مثلاً از tgLeadsRaw_)، بی خواندن دوبارهٔ شیت */
+function tgLeadOfRow_(v, row, hm) {
   const codeCol = tgLeadCodeCol_();
-  const v = sh.getRange(row, 1, 1, sh.getLastColumn()).getValues()[0];
-  const hm = tgLeadHeadMap_(sh);
   const now = new Date();
   const today = Utilities.formatDate(now, TG_TZ, 'yyyy-MM-dd');
   const statusRaw = String(v[8] || '').trim();
