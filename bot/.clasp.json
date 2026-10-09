@@ -50,7 +50,8 @@
     "guard.gs",
     "changes.gs",
     "uptime.gs",
-    "agents.gs"
+    "agents.gs",
+    "evlite.gs"
   ],
   "htmlExtensions": [
     ".html"

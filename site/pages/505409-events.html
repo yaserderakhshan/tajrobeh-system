@@ -922,6 +922,10 @@ main.tj-page{margin-block-start:0}.wp-block-post-content>.tj2.alignfull{margin-t
 .tj2 .dr .lx p{font-size:14px;line-height:2;color:var(--tj-soft)}
 .tj2 .dr .fbk{display:flex;flex-direction:column;gap:8px}
 .tj2 .dr .fbk blockquote{margin:0;border-right:3px solid var(--gc,var(--tj-red));background:var(--tj-sunk);border-radius:12px;padding:10px 14px}
+.evph{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-block:4px 14px}
+.evph a{display:block;border-radius:10px;overflow:hidden;background:var(--tj-sunk)}
+.evph img{display:block;inline-size:100%;block-size:84px;object-fit:cover}
+.tj2 [data-g="class"] .tb{color:#b63942}
 .tj2 .dr .fbk blockquote p{font-size:14px;line-height:2;margin:0 0 4px;color:var(--tj-ink)}
 .tj2 .dr .fbk cite{font-style:normal;font-size:12px;color:var(--tj-mut)}
 .tj2 .dr .fbk cite a{color:var(--tj-red);font-weight:700}
@@ -1179,6 +1183,7 @@ function accText(e){var c=D.C[e.c];
  if(e.a=='pre')return '<b>پیش‌ثبت‌نام باز است.</b>';
  return e._past?'<b>این برنامه برگزار شده است.</b>':'<b>با ثبت‌نام.</b> ظرفیت محدود است.';}
 function liveX(e){var h='';
+ if(e.ph){if(e.ph.length){h+='<div class="evph">';e.ph.forEach(function(p){h+='<a href="'+esc(p.u)+'" target="_blank" rel="noopener"><img src="'+esc(p.t||p.u)+'" alt="'+esc(p.a||'')+'" loading="lazy" width="300" height="200"></a>';});h+='</div>';}}
  if(e.hl)h+='<div class="lx"><h4>نکته‌ها و هایلایت</h4><p>'+esc(e.hl).replace(/\n/g,'<br>')+'</p></div>';
  var ru=String(e.rec||'').split(/\s/)[0];if(/^https?:/.test(ru))h+='<div class="hl"><a href="'+esc(ru)+'" target="_blank" rel="noopener">🎧 ضبط یا ویس جمع‌بندی</a></div>';
  if(e.fb){if(e.fb.length){h+='<div class="fbk"><h4>از زبان شرکت‌کننده‌ها</h4>';e.fb.forEach(function(f){h+='<blockquote>'+(f.text?'<p>'+esc(f.text)+'</p>':'')+'<cite>'+esc(f.name||'یک شرکت‌کننده')+(f.voice?' · <a href="'+esc(f.voice)+'" target="_blank" rel="noopener">شنیدن ویس</a>':'')+'</cite></blockquote>';});h+='</div>';}}

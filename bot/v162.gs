@@ -423,6 +423,7 @@ function tgEvnConfirm_(chat, st) {
 function tgEvNextCode_() {
   var L = tgEvAll_(), max = 2000;
   for (var i = 0; i < L.length; i++) { var m = String(L[i].code || '').match(/^EV-(\d+)$/); if (m && Number(m[1]) > max) max = Number(m[1]); }
+  if (typeof evlMaxCode_ === 'function') { try { max = Math.max(max, evlMaxCode_()); } catch (eL) {} }   /* v170.23.38: کدهای رویداد سبک تکرار نشوند */
   return 'EV-' + (max + 1);
 }
 function tgEvCalId_() { var p = TG_DRY ? '' : (PropertiesService.getScriptProperties().getProperty('TG_EV_CAL') || ''); return p || TG_CAL_PUBLIC[0]; }

@@ -2503,6 +2503,7 @@ function tgPrivate_(m) {
   if (typeof ptRoute_ === 'function' && ptRoute_(m, chat, name, uname)) return;
   /* v170.16: کمپین C-004 (ebi.gs): کدهای ebi، نام و شماره، نوشتن مورد فهرست و ویس، پیش از tgOnPhone_ و کلیدواژه‌ها */
   if (typeof ebiRoute_ === 'function' && ebiRoute_(m, chat, name, uname)) return;
+  if (typeof evlRoute_ === 'function' && evlRoute_(m, chat, name, uname)) return;   /* v170.23.38: رویداد سبک J-07 (evlite.gs)؛ evc- فقط برای کدهای همان تب */
   if (m.text && /^\/start(@\w+)?\s+psyjoin-/.test(m.text) && typeof ps2Join_ === 'function' && ps2Join_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;   /* v170.23.8: اتصال با تأیید مسئول */
   if (m.text && /^\/start(@\w+)?\s+psy(dr)?-/.test(m.text) && typeof tgPsyJoin_ === 'function' && tgPsyJoin_(chat, uname, name, m.text.replace(/^\/start(@\w+)?\s+/, '').trim())) return;
   if (m.text && /^\/start(@\w+)?\s+(psybook|off|voice|psycard)$/.test(m.text)) { var sp0 = m.text.replace(/^\/start(@\w+)?\s+/, '').trim(); if (sp0 === 'psybook') tgPsyBookStart_(chat); else if (sp0 === 'off') tgOffStart_(chat); else if (sp0 === 'voice') tgEnVolunteerStart_(chat); else tgPsyCardStart_(chat); return; }   /* v159: کدهای شروع مینی‌اپ */
@@ -4698,6 +4699,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('re:') === 0 && typeof reCb_ === 'function') return reCb_(chat, data, name, uname);   /* v170.23.14: بازگرداندن مراجعان قدیمی */
   if (data.indexOf('mig:') === 0 && typeof migCb_ === 'function') return migCb_(chat, data);   /* v170.23.6.3: مهاجرت مراجعان به نسخهٔ ۲ */
   if ((data.indexOf('crq:') === 0 || data.indexOf('vnr:') === 0) && typeof chgCb_ === 'function') return chgCb_(chat, data);   /* v170.23.31: درخواست تغییر و اعلان نسخه (changes.gs) */
+  if (data.indexOf('evl:') === 0 && typeof evlCb_ === 'function') return evlCb_(chat, data, name, uname);   /* v170.23.38: رویداد سبک */
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
   if (data.indexOf('ps2:') === 0 && typeof ps2Cb_ === 'function') return ps2Cb_(chat, data);   /* v170.23.8: اتصال روان‌پزشک */   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
@@ -7125,6 +7127,7 @@ function tgWatchdog(e) {
   }
   S('tgFollowTick_', 'light', tgFollowTick_);
   S('grdTick_', 'light', typeof grdTick_ === 'function' ? grdTick_ : null);   /* v170.23.30: نگهبان مهلت‌ها J-04، J-02، J-06 (guard.gs) */
+  S('evlTick_', 'light', typeof evlTick_ === 'function' ? evlTick_ : null);   /* v170.23.38: رویداد سبک: بستن ۴۸ ساعته، یادآوری تأیید */
   S('vnTick_', 'light', typeof vnTick_ === 'function' ? function () { if (typeof grdInHours_ === 'function' && !grdInHours_(Date.now())) return; return vnTick_(); } : null);   /* v170.23.31: اعلان نسخه با «خواندم» (changes.gs) */
   S('agCostTick_', 'light', typeof agCostTick_ === 'function' ? agCostTick_ : null);   /* v170.23.33: خرج ایجنت‌های کنسول، روزی یک بار (agents.gs) */
   /* سنگین: فقط ساعت‌های BG_HEAVY_HOURS */
@@ -11056,7 +11059,7 @@ function tgRolePick_(chat, roles) {
   for (var i = 0; i < roles.length; i++) kb.push([TG_ROLE_BTN[roles[i]] || roles[i]]);
   kb.push([T_ROLE_CLAIM_BTN]);
   if (typeof TG_SJ_BTN !== 'undefined' && roles.length < 2) { kb.push([TG_SJ_BTN]); }
-  if (typeof tgSchOwnerOf_ === 'function' && tgSchOwnerOf_(chat, '')) { kb.push([TG_SJ_DESK]); kb.push([TG_SL_BTN]); kb.push([TG_ALQ_BTN, TG_APQ_BTN]); kb.push([TG_EVN_BTN, TG_EV_BTN_LINK]); }
+  if (typeof tgSchOwnerOf_ === 'function' && tgSchOwnerOf_(chat, '')) { kb.push([TG_SJ_DESK]); kb.push([TG_SL_BTN]); kb.push([TG_ALQ_BTN, TG_APQ_BTN]); kb.push([TG_EVN_BTN, TG_EV_BTN_LINK]); if (typeof EVL_BTN !== 'undefined') kb.push([EVL_BTN]); }
   if (typeof tgCpIsOwner_ === 'function' && tgCpIsOwner_(chat)) kb.push([TG_CP_BTN]);
   return tgSend_(chat, T_ROLE_PICK, { keyboard: kb, resize_keyboard: true });
 }
@@ -13284,7 +13287,7 @@ function tgMagNotifyEditors_(text, markup) {
 
 function tgMagEdMenu_() {
   var pb = typeof PB_BTNS !== 'undefined' ? [[PB_BTNS[0]], [PB_BTNS[1], PB_BTNS[2]]] : [];   /* v167 */
-  return { keyboard: [[TG_MAG_DESK_BTNS[0]], [TG_MAG_DESK_BTNS[1], TG_MAG_DESK_BTNS[2]], [TG_MAG_DESK_BTNS[3], TG_MAG_DESK_BTNS[5]], [TG_MAG_DESK_BTNS[4], TG_EVN_BTN]].concat(pb)
+  return { keyboard: [[TG_MAG_DESK_BTNS[0]], [TG_MAG_DESK_BTNS[1], TG_MAG_DESK_BTNS[2]], [TG_MAG_DESK_BTNS[3], TG_MAG_DESK_BTNS[5]], [TG_MAG_DESK_BTNS[4], TG_EVN_BTN]].concat(typeof EVL_BTN !== 'undefined' ? [[EVL_BTN]] : []).concat(pb)
              .concat(tgRoleRow_()), resize_keyboard: true };
 }
 

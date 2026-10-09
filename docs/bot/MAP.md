@@ -80,19 +80,19 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.37`
+نسخهٔ کد: `v170.23.38`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۰۷۰ | ۲۰۵۵ |
+| `telegram.gs` | ۳۸۰۷۳ | ۲۰۵۵ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
 | `maint.gs` | ۴ | ۱ |
-| `v162.gs` | ۷۹۹ | ۶۴ |
+| `v162.gs` | ۸۰۰ | ۶۴ |
 | `school2.gs` | ۴۳۹ | ۳۲ |
 | `mag_contrib.gs` | ۱۲۴۳ | ۹۷ |
 | `author.gs` | ۱۴۸ | ۱۰ |
@@ -132,6 +132,7 @@
 | `changes.gs` | ۲۶۵ | ۲۸ |
 | `uptime.gs` | ۱۱۲ | ۹ |
 | `agents.gs` | ۲۶۸ | ۲۰ |
+| `evlite.gs` | ۶۹۶ | ۶۰ |
 
 ### کارهای زمان‌دار
 
@@ -155,6 +156,7 @@
 | `vkTick` | `building.gs` | onEdit / دستی | رد |
 | `vxTick` | `voice.gs` | after(پویا) | رد |
 | `ciRunDeferred` | `ci.gs` | at(پویا)، after(5000)، after(60 * 1000) | متوقف نمی‌شود |
+| `evlRun` | `evlite.gs` | after(1000) | متوقف نمی‌شود |
 | `tgPoll` | `telegram.gs` | everyMinutes(1) | متوقف نمی‌شود |
 | `tgRun` | `telegram.gs` | after(60 * 1000)، after(1000) | متوقف نمی‌شود |
 | `tgTick5` | `v168.gs` | everyMinutes(5) | متوقف نمی‌شود |
@@ -419,6 +421,7 @@
 | کنترل تغییر | `chgTests` |
 | پایش سایت | `upTests` |
 | ایجنت‌های کنسول | `agTests` |
+| رویداد سبک J-07 | `evlTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
