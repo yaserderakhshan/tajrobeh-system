@@ -42,6 +42,12 @@ jobs:
       - name: بررسی محلی و همهٔ تست‌ها با دادهٔ ساختگی (و نقشهٔ بات در docs)
         run: node .github/scripts/bot-precheck.mjs
 
+      # v170.23 کار ۸ (۱۸ مهر ۱۴۰۵): مرور امنیتی خودکار فقط روی خط‌های تازهٔ فایل‌های عوض‌شده؛ خطا یعنی مرج نه
+      - name: مرور امنیتی فایل‌های عوض‌شده
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/scripts/bot-sec-review.mjs
+
       # هر PR که کد بات را عوض کند: شمارهٔ نسخه در bot/version.gs بالا برود و یک خط برایش در CHANGELOG.md باشد
       - name: شمارهٔ نسخه و CHANGELOG
         env:
