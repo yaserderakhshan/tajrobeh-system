@@ -1,0 +1,15 @@
+# محیط ابری پایش امنیت. فقط میزبان‌های لازم؛ رمزها در vault و فقط برای میزبان خودشان جایگزین می‌شوند.
+name: tj-security-watch-env
+config:
+  type: cloud
+  networking:
+    type: limited
+    allow_package_managers: false
+    allowed_hosts:
+      - tajrobeh.life
+      - www.tajrobeh.life
+      - rdap.org
+      - "*.identitydigital.services"
+      - api.wordpress.org
+      - www.wordfence.com
+      - tj-assist.yaserderakhshan.workers.dev
