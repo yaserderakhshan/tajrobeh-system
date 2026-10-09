@@ -3,11 +3,13 @@
 //   GET  /assist/boot     جملهٔ شروع، پرسش‌های پرتکرار، موضوع‌ها و جملهٔ حریم خصوصی برای ویجت.
 //   POST /assist/refresh  بات بعد از تأیید دانش و تعویض نمایه صدا می‌زند؛ دقیقه‌ای یک بار داده را از بات می‌گیرد.
 //   GET  /assist/health   نسخهٔ داده و سن آن (بی هیچ محتوا).
+//   POST /uptime/beat     ضربان سرور سایت از داخل ایران برای پایش بالا بودن سایت (uptime.js)، با امضای سرور.
 // داده: خروجی اکشن as_dump بات در KV (کلید dump)، هر ۳۰ دقیقه با cron و با پینگ تازه می‌شود. گزارش‌ها با ctx.waitUntil (اکشن as_log).
 // رمزها فقط secret ورکر: BOT_URL، BOT_KEY (کلید دوم درگاه)، LEAD_SECRET (امضای سرور، همان رمز لید سایت)، GEMINI_API_KEY (اختیاری).
 import { prepare, ask, tap, boot, nearTopics, siteEventsFrom, classified } from './engine.js';
 import { classifyPrompt, CLASSIFY_SCHEMA, faTokens } from './faq.js';
 import FAQ_DATA from '../../../content/assist/faq.json' with { type: 'json' };
+import { upTick, upBeat } from './uptime.js';
 
 const ORIGINS = ['https://tajrobeh.life', 'https://www.tajrobeh.life', 'https://new.tajrobeh.life'];
 const GEM_MODEL = 'gemini-flash-lite-latest';
@@ -87,6 +89,12 @@ export default {
         if (logs.length) ctx.waitUntil(sendLogs(env, logs));
         return json(res, 200, { 'server-timing': 'assist;dur=' + ms + (model ? ', gemini' : '') + ', gem;desc="' + why + '";dur=' + gms });
       }
+      /* ضربان سرور سایت از داخل ایران (اسنیپت 506148، wp-cron)؛ فقط با امضای سرور */
+      if (path === '/uptime/beat' && req.method === 'POST') {
+        const raw = await req.text();
+        if (!(await verify(req, url, raw, env))) return json({ ok: false, error: 'sig' }, 403);
+        await upBeat(env); return json({ ok: true });
+      }
       /* نزدیک‌ترین موضوع‌ها بی گزارش، برای بازگشت سبک ویجت */
       if (path === '/assist/near' && req.method === 'GET') {
         const P = await data(env, ctx); if (!P) return json({ ok: false }, 503);
@@ -97,7 +105,8 @@ export default {
       return json({ ok: false, error: 'internal' }, 500);
     }
   },
-  async scheduled(ev, env, ctx) { ctx.waitUntil(refresh(env, false)); }
+  /* ۱۸ مهر: cron پنج‌دقیقه‌ای پایش بالا بودن سایت (uptime.js)؛ نیم‌ساعتی همان تازه کردن داده */
+  async scheduled(ev, env, ctx) { ctx.waitUntil(ev.cron === '*/5 * * * *' ? upTick(env) : refresh(env, false)); }
 };
 
 /* ───── داده ───── */
