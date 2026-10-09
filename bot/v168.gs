@@ -2293,12 +2293,19 @@ function bgFlush_() {
 /* هر جایی که سطری به لیدها اضافه یا دستی ویرایش شود این را می‌زند؛ tgDutyTick بی آن شیت را نمی‌خواند */
 function bgLeadMark_() { try { bgProp_('BG_LEAD_AT', bgNow_()); } catch (e) {} }
 /* full = باید شیت خوانده شود؛ دلیل برای گزارش */
+/* v170.23.42 (سهمیهٔ اجرا ۳ از ۳): بعد از هر خواندن کامل، موعد بعدی در BG_DUTY_NEXT (۰ یعنی هیچ موعدی) و همین اول سنجیده می‌شود.
+   ۲۱ تا ۹ تهران (با همان شروع ۸) کار واقعی دست‌کم ۱۰ دقیقه فاصله دارد؛ تیک‌های میانی فوری برمی‌گردند. */
+var BG_DUTY_NIGHT_MIN = 10;
+function bgDutyNight_(h) { return h >= 21 || h < 9; }
 function bgDutyPlan_() {
   var now = bgNow_(), h = bgHour_();
   if (h < BG_DUTY_FROM) return { run: false, why: 'شب' };
   var mark = Number(bgProp_('BG_LEAD_AT') || 0), full = Number(bgProp_('BG_DUTY_FULL') || 0);
+  if (full && bgDutyNight_(h) && now - full < BG_DUTY_NIGHT_MIN * 60000 - 30000) return { run: false, why: 'شب، هر ۱۰ دقیقه' };
   if (mark && mark >= full) return { run: true, why: 'لید تازه' };
   if (now - full >= BG_DUTY_SAFE_MIN * 60000) return { run: true, why: 'دورهٔ ایمنی' };
+  var nx = bgProp_('BG_DUTY_NEXT');
+  if (nx !== '') { nx = Number(nx); return nx && now >= nx ? { run: true, why: 'نوبت اقدام' } : { run: false, why: nx ? 'منتظر' : 'بی‌کار' }; }
   var pend = [];
   try { pend = bgDry_() ? (TG_MEM['bg:pend'] || []) : JSON.parse(PropertiesService.getScriptProperties().getProperty('TG_DUTY_PEND') || '[]'); } catch (e) { pend = []; }
   if (!pend.length) return { run: false, why: 'بی‌کار' };
@@ -2308,7 +2315,18 @@ function bgDutyPlan_() {
   if (now - full >= BG_DUTY_FULL_MIN * 60000) return { run: true, why: 'پیگیری در انتظار' };
   return { run: false, why: 'منتظر' };
 }
-function bgDutyDone_(t) { bgProp_('BG_DUTY_FULL', t || bgNow_()); }   /* زمان شروع خواندن، تا لیدی که وسط کار رسید جا نماند */
+function bgDutyDone_(t) { bgProp_('BG_DUTY_FULL', t || bgNow_()); }
+/** موعد بعدی از لیدهای در انتظار (بی خواندن شیت): به نوبت‌دار نرسیده ← شروع نوبت بعدی؛ یادآوری ← t + انتظار؛
+    در انتظار تماس اول ← هر BG_DUTY_FULL_MIN. بی هیچ لید، ۰. */
+function bgDutyNext_(pend, now, slotAt) {
+  var wait = typeof TG_DUTY_WAIT !== 'undefined' ? TG_DUTY_WAIT : 10, nx = 0;
+  var take = function (t) { if (t && (!nx || t < nx)) nx = t; };
+  (pend || []).forEach(function (x) {
+    if (!x.n) take(Math.max(now, slotAt || now));
+    else { if (x.n === 1 && x.t) take(x.t + wait * 60000); take(now + BG_DUTY_FULL_MIN * 60000); }
+  });
+  return nx;
+}   /* زمان شروع خواندن، تا لیدی که وسط کار رسید جا نماند */
 
 /* ───── v170.23.27: گیرکرده‌ها و SLA ───── */
 /* ۹ تا ۲۱ تهران هر ساعت (با tgWatchdog)؛ بیرون از آن هر دو ساعت یک بار */
