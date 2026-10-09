@@ -536,9 +536,52 @@ function tgBoxReply_(chat, th, text, name, role) {
   return r;
 }
 
+/* v170.23.35 (امنیت): خواندن، جواب به نام مرکز و بستن رشته فقط برای تیم (tgV1CanCreate_)؛ «جواب می‌دهم» طرف بیرونی فقط برای رشتهٔ خودش.
+   پیش از این هر کس با callback ساختگی (از مینی‌اپ box.act یا کلاینت) رشته‌ها را می‌خواند و به نام مرکز پیام می‌فرستاد. */
+function tgBoxMineOk_(chat, th) {
+  var list = tgBoxThread_(th);
+  return list.length > 0 && tgChatIn_(String(list[0].chat), chat);
+}
+function secBoxTests() {
+  var pass = 0, fail = 0, text = [];
+  function ok(t, c) { if (c) { pass++; text.push('✅ ' + t); } else { fail++; text.push('❌ ' + t); } }
+  var kD = TG_DRY, kO = TG_OUTBOX, kM = TG_MEM, kRows = tgBoxRows_, kCan = tgV1CanCreate_, kSend = tgBoxSend_, kSt = tgBoxThreadSt_;
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = {};
+  var sent = [], closed = [];
+  try {
+    tgBoxRows_ = function () { return [['M-1', 'TH-001', '501', 'مراجع ساختگی', 'مراجع', 'مرکز', 'متن خصوصی رشته', '', 'باز', '900']]; };
+    tgV1CanCreate_ = function (c) { return String(c) === '900'; };
+    tgBoxSend_ = function (to, t) { sent.push([String(to), t]); };
+    tgBoxThreadSt_ = function (th, st) { closed.push(th); };
+    function said(c) { return TG_OUTBOX.filter(function (x) { return x.chat === String(c); }).map(function (x) { return x.text; }).join('\n'); }
+    tgBoxCb_('666', 'bx:open:TH-001', 'غریبه', '');
+    ok('غریبه رشته را نمی‌خواند', said('666').indexOf('متن خصوصی رشته') < 0 && said('666').indexOf('فقط برای تیم') > -1);
+    tgBoxCb_('666', 'bx:us:TH-001', 'غریبه', '');
+    ok('غریبه حالت جواب به نام مرکز نمی‌گیرد', !tgGetVal_('box', '666'));
+    tgSetVal_('box', '666', JSON.stringify({ step: 'us', thread: 'TH-001' }));
+    tgV1BoxState_('666', 'غریبه', '', 'پیام جعلی');
+    ok('حالت جعلی us هم پیام نمی‌فرستد', sent.length === 0);
+    tgBoxCb_('666', 'bx:close:TH-001', 'غریبه', '');
+    ok('غریبه رشته را نمی‌بندد', closed.length === 0);
+    tgBoxCb_('666', 'bx:re:TH-001', 'غریبه', '');
+    ok('غریبه به رشتهٔ دیگری جواب نمی‌دهد', !tgGetVal_('box', '666'));
+    TG_OUTBOX = [];
+    tgBoxCb_('900', 'bx:open:TH-001', 'تیم', '');
+    ok('تیم رشته را می‌خواند', said('900').indexOf('متن خصوصی رشته') > -1);
+    tgBoxCb_('900', 'bx:us:TH-001', 'تیم', ''); tgV1BoxState_('900', 'تیم', '', 'جواب مرکز');
+    ok('تیم به نام مرکز جواب می‌دهد', sent.length === 1 && sent[0][0] === '501');
+    tgBoxCb_('501', 'bx:re:TH-001', 'مراجع', '');
+    ok('طرف خود رشته «جواب می‌دهم» دارد', /reply/.test(tgGetVal_('box', '501')));
+  } catch (e) { fail++; text.push('❌ خطا: ' + (e && e.message)); }
+  finally { TG_DRY = kD; TG_OUTBOX = kO; TG_MEM = kM; tgBoxRows_ = kRows; tgV1CanCreate_ = kCan; tgBoxSend_ = kSend; tgBoxThreadSt_ = kSt; }
+  return { pass: pass, fail: fail, text: text.join('\n') };
+}
+
 function tgBoxCb_(chat, data, name, role) {
   var p = String(data).split(':');
   var act = p[1], th = p[2];
+  if ((act === 'us' || act === 'close' || act === 'open') && !tgV1CanCreate_(chat, '')) { tgSend_(chat, 'این گزینه فقط برای تیم تجربه است.'); return true; }
+  if (act === 're' && !tgBoxMineOk_(chat, th)) { tgSend_(chat, 'این رشته پیدا نشد.'); return true; }
   if (act === 're') {
     tgSetVal_('box', chat, JSON.stringify({ step: 'reply', thread: th }));
     tgSend_(chat, '✍️ پاسخ‌تان را همین‌جا بنویسید. مستقیم به ما می‌رسد.');
@@ -957,6 +1000,7 @@ function tgV1BoxState_(chat, name, uname, text) {
 
   if (st.step === 'reply') {
     tgSetVal_('box', chat, '');
+    if (!tgBoxMineOk_(chat, st.thread)) { tgSend_(chat, 'این رشته پیدا نشد.'); return true; }   /* v170.23.35 */
     var roles = tgV1Roles_(chat, uname);
     tgBoxReply_(chat, st.thread, String(text), name, roles.join(' · '));
     tgSend_(chat, '✅ رسید. جواب‌تان را به ما رساندم.');
@@ -965,6 +1009,7 @@ function tgV1BoxState_(chat, name, uname, text) {
 
   if (st.step === 'us') {
     tgSetVal_('box', chat, '');
+    if (!tgV1CanCreate_(chat, uname)) { tgSend_(chat, 'این گزینه فقط برای تیم تجربه است.'); return true; }   /* v170.23.35 */
     var list = tgBoxThread_(st.thread);
     if (!list.length) { tgSend_(chat, 'این رشته پیدا نشد.'); return true; }
     tgBoxSend_(list[0].chat, String(text), { thread: st.thread, name: list[0].name, role: list[0].role, owner: String(chat) });
