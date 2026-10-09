@@ -7076,7 +7076,8 @@ function tgWatchdog(e) {
     } finally { tgLeadsShare_(false); }
   }
   S('tgFollowTick_', 'light', tgFollowTick_);
-  S('grdTick_', 'light', typeof grdTick_ === 'function' ? grdTick_ : null);   /* v170.23.30: نگهبان مهلت‌ها J-04، J-02، J-06 (guard.gs) */
+  S('grdTick_', 'light', typeof grdTick_ === 'function' ? grdTick_ : null);
+  S('agCostTick_', 'light', typeof agCostTick_ === 'function' ? agCostTick_ : null);   /* v170.23.33: خرج ایجنت‌های کنسول، روزی یک بار */   /* v170.23.30: نگهبان مهلت‌ها J-04، J-02، J-06 (guard.gs) */
   /* سنگین: فقط ساعت‌های BG_HEAVY_HOURS */
   if (heavyHour) {
     /* v169.1: اگر کار هفتگی سنگین (tgTherWeekly، تا ۲۶۶ ثانیه) همین ساعت رفت، بقیهٔ سنگین‌ها به نوبت بعد می‌رود */

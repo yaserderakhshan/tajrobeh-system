@@ -29,6 +29,7 @@
 | `ci.gs` | مسیر دیپلوی خودکار: کلید یک‌بارمصرف، توقف کارهای زمان‌دار، تست، پایش خطا، اجرای یک‌باره | `ci` |
 | `ebi.gs` | کمپین «پلی‌لیستِ ابی» (C-004، v170.15 به بعد): اکشن `ebi_check` درگاه، کدهای start `ebi…`، ویس درمانگران، تب آینهٔ ثبت‌نام‌ها، راهبران از تنظیمات | `ebi` و `EBI_` |
 | `guard.gs` | نگهبان مهلت‌ها (برد فرآیندها، v170.23.30): لید مدرسه J-04، فهرست انتظار روان‌پزشکی J-02، پروفایل ناقص درمانگر تازه J-06؛ هر ساعت در ۹ تا ۱۸ از `tgWatchdog`، بی هوش مصنوعی؛ هر هشدار یک سطر در «رویدادهای لید»؛ J-01 همان `tgSlaTick_` با `tgSlaWant_` | `grd` |
+| `agents.gs` | ایجنت‌های کنسول Claude، سمت بات (v170.23.33): اکشن‌های درگاه `agent_data` (فقط عدد تجمیعی)، `agent_report` (به ناظر، تیم فنی یا سردبیر)، `seo_log` (تب «تغییرات سئو»)؛ خرج روزانه در «هزینهٔ ایجنت‌ها» و سقف ماهانهٔ ۱۵ دلار؛ جلسهٔ سئو برای هر مطلب تازه. تعریف ایجنت‌ها در `agents/` | `ag` |
 | `version.gs` | شمارهٔ نسخهٔ کد (`TG_CODE_VERSION`) | |
 
 ترتیب اجرای فایل‌ها مهم است و در `bot/.clasp.json` (`filePushOrder`) ثابت شده: اول `Code.gs`، بعد `telegram.gs`.
@@ -79,14 +80,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.23.30`
+نسخهٔ کد: `v170.23.33`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۷۹۵۵ | ۲۰۵۰ |
+| `telegram.gs` | ۳۷۹۵۶ | ۲۰۵۰ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -100,7 +101,7 @@
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۵۷۶ | ۱۲۰ |
+| `publish.gs` | ۱۵۷۸ | ۱۲۰ |
 | `v168.gs` | ۲۴۴۸ | ۱۵۱ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۹ | ۳۴ |
@@ -128,6 +129,7 @@
 | `nurture.gs` | ۲۸۹ | ۳۰ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 | `guard.gs` | ۳۳۰ | ۲۵ |
+| `agents.gs` | ۲۶۸ | ۲۰ |
 
 ### کارهای زمان‌دار
 
@@ -164,6 +166,8 @@
 | `AB_FN_TAB` | «قیف خارج از ایران» | `leadspeed.gs` |
 | `AB_FX_TAB` | «اصلاح دادهٔ لیدها · پیش‌نمایش» | `leadspeed.gs` |
 | `AB_PV_TAB` | «مبنای ارجاع · پیش‌نمایش» | `leadspeed.gs` |
+| `AG_COST_TAB` | «هزینهٔ ایجنت‌ها» | `agents.gs` |
+| `AG_SEO_TAB` | «تغییرات سئو» | `agents.gs` |
 | `AS_IDX_TAB` | «نمایهٔ دانش» | `assist.gs` |
 | `BG_TAB` | «سهمیهٔ اجرا» | `v168.gs` |
 | `CFG_TAB` | «تنظیمات خصوصی بات» | `cfg.gs` |
@@ -216,7 +220,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` `agents.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -407,6 +411,7 @@
 | پیگیری گیرکرده‌ها (v170.23.13) | `nuTests` |
 | بازگرداندن مراجعان قدیمی (v170.23.14) | `reTests` |
 | نگهبان مهلت | `grdTests` |
+| ایجنت‌های کنسول | `agTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)
