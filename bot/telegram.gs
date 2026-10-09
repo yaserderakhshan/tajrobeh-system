@@ -3597,13 +3597,20 @@ function tgSlaTick_() {
       sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(ws) + ' ' + stamp);
       continue;
     }
-    if (stage >= 2) continue;
+    if (stage >= 3) { if (l.code && typeof grdJ01Keep_ === 'function') grdJ01Keep_(l.code, l.row); continue; }
     /* v166.9: تا پیش از این، هر «2» در ساعتِ برچسب مرحلهٔ ۱ (مثل 12:40) مرحلهٔ ۲ خوانده می‌شد و پیگیری دوساعته نمی‌رفت.
        لیدهایی که بیش از TG_SLA_BACKLOG_MIN پیش مرحلهٔ ۱ گرفتند و به همین دلیل گیر ماندند، یک‌جا هشدار نمی‌گیرند (دایجست دارند). */
     if (stage === 1 && l.age > TG_SLA_BACKLOG_MIN) continue;
 
-    const wantStage = l.urgent ? 1 : (l.age >= TG_SLA_SECOND ? 2 : (l.age >= TG_SLA_FIRST ? 1 : 0));
+    /* v170.23.30 (برد فرآیندها J-01): فوری ۳۰ دقیقه، عادی ۲ ساعت ← مسئول لید؛ ۲۴ ساعت بعد ← مسئول پذیرش؛ ۲۴ ساعت بعد ← جمع‌بندی یاسر */
+    const wantStage = tgSlaWant_(l.age, l.urgent);
     if (!wantStage || wantStage <= stage) continue;
+    if (wantStage === 3) {
+      const c3 = l.code || tgLeadCode_(l.row);
+      if (typeof grdJ01Late_ === 'function') grdJ01Late_(c3, l.row, l.name, l.owner);
+      sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(3) + ' ' + stamp);
+      continue;
+    }
     if (wantStage === 2) to = boss;
 
     const duty = tgDeskOnDuty_(to, now);
@@ -3612,18 +3619,19 @@ function tgSlaTick_() {
 
     const head = l.urgent
       ? (l.booked ? '📅 <b>یک معارفه رزرو شد</b>' : '🌍 <b>مراجع خارج از ایران</b>')
-      : (wantStage === 2 ? '⏰ <b>دو ساعت است تماس اول گرفته نشده</b>' : '⏳ <b>نیم ساعت است تماس اول گرفته نشده</b>');
+      : (wantStage === 2 ? '⏰ <b>یک روز از مهلت تماس اول گذشته</b>' : '⏳ <b>دو ساعت است تماس اول گرفته نشده</b>');
     const lr2 = tgLeadRead_(l.row);
     const kind2 = l.urgent ? TG_NK.urgent : TG_NK.task;
     if (lr2) { if (!lr2.code) lr2.code = tgLeadCode_(l.row); tgNotify_(to.chat, kind2, head + '\n\n' + tgLeadCardText_(lr2), { ref: lr2.code, markup: tgLeadKb_(lr2) }); }
     else tgNotify_(to.chat, kind2, head + '\n\n' + tgLeadLine_(l) + (l.phone ? '\n   ' + tgEsc_(l.phone) : ''), { ref: 'لید سطر ' + l.row });
-    if (wantStage === 2) { try { tgTaskFor_({ title: 'تماس اول لید ' + ((lr2 && lr2.code) || l.row), body: 'دو ساعت بی‌تماس مانده', team: 'پذیرش', who: to.name, chat: to.chat, dueDays: 0, link: (lr2 && lr2.code) || ('لید سطر ' + l.row), by: 'SLA' }); } catch (eT) { tgErr_('tgSlaTick_ task', eT); } }
+    try { tgLeadEv_({ code: (lr2 && lr2.code) || l.code || '', row: l.row, actor: 'بات', channel: 'نگهبان مهلت', what: 'هشدار مهلت تماس اول', from: 'مرحلهٔ ' + tgFa_(wantStage), to: to.name || '', note: 'J-01', type: l.type || '' }); } catch (eEv) {}
+    if (wantStage === 2) { try { tgTaskFor_({ title: 'تماس اول لید ' + ((lr2 && lr2.code) || l.row), body: 'یک روز از مهلت تماس اول گذشته', team: 'پذیرش', who: to.name, chat: to.chat, dueDays: 0, link: (lr2 && lr2.code) || ('لید سطر ' + l.row), by: 'SLA' }); } catch (eT) { tgErr_('tgSlaTick_ task', eT); } }
     sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(wantStage) + ' ' + stamp);
   }
 }
 
 /* مرحلهٔ اعلان از ستون «اعلان بات»: فقط «مرحلهٔ N»، نه هر رقمی (برچسب زمان هم رقم دارد) */
-var TG_SLA_BACKLOG_MIN = 48 * 60;
+var TG_SLA_BACKLOG_MIN = 7 * 24 * 60;   /* v170.23.30: زنجیرهٔ تازه تا ۲ روز بعد از مهلت می‌رود */
 function tgSlaStage_(flag) {
   var m = String(flag || '').match(/مرحلهٔ\s*[۱۲۳123]/g) || [], st = 0;
   for (var i = 0; i < m.length; i++) { var d = m[i].slice(-1); var n = (d === '۳' || d === '3') ? 3 : ((d === '۲' || d === '2') ? 2 : 1); if (n > st) st = n; }
@@ -7068,6 +7076,7 @@ function tgWatchdog(e) {
     } finally { tgLeadsShare_(false); }
   }
   S('tgFollowTick_', 'light', tgFollowTick_);
+  S('grdTick_', 'light', typeof grdTick_ === 'function' ? grdTick_ : null);   /* v170.23.30: نگهبان مهلت‌ها J-04، J-02، J-06 (guard.gs) */
   /* سنگین: فقط ساعت‌های BG_HEAVY_HOURS */
   if (heavyHour) {
     /* v169.1: اگر کار هفتگی سنگین (tgTherWeekly، تا ۲۶۶ ثانیه) همین ساعت رفت، بقیهٔ سنگین‌ها به نوبت بعد می‌رود */

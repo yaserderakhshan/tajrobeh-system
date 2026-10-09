@@ -46,7 +46,8 @@
     "assist.gs",
     "leadspeed.gs",
     "nurture.gs",
-    "reactivate.gs"
+    "reactivate.gs",
+    "guard.gs"
   ],
   "htmlExtensions": [
     ".html"

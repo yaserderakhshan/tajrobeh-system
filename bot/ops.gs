@@ -611,6 +611,7 @@ function opsEvening_() {
     if (chat === opsOwnerChat_()) {
       var esc2 = open.filter(function (x) { return x.esc.indexOf('۲') === 0 || x.esc.indexOf('2') === 0; });
       if (esc2.length) t += '\n\n⚠️ <b>بی‌اقدام پاسخگو هم</b>\n' + esc2.slice(0, 10).map(function (x) { return '• ' + tgEsc_(x.title) + ' · ' + tgEsc_(x.owner) + ' ← ' + tgEsc_(x.resp); }).join('\n');
+      try { var gl = typeof grdDigestLines_ === 'function' ? grdDigestLines_() : []; if (gl.length) t += '\n\n⏰ <b>مهلت تماس اول دو روز گذشته</b> (نگهبان مهلت)\n' + gl.slice(0, 10).join('\n'); } catch (eG) {}
     }
     tgSend_(chat, t); n++;
   });
