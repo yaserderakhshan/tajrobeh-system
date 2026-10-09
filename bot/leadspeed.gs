@@ -794,20 +794,59 @@ function abNoansNext_(n) {
 
 /* ───── ستون پنجره، بعد از معارفه، دایجست ───── */
 /** هر ساعت: ستون پنجرهٔ تماس برای لیدهای باز؛ معارفهٔ بی نتیجه ۲۴ ساعت بعد */
+/* v170.23.40 (سهمیهٔ اجرا): abHourly_ پیش از این هر ساعت حدود ۳٫۷ دقیقه می‌برد: ستون پنجره را خانه‌به‌خانه با setValue
+   می‌نوشت و abAfterIntro_ با lsLeads_(400) هر سطر را جدا (tgLeadRead_) از شیت می‌خواند. حالا:
+   - یک خواندن: همان tgLeadsRaw_ که stkHourly_ و tgSlaTick_ در پنجرهٔ tgLeadsShare_ می‌خوانند.
+   - یک نوشتن: کل ستون «پنجرهٔ تماس (تهران)» آخرین ۴۰۰ سطر با یک setValues، فقط اگر چیزی عوض شده.
+   - هر ۳ ساعت و فقط ۹ تا ۲۱ تهران (AB_LAST_RUN در Script Properties؛ بی تریگر تازه). رفتار همان است، فقط کمتر بررسی می‌شود. */
+var AB_EVERY_MS = 3 * 3600000, AB_SLACK_MS = 10 * 60000, AB_LAST_N = 400;
+function abDue_(now) {
+  var h = Number(Utilities.formatDate(new Date(now), 'Asia/Tehran', 'H'));
+  if (h < 9 || h >= 21) return false;
+  var last = Number(lsProp_('AB_LAST_RUN') || 0);
+  return !last || now - last >= AB_EVERY_MS - AB_SLACK_MS;   /* نوبت ساعتی چند دقیقه جابه‌جا می‌شود */
+}
 function abHourly_() {
-  if (lsDry_()) return 0;
-  var sh = tgSS_().getSheetByName(TG_LEADS), last = sh ? sh.getLastRow() : 0; if (last < 2) return 0;
-  var hm = tgLeadHeadMap_(sh), wc = tgLeadCol_(AB_WIN_COL), from = Math.max(2, last - 400);
-  var v = sh.getRange(from, 1, last - from + 1, sh.getLastColumn()).getValues(), n = 0;
+  var now = lsNow_();
+  if (!abDue_(now)) return 0;
+  lsProp_('AB_LAST_RUN', String(now));
+  var opened = !TG_OPEN_MEMO; if (opened) tgLeadsShare_(true);
+  try {
+    var o = tgLeadsRaw_(), n = abWinSync_(o);
+    try { abAfterIntro_(abLeadsOf_(o)); } catch (e) { tgErr_('abAfterIntro_', e); }
+    return n;
+  } finally { if (opened) tgLeadsShare_(false); }
+}
+/** ستون پنجرهٔ تماس آخرین ۴۰۰ سطر از سطرهای خوانده‌شده؛ یک setValues اگر دست‌کم یک خانه عوض شده باشد */
+function abWinSync_(o) {
+  var v = (o && o.v) || [], hm = (o && o.hm) || {}; if (!v.length) return 0;
+  var wi = hm[AB_WIN_COL];
+  if (wi === undefined && !lsDry_()) { var c = tgLeadCol_(AB_WIN_COL); wi = c ? c - 1 : undefined; }
+  if (wi === undefined) return 0;
   var g = function (r, h) { var i = hm[h]; return (i === undefined || i < 0 || i >= r.length) ? '' : String(r[i] || '').trim(); };
-  v.forEach(function (r, i) {
-    if (tgStClosed_(g(r, 'وضعیت')) || (!String(r[3] || '').trim() && !String(r[5] || '').trim())) return;
-    var tz = g(r, 'منطقهٔ زمانی') || abTzFromNote_(g(r, 'یادداشت')), best = g(r, 'زمان مناسب') || abBestFromNote_(g(r, 'یادداشت'));
-    var lbl = abWinLabel_(tz, best), cur = wc && r[wc - 1] != null ? String(r[wc - 1]) : '';
-    if (wc && lbl !== cur) { sh.getRange(from + i, wc).setValue(lbl); n++; }
-  });
-  try { abAfterIntro_(); } catch (e) { tgErr_('abAfterIntro_', e); }
+  var from = Math.max(0, v.length - AB_LAST_N), col = [], n = 0;
+  for (var i = from; i < v.length; i++) {
+    var r = v[i], cur = r[wi] != null ? String(r[wi]) : '', val = cur;
+    if (!tgStClosed_(g(r, 'وضعیت')) && (String(r[3] || '').trim() || String(r[5] || '').trim())) {
+      var tz = g(r, 'منطقهٔ زمانی') || abTzFromNote_(g(r, 'یادداشت')), best = g(r, 'زمان مناسب') || abBestFromNote_(g(r, 'یادداشت'));
+      val = abWinLabel_(tz, best);
+      if (val !== cur) { n++; r[wi] = val; }
+    }
+    col.push([val]);
+  }
+  if (!n) return 0;
+  if (lsDry_()) { (TG_MEM['ab:winwrites'] = TG_MEM['ab:winwrites'] || []).push({ row: from + 2, col: wi + 1, n: col.length }); return n; }
+  tgSS_().getSheetByName(TG_LEADS).getRange(from + 2, wi + 1, col.length, 1).setValues(col);
   return n;
+}
+/** همان شیء tgLeadRead_ برای آخرین ۴۰۰ سطر، از همان خواندن مشترک */
+function abLeadsOf_(o) {
+  if (lsDry_() && TG_MEM['ls:leads']) return TG_MEM['ls:leads'];
+  var v = (o && o.v) || [], out = [];
+  for (var i = Math.max(0, v.length - AB_LAST_N); i < v.length; i++) {
+    try { var l = tgLeadOfRow_(v[i], i + 2, o.hm || {}); if (l && (l.name || l.phone)) out.push(l); } catch (e) {}
+  }
+  return out;
 }
 /** «معارفه رزرو شد» بی‌تاریخ یا گذشته و بی نتیجه */
 function abIntroGaps_(list, today, nowMs) {
@@ -820,9 +859,9 @@ function abIntroGaps_(list, today, nowMs) {
   }).filter(Boolean);
 }
 /** ۲۴ ساعت بعد از معارفهٔ بی نتیجه: یک بار پرسش از درمانگر و کارت پذیرش */
-function abAfterIntro_() {
+function abAfterIntro_(leads) {
   var day = lsDay_(), now = lsNow_(), asked = lsJson_('AB_ASKED', {}), ch = false;
-  abIntroGaps_(lsLeads_(400), day, now).forEach(function (x) {
+  abIntroGaps_(leads || lsLeads_(AB_LAST_N), day, now).forEach(function (x) {
     var l = x.l, d = String(l.meetDate || '').slice(0, 10); if (!l.code || asked[l.code]) return;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || now - new Date(d + 'T23:59:00+03:30').getTime() < 0) return;
     asked[l.code] = day; ch = true;
@@ -1000,3 +1039,37 @@ function abTests3() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'abTests3'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['لیدهای خارج · قیف هفتگی (v170.23.23)', 'abTests3']); } catch (eAb3) {}
+
+/* v170.23.40 (سهمیهٔ اجرا): abHourly_ هر ۳ ساعت در ۹ تا ۲۱، یک خواندن مشترک و یک setValues */
+function abQuotaTests() {
+  var pass = 0, fail = 0, text = [];
+  function ok(t, c, d) { if (c) { pass++; text.push('✅ ' + t); } else { fail++; text.push('❌ ' + t + (d ? ' · ' + d : '')); } }
+  var kD = TG_DRY, kM = TG_MEM, kO = TG_OUTBOX, kMemo = TG_OPEN_MEMO;
+  TG_DRY = true; TG_MEM = {}; TG_OUTBOX = []; TG_OPEN_MEMO = null;
+  try {
+    var T = function (hm) { return new Date('2026-10-10T' + hm + ':00+03:30').getTime(); };
+    var hm = { 'وضعیت': 8, 'منطقهٔ زمانی': 38, 'زمان مناسب': 39 }; hm[AB_WIN_COL] = 40;
+    var row = function (name, tz, win) { var r = []; for (var i = 0; i < 41; i++) r.push(''); r[3] = name; r[8] = 'جدید'; r[36] = 'L-' + name.length; r[38] = tz; r[39] = 'شب'; r[40] = win || ''; return r; };
+    TG_MEM['openrows'] = { v: [row('الف', 'Europe/Berlin'), row('ب', 'Europe/Berlin'), row('', ''), row('د', 'Europe/Berlin', 'قدیمی')], hm: hm };
+    TG_MEM['ls:now'] = T('08:30');
+    ok('پیش از ۹ تهران اجرا نمی‌شود و شیت خوانده نمی‌شود', abHourly_() === 0 && !TG_MEM['openrows:reads']);
+    TG_MEM['ls:now'] = T('10:00');
+    var n = abHourly_();
+    ok('اجرای اول: یک خواندن و یک نوشتن دسته‌ای برای ۳ خانهٔ عوض‌شده', n === 3 && TG_MEM['openrows:reads'] === 1 && (TG_MEM['ab:winwrites'] || []).length === 1 && TG_MEM['ab:winwrites'][0].n === 4 && TG_MEM['ab:winwrites'][0].row === 2);
+    ok('زمان آخرین اجرا در Properties', Number(TG_MEM['lsp:AB_LAST_RUN']) === T('10:00'));
+    TG_MEM['ls:now'] = T('11:00');
+    ok('یک ساعت بعد اجرا نمی‌شود', abHourly_() === 0 && TG_MEM['openrows:reads'] === 1);
+    TG_MEM['ls:now'] = T('12:55');
+    ok('حدود ۳ ساعت بعد: اجرا، ولی بی تغییر یعنی بی نوشتن', abHourly_() === 0 && TG_MEM['openrows:reads'] === 2 && TG_MEM['ab:winwrites'].length === 1);
+    TG_MEM['lsp:AB_LAST_RUN'] = ''; TG_MEM['ls:now'] = T('21:10');
+    ok('بعد از ۲۱ تهران اجرا نمی‌شود', abHourly_() === 0);
+    TG_MEM['lsp:AB_LAST_RUN'] = ''; TG_MEM['ls:now'] = T('15:00'); TG_MEM['openrows:reads'] = 0;
+    tgLeadsShare_(true); tgLeadsRaw_(); abHourly_(); tgLeadsShare_(false);
+    ok('در پنجرهٔ مشترک tgLeadsShare_ شیت لیدها دوباره خوانده نمی‌شود', TG_MEM['openrows:reads'] === 1);
+    var L = abLeadsOf_(TG_MEM['openrows']);
+    ok('لیدهای معارفه از همان سطرها، بی خواندن سطر به سطر', L.length === 3 && L[0].row === 2 && L[0].code === 'L-3' && L[2].row === 5, JSON.stringify(L.map(function (x) { return [x.row, x.code]; })));
+  } catch (e) { fail++; text.push('❌ خطا: ' + (e && e.stack || e)); }
+  finally { TG_DRY = kD; TG_MEM = kM; TG_OUTBOX = kO; TG_OPEN_MEMO = kMemo; }
+  return { pass: pass, fail: fail, text: text.join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'abQuotaTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['سهمیه: پنجرهٔ تماس هر ۳ ساعت (v170.23.40)', 'abQuotaTests']); } catch (eAbq) {}
