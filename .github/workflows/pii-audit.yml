@@ -1,0 +1,28 @@
+name: بازرسی اطلاعات شخصی
+
+# بازرسی کامل مخزن عمومی (درخت فعلی و کل تاریخچه) با همان قاعده‌های pii-scan و نام‌های PII_NAMES. هیچ مقداری چاپ نمی‌شود.
+# اجرای دستی، و هر دوشنبه ساعت ۰۷:۴۰ تهران. فقط گزارش می‌دهد و قرمز نمی‌شود؛ PR تازه را همان «چک رمز» می‌سنجد.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '10 4 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: بازرسی
+        env:
+          PII_NAMES: ${{ secrets.PII_NAMES }}
+        run: node .github/scripts/pii-audit.mjs > /dev/null
