@@ -61,11 +61,12 @@ var CFG_NOTE = {
   CM_FIX_CALL: 'کد لیدهای وضعیت مبهم برای کار «بررسی تلفنی وضعیت» پذیرش: ["کد لید", …] (JSON، اختیاری؛ v170.23.4)',
   PSY_WELCOME: 'متن کامل پیام خوشامد روان‌پزشک با دکمهٔ «تکمیل اطلاعات» (نام‌ها فقط اینجا؛ v170.23.9؛ خالی = خوشامد نمی‌رود)',
   PSY_NATIONAL_NET: '«بله» در روزهای اینترنت ملی: لینک‌های ویزیت به بستر جایگزین (الوکام یا اسکای‌روم) می‌رود (v170.23.9)',
+  LEAD_SLA: 'قول تماس اول لید (JSON، دقیقه): {"first":15,"remind":10,"claim":15,"morningClaim":30}؛ خالی یعنی همین (v170.23.44، تصمیم D17)',
   PSY_FIRST_MIN: 'مدت ویزیت اول روان‌پزشکی به دقیقه، بین ۳۰ و ۴۰ (v170.23.9؛ پیش‌فرض ۴۰)',
   PSY_FOLLOW_MIN: 'مدت ویزیت پیگیری روان‌پزشکی به دقیقه (v170.23.9؛ پیش‌فرض ۲۰)'
 };
 /* کلیدهایی که خالی بودنشان مجاز است (جایگزین دارند) */
-var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'MIG_HUB', 'MIG_ENABLED', 'MIG_CHECKLIST', 'MIG_INVITE_TEXT', 'MIG_V2_LOGIN_URL', 'MIG_V2DEV_MSG', 'GEMINI_PAID', 'PSY_WELCOME', 'PSY_NATIONAL_NET', 'PSY_FIRST_MIN', 'PSY_FOLLOW_MIN', 'ASSIST_ENABLED', 'ASSIST_MODE', 'ASSIST_GEMINI_PAID', 'ASSIST_MATCH_MIN', 'ASSIST_RATE', 'ASSIST_KB_TEAMS', 'ASSIST_TOOLS', 'ASSIST_WEEKLY', 'ASSIST_REWRITE', 'ASSIST_GEMINI_DAILY', 'ASSIST_GEMINI_DRAFT', 'ASSIST_IDX_MIN', 'ASSIST_EDGE_URL', 'LEAD_SPEED_ENABLED', 'LEAD_SCORE_WEIGHTS', 'NURTURE_ENABLED', 'NURTURE_1', 'NURTURE_2', 'NURTURE_3', 'NURTURE_INTRO_1', 'NURTURE_INTRO_2', 'NURTURE_INTRO_3', 'REACTIVATE_ENABLED', 'REACTIVATE_TEXT', 'EVL_APPROVER'];
+var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'MIG_HUB', 'MIG_ENABLED', 'MIG_CHECKLIST', 'MIG_INVITE_TEXT', 'MIG_V2_LOGIN_URL', 'MIG_V2DEV_MSG', 'GEMINI_PAID', 'PSY_WELCOME', 'PSY_NATIONAL_NET', 'PSY_FIRST_MIN', 'PSY_FOLLOW_MIN', 'ASSIST_ENABLED', 'ASSIST_MODE', 'ASSIST_GEMINI_PAID', 'ASSIST_MATCH_MIN', 'ASSIST_RATE', 'ASSIST_KB_TEAMS', 'ASSIST_TOOLS', 'ASSIST_WEEKLY', 'ASSIST_REWRITE', 'ASSIST_GEMINI_DAILY', 'ASSIST_GEMINI_DRAFT', 'ASSIST_IDX_MIN', 'ASSIST_EDGE_URL', 'LEAD_SPEED_ENABLED', 'LEAD_SCORE_WEIGHTS', 'NURTURE_ENABLED', 'NURTURE_1', 'NURTURE_2', 'NURTURE_3', 'NURTURE_INTRO_1', 'NURTURE_INTRO_2', 'NURTURE_INTRO_3', 'REACTIVATE_ENABLED', 'REACTIVATE_TEXT', 'EVL_APPROVER', 'LEAD_SLA'];
 /* v170.9: کلیدهای لازمی که در Property خالی‌اند (فقط نام). روی دیپلوی آزمایشی سنجیده می‌شود؛ هر کدام خالی = انتشار متوقف */
 function cfgMissing_() {
   var o = cfgPropGet_();
