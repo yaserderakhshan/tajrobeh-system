@@ -18,7 +18,17 @@
  * صف tgDutyRun_ (TG_DUTY_PEND) همان می‌ماند و هر سطرش با lcStep_ پیش می‌رود.
  */
 var LC_PROMISE_MIN = 15, LC_MORNING_MIN = 30, LC_MORNING_H = 9, LC_KEEP_DAYS = 3;
-var LC_EV = { start: 'نوبت · واگذاری', pass: 'نوبت · به نفر بعدی', claim: 'نوبت · برداشته شد', first: 'نوبت · اولین تماس' };
+/* v170.23.44 (تصمیم D17): قول تماس اول. عددها در «تنظیمات خصوصی بات»، کلید LEAD_SLA (JSON)؛ خالی یعنی همین پیش‌فرض‌ها:
+   first مهلت تماس اول از شروع ساعت کاری صاحب لید (۱۵)، remind یادآوری به صاحب لید (۱۰)، claim مهلت «برداشتم» (۱۵)، morningClaim مهلت «برداشتم» صبح (۳۰) */
+cfg_('LEAD_SLA', '');
+function lcCfg_() {
+  var c = lcDry_() && TG_MEM['lc:cfg'] ? TG_MEM['lc:cfg'] : cfg_('LEAD_SLA', '');
+  if (typeof c === 'string') { try { c = c ? JSON.parse(c) : {}; } catch (e) { c = {}; } }
+  c = c || {};
+  var n = function (v, d) { v = Number(v); return v > 0 && v < 1440 ? v : d; };
+  return { first: n(c.first, 15), remind: n(c.remind, 10), claim: n(c.claim, LC_PROMISE_MIN), morning: n(c.morningClaim, LC_MORNING_MIN) };
+}
+var LC_EV = { start: 'نوبت · واگذاری', pass: 'نوبت · به نفر بعدی', claim: 'نوبت · برداشته شد', first: 'نوبت · اولین تماس', remind: 'نوبت · یادآوری تماس اول', late: 'نوبت · مهلت تماس اول گذشت' };
 var LC_IN = 'در قول', LC_OUT = 'بیرون از قول';
 
 function lcDry_() { return typeof TG_DRY !== 'undefined' && TG_DRY; }
@@ -122,7 +132,7 @@ function lcOwnerSet_(l, name, why) {
 function lcCard_(code, st, p, now, pr, l, first) {
   st.t = now; st.pr = pr; st.to = p.name; st.ch = String(p.chat);
   st.tr = (st.tr || []).concat([p.name]);
-  var head = first && pr === LC_MORNING_MIN ? '🌅 <b>لید شب، نوبت صبح شماست</b>' : (first ? '🔔 <b>لید تازه، نوبت شماست</b>' : '🔁 <b>لید به شما رسید</b>');
+  var head = first && st.at ? '🌅 <b>لید بیرون از ساعت کاری، حالا نوبت شماست</b>' : (first ? '🔔 <b>لید تازه، نوبت شماست</b>' : '🔁 <b>لید به شما رسید</b>');
   tgSend_(st.ch, head + '\nقول پاسخ: ' + tgFa_(pr) + ' دقیقه. با «برداشتم» لید مال شما می‌شود؛ اگر برنداشتید، به نفر بعدی می‌رود.\n\n' + tgLeadCardText_(l), lcKb_(code));
   lcOwnerSet_(l, p.name, first ? 'نوبت پذیرش' : 'نوبت پذیرش · نفر بعدی');
   if (!lcDry_()) {
@@ -142,52 +152,110 @@ function lcNext_(st, now) {
   return null;
 }
 function lcPass_(code, st, l, now, why) {
-  var from = st.to || '', boss = lcBoss_(), nx = lcNext_(st, now), waited = Math.round((now - (st.s || st.t || now)) / 60000);
-  if (why === 'مهلت' && boss && lcNorm_(boss.name) !== lcNorm_(from)) {
+  var from = st.to || '', boss = lcBoss_(), nx = lcNext_(st, now), waited = Math.round((now - (st.s || st.t || now)) / 60000), cf = lcCfg_();
+  var told = st.lt && now - st.lt < 5 * 60000;   /* خبر «مهلت تماس اول» همین الان رفته؛ پیام دوم به سرپرست نه */
+  if (why === 'مهلت' && boss && lcNorm_(boss.name) !== lcNorm_(from) && !told) {
     tgNotify_(boss.chat, TG_NK.task, '⏱ <b>لید ' + tgEsc_(code) + ' در قول برداشته نشد</b>\n' + tgFa_(waited) + ' دقیقه از شروع قول گذشته و «برداشتم» نخورد. ' +
       (nx ? 'به نفر بعدی رسید: ' + tgEsc_(nx.name) + '.' : 'کس دیگری در ساعت کاری نیست؛ لطفاً خودتان پیگیری کنید.') + '\n\n' + tgLeadLine_(l), { ref: code });
   }
   if (nx) {
-    lcCard_(code, st, nx, now, LC_PROMISE_MIN, l, false);
+    lcCard_(code, st, nx, now, cf.claim, l, false);
     tgLeadEv_({ code: code, row: l.row, actor: 'بات', channel: 'نوبت پذیرش', what: LC_EV.pass, from: from, to: nx.name, note: why, type: l.type || '' });
-  } else { st.t = now; st.pr = LC_PROMISE_MIN * 2; }
+  } else { st.t = now; st.pr = cf.claim * 2; }
   lcSave_(code, st);
   return nx;
 }
-function lcClaim_(code, st, name, now, l) {
+function lcClaim_(code, st, name, now, l, chat) {
   if (st.c) return false;
-  st.c = now; st.cb = name;
-  var mins = Math.max(0, Math.round((now - (st.s || now)) / 60000)), inP = st.s ? (now - st.s) <= (st.p0 || LC_PROMISE_MIN) * 60000 : true;
+  st.c = now; st.cb = name; if (chat) st.cbc = String(chat);
+  var mins = Math.max(0, Math.round((now - (st.s || now)) / 60000)), inP = st.s ? (now - st.s) <= (st.p0 || lcCfg_().claim) * 60000 : true;
   tgLeadEv_({ code: code, row: l ? l.row : '', actor: name, channel: 'نوبت پذیرش', what: LC_EV.claim, from: '', to: mins, note: inP ? LC_IN : LC_OUT, type: (l && l.type) || '' });
   if (l) lcOwnerSet_(l, name, 'برداشتم');
   lcSave_(code, st);
   return true;
 }
-/** اولین تماس (دکمهٔ «تماس گرفتم» کارت، نتیجهٔ تماس کارت لید، یا ستون تماس شیت) */
+/* ───── قول تماس اول (D17) ───── */
+/** شمار روزانه برای خلاصهٔ شبانه: LC_DAY:<روز شروع قول> = {ok، miss، m: دقیقه‌ها} */
+function lcDayAdd_(cs, fn) {
+  var k = 'LC_DAY:' + Utilities.formatDate(new Date(cs || lcNow_()), TG_TZ, 'yyyy-MM-dd'), d;
+  try { d = JSON.parse(lcProp_(k) || '{}') || {}; } catch (e) { d = {}; }
+  d.ok = d.ok || 0; d.miss = d.miss || 0; d.m = d.m || [];
+  fn(d); d.m = d.m.slice(-300);
+  lcProp_(k, JSON.stringify(d));
+}
+/** اولین تماس (دکمهٔ «تماس گرفتم» کارت، نتیجهٔ تماس کارت لید، یا ستون تماس شیت). دقیقه از شروع قول (cs) */
 function lcOnContact_(code, name) {
   var st = lcSt_(code);
   if (!st || st.f || !(st.a || st.s)) return false;
-  var now = lcNow_();
+  var now = lcNow_(), cs = st.cs || st.a || st.s, cf = lcCfg_();
   st.f = now;
-  var mins = Math.max(0, Math.round((now - (st.a || st.s)) / 60000));
-  tgLeadEv_({ code: code, actor: name || 'شیت', channel: 'نوبت پذیرش', what: LC_EV.first, from: '', to: mins, note: '' });
+  var mins = Math.max(0, Math.round((now - cs) / 60000)), inP = now - cs <= cf.first * 60000;
+  tgLeadEv_({ code: code, actor: name || 'شیت', channel: 'نوبت پذیرش', what: LC_EV.first, from: '', to: mins, note: inP ? LC_IN : LC_OUT });
+  lcDayAdd_(cs, function (d) { d.m.push(mins); if (inP) d.ok++; else if (!st.lt) d.miss++; });
   lcSave_(code, st);
   return true;
 }
 function lcNow_() { return lcDry_() && TG_MEM['lc:now'] ? Number(TG_MEM['lc:now']) : Date.now(); }
-function lcAckText_(now, m) {
-  var d0 = Utilities.formatDate(new Date(now), TG_TZ, 'yyyy-MM-dd'), d1 = Utilities.formatDate(new Date(now + 86400000), TG_TZ, 'yyyy-MM-dd'), dm = Utilities.formatDate(new Date(m), TG_TZ, 'yyyy-MM-dd');
-  var word = dm === d0 ? 'امروز' : (dm === d1 ? 'فردا' : TG_DUTY_DAYS[tgDutyDayIdx_(new Date(m))]);
-  return 'پیامتان رسید؛ ' + word + ' از ساعت ' + tgFa_(LC_MORNING_H) + ' پذیرش با شما تماس می‌گیرد.';
+/** لید خارج: «زمان مناسب» مراجع؛ null برای لید داخل */
+function lcAbroad_(l) {
+  if (!l || String(l.region || '').indexOf('خارج') < 0) return null;
+  var tz = '', best = '';
+  try { tz = abLeadTz_(l); best = abLeadBest_(l); } catch (e) {}
+  return { tz: tz, best: best };
 }
-
-/** از tgDutyRun_ برای هر لید باز پذیرش؛ true یعنی در صف بماند. x.n: ۰ منتظر صبح، ۱ کارت منتظر برداشت، ۳ برداشته‌شده */
+function lcOk_(p, t, ab) { return lcInHours_(p, t) && (!ab || abInWinNow_(ab.tz, ab.best, t)); }
+/** نخستین لحظه از t که صاحب لید در ساعت کاری است (و برای لید خارج، داخل «زمان مناسب» مراجع)؛ گام ۱۵ دقیقه، تا ۸ روز */
+function lcWorkStart_(p, t, ab) {
+  if (!p) return t;
+  if (lcOk_(p, t, ab)) return t;
+  var q = 900000;
+  for (var x = Math.ceil(t / q) * q; x < t + 8 * 86400000; x += q) if (lcOk_(p, x, ab)) return x;
+  return ab ? lcWorkStart_(p, t, null) : t;   /* بی اشتراک: فقط ساعت کاری صاحب لید */
+}
+function lcHm_(ms, tz) {
+  var d = new Date(ms), h = Number(Utilities.formatDate(d, tz, 'H')), m = Number(Utilities.formatDate(d, tz, 'm'));
+  return m ? tgFa_(('0' + h).slice(-2) + ':' + ('0' + m).slice(-2)) : tgFa_(h);
+}
+/** پیام بیرون از ساعت کاری: «درخواستتان رسید؛ فردا صبح ساعت ۹ تماس می‌گیریم.» (لید خارج: ساعت به وقت خودش) */
+function lcAckText_(now, m, ab) {
+  var tz = ab && ab.tz ? ab.tz : TG_TZ;
+  var d0 = Utilities.formatDate(new Date(now), tz, 'yyyy-MM-dd'), d1 = Utilities.formatDate(new Date(now + 86400000), tz, 'yyyy-MM-dd'), dm = Utilities.formatDate(new Date(m), tz, 'yyyy-MM-dd');
+  var am = Number(Utilities.formatDate(new Date(m), tz, 'H')) < 12;
+  var word = dm === d0 ? 'امروز' : (dm === d1 ? (am ? 'فردا صبح' : 'فردا') : TG_DUTY_DAYS[tgDutyDayIdx_(new Date(m))]);
+  return 'درخواستتان رسید؛ ' + word + ' ساعت ' + lcHm_(m, tz) + (tz !== TG_TZ ? ' به وقت شما' : '') + ' تماس می‌گیریم.';
+}
+/** از tgDutyRun_ برای هر لید باز پذیرش؛ true یعنی در صف بماند. x.n: ۰ منتظر شروع ساعت کاری، ۱ کارت منتظر برداشت، ۳ برداشته‌شده */
 function lcStep_(x, l, now) {
   if (now instanceof Date) now = now.getTime();
-  var code = x.k, st = lcSt_(code) || {};
+  var code = x.k, st = lcSt_(code) || {}, cf = lcCfg_();
   if (!st.a) st.a = x.a || now;
   /* صف پیش از v170.23.43: کارتش رفته بود؛ دوباره کارت و رد نمی‌گیرد و مثل برداشته‌شده تا تماس اول یا پایان مهلت می‌ماند */
   if (!st.s && !st.c && x.n >= 1 && x.t) { st.s = x.t; st.c = x.t; st.cb = x.to || ''; st.legacy = 1; lcSave_(code, st); }
+  var kept = lcStepCore_(x, l, now, code, st, cf);
+  /* هشدارهای قول تماس اول، در هر حالت (برداشته یا نه) تا اولین تماس */
+  if (kept && st.cs && !st.f && !st.legacy) {
+    var e = now - st.cs, changed = false;
+    if (!st.r10 && e >= cf.remind * 60000 && e < cf.first * 60000) {
+      st.r10 = now; changed = true;
+      var hc = st.cbc || st.ch;
+      if (hc) tgNotify_(hc, TG_NK.urgent, '⏰ <b>' + tgFa_(cf.remind) + ' دقیقه از قول تماس اول لید ' + tgEsc_(code) + ' گذشته</b>\nتا ' + tgFa_(cf.first) + ' دقیقه تماس بگیرید و نتیجه را از کارت ثبت کنید.', { ref: code });
+      tgLeadEv_({ code: code, row: l.row, actor: 'بات', channel: 'نوبت پذیرش', what: LC_EV.remind, from: '', to: cf.remind, note: '', type: l.type || '' });
+    }
+    if (!st.lt && e >= cf.first * 60000) {
+      st.lt = now; st.r10 = st.r10 || now; changed = true;
+      var b = lcBoss_();
+      if (b) tgNotify_(b.chat, TG_NK.task, '⏱ <b>مهلت ' + tgFa_(cf.first) + ' دقیقه‌ای تماس اول لید ' + tgEsc_(code) + ' گذشت</b>\n' + (st.c ? 'برداشته شده ولی تماس اول ثبت نشده.' : '«برداشتم» هم نخورده.') + '\n\n' + tgLeadLine_(l), { ref: code });
+      tgLeadEv_({ code: code, row: l.row, actor: 'بات', channel: 'نوبت پذیرش', what: LC_EV.late, from: '', to: cf.first, note: LC_OUT, type: l.type || '' });
+      lcDayAdd_(st.cs, function (d) { d.miss++; });
+    }
+    if (changed) lcSave_(code, st);
+  }
+  x.d = st.cs && !st.f && !st.legacy ? (!st.r10 ? st.cs + cf.remind * 60000 : (!st.lt ? st.cs + cf.first * 60000 : 0)) : 0;
+  if (!x.d) delete x.d;
+  return kept;
+}
+function lcStepCore_(x, l, now, code, st, cf) {
+  if (st.f && !st.c) { st.c = st.f; lcSave_(code, st); }   /* تماس اول یعنی برداشته شده؛ رد به نفر بعدی نه */
   if (st.c) {
     x.n = 3; x.t = st.c;
     if (now - st.c >= TG_DUTY_GIVEUP * 60000) { try { tgDutyLog_(l, { a: st.a, t: st.s, to: st.cb, n: 1 }, 'بی‌پاسخ ماند', null); } catch (eG) {} return false; }
@@ -195,23 +263,55 @@ function lcStep_(x, l, now) {
   }
   if (!st.s) {
     if (st.at && now < st.at) { x.n = 0; x.at = st.at; return true; }
-    var morning = !!st.at, pl = lcPlan_(now);
-    if (!pl.live) {
-      if (!st.ack && l.chatId) { tgSend_(l.chatId, lcAckText_(now, pl.at)); st.ack = 1; }
-      st.at = pl.at;
-      if (pl.owner) lcOwnerSet_(l, pl.owner.name, 'نوبت صبح');
-      lcSave_(code, st); x.n = 0; x.at = pl.at; return true;
+    var morning = !!st.at, pl = lcPlan_(now), ab = lcAbroad_(l), owner = pl.owner;
+    /* شروع قول: از ساخت لید، فقط داخل ساعت کاری صاحب لید (لید خارج: اشتراک با «زمان مناسب» مراجع) */
+    if (!st.cs) st.cs = lcWorkStart_(owner, pl.live ? st.a : now, ab);
+    if (st.cs > now || !pl.live) {
+      if (st.cs <= now && !pl.live) st.cs = lcWorkStart_(owner, now, ab);
+      if (st.cs > now) {
+        if (!st.ack && l.chatId) { tgSend_(l.chatId, lcAckText_(now, st.cs, ab)); st.ack = 1; }
+        st.at = st.cs;
+        if (owner) lcOwnerSet_(l, owner.name, 'نوبت صبح');
+        if (!st.ns) { lcNextSet_(l, st.cs); st.ns = 1; }
+        lcSave_(code, st); x.n = 0; x.at = st.at; return true;
+      }
     }
-    var pr = morning ? LC_MORNING_MIN : LC_PROMISE_MIN;
-    lcCard_(code, st, pl.owner, now, pr, l, true);
+    if (!owner) { lcSave_(code, st); x.n = 0; delete x.at; return true; }   /* نه نوبت‌داری، نه مسئول پذیرش: فقط پایش ساعتی tgSlaTick_ */
+    var pr = morning ? cf.morning : cf.claim;
+    lcCard_(code, st, owner, now, pr, l, true);
     st.s = now; st.p0 = pr;
-    tgLeadEv_({ code: code, row: l.row, actor: 'بات', channel: 'نوبت پذیرش', what: LC_EV.start, from: '', to: pl.owner.name, note: morning ? 'صبح روز کاری بعد · ' + pr + ' دقیقه' : 'ساعت کاری · ' + pr + ' دقیقه', type: l.type || '' });
+    tgLeadEv_({ code: code, row: l.row, actor: 'بات', channel: 'نوبت پذیرش', what: LC_EV.start, from: '', to: owner.name, note: morning ? 'صبح روز کاری بعد · ' + pr + ' دقیقه' : 'ساعت کاری · ' + pr + ' دقیقه', type: l.type || '' });
     lcSave_(code, st); x.sent = 1;
     x.n = 1; x.t = st.t; x.pr = st.pr; delete x.at; return true;
   }
-  if (now - st.t >= (st.pr || LC_PROMISE_MIN) * 60000) { if (lcPass_(code, st, l, now, 'مهلت')) x.sent = 1; }
+  if (now - st.t >= (st.pr || cf.claim) * 60000) { if (lcPass_(code, st, l, now, 'مهلت')) x.sent = 1; }
   x.n = 1; x.t = st.t; x.pr = st.pr; return true;
 }
+/** لید بیرون از ساعت: «تماس اول» با تاریخ روز شروع قول، تا اولین کار «کار امروز» صاحبش باشد */
+function lcNextSet_(l, at) {
+  var d = Utilities.formatDate(new Date(at), TG_TZ, 'yyyy-MM-dd');
+  if (lcDry_()) { (TG_MEM['lc:next'] = TG_MEM['lc:next'] || []).push({ code: l.code, date: d }); return; }
+  if (l.row >= 2) { try { tgLeadSet_(l.row, { 'اقدام بعدی': 'تماس اول', 'تاریخ اقدام بعدی': d }, 'بات', 'بات', 'نوبت صبح'); } catch (e) { tgErr_('lcNextSet_', e, l.code); } }
+}
+/** «کار امروز»: لید شب که امروز نوبتش است اول فهرست (tgTodayList_) */
+function lcTodayFirst_(code) {
+  if (!code) return false;
+  var st = lcAll_()[code];
+  return !!(st && st.at && !st.f && st.at <= lcNow_() + 86400000);
+}
+/** آیا قول تماس اول این لید را همین ماژول پایش می‌کند (tgSlaTick_ مرحلهٔ ۱ را تکرار نکند) */
+function lcSlaOwn_(code) { var st = code ? lcAll_()[code] : null; return !!(st && st.cs && !st.legacy); }
+/** خط خلاصهٔ شبانهٔ یاسر */
+function lcNightLine_() {
+  var k = 'LC_DAY:' + Utilities.formatDate(new Date(lcNow_()), TG_TZ, 'yyyy-MM-dd'), d;
+  try { d = JSON.parse(lcProp_(k) || '{}') || {}; } catch (e) { d = {}; }
+  var n = (d.ok || 0) + (d.miss || 0), cf = lcCfg_();
+  if (!n && !(d.m || []).length) return '';
+  var m = typeof lmMedian_ === 'function' ? lmMedian_(d.m || []) : null;
+  return '⏱ قول تماس اول (امروز): پاسخ زیر ' + tgFa_(cf.first) + ' دقیقه ' + tgFa_(d.ok || 0) + ' از ' + tgFa_(n) +
+    (n ? ' (' + tgFa_(Math.round(100 * (d.ok || 0) / n)) + '٪)' : '') + ' · میانهٔ زمان پاسخ ' + (m === null ? 'بی داده' : tgFa_(Math.round(m)) + ' دقیقه');
+}
+try { TG_NIGHT_LINES.push(lcNightLine_); } catch (eNl) {}
 
 /* ───── دکمه‌ها ───── */
 function lcLead_(code) {
@@ -228,7 +328,7 @@ function lcCb_(cq, chat, data) {
   var boss = lcBoss_(), isBoss = boss && lcNorm_(boss.name) === lcNorm_(who.name);
   if (act === 'take' || act === 'call') {
     if (st.c && lcNorm_(st.cb) !== lcNorm_(who.name)) return tgSend_(chat, 'این لید را ' + tgEsc_(st.cb) + ' برداشته است.');
-    var got = lcClaim_(code, st, who.name, now, l);
+    var got = lcClaim_(code, st, who.name, now, l, chat);
     if (act === 'call') { lcOnContact_(code, who.name); return tgOnLead_(cq, 'call:' + code); }
     if (got) { try { tgLeadCardEdit_(cq, l); } catch (eE) {} }
     return tgSend_(chat, got ? '✅ لید ' + tgEsc_(code) + ' مال شماست. نتیجهٔ تماس را از همین کارت ثبت کنید.' : 'این لید را خودتان برداشته‌اید.');
@@ -299,7 +399,7 @@ function lcTests() {
     lcStep_(x1, l1, t0 + 15 * M);
     var bossN = msgs('9100').length;
     ok('بعد از ۱۵ دقیقه: کارت به نفر بعدی همان نوبت', msgs('9102').length === 1 && lcSt_('L-7001').to === 'کشیک ب' && (TG_MEM['lc:owner'] || []).some(function (o) { return o.code === 'L-7001' && o.name === 'کشیک ب'; }));
-    ok('سرپرست پذیرش خبر گرفت', (TG_MEM['notify'] || []).some(function (n) { return n.chat === '9100' && /در قول برداشته نشد/.test(n.text); }));
+    ok('سرپرست پذیرش یک خبر گرفت (مهلت تماس اول و برداشت با هم)', (TG_MEM['notify'] || []).filter(function (n) { return n.chat === '9100' && /در قول برداشته نشد|مهلت ۱۵ دقیقه‌ای تماس اول/.test(n.text); }).length === 1);
     ok('رویداد «به نفر بعدی»', evs(LC_EV.pass).length === 1);
 
     /* برداشتم: دقیقه و بیرون از قول */
@@ -338,7 +438,7 @@ function lcTests() {
     TG_OUTBOX = []; TG_MEM['notify'] = [];
     var l4 = lead('L-7004', '8801'), x4 = { k: 'L-7004', n: 0, a: T('10', '23:10') };
     ok('بیرون از ساعت: در صف تا صبح', lcStep_(x4, l4, T('10', '23:12')) && x4.n === 0 && x4.at === T('11', '09:00'));
-    ok('پیام کوتاه به مراجع', msgs('8801').length === 1 && msgs('8801')[0].text === 'پیامتان رسید؛ فردا از ساعت ۹ پذیرش با شما تماس می‌گیرد.' && !msgs('9101').length);
+    ok('پیام کوتاه به مراجع', msgs('8801').length === 1 && msgs('8801')[0].text === 'درخواستتان رسید؛ فردا صبح ساعت ۹ تماس می‌گیریم.' && !msgs('9101').length);
     lcStep_(x4, l4, T('10', '23:40'));
     ok('پیام مراجع فقط یک بار و شب کارتی نمی‌رود', msgs('8801').length === 1 && !msgs('9101').length && !msgs('9102').length);
     lcStep_(x4, l4, T('11', '09:00'));
@@ -349,7 +449,7 @@ function lcTests() {
     lcCb_(cq, '9101', 'lq:take:L-7004');
     ok('برداشت صبح در ۲۵ دقیقه: «در قول»', evs(LC_EV.claim).some(function (e) { return e.o.code === 'L-7004' && e.o.note === LC_IN; }));
     TG_MEM['lc:now'] = T('15', '23:00');
-    ok('شب پنج‌شنبه: «شنبه» به‌جای «فردا»', /شنبه از ساعت ۹/.test(lcAckText_(T('15', '23:00'), lcNextMorning_(T('15', '23:00')))));
+    ok('شب پنج‌شنبه: «شنبه» به‌جای «فردا»', /^درخواستتان رسید؛ شنبه ساعت ۹ تماس می‌گیریم\.$/.test(lcAckText_(T('15', '23:00'), lcNextMorning_(T('15', '23:00')))));
 
     /* نفر بعدی در ساعت کاری خودش؛ کسی نیست ← سرپرست */
     TG_OUTBOX = []; TG_MEM['notify'] = [];
@@ -393,3 +493,110 @@ function lcTests() {
   return { pass: pass, fail: fail, text: text.join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'lcTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['قول پاسخ لید تازه (v170.23.43)', 'lcTests']); } catch (eLc) {}
+
+/* v170.23.44 (D17): قول تماس اول ۱۵ دقیقه از شروع ساعت کاری صاحب لید */
+function lcSlaTests() {
+  var pass = 0, fail = 0, text = [];
+  function ok(t, c, d) { if (c) { pass++; text.push('✅ ' + t); } else { fail++; text.push('❌ ' + t + (d ? ' · ' + d : '')); } }
+  var kD = TG_DRY, kM = TG_MEM, kO = TG_OUTBOX;
+  TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
+  try {
+    var T = function (d, hm) { return new Date('2026-10-' + d + 'T' + hm + ':00+03:30').getTime(); }, M = 60000;
+    var desk = function () { return [
+      { name: 'کشیک الف', role: 'پذیرش', chat: '9101', start: 9, end: 18, days: TG_DESK_DAYS[0] },
+      { name: 'کشیک ب', role: 'پذیرش', chat: '9102', start: 9, end: 22, days: TG_DESK_DAYS[0] },
+      { name: 'سرپرست نمونه', role: 'مسئول پذیرش', chat: '9100', start: 9, end: 18, days: TG_DESK_DAYS[0] }]; };
+    var grid = function () { var g = TG_DUTY_DAYS.map(function () { return ['کشیک الف، کشیک ب', 'کشیک الف', '']; }); g[6] = ['', '', '']; return g; };
+    var reset = function () { TG_MEM = { 'lc:desk': desk(), duty: grid() }; TG_OUTBOX = []; };
+    var lead = function (code, extra) { var l = { row: 5, code: code, name: 'مراجع ساختگی', phone: '', owner: '', chatId: '', type: 'مراجع', region: 'داخل ایران' }; for (var k in (extra || {})) l[k] = extra[k]; return l; };
+    var notes = function (chat, rx) { return (TG_MEM['notify'] || []).filter(function (n) { return n.chat === chat && (!rx || rx.test(n.text)); }); };
+    var evs = function (what, code) { return TG_OUTBOX.filter(function (o) { return o.kind === 'leadev' && o.o.what === what && (!code || o.o.code === code); }); };
+    var day = function (d) { try { return JSON.parse(TG_MEM['lcp:LC_DAY:2026-10-' + d] || '{}'); } catch (e) { return {}; } };
+
+    /* ۱) در ساعت کاری: ۱۵ دقیقه از ساخت لید؛ یادآوری ۱۰ به صاحب، ۱۵ به سرپرست */
+    reset();
+    var l1 = lead('L-8101'), x1 = { k: 'L-8101', n: 0, a: T('10', '10:00') };
+    lcStep_(x1, l1, T('10', '10:02'));
+    ok('در ساعت: شروع قول همان لحظهٔ ساخت لید', lcSt_('L-8101').cs === T('10', '10:00') && x1.d === T('10', '10:10'));
+    lcStep_(x1, l1, T('10', '10:09'));
+    ok('پیش از دقیقهٔ ۱۰ یادآوری نه', !notes('9101', /قول تماس اول/).length);
+    lcStep_(x1, l1, T('10', '10:10'));
+    ok('دقیقهٔ ۱۰: یادآوری به صاحب لید', notes('9101', /۱۰ دقیقه از قول تماس اول/).length === 1 && evs(LC_EV.remind, 'L-8101').length === 1 && x1.d === T('10', '10:15'));
+    lcStep_(x1, l1, T('10', '10:15'));
+    ok('دقیقهٔ ۱۵: خبر به سرپرست پذیرش، یک بار', notes('9100', /مهلت ۱۵ دقیقه‌ای تماس اول/).length === 1 && evs(LC_EV.late, 'L-8101').length === 1 && !x1.d);
+    lcStep_(x1, l1, T('10', '10:40'));
+    ok('یادآوری و خبر تکرار نمی‌شوند', notes('9101', /۱۰ دقیقه از قول/).length === 1 && notes('9100', /مهلت ۱۵/).length === 1);
+    ok('شمار امروز: یک مهلت گذشته', day('10').miss === 1 && !day('10').ok);
+    var l1b = lead('L-8102'), x1b = { k: 'L-8102', n: 0, a: T('10', '11:00') };
+    lcStep_(x1b, l1b, T('10', '11:01')); TG_MEM['lc:now'] = T('10', '11:12');
+    lcOnContact_('L-8102', 'کشیک الف');
+    ok('تماس اول در ۱۲ دقیقه: «در قول» و شمار ok', evs(LC_EV.first, 'L-8102').some(function (e) { return e.o.to === 12 && e.o.note === LC_IN; }) && day('10').ok === 1);
+    lcStep_(x1b, l1b, T('10', '11:20'));
+    ok('بعد از تماس اول هیچ هشداری نمی‌رود', !notes('9100', /L-8102/).length);
+    TG_MEM['lc:now'] = T('10', '21:00');
+    var nl = lcNightLine_();
+    ok('خلاصهٔ روزانهٔ یاسر: پاسخ زیر ۱۵ دقیقه و میانه', /پاسخ زیر ۱۵ دقیقه ۱ از ۲/.test(nl) && /میانهٔ زمان پاسخ ۱۲ دقیقه/.test(nl) && TG_NIGHT_LINES.indexOf(lcNightLine_) > -1, nl);
+
+    /* ۲) بیرون از ساعت کاری: پیام با ساعت شروع کار صاحب لید، اولین کار امروز، ۱۵ دقیقه از شروع کار او */
+    reset(); TG_MEM['lc:desk'][0].start = 10;
+    var l2 = lead('L-8201', { chatId: '8801' }), x2 = { k: 'L-8201', n: 0, a: T('10', '23:10') };
+    lcStep_(x2, l2, T('10', '23:12'));
+    var ack = TG_OUTBOX.filter(function (o) { return o.kind === 'msg' && o.chat === '8801'; });
+    ok('بیرون از ساعت: «درخواستتان رسید» با ساعت شروع کار صاحب لید', ack.length === 1 && ack[0].text === 'درخواستتان رسید؛ فردا صبح ساعت ۱۰ تماس می‌گیریم.', ack.length ? ack[0].text : '');
+    ok('شروع قول: ساعت ۱۰ فردا (شروع کار او)', lcSt_('L-8201').cs === T('11', '10:00') && x2.at === T('11', '10:00'));
+    ok('«تماس اول» با تاریخ فردا، اولین کار «کار امروز»', (TG_MEM['lc:next'] || []).some(function (o) { return o.code === 'L-8201' && o.date === '2026-10-11'; }));
+    TG_MEM['lc:now'] = T('11', '09:00');
+    ok('صبح: لید شب در «کار امروز» اول است', lcTodayFirst_('L-8201') === true && lcTodayFirst_('L-0000') === false);
+    lcStep_(x2, l2, T('11', '10:00'));
+    ok('ساعت ۱۰: کارت به صاحب لید', TG_OUTBOX.some(function (o) { return o.kind === 'msg' && o.chat === '9101' && /بیرون از ساعت کاری/.test(o.text); }));
+    lcStep_(x2, l2, T('11', '10:09'));
+    ok('یادآوری از ۱۰:۰۰ شمرده می‌شود، نه از ساخت لید', !notes('9101', /قول تماس اول/).length);
+    lcStep_(x2, l2, T('11', '10:10'));
+    ok('۱۰:۱۰ یادآوری به صاحب لید', notes('9101', /قول تماس اول/).length === 1);
+
+    /* ۳) لید خارج: اشتراک ساعت کاری صاحب لید با «زمان مناسب» مراجع */
+    reset();
+    var l3 = lead('L-8301', { region: 'خارج از ایران', tz: 'Europe/Berlin', best: 'بعدازظهر', chatId: '8802' }), x3 = { k: 'L-8301', n: 0, a: T('10', '10:00') };
+    lcStep_(x3, l3, T('10', '10:01'));
+    ok('لید خارج: شروع قول از ۱۴:۳۰ تهران (۱۳ به وقت او)', lcSt_('L-8301').cs === T('10', '14:30') && x3.at === T('10', '14:30'), String(lcSt_('L-8301').cs));
+    var ack3 = TG_OUTBOX.filter(function (o) { return o.kind === 'msg' && o.chat === '8802'; });
+    ok('لید خارج: پیام با ساعت به وقت خودش', ack3.length === 1 && ack3[0].text === 'درخواستتان رسید؛ امروز ساعت ۱۳ به وقت شما تماس می‌گیریم.', ack3.length ? ack3[0].text : '');
+    lcStep_(x3, l3, T('10', '14:30')); lcStep_(x3, l3, T('10', '14:40'));
+    ok('لید خارج: کارت ۱۴:۳۰ و یادآوری ۱۴:۴۰', TG_OUTBOX.some(function (o) { return o.kind === 'msg' && o.chat === '9101' && /برداشتم/.test(JSON.stringify(o.markup || '')); }) && notes('9101', /قول تماس اول/).length === 1);
+    var l3b = lead('L-8302', { region: 'خارج از ایران', tz: 'Europe/Berlin', best: 'شب' }), x3b = { k: 'L-8302', n: 0, a: T('10', '10:00') };
+    lcStep_(x3b, l3b, T('10', '10:01'));
+    ok('لید خارج بی اشتراک (شب او بیرون از ساعت صاحب لید): همان ساعت کاری صاحب لید', lcSt_('L-8302').cs === T('10', '10:00'));
+
+    /* ۴) بی‌مسئول: خانهٔ خالی نوبت ← مسئول پذیرش؛ بی هیچ کس ← بی خطا در صف */
+    reset(); TG_MEM['duty'][0][0] = '';
+    var l4 = lead('L-8401'), x4 = { k: 'L-8401', n: 0, a: T('10', '10:00') };
+    lcStep_(x4, l4, T('10', '10:00'));
+    ok('بی‌مسئول: کارت و قول با مسئول پذیرش', TG_OUTBOX.some(function (o) { return o.kind === 'msg' && o.chat === '9100'; }) && lcSt_('L-8401').cs === T('10', '10:00'));
+    lcStep_(x4, l4, T('10', '10:10')); lcStep_(x4, l4, T('10', '10:15'));
+    ok('بی‌مسئول: یادآوری ۱۰ و خبر ۱۵ به مسئول پذیرش', notes('9100', /۱۰ دقیقه از قول/).length === 1 && notes('9100', /مهلت ۱۵/).length === 1);
+    reset(); TG_MEM['lc:desk'] = [];
+    var l5 = lead('L-8501'), x5 = { k: 'L-8501', n: 0, a: T('10', '10:00') }, kept = false, threw = '';
+    try { kept = lcStep_(x5, l5, T('10', '10:00')); lcStep_(x5, l5, T('10', '10:20')); } catch (e5) { threw = String(e5); }
+    ok('بی هیچ کس در تیم: بی خطا، در صف برای پایش ساعتی', kept && !threw && !TG_OUTBOX.some(function (o) { return o.kind === 'msg'; }), threw);
+
+    /* عددها از «تنظیمات خصوصی بات» */
+    reset(); TG_MEM['lc:cfg'] = { first: 20, remind: 12 };
+    var l6 = lead('L-8601'), x6 = { k: 'L-8601', n: 0, a: T('10', '10:00') };
+    lcStep_(x6, l6, T('10', '10:00')); lcStep_(x6, l6, T('10', '10:11'));
+    ok('LEAD_SLA: یادآوری ۱۲ دقیقه', !notes('9101', /قول تماس اول/).length && x6.d === T('10', '10:12'));
+    lcStep_(x6, l6, T('10', '10:12')); lcStep_(x6, l6, T('10', '10:19'));
+    ok('LEAD_SLA: مهلت ۲۰ دقیقه', notes('9101', /۱۲ دقیقه از قول/).length === 1 && !notes('9100', /مهلت ۲۰/).length);
+    lcStep_(x6, l6, T('10', '10:20'));
+    ok('LEAD_SLA: خبر سرپرست سر ۲۰ دقیقه', notes('9100', /مهلت ۲۰ دقیقه‌ای/).length === 1);
+    ok('LEAD_SLA در فهرست کلیدهای اختیاری تنظیمات', CFG_OPTIONAL.indexOf('LEAD_SLA') > -1 && !!CFG_NOTE.LEAD_SLA);
+    TG_MEM['lc:cfg'] = null;
+
+    /* قاعدهٔ SLA لید: فوری و عادی ۱۵ دقیقه؛ پایش ساعتی تکرار نمی‌کند */
+    ok('tgSlaWant_: فوری و عادی ۱۵ دقیقه', tgSlaWant_(15, false) === 1 && tgSlaWant_(15, true) === 1 && tgSlaWant_(14, false) === 0);
+    ok('پایش ساعتی لید پایش‌شده را دوباره هشدار نمی‌دهد', lcSlaOwn_('L-8601') === true && lcSlaOwn_('L-0000') === false && /lcSlaOwn_\(/.test(String(tgSlaTick_)));
+    ok('موعد هشدار در برنامهٔ تیک (بی خواندن شیت)', bgDutyNext_([{ n: 1, t: T('10', '10:00'), pr: 15, d: T('10', '10:10') }], T('10', '10:01'), 0) === T('10', '10:10'));
+  } catch (e) { fail++; text.push('❌ خطا: ' + (e && e.stack || e)); }
+  finally { TG_DRY = kD; TG_MEM = kM; TG_OUTBOX = kO; }
+  return { pass: pass, fail: fail, text: text.join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'lcSlaTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['قول تماس اول ۱۵ دقیقه (v170.23.44، D17)', 'lcSlaTests']); } catch (eLs) {}

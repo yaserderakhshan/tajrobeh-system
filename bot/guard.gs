@@ -90,7 +90,7 @@ function grdPersonChat_(name) {
 /* ───── J-01: مرحلهٔ خواستنی برای tgSlaTick_ (تابع خالص) ─────
    age دقیقه از ورود لید؛ urgent یعنی فوری (۳۰ دقیقه)، وگرنه عادی (۲ ساعت). ۱ مسئول لید، ۲ مسئول پذیرش، ۳ جمع‌بندی یاسر. */
 function tgSlaWant_(age, urgent) {
-  var first = urgent ? 30 : 120;
+  var first = typeof lcCfg_ === 'function' ? lcCfg_().first : 15;   /* v170.23.44 (D17): فوری و عادی، همان قول تماس اول */
   if (age >= first + 2 * 1440) return 3;
   if (age >= first + 1440) return 2;
   if (age >= first) return 1;
@@ -247,10 +247,9 @@ function grdTests() {
   TG_DRY = true; TG_MEM = {}; TG_OUTBOX = []; GRD_ST = null;
   try {
     /* J-01 */
-    ok('J-01 عادی: پیش از ۲ ساعت هیچ', tgSlaWant_(119, false) === 0);
-    ok('J-01 عادی: ۲ ساعت ← مسئول لید', tgSlaWant_(120, false) === 1);
-    ok('J-01 فوری: ۳۰ دقیقه ← مسئول لید', tgSlaWant_(30, true) === 1 && tgSlaWant_(29, true) === 0);
-    ok('J-01: ۲۴ ساعت بعد ← مسئول پذیرش', tgSlaWant_(120 + 1440, false) === 2 && tgSlaWant_(120 + 1439, false) === 1);
+    ok('J-01 (D17): پیش از ۱۵ دقیقه هیچ، فوری و عادی یکسان', tgSlaWant_(14, false) === 0 && tgSlaWant_(14, true) === 0);
+    ok('J-01 (D17): ۱۵ دقیقه ← مسئول لید، فوری و عادی', tgSlaWant_(15, false) === 1 && tgSlaWant_(15, true) === 1);
+    ok('J-01: ۲۴ ساعت بعد ← مسئول پذیرش', tgSlaWant_(15 + 1440, false) === 2 && tgSlaWant_(15 + 1439, false) === 1);
     ok('J-01: ۲۴ ساعت بعد ← جمع‌بندی یاسر', tgSlaWant_(120 + 2880, false) === 3);
     /* ساعت کاری: دوشنبه ۱۰:۰۰ تهران */
     var mon10 = new Date('2026-10-12T10:00:00+03:30').getTime();

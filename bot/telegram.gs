@@ -3636,6 +3636,7 @@ function tgSlaTick_() {
     if (l.abroad) {
       const ws = abSlaStage_(l, now.getTime());
       if (!ws || ws <= stage) continue;
+      if (ws === 1 && typeof lcSlaOwn_ === 'function' && lcSlaOwn_(l.code)) { sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ۱ ' + stamp); continue; }   /* v170.23.44: قول تماس اول را leadclaim.gs پایش می‌کند */
       var toA = ws === 1 ? to : boss;
       if (ws === 3 && TG_OWNER_CHAT) toA = { chat: TG_OWNER_CHAT, name: 'یاسر', style: TG_DESK_STYLES[0] };
       if (ws < 3 && !tgDeskOnDuty_(toA, now)) continue;
@@ -3659,6 +3660,7 @@ function tgSlaTick_() {
       sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(3) + ' ' + stamp);
       continue;
     }
+    if (wantStage === 1 && typeof lcSlaOwn_ === 'function' && lcSlaOwn_(l.code)) { sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ۱ ' + stamp); continue; }   /* v170.23.44: یادآوری ۱۰ و ۱۵ دقیقه از leadclaim.gs رفته */
     if (wantStage === 2) to = boss;
 
     const duty = tgDeskOnDuty_(to, now);
@@ -3667,7 +3669,7 @@ function tgSlaTick_() {
 
     const head = l.urgent
       ? (l.booked ? '📅 <b>یک معارفه رزرو شد</b>' : '🌍 <b>مراجع خارج از ایران</b>')
-      : (wantStage === 2 ? '⏰ <b>یک روز از مهلت تماس اول گذشته</b>' : '⏳ <b>دو ساعت است تماس اول گرفته نشده</b>');
+      : (wantStage === 2 ? '⏰ <b>یک روز از مهلت تماس اول گذشته</b>' : '⏳ <b>مهلت تماس اول گذشته و هنوز تماس گرفته نشده</b>');
     const lr2 = tgLeadRead_(l.row);
     const kind2 = l.urgent ? TG_NK.urgent : TG_NK.task;
     if (lr2) { if (!lr2.code) lr2.code = tgLeadCode_(l.row); tgNotify_(to.chat, kind2, head + '\n\n' + tgLeadCardText_(lr2), { ref: lr2.code, markup: tgLeadKb_(lr2) }); }
