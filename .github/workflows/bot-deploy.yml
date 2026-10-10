@@ -228,6 +228,7 @@ jobs:
           PREV_VERSION=$(echo "$DEPS" | jq -r --arg d "$DEPLOYMENT_ID" '.[] | select(.deploymentId == $d) | .versionNumber // empty')
           [ -n "$PREV_VERSION" ] || { echo "::error::شمارهٔ نسخهٔ فعلی دیپلوی اصلی خوانده نشد"; exit 1; }
           STAGING_ID=$(echo "$DEPS" | jq -r --arg p "$STAGING_DESC" '[.[] | select((.description // "") | startswith($p))][0].deploymentId // empty')
+          [ -n "$STAGING_ID" ] && echo "::add-mask::$STAGING_ID"   # v170.16.4: لاگ مخزن عمومی؛ شناسهٔ دیپلوی آزمایشی پوشانده
           MAXV=$(clasp list-versions --json | jq '[.[].versionNumber] | max // 0')
           VCOUNT=$(clasp list-versions --json | jq 'length')
           echo "prev_ref=$PREV_REF" >> "$GITHUB_OUTPUT"
@@ -288,8 +289,9 @@ jobs:
           else
             OUT=$(clasp create-deployment -V "$V" -d "$STAGING_DESC · $DESC" --json)
           fi
-          echo "$OUT"
           SID=$(echo "$OUT" | jq -r '.deploymentId // empty')
+          [ -n "$SID" ] && echo "::add-mask::$SID"
+          echo "$OUT"
           SV=$(echo "$OUT" | jq -r '.versionNumber // empty')
           [ -n "$SID" ] && [ "$SV" = "$V" ] || { echo "::error::دیپلوی آزمایشی نسخهٔ $V را نگرفت"; exit 1; }
           [ "$SID" != "$DEPLOYMENT_ID" ] || { echo "::error::دیپلوی آزمایشی با دیپلوی اصلی یکی است"; exit 1; }
