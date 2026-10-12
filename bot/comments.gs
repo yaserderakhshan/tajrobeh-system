@@ -337,7 +337,7 @@ function cmApplyOne_(it, c, l, p) {
   }
   var taskCode = '';
   if (p.task) {
-    try { if (typeof opsAdd_ === 'function') taskCode = opsAdd_({ title: p.task.title, cat: 'پذیرش', owner: p.task.owner, by: it.author || 'کامنت', due: p.task.due, src: 'کامنت', ref: 'CM:' + it.id, note: code }); } catch (eT) { tgErr_('cmApplyOne_ opsAdd_', eT); }
+    try { if (typeof opsAdd_ === 'function') taskCode = opsAdd_({ title: p.task.title, cat: 'لید و پذیرش', owner: p.task.owner, by: it.author || 'کامنت', due: p.task.due, src: 'کامنت', ref: 'CM:' + it.id, note: code }); } catch (eT) { tgErr_('cmApplyOne_ opsAdd_', eT); }
     if (!taskCode && row >= 2 && !stkDry_() && !cmIsStale_(it, l)) tgLeadSet_(row, { 'اقدام بعدی': p.task.title.slice(0, 80), 'تاریخ اقدام بعدی': cmDay_(1) }, it.author || 'کامنت', 'کامنت', 'دستور ' + tgNm_('reception'));
     if (taskCode) p.reply = p.reply.replace('ثبت شد: کار', 'ثبت شد: کار ' + taskCode);
   }
