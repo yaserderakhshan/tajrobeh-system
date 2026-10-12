@@ -88,7 +88,8 @@ export default {
         /* ویجت شمار درخواست‌هایی را که به ورکر نرسید (شبکه یا مهلت ۴ ثانیه) با درخواست بعدی می‌فرستد؛ جدا از «بی‌پاسخ» واقعی */
         const miss = Math.min(20, Math.max(0, parseInt(body.miss, 10) || 0));
         if (miss) logs.push({ k: 'log', ch: c.channel, id: '', topic: '', mode: 'وصل نشد', res: 'وصل نشد ×' + miss, au: c.audience || 'کاربر عمومی' });
-        if (logs.length) ctx.waitUntil(sendLogs(env, logs));
+        /* آزمون دود روزانه (کانال smoke، ۰۷:۴۷ تهران) صدها پرسش پشت هم می‌فرستد؛ گزارششان به بات نمی‌رود تا هاب با نوشتن هم‌زمان پر نشود */
+        if (logs.length && c.channel !== 'smoke') ctx.waitUntil(sendLogs(env, logs));
         return json(res, 200, { 'server-timing': 'assist;dur=' + ms + (model ? ', gemini' : '') + ', gem;desc="' + why + '";dur=' + gms });
       }
       /* ضربان سرور سایت از داخل ایران (اسنیپت 506148، wp-cron)؛ فقط با امضای سرور */

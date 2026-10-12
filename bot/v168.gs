@@ -2341,6 +2341,18 @@ function bgLeadsDue_() {
   bgProp_('BG_LEADS_AT', now); return true;
 }
 
+/* ───── v170.38 (سهمیهٔ اجرا): پرسش بعد از معارفه و درخواست‌های متوقف ───── */
+var BG_MEET_DAY_MIN = 60;      /* tgMeetTick ۹ تا ۲۱ تهران؛ تریگر ۳۰ دقیقه‌ای می‌ماند و تیک میانی فوری برمی‌گردد */
+var BG_MEET_NIGHT_MIN = 180;
+var BG_STK_MIN = 115;          /* stkHourly_ هر دو ساعت، با حاشیه برای لرزش زمان تریگر */
+function bgEvery_(k, min) {
+  var now = bgNow_();
+  if (now - Number(bgProp_(k) || 0) < min * 60000 - 30000) return false;
+  bgProp_(k, now); return true;
+}
+function bgMeetDue_() { var h = bgHour_(); return bgEvery_('BG_MEET_AT', h >= 9 && h < 21 ? BG_MEET_DAY_MIN : BG_MEET_NIGHT_MIN); }
+function bgStkDue_() { return bgEvery_('BG_STK_AT', BG_STK_MIN); }
+
 /* ───── tgCpTick: فقط با کمپین فعال ───── */
 /* '' یعنی هنوز سنجیده نشده: فعال فرض می‌شود */
 function bgCpActive_() { return bgProp_('BG_CP_ACTIVE') !== '0'; }
@@ -2412,6 +2424,18 @@ function bgTests() {
     ok('خط گزارش شبانه: مصرف، بیشترین، ردشده', /سهمیهٔ اجرا: ۸۰٫۰|سهمیهٔ اجرا: ۸۰\.۰/.test(bgNightLine_()) || (/سهمیهٔ اجرا/.test(bgNightLine_()) && /رد شد/.test(bgNightLine_())), bgNightLine_());
     ok('در خط‌های گزارش شبانه ثبت است', TG_NIGHT_LINES.indexOf(bgNightLine_) > -1);
     ok('همگام‌سازی تب تنظیمات خصوصی واجب است و بالای ۷۵ دقیقه هم می‌رود (v170.23.28)', /S\('cfgHourly_', 'must'/.test(String(tgWatchdog)));
+
+    /* v170.38: پرسش بعد از معارفه و درخواست‌های متوقف */
+    at(2026, 10, 8, 10, 0); ok('معارفه: اولین تیک روز می‌رود', bgMeetDue_() === true);
+    at(2026, 10, 8, 10, 30); ok('معارفه: نیم ساعت بعد نه', bgMeetDue_() === false);
+    at(2026, 10, 8, 11, 0); ok('معارفه: یک ساعت بعد می‌رود', bgMeetDue_() === true);
+    at(2026, 10, 8, 22, 0); ok('معارفه شب: می‌رود', bgMeetDue_() === true);
+    at(2026, 10, 8, 23, 30); ok('معارفه شب: یک و نیم ساعت بعد نه', bgMeetDue_() === false);
+    at(2026, 10, 9, 1, 0); ok('معارفه شب: سه ساعت بعد می‌رود', bgMeetDue_() === true);
+    at(2026, 10, 8, 9, 0); TG_MEM['bgp:BG_STK_AT'] = ''; ok('متوقف‌ها: ساعت ۹ می‌رود', bgStkDue_() === true);
+    at(2026, 10, 8, 10, 0); ok('متوقف‌ها: ساعت ۱۰ نه', bgStkDue_() === false);
+    at(2026, 10, 8, 11, 0); ok('متوقف‌ها: ساعت ۱۱ می‌رود', bgStkDue_() === true);
+    ok('واگذاری خودکار داخل خواندن مشترک لیدها', /tgLeadsShare_\(true\)[\s\S]*S\('tgAssignTick_'[\s\S]*tgLeadsShare_\(false\)/.test(String(tgWatchdog)));
 
     /* tgDutyTick */
     at(2026, 10, 8, 3, 0);
