@@ -194,7 +194,7 @@ function lsLeadRate_(days, to) {
   var clicks = 0;
   if (lsDry_()) clicks = (TG_MEM['ls:clicks'] || []).filter(function (d) { return d >= from && d < end; }).length;
   else { try { var sh = tgSS_().getSheetByName('کلیک‌های تماس'); if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (v) { var d = v[0] instanceof Date ? lsDay_(v[0].getTime()) : String(v[0]).slice(0, 10); if (d >= from && d < end) clicks++; }); } catch (e) {} }
-  var leads = lsLeads_().filter(function (l) { var d = lsDay_(lsNow_() - (l.age || 0) * 60000); return d >= from && d < end; }).length;
+  var leads = lsLeads_().filter(function (l) { if (!tgClientLead_(l.src)) return false; var d = lsDay_(lsNow_() - (l.age || 0) * 60000); return d >= from && d < end; }).length;
   return clicks ? Math.round(1000 * leads / clicks) / 10 : null;
 }
 /** عدد پایه یک بار، لحظهٔ اولین روشن شدن */
@@ -605,13 +605,13 @@ function abTests() {
     ok('کشور افغانستان با شمارهٔ محلی: خارج', abRegion_('0791112233', '', 'افغانستان') === 'خارج از ایران');   // pii:ok ساختگی
     ok('منطقهٔ زمانی برلین با شمارهٔ ایران: خارج', abRegion_('09121112233', 'Europe/Berlin', '') === 'خارج از ایران');   // pii:ok ساختگی
     ok('کشور ایران از منطقهٔ زمانی مهم‌تر است', abRegion_('', 'Europe/London', 'ایران') === 'داخل ایران');
-    ok('chat_id شماره نیست (روی کد قبلی «خارج» بود)', tgRegion_('5367159854') === '' && tgRegion_('+491701112233') === 'خارج از ایران');   // pii:ok ساختگی
+    ok('chat_id شماره نیست (روی کد قبلی «خارج» بود)', tgRegion_('5000000001') === '' && tgRegion_('+491701112233') === 'خارج از ایران');   // pii:ok ساختگی
     ok('منطقه و زمان مناسب از یادداشت قدیمی', abTzFromNote_('زمان مناسب: هر وقت · Europe/Berlin') === 'Europe/Berlin' && abBestFromNote_('زمان مناسب: هر وقت · Europe/Berlin') === 'هر وقت');
     /* الف۶: تاریخ و نوع لید */
     ok('تاریخ‌های قاطی ISO می‌شوند', abIso_('9/16/2026') === '2026-09-16' && abIso_('1405/06/31') === '2026-09-22' && abIso_(new Date('2026-10-03T10:00:00Z')) === '2026-10-03' && abIso_('2026-10-01') === '2026-10-01');
     ok('درخواست زوج با «پارتنرم» مراجع است، نه پارتنر', lmGuessType_('سایت › پذیرش › تراپی فارسی', 'زوج‌درمانی با پارتنرم') === LM_T.C && lmGuessType_('سایت › پارتنر › فضا', 'اتاق می‌خواهم') === LM_T.P);
     /* ب۸: صف ارسال با chat_id عددی */
-    ok('صف ارسال: چند chat_id عددی با کاما', JSON.stringify(soResolve_('368181539,5367159854, 1369595367')) === JSON.stringify(['368181539', '5367159854', '1369595367']));   // pii:ok ساختگی
+    ok('صف ارسال: چند chat_id عددی با کاما', JSON.stringify(soResolve_('400000002,5000000001, 1300000003')) === JSON.stringify(['400000002', '5000000001', '1300000003']));   // pii:ok ساختگی
     /* الف۳: گارد سخت */
     TG_MEM['ab:ther'] = [{ name: 'درمانگر الف', status: 'فعال', row: 4 }, { name: 'درمانگر ب', status: 'پایان همکاری', row: 5 }, { name: 'درمانگر ج', status: 'نامعلوم', row: 6 }];
     ok('فقط «فعال»', abTherOkName_('درمانگر الف') && !abTherOkName_('درمانگر ب') && !abTherOkName_('درمانگر ج') && !abTherOkName_('ناشناس'));
@@ -983,7 +983,7 @@ function abFunnelRows_(leads, firstMs, clicks, weeks, nowMs) {
 function abFunnelBuild_() {
   if (lsDry_()) return TG_MEM['ab:fn'] = abFunnelRows_(TG_MEM['ab:fnleads'] || [], TG_MEM['ab:fnfirst'] || {}, TG_MEM['ab:fnclicks'] || [], 8, lsNow_());
   var sh = tgSS_().getSheetByName(TG_LEADS), last = sh.getLastRow(), hm = tgLeadHeadMap_(sh);
-  var v = last > 1 ? sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues() : [];
+  var v = last > 1 ? sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues().filter(function (r) { return tgClientLead_(r[2]); }) : [];   /* v170.40 */
   var g = function (r, h) { var i = hm[h]; return (i === undefined || i < 0 || i >= r.length) ? '' : r[i]; };
   var leads = v.map(function (r) {
     var st = tgStOf_(String(g(r, 'وضعیت') || '').trim()) || String(g(r, 'وضعیت') || '').trim();

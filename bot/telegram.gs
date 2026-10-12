@@ -9728,6 +9728,9 @@ function tgAsDate_(when, hhmm) {
 }
 
 /* عددهای یک هفته. back=۰ هفتهٔ جاری، back=۱ هفتهٔ گذشته. */
+/* v170.40: سطرهای «مدل لید ›» (تقاضای حضوری، درمانگر متقاضی، پارتنر) کار پذیرش‌اند، نه لید مراجع؛ در شمارش و قیف نمی‌آیند.
+   پاک نمی‌شوند و در صف کار (کارهای روی زمین، کارتابل) می‌مانند. */
+function tgClientLead_(src) { return !/^\s*مدل لید\s*›/.test(String(src == null ? '' : src)); }
 function tgMonWeek_(back) {
   const a = tgWeekStart_(back);
   const b = new Date(a.getTime() + 7 * 86400000);
@@ -9747,6 +9750,7 @@ function tgMonWeek_(back) {
       const d = tgAsDate_(v[i][0], v[i][1]);
       if (!d || d < a || d >= b) continue;
       if (!String(v[i][3] || '').trim() && !String(v[i][5] || '').trim()) continue;
+      if (!tgClientLead_(v[i][2])) continue;   /* v170.40 */
       m.total++;
       const k = tgLeadSrc_(v[i][2], v[i][4]);
       if (k === 'سایت') m.site++; else if (k === 'بات') m.bot++; else m.other++;
@@ -10261,6 +10265,7 @@ function tgDayWin_() {
         const t = tgAsDate_(v[i][0], v[i][1]);
         if (!t) continue;
         if (!String(v[i][3] || '').trim() && !String(v[i][5] || '').trim()) continue;
+        if (!tgClientLead_(v[i][2])) continue;   /* v170.40 */
         const st = tgStOf_(v[i][8]);
         const open = !st || st === 'جدید';
         const sc = tgSection_(v[i][2], v[i][12]);
@@ -38190,6 +38195,19 @@ function tgSchApSheet_() {
   if (sh) { if (sh.getMaxColumns() < TG_SCH_APPLY_HEAD.length) tgSchHeadFix_(TG_SCH_T_APPLY, TG_SCH_APPLY_HEAD); }
   return sh;
 }
+
+/* v170.40: سطرهای «مدل لید ›» در شمارش لید مراجع و قیف نمی‌آیند */
+function tgV17040Tests() {
+  var pass = 0, fail = 0, out = [];
+  function ok(n, c, x) { if (c) pass++; else fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !x ? '' : ' · ' + String(x).slice(0, 160))); }
+  try {
+    ok('سه نوع مدل لید بیرون‌اند', ['مدل لید › تقاضای حضوری', 'مدل لید › درمانگر متقاضی', 'مدل لید › پارتنر'].every(function (s) { return !tgClientLead_(s); }));
+    ok('بات، مینی‌اپ، سایت و منبع خالی لید مراجع‌اند', ['Telegram bot', 'Telegram mini app', 'سایت › پذیرش › فرم شروع تراپی', '', null].every(function (s) { return tgClientLead_(s); }));
+    ok('شمارش هفتگی، روزانه، بستن ماه، قیف خارج و نرخ لید فیلتر دارند', [tgMonWeek_, tgDayWin_, v168MonthInput_, abFunnelBuild_, lsLeadRate_].every(function (f) { return String(f).indexOf('tgClientLead_') > -1; }));
+  } catch (e) { ok('خطا: ' + e, false); }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'tgV17040Tests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['شمارش لید بی مدل لید (v170.40)', 'tgV17040Tests']); } catch (eV40) {}
 
 /* v170.39: چهار خطای تب «خطاها» (گزارش ۲۰ مهر): بلاک، عکسِ سند، دکمهٔ بی داده، شناسهٔ تکراری خطا */
 function tgV17039Tests() {
