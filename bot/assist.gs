@@ -769,7 +769,8 @@ function asEdgeDump_(p) {
 /* گزارش ورکر: {entries: [{k: 'log'|'un'|'rate'|'handoff'|'gem', ...}]}، حداکثر AS_EDGE_MAX_LOG در هر فراخوان */
 function asEdgeLog_(p, dry) {
   if (typeof ebiKey2Ok_ === 'function' && !ebiKey2Ok_(p && p.key)) return { ok: false, error: 'key2_only' };
-  var L = Array.isArray(p.entries) ? p.entries.slice(0, AS_EDGE_MAX_LOG) : [], n = 0;
+  /* v170.38: گزارش آزمون دود (کانال smoke) در هاب نوشته نمی‌شود؛ صدها نوشتن هم‌زمان «Too many simultaneous invocations» می‌داد */
+  var L = (Array.isArray(p.entries) ? p.entries.slice(0, AS_EDGE_MAX_LOG) : []).filter(function (x) { return !(x && String(x.ch || '') === 'smoke'); }), n = 0;
   if (dry) return { ok: true, data: { would: L.length } };
   var cl = function (s, m) { return String(s == null ? '' : s).slice(0, m); };
   L.forEach(function (x) {
@@ -1445,6 +1446,8 @@ function asTests8() {
     ok('as_log: تحویل به پذیرش', TG_MEM['as:handoff'].length === 1);
     ok('as_log: شناسهٔ نامعتبر جایش شناسهٔ تازه', (asEdgeLog_({ key: K, entries: [{ k: 'log', id: 'x;drop', res: 'پاسخ' }] }), /^A-/.test(TG_MEM['as:' + AS_LOG_TAB].slice(-1)[0]['شناسه']) && TG_MEM['as:' + AS_LOG_TAB].slice(-1)[0]['شناسه'] !== 'x;drop'));
     var many = []; for (var i = 0; i < 60; i++) many.push({ k: 'log', res: 'پاسخ' });
+    var nSm = (TG_MEM['as:' + AS_LOG_TAB] || []).length;
+    ok('as_log: گزارش آزمون دود (smoke) نوشته نمی‌شود (v170.38)', asEdgeLog_({ key: K, entries: [{ k: 'log', ch: 'smoke', res: 'پاسخ' }, { k: 'un', ch: 'smoke', text: 'x' }] }).data.n === 0 && (TG_MEM['as:' + AS_LOG_TAB] || []).length === nSm);
     ok('as_log: حداکثر ۴۰ در هر فراخوان', asEdgeLog_({ key: K, entries: many }).data.n === AS_EDGE_MAX_LOG);
     TG_MEM['as:edgeping'] = [];
     ok('پینگ بی نشانی کاری نمی‌کند', asEdgePing_() === false && !TG_MEM['as:edgeping'].length);
