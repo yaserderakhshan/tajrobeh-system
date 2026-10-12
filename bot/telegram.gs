@@ -7184,16 +7184,17 @@ function tgWatchdog(e) {
   S('opsHourly_', 'light', typeof opsHourly_ === 'function' ? opsHourly_ : null);   /* v169.2: کار امروز ۹:۰۰، ارجاع، تازه‌کردن هاب‌ها */
   S('splHourly_', 'light', typeof splHourly_ === 'function' ? splHourly_ : null);   /* v170.23.3: صف تلاش دوبارهٔ انتشار سایت و آشتی ۳ بامداد */
   S('tgWeeklyConfirmTick_', 'light', tgWeeklyConfirmTick_);
-  S('tgAssignTick_', 'light', tgAssignTick_);
   S('tgTkSla_', 'light', tgTkSla_);
   S('tgBugNotify_', 'light', tgBugNotify_);
   /* v170.23.27: گیرکرده‌ها و SLA پشت سر هم با یک خواندن شیت لیدها؛ بیرون از ۹ تا ۲۱ هر دو ساعت (bgLeadsDue_) */
   if (bgLeadsDue_()) {
     tgLeadsShare_(true);
     try {
-      S('stkHourly_', 'light', typeof stkHourly_ === 'function' ? stkHourly_ : null);   /* v170.2: درخواست‌های متوقف و خلاصهٔ ۹ صبح */
+      /* v170.38 (سهمیهٔ اجرا): درخواست‌های متوقف هر ۲ ساعت (خلاصهٔ ۹ صبح با «h >= 9» جا نمی‌ماند) */
+      if (bgStkDue_()) S('stkHourly_', 'light', typeof stkHourly_ === 'function' ? stkHourly_ : null);   /* v170.2: درخواست‌های متوقف و خلاصهٔ ۹ صبح */
       S('tgSlaTick_', 'light', tgSlaTick_);
       S('abHourly_', 'light', typeof abHourly_ === 'function' ? abHourly_ : null);   /* v170.23.22: پنجرهٔ تماس و معارفهٔ بی نتیجه. v170.23.40: در همان خواندن مشترک، هر ۳ ساعت ۹ تا ۲۱ */
+      S('tgAssignTick_', 'light', tgAssignTick_);   /* v170.38: آخر همان خواندن مشترک (پیش از این خواندن جدای لیدها، ۲ دقیقه در روز) */
     } finally { tgLeadsShare_(false); }
   }
   S('tgFollowTick_', 'light', tgFollowTick_);
@@ -24006,6 +24007,7 @@ function tgMtAskStart_(r) {
 function tgMeetTick(e) {
   if (ciPaused_(e, 'tgMeetTick', 'skip')) return;
   if (!TG_DRY && !bgOk_('light', 'tgMeetTick')) { bgFlush_(); return 0; }   /* v170.23.12.5: پرسش بعد از معارفه، زیر سقف ۷۵ دقیقه (یادآوری پیش از جلسه در tgWatchdog واجب است) */
+  if (!TG_DRY && !bgMeetDue_()) return 0;   /* v170.38 (سهمیهٔ اجرا): ۹ تا ۲۱ هر ساعت، بیرون از آن هر ۳ ساعت؛ تیک‌های میانی بی خواندن شیت */
   var rs0 = Date.now(); try {   /* v166.18: سنجش زمان اجرا (بدنه بی‌تغییر) */
   if (TG_DRY) return 0;
   var asked = 0, t0 = Date.now();
@@ -32201,12 +32203,19 @@ function tgDutyRun_(now) {
 
   /* لیدهای تازه */
   var codeRow = {};
+  /* v170.38 (سهمیهٔ اجرا): کل لیدها یک بار خوانده می‌شود و هر لید در انتظار از همین خواندن ساخته می‌شود.
+     پیش از این هر لید در انتظار (تا ۸۰ تا) سه بار جدا شیت را می‌خواند و هر خواندن کامل ۲۰ تا ۳۰ ثانیه می‌شد. */
+  var allV = last >= 2 ? sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues() : [], allHm = tgLeadHeadMap_(sh);
+  for (var a0 = 0; a0 < allV.length; a0++) { var c0 = String(allV[a0][codeCol - 1] || '').trim(); if (c0 && !codeRow[c0]) codeRow[c0] = a0 + 2; }
+  var leadOf = function (r, k) {   /* سطری که کدش هنوز در همین خواندن نیست (تازه کد گرفت) از خود شیت */
+    var v0 = allV[r - 2];
+    return v0 && String(v0[codeCol - 1] || '').trim() === k ? tgLeadOfRow_(v0, r, allHm) : tgLeadRead_(r);
+  };
   if (last >= 2) {
-    var from = Math.max(2, last - TG_DUTY_SCAN + 1), w0 = Math.max(codeCol, 6);
-    var block = sh.getRange(from, 1, last - from + 1, w0).getValues();
+    var from = Math.max(2, last - TG_DUTY_SCAN + 1);
+    var block = allV.slice(from - 2);
     for (var j = 0; j < block.length; j++) {
       var v = block[j], row = from + j;
-      var cj = String(v[codeCol - 1] || '').trim(); if (cj) codeRow[cj] = row;   /* v170.23.12.5: سطر لیدهای در انتظار از همین بلوک */
       if (!(String(v[3] || '').trim() || String(v[5] || '').trim())) continue;
       var fp = tgDutyFp_(v), code = String(v[codeCol - 1] || '').trim();
       if ((code && seen[code]) || seen[fp]) continue;
@@ -32224,7 +32233,7 @@ function tgDutyRun_(now) {
   for (var i = 0; i < pend.length; i++) {
     var x = pend[i], r = codeRow[x.k] || tgLeadByCode_(x.k);
     if (r < 2) continue;   /* لید حذف شد */
-    var l = tgLeadRead_(r);
+    var l = leadOf(r, x.k);
     if (!l || !(l.name || l.phone)) continue;
     if (!x.a) x.a = now.getTime() - (l.age || 0) * 60000;
     if (l.closed || l.touched) {

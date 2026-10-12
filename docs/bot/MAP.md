@@ -87,7 +87,7 @@
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۲۲۶ | ۲۰۶۶ |
+| `telegram.gs` | ۳۸۲۳۵ | ۲۰۶۶ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -102,7 +102,7 @@
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۵۷۸ | ۱۲۰ |
-| `v168.gs` | ۲۴۶۹ | ۱۵۳ |
+| `v168.gs` | ۲۴۹۳ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۴۷۹ | ۳۴ |
 | `leadmodel.gs` | ۷۷۹ | ۴۱ |
@@ -124,7 +124,7 @@
 | `migrate.gs` | ۵۶۲ | ۵۶ |
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
-| `assist.gs` | ۱۴۶۲ | ۱۱۴ |
+| `assist.gs` | ۱۴۶۵ | ۱۱۴ |
 | `leadspeed.gs` | ۱۱۵۶ | ۸۷ |
 | `leadclaim.gs` | ۶۰۳ | ۴۳ |
 | `nurture.gs` | ۲۸۹ | ۳۰ |
