@@ -2455,6 +2455,10 @@ function tgHandle(update) {
     TG_CUR = '';
     if (!TG_DRY) TG_OUT_BUF = [];   /* v162: دفتر خروجی آخر کار یک‌جا نوشته می‌شود */
     tgSeen_(update);
+    /* v170.39: بلاک و باز کردن دوبارهٔ بات در چت خصوصی */
+    if (update.my_chat_member && update.my_chat_member.chat && update.my_chat_member.chat.type === 'private') {
+      try { var mst = String((update.my_chat_member.new_chat_member || {}).status || ''); if (mst) tgBlkSet_(update.my_chat_member.chat.id, mst === 'kicked'); } catch (eBk) {}
+    }
     const pc = update.callback_query
       ? (update.callback_query.message && update.callback_query.message.chat ? update.callback_query.message.chat.id : 0)
       : (((update.message || update.edited_message || {}).chat || {}).id || 0);
@@ -6765,6 +6769,17 @@ function tgCbFix_(markup) {
   }
   return markup;
 }
+/* v170.39: دکمهٔ بی داده (BUTTON_DATA_INVALID کل پیام را برمی‌گرداند) بعد از گزارش tgBtnCheck_ برداشته می‌شود تا خود پیام برسد */
+function tgCbDropEmpty_(markup) {
+  var rows = markup && markup.inline_keyboard;
+  if (!rows || !rows.length) return markup;
+  for (var r2 = rows.length - 1; r2 >= 0; r2--) {
+    var row2 = rows[r2] || [];
+    for (var j2 = row2.length - 1; j2 >= 0; j2--) { var b2 = row2[j2]; if (b2 && 'callback_data' in b2 && !tgCbBytes_(b2.callback_data)) row2.splice(j2, 1); }
+    if (!row2.length) rows.splice(r2, 1);
+  }
+  return markup;
+}
 
 /* v170.9.2: تست دادهٔ دکمه (BUTTON_DATA_INVALID روی دیپلوی اصلی، اجرای 37152498810؛ ۸ پیام به پذیرش) */
 function tgCbTests() {
@@ -6862,9 +6877,9 @@ function tgApi_(method, body) {
   if (body && body.reply_markup) {
     if (typeof body.reply_markup === 'string') {
       var rmk = null; try { rmk = JSON.parse(body.reply_markup); } catch (e) {}
-      if (rmk && rmk.inline_keyboard) { var before = body.reply_markup; tgCbFix_(rmk); var after = JSON.stringify(rmk); if (after !== before) body.reply_markup = after; }
-      tgBtnCheck_(method, rmk);
-    } else { tgCbFix_(body.reply_markup); tgBtnCheck_(method, body.reply_markup); }
+      if (rmk && rmk.inline_keyboard) { var before = body.reply_markup; tgCbFix_(rmk); tgBtnCheck_(method, rmk); tgCbDropEmpty_(rmk); var after = JSON.stringify(rmk); if (after !== before) body.reply_markup = after; }
+      else tgBtnCheck_(method, rmk);
+    } else { tgCbFix_(body.reply_markup); tgBtnCheck_(method, body.reply_markup); tgCbDropEmpty_(body.reply_markup); }
   }
   if (TG_API_CHAT) {
     if (method === 'answerCallbackQuery') { if (TG_DRY) TG_OUTBOX.push({ kind: 'api', method: method }); return null; }
@@ -6874,6 +6889,7 @@ function tgApi_(method, body) {
       return null;
     }
   }
+  if (body && TG_BLK_METHODS.test(method) && tgBlkIs_(body.chat_id)) { if (TG_DRY) TG_OUTBOX.push({ kind: 'blocked', method: method, chat: String(body.chat_id) }); return tgBlkRes_(); }   /* v170.39 */
   if (TG_DRY) { TG_OUTBOX.push({ kind: 'api', method: method }); return null; }
   if (tgTestLeak_('تلگرام ' + method)) return null;
   const token = PropertiesService.getScriptProperties().getProperty('TELEGRAM_TOKEN');
@@ -6888,10 +6904,61 @@ function tgApi_(method, body) {
     res = tgFetchRetry_(url, { method: 'post', contentType: 'application/json', payload: JSON.stringify(b2), muteHttpExceptions: true });
     code = res.getResponseCode(); txt = code === 200 ? '' : String(res.getContentText() || '');
   }
+  /* v170.39: فایلی که به شکل سند ذخیره شده (عکس پروفایل، رزومه) با sendPhoto نمی‌رود؛ همان شناسه با sendDocument */
+  var asDoc = tgPhotoAsDoc_(method, code, txt, body);
+  if (asDoc) {
+    res = tgFetchRetry_('https://api.telegram.org/bot' + token + '/sendDocument', { method: 'post', contentType: 'application/json', payload: JSON.stringify(asDoc), muteHttpExceptions: true });
+    code = res.getResponseCode(); txt = code === 200 ? '' : String(res.getContentText() || ''); method = 'sendDocument';
+  }
   /* پاسخ دیرِ دکمه هیچ اثری برای کاربر ندارد؛ خطا نیست */
   if (code === 400 && method === 'answerCallbackQuery' && /query is too old|query ID is invalid/i.test(txt)) return res;
+  /* v170.39: کسی که بات را بلاک کرده از فهرست ارسال بیرون می‌رود (یک چت تا ۵۰ خطا در روز می‌ساخت)؛ خطا ثبت نمی‌شود */
+  if (code === 403 && body && TG_BLK_RE.test(txt)) { tgBlkSet_(body.chat_id, true); return res; }
   if (code !== 200) tgErr_('tgApi_ ' + method, txt, body && body.chat_id ? 'chat ' + body.chat_id : '');
   return res;
+}
+
+/* ───── v170.39: کاربرانی که بات را بلاک کرده‌اند ─────
+   ۴۰۳ «bot was blocked by the user» یا my_chat_member با وضعیت kicked ← chat در Script Property «TG_BLOCKED» (کش ۶ ساعته)؛
+   هر ارسال بعدی به همان چت بی تماس با تلگرام برمی‌گردد. وقتی دوباره بات را باز کند (my_chat_member: member) از فهرست بیرون می‌آید.
+   فقط چت خصوصی (شناسهٔ مثبت). سقف TG_BLK_MAX تا Property از ۹ کیلوبایت نگذرد. */
+var TG_BLK_PROP = 'TG_BLOCKED', TG_BLK_MAX = 250, TG_BLK_X = null;
+var TG_BLK_METHODS = /^(send|copyMessage$|forwardMessage$)/;
+var TG_BLK_RE = /bot was blocked by the user|user is deactivated/i;
+function tgBlkMap_() {
+  if (TG_DRY) return (TG_MEM['blk'] = TG_MEM['blk'] || {});
+  if (TG_BLK_X) return TG_BLK_X;
+  var raw = null, c = null;
+  try { c = CacheService.getScriptCache(); raw = c.get('blkset'); } catch (e) {}
+  if (raw === null) { raw = PropertiesService.getScriptProperties().getProperty(TG_BLK_PROP) || '{}'; try { if (c) c.put('blkset', raw, 21600); } catch (e2) {} }
+  try { TG_BLK_X = JSON.parse(raw) || {}; } catch (e3) { TG_BLK_X = {}; }
+  return TG_BLK_X;
+}
+function tgBlkIs_(chat) { chat = String(chat == null ? '' : chat); return /^\d+$/.test(chat) && !!tgBlkMap_()[chat]; }
+function tgBlkSet_(chat, on) {
+  chat = String(chat == null ? '' : chat);
+  if (!/^\d+$/.test(chat)) return false;
+  var m = tgBlkMap_(), had = !!m[chat];
+  if (!!on === had) return false;
+  if (on) m[chat] = Math.floor(Date.now() / 86400000); else delete m[chat];
+  if (TG_DRY) return true;
+  var ks = Object.keys(m);
+  if (ks.length > TG_BLK_MAX) ks.sort(function (a, b) { return m[a] - m[b]; }).slice(0, ks.length - TG_BLK_MAX).forEach(function (k) { delete m[k]; });
+  var raw = JSON.stringify(m);
+  try { PropertiesService.getScriptProperties().setProperty(TG_BLK_PROP, raw); CacheService.getScriptCache().put('blkset', raw, 21600); } catch (e) {}
+  return true;
+}
+/* پاسخ ساختگی برای صدازننده‌هایی که getResponseCode می‌خوانند */
+function tgBlkRes_() {
+  var t = '{"ok":false,"error_code":403,"description":"Forbidden: bot was blocked by the user (فهرست بلاک)"}';
+  return { getResponseCode: function () { return 403; }, getContentText: function () { return t; } };
+}
+/* sendPhoto با شناسهٔ فایلِ سند ← بدنهٔ sendDocument با همان شناسه؛ وگرنه null */
+function tgPhotoAsDoc_(method, code, txt, body) {
+  if (method !== 'sendPhoto' || code !== 400 || !body || typeof body.photo !== 'string' || !/type Document as Photo/i.test(String(txt || ''))) return null;
+  var b = JSON.parse(JSON.stringify(body));
+  b.document = b.photo; delete b.photo;
+  return b;
 }
 
 /* v166.23: خطای شبکهٔ UrlFetch (مثل Address unavailable) تا سه بار با فاصلهٔ کوتاه تکرار می‌شود؛ ۵xx هم یک بار دیگر */
@@ -19121,19 +19188,30 @@ function tgErr_(where, err, ref) {
     var key = 'err:' + day + ':' + tgHash_(w + '|' + String(msg).slice(0, 120));
     var c = CacheService.getScriptCache(), hit = c.get(key);
     var sh = tgErrSheet_(); if (!sh) return '';
-    if (hit) {
-      var row = Number(hit);
+    var bump = function (h) {
+      var row = Number(h);
       var cur = Number(sh.getRange(row, 6).getValue() || 1);
       sh.getRange(row, 6).setValue(cur + 1);
       return String(sh.getRange(row, 1).getValue() || '');
-    }
-    var last = sh.getLastRow(), seq = 1000;
-    if (last >= 2) { var m = String(sh.getRange(last, 1).getValue() || '').match(/E-(\d+)/); if (m) seq = Number(m[1]); }
-    var id = 'E-' + (seq + 1);
-    sh.appendRow([id, new Date(), w, ref || '', String(msg).slice(0, TG_ERR_MAX), 1, 'تازه']);
-    c.put(key, String(sh.getLastRow()), 21600);
-    return id;
+    };
+    if (hit) return bump(hit);
+    /* v170.39: شناسه زیر قفل کاربر (همان قفل هاب عملیات، جدا از قفل اسکریپت بات). پیش از این چند اجرای هم‌زمان یک شناسه
+       (مثلاً E-1039 سه بار) و سطرهای تکراری می‌ساختند. قفل نیامد: شناسه پسوند تصادفی می‌گیرد تا تکراری نشود */
+    var lk = null;
+    if (!(typeof OPS_LOCKED !== 'undefined' && OPS_LOCKED)) { lk = LockService.getUserLock(); if (!lk.tryLock(2000)) lk = false; }
+    try {
+      if (lk !== false) { hit = c.get(key); if (hit) return bump(hit); }
+      var id = tgErrNextId_(sh.getLastRow() >= 2 ? sh.getRange(sh.getLastRow(), 1).getValue() : '', lk === false);
+      sh.appendRow([id, new Date(), w, ref || '', String(msg).slice(0, TG_ERR_MAX), 1, 'تازه']);
+      c.put(key, String(sh.getLastRow()), 21600);
+      return id;
+    } finally { if (lk) { try { lk.releaseLock(); } catch (eL) {} } }
   } catch (e) { return ''; }
+}
+/* شناسهٔ خطای بعدی از شناسهٔ سطر آخر؛ بی قفل با پسوند تصادفی */
+function tgErrNextId_(lastId, noLock) {
+  var m = String(lastId || '').match(/E-(\d+)/), seq = m ? Number(m[1]) : 1000;
+  return 'E-' + (seq + 1) + (noLock ? '-' + Math.random().toString(36).slice(2, 5) : '');
 }
 function tgHash_(s) {
   var h = 0; s = String(s || '');
@@ -38130,3 +38208,45 @@ function tgV17040Tests() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'tgV17040Tests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['شمارش لید بی مدل لید (v170.40)', 'tgV17040Tests']); } catch (eV40) {}
+
+/* v170.39: چهار خطای تب «خطاها» (گزارش ۲۰ مهر): بلاک، عکسِ سند، دکمهٔ بی داده، شناسهٔ تکراری خطا */
+function tgV17039Tests() {
+  var pass = 0, fail = 0, out = [];
+  function ok(n, c, x) { if (c) pass++; else fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !x ? '' : ' · ' + String(x).slice(0, 160))); }
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, bad: TG_BTN_BAD.slice() };
+  TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
+  try {
+    /* عکسی که سند است */
+    var b = { chat_id: 101, photo: 'FILEID-1', caption: 'کارت', parse_mode: 'HTML' };
+    var d = tgPhotoAsDoc_('sendPhoto', 400, '{"description":"Bad Request: can\'t use file of type Document as Photo"}', b);
+    ok('عکسِ سند ← sendDocument با همان شناسه و توضیح', d && d.document === 'FILEID-1' && !('photo' in d) && d.caption === 'کارت' && b.photo === 'FILEID-1');
+    ok('خطای دیگر یا روش دیگر تبدیل نمی‌شود', tgPhotoAsDoc_('sendPhoto', 400, 'chat not found', b) === null && tgPhotoAsDoc_('sendMessage', 400, 'type Document as Photo', b) === null);
+    /* بلاک */
+    ok('در آغاز هیچ چتی بلاک نیست', !tgBlkIs_(9001));
+    ok('بلاک ثبت می‌شود', tgBlkSet_(9001, true) && tgBlkIs_('9001'));
+    TG_OUTBOX = [];
+    var r = tgApi_('sendMessage', { chat_id: 9001, text: 'سلام' });
+    ok('ارسال به چت بلاک‌شده بی تماس با تلگرام، پاسخ ۴۰۳', r && r.getResponseCode() === 403 && TG_OUTBOX.length === 1 && TG_OUTBOX[0].kind === 'blocked');
+    TG_OUTBOX = []; tgApi_('sendMessage', { chat_id: 9002, text: 'سلام' });
+    ok('چت دیگر مثل قبل', TG_OUTBOX.length === 1 && TG_OUTBOX[0].kind === 'api');
+    TG_OUTBOX = []; tgApi_('answerCallbackQuery', { chat_id: 9001, callback_query_id: 'q' });
+    ok('روش غیر ارسالی برای چت بلاک‌شده رد نمی‌شود', TG_OUTBOX.length === 1 && TG_OUTBOX[0].kind === 'api');
+    ok('گروه (شناسهٔ منفی) هرگز بلاک ثبت نمی‌شود', !tgBlkSet_(-1001234567890, true) && !tgBlkIs_(-1001234567890));
+    ok('باز کردن دوباره از فهرست بیرون می‌آورد', tgBlkSet_(9001, false) && !tgBlkIs_(9001));
+    ok('متن ۴۰۳ بلاک و حساب حذف‌شده شناخته می‌شود', TG_BLK_RE.test('Forbidden: bot was blocked by the user') && TG_BLK_RE.test('Forbidden: user is deactivated') && !TG_BLK_RE.test('Forbidden: bot is not a member'));
+    ok('my_chat_member در tgHandle بلاک و باز کردن را ثبت می‌کند', /my_chat_member[\s\S]{0,300}tgBlkSet_\([^)]*'kicked'\)/.test(String(tgHandle)));
+    /* دکمهٔ بی داده */
+    TG_BTN_BAD = [];
+    var mk = { inline_keyboard: [[{ text: 'خالی', callback_data: '' }, { text: 'درست', callback_data: 'ok:1' }], [{ text: 'خالی ۲', callback_data: '' }]] };
+    TG_OUTBOX = []; tgApi_('sendMessage', { chat_id: 9003, text: 'پیام', reply_markup: mk });
+    ok('دکمهٔ بی داده برداشته می‌شود و پیام می‌رود', mk.inline_keyboard.length === 1 && mk.inline_keyboard[0].length === 1 && mk.inline_keyboard[0][0].callback_data === 'ok:1' && TG_OUTBOX.length === 1, JSON.stringify(mk));
+    ok('دکمهٔ بی داده پیش از برداشتن گزارش می‌شود', TG_BTN_BAD.length >= 1, JSON.stringify(TG_BTN_BAD));
+    /* شناسهٔ خطا */
+    ok('شناسهٔ خطای بعدی', tgErrNextId_('E-1061', false) === 'E-1062' && tgErrNextId_('', false) === 'E-1001');
+    ok('بی قفل: پسوند تصادفی، دو بار یکی نیست', /^E-1062-[0-9a-z]{1,3}$/.test(tgErrNextId_('E-1061', true)) && tgErrNextId_('E-1061', true) !== tgErrNextId_('E-1061', true));
+    ok('ثبت خطا زیر قفل کاربر', /getUserLock\(\)[\s\S]{0,400}tgErrNextId_/.test(String(tgErr_)));
+  } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_BTN_BAD = keep.bad; }
+  return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'tgV17039Tests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['چهار خطای تب خطاها (v170.39)', 'tgV17039Tests']); } catch (eV39) {}

@@ -280,7 +280,7 @@ function ktbRouteMaybe_() {
   ktbRouteRows_().forEach(function (r) {
     if (!r.owner) return;
     if (r.kind === 'کار بی‌صاحب') { if (ktbDry_()) (TG_MEM['ktb:own'] = TG_MEM['ktb:own'] || []).push(r); else ktbOwnerSet_(r.ref, r.owner); }
-    var t = { title: r.title, cat: r.kind === 'باگ' ? 'فنی' : 'پذیرش', owner: r.owner, by: 'بات', due: new Date(ktbNow_() + 2 * 86400000), src: 'بات', ref: 'KTB:' + r.kind + ':' + r.ref, note: r.why };
+    var t = { title: r.title, cat: r.kind === 'باگ' ? 'فنی' : 'لید و پذیرش', owner: r.owner, by: 'بات', due: new Date(ktbNow_() + 2 * 86400000), src: 'بات', ref: 'KTB:' + r.kind + ':' + r.ref, note: r.why };
     if (r.kind === 'کار بی‌صاحب') return;
     if (ktbDry_()) (TG_MEM['ktb:tasks'] = TG_MEM['ktb:tasks'] || []).push(t); else opsAdd_(t);
     n++;

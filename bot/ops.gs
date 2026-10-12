@@ -172,7 +172,16 @@ function opsArr_(t) {
 }
 function opsGet_(code) { return opsRows_().filter(function (t) { return t.code === code; })[0] || null; }
 function opsByRef_(ref) { return opsRows_().filter(function (t) { return t.ref === ref && opsOpen_(t); }); }
+/* v170.39: دستهٔ کار همیشه یکی از فهرست کشویی ستون «دسته» (OPS_CATS). پیش از این «پذیرش» (کارتابل، کامنت‌ها) در فهرست نبود و
+   هر نوشتن روی همان سطر (مثلاً تغییر وضعیت از vnTick_) با خطای اعتبارسنجی سلول C می‌شکست */
+var OPS_CAT_MAP = { 'پذیرش': 'لید و پذیرش', 'لید': 'لید و پذیرش', 'کلینیک': 'درمانگران', 'مجله': 'مجله و محتوا', 'محتوا': 'مجله و محتوا', 'باگ': 'فنی' };
+function opsCat_(c) {
+  c = String(c || '').trim();
+  if (OPS_CATS.indexOf(c) > -1) return c;
+  return OPS_CAT_MAP[c] || 'اداری';
+}
 function opsWrite_(t) {
+  t.cat = opsCat_(t.cat);
   if (opsDry_()) { var rows = opsRows_(), i = rows.map(function (x) { return x.code; }).indexOf(t.code); if (i < 0) rows.push(t); else rows[i] = t; return; }
   var sh = opsSheet_(); if (!sh) return;
   if (t.row) sh.getRange(t.row, 1, 1, OPS_HEAD.length).setValues([opsArr_(t)]);
@@ -203,7 +212,7 @@ function opsAdd_(o) {
     }
     var mx = 1000;
     rows.forEach(function (t) { var m = /^T-(\d+)$/.exec(t.code); if (m) mx = Math.max(mx, +m[1]); });
-    var t = { code: 'T-' + (mx + 1), title: String(o.title || '').slice(0, 200), cat: o.cat || 'اداری', pri: o.pri || 'عادی', st: o.st || OPS_ST.NEW,
+    var t = { code: 'T-' + (mx + 1), title: String(o.title || '').slice(0, 200), cat: opsCat_(o.cat), pri: o.pri || 'عادی', st: o.st || OPS_ST.NEW,
       owner: o.owner || '', by: o.by || 'بات', resp: o.resp || '', made: opsStamp_(), due: o.due ? opsJ_(o.due) : '', dueAt: o.due || null,
       src: o.src || 'بات', ref: o.ref || '', link: o.link || '', note: String(o.note || '').slice(0, 500), moved: opsStamp_(), ownerChat: o.ownerChat || '', esc: '' };
     opsWrite_(t);
@@ -1083,6 +1092,16 @@ function opsTests() {
     TG_MEM['apiwho'] = { chat: 7001, name: 'سردبیر' };
     var hm = opsApi_({ initData: 'x' }, 'hub.me');
     ok('مینی‌اپ hub.me لینک هاب خود نفر', hm.ok && hm.url === hubE.url);
+
+    /* v170.39: دسته همیشه از فهرست کشویی */
+    var cA = opsAdd_({ title: 'کار دستهٔ کهنه', cat: 'پذیرش', owner: 'سردبیر آزمایشی', ref: 'X-CAT1' });
+    var cB = opsAdd_({ title: 'کار دستهٔ ناشناس', cat: 'نامعلوم', owner: 'سردبیر آزمایشی', ref: 'X-CAT2' });
+    var catOf = function (c) { return (opsRows_().filter(function (t) { return t.code === c; })[0] || {}).cat; };
+    ok('دستهٔ «پذیرش» ← «لید و پذیرش»، ناشناس ← «اداری»', catOf(cA) === 'لید و پذیرش' && catOf(cB) === 'اداری');
+    var oldT = opsRows_().filter(function (t) { return t.code === cA; })[0]; oldT.cat = 'پذیرش';
+    opsAdd_({ ref: 'X-CAT1', st: OPS_ST.DONE });
+    opsAdd_({ ref: 'X-CAT2', st: OPS_ST.DONE });
+    ok('سطر قدیمی با دستهٔ بیرون از فهرست هنگام نوشتن درست می‌شود', catOf(cA) === 'لید و پذیرش');
 
     /* خانهٔ تیم در مینی‌اپ (v169.3) */
     TG_MEM['ops:now'] = pbTehran_(2026, 10, 3, 10, 0).getTime();
