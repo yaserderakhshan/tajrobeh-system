@@ -408,90 +408,227 @@ main.tj-page{margin-block-start:0}
 .tj2 #need .chips{flex-wrap:wrap;overflow:visible;justify-content:flex-start}
 @media (max-width:760px){.tj2 #need .chip{font-size:15px;padding:11px 16px}}
 
-/* gt-simple: chips in grid fix */
-.tj2 .school .chips{flex-wrap:wrap}.tj2 .school>*,.tj2 .school .wrap>*{min-width:0}
+/* == gtw v2: ویجت شروع تراپی · 1405-06-29 == */
+main.tj-page{margin-block-start:0}.wp-block-post-content>.tj2.alignfull{margin-top:0}
+body.gt-focus .tjh nav,body.gt-focus .tjh .burger,body.gt-focus .tjh .cta.alt,body.gt-focus .tjh .mcta{display:none!important}
+body:has(#gtw) .tjh nav,body:has(#gtw) .tjh .burger,body:has(#gtw) .tjh .cta.alt{display:none!important}
+body.gt-focus #tjFabRoot,body:has(#gtw) #tjFabRoot{display:none!important}
+.tj2 #start.gtw-sec{background:#fff;padding:34px 0 26px}
+.tj2 .gtw-head{text-align:center;max-width:680px;margin:0 auto 20px}
+.tj2 .gtw-head h1{font-size:clamp(26px,5.4vw,40px);line-height:1.45;margin:10px 0 8px}
+.tj2 .gtw-head h1 em{font-style:normal;color:var(--tj-red)}
+.tj2 .gtw-head .lede{font-size:15.5px;line-height:1.9;color:var(--tj-soft);margin:0 auto;max-width:600px;text-align:center}
+.tj2 .gtw{max-width:720px;margin:0 auto;border:1px solid var(--tj-line);border-radius:22px;background:#fff;padding:20px 22px 16px;box-shadow:0 10px 34px rgba(14,14,14,.06);transition:max-width .25s}
+.tj2 .gtw.wide{max-width:1000px}
+/* استپر */
+.tj2 .gtw-steps{list-style:none;margin:0 0 18px;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:relative}
+.tj2 .gtw-steps li{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;margin:0;padding:0;text-align:center;min-width:0}
+.tj2 .gtw-steps li::before{content:"";position:absolute;top:13px;inset-inline-start:calc(-50% + 18px);width:calc(100% - 36px);height:2px;background:var(--tj-line);border-radius:2px}
+.tj2 .gtw-steps li:first-child::before{display:none}
+.tj2 .gtw-steps li.done::before,.tj2 .gtw-steps li.now::before{background:var(--tj-red-400)}
+.tj2 .gtw-steps .n{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;line-height:1;background:#fff;border:2px solid var(--tj-line);color:var(--tj-mut);transition:.2s}
+.tj2 .gtw-steps .n svg{width:14px;height:14px}
+.tj2 .gtw-steps .l{font-size:12.5px;line-height:1.6;color:var(--tj-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tj2 .gtw-steps li.now .n{border-color:var(--tj-red);color:var(--tj-red);box-shadow:0 0 0 4px var(--tj-tint)}
+.tj2 .gtw-steps li.now .l{color:var(--tj-ink);font-weight:700}
+.tj2 .gtw-steps li.done .n{background:var(--tj-red);border-color:var(--tj-red);color:#fff}
+.tj2 .gtw-steps li.done .l{color:var(--tj-soft)}
+.tj2 .gtw-steps li.done{cursor:pointer}
+.tj2 .gtw-steps li.done:hover .l{color:var(--tj-red)}
+/* پنل و گزینه‌ها */
+.tj2 .gtw-panel{animation:gtwIn .28s ease both;min-height:236px}
+@keyframes gtwIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.tj2 .gtw-panel{animation:none}}
+.tj2 .gtw-q{font-size:19px;font-weight:700;line-height:1.7;margin:0 0 2px;color:var(--tj-ink);text-align:start}
+.tj2 .gtw-hint{font-size:13.5px;color:var(--tj-mut);line-height:1.8;margin:0 0 14px;text-align:start}
+.tj2 .gtw-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tj2 .gtw-opts.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tj2 .gtw-opt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;min-height:58px;padding:10px 12px;border:1px solid var(--tj-line);border-radius:14px;background:#fff;color:var(--tj-ink)!important;font:inherit;font-size:15px;line-height:1.6;cursor:pointer;text-decoration:none!important;transition:border-color .15s,background .15s,transform .1s;-webkit-tap-highlight-color:transparent}
+.tj2 .gtw-opt small{display:block;font-size:12px;color:var(--tj-mut);line-height:1.6}
+.tj2 .gtw-opt:hover,.tj2 .gtw-opt:focus-visible{border-color:var(--tj-red);background:var(--tj-tint);outline:none}
+.tj2 .gtw-opt:active{transform:scale(.98)}
+.tj2 .gtw-opt.on{border-color:var(--tj-red);background:var(--tj-tint);color:var(--tj-red)!important}
+.tj2 .gtw-opt.wide{grid-column:1/-1}
+.tj2 .gtw-sub{margin-top:14px;padding-top:14px;border-top:1px dashed var(--tj-line)}
+.tj2 .gtw-sub .gtw-opt{min-height:46px;font-size:14px}
+/* پاورقی ویجت */
+.tj2 .gtw-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid var(--tj-sunk);min-height:30px}
+.gtw-foot{flex-wrap:wrap}.tj2 .gtw-fast{flex-basis:100%;font-size:14px;color:var(--tj-mut);line-height:1.9}.tj2 .gtw-fast a{color:var(--tj-red);font-weight:700;text-decoration:underline;text-underline-offset:4px}.tj2 .gtw.wide .gtw-fast{display:none}
+.tj2 .gtw-back{appearance:none;border:0;background:none;font:inherit;font-size:13.5px;color:var(--tj-soft);cursor:pointer;padding:4px 0;display:inline-flex;align-items:center;gap:6px}
+.tj2 .gtw-back svg{width:14px;height:14px}
+.tj2 .gtw-back:hover{color:var(--tj-red)}
+.tj2 .gtw-back[hidden]{display:inline-flex;visibility:hidden}
+.tj2 .gtw-assure{font-size:12.5px;color:var(--tj-mut);line-height:1.7;text-align:end}
+/* نتیجه */
+.tj2 .gtw-sum{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.tj2 .gtw-sum span{font-size:12.5px;line-height:1.6;color:var(--tj-soft);background:var(--tj-sunk);border-radius:999px;padding:3px 10px}
+.tj2 .gtw-cards{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:6px}
+.tj2 .gtw-card{position:relative;display:flex;flex-direction:column;border:1px solid var(--tj-line);border-radius:18px;padding:16px;background:#fff;transition:border-color .18s,box-shadow .18s;min-width:0}
+.tj2 .gtw-card:hover{border-color:var(--tj-red-400);box-shadow:0 10px 26px -16px rgba(14,14,14,.3)}
+.tj2 .gtw-card .vf{position:absolute;top:12px;inset-inline-end:12px;width:18px;height:18px}
+.tj2 .gtw-card .who{display:flex;align-items:center;gap:12px;min-width:0}
+.tj2 .gtw-card .ph{flex:none;width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--tj-sunk);background:var(--tj-sunk);display:block}
+.tj2 .gtw-card .mono{flex:none;width:64px;height:64px;border-radius:50%;background:var(--tj-tint);color:var(--tj-red);border:3px solid var(--tj-sunk);display:grid;place-items:center;font-size:17px;font-weight:700;letter-spacing:1px}
+.tj2 .gtw-card .id{min-width:0;padding-inline-end:22px}
+.tj2 .gtw-card b{display:block;font-size:15.5px;line-height:1.6;color:var(--tj-ink);font-weight:700}
+.tj2 .gtw-card .tt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px;color:var(--tj-mut);line-height:1.7}
+.tj2 .gtw-card .meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.tj2 .gtw-card .meta span{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;line-height:1.7;padding:2px 9px;border-radius:999px;background:var(--tj-sunk);color:var(--tj-soft)}
+.tj2 .gtw-card .meta span.yr{background:var(--tj-tint);color:var(--tj-red-600)}
+.tj2 .gtw-card .meta svg{width:11px;height:11px;flex:none;color:var(--tj-mut)}
+.tj2 .gtw-card .hl{position:relative;margin:12px 0 0;padding-inline-start:12px;border-inline-start:2px solid var(--tj-red-400);font-size:13.5px;line-height:1.85;color:var(--tj-soft);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tj2 .gtw-card .grow{flex:1 1 auto;min-height:12px}
+.tj2 .gtw-card .slot{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--tj-tint)}
+.tj2 .gtw-card .slot svg{flex:none;width:20px;height:20px;color:var(--tj-red)}
+.tj2 .gtw-card .slot small{display:block;font-size:11.5px;line-height:1.6;color:var(--tj-red-600)}
+.tj2 .gtw-card .slot strong{display:block;font-size:14px;line-height:1.7;color:var(--tj-ink);font-weight:700}
+.tj2 .gtw-card .slot.none{background:var(--tj-sunk)}
+.tj2 .gtw-card .slot.none svg{color:var(--tj-mut)}
+.tj2 .gtw-card .slot.none small{color:var(--tj-mut)}
+.tj2 .gtw-card .slot.none strong{font-weight:500;color:var(--tj-soft);font-size:13px}
+.tj2 .gtw-card .slot.wait{background:var(--tj-sunk);overflow:hidden;position:relative}
+.tj2 .gtw-card .slot.wait::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.75) 50%,transparent 70%);animation:gtwSh 1.4s linear infinite}
+@keyframes gtwSh{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+.tj2 .gtw-card .slot.wait svg,.tj2 .gtw-card .slot.wait small{color:var(--tj-mut)}
+.tj2 .gtw-card .slot.wait strong{font-weight:500;color:var(--tj-soft);font-size:13px}
+.tj2 .gtw-card a.btn{display:flex;justify-content:center;text-align:center;width:100%;margin-top:10px;font-size:14.5px;padding:11px 14px;box-sizing:border-box}
+.tj2 .gtw-card a.more{display:block;text-align:center;font-size:12.5px;color:var(--tj-mut)!important;text-decoration:none;margin-top:8px;line-height:1.6}
+.tj2 .gtw-card a.more:hover{color:var(--tj-red)!important;text-decoration:underline}
+.tj2 .gtw-altnote{margin:10px 2px 0}
+.tj2 .gtw-card .tag{align-self:flex-start;display:inline-block;margin:0 0 10px;font-size:11.5px;line-height:1.7;padding:2px 10px;border-radius:999px;background:var(--tj-ink);color:#fff;font-weight:500}
+.tj2 .gtw-card.is-alt{border-style:dashed}
+.tj2 .gtw-or{display:flex;align-items:center;gap:12px;margin:18px 0 10px;font-size:12.5px;color:var(--tj-mut)}
+.tj2 .gtw-or::before,.tj2 .gtw-or::after{content:"";flex:1;height:1px;background:var(--tj-line)}
+.tj2 .gtw-doors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tj2 .gtw-doors .gtw-opt{min-height:54px;font-size:14px}
+.tj2 .gtw-note{font-size:12.5px;color:var(--tj-mut);line-height:1.9;margin:10px 2px 0;text-align:start}
+.tj2 .gtw-abinfo{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;padding:10px 12px;border:1px solid var(--tj-line);border-radius:12px;font-size:13px;line-height:1.85;color:var(--tj-soft)}
+.tj2 .gtw-abinfo svg{flex:none;width:18px;height:18px;margin-top:3px;color:var(--tj-red)}
+.tj2 .gtw-formwrap .formbox{margin-top:8px;box-shadow:none;border:0;padding:0;max-width:none}
+.tj2 .gtw-formwrap fieldset{grid-template-columns:minmax(0,1fr)!important}
+.tj2 .gtw-hide{display:none!important}
+.tj2 .gtw-trust{list-style:none;margin:18px auto 0;padding:0;max-width:720px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.tj2 .gtw-trust li{display:flex;gap:7px;align-items:flex-start;font-size:13px;line-height:1.8;color:var(--tj-soft);margin:0}
+.tj2 .gtw-trust svg{flex:none;width:16px;height:16px;margin-top:4px;color:var(--tj-red)}
+.tj2 #after .how-step svg.ic{display:block;width:48px;height:48px;margin-bottom:10px;color:var(--tj-mut)}
+@media (max-width:760px){.tj2 #after .how-step svg.ic{width:36px;height:36px}}
+.tj2 .gtw-old{font-size:13px;color:var(--tj-mut);text-align:center;margin:26px 0 0}
+.tj2 .gtw-old a{color:var(--tj-soft)!important;text-decoration:underline}
+.tj2 #callback .formbox{max-width:560px;margin-inline:auto}
+.gtw-bar{position:fixed;inset-inline:0;bottom:0;z-index:60;display:none;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid #dfdfe2;transform:translateY(110%);transition:transform .25s}
+.gtw-bar.show{transform:none}
+.gtw-bar a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:999px;background:#c83f49;color:#fff!important;font-size:15.5px;font-weight:700;text-decoration:none!important}
+@media (min-width:761px){
+.tj2 .gtw-opts:not(.c3){grid-template-columns:repeat(4,minmax(0,1fr))}
+.tj2 .gtw-opts:not(.c3) .gtw-opt{min-height:72px}
+.tj2 .gtw-opts.s2{grid-template-columns:repeat(4,minmax(0,1fr))}
+.tj2 .gtw-cards.n2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tj2 .gtw-cards.n3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tj2 .gtw-cards.n1{max-width:420px}
+.tj2 .gtw-cards.n2 .gtw-card .tag,.tj2 .gtw-cards.n3 .gtw-card .tag{position:absolute;top:12px;inset-inline-start:12px;margin:0}
+.tj2 .gtw-cards.n2 .gtw-card .who,.tj2 .gtw-cards.n3 .gtw-card .who{flex-direction:column;text-align:center;gap:8px}
+.tj2 .gtw-cards.n2 .gtw-card .id,.tj2 .gtw-cards.n3 .gtw-card .id{padding-inline-end:0}
+.tj2 .gtw-cards.n2 .gtw-card .ph,.tj2 .gtw-cards.n3 .gtw-card .ph,.tj2 .gtw-cards.n2 .gtw-card .mono,.tj2 .gtw-cards.n3 .gtw-card .mono{width:76px;height:76px}
+.tj2 .gtw-cards.n2 .gtw-card .meta,.tj2 .gtw-cards.n3 .gtw-card .meta{justify-content:center}
+.tj2 .gtw-cards.n2 .gtw-card .tt,.tj2 .gtw-cards.n3 .gtw-card .tt{min-height:3.4em}
+}
+@media (max-width:760px){
+.gtw-bar{display:block}
+.tj2 #start.gtw-sec{padding:18px 0 22px}
+.tj2 .gtw-head{margin-bottom:14px}
+.tj2 .gtw-head .eyebrow{display:none}
+.tj2 .gtw-head h1{margin-top:0}
+.tj2 .gtw-head .lede{font-size:14.5px;line-height:1.85}
+.tj2 .gtw{padding:16px 14px 12px;border-radius:18px}
+.tj2 .gtw-steps{margin-bottom:14px}
+.tj2 .gtw-steps .l{font-size:11.5px}
+.tj2 .gtw-panel{min-height:0}
+.tj2 .gtw-q{font-size:17.5px}
+.tj2 .gtw-opts.c3{grid-template-columns:repeat(1,minmax(0,1fr))}
+.tj2 .gtw-opts.c3 .gtw-opt{min-height:52px}
+.tj2 .gtw-sub .gtw-opts.c3{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tj2 .gtw-trust{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px}
+.tj2 .gtw-doors{grid-template-columns:minmax(0,1fr)}
+.tj2 .gtw-assure{font-size:11.5px}
+body.gt-focus .tj2{padding-bottom:76px}
+}
+/* == gtw match: لحظهٔ انتخاب، چرا این گزینه، همراهی · 1405-07-11 == */
+.tj2 .gtw-match{padding:6px 0 4px}
+.tj2 .gtw-match ol{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.tj2 .gtw-match li{display:flex;gap:12px;align-items:flex-start;opacity:.35;transition:opacity .3s}
+.tj2 .gtw-match li.now,.tj2 .gtw-match li.ok{opacity:1}
+.tj2 .gtw-match .dot{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--tj-line);display:grid;place-items:center;margin-top:3px;box-sizing:border-box;color:#fff}
+.tj2 .gtw-match li.now .dot{border-color:var(--tj-red-400);border-top-color:transparent;animation:gtwSpin .8s linear infinite}
+.tj2 .gtw-match li.ok .dot{background:var(--tj-red);border-color:var(--tj-red);animation:none}
+.tj2 .gtw-match .dot svg{width:14px;height:14px}
+.tj2 .gtw-match b{display:block;font-size:15px;line-height:1.75;color:var(--tj-ink);font-weight:700;text-align:start}
+.tj2 .gtw-match small{display:block;font-size:12.5px;line-height:1.75;color:var(--tj-mut);text-align:start}
+.tj2 .gtw-match small:empty{display:none}
+@keyframes gtwSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.tj2 .gtw-match li.now .dot{animation:none}}
+.tj2 .gtw-card .why{margin:10px 0 0;font-size:12.5px;line-height:1.85;color:var(--tj-soft);text-align:start}
+.tj2 .gtw-card .why span{color:var(--tj-red-600);font-weight:700}
+.tj2 .gtw-cards.n2 .gtw-card .why,.tj2 .gtw-cards.n3 .gtw-card .why{text-align:center}
+.tj2 .gtw-care{margin:16px 0 0;padding:14px 16px;border-radius:16px;background:var(--tj-sunk)}
+.tj2 .gtw-care p{margin:0 0 10px;font-size:13.5px;line-height:1.9;color:var(--tj-soft);text-align:start}
+.tj2 .gtw-care .acts{display:flex;flex-wrap:wrap;gap:8px}
+.tj2 .gtw-care .acts a,.tj2 .gtw-care .acts button{font:inherit;font-size:13px;line-height:1.6;padding:6px 14px;border-radius:999px;border:1px solid var(--tj-red-400);background:#fff;color:var(--tj-red-600)!important;text-decoration:none;cursor:pointer}
+.tj2 .gtw-care .acts a:hover,.tj2 .gtw-care .acts button:hover{background:var(--tj-tint)}
+
+/* gt-simple */
+.tj2 .gt-formwrap{max-width:560px;margin:6px auto 0}.tj2 .gt-formwrap .formbox{margin:0}.tj2 .gt-privacy{font-size:13px;line-height:1.9;opacity:.75;text-align:center;margin:10px 0 0}.tj2 .gt-alt{font-size:14.5px;text-align:center;margin:8px 0 0}.tj2 .gt-alt a{color:#c83f49;font-weight:700;text-decoration:underline;text-underline-offset:4px}
 </style>
 <div class="tj2 alignfull" id="tj2">
-<section class="hero" id="start"><div class="wrap"><div class="copy"><span class="eyebrow">شروع تراپی</span><h1>قدم اول کوچک است، <em>فقط یک گفت‌وگو</em></h1><p class="lede">جلسهٔ معارفه رایگان است و حدود بیست دقیقه طول می‌کشد. لازم نیست از قبل بدانید مشکلتان چیست یا چه نوع تراپی می‌خواهید. سریع‌ترین راه، تلگرام است: بدون ثبت‌نام و بدون کد تأیید.</p><div class="ctas"><a class="btn btn-brand" data-gt="hero" href="https://t.me/tajrobehlife_bot?start=gt-hero" target="_blank" rel="noopener">رزرو معارفهٔ رایگان در تلگرام</a><a class="btn btn-ghost" data-gt="hero-form" href="#callback">ترجیح می‌دهم پذیرش تماس بگیرد</a></div><div class="nums" aria-label="تجربه در یک نگاه"><div><b>۱۰۰٬۰۰۰+</b><span>جلسه برگزار شده</span></div><div><b>۹۳٪</b><span>مراجعان تراپیست مناسب خود را پیدا کرده‌اند</span></div><div><b>۱۵۰+</b><span>تراپیست تأییدشده</span></div></div></div><div class="art"><img src="/wp-content/uploads/2026/09/tjl-sc-hero-900.webp" alt="اتاق درمان مرکز تجربه زندگی" width="900" height="900" fetchpriority="high" decoding="async"></div></div></section><section class="how" id="callback"><div class="wrap"><div class="center rv"><span class="eyebrow">راه دوم</span><h2 class="h2">ترجیح می‌دهید ما تماس بگیریم؟</h2><p class="lede">فقط اسم و شماره‌تان را بگذارید. همکاران پذیرش همان روز کاری تماس می‌گیرند و بقیه‌اش را با هم پیش می‌بریم. شماره‌تان فقط برای همین تماس استفاده می‌شود.</p></div><div class="formbox">[fluentform id="7"]</div><div class="ctas" style="justify-content:center;margin-top:22px"><a class="btn btn-ghost" data-gt="ask" href="https://t.me/tajrobehlife_bot" target="_blank" rel="noopener">یک سؤال دارم، در تلگرام</a></div></div></section><section class="school" id="need"><div class="wrap"><div><span class="eyebrow">از کجا شروع کنیم</span><h2 class="h2">چه چیزی این روزها بیشتر مشغولتان کرده؟</h2><p class="lede">یکی را بزنید. همان‌جا در تلگرام ادامه می‌دهیم و لازم نیست از اول همه‌چیز را توضیح بدهید. اگر هیچ‌کدام دقیق نبود هم مهم نیست، در گفت‌وگو روشن می‌شود.</p><div class="chips rv"><a class="chip" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-rel" target="_blank" rel="noopener">رابطه و زوج</a><a class="chip" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-anx" target="_blank" rel="noopener">اضطراب و فکرهای تکراری</a><a class="chip" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-dep" target="_blank" rel="noopener">بی‌حالی و افسردگی</a><a class="chip" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-grief" target="_blank" rel="noopener">سوگ و فقدان</a><a class="chip" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-self" target="_blank" rel="noopener">خودشناسی</a><a class="chip" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-fam" target="_blank" rel="noopener">خانواده</a><a class="chip" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-child" target="_blank" rel="noopener">کودک و نوجوان</a><a class="chip" data-gt="need" href="https://t.me/tajrobehlife_bot?start=gt-unsure" target="_blank" rel="noopener">هنوز نمی‌دانم</a></div></div><div class="art"><img src="/wp-content/uploads/2026/09/tjl-matchmaking.webp" alt="مچ‌میکینگ تجربه" width="385" height="387" loading="lazy"></div></div></section><section class="how" id="after"><div class="wrap"><div class="center rv"><span class="eyebrow">بعد از کلیک</span><h2 class="h2">چهار قدم تا اولین جلسه</h2></div><div class="how-grid"><div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-1.webp" alt="چند سؤال کوتاه" width="77" height="77" loading="lazy"><h3>چند سؤال کوتاه</h3><p>دربارهٔ خودتان، آنچه اذیتتان می‌کند و ترجیح‌هایتان: زبان، جنسیت تراپیست، آنلاین یا حضوری.</p></div><div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-2.webp" alt="انتخاب تراپیست" width="77" height="77" loading="lazy"><h3>انتخاب تراپیست</h3><p>تیم ارجاع تجربه درخواست شما را می‌خواند و تراپیست متناسب را معرفی می‌کند. لازم نیست خودتان از فهرستی بلند انتخاب کنید.</p></div><div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-3.webp" alt="جلسهٔ معارفهٔ رایگان" width="77" height="77" loading="lazy"><h3>جلسهٔ معارفهٔ رایگان</h3><p>حدود بیست دقیقه آشنایی. سؤال می‌پرسید و بعد با اطمینان بیشتری تصمیم می‌گیرید.</p></div><div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-4.webp" alt="شروع تراپی" width="77" height="77" loading="lazy"><h3>شروع تراپی</h3><p>آنلاین از هر جای دنیا، یا حضوری در کلینیک. تغییر تراپیست در هر مرحله بدون هزینه است.</p></div></div></div></section><section class="th" id="therapists">
-<div class="wrap">
-<div class="head rv">
-<div><span class="eyebrow">تراپیست‌های تجربه</span><h2 class="h2">کسانی که ممکن است به شما معرفی شوند</h2><p class="lede">هر تراپیست پیش از ورود مصاحبهٔ علمی و جلسهٔ شبیه‌سازی می‌دهد، خودش سال‌ها در درمان شخصی بوده و بعد از ورود هم زیر نظارت بالینی سوپروایزر کار می‌کند. معرفی نهایی را تیم ارجاع بر اساس درخواست شما انجام می‌دهد.</p></div>
-<div class="arrows" data-for="thTrack"><button type="button" aria-label="قبلی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"></path></svg></button><button type="button" aria-label="بعدی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></button></div>
-</div>
-<div class="chips rv" id="thFilter" style="justify-content:flex-start;margin-top:18px"><span class="lbl">فیلتر:</span><button type="button" class="chip on" data-tag="all">همه</button><button type="button" class="chip" data-tag="lacan">لکانی</button><button type="button" class="chip" data-tag="object">روابط ابژه</button><button type="button" class="chip" data-tag="classic">کلاسیک و تحلیلی</button><button type="button" class="chip" data-tag="modern">مدرن و معاصر</button><button type="button" class="chip" data-tag="cbt">CBT</button><button type="button" class="chip" data-tag="schema">طرحواره</button><button type="button" class="chip" data-tag="eft">هیجان‌مدار</button><button type="button" class="chip" data-tag="mbt">ذهنی‌سازی</button><button type="button" class="chip" data-tag="child">کودک و نوجوان</button><button type="button" class="chip" data-tag="psy">روانپزشک</button><button type="button" class="chip" data-tag="writer">نویسنده‌ی مجله</button><button type="button" class="chip" data-tag="school">دانش‌آموخته‌ی مدرسه</button><button type="button" class="chip" data-tag="abroad">مقیم خارج از ایران</button></div>
-<div class="hs" id="thTrack"><div class="thc" data-tags="modern abroad school"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-01.webp" alt="ونوس بافکار" width="92" height="92" loading="lazy"><b>ونوس بافکار</b><span class="sp">روان‌درمانی تحلیلی مدرن</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>آمریکا</span><span class="sch" title="دانش‌آموخته‌ی مدرسه تجربه زندگی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4 2 9l10 5 10-5-10-5Z"></path><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"></path></svg>مدرسه‌ی تجربه</span></span></div>
-<div class="thc" data-tags="classic lacan school writer"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-02.webp" alt="سیامک صفری" width="92" height="92" loading="lazy"><b>سیامک صفری</b><span class="sp">روان‌درمانی تحلیلی، روانکاوی کلاسیک و لکانی</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span><span class="sch" title="دانش‌آموخته‌ی مدرسه تجربه زندگی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4 2 9l10 5 10-5-10-5Z"></path><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"></path></svg>مدرسه‌ی تجربه</span><span class="mnt" title="منتور حلقه‌های مدرسه تجربه"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.5l2.2 5.3 5.3 2.2-5.3 2.2-2.2 5.3-2.2-5.3L4.5 11l5.3-2.2L12 3.5Z"></path></svg>منتور</span><a class="pen" href="/mag/author/siamak-safari/" title="مقاله‌های سیامک صفری در مجله"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>۱ مقاله</a></span></div>
-<div class="thc" data-tags="psy"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-03.webp" alt="دکتر کامران درخشان" width="92" height="92" loading="lazy"><b>دکتر کامران درخشان</b><span class="sp">متخصص روانپزشکی، فلوشیپ طب روان‌تنی</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span></span></div>
-<div class="thc" data-tags="modern abroad"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-05.webp" alt="ارمغان قبادی" width="92" height="92" loading="lazy"><b>ارمغان قبادی</b><span class="sp">روانکاوی معاصر و مدرن</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>انگلیس</span></span></div>
-
-<div class="thc" data-tags="classic writer school"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-07.webp" alt="مستوره کرمی" width="92" height="92" loading="lazy"><b>مستوره کرمی</b><span class="sp">روانکاوی کلاسیک فرویدی</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span><span class="sch" title="دانش‌آموخته‌ی مدرسه تجربه زندگی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4 2 9l10 5 10-5-10-5Z"></path><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"></path></svg>مدرسه‌ی تجربه</span><a class="pen" href="/mag/author/mastooreh-karami/" title="مقاله‌های مستوره کرمی در مجله"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>۲ مقاله</a></span></div>
-<div class="thc" data-tags="object writer"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th2-mseny.webp" alt="آرمان دشتی" width="92" height="92" loading="lazy"><b>آرمان دشتی</b><span class="sp">روانکاوی مدرن و رابطه‌ای</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span><a class="pen" href="/mag/author/arman-dashti/" title="مقاله‌های آرمان دشتی در مجله"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>۶ مقاله</a></span></div>
-<div class="thc" data-tags="object"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-09.webp" alt="سارا ضیافر" width="92" height="92" loading="lazy"><b>سارا ضیافر</b><span class="sp">روانکاوی روابط ابژه</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span></span></div>
-<div class="thc" data-tags="lacan classic"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-10.webp" alt="سها هاشمی" width="92" height="92" loading="lazy"><b>سها هاشمی</b><span class="sp">لکانی، روانکاوی کلاسیک و روان‌درمانی تحلیلی</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span></span></div>
-<div class="thc" data-tags="modern classic school writer"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th2-mltc4-2.webp" alt="عرفان امیربیگی" width="92" height="92" loading="lazy"><b>عرفان امیربیگی</b><span class="sp">روانکاوی مدرن و رابطه‌ای و روانکاوی کلاسیک</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span><span class="sch" title="دانش‌آموخته‌ی مدرسه تجربه زندگی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4 2 9l10 5 10-5-10-5Z"></path><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"></path></svg>مدرسه‌ی تجربه</span><a class="pen" href="/mag/author/erfan-amirbeigi/" title="مقاله‌های عرفان امیربیگی در مجله"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>۱۲ مقاله</a></span></div>
-<div class="thc" data-tags="eft cbt"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-12.webp" alt="بهار ایروانی" width="92" height="92" loading="lazy"><b>بهار ایروانی</b><span class="sp">هیجان‌مدار (EFT)، CBT و خانواده‌درمانی سیستمی</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span><span class="mnt" title="منتور دورهٔ درمان هیجان‌مدار (EFT) مدرسه تجربه"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.5l2.2 5.3 5.3 2.2-5.3 2.2-2.2 5.3-2.2-5.3L4.5 11l5.3-2.2L12 3.5Z"></path></svg>منتور</span></span></div>
-<div class="thc" data-tags="object modern"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-13.webp" alt="یوسف اسماعیلیون" width="92" height="92" loading="lazy"><b>یوسف اسماعیلیون</b><span class="sp">روابط ابژه و روانکاوی مدرن</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>تهران</span></span></div>
-<div class="thc" data-tags="classic abroad"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th-14.webp" alt="الهام داوودی" width="92" height="92" loading="lazy"><b>الهام داوودی</b><span class="sp">روانکاوی کلاسیک فرویدی</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>استرالیا</span></span></div>
-<div class="thc" data-tags="classic writer school"><img class="vf" src="/wp-content/uploads/2026/09/tjl-verified-badge.webp" alt="تأییدشده" width="18" height="18" loading="lazy"><img class="ph" src="/wp-content/uploads/2026/09/tjl-th2-miwxp.webp" alt="فاطمه بابری" width="92" height="92" loading="lazy"><b>فاطمه بابری</b><span class="sp">روان‌درمانی تحلیلی، لکانی و روانکاوی کلاسیک</span><span class="meta"><span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>انگلیس</span><span class="sch" title="دانش‌آموخته‌ی مدرسه تجربه زندگی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4 2 9l10 5 10-5-10-5Z"></path><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"></path></svg>مدرسه‌ی تجربه</span><a class="pen" href="/mag/author/fatemeh-baberi/" title="مقاله‌های فاطمه بابری در مجله"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>۲ مقاله</a></span></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<a class="thc more" href="/get-therapy/"><b>۱۰۰+</b><span>تراپیست دیگر در تجربه</span><span class="btn btn-brand">همه را ببینید</span></a>
-</div>
-<div class="dots" id="thDots"></div>
-<div class="std rv">
-<div><img src="/wp-content/uploads/2026/09/tjl-crit-science.webp" alt="معیار اول: مصاحبه‌ی علمی تراپیست" loading="lazy"><div><b>مصاحبه‌ی علمی</b><span>سنجش دانش نظری و بالینی</span></div></div>
-<div><img src="/wp-content/uploads/2026/09/tjl-crit-roleplay.webp" alt="معیار دوم: شبیه‌سازی جلسه" loading="lazy"><div><b>شبیه‌سازی جلسه</b><span>مصاحبه‌ی عملی (Role Playing)</span></div></div>
-<div><img src="/wp-content/uploads/2026/09/tjl-crit-personal.webp" alt="معیار سوم: درمان شخصی تراپیست" loading="lazy"><div><b>درمان شخصی تراپیست</b><span>تجربه‌ی بلندمدت روی کاناپه</span></div></div>
-<div><img src="/wp-content/uploads/2026/09/tjl-crit-supervision.webp" alt="معیار چهارم: نظارت بالینی مداوم" loading="lazy"><div><b>نظارت بالینی مداوم</b><span>سوپرویژن متناسب با رویکرد</span></div></div>
+<section class="gtw-sec" id="start"><div class="wrap">
+<div class="gtw-head"><span class="eyebrow">شروع تراپی</span><h1>شروع تراپی آنلاین یا حضوری، <em>با یک تماس</em></h1><p class="lede" id="gtwLede">اسم و شماره‌تان را بگذارید. همکاران پذیرش همان روز کاری تماس می‌گیرند و کمک می‌کنند تراپیست مناسب خودتان را پیدا کنید. بدون ثبت‌نام و بدون کد تأیید.</p></div>
+<div class="gt-formwrap"><div id="gtwFormHome"><div class="formbox">[fluentform id="7"]</div></div><div id="gtwFormHomeAb" class="gtw-hide"><div class="formbox">[fluentform id="5"]</div></div><p class="gt-alt">ترجیح می‌دهید پیام بدهید؟ <a href="https://t.me/tajrobehlife_bot?start=gt-hero" target="_blank" rel="noopener" data-gt="hero-tg">گفت‌وگو با پذیرش در تلگرام</a></p></div>
+<ul class="gtw-trust"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>جلسهٔ معارفه رایگان است و حدود بیست دقیقه طول می‌کشد</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>پذیرش در همان روز کاری جواب می‌دهد</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>تغییر تراپیست در هر مرحله بدون هزینه است</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span id="gtwPrice">هر جلسه از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان</span></li></ul>
+</div></section>
+<section class="tjvc" id="voice-match" aria-labelledby="tjvc-h">
+<style>
+.tjvc{--r:#c83f49;--r4:#d9737a;--ink:#0e0e0e;--soft:#4e4e4e;--line:#dfdfe2;--tint:#faeced;direction:rtl;margin:56px auto;max-width:1180px;padding:0 16px;overflow-wrap:normal;word-break:normal}
+.tjvc-in{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:40px;align-items:center;border:1px solid var(--line);border-radius:28px;padding:36px;background:#fff;box-shadow:0 18px 50px rgba(14,14,14,.06)}
+.tjvc-art{position:relative;aspect-ratio:1/1;max-width:340px;width:100%;margin:0 auto;border-radius:50%;background:radial-gradient(circle at 50% 50%,var(--tint) 0,var(--tint) 46%,#fff 47%,#fff 60%,var(--tint) 61%,var(--tint) 62%,#fff 63%);display:grid;place-items:center}
+.tjvc-mic{width:92px;height:92px;border-radius:50%;background:var(--r);display:grid;place-items:center;box-shadow:0 0 0 0 rgba(200,63,73,.35);animation:tjvcP 2.4s infinite}
+.tjvc-mic svg{width:40px;height:40px;fill:#fff}
+@keyframes tjvcP{0%{box-shadow:0 0 0 0 rgba(200,63,73,.35)}70%{box-shadow:0 0 0 26px rgba(200,63,73,0)}100%{box-shadow:0 0 0 0 rgba(200,63,73,0)}}
+.tjvc-wave{position:absolute;inset:auto 12% 16% 12%;display:flex;align-items:center;justify-content:center;gap:4px;height:40px}
+.tjvc-wave i{display:block;width:4px;height:100%;border-radius:4px;background:var(--r4);transform:scaleY(.25);animation:tjvcW 1.2s ease-in-out infinite}
+.tjvc-wave i:nth-child(3n){animation-delay:-.3s}.tjvc-wave i:nth-child(3n+1){animation-delay:-.6s}.tjvc-wave i:nth-child(4n){animation-delay:-.9s;background:var(--r)}
+@keyframes tjvcW{0%,100%{transform:scaleY(.2)}50%{transform:scaleY(1)}}
+.tjvc-k{display:inline-block;font-size:13px;font-weight:700;color:var(--r);background:var(--tint);border-radius:999px;padding:2px 12px}
+.tjvc h2{font-size:clamp(24px,3.2vw,34px);line-height:1.45;margin:10px 0 8px;color:var(--ink)}
+.tjvc p{color:var(--soft);font-size:17px;line-height:1.95;margin:0 0 14px}
+.tjvc-steps{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.tjvc-steps li{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:4px 14px 4px 6px;font-size:14px;color:var(--ink)}
+.tjvc-steps b{width:24px;height:24px;border-radius:50%;background:var(--tint);color:var(--r);display:grid;place-items:center;font-size:13px}
+.tjvc-btn{display:inline-flex;align-items:center;gap:10px;background:var(--r)!important;color:#fff!important;text-decoration:none!important;font-weight:700;border-radius:999px;padding:12px 26px;box-shadow:0 10px 24px rgba(200,63,73,.25);transition:transform .2s}
+.tjvc-btn:hover{transform:translateY(-2px)}
+.tjvc-btn svg{width:18px;height:18px;fill:#fff}
+.tjvc .tjvc-pv{font-size:13px;color:#676768;margin:14px 0 0;line-height:1.85}
+@media (max-width:760px){.tjvc-in{grid-template-columns:minmax(0,1fr);padding:24px 18px;gap:18px}.tjvc-art{max-width:200px}.tjvc-mic{width:70px;height:70px}.tjvc-mic svg{width:30px;height:30px}}
+@media (prefers-reduced-motion:reduce){.tjvc-mic,.tjvc-wave i{animation:none}}
+</style>
+<div class="tjvc-in">
+<div class="tjvc-art" aria-hidden="true"><span class="tjvc-mic"><svg viewBox="0 0 24 24"><path d="M12 14.5a3.5 3.5 0 0 0 3.5-3.5V5.5a3.5 3.5 0 1 0-7 0V11a3.5 3.5 0 0 0 3.5 3.5zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.9V19H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2.1a6 6 0 0 0 5-5.9z"/></svg></span><div class="tjvc-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div class="tjvc-tx">
+<span class="tjvc-k">تازه در بات تجربه</span>
+<h2 id="tjvc-h">فقط بگویید؛ ما گوش می‌دهیم</h2>
+<p>لازم نیست سؤال‌ها را یکی‌یکی جواب بدهید. در بات تلگرام تجربه یک ویس بفرستید و هر چه در ذهنتان است بگویید: چه چیزی اذیتتان می‌کند و از تراپی چه می‌خواهید. برداشت ما از حرفتان را می‌بینید و تأیید می‌کنید، و بعد درمانگری پیشنهاد می‌شود که به حرفتان نزدیک‌تر است.</p>
+<ul class="tjvc-steps"><li><b>۱</b>یک ویس یک تا سه دقیقه‌ای</li><li><b>۲</b>برداشت ما را می‌بینید و تأیید می‌کنید</li><li><b>۳</b>پیشنهاد درمانگر و معارفهٔ رایگان</li></ul>
+<a class="tjvc-btn" href="https://t.me/tajrobehlife_bot?start=vxc" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14.5a3.5 3.5 0 0 0 3.5-3.5V5.5a3.5 3.5 0 1 0-7 0V11a3.5 3.5 0 0 0 3.5 3.5zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.9V19H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2.1a6 6 0 0 0 5-5.9z"/></svg>با صدای خودم می‌گویم</a>
+<p class="tjvc-pv">فایل صدای شما نزد ما ذخیره نمی‌شود و فقط به متن تبدیل می‌شود. این متن فقط در اختیار مسئول پذیرش در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت شما منتشر یا با کسی به اشتراک گذاشته نمی‌شود.</p>
 </div>
 </div>
-</section><section class="school gt-hide" id="abroad"><div class="wrap"><div><span class="eyebrow">خارج از ایران</span><h2 class="h2">درمانگر فارسی‌زبان، به وقت محلی خودتان</h2><p class="lede" id="gtLocal">جلسه‌ها با ساعت محلی شما ست می‌شود.</p><p class="lede">پرداخت ارزی است و همهٔ کار در تلگرام انجام می‌شود، بدون ثبت‌نام و بدون کد تأیید پیامکی. جلسهٔ معارفه برای شما هم رایگان است.</p><div class="ctas"><a class="btn btn-brand" data-gt="abroad" href="https://t.me/tajrobehlife_bot?start=gt-d" target="_blank" rel="noopener">رزرو معارفه در تلگرام</a><a class="btn btn-ghost" data-gt="abroad-page" href="/persian-therapy/">صفحهٔ فارسی‌زبانان خارج از ایران</a></div></div><div class="art"><img src="/wp-content/uploads/2026/09/tjl-cut-orbit.webp" alt="تجربه برای فارسی‌زبانان خارج از ایران" width="682" height="666" loading="lazy"></div></div></section><section class="eco" id="still"><div class="wrap"><div class="center rv"><span class="eyebrow">اگر امروز آمادهٔ رزرو نیستید</span><h2 class="h2">دست خالی نروید</h2><p class="lede">تصمیم گرفتن برای تراپی وقت می‌خواهد. این چهار تا رایگان‌اند و هیچ‌کدام شما را به چیزی متعهد نمی‌کند.</p></div><div class="svc-list rv"><a class="svc-row" data-gt="test-style" href="/tests/therapy-style/"><img src="/wp-content/uploads/2026/09/tjl-icon-match.webp" alt="تست سبک درمانی من" width="82" height="82" loading="lazy"><div><b>تست سبک درمانی من</b><span>در دو دقیقه می‌گوید کدام سبک تراپی به شما نزدیک‌تر است</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a><a class="svc-row" data-gt="test-all" href="/tests/"><img src="/wp-content/uploads/2026/09/tjl-icon-standards.webp" alt="تست‌های رایگان تجربه" width="82" height="82" loading="lazy"><div><b>تست‌های رایگان تجربه</b><span>نیمرخ نیاز و بقیهٔ تست‌ها، بدون ثبت‌نام</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a><a class="svc-row" data-gt="mag" href="/mag/"><img src="/wp-content/uploads/2026/09/tjl-icon-book.webp" alt="مجلهٔ تجربه" width="82" height="82" loading="lazy"><div><b>مجلهٔ تجربه</b><span>دویست‌وشصت‌واند مطلب دربارهٔ روانکاوی، رابطه و زندگی</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a><a class="svc-row" data-gt="bot-feed" href="https://t.me/tajrobehlife_bot?start=gt-k" target="_blank" rel="noopener"><img src="/wp-content/uploads/2026/09/tjl-icon-cap.webp" alt="در تلگرام خبرم کنید" width="82" height="82" loading="lazy"><div><b>در تلگرام خبرم کنید</b><span>موضوع‌های موردعلاقه‌تان را انتخاب می‌کنید و تازه‌ها را می‌فرستیم</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"></path></svg></a></div></div></section><section class="faq" id="faq"><div class="wrap"><div class="center rv"><span class="eyebrow">پرسش‌های پرتکرار</span><h2 class="h2">چیزهایی که معمولاً می‌پرسند</h2></div><div class="faq-list rv"><details><summary>باید همین حالا هزینه‌ای پرداخت کنم؟</summary><div class="ans"><p>نه. جلسهٔ معارفه رایگان است. هزینهٔ جلسهٔ اول پیش از برگزاری آن پرداخت می‌شود و جلسه‌های بعدی تا پایان همان ماه.</p></div></details><details class="tj-price-faq"><summary>هزینهٔ هر جلسه چقدر است؟</summary><div class="ans"><p>هزینهٔ هر جلسهٔ تراپی برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست و نوع خدمت بستگی دارد؛ عدد دقیق پیش از شروع به شما گفته می‌شود. برای فارسی‌زبانان ساکن خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسهٔ معارفه در هر دو حالت رایگان است.</p></div></details><details><summary>اگر تراپیست مناسب من نبود چه؟</summary><div class="ans"><p>در تمام مراحل می‌توانید تراپیستتان را بدون هزینه تغییر دهید. ارتباط درمانی درست، مهم‌ترین عامل موفقیت تراپی است و بخشی از کار ما همین است.</p></div></details><details><summary>باید از قبل بدانم چه نوع تراپی می‌خواهم؟</summary><div class="ans"><p>نه. کار تیم ارجاع تجربه دقیقاً همین است: از روی آنچه می‌نویسید، مسیر مناسب را پیشنهاد می‌دهد.</p></div></details><details><summary>جلسات آنلاین است یا حضوری؟</summary><div class="ans"><p>هر دو. حضوری در کلینیک برگزار می‌شود و آنلاین از هر جای دنیا. می‌توانید ترکیبی هم پیش بروید.</p></div></details><details><summary>خارج از ایران زندگی می‌کنم.</summary><div class="ans"><p>تجربه تراپیست‌های فارسی‌زبان برای ایرانیان خارج از کشور دارد. جلسه به وقت محلی خودتان ست می‌شود و پرداخت ارزی است.</p></div></details><details><summary>چرا تلگرام؟</summary><div class="ans"><p>چون سریع‌ترین راه است: بدون ثبت‌نام، بدون کد تأیید و بدون فرم بلند. اگر تلگرام ندارید، فرم پذیرش همین صفحه همان کار را می‌کند.</p></div></details><details><summary>آیا مهم است درمانگر زن باشد یا مرد؟</summary><div class="ans"><p>جنسیت درمانگر به‌تنهایی تعیین‌کننده نیست؛ مهم‌تر از آن احساس امنیت، اعتماد و تناسب میان مراجع و درمانگر است. با این حال ترجیح شما را می‌پرسیم و رعایت می‌کنیم.</p></div></details><details><summary>اطلاعاتم کجا می‌رود؟</summary><div class="ans"><p>فقط نزد تیم پذیرش تجربه و تراپیستی که به شما معرفی می‌شود. چیزی جای دیگری نمی‌رود و برای تبلیغات استفاده نمی‌شود.</p></div></details></div></div></section><section class="berry" id="ready"><div class="wrap rv"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" width="378" height="308" loading="lazy"><h2 class="h2">هر وقت آماده بودید</h2><p class="lede">جلسهٔ معارفه رایگان است و شما را به هیچ چیز متعهد نمی‌کند. اگر امروز نشد، هر وقت دیگری هم همین‌جاست.</p><div class="ctas"><a class="btn btn-brand" data-gt="berry" href="https://t.me/tajrobehlife_bot?start=gt-end" target="_blank" rel="noopener">رزرو معارفه در تلگرام</a><a class="btn btn-ghost" data-gt="berry-form" href="#callback">شماره‌ام را می‌گذارم</a></div></div></section>
+</section>
+
+<section class="how" id="after"><div class="wrap"><div class="center rv"><span class="eyebrow">بعد از گذاشتن شماره</span><h2 class="h2">چهار قدم تا اولین جلسه</h2></div><div class="how-grid"><div class="how-step rv"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="تماس پذیرش"><path d="M3.5 6.4l1.5 1.5 2.8-3"></path><path d="M11 6.4h9.5"></path><path d="M3.5 12.4l1.5 1.5 2.8-3"></path><path d="M11 12.4h9.5"></path><path d="M3.5 18.4l1.5 1.5 2.8-3"></path><path d="M11 18.4h9.5"></path></svg><h3>تماس پذیرش</h3><p>همکاران پذیرش همان روز کاری تماس می‌گیرند و چند سؤال کوتاه می‌پرسند: موضوعی که مشغولتان کرده، آنلاین یا حضوری، و ترجیحتان دربارهٔ تراپیست.</p></div><div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-2.webp" alt="تراپیست هم‌خوان" width="77" height="77" loading="lazy"><h3>تراپیست هم‌خوان</h3><p>تیم ارجاع تجربه از میان تراپیست‌ها کسی را معرفی می‌کند که با موضوع و ترجیح شما هم‌خوان است و وقت آزاد دارد.</p></div><div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-3.webp" alt="جلسهٔ معارفهٔ رایگان" width="77" height="77" loading="lazy"><h3>جلسهٔ معارفهٔ رایگان</h3><p>حدود بیست دقیقه آشنایی با خود تراپیست. سؤال می‌پرسید و بعد با اطمینان بیشتری تصمیم می‌گیرید.</p></div><div class="how-step rv"><img src="/wp-content/uploads/2026/09/tjl-step-4.webp" alt="شروع تراپی" width="77" height="77" loading="lazy"><h3>شروع تراپی</h3><p>آنلاین از هر جای دنیا، یا حضوری در کلینیک. تغییر تراپیست در هر مرحله بدون هزینه است.</p></div></div></div></section>
+
+<section class="faq" id="faq"><div class="wrap"><div class="center rv"><span class="eyebrow">پرسش‌های پرتکرار</span><h2 class="h2">چیزهایی که معمولاً می‌پرسند</h2></div><div class="faq-list rv"><details><summary>باید همین حالا هزینه‌ای پرداخت کنم؟</summary><div class="ans"><p>نه. جلسهٔ معارفه رایگان است. هزینهٔ جلسهٔ اول پیش از برگزاری آن پرداخت می‌شود و جلسه‌های بعدی تا پایان همان ماه.</p></div></details><details class="tj-price-faq"><summary>هزینهٔ هر جلسه چقدر است؟</summary><div class="ans"><p>هزینهٔ هر جلسهٔ تراپی برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست و نوع خدمت بستگی دارد؛ عدد دقیق پیش از شروع به شما گفته می‌شود. برای فارسی‌زبانان ساکن خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسهٔ معارفه در هر دو حالت رایگان است.</p></div></details><details><summary>اگر تراپیست مناسب من نبود چه؟</summary><div class="ans"><p>در تمام مراحل می‌توانید تراپیستتان را بدون هزینه تغییر دهید. ارتباط درمانی درست، مهم‌ترین عامل موفقیت تراپی است و بخشی از کار ما همین است.</p></div></details><details><summary>باید از قبل بدانم چه نوع تراپی می‌خواهم؟</summary><div class="ans"><p>نه. کار تیم ارجاع تجربه دقیقاً همین است: از روی آنچه می‌نویسید، مسیر مناسب را پیشنهاد می‌دهد.</p></div></details><details><summary>تراپی آنلاین است یا حضوری؟</summary><div class="ans"><p>هر دو. تراپی آنلاین از هر جای دنیا برگزار می‌شود و حضوری در کلینیک تجربه. می‌توانید ترکیبی هم پیش بروید؛ مثلاً معارفه آنلاین و ادامه حضوری.</p></div></details><details><summary>تراپی آنلاین به اندازهٔ جلسهٔ حضوری اثر دارد؟</summary><div class="ans"><p>پژوهش‌ها نشان داده‌اند برای بسیاری از مشکلات رایج مثل اضطراب و افسردگی، رواندرمانی آنلاین اثری نزدیک به جلسهٔ حضوری دارد. اگر جای خلوت و اینترنت پایدار داشته باشید، تفاوت زیادی حس نمی‌کنید. در <a href="/report/">دادهٔ پذیرش خود تجربه</a> هم بیشتر متقاضیان جلسهٔ آنلاین را ترجیح داده‌اند.</p></div></details><details><summary>خارج از ایران زندگی می‌کنم.</summary><div class="ans"><p>تجربه تراپیست‌های فارسی‌زبان برای ایرانیان خارج از کشور دارد. جلسه به وقت محلی خودتان ست می‌شود و پرداخت ارزی است.</p></div></details><details><summary>چرا تلگرام؟</summary><div class="ans"><p>چون سریع‌ترین راه است: بدون ثبت‌نام، بدون کد تأیید و بدون فرم بلند. اگر تلگرام ندارید، فرم پذیرش همین صفحه همان کار را می‌کند.</p></div></details><details><summary>آیا مهم است درمانگر زن باشد یا مرد؟</summary><div class="ans"><p>جنسیت درمانگر به‌تنهایی تعیین‌کننده نیست؛ مهم‌تر از آن احساس امنیت، اعتماد و تناسب میان مراجع و درمانگر است. با این حال ترجیح شما را می‌پرسیم و رعایت می‌کنیم.</p></div></details><details><summary>اطلاعاتم کجا می‌رود؟</summary><div class="ans"><p>فقط نزد تیم پذیرش تجربه و تراپیستی که به شما معرفی می‌شود. چیزی جای دیگری نمی‌رود و برای تبلیغات استفاده نمی‌شود.</p></div></details></div></div></section>
+<section class="berry" id="ready"><div class="wrap rv"><img src="/wp-content/uploads/2026/09/tjl-berry.webp" alt="" width="378" height="308" loading="lazy"><h2 class="h2">هر وقت آماده بودید</h2><p class="lede">جلسهٔ معارفه رایگان است و شما را به هیچ چیز متعهد نمی‌کند. اگر امروز نشد، هر وقت دیگری هم همین‌جاست.</p><div class="ctas"><a class="btn btn-brand" data-gt="berry" href="#start">درخواست تماس پذیرش</a><a class="btn btn-ghost" data-gt="bot-feed" href="https://t.me/tajrobehlife_bot?start=gt-k" target="_blank" rel="noopener">هنوز آماده نیستم، در تلگرام خبرم کنید</a></div><p class="gtw-old">از قبل مراجع تجربه هستید؟ <a href="/login" rel="nofollow" data-gt="login">ورود به حساب</a></p></div></section>
 </div>
+<div class="gtw-bar" id="gtwBar"><a href="#start" data-gt="sticky">درخواست تماس رایگان</a></div>
+
 <script>
 (function(){
 var root=document.getElementById('tj2'); if(!root) return;
@@ -518,62 +655,6 @@ var tl=document.getElementById('todayLink');if(tl){var day=Math.floor(Date.now()
 })();
 
 </script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tajrobeh.life/get-therapy/","name":"شروع تراپی در مرکز تجربه زندگی","url":"https://tajrobeh.life/get-therapy/","inLanguage":"fa-IR"},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"باید همین حالا هزینه‌ای پرداخت کنم؟","acceptedAnswer":{"@type":"Answer","text":"نه. جلسهٔ معارفه رایگان است. هزینهٔ جلسهٔ اول پیش از برگزاری آن پرداخت می‌شود و جلسه‌های بعدی تا پایان همان ماه."}},{"@type":"Question","name":"هزینهٔ هر جلسه چقدر است؟","acceptedAnswer":{"@type":"Answer","text":"هزینهٔ هر جلسهٔ تراپی برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست و نوع خدمت بستگی دارد؛ عدد دقیق پیش از شروع به شما گفته می‌شود. برای فارسی‌زبانان ساکن خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسهٔ معارفه در هر دو حالت رایگان است."}},{"@type":"Question","name":"اگر تراپیست مناسب من نبود چه؟","acceptedAnswer":{"@type":"Answer","text":"در تمام مراحل می‌توانید تراپیستتان را بدون هزینه تغییر دهید."}},{"@type":"Question","name":"باید از قبل بدانم چه نوع تراپی می‌خواهم؟","acceptedAnswer":{"@type":"Answer","text":"نه. تیم ارجاع تجربه از روی آنچه می‌نویسید مسیر مناسب را پیشنهاد می‌دهد."}},{"@type":"Question","name":"جلسات آنلاین است یا حضوری؟","acceptedAnswer":{"@type":"Answer","text":"هر دو. حضوری در کلینیک و آنلاین از هر جای دنیا."}},{"@type":"Question","name":"خارج از ایران زندگی می‌کنم.","acceptedAnswer":{"@type":"Answer","text":"تجربه تراپیست فارسی‌زبان برای ایرانیان خارج از کشور دارد. جلسه به وقت محلی خودتان ست می‌شود و پرداخت ارزی است."}},{"@type":"Question","name":"چرا تلگرام؟","acceptedAnswer":{"@type":"Answer","text":"چون سریع‌ترین راه است: بدون ثبت‌نام، بدون کد تأیید و بدون فرم بلند."}}]}]}</script>
-<script>
-(function(){
-  function ev(n,p){ p=p||{};
-    try{ if(window.gtag){ gtag("event", n, p); } }catch(e){}
-    try{ window.dataLayer=window.dataLayer||[]; var o={event:n}; for(var k in p){ o[k]=p[k]; } window.dataLayer.push(o); }catch(e){}
-  }
-  var tz=""; try{ if(window.Intl){ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||""; } }catch(e){}
-  var abroad=false;
-  if(tz){ if(tz.indexOf("Tehran")<0){ if(tz!=="Iran"){ abroad=true; } } }
-  var geo=abroad?"abroad":"iran";
-  if(abroad){
-    var sec=document.getElementById("abroad");
-    if(sec){
-      sec.classList.remove("gt-hide");
-      var t=document.getElementById("gtLocal");
-      if(t){ try{ t.textContent="ساعت محلی شما الان "+new Intl.DateTimeFormat("fa-IR",{hour:"2-digit",minute:"2-digit"}).format(new Date())+" است و جلسه‌ها با همین ساعت ست می‌شود."; }catch(e){} }
-      var hero=document.querySelector("#start .lede");
-      if(hero){ hero.textContent="جلسهٔ معارفه رایگان است و حدود بیست دقیقه طول می‌کشد. برای شما که خارج از ایران هستید جلسه به وقت محلی خودتان ست می‌شود و پرداخت ارزی است. همهٔ کار در تلگرام انجام می‌شود، بدون ثبت‌نام."; }
-      ev("gt_abroad_shown",{tz:tz});
-    }
-  }
-  document.addEventListener("click", function(e){
-    var a=e.target.closest?e.target.closest("a"):null;
-    if(!a){ return; }
-    var h=a.getAttribute("href")||"";
-    var slot=a.getAttribute("data-gt")||"";
-    var txt=(a.textContent||"").trim().slice(0,60);
-    if(h.indexOf("t.me/")>-1){
-      var sp=""; var qi=h.indexOf("start"+String.fromCharCode(61));
-      if(qi>-1){ sp=h.slice(qi+6); }
-      ev("bot_click",{block:slot||"gt", variant:"gt", page_kind:"get_therapy", page_path:location.pathname, start_param:sp, geo:geo, link_text:txt});
-      return;
-    }
-    if(h.indexOf("wa.me")>-1){ ev("whatsapp_click",{page_kind:"get_therapy", geo:geo}); return; }
-    if(slot){ ev("gt_path_click",{block:slot, page_kind:"get_therapy", geo:geo, link_text:txt}); }
-  }, true);
-  try{
-    if(window.IntersectionObserver){
-      var seen={};
-      var io=new IntersectionObserver(function(en){
-        for(var i=0;i<en.length;i++){
-          var t2=en[i];
-          if(!t2.isIntersecting){ continue; }
-          var id=t2.target.id||"sec";
-          if(seen[id]){ io.unobserve(t2.target); continue; }
-          seen[id]=1; ev("gt_section_view",{section:id, geo:geo}); io.unobserve(t2.target);
-        }
-      },{threshold:0.4});
-      var secs=document.querySelectorAll("#tj2 section[id]");
-      for(var q=0;q<secs.length;q++){ io.observe(secs[q]); }
-    }
-  }catch(e){}
-  document.addEventListener("fluentform_submission_success", function(){ ev("gt_form_submit",{geo:geo}); });
-  var st0=Date.now();
-  window.addEventListener("beforeunload", function(){ ev("gt_time",{seconds:Math.round((Date.now()-st0)/1000), geo:geo}); });
-})();
-</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tajrobeh.life/get-therapy/","name":"تراپی آنلاین و حضوری در مرکز تجربه زندگی","url":"https://tajrobeh.life/get-therapy/","inLanguage":"fa-IR","description":"اسم و شماره‌تان را بگذارید تا پذیرش تماس بگیرد و تراپیست هم‌خوان و جلسهٔ معارفهٔ رایگان را با هم پیدا کنید."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"باید همین حالا هزینه‌ای پرداخت کنم؟","acceptedAnswer":{"@type":"Answer","text":"نه. جلسهٔ معارفه رایگان است. هزینهٔ جلسهٔ اول پیش از برگزاری آن پرداخت می‌شود و جلسه‌های بعدی تا پایان همان ماه."}},{"@type":"Question","name":"هزینهٔ هر جلسه چقدر است؟","acceptedAnswer":{"@type":"Answer","text":"هزینهٔ هر جلسهٔ تراپی برای مراجعان ساکن ایران از ۱٬۵۰۰٬۰۰۰ تا ۳٬۰۰۰٬۰۰۰ تومان است و به تراپیست و نوع خدمت بستگی دارد؛ عدد دقیق پیش از شروع به شما گفته می‌شود. برای فارسی‌زبانان ساکن خارج از ایران ۲۵ یورو برای دانشجو و ۳۵ یورو برای بقیه. جلسهٔ معارفه در هر دو حالت رایگان است."}},{"@type":"Question","name":"اگر تراپیست مناسب من نبود چه؟","acceptedAnswer":{"@type":"Answer","text":"در تمام مراحل می‌توانید تراپیستتان را بدون هزینه تغییر دهید. ارتباط درمانی درست، مهم‌ترین عامل موفقیت تراپی است و بخشی از کار ما همین است."}},{"@type":"Question","name":"باید از قبل بدانم چه نوع تراپی می‌خواهم؟","acceptedAnswer":{"@type":"Answer","text":"نه. کار تیم ارجاع تجربه دقیقاً همین است: از روی آنچه می‌نویسید، مسیر مناسب را پیشنهاد می‌دهد."}},{"@type":"Question","name":"تراپی آنلاین است یا حضوری؟","acceptedAnswer":{"@type":"Answer","text":"هر دو. تراپی آنلاین از هر جای دنیا برگزار می‌شود و حضوری در کلینیک تجربه. می‌توانید ترکیبی هم پیش بروید؛ مثلاً معارفه آنلاین و ادامه حضوری."}},{"@type":"Question","name":"تراپی آنلاین به اندازهٔ جلسهٔ حضوری اثر دارد؟","acceptedAnswer":{"@type":"Answer","text":"پژوهش‌ها نشان داده‌اند برای بسیاری از مشکلات رایج مثل اضطراب و افسردگی، رواندرمانی آنلاین اثری نزدیک به جلسهٔ حضوری دارد. اگر جای خلوت و اینترنت پایدار داشته باشید، تفاوت زیادی حس نمی‌کنید. در دادهٔ پذیرش خود تجربه هم بیشتر متقاضیان جلسهٔ آنلاین را ترجیح داده‌اند."}},{"@type":"Question","name":"خارج از ایران زندگی می‌کنم.","acceptedAnswer":{"@type":"Answer","text":"تجربه تراپیست‌های فارسی‌زبان برای ایرانیان خارج از کشور دارد. جلسه به وقت محلی خودتان ست می‌شود و پرداخت ارزی است."}},{"@type":"Question","name":"چرا تلگرام؟","acceptedAnswer":{"@type":"Answer","text":"چون سریع‌ترین راه است: بدون ثبت‌نام، بدون کد تأیید و بدون فرم بلند. اگر تلگرام ندارید، فرم پذیرش همین صفحه همان کار را می‌کند."}},{"@type":"Question","name":"آیا مهم است درمانگر زن باشد یا مرد؟","acceptedAnswer":{"@type":"Answer","text":"جنسیت درمانگر به‌تنهایی تعیین‌کننده نیست؛ مهم‌تر از آن احساس امنیت، اعتماد و تناسب میان مراجع و درمانگر است. با این حال ترجیح شما را می‌پرسیم و رعایت می‌کنیم."}},{"@type":"Question","name":"اطلاعاتم کجا می‌رود؟","acceptedAnswer":{"@type":"Answer","text":"فقط نزد تیم پذیرش تجربه و تراپیستی که به شما معرفی می‌شود. چیزی جای دیگری نمی‌رود و برای تبلیغات استفاده نمی‌شود."}}]}]}</script>
+<script>(function(){var b=document.body;if(b)b.classList.add('gt-focus');var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||''}catch(e){}var ab=false;if(tz){if(tz!=='Asia/Tehran')ab=true}var h=document.getElementById('gtwFormHome'),ha=document.getElementById('gtwFormHomeAb');if(ab){if(h){if(ha){h.classList.add('gtw-hide');ha.classList.remove('gtw-hide')}}}try{var p=new URLSearchParams(location.search),parts=[];['need','from','tj_style'].forEach(function(k){if(p.get(k))parts.push(k+':'+p.get(k))});if(parts.length){document.querySelectorAll('.tj2 input[name="topic"]').forEach(function(i){i.value=parts.join(' | ')})}}catch(e){}function ev(n,pr){pr=pr||{};pr.page_kind='get_therapy';pr.variant='simple';try{if(window.gtag)gtag('event',n,pr)}catch(e){}try{window.dataLayer=window.dataLayer||[];var o={event:n};for(var k in pr)o[k]=pr[k];window.dataLayer.push(o)}catch(e){}try{if(window.clarity)clarity('event',n)}catch(e){}}var bar=document.getElementById('gtwBar'),st=document.getElementById('start');function chk(){if(!bar)return;if(!st)return;var r=st.getBoundingClientRect();if(r.bottom<0)bar.classList.add('show');else bar.classList.remove('show')}window.addEventListener('scroll',chk,{passive:true});chk();if(window.jQuery){var sent=0;jQuery(document).on('fluentform_submission_success',function(){if(sent)return;sent=1;ev('gt_form_submit',{abroad:ab?1:0})})}document.addEventListener('click',function(e){var a=e.target.closest?e.target.closest('a'):null;if(!a)return;var hr=a.getAttribute('href')||'';if(hr.indexOf('t.me/')>-1)ev('bot_click',{where:a.getAttribute('data-gt')||''});if(hr==='#start')ev('gt_path_click',{to:'form'})},true);ev('gt_view',{abroad:ab?1:0});})();</script>
 <!-- /wp:html -->
