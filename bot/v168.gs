@@ -1350,6 +1350,7 @@ function v168MonthInput_() {
   var g = function (r, h) { var i = hm[h]; return (i === undefined || i < 0 || i >= r.length) ? '' : String(r[i] || '').trim(); };
   if (last > 1) sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues().forEach(function (r) {
     if (!String(r[3] || r[5] || '').trim()) return;
+    if (!tgClientLead_(r[2])) return;   /* v170.40: سطرهای مدل لید در بستن ماه شمرده نمی‌شوند */
     var st = String(r[8] || '').trim(), stOf = tgStOf_(st) || st;
     inp.leads.push({ d: v168Iso_(r[0]), src: String(r[2] || '').trim(), channel: String(r[4] || '').trim(), region: String(r[6] || '').trim(), status: stOf,
       touched: !!tgContactDate_(r[10], new Date()), ref: !!(g(r, V168_SUG[0]) || g(r, 'تاریخ ارجاع')), booked: g(r, 'معارفه هماهنگ شد؟') === 'بله' || stOf === TG_ST.BOOKED || stOf === TG_ST.HELD,

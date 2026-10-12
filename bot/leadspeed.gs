@@ -194,7 +194,7 @@ function lsLeadRate_(days, to) {
   var clicks = 0;
   if (lsDry_()) clicks = (TG_MEM['ls:clicks'] || []).filter(function (d) { return d >= from && d < end; }).length;
   else { try { var sh = tgSS_().getSheetByName('کلیک‌های تماس'); if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (v) { var d = v[0] instanceof Date ? lsDay_(v[0].getTime()) : String(v[0]).slice(0, 10); if (d >= from && d < end) clicks++; }); } catch (e) {} }
-  var leads = lsLeads_().filter(function (l) { var d = lsDay_(lsNow_() - (l.age || 0) * 60000); return d >= from && d < end; }).length;
+  var leads = lsLeads_().filter(function (l) { if (!tgClientLead_(l.src)) return false; var d = lsDay_(lsNow_() - (l.age || 0) * 60000); return d >= from && d < end; }).length;
   return clicks ? Math.round(1000 * leads / clicks) / 10 : null;
 }
 /** عدد پایه یک بار، لحظهٔ اولین روشن شدن */
@@ -983,7 +983,7 @@ function abFunnelRows_(leads, firstMs, clicks, weeks, nowMs) {
 function abFunnelBuild_() {
   if (lsDry_()) return TG_MEM['ab:fn'] = abFunnelRows_(TG_MEM['ab:fnleads'] || [], TG_MEM['ab:fnfirst'] || {}, TG_MEM['ab:fnclicks'] || [], 8, lsNow_());
   var sh = tgSS_().getSheetByName(TG_LEADS), last = sh.getLastRow(), hm = tgLeadHeadMap_(sh);
-  var v = last > 1 ? sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues() : [];
+  var v = last > 1 ? sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues().filter(function (r) { return tgClientLead_(r[2]); }) : [];   /* v170.40 */
   var g = function (r, h) { var i = hm[h]; return (i === undefined || i < 0 || i >= r.length) ? '' : r[i]; };
   var leads = v.map(function (r) {
     var st = tgStOf_(String(g(r, 'وضعیت') || '').trim()) || String(g(r, 'وضعیت') || '').trim();
