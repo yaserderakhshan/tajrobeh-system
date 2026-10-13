@@ -1615,6 +1615,13 @@ function pbPkgLink_(o) {
   return pbPkgBase_(o) + '?utm_source=telegram&utm_medium=social&utm_content=longread&utm_campaign=mag_' + slug.replace(/-/g, '_') + '_' + d;
 }
 function pbPkgBase_(o) { var u = String(o.link || '').split('?')[0]; return u || PB_SITE + '/?p=' + o.id; }
+/* v170.55: ریشهٔ لینک دوبارهٔ Q-5: جمنای گاهی به‌جای {LINK} خود لینک خام (با &) را در خط 📖 می‌نوشت؛ سنجش «linkH در کپشن نیست»
+   خط دوم با &amp; را اضافه می‌کرد. حالا هر خطی که 📖 دارد یا به همین مقاله لینک می‌دهد برداشته می‌شود و دقیقاً یک خط درست (با &amp;) ته کپشن می‌آید. */
+function pbPkgLinkOnce_(cap, base, line) {
+  var b = String(base || '').split('?')[0];
+  var keep = String(cap || '').split('\n').filter(function (l) { return l.indexOf('📖') < 0 && !(b && l.indexOf(b) > -1 && /<a\s/i.test(l)); });
+  return keep.join('\n').replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '') + '\n\n' + line;
+}
 /** یک سطر «منتظر بسته» ← بسته و صف. force: اجرای یک‌باره بی شرط ساعت و فاصله. خروجی متن کوتاه برای لاگ */
 function pbPkgBuild_(row, force) {
   var id = String(row['شناسه']).trim(), tries = Number(pbProp_('PB_PKG_TRY:' + id) || 0);
@@ -1633,8 +1640,8 @@ function pbPkgBuild_(row, force) {
   for (var i = 0; i < 3; i++) {
     try { g = TG_DRY ? JSON.parse(JSON.stringify(TG_MEM['pb:pkggem'])) : gemJson_(pbPkgPrompt_(o, text, link, fb), PB_PKG_SCHEMA); pbGemUse_(true); }
     catch (e) { pbGemUse_(false, e.message); return note('جمنای: ' + String(e.message || e).slice(0, 80)); }
-    var cap = String(g.caption_html || '').replace(/\{LINK\}/g, linkH).replace(/\{TITLE\}/g, tgEsc_(o.title)).replace(/\{MIN\}/g, tgFa_(g.read_minutes || 5));
-    if (cap.indexOf(linkH) < 0) cap += '\n\n📖 <a href="' + linkH + '">' + tgEsc_(o.title) + ' · ' + tgFa_(g.read_minutes || 5) + ' دقیقه</a>';
+    var cap = pbPkgLinkOnce_(String(g.caption_html || '').replace(/\{LINK\}/g, linkH).replace(/\{TITLE\}/g, tgEsc_(o.title)).replace(/\{MIN\}/g, tgFa_(g.read_minutes || 5)),
+      pbPkgBase_(o), '📖 <a href="' + linkH + '">' + tgEsc_(o.title) + ' · ' + tgFa_(g.read_minutes || 5) + ' دقیقه</a>');
     g.caption_html = cap;
     var v = pbValidatePost_({ chat: 'public', photo_url: img, caption_html: cap });
     errs = v.errs.slice();
@@ -1647,8 +1654,11 @@ function pbPkgBuild_(row, force) {
   var when = pbFmt_(new Date(pbNow_().getTime() + 30 * 60000));
   var r = pbChannelPost_({ chat: 'public', photo_url: img, caption_html: g.caption_html, post_id: id, type: PB_TYPE_MAG, send_at: when }, false, 'بستهٔ خودکار');
   if (!r.ok) return note('صف نپذیرفت: ' + String(r.error || '').slice(0, 100));
-  pbSet_('e', PB_T_PKG, PB_PKG_HEAD, row, { 'کلیدواژهٔ ریپلای پیشنهادی': String(g.reply_keyword).trim(), 'یادداشت': 'بستهٔ خودکار ساخته شد (' + (g._model || 'جمنای') + ') · ' + pbFmt_(pbNow_()) });
   var qid = r.data && (r.data.queued || r.data.id) || '';
+  /* v170.55: وضعیت و شناسهٔ صف را خود سازنده هم روی همین سطر می‌نویسد؛ نه فقط pbPkgMark_ که سطر را دوباره با شناسه پیدا می‌کند */
+  var done = { 'کلیدواژهٔ ریپلای پیشنهادی': String(g.reply_keyword).trim(), 'یادداشت': 'بستهٔ خودکار ساخته شد (' + (g._model || 'جمنای') + ') · ' + pbFmt_(pbNow_()) };
+  if (qid) { done['وضعیت'] = r.data && r.data.id && !r.data.queued ? PB_PKG_ST.pub : PB_PKG_ST.q; done['شناسهٔ صف'] = qid; }
+  pbSet_('e', PB_T_PKG, PB_PKG_HEAD, row, done);
   pbNotifyEditors_('📦 <b>بستهٔ انتشار خودکار ساخته شد</b>\n' + tgEsc_(o.title) + '\nزمان: ' + tgEsc_(r.data && r.data.when ? r.data.when : when) + ' · کلیدواژهٔ ریپلای: ' + tgEsc_(String(g.reply_keyword).trim()) +
     '\n\n' + g.caption_html, qid ? { inline_keyboard: [[{ text: '✖️ لغو این پست', callback_data: 'pb:x:' + qid }]] } : null);
   /* سئو: یک بار برای هر مطلب */
@@ -1706,6 +1716,12 @@ function pbPkgTests() {
     ok('فقط سطری که بیش از ۲ ساعت منتظر است؛ تازه دست نمی‌خورد', /ساخته شد/.test(r1) && pk[0]['وضعیت'] === PB_PKG_ST.wait && pk[1]['وضعیت'] === PB_PKG_ST.q, r1);
     ok('صف: تصویر شاخص، کپشن با لینک UTM و شناسهٔ مطلب، نیم ساعت بعد', q.length === 1 && /x\.jpg$/.test(q[0]['آدرس رسانه']) && /utm_campaign=mag_old_1405_07_21/.test(q[0]['کپشن']) && q[0]['شناسهٔ مطلب'] === '902' && q[0]['زمان'] === '2026-10-13 12:30' && /۹ دقیقه/.test(q[0]['کپشن']), q[0] && q[0]['کپشن']);
     ok('کلیدواژهٔ ریپلای و یادداشت در سطر بسته', pk[1]['کلیدواژهٔ ریپلای پیشنهادی'] === 'هنر' && /بستهٔ خودکار ساخته شد/.test(pk[1]['یادداشت']));
+    ok('v170.55: سطر بسته «در صف» و شناسهٔ صف همان پست صف', pk[1]['وضعیت'] === PB_PKG_ST.q && pk[1]['شناسهٔ صف'] === q[0]['شناسه'] && !!q[0]['شناسه'], pk[1]['شناسهٔ صف']);
+    ok('v170.55: خط 📖 فقط یک بار، با &amp;', (q[0]['کپشن'].match(/📖/g) || []).length === 1 && /utm_source=telegram&amp;utm_medium/.test(q[0]['کپشن']) && !/utm_source=telegram&utm_medium/.test(q[0]['کپشن']));
+    /* ریشهٔ Q-5: جمنای لینک خام (با &) را خودش در خط 📖 نوشت، بی {LINK} */
+    var raw = pbPkgLink_({ id: '902', slug: 'old', link: 'https://tajrobeh.life/mag/old/' });
+    var two = pbPkgLinkOnce_('<b>تیتر</b>\n\nمتن.\n\n📖 <a href="' + raw + '">کهنه · ۶ دقیقه</a>\n', 'https://tajrobeh.life/mag/old/', '📖 <a href="' + raw.replace(/&/g, '&amp;') + '">کهنه · ۶ دقیقه</a>');
+    ok('v170.55: لینک خام جمنای با & جای خط درست را نمی‌گیرد و دو خط نمی‌شود', (two.match(/📖/g) || []).length === 1 && two.indexOf('&amp;utm_medium') > -1 && two.indexOf('&utm_medium') < 0 && /متن\.\n\n📖/.test(two), two);
     ok('سردبیر خبر و دکمهٔ لغو دارد؛ سئو یک بار', told.some(function (x) { return /بستهٔ انتشار خودکار/.test(x.t) && JSON.stringify(x.kb).indexOf('pb:x:') > -1; }) && seo.join() === '902');
     ok('بیرون از ۹ تا ۲۱ کاری نمی‌کند', pbPkgAuto_(pbTehran_(2026, 10, 13, 22, 0)) === '');
     /* گیت: خط تیره رد و تا سه بار؛ بعد یادداشت */
@@ -1721,6 +1737,13 @@ function pbPkgTests() {
     /* خاموش */
     TG_MEM['pb:' + PB_T_CFG] = [{ 'کلید': 'pkg_auto', 'مقدار': 'خیر', 'توضیح': '' }];
     ok('pkg_auto = خیر: خاموش', pbPkgAuto_(pbTehran_(2026, 10, 14, 12, 0)) === '');
+    TG_MEM['pb:' + PB_T_PKG].push({ 'شناسه': '903', 'عنوان': 'سوم', 'دسته': '10', 'نامک': 'third', 'کلیدواژهٔ ریپلای پیشنهادی': '', 'وضعیت': PB_PKG_ST.wait, 'تاریخ ثبت': '2026-10-13 08:00' });
+    TG_MEM['wp:/wp-json/wp/v2/posts/903?_fields=id,link,title,slug,content,featured_media'] = { id: 903, link: 'https://tajrobeh.life/mag/third/', title: { rendered: 'سوم' }, slug: 'third', content: { rendered: '<p>متن.</p>' }, featured_media: 77 };
+    var raw3 = pbPkgLink_({ id: '903', slug: 'third', link: 'https://tajrobeh.life/mag/third/' });
+    TG_MEM['pb:pkggem'] = { caption_html: '<b>سوم</b>\n\nپاراگراف.\n\n📖 <a href="' + raw3 + '">سوم · ۶ دقیقه</a>', reply_keyword: 'هنر', read_minutes: 6 };
+    var r3 = pbPkgBuild_(TG_MEM['pb:' + PB_T_PKG][2], true), q3 = TG_MEM['pb:' + PB_T_Q].filter(function (x) { return x['شناسهٔ مطلب'] === '903'; })[0];
+    ok('v170.55: سازنده با لینک خام جمنای یک خط 📖 با &amp; می‌سازد و سطر بسته شناسهٔ صف می‌گیرد', /ساخته شد/.test(r3) && q3 && (q3['کپشن'].match(/📖/g) || []).length === 1 && q3['کپشن'].indexOf('&utm_medium') < 0 &&
+      TG_MEM['pb:' + PB_T_PKG][2]['شناسهٔ صف'] === q3['شناسه'] && TG_MEM['pb:' + PB_T_PKG][2]['وضعیت'] === PB_PKG_ST.q, r3);
     /* یک‌باره: Q-1 */
     TG_MEM['pb:' + PB_T_Q].unshift({ 'شناسه': 'Q-1', 'وضعیت': 'خطا: فایل باز نشد (404): x.jpg', 'یادداشت': '' });
     var o1 = tgV17045Pkg().out;
