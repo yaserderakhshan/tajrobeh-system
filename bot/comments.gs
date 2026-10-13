@@ -597,7 +597,7 @@ function cmTests() {
     var keys = stkRows_().map(function (r) { return r.key; }).join(',');
     ok('سلامت: موعد گذشته، بسته با اقدام باز، جدید ۴۸ ساعت، معارفهٔ بی نتیجه، کامنت ۳ روزه، بی اقدام',
       /lead_nonext:L-2001/.test(keys) && /lead_closednext:L-2002/.test(keys) && /lead_new48:L-2001/.test(keys) && /lead_meetstale:L-2003/.test(keys) && /lead_comment3:L-2004/.test(keys) && /lead_nonext:L-2004/.test(keys));
-    ok('سلامت: کارت‌ها تا تأیید یاسر نگه‌داشته', stkRows_().every(function (r) { return r.card === STK_HELD; }));
+    ok('سلامت: کارت جدا نمی‌رود؛ در خلاصهٔ روزانه (v170.43)', stkRows_().every(function (r) { return r.card === STK_DAILY; }));
     /* v170.21 و v170.22.2: اصلاح یک‌باره؛ پیش‌نمایش بی تغییر، اعمال فقط با «اوکی». ساعت آزمون: ۱۳ مهر ۱۰:۲۵ (۲۰۲۶-۱۰-۰۴) */
     var T = function (iso) { return new Date(iso + ':00+03:30'); };
     TG_MEM['lm:leads'] = [{ row: 2, code: 'L-1272', status: 'در پیگیری' }, { row: 3, code: 'L-1300', status: 'پاسخ نداد' },
