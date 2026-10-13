@@ -74,20 +74,26 @@ function stkSheet_() {
   }
   return sh;
 }
+/* v170.46: حافظهٔ یک‌اجرایی. پیش از این هر stkRaise_ کل تب را دو بار می‌خواند و هر ردیف را حتی بی تغییر دوباره می‌نوشت؛
+   با حدود ۳۰۰ ردیف، اسکن و سلامت لید از سقف ۶ دقیقهٔ اجرا گذشت و خلاصهٔ یک‌بارهٔ v170.43 هرگز نرسید. */
+var STK_X = null;
 function stkRows_() {
   if (stkDry_()) return (TG_MEM['stk:rows'] = TG_MEM['stk:rows'] || []);
+  if (STK_X) return STK_X;
   var sh = stkSheet_(), n = sh.getLastRow();
-  if (n < 2) return [];
-  return sh.getRange(2, 1, n - 1, STK_HEAD.length).getDisplayValues().map(function (v, i) {
-    var r = { row: i + 2 }; STK_F.forEach(function (f, j) { r[f] = v[j]; }); return r;
+  if (n < 2) return (STK_X = []);
+  STK_X = sh.getRange(2, 1, n - 1, STK_HEAD.length).getDisplayValues().map(function (v, i) {
+    var r = { row: i + 2 }; STK_F.forEach(function (f, j) { r[f] = v[j]; }); r._sig = stkArr_(r).join('\u0001'); return r;
   }).filter(function (r) { return r.code; });
+  return STK_X;
 }
 function stkArr_(r) { return STK_F.map(function (f) { return r[f] === undefined || r[f] === null ? '' : r[f]; }); }
 function stkWrite_(r) {
   if (stkDry_()) { var a = stkRows_(), i = a.map(function (x) { return x.code; }).indexOf(r.code); if (i < 0) a.push(r); else a[i] = r; return; }
-  var sh = stkSheet_();
-  if (r.row) sh.getRange(r.row, 1, 1, STK_HEAD.length).setValues([stkArr_(r)]);
-  else { sh.appendRow(stkArr_(r)); r.row = sh.getLastRow(); }
+  var sh = stkSheet_(), arr = stkArr_(r), sig = arr.join('\u0001');
+  if (r.row) { if (r._sig === sig) return; sh.getRange(r.row, 1, 1, STK_HEAD.length).setValues([arr]); }
+  else { sh.appendRow(arr); r.row = sh.getLastRow(); if (STK_X && STK_X.indexOf(r) < 0) STK_X.push(r); }
+  r._sig = sig;
 }
 function stkOpen_(r) { return r.st !== STK_ST.DONE; }
 
@@ -432,15 +438,30 @@ function stkDigest_(force) {
     var w = stkWho_(r.owner); if (!w || !w.chat) return;
     (groups[w.chat] = groups[w.chat] || { who: w, rows: [] }).rows.push(r);
   });
+  var marked = [];
   Object.keys(groups).forEach(function (c) {
-    var g = groups[c];
-    var st = tgNotify_(c, TG_NK.task, stkDigestText_(g.rows), { ref: 'STK-DAY', markup: { inline_keyboard: [[{ text: '📥 کارهای روی زمین', callback_data: 'sk:open:-' }]] } });
-    if (st !== 'رفت' && st !== 'صف') return;
+    var g = groups[c], k = 'STK_DIG:' + day + ':' + c;
+    /* v170.46: هر گیرنده روزی یک پیام، حتی اگر اجرا وسط کار قطع و دوباره اجرا شود */
+    if (stkProp_(k) !== '1') {
+      var st = tgNotify_(c, TG_NK.task, stkDigestText_(g.rows), { ref: 'STK-DAY', markup: { inline_keyboard: [[{ text: '📥 کارهای روی زمین', callback_data: 'sk:open:-' }]] } });
+      if (st !== 'رفت' && st !== 'صف') return;
+      stkProp_(k, '1');
+    }
     sent++; tot.push(g.rows.length);
-    g.rows.forEach(function (r) { r.card = mark; stkWrite_(r); });
+    g.rows.forEach(function (r) { r.card = mark; marked.push(r); });
   });
+  stkCardsWrite_(marked);
   if (sent && String(TG_OWNER_CHAT)) tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '🧭 خلاصهٔ درخواست‌های متوقف برای ' + tgFa_(sent) + ' مسئول رفت (' + tot.map(tgFa_).join('، ') + ' مورد).', { ref: 'STK-DAY' });
   return { sent: sent, rows: open.length };
+}
+/* v170.46: ستون «کارت» ردیف‌های خلاصه‌شده در یک نوشتن (نه یک نوشتن برای هر ردیف) */
+function stkCardsWrite_(rows) {
+  if (!rows.length) return;
+  if (stkDry_()) { rows.forEach(function (r) { stkWrite_(r); }); return; }
+  var sh = stkSheet_(), n = sh.getLastRow(); if (n < 2) return;
+  var col = STK_F.indexOf('card') + 1, rng = sh.getRange(2, col, n - 1, 1), v = rng.getValues();
+  rows.forEach(function (r) { if (r.row >= 2 && r.row - 2 < v.length) { v[r.row - 2][0] = r.card; r._sig = stkArr_(r).join('\u0001'); } });
+  rng.setValues(v);
 }
 /* یک‌بارهٔ خودکار v170.43 (تأیید یاسر): اول دوباره سنجیدن (حل‌شده‌ها «حل شد» می‌شوند)، بعد یک خلاصه برای هر مسئول. فقط شمار. */
 function tgV17043StkDigest() {
@@ -532,9 +553,12 @@ function stkTests() {
     ok('v170.43: یاسر فقط یک خط شمار می‌گیرد، نه کارت', TG_OUTBOX.filter(function (o) { return o.chat === OWN && /برای ۱ مسئول رفت/.test(o.text || ''); }).length === 1);
     ok('v170.43: ستون «کارت» ← «در خلاصه فرستاده شد + تاریخ»', stkRows_().filter(stkOpen_).every(function (r) { return /^در خلاصه فرستاده شد /.test(r.card); }));
     TG_MEM['stk:who'] = { 'عرفان': '7202' }; stkRaise_({ reason: 'lead_new48', key: 'L-1400', lead: 'L-1400', owner: 'عرفان', detail: 'L-1400: جدید.' });
+    TG_MEM['stk:now'] = pbTehran_(2026, 10, 6, 9, 5).getTime();   /* روز بعد */
     TG_OUTBOX = []; var d2 = stkDigest_(true), m2 = TG_OUTBOX.filter(function (o) { return /خلاصهٔ درخواست‌های متوقف/.test(o.text || ''); });
     ok('v170.43: هر مسئول یک پیام؛ «پذیرش» یعنی مسئول پذیرش', d2.sent === 2 && m2.length === 2 && m2.some(function (o) { return o.chat === '7202' && /جدید بی‌تماس بیش از ۴۸ ساعت: ۱/.test(o.text) && /L-1400/.test(o.text); }));
     ok('v170.43: روزی یک بار (بی force دوباره نمی‌رود)', stkDigest_(false).sent === 0);
+    TG_OUTBOX = []; stkDigest_(true);
+    ok('v170.46: اجرای دوبارهٔ همان روز (قطع و تکرار) پیام دوم نمی‌فرستد ولی ستون «کارت» را می‌نویسد', !TG_OUTBOX.some(function (o) { return /خلاصهٔ درخواست‌های متوقف/.test(o.text || ''); }) && stkRows_().filter(stkOpen_).every(function (r) { return /^در خلاصه فرستاده شد /.test(r.card); }));
     ok('v170.43: دکمهٔ خلاصه کارهای روی زمین را باز می‌کند', (function () { var k = tgDeskOpen_; var hit = 0; tgDeskOpen_ = function () { hit++; }; try { stkCb_(OWN, 'sk:open:-'); } finally { tgDeskOpen_ = k; } return hit === 1; })());
     ok('روز تازه، کارت تازه برای همان علت', cards('7101').length >= 0 && stkSentToday_('7101', 'lead_abroad') === false);
     var w48 = stkRows_().filter(function (r) { return r.key === 'inp_wait48:gandhi'; })[0];
