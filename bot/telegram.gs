@@ -4705,6 +4705,7 @@ function tgOnCallback_(cq) {
   if (typeof VK_CUR !== 'undefined') VK_CUR = String(chat);
   if (data.indexOf('vk:') === 0 && typeof vkCb_ === 'function') return vkCb_(cq, data.slice(3), chat, name, uname);
   if (data.indexOf('ebi:') === 0 && typeof ebiCb_ === 'function') return ebiCb_(cq, chat, data, name, uname);   /* v170.16: کمپین C-004 */
+  if (data.indexOf('tq:') === 0 && typeof thqCb_ === 'function') return thqCb_(cq, chat, data);   /* v170.66: پرسش از درمانگران */
   try { tgMyRoles_(chat, cq.from && cq.from.username); } catch (e) {}
 
   if (tgV1Cb_(chat, data, name, uname)) return;
@@ -6201,6 +6202,7 @@ function tgTherRoute_(chat, who, text, m) {
 
   // اگر وسط فرم پروفایل است، همان‌جا ادامه بدهد
   if (tgProStep_(chat, text, m) === true) return;
+  if (typeof thqText_ === 'function' && thqText_(chat, text)) return;   /* v170.66: پاسخ متنی پرسش از درمانگران */
   if (typeof tgScSetText_ === 'function' && tgScSetText_(chat, who, text)) return;
   if (typeof tgScHourText_ === 'function' && tgScHourText_(chat, who, text)) return;
   if (String(text || '').indexOf('طول جلسه و استراحت') > -1 && typeof tgScSetStart_ === 'function') return tgScSetStart_(chat, who);
@@ -7192,6 +7194,7 @@ function tgWatchdog(e) {
      خودشان روزی یک بار و فقط از ساعت ۲۲ تهران کار می‌کنند؛ بقیهٔ ساعت‌ها فقط یک خواندن Property است. */
   S('tgStatTick_', 'must', tgStatTick_);
   S('tgRmStatTick_', 'must', tgRmStatTick_);
+  S('thqTick_', 'must', typeof thqTick_ === 'function' ? thqTick_ : null);   /* v170.66: پرسش از درمانگران، ۹ تا ۲۱ تهران؛ یادآوری ۴۸ ساعته */
   S('praDaily_', 'must', typeof praDaily_ === 'function' ? function () { return praDaily_(); } : null);   /* v170.56: خلاصهٔ تغییر پروفایل‌ها، ۱۰ صبح؛ بیرون از آن ساعت فقط یک خواندن Property */
   S('asWeeklyMaybe_', 'light', typeof asWeeklyMaybe_ === 'function' ? asWeeklyMaybe_ : null);   /* v170.23.17: گزارش هفتگی تیم‌های دستیار، شنبه یک بار */
   S('nuTick_', 'light', typeof nuTick_ === 'function' ? nuTick_ : null);   /* v170.23.13: پیگیری گیرکرده‌ها */

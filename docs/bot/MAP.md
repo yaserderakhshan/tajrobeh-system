@@ -80,14 +80,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.64`
+نسخهٔ کد: `v170.66`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۲۹۳ | ۲۰۶۹ |
+| `telegram.gs` | ۳۸۲۹۶ | ۲۰۶۹ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -122,6 +122,7 @@
 | `prauto.gs` | ۳۹۳ | ۲۷ |
 | `statfill.gs` | ۱۶۰ | ۱۶ |
 | `specialty.gs` | ۳۷۷ | ۲۷ |
+| `thq.gs` | ۳۸۰ | ۳۶ |
 | `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `migrate.gs` | ۵۶۲ | ۵۶ |
@@ -269,7 +270,7 @@
 | `TG_STAT_TAB` | «آمار روزانهٔ بات» | `telegram.gs` |
 | `TG_SUP_TAB` | «درخواست سوپرویژن» | `telegram.gs` |
 | `TG_TEST_TAB` | «تست‌ها» | `telegram.gs` |
-| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` `specialty.gs` `psy2.gs` `sesslen.gs` `leadspeed.gs` |
+| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` `specialty.gs` `thq.gs` `psy2.gs` `sesslen.gs` `leadspeed.gs` |
 | `TG_TK_TAB` | «پیام‌های درمانگران» | `telegram.gs` `kartable.gs` |
 | `TG_TSK_TAB` | «کارها» | `telegram.gs` |
 | `TG_USERS_TAB` | «کاربران بات» | `telegram.gs` `ebi.gs` |
@@ -410,6 +411,7 @@
 | انتشار خودکار پروفایل و گارد (v170.56) | `praTests` |
 | بازسازی آمار روزانه (v170.58) | `sfTests` |
 | خط‌های خدمت تخصصی: استخرها، برچسب لید، پرسش‌های والد (v170.62 تا v170.64) | `spTests` |
+| پرسش از درمانگران (v170.66) | `thqTests` |
 | جمنای به‌جای گروک (v170.23.7) | `aiTests` |
 | روان‌پزشکی: نقش و اتصال (v170.23.8) | `ps2Tests` |
 | مهاجرت مراجعان به نسخهٔ ۲ (v170.23.6.3) | `migTests` |
