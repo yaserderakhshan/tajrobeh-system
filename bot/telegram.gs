@@ -4522,7 +4522,7 @@ function tgOnPhone_(chat, name, uname, phone) {
       firstText: 'درخواست شروع درمان از بات' + (q.topic ? ' · موضوع: ' + q.topic : '') +
         (want ? ' · ترجیح درمانگر: ' + want : '') +
         (sc.answered ? ' · علامت ' + sc.S + ' از ۶ · بینش ' + sc.I + ' از ۳' + (sc.profile ? ' · ' + sc.profile : '') : ''),
-      status: 'جدید', kind: q.kind, topic: q.topic,
+      status: 'جدید', kind: (typeof spKindOfChat_ === 'function' && spKindOfChat_(chat)) || q.kind, topic: q.topic,   /* v170.63: کد شروع خط تخصصی */
       note: 'chat_id: ' + chat + (uname ? ' · ' + uname : '') + (want ? ' · ترجیح درمانگر: ' + want : ''),
       extra: extra
     }) !== false;
@@ -5437,6 +5437,7 @@ function tgClearBooking_(chat) {
 
 /* v166.12: true/false برمی‌گرداند. اگر نوشتن شکست خورد، لید در TG_LEAD_RETRY می‌ماند و tgLeadRetry_ (از tgDutyTick) دوباره می‌نویسد. */
 function tgAppendLead_(o, isRetry) {
+  if (!isRetry && typeof spLeadPrefill_ === 'function') o = spLeadPrefill_(o);   /* v170.63: برچسب خط تخصصی از need فرم سایت یا کلیدواژهٔ روشن */
   if (!isRetry && typeof igLeadPrefill_ === 'function') o = igLeadPrefill_(o);   /* v168: منبع اینستاگرام و فیلدهای پیش‌پر */
   if (!isRetry && typeof ebiLeadPrefill_ === 'function') o = ebiLeadPrefill_(o);   /* v170.16: منبع «کمپین › C-004 › <نوع>» */
   if (!isRetry && typeof v168NewLeadNext_ === 'function') o = v168NewLeadNext_(o);   /* v168 فاز ۲: لید تازه همان لحظه تکلیف دارد */
@@ -13001,6 +13002,7 @@ function tgGtStart_(chat, arg, name, uname) {
     return true;
   }
   var t = TG_GT_TOPIC[k] || '';
+  if (k === 'grief' && typeof spStartArg_ === 'function') spStartArg_(chat, 'gt-grief');   /* v170.63: لید سوگ */
   if (t) {
     var lbl = '';
     for (var i = 0; i < TG_TOPICS.length; i++) { if (TG_TOPICS[i].k === t) { lbl = TG_TOPICS[i].topic; } }
@@ -13092,6 +13094,7 @@ function tgSchoolStart_(chat, arg, uname) {
   if (arg === 'prereg' && typeof tgPzStart_ === 'function') { tgPzStart_(chat, ''); return true; }
   tgLogStart_(arg, chat);
   tgSetVal_('esrc', chat, arg);
+  if (typeof spStartArg_ === 'function') spStartArg_(chat, arg);   /* v170.63: th_pre و … همان مسیر th_cpl، نوع درخواست از پیش پر */
   if (arg === 'edu' || arg === 'edu_s' || arg === 'edu_t') { tgEduSignup_(chat); return true; }
   if (arg === 'join' || arg === 'sch_join') { tgSjStart_(chat, ''); return true; }
   if (arg === 'comm' || arg === 'community') { tgCommStart_(chat, ''); return true; }
