@@ -80,7 +80,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.57`
+نسخهٔ کد: `v170.58`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -120,6 +120,7 @@
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
 | `kartable.gs` | ۴۷۷ | ۳۵ |
 | `prauto.gs` | ۳۹۳ | ۲۷ |
+| `statfill.gs` | ۱۴۵ | ۱۲ |
 | `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `migrate.gs` | ۵۶۲ | ۵۶ |
@@ -198,7 +199,7 @@
 | `SEO_TAB` | «سئو · پیشنهاد Gemini» | `seo_gemini.gs` |
 | `SPL_TAB` | «نتیجهٔ انتشار سایت» | `sitepub.gs` |
 | `STK_TAB` | «درخواست‌های متوقف» | `stuck.gs` |
-| `TG_AE_TAB` | «رویدادهای بات و اپ» | `telegram.gs` |
+| `TG_AE_TAB` | «رویدادهای بات و اپ» | `telegram.gs` `statfill.gs` |
 | `TG_ANN_TAB` | «اطلاعیه‌ها» | `telegram.gs` |
 | `TG_APM_TAB` | «جذب تراپیست» | `telegram.gs` |
 | `TG_BOX_TAB` | «صندوق پیام» | `telegram.gs` |
@@ -406,6 +407,7 @@
 | نتیجهٔ انتشار سایت و تلاش دوباره (v170.23.3) | `splTests` |
 | کارتابل تأیید یاسر (v170.23.5) | `ktbTests` |
 | انتشار خودکار پروفایل و گارد (v170.56) | `praTests` |
+| بازسازی آمار روزانه (v170.58) | `sfTests` |
 | جمنای به‌جای گروک (v170.23.7) | `aiTests` |
 | روان‌پزشکی: نقش و اتصال (v170.23.8) | `ps2Tests` |
 | مهاجرت مراجعان به نسخهٔ ۲ (v170.23.6.3) | `migTests` |
