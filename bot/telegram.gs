@@ -3933,7 +3933,9 @@ function tgPoolMap_() {
   const out = {};
   if (!sh || sh.getLastRow() < 4) { c.put('pools', '{}', 120); return out; }
 
-  const v = sh.getRange(4, 1, sh.getLastRow() - 3, TG_POOL_LAST).getValues();
+  /* v170.62: ستون‌های استخر تخصصی (۱۸ تا ۲۳، specialty.gs) هم خوانده می‌شوند */
+  const pw = typeof SP_POOL_LAST !== 'undefined' ? Math.max(TG_POOL_LAST, Math.min(sh.getMaxColumns(), SP_POOL_LAST)) : TG_POOL_LAST;
+  const v = sh.getRange(4, 1, sh.getLastRow() - 3, pw).getValues();
   for (var i = 0; i < v.length; i++) {
     const name = String(v[i][0]).trim();
     if (!name) continue;
@@ -3944,6 +3946,7 @@ function tgPoolMap_() {
       const p = tgPoolPri_(v[i][TG_POOL_DEFS[j].col - 1]);
       if (p) rec[TG_POOL_DEFS[j].key] = p;
     }
+    if (typeof spPoolRec_ === 'function') spPoolRec_(v[i], rec);
     out[tgNorm_(name)] = rec;
   }
   c.put('pools', JSON.stringify(out), 600);
@@ -3995,6 +3998,9 @@ function tgBuildPools() {
   const head = ['نام درمانگر', 'وضعیت همکاری', 'جنسیت', 'رویکرد', 'حداقل ویزیت', 'محل سکونت', 'وصل به بات', 'لینک جلسه'];
   for (var j = 0; j < TG_POOL_DEFS.length; j++) head.push(TG_POOL_DEFS[j].name);
   head.push('خارج از ایران', 'جلسهٔ حضوری', 'پذیرش همهٔ هویت‌ها', 'یادداشت');
+  const spL = typeof spNewPools_ === 'function' ? spNewPools_() : [];   /* v170.62: استخرهای تخصصی تازه بعد از «یادداشت»، عضویت فقط از «تأییدشده» */
+  const spSvc = spL.length && typeof spTherOk_ === 'function' ? spTherOk_() : {};
+  for (var js = 0; js < spL.length; js++) head.push(spL[js].name);
   sh.getRange(3, 1, 1, head.length).setValues([head]).setFontWeight('bold').setBackground('#f3efec').setWrap(true);
   sh.setFrozenRows(3);
 
@@ -4041,6 +4047,10 @@ function tgBuildPools() {
     const oldLg = prev ? String(prev[TG_POOL_LGBT - 1] || '').trim() : '';
     line.push(oldLg || (p && p.lgbt ? 'بله' : ''));
     line.push(prev ? String(prev[TG_POOL_LAST - 1] || '') : '');
+    for (var ds = 0; ds < spL.length; ds++) {
+      const oldS = prev ? String(prev[spL[ds].col - 1] || '').trim() : '';
+      line.push(oldS || (active && spSvc[nm] && spSvc[nm][spL[ds].key] ? TG_POOL_PRI[1] : ''));
+    }
 
     body.push(line);
   }
@@ -4051,6 +4061,7 @@ function tgBuildPools() {
   const yes = SpreadsheetApp.newDataValidation().requireValueInList(['بله'], true).setAllowInvalid(false).build();
   for (var d3 = 0; d3 < TG_POOL_DEFS.length; d3++) sh.getRange(4, TG_POOL_DEFS[d3].col, body.length, 1).setDataValidation(pri);
   sh.getRange(4, TG_POOL_ABROAD, body.length, 3).setDataValidation(yes);
+  if (spL.length) { sh.getRange(4, spL[0].col, body.length, spL.length).setDataValidation(pri); sh.getRange(3, spL[0].col, 1, spL.length).setBackground('#fbe9ea'); }
 
   sh.getRange(3, 1, body.length + 1, 8).setBackground('#f7f7f8').setFontColor('#5a5a63');
   sh.getRange(3, 1, 1, 8).setFontColor('#3a3a40');
@@ -4058,7 +4069,7 @@ function tgBuildPools() {
   sh.getRange(3, TG_POOL_ABROAD, 1, 3).setBackground('#eaf2fb');
   sh.setColumnWidth(1, 170);
   sh.setColumnWidth(4, 200);
-  for (var w = TG_POOL_FIRST; w <= TG_POOL_LAST; w++) sh.setColumnWidth(w, 105);
+  for (var w = TG_POOL_FIRST; w <= TG_POOL_LAST + spL.length; w++) sh.setColumnWidth(w, 105);
 
   CacheService.getScriptCache().remove('pools');
   Logger.log('تب «' + TG_POOLS_TAB + '»: ' + body.length + ' سطر · ' + matched +
@@ -4079,6 +4090,8 @@ function tgPoolFilter_(slots, chat, over) {
   const topic = over ? String(over.topic || '') : String(tgGetVal_('qt', chat) || '');
   const pool = TG_TOPIC_POOL[topic] || '';
   const abroad = over ? !!over.abroad : String(tgGetVal_('tz', chat) || '') !== 'ir' && String(tgGetVal_('tz', chat) || '') !== '';
+  /* v170.62: خط خدمت تخصصی (specialty.gs) اول؛ اگر کسی در آن استخر نماند، همان قاعدهٔ قبلی */
+  if (typeof spPoolFirst_ === 'function') { const spr = spPoolFirst_(slots, chat, over, map, abroad); if (spr) return spr; }
 
   function distinct(list) {
     const s = {}; let n = 0;
@@ -14301,6 +14314,8 @@ function tgPqSave_(chat, st, q, val) {
       if (rowC && colC) shC.getRange(rowC, colC).setValue(val);
       CacheService.getScriptCache().remove('trows');
     }
+    /* v170.62: «خدمات تخصصی (اعلام‌شده)» با هر تغییر موضوع‌ها، گروه‌ها و رده‌ها (specialty.gs) */
+    if (st.ther && (q.k === 'focus' || q.k === 'groups' || q.k === 'ages') && typeof spDeclSync_ === 'function') spDeclSync_(st.name);
     var p = (q.k === 'uni' || q.k === 'supaccept') ? tgWhoPerson_(chat, '') : null;
     if (p && q.k === 'uni') { tgPersonSet_(p.row, { 'دانشگاه': val }, 'خود فرد', { why: 'پروفایل' }); CacheService.getScriptCache().remove('plist'); }
     if (p && q.k === 'supaccept') { tgPersonSet_(p.row, { 'سوپرویژن می‌پذیرد؟': val.indexOf('ندارم') > -1 ? 'خیر' : 'بله' }, 'خود فرد', { why: 'پروفایل' }); CacheService.getScriptCache().remove('plist'); }
@@ -31227,6 +31242,7 @@ function tgApiBook2_(p) {
 
 /* ---------- ارجاع دستی پذیرش: زوج به فردی‌کار نرود ---------- */
 function tgReferNeed_(kind, topic) {
+  if (typeof spReferNeed_ === 'function') { var sp = spReferNeed_(kind); if (sp) return sp; }   /* v170.62: خط تخصصی با استخر عضودار */
   var s = String(kind || '') + ' ' + String(topic || '');
   if (/زوج/.test(s)) return 'rel';
   if (/کودک|نوجوان/.test(s)) return 'kid';
@@ -31243,7 +31259,7 @@ function tgLeadKind_(row) {
 function tgReferGuard_(therName, kind, topic) {
   var need = tgReferNeed_(kind, topic);
   if (!need || tgPoolHas_(therName, need)) return null;
-  return { pool: need, label: TG_POOL_HARD[need] || TG_TH_POOLNAME[need], alts: tgPoolNames_(need).slice(0, 6) };
+  return { pool: need, label: TG_POOL_HARD[need] || TG_TH_POOLNAME[need] || (typeof spPoolName_ === 'function' ? spPoolName_(need) : ''), alts: tgPoolNames_(need).slice(0, 6) };
 }
 function tgReferWarn_(chat, code, therName, gd) {
   var rows = gd.alts.map(function (n) { return [{ text: '👤 ' + n, callback_data: 'rf:p:' + code + ':' + n }]; });
