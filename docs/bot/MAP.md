@@ -87,7 +87,7 @@
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۲۸۸ | ۲۰۶۹ |
+| `telegram.gs` | ۳۸۲۹۰ | ۲۰۶۹ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -121,7 +121,8 @@
 | `kartable.gs` | ۴۷۷ | ۳۵ |
 | `prauto.gs` | ۳۹۳ | ۲۷ |
 | `statfill.gs` | ۱۶۰ | ۱۶ |
-| `specialty.gs` | ۳۰۰ | ۲۳ |
+| `leadfix.gs` | ۷۳ | ۶ |
+| `specialty.gs` | ۳۷۴ | ۳۰ |
 | `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `migrate.gs` | ۵۶۲ | ۵۶ |
@@ -228,7 +229,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `specialty.gs` `leadspeed.gs` `leadclaim.gs` `agents.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadfix.gs` `specialty.gs` `leadspeed.gs` `leadclaim.gs` `agents.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -409,7 +410,9 @@
 | کارتابل تأیید یاسر (v170.23.5) | `ktbTests` |
 | انتشار خودکار پروفایل و گارد (v170.56) | `praTests` |
 | بازسازی آمار روزانه (v170.58) | `sfTests` |
-| خط‌های خدمت تخصصی، استخرها و برچسب لید (v170.62، v170.63) | `spTests` |
+| اصلاح یک‌بارهٔ شروع درمان (v170.61) | `lfTests` |
+| K07 خط‌های تخصصی: اعلام‌شده، استخرها، مچ‌میکینگ (v170.62) | `spTests` |
+| K07 برچسب لید (v170.63) | `spLabelTests` |
 | جمنای به‌جای گروک (v170.23.7) | `aiTests` |
 | روان‌پزشکی: نقش و اتصال (v170.23.8) | `ps2Tests` |
 | مهاجرت مراجعان به نسخهٔ ۲ (v170.23.6.3) | `migTests` |

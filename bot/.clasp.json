@@ -39,7 +39,7 @@
     "sitepub.gs",
     "kartable.gs",
     "prauto.gs",
-    "statfill.gs", "specialty.gs",
+    "statfill.gs", "leadfix.gs", "specialty.gs",
     "ai.gs",
     "psy2.gs",
     "migrate.gs",

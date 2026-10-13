@@ -3998,8 +3998,8 @@ function tgBuildPools() {
   const head = ['نام درمانگر', 'وضعیت همکاری', 'جنسیت', 'رویکرد', 'حداقل ویزیت', 'محل سکونت', 'وصل به بات', 'لینک جلسه'];
   for (var j = 0; j < TG_POOL_DEFS.length; j++) head.push(TG_POOL_DEFS[j].name);
   head.push('خارج از ایران', 'جلسهٔ حضوری', 'پذیرش همهٔ هویت‌ها', 'یادداشت');
-  const spL = typeof SP_LINES !== 'undefined' ? SP_LINES : [];   /* v170.62: استخرهای تخصصی بعد از «یادداشت» */
-  const spSvc = spL.length && typeof spTherSvc_ === 'function' ? spTherSvc_() : {};
+  const spL = typeof spNewPools_ === 'function' ? spNewPools_() : [];   /* v170.62: استخرهای تخصصی تازه بعد از «یادداشت»، عضویت فقط از «تأییدشده» */
+  const spSvc = spL.length && typeof spTherOk_ === 'function' ? spTherOk_() : {};
   for (var js = 0; js < spL.length; js++) head.push(spL[js].name);
   sh.getRange(3, 1, 1, head.length).setValues([head]).setFontWeight('bold').setBackground('#f3efec').setWrap(true);
   sh.setFrozenRows(3);
@@ -14317,6 +14317,8 @@ function tgPqSave_(chat, st, q, val) {
       if (rowC && colC) shC.getRange(rowC, colC).setValue(val);
       CacheService.getScriptCache().remove('trows');
     }
+    /* v170.62: «خدمات تخصصی (اعلام‌شده)» با هر تغییر موضوع‌ها، گروه‌ها و رده‌ها (specialty.gs) */
+    if (st.ther && (q.k === 'focus' || q.k === 'groups' || q.k === 'ages') && typeof spDeclSync_ === 'function') spDeclSync_(st.name);
     var p = (q.k === 'uni' || q.k === 'supaccept') ? tgWhoPerson_(chat, '') : null;
     if (p && q.k === 'uni') { tgPersonSet_(p.row, { 'دانشگاه': val }, 'خود فرد', { why: 'پروفایل' }); CacheService.getScriptCache().remove('plist'); }
     if (p && q.k === 'supaccept') { tgPersonSet_(p.row, { 'سوپرویژن می‌پذیرد؟': val.indexOf('ندارم') > -1 ? 'خیر' : 'بله' }, 'خود فرد', { why: 'پروفایل' }); CacheService.getScriptCache().remove('plist'); }
