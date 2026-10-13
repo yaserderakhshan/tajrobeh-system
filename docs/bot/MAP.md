@@ -80,7 +80,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.50`
+نسخهٔ کد: `v170.53`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -96,12 +96,12 @@
 | `school2.gs` | ۴۳۹ | ۳۲ |
 | `mag_contrib.gs` | ۱۲۴۳ | ۹۷ |
 | `author.gs` | ۱۴۸ | ۱۰ |
-| `voice.gs` | ۱۱۰۵ | ۹۳ |
+| `voice.gs` | ۱۱۱۷ | ۹۳ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۵۷۸ | ۱۲۰ |
+| `publish.gs` | ۱۷۳۳ | ۱۲۸ |
 | `v168.gs` | ۲۴۹۴ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
@@ -390,6 +390,7 @@
 | تجربه پارتنرز ۲ | `ptTests` |
 | برنامهٔ من (v118) | `tgV118Tests` |
 | اشغال گاندی (v144) | `tgOccTests` |
+| بستهٔ انتشار خودکار (v170.45) | `pbPkgTests` |
 | سهمیهٔ زمان اجرا (v170.23.12.5) | `bgTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | اقدام بعدی لید بسته (v170.50) | `lmClosedNextTests` |
