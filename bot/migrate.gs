@@ -473,6 +473,7 @@ function migOwnerCmd_(chat, t) {
   if (String(chat) !== String(TG_OWNER_CHAT)) return false;
   if (t === '/migpilot') { tgSend_(chat, migOn_() ? '🤝 پرسش همیار برای ' + tgFa_(migPilotAsk_(8)) + ' درمانگرِ پرمراجع رفت.' : 'مهاجرت خاموش است (MIG_ENABLED).'); return true; }
   if (t === '/migreport') { migProp_('MIG_NIGHT', ''); migNightly_(); return true; }
+  if (typeof migSmsCmd_ === 'function' && migSmsCmd_(chat, t)) return true;   /* v170.41: پیامک دعوت موج (migsms.gs) */
   return false;
 }
 
