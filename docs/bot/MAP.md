@@ -120,7 +120,7 @@
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
 | `kartable.gs` | ۴۷۷ | ۳۵ |
 | `prauto.gs` | ۳۹۳ | ۲۷ |
-| `statfill.gs` | ۱۴۵ | ۱۲ |
+| `statfill.gs` | ۱۶۰ | ۱۶ |
 | `leadfix.gs` | ۷۳ | ۶ |
 | `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
