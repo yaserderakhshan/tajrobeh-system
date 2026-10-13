@@ -22745,6 +22745,11 @@ function tgLeadEdited_(row, c1, c2, actor, oldValue) {
             '\nوضعیت‌ها: ' + TG_LEAD_ST.join(' ← '));
         }
         if (tgStClosed_(fixed)) {
+          /* v170.50: بستن یا «شروع درمان» از شیت هم اقدام بعدی را پاک می‌کند (پیش از این فقط مسیر بات پاک می‌کرد) */
+          if (l.next || l.nextDate) {
+            const chN = {}; if (l.next) chN['اقدام بعدی'] = ''; if (l.nextDate) chN['تاریخ اقدام بعدی'] = '';
+            tgLeadSet_(row, chN, 'بات', 'شیت', 'خودکار: لید بسته اقدام بعدی ندارد');
+          }
           const o = tgDeskByName_(l.owner);
           if (o && o.chat) tgSend_(o.chat, '✅ لید ' + tgEsc_(code) + ' ' + (fixed === TG_ST.START ? 'به «شروع درمان» رسید' : 'بسته شد') + (nz.changed ? ' (' + tgEsc_(st) + ')' : '') + '\nاز پیگیری‌های بات بیرون رفت.');
         }
