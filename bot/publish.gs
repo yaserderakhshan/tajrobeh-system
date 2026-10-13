@@ -80,6 +80,8 @@ var PB_CFG_DEF = [
   ['api_hourly_max', '30', 'سقف فراخوانی درگاه در ساعت'],
   ['err_alert_n', '3', 'خطایی که در ۲۴ ساعت بیش از این تکرار شد، به یاسر خبر داده می‌شود'],
   ['late_hours', '6', 'پست صف که بیش از این ساعت دیر شده باشد نمی‌رود'],
+  ['pkg_auto', 'بله', 'بستهٔ انتشار خودکار مطلب تازه با جمنای (v170.45)؛ «خیر» خاموش'],
+  ['pkg_auto_hours', '2', 'چند ساعت بعد از ثبت مطلب، اگر بسته‌اش دستی ساخته نشد، بات خودش می‌سازد'],
   ['new_post_check_time', '09:00', 'ساعت چک روزانهٔ مطلب تازه (فقط خبر به سردبیر؛ v168.9)']
 ];
 
@@ -1248,6 +1250,7 @@ function pbTickRun_(now) {
   try { pbDailyNew_(now); } catch (e) { tgErr_('pbDailyNew_', e); }
   try { pbPoolRefresh_(now); } catch (e) { tgErr_('pbPoolRefresh_', e); }
   try { pbDigestTick_(now); } catch (e) { tgErr_('pbDigestTick_', e); }
+  try { pbPkgAuto_(now); } catch (e) { tgErr_('pbPkgAuto_', e); }   /* v170.45: بستهٔ انتشار خودکار */
   try { pbErrAlert_(now); } catch (e) { tgErr_('pbErrAlert_', e); }
 }
 
@@ -1575,3 +1578,155 @@ function pbSendTests() {
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ اکشن send درست است'));
   return tgTestTally_(log, fail);
 }
+
+/* ================= ۸) v170.45 · بستهٔ انتشار خودکار (کپشن کانال، کلیدواژهٔ ریپلای، تصویر) =================
+   ریشهٔ گیرکردن «منتظر بسته»: از v168.9 بات مطلب تازه را فقط ثبت می‌کرد و به سردبیر خبر می‌داد؛ ساختن بسته (کپشن، تصویر،
+   کلیدواژه) هیچ مسیر خودکاری نداشت و فقط از درگاه API و دست دستیار می‌آمد. ایجنت سئوی کنسول هم خاموش است (تصمیم یاسر).
+   حالا خود بات با جمنای (مثل gem_seo، قاعدهٔ ۱۵: سئوی مجله با جمنای داخل بات) بسته را می‌سازد و در «صف انتشار» می‌گذارد:
+   - کدام: سطر «منتظر بسته» که دست‌کم pkg_auto_hours ساعت (پیش‌فرض ۲) از ثبتش گذشته، هر تیک یکی، ساعت ۹ تا ۲۱ تهران.
+   - تصویر: تصویر شاخص خود مطلب در وردپرس. بی تصویر شاخص، بسته ساخته نمی‌شود و یادداشت می‌خورد.
+   - کپشن: فقط از متن منتشرشدهٔ مقاله؛ همان گیت درگاه (pbValidatePost_: خط تیره، برچسب، طول) و واژه‌های ممنوع؛ تا سه بار.
+   - صف: نیم ساعت بعد (سردبیر خبر دارد و می‌تواند لغو کند)؛ قاعدهٔ «روزی یک پست مجله» همان pbFitDay_ است.
+   - سئو: اگر برای مطلب سطر «بستهٔ سئو» نیست، gem_seo هم یک بار.
+   - شکست: یادداشت سطر و تا سه بار در روزهای بعد؛ بعد فقط دستی. خاموش کردن: کلید pkg_auto در «تنظیمات انتشار» = خیر. */
+var PB_PKG_SCHEMA = {
+  type: 'OBJECT',
+  properties: { caption_html: { type: 'STRING' }, reply_keyword: { type: 'STRING' }, read_minutes: { type: 'INTEGER' } },
+  required: ['caption_html', 'reply_keyword', 'read_minutes']
+};
+function pbPkgOn_() { return !/^(خیر|نه|no|0|false)$/i.test(String(pbCfg_('pkg_auto') || '').trim()); }
+function pbPkgPrompt_(post, text, link, fb) {
+  return [
+    'تو ویراستار کانال تلگرام «مجلهٔ تجربه» هستی؛ مجلهٔ روان‌درمانی و روانکاوی مرکز تجربه زندگی. خروجی فقط JSON طبق اسکیما.',
+    '۱. caption_html: کپشن کانال برای همین مقاله، فقط از متن خود مقاله، بی هیچ ادعا یا وعدهٔ تازه. ساختار:',
+    '   خط اول عنوان کوتاه با <b>، بعد سه یا چهار پاراگراف کوتاه که ایدهٔ اصلی را روشن بگوید، اگر جملهٔ کلیدی هست در <blockquote>،',
+    '   یک جملهٔ پایانی کوتاه با <i>، و آخرین خط دقیقاً: 📖 <a href="{LINK}">{TITLE} · {MIN} دقیقه</a>',
+    '   فقط برچسب‌های b، i، blockquote و a. کل متن دیده‌شده کمتر از ۹۰۰ نویسه.',
+    '۲. reply_keyword: یک واژهٔ فارسی کوتاه که خواننده برای گرفتن لینک در دایرکت یا ریپلای بفرستد (مثل «هنر»).',
+    '۳. read_minutes: زمان تقریبی خواندن مقاله به دقیقه.',
+    '۴. هیچ خط تیرهٔ بلند یا کوتاه (— یا –). «بیمار»، «مشتری» و «ارگانیک» ننویس. لحن متواضع و همکار، بی تبلیغ.',
+    fb ? 'ایرادهای نسخهٔ قبلی که باید رفع شود: ' + fb : '',
+    '', 'عنوان: ' + post.title, 'لینک: ' + link, 'متن مقاله:', text.slice(0, 12000)
+  ].join('\n');
+}
+function pbPkgLink_(o) {
+  var j = tgJalali_(pbNow_(), TG_TZ), d = j.y + '_' + ('0' + j.m).slice(-2) + '_' + ('0' + j.d).slice(-2);
+  var slug = String(o.slug || o.id).replace(/[^a-z0-9-]/gi, '').slice(0, 30) || o.id;
+  return pbPkgBase_(o) + '?utm_source=telegram&utm_medium=social&utm_content=longread&utm_campaign=mag_' + slug.replace(/-/g, '_') + '_' + d;
+}
+function pbPkgBase_(o) { var u = String(o.link || '').split('?')[0]; return u || PB_SITE + '/?p=' + o.id; }
+/** یک سطر «منتظر بسته» ← بسته و صف. force: اجرای یک‌باره بی شرط ساعت و فاصله. خروجی متن کوتاه برای لاگ */
+function pbPkgBuild_(row, force) {
+  var id = String(row['شناسه']).trim(), tries = Number(pbProp_('PB_PKG_TRY:' + id) || 0);
+  if (!force && tries >= 3) return 'سه بار ناموفق؛ فقط دستی';
+  if (pbGemLeft_() <= 0) return 'سقف روزانهٔ جمنای';
+  pbProp_('PB_PKG_TRY:' + id, String(tries + 1));
+  var note = function (t) { pbSet_('e', PB_T_PKG, PB_PKG_HEAD, row, { 'یادداشت': 'بستهٔ خودکار: ' + t + ' · ' + pbFmt_(pbNow_()) }); return t; };
+  var post, img = '';
+  try {
+    post = pbWp_('/wp-json/wp/v2/posts/' + id + '?_fields=id,link,title,slug,content,featured_media');
+    if (post.featured_media) img = String((pbWp_('/wp-json/wp/v2/media/' + post.featured_media + '?_fields=source_url') || {}).source_url || '');
+  } catch (e) { return note('مطلب از سایت خوانده نشد: ' + String(e.message || e).slice(0, 80)); }
+  if (!img || !pbUrlOk_(img)) return note('تصویر شاخص ندارد؛ بسته دستی ساخته شود');
+  var o = { id: id, title: seoStrip_(post.title && post.title.rendered || row['عنوان'] || ''), slug: String(post.slug || row['نامک'] || ''), link: decodeURI(String(post.link || '')) };
+  var text = seoStrip_(post.content && post.content.rendered || ''), link = pbPkgLink_(o), linkH = link.replace(/&/g, '&amp;'), g = null, fb = '', errs = [];
+  for (var i = 0; i < 3; i++) {
+    try { g = TG_DRY ? JSON.parse(JSON.stringify(TG_MEM['pb:pkggem'])) : gemJson_(pbPkgPrompt_(o, text, link, fb), PB_PKG_SCHEMA); pbGemUse_(true); }
+    catch (e) { pbGemUse_(false, e.message); return note('جمنای: ' + String(e.message || e).slice(0, 80)); }
+    var cap = String(g.caption_html || '').replace(/\{LINK\}/g, linkH).replace(/\{TITLE\}/g, tgEsc_(o.title)).replace(/\{MIN\}/g, tgFa_(g.read_minutes || 5));
+    if (cap.indexOf(linkH) < 0) cap += '\n\n📖 <a href="' + linkH + '">' + tgEsc_(o.title) + ' · ' + tgFa_(g.read_minutes || 5) + ' دقیقه</a>';
+    g.caption_html = cap;
+    var v = pbValidatePost_({ chat: 'public', photo_url: img, caption_html: cap });
+    errs = v.errs.slice();
+    if (/بیمار|مشتری|ارگانیک/.test(tgPlain_(cap))) errs.push('واژهٔ ممنوع');
+    if (!String(g.reply_keyword || '').trim() || /\s/.test(String(g.reply_keyword).trim())) errs.push('کلیدواژهٔ ریپلای یک واژه نیست');
+    if (!errs.length) break;
+    fb = errs.join('، ');
+  }
+  if (errs.length) return note('گیت کپشن رد کرد: ' + errs.join('، ').slice(0, 100));
+  var when = pbFmt_(new Date(pbNow_().getTime() + 30 * 60000));
+  var r = pbChannelPost_({ chat: 'public', photo_url: img, caption_html: g.caption_html, post_id: id, type: PB_TYPE_MAG, send_at: when }, false, 'بستهٔ خودکار');
+  if (!r.ok) return note('صف نپذیرفت: ' + String(r.error || '').slice(0, 100));
+  pbSet_('e', PB_T_PKG, PB_PKG_HEAD, row, { 'کلیدواژهٔ ریپلای پیشنهادی': String(g.reply_keyword).trim(), 'یادداشت': 'بستهٔ خودکار ساخته شد (' + (g._model || 'جمنای') + ') · ' + pbFmt_(pbNow_()) });
+  var qid = r.data && (r.data.queued || r.data.id) || '';
+  pbNotifyEditors_('📦 <b>بستهٔ انتشار خودکار ساخته شد</b>\n' + tgEsc_(o.title) + '\nزمان: ' + tgEsc_(r.data && r.data.when ? r.data.when : when) + ' · کلیدواژهٔ ریپلای: ' + tgEsc_(String(g.reply_keyword).trim()) +
+    '\n\n' + g.caption_html, qid ? { inline_keyboard: [[{ text: '✖️ لغو این پست', callback_data: 'pb:x:' + qid }]] } : null);
+  /* سئو: یک بار برای هر مطلب */
+  try { var has = pbRows_('c', PB_T_SEO, PB_SEO_HEAD).some(function (x) { return String(x['شناسه']).trim() === id; }); if (!has && pbGemLeft_() > 0) pbGemSeo_(id, false); } catch (eS) { tgErr_('pbPkgBuild_ seo', eS, id); }
+  pbProp_('PB_PKG_TRY:' + id, '');
+  return 'ساخته شد · ' + (qid || '');
+}
+/** از pbTickRun_ (هر ۵ دقیقه): هر تیک حداکثر یک سطر */
+function pbPkgAuto_(now) {
+  if (!pbPkgOn_()) return '';
+  var p = pbParts_(now); if (p.h < 9 || p.h >= 21) return '';
+  var wait = pbCfgN_('pkg_auto_hours', 2) * 3600000;
+  var row = pbRows_('e', PB_T_PKG, PB_PKG_HEAD).filter(function (r) {
+    if (String(r['وضعیت']).trim() !== PB_PKG_ST.wait) return false;
+    var id = String(r['شناسه']).trim(); if (!id || Number(pbProp_('PB_PKG_TRY:' + id) || 0) >= 3) return false;
+    var last = String(pbProp_('PB_PKG_AT:' + id) || ''); if (last === pbDay_(now)) return false;   /* روزی یک تلاش برای هر مطلب */
+    var t = r['تاریخ ثبت'] instanceof Date ? r['تاریخ ثبت'] : new Date(String(r['تاریخ ثبت']).replace(' ', 'T') + ':00+03:30');
+    return !isNaN(t.getTime()) && now.getTime() - t.getTime() >= wait;
+  })[0];
+  if (!row) return '';
+  pbProp_('PB_PKG_AT:' + String(row['شناسه']).trim(), pbDay_(now));
+  return pbPkgBuild_(row, false);
+}
+/* یک‌بارهٔ خودکار v170.45 (تأیید یاسر): بستهٔ مقالهٔ گیرکرده از ۱۰ اکتبر، و Q-1 (ژیژک، خطای ۴۰۴ تصویر که Q-2 جایش رفت) ← «جایگزین شد» */
+var PB_V45_POST = '505810';
+function tgV17045Pkg() {
+  var out = [];
+  var row = pbRows_('e', PB_T_PKG, PB_PKG_HEAD).filter(function (r) { return String(r['شناسه']).trim() === PB_V45_POST; })[0];
+  if (!row) out.push('بسته: سطر نیست');
+  else if (String(row['وضعیت']).trim() !== PB_PKG_ST.wait) out.push('بسته: پیش از این ' + row['وضعیت']);
+  else out.push('بسته: ' + pbPkgBuild_(row, true));
+  var q1 = pbQRows_().filter(function (r) { return String(r['شناسه']).trim() === 'Q-1'; })[0];
+  if (q1 && /^خطا/.test(String(q1['وضعیت']))) { pbSet_('e', PB_T_Q, PB_Q_HEAD, q1, { 'وضعیت': 'جایگزین شد', 'یادداشت': 'Q-2 جایش فرستاده شد (۲۱ مهر ۱۴۰۵)' }); out.push('Q-1: جایگزین شد'); }
+  else out.push('Q-1: ' + (q1 ? 'دست نخورد (' + q1['وضعیت'] + ')' : 'نیست'));
+  return { out: out.join(' · ') };
+}
+function pbPkgTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, ed: pbNotifyEditors_, seo: pbGemSeo_ };
+  TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
+  var told = [], seo = [];
+  pbNotifyEditors_ = function (t, kb) { told.push({ t: t, kb: kb }); };
+  pbGemSeo_ = function (id) { seo.push(id); return { ok: true }; };
+  try {
+    TG_MEM['pb:now'] = pbTehran_(2026, 10, 13, 12, 0).getTime();
+    TG_MEM['pb:' + PB_T_CH] = [{ 'نام مستعار': 'public', 'chat_id': '-100', 'یوزرنیم': '@x', 'توضیح': '' }];
+    TG_MEM['pb:' + PB_T_PKG] = [{ 'شناسه': '901', 'عنوان': 'مطلب نمونه', 'دسته': '10', 'نامک': 'sample-post', 'کلیدواژهٔ ریپلای پیشنهادی': '', 'وضعیت': PB_PKG_ST.wait, 'تاریخ ثبت': '2026-10-13 11:30' },
+                                 { 'شناسه': '902', 'عنوان': 'کهنه', 'دسته': '10', 'نامک': 'old', 'کلیدواژهٔ ریپلای پیشنهادی': '', 'وضعیت': PB_PKG_ST.wait, 'تاریخ ثبت': '2026-10-10 20:54' }];
+    TG_MEM['wp:/wp-json/wp/v2/posts/902?_fields=id,link,title,slug,content,featured_media'] = { id: 902, link: 'https://tajrobeh.life/mag/old/', title: { rendered: 'کهنه' }, slug: 'old', content: { rendered: '<p>متن نمونهٔ مقاله.</p>' }, featured_media: 77 };
+    TG_MEM['wp:/wp-json/wp/v2/media/77?_fields=source_url'] = { source_url: 'https://tajrobeh.life/wp-content/uploads/2026/10/x.jpg' };
+    TG_MEM['pb:pkggem'] = { caption_html: '<b>عنوان کوتاه</b>\n\nپاراگراف نمونه.\n\n📖 <a href="{LINK}">{TITLE} · {MIN} دقیقه</a>', reply_keyword: 'هنر', read_minutes: 9 };
+    var r1 = pbPkgAuto_(pbNow_());
+    var pk = TG_MEM['pb:' + PB_T_PKG], q = TG_MEM['pb:' + PB_T_Q] || [];
+    ok('فقط سطری که بیش از ۲ ساعت منتظر است؛ تازه دست نمی‌خورد', /ساخته شد/.test(r1) && pk[0]['وضعیت'] === PB_PKG_ST.wait && pk[1]['وضعیت'] === PB_PKG_ST.q, r1);
+    ok('صف: تصویر شاخص، کپشن با لینک UTM و شناسهٔ مطلب، نیم ساعت بعد', q.length === 1 && /x\.jpg$/.test(q[0]['آدرس رسانه']) && /utm_campaign=mag_old_1405_07_21/.test(q[0]['کپشن']) && q[0]['شناسهٔ مطلب'] === '902' && q[0]['زمان'] === '2026-10-13 12:30' && /۹ دقیقه/.test(q[0]['کپشن']), q[0] && q[0]['کپشن']);
+    ok('کلیدواژهٔ ریپلای و یادداشت در سطر بسته', pk[1]['کلیدواژهٔ ریپلای پیشنهادی'] === 'هنر' && /بستهٔ خودکار ساخته شد/.test(pk[1]['یادداشت']));
+    ok('سردبیر خبر و دکمهٔ لغو دارد؛ سئو یک بار', told.some(function (x) { return /بستهٔ انتشار خودکار/.test(x.t) && JSON.stringify(x.kb).indexOf('pb:x:') > -1; }) && seo.join() === '902');
+    ok('بیرون از ۹ تا ۲۱ کاری نمی‌کند', pbPkgAuto_(pbTehran_(2026, 10, 13, 22, 0)) === '');
+    /* گیت: خط تیره رد و تا سه بار؛ بعد یادداشت */
+    pk[0]['تاریخ ثبت'] = '2026-10-13 08:00';
+    TG_MEM['wp:/wp-json/wp/v2/posts/901?_fields=id,link,title,slug,content,featured_media'] = { id: 901, link: 'https://tajrobeh.life/mag/s/', title: { rendered: 'مطلب نمونه' }, slug: 'sample-post', content: { rendered: '<p>x</p>' }, featured_media: 77 };
+    TG_MEM['pb:pkggem'] = { caption_html: '<b>الف — ب</b>', reply_keyword: 'دو واژه', read_minutes: 3 };
+    var r2 = pbPkgAuto_(pbNow_());
+    ok('گیت: خط تیره و کلیدواژهٔ چندواژه رد؛ چیزی در صف نمی‌رود', /گیت کپشن/.test(r2) && (TG_MEM['pb:' + PB_T_Q] || []).length === 1 && /بستهٔ خودکار: گیت/.test(pk[0]['یادداشت']), r2);
+    ok('همان روز دوباره تلاش نمی‌شود', pbPkgAuto_(pbNow_()) === '');
+    /* بی تصویر شاخص */
+    TG_MEM['wp:/wp-json/wp/v2/posts/901?_fields=id,link,title,slug,content,featured_media'].featured_media = 0;
+    ok('بی تصویر شاخص: بسته ساخته نمی‌شود', /تصویر شاخص ندارد/.test(pbPkgBuild_(pk[0], true)));
+    /* خاموش */
+    TG_MEM['pb:' + PB_T_CFG] = [{ 'کلید': 'pkg_auto', 'مقدار': 'خیر', 'توضیح': '' }];
+    ok('pkg_auto = خیر: خاموش', pbPkgAuto_(pbTehran_(2026, 10, 14, 12, 0)) === '');
+    /* یک‌باره: Q-1 */
+    TG_MEM['pb:' + PB_T_Q].unshift({ 'شناسه': 'Q-1', 'وضعیت': 'خطا: فایل باز نشد (404): x.jpg', 'یادداشت': '' });
+    var o1 = tgV17045Pkg().out;
+    ok('یک‌باره: Q-1 ← «جایگزین شد»؛ بستهٔ ساخته‌شده دوباره ساخته نمی‌شود', TG_MEM['pb:' + PB_T_Q][0]['وضعیت'] === 'جایگزین شد' && /Q-1: جایگزین شد/.test(o1), o1);
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300)); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; pbNotifyEditors_ = keep.ed; pbGemSeo_ = keep.seo; }
+  return tgTestTally_(log, fail);
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'pbPkgTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['بستهٔ انتشار خودکار (v170.45)', 'pbPkgTests']); } catch (ePk) {}
