@@ -315,50 +315,6 @@ function tgV17042Apply() {
   return { out: out.join(' · ') };
 }
 
-/* ───── v170.44 · بازبینی پروفایل‌های «منتظر بازبینی» (تأیید یاسر، ۲۱ مهر ۱۴۰۵) ─────
-   مخزن عمومی است: ردیف‌ها فقط با هش شناسه (tgPrH_) نام برده می‌شوند، نه نام. هر کار فقط اگر ردیف هنوز «منتظر بازبینی» است.
-   pub: تأیید و انتشار با همان روند بازبینی بات (tgPrPublish_)؛ پشتوانه قرارداد همکاری است، اجازهٔ جدا نمی‌خواهد.
-   stu: دانشجو؛ تأیید بی انتشار (پروفایل عمومی نیست).
-   ret: پیام کوتاه از بات با دکمهٔ ادامهٔ همان پرسش‌ها؛ تا پاسخ تازه از صف بازبینی بیرون می‌رود. */
-var KTB_V44 = {
-  pub: ['m20k', 'tk16', 'w4f7'],
-  stu: ['jxoq', 'tug4', 'x37t', '7ct6', '0183', 'vvc5', 'xz0x', 'qpew', '2a2s', 'a8qw'],
-  ret: {
-    o69a: 'سلام. ممنون که پروفایلتان را کامل کردید. پیش از انتشار دو مورد اصلاح لازم دارد:\n۱. جواب «آخرین مدرک و دانشگاه» و «کد نظام» جابه‌جا ثبت شده است.\n۲. «یک جملهٔ معرفی» الان فهرست موضوع‌های کاری است؛ لطفاً یک جملهٔ کوتاه دربارهٔ خودتان و کارتان بنویسید.',
-    qxqx: 'سلام. ممنون که پروفایلتان را پر کردید. پیش از انتشار چند مورد کامل یا اصلاح شود:\n۱. عکس پروفایل هنوز ثبت نشده است.\n۲. کد نظام هنوز ثبت نشده است.\n۳. چند غلط تایپی هست، مثل «اعتمام» و «مطمین».',
-    ua10: 'سلام. ممنون که پروفایلتان را پر کردید. پیش از انتشار این‌ها هنوز ثبت نشده است:\n۱. عکس پروفایل\n۲. شهر\n۳. کد نظام'
-  }
-};
-var KTB_V44_TAIL = '\n\nبا دکمهٔ زیر همان پرسش‌ها باز می‌شود. بعد از اصلاح، صفحه دوباره برای انتشار بررسی می‌شود.';
-function ktbV44Mark_(v, status) {
-  tgPqPut_(v.id, { review: tgPqNow_() + ' · ' + tgPrWho_(String(TG_OWNER_CHAT)), rstamp: String(Date.now()), notified: String(tgPrStamp_(v)), status: status });
-}
-function tgV17044Profiles() {
-  var own = String(TG_OWNER_CHAT), by = {}, n = { pub: 0, lock: 0, stu: 0, ret: 0, skip: 0 }, lock = [];
-  tgPrAll_().forEach(function (r) { by[tgPrH_(r.v.id)] = r; });
-  var wait = function (r) { return r && /منتظر بازبینی/.test(String(r.v.status || '')); };
-  KTB_V44.pub.forEach(function (h) {
-    var r = by[h]; if (!wait(r)) { n.skip++; return; }
-    var p = tgPrPlan_(r), val = tgPrValid_(p);
-    if (p.blocked || val.block.length) { n.lock++; lock.push(p.name + ': ' + val.block.join('، ')); return; }
-    if (!p.canPublish) { ktbV44Mark_(r.v, 'بازبینی شد'); n.pub++; return; }
-    try { tgPrPublish_(own, r); } catch (e) { tgErr_('tgV17044Profiles', e, h); }
-    var after = tgPrRow_(r.row); if (after && after.v.status === 'روی سایت') n.pub++; else { n.lock++; lock.push(p.name + ': انتشار کامل نشد'); }
-  });
-  KTB_V44.stu.forEach(function (h) { var r = by[h]; if (!wait(r)) { n.skip++; return; } ktbV44Mark_(r.v, 'بازبینی شد'); n.stu++; });
-  Object.keys(KTB_V44.ret).forEach(function (h) {
-    var r = by[h]; if (!wait(r)) { n.skip++; return; }
-    var to = String(r.v.chat || '').split(/[,،;\s]+/)[0]; if (!to) { n.skip++; return; }
-    var res = tgSend_(to, '💬 <b>پیام تیم تجربه دربارهٔ صفحهٔ شما</b>\n\n' + tgEsc_(KTB_V44.ret[h] + KTB_V44_TAIL),
-      { inline_keyboard: [[{ text: '🪪 ادامهٔ تکمیل از همان پرسش‌ها', callback_data: 'pq:go' }], [{ text: '✏️ مرور و اصلاح پاسخ‌ها', callback_data: 'pq:re' }]] });
-    if (!(TG_DRY || (res && res.getResponseCode && res.getResponseCode() === 200))) { n.skip++; return; }
-    ktbV44Mark_(r.v, 'برگشت برای اصلاح'); n.ret++;
-  });
-  /* گزارش برای یاسر: کارت‌های قفل با دلیل (فقط تلگرام خود یاسر) */
-  if (lock.length) tgSend_(own, '🔒 <b>پروفایل‌هایی که منتشر نشد</b>\n' + lock.map(function (x) { return '• ' + tgEsc_(x); }).join('\n') + '\n\nاز «' + TG_PR_BTN + '» اصلاح و دوباره تأیید کن.');
-  return { out: 'منتشر ' + n.pub + ' · قفل یا ناقص ' + n.lock + ' · دانشجو تأیید ' + n.stu + ' · برگشت برای اصلاح ' + n.ret + ' · رد شد (نه منتظر بازبینی) ' + n.skip };
-}
-
 /* کار بی‌صاحب ← صاحب (همان مسیر opsAdd_ برای chat و آینه) */
 function ktbOwnerSet_(code, owner) {
   try {
@@ -439,7 +395,7 @@ function ktbTests() {
       'ther:پ': mk({ id: 'ther:پ', name: 'پ', status: 'منتشر نشد' }),
       'ther:ت': mk({ id: 'ther:ت', name: 'ت', status: 'روی سایت', onsite: 'خانه', resume: 'tg:doc:D1 · cv.pdf', page: 'https://tajrobeh.life/team/t/' }),
       'ther:ث': mk({ id: 'ther:ث', name: 'ث', status: 'روی سایت', onsite: 'خانه', voice: 'tg:voice:V1 · 40s', page: 'https://tajrobeh.life/team/s/', page_voice: '' }),
-      'ther:نمونه‌سوم': mk({ id: 'ther:نمونه‌سوم', name: 'ج', status: 'روی سایت نمی‌رود (تصمیم تیم)', resume: 'tg:doc:D2' }) };
+      'ther:ج': mk({ id: 'ther:ج', name: 'ج', status: 'روی سایت نمی‌رود (تصمیم تیم)', resume: 'tg:doc:D2' }) };
     var I = ktbItems_();
     ok('منتظر بازبینی', I.review.length === 1 && I.review[0].v.name === 'الف');
     ok('بازبینی‌شده ولی منتشرنشده', I.reviewed.length === 1 && I.reviewed[0].v.name === 'ب');
@@ -514,26 +470,6 @@ function ktbTests() {
     ok('ریشه: لینک وسط پرسش «عنوان» مصرف نمی‌شود و حالت بسته می‌شود', tgPqStep_('905', { text: 'https://meet.google.com/abc-defg-hij' }) === false && !tgGetVal_('pq', '905') && TG_MEM['pqrows']['ther:ح'].title === '');
     tgSetVal_('pq', '905', JSON.stringify({ id: 'ther:ح', w: 'T', name: 'ح', todo: ['links'], i: 0, pick: [], n: 1 }));
     ok('ریشه: پرسش «لینک‌ها» لینک را می‌پذیرد', tgPqStep_('905', { text: 'https://example.org/me' }) === true);
-    /* v170.44: بازبینی یک‌بارهٔ منتظرها با هش شناسه */
-    (function () {
-      var keepV = KTB_V44, keepPub = tgPrPublish_, pubbed = [];
-      try {
-        TG_MEM['pqrows'] = {};
-        var w = function (id, roles) { TG_MEM['pqrows'][id] = mk({ id: id, name: id.split(':')[1], roles: roles, status: 'منتظر بازبینی', chat: '9' + Object.keys(TG_MEM['pqrows']).length, basis: '' }); };
-        w('ther:الف', 'T'); w('ppl:ب', 'D'); w('ther:نمونه‌سوم', 'T'); w('ther:د', 'T');
-        TG_MEM['pqrows']['ther:د'].status = 'روی سایت';
-        KTB_V44 = { pub: [tgPrH_('ther:الف'), tgPrH_('ther:د')], stu: [tgPrH_('ppl:ب')], ret: {} };
-        KTB_V44.ret[tgPrH_('ther:نمونه‌سوم')] = 'متن نمونه';
-        tgPrPublish_ = function (c, r) { pubbed.push(r.v.id); tgPqPut_(r.v.id, { status: 'روی سایت' }); };
-        TG_OUTBOX = [];
-        var o = tgV17044Profiles().out, R = TG_MEM['pqrows'];
-        ok('v170.44: انتشار فقط منتظر بازبینی؛ «روی سایت» دست نمی‌خورد', pubbed.length === 1 && pubbed[0] === 'ther:الف' && /منتشر 1/.test(o), o);
-        ok('v170.44: دانشجو تأیید بی انتشار', R['ppl:ب'].status === 'بازبینی شد' && pubbed.indexOf('ppl:ب') < 0);
-        var m = TG_OUTBOX.filter(function (x) { return /متن نمونه/.test(x.text || ''); })[0];
-        ok('v170.44: برگشت با پیام و دکمهٔ ادامهٔ همان پرسش‌ها، بی نام', m && JSON.stringify(m.markup).indexOf('pq:go') > -1 && m.text.indexOf('نمونه‌سوم') < 0 && R['ther:نمونه‌سوم'].status === 'برگشت برای اصلاح' && !tgPrNeeds_(R['ther:نمونه‌سوم']));
-        ok('v170.44: اجرای دوباره کاری نمی‌کند', (pubbed = [], TG_OUTBOX = [], /منتشر 0 .*برگشت برای اصلاح 0/.test(tgV17044Profiles().out)) && !pubbed.length && !TG_OUTBOX.length);
-      } finally { KTB_V44 = keepV; tgPrPublish_ = keepPub; }
-    })();
     TG_CFG_ = null;
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_CFG_ = null; }
