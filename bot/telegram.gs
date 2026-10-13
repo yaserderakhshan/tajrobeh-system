@@ -19275,19 +19275,28 @@ function tgErrDigest_() {
   var day = Utilities.formatDate(now, TG_TZ, 'yyyy-MM-dd'), c = CacheService.getScriptCache();
   if (c.get('errdig:' + day)) return '';
   c.put('errdig:' + day, '1', 21600 * 3);
-  var sh = tgErrSheet_(); if (!sh || sh.getLastRow() < 2) return '';
-  var n = sh.getLastRow() - 1, v = sh.getRange(2, 1, n, 7).getValues(), since = now.getTime() - 86400000;
-  var rows = v.filter(function (r) { return r[1] instanceof Date && r[1].getTime() >= since; });
-  if (!rows.length) return '';
+  var sh = tgErrSheet_(), rows = [];
+  if (sh && sh.getLastRow() >= 2) {
+    var n = sh.getLastRow() - 1, v = sh.getRange(2, 1, n, 7).getValues(), since = now.getTime() - 86400000;
+    rows = v.filter(function (r) { return r[1] instanceof Date && r[1].getTime() >= since; });
+  }
+  /* v170.42 (تصمیم یاسر): باگ‌های گزارش‌شده کار تیم نیستند؛ فقط همین گزارش فنی */
+  var bugs = []; try { bugs = tgBugRows_().filter(function (b) { return b.status === 'تازه' || b.status === 'در بررسی'; }); } catch (eB) {}
+  if (!rows.length && !bugs.length) return '';
   rows.sort(function (a, b) { return Number(b[5] || 0) - Number(a[5] || 0); });
   var total = rows.reduce(function (s, r) { return s + Number(r[5] || 1); }, 0);
-  var L = ['🧯 <b>خطاهای ۲۴ ساعت گذشته</b> · ' + tgFa_(total) + ' بار در ' + tgFa_(rows.length) + ' نوع', ''];
+  var L = [rows.length ? '🧯 <b>خطاهای ۲۴ ساعت گذشته</b> · ' + tgFa_(total) + ' بار در ' + tgFa_(rows.length) + ' نوع' : '🧯 <b>گزارش فنی</b> · خطای تازه‌ای نبود', ''];
   for (var i = 0; i < Math.min(rows.length, 5); i++) L.push('• ' + tgEsc_(rows[i][0]) + ' · ' + tgEsc_(rows[i][2] || '؟') + ' × ' + tgFa_(rows[i][5]) + '\n  ' + tgEsc_(String(rows[i][4]).slice(0, 90)));
-  L.push(''); L.push('فهرست کامل در تب «خطاها»ی هاب پیام.');
+  if (rows.length) { L.push(''); L.push('فهرست کامل در تب «خطاها»ی هاب پیام.'); }
+  if (bugs.length) {
+    L.push(''); L.push('🐞 <b>باگ و پیشنهاد باز</b> · ' + tgFa_(bugs.length));
+    bugs.slice(0, 8).forEach(function (b) { L.push('• <code>' + tgEsc_(b.id) + '</code> · ' + tgEsc_(b.status) + ' · ' + tgEsc_(String(b.body).slice(0, 80))); });
+    L.push('تب «باگ و پیشنهاد» در هاب تجربه.');
+  }
   TG_OUT_KIND = 'سیستم'; TG_OUT_REF = 'خطاها';
   tgSend_(TG_OWNER_CHAT, L.join('\n'));
   TG_OUT_KIND = ''; TG_OUT_REF = '';
-  return 'digest ' + rows.length;
+  return 'digest ' + rows.length + (bugs.length ? ' · bugs ' + bugs.length : '');
 }
 
 /* ---------- ثبت همهٔ ارسال‌های بات (تب «ارسال‌های بات» در هاب پیام) ---------- */

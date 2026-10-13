@@ -239,7 +239,11 @@ function ktbRemind_(I) {
 var KTB_RT_TAB = 'مسیریابی منتظرها · پیش‌نمایش';
 var KTB_RT_HEAD = ['نوع', 'مرجع', 'عنوان کار', 'صاحب', 'دلیل', 'حالت'];
 cfg_('TG_ROUTE', {});   /* {"باگ": "<کلید TG_NAMES>", "پیش‌فرض": "<کلید TG_NAMES>"}؛ پیش‌فرض: مدیر عملیات */
+/* v170.42 (تصمیم یاسر): باگ هیچ‌وقت کار تیم نمی‌شود و به هیچ همکاری سپرده نمی‌شود، حتی اگر TG_ROUTE «باگ» داشته باشد.
+   صاحبش «یاسر/فنی» است و فقط در گزارش فنی روزانهٔ یاسر می‌آید (tgErrDigest_). */
+var KTB_TECH = 'یاسر/فنی';
 function ktbRouteOwner_(kind) {
+  if (kind === 'باگ') return KTB_TECH;
   var r = cfg_('TG_ROUTE', {}) || {}, key = r[kind] || r['پیش‌فرض'] || 'ops';
   return tgNm_(key) || tgNm_('ops') || tgNm_('chief') || '';
 }
@@ -252,7 +256,7 @@ function ktbRouteRows_() {
     out.push({ kind: 'تیکت', ref: t.id, title: 'پاسخ واقعی به پیام ' + t.id + (t.st === 'پاسخ داده شد' ? ' (علامت «پاسخ داده شد» بی متن پاسخ)' : ''), owner: t.owner || ktbRouteOwner_('تیکت'), why: t.st === 'پاسخ داده شد' ? 'بسته شده بی پاسخ واقعی' : 'بی پاسخ' });
   });
   var bg = ktbDry_() ? (TG_MEM['ktb:bug'] || []) : (function () { var sh = tgSS_().getSheetByName(TG_BUG_TAB), n = sh ? sh.getLastRow() : 0; return n < 2 ? [] : sh.getRange(2, 1, n - 1, 7).getValues().map(function (v) { return { id: String(v[0]), kind: String(v[2]), st: String(v[6]) }; }); })();
-  bg.forEach(function (b) { if (b.id && (String(b.st).trim() || 'تازه') === 'تازه') out.push({ kind: 'باگ', ref: b.id, title: 'بررسی ' + (b.kind || 'باگ') + ' ' + b.id, owner: ktbRouteOwner_('باگ'), why: 'باگ «تازه» بی بررسی' }); });
+  bg.forEach(function (b) { if (b.id && (String(b.st).trim() || 'تازه') === 'تازه') out.push({ kind: 'باگ', ref: b.id, title: 'بررسی ' + (b.kind || 'باگ') + ' ' + b.id, owner: KTB_TECH, why: 'باگ «تازه» بی بررسی' }); });
   var ops = ktbDry_() ? (TG_MEM['ktb:ops'] || []) : (function () { try { return opsRows_(); } catch (e) { return []; } })();
   ops.forEach(function (t) { if (opsOpen_(t) && !String(t.owner || '').trim()) out.push({ kind: 'کار بی‌صاحب', ref: t.code, title: t.title, owner: ktbRouteOwner_(t.cat || 'کار'), why: 'کار باز بی صاحب' }); });
   return out;
@@ -267,26 +271,48 @@ function ktbRoutePreview_() {
   sh.clear(); sh.setRightToLeft(true);
   sh.getRange(1, 1, 1, 3).setValues([['بررسی Cowork: بعد از بررسی، Cowork در B1 «اوکی» می‌نویسد', '', 'v170.23.5 · ' + sum]]).setFontWeight('bold');
   sh.getRange(2, 1, 1, KTB_RT_HEAD.length).setValues([KTB_RT_HEAD]).setFontWeight('bold').setBackground('#f5f5f8');
-  if (rows.length) sh.getRange(3, 1, rows.length, KTB_RT_HEAD.length).setNumberFormat('@').setValues(rows.map(function (r) { return [r.kind, r.ref, r.title, r.owner, r.why, r.owner ? 'با اوکی کار ساخته یا صاحب داده می‌شود' : 'صاحب پیدا نشد؛ دست نمی‌خورد']; }));
+  if (rows.length) sh.getRange(3, 1, rows.length, KTB_RT_HEAD.length).setNumberFormat('@').setValues(rows.map(function (r) { return [r.kind, r.ref, r.title, r.owner, r.why, r.kind === 'باگ' ? 'فقط در گزارش فنی؛ کار تیم ساخته نمی‌شود' : r.owner ? 'با اوکی کار ساخته یا صاحب داده می‌شود' : 'صاحب پیدا نشد؛ دست نمی‌خورد']; }));
   sh.setFrozenRows(2);
   return sum;
 }
-function ktbRouteMaybe_() {
+/** force: تأیید صریح یاسر در یک‌بارهٔ v170.42 (به جای «اوکی» در B1) */
+function ktbRouteMaybe_(force) {
   if (ktbProp_('KTB_RT_DONE') === '1') return 0;
   var ok = ktbDry_() ? TG_MEM['ktb:rtok'] : (function () { var sh = tgSS_().getSheetByName(KTB_RT_TAB); return sh ? String(sh.getRange(1, 2).getValue() || '').trim() : ''; })();
-  if (ok !== 'اوکی') return 0;
+  if (ok !== 'اوکی' && force !== true) return 0;
   ktbProp_('KTB_RT_DONE', '1');
   var n = 0;
   ktbRouteRows_().forEach(function (r) {
-    if (!r.owner) return;
+    if (!r.owner || r.kind === 'باگ') return;   /* v170.42: باگ فقط در گزارش فنی */
     if (r.kind === 'کار بی‌صاحب') { if (ktbDry_()) (TG_MEM['ktb:own'] = TG_MEM['ktb:own'] || []).push(r); else ktbOwnerSet_(r.ref, r.owner); }
-    var t = { title: r.title, cat: r.kind === 'باگ' ? 'فنی' : 'لید و پذیرش', owner: r.owner, by: 'بات', due: new Date(ktbNow_() + 2 * 86400000), src: 'بات', ref: 'KTB:' + r.kind + ':' + r.ref, note: r.why };
+    var t = { title: r.title, cat: 'لید و پذیرش', owner: r.owner, by: 'بات', due: new Date(ktbNow_() + 2 * 86400000), src: 'بات', ref: 'KTB:' + r.kind + ':' + r.ref, note: r.why };
     if (r.kind === 'کار بی‌صاحب') return;
     if (ktbDry_()) (TG_MEM['ktb:tasks'] = TG_MEM['ktb:tasks'] || []).push(t); else opsAdd_(t);
     n++;
   });
   if (!ktbDry_()) { try { tgSS_().getSheetByName(KTB_RT_TAB).getRange(1, 2).setValue('اعمال شد ' + Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm') + ' · ' + n + ' کار'); } catch (e) {} }
   return n;
+}
+
+/* یک‌بارهٔ خودکار v170.42: چهار پیش‌نمایشی که «اوکی» گرفته‌اند همین حالا اعمال می‌شوند (قدم‌های سبک واچ‌داگ بالای ۷۵ دقیقه
+   مصرف روزانه رد می‌شوند و اعمال عقب می‌ماند)، و مسیریابی منتظرها با تأیید صریح یاسر. فقط شمار؛ لاگ عمومی است. */
+function tgV17042Apply() {
+  var out = [], run = function (name, fn) { try { out.push(name + ': ' + fn()); } catch (e) { out.push(name + ': خطا'); tgErr_('tgV17042Apply ' + name, e); } };
+  run('اصلاح دادهٔ لیدها', function () {
+    if (lsProp_('AB_FX_DONE') === '1') return 'پیش از این';
+    if (!abOk_(AB_FX_TAB, 'ab:fxok')) return 'اوکی نیست';
+    lsProp_('AB_FX_DONE', '1'); return abFixApply_();
+  });
+  run('اصلاح کامنت‌ها', function () { return cmFixMaybe_(); });
+  run('اصلاح پروفایل‌ها', function () { return ktbFixMaybe_(); });
+  run('مبنای ارجاع', function () {
+    if (lsProp_('AB_ST_ON') !== '1' && !abOk_(AB_PV_TAB, 'ab:pvok')) return 'اوکی نیست';
+    lsProp_('AB_ST_ON', '1'); abStatsWrite_();
+    if (!lsDry_()) { try { tgSS_().getSheetByName(AB_PV_TAB).getRange(1, 2).setValue('اعمال شد ' + Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm') + ' · روزانه در «درمانگران»'); } catch (eB) {} }
+    return 'روشن';
+  });
+  run('مسیریابی منتظرها', function () { return ktbRouteMaybe_(true); });
+  return { out: out.join(' · ') };
 }
 
 /* کار بی‌صاحب ← صاحب (همان مسیر opsAdd_ برای chat و آینه) */
@@ -414,10 +440,16 @@ function ktbTests() {
     TG_MEM['ktb:ops'] = [{ code: 'T-1', title: 'کار نمونه', owner: '', st: OPS_ST.NEW }, { code: 'T-2', title: 'با صاحب', owner: 'x', st: OPS_ST.NEW }];
     var sum = ktbRoutePreview_(), rr = TG_MEM['ktb:rt'];
     ok('مسیریابی: تیکت بی پاسخ واقعی، باگ تازه، کار بی‌صاحب', /تیکت بی پاسخ واقعی: 2/.test(sum) && /باگ تازه: 1/.test(sum) && /کار بی‌صاحب: 1/.test(sum), sum);
-    ok('مسیریابی: بی صاحب ← مدیر عملیات', rr.filter(function (r) { return r.ref === 'M-3' || r.ref === 'B-1'; }).every(function (r) { return r.owner === 'مدیر نمونه'; }));
+    ok('مسیریابی: بی صاحب ← مدیر عملیات', rr.filter(function (r) { return r.ref === 'M-3'; }).every(function (r) { return r.owner === 'مدیر نمونه'; }));
+    TG_CFG_.TG_ROUTE = { 'باگ': 'reception' }; ktbRoutePreview_(); rr = TG_MEM['ktb:rt'];
+    ok('v170.42: باگ هرگز به همکار نمی‌رود، حتی با TG_ROUTE؛ صاحب «یاسر/فنی»', rr.filter(function (r) { return r.kind === 'باگ'; }).every(function (r) { return r.owner === KTB_TECH; }) && ktbRouteOwner_('باگ') === KTB_TECH);
+    TG_CFG_.TG_ROUTE = {};
     ok('مسیریابی: بی «اوکی» Cowork کاری ساخته نمی‌شود', ktbRouteMaybe_() === 0 && !(TG_MEM['ktb:tasks'] || []).length);
     TG_MEM['ktb:rtok'] = 'اوکی';
-    ok('مسیریابی: با «اوکی» یک بار', ktbRouteMaybe_() === 3 && ktbRouteMaybe_() === 0 && (TG_MEM['ktb:own'] || []).length === 1);
+    ok('مسیریابی: با «اوکی» یک بار؛ باگ کار تیم نمی‌شود', ktbRouteMaybe_() === 2 && ktbRouteMaybe_() === 0 && (TG_MEM['ktb:own'] || []).length === 1 &&
+      !(TG_MEM['ktb:tasks'] || []).some(function (t) { return /B-1/.test(t.ref); }), JSON.stringify(TG_MEM['ktb:tasks']));
+    TG_MEM['ktbp:KTB_RT_DONE'] = ''; TG_MEM['ktb:rtok'] = ''; TG_MEM['ktb:tasks'] = []; TG_MEM['ktb:own'] = [];
+    ok('v170.42: با تأیید صریح (force) بی «اوکی» هم اعمال می‌شود', ktbRouteMaybe_(true) === 2 && ktbRouteMaybe_(true) === 0);
     /* v170.23.6: کارت تأیید یکسان، اعتبارسنجی، ریشهٔ لینک در «عنوان»، اصلاح هاب و پشتوانهٔ انتشار */
     TG_CFG_ = { TG_CONTRACT_VER: '۱' };
     ok('پشتوانهٔ انتشار با نسخهٔ قرارداد', tgPrBasis_() === 'قرارداد همکاری · نسخهٔ ۱');
