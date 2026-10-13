@@ -30,6 +30,9 @@ var CFG_NOTE = {
   MIG_CHECKLIST: 'متن چک‌لیست پیش از هر موج مهاجرت (بخش ۹ CLIENT-MIGRATION.md)؛ با دکمه‌های «شروع موج» و «صبر» برای مالک می‌رود (v170.23.6.3)',
   MIG_INVITE_TEXT: 'متن پیام قابل فوروارد درمانگر به مراجعانش؛ {link} جای لینک start=v2mig (اختیاری؛ v170.23.6.3)',
   MIG_V2_LOGIN_URL: 'آدرس ورود یک‌لمسی نسخهٔ ۲ بعد از تأیید مراجع (اختیاری، وقتی آماده شد؛ v170.23.6.3)',
+  MIG_TEST_PHONE: 'شمارهٔ آزمایشی پیامک دعوت مهاجرت؛ اگر پر بود هر پیامک دعوت فقط به همین یک شماره می‌رود، حتی با MIG_ENABLED روشن (v170.41)',
+  V2DEV_LOGIN_LINK_URL: 'آدرس endpoint لینک ورود یک‌بارمصرف نسخهٔ ۲ (کار T10)؛ خالی = پیامک دعوت با «لینک نیست» رد می‌شود (v170.41)',
+  MIG_DAILY_CAP: 'سقف روزانهٔ پیامک دعوت مهاجرت (فرستاده و آزمایشی)؛ خالی = ۵۰ (v170.41)',
   MIG_V2DEV_MSG: 'متن کامل پیام یک‌باره به همکار نسخهٔ ۲ (کلید v2dev در TG_NAMES)؛ نام‌ها فقط همین‌جا (v170.23.6.3)',
   ASSIST_ENABLED: 'روشن بودن دستیار پاسخ‌گو (assist.gs): «بله» = دکمهٔ «سؤال دارم»، متن آزاد و رابط وب assist.ask (v170.23.11)',
   ASSIST_MODE: 'حالت دستیار: «منو» (فقط دکمه، متن آزاد به پذیرش)، «جستجو» (پیش‌فرض، تطبیق داخلی بی سرویس بیرونی) یا «هوشمند» (فقط با ASSIST_GEMINI_PAID = بله) (v170.23.11)',
@@ -66,7 +69,7 @@ var CFG_NOTE = {
   PSY_FOLLOW_MIN: 'مدت ویزیت پیگیری روان‌پزشکی به دقیقه (v170.23.9؛ پیش‌فرض ۲۰)'
 };
 /* کلیدهایی که خالی بودنشان مجاز است (جایگزین دارند) */
-var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'MIG_HUB', 'MIG_ENABLED', 'MIG_CHECKLIST', 'MIG_INVITE_TEXT', 'MIG_V2_LOGIN_URL', 'MIG_V2DEV_MSG', 'GEMINI_PAID', 'PSY_WELCOME', 'PSY_NATIONAL_NET', 'PSY_FIRST_MIN', 'PSY_FOLLOW_MIN', 'ASSIST_ENABLED', 'ASSIST_MODE', 'ASSIST_GEMINI_PAID', 'ASSIST_MATCH_MIN', 'ASSIST_RATE', 'ASSIST_KB_TEAMS', 'ASSIST_TOOLS', 'ASSIST_WEEKLY', 'ASSIST_REWRITE', 'ASSIST_GEMINI_DAILY', 'ASSIST_GEMINI_DRAFT', 'ASSIST_IDX_MIN', 'ASSIST_EDGE_URL', 'LEAD_SPEED_ENABLED', 'LEAD_SCORE_WEIGHTS', 'NURTURE_ENABLED', 'NURTURE_1', 'NURTURE_2', 'NURTURE_3', 'NURTURE_INTRO_1', 'NURTURE_INTRO_2', 'NURTURE_INTRO_3', 'REACTIVATE_ENABLED', 'REACTIVATE_TEXT', 'EVL_APPROVER', 'LEAD_SLA'];
+var CFG_OPTIONAL = ['RECEPTION_USER', 'SCHOOL_CHIEF_USER', 'RM_FOLDER_ID', 'TG_INP_SEED', 'TG_INP_MIG68', 'PT_M0924', 'TG_RELAY_BASE', 'CM_FIX_HINTS', 'CM_FIX_SKIP', 'CM_FIX_FORCE', 'CM_FIX_CALL', 'TG_ROUTE', 'TG_CONTRACT_VER', 'MIG_HUB', 'MIG_ENABLED', 'MIG_CHECKLIST', 'MIG_INVITE_TEXT', 'MIG_V2_LOGIN_URL', 'MIG_V2DEV_MSG', 'MIG_TEST_PHONE', 'V2DEV_LOGIN_LINK_URL', 'MIG_DAILY_CAP', 'GEMINI_PAID', 'PSY_WELCOME', 'PSY_NATIONAL_NET', 'PSY_FIRST_MIN', 'PSY_FOLLOW_MIN', 'ASSIST_ENABLED', 'ASSIST_MODE', 'ASSIST_GEMINI_PAID', 'ASSIST_MATCH_MIN', 'ASSIST_RATE', 'ASSIST_KB_TEAMS', 'ASSIST_TOOLS', 'ASSIST_WEEKLY', 'ASSIST_REWRITE', 'ASSIST_GEMINI_DAILY', 'ASSIST_GEMINI_DRAFT', 'ASSIST_IDX_MIN', 'ASSIST_EDGE_URL', 'LEAD_SPEED_ENABLED', 'LEAD_SCORE_WEIGHTS', 'NURTURE_ENABLED', 'NURTURE_1', 'NURTURE_2', 'NURTURE_3', 'NURTURE_INTRO_1', 'NURTURE_INTRO_2', 'NURTURE_INTRO_3', 'REACTIVATE_ENABLED', 'REACTIVATE_TEXT', 'EVL_APPROVER', 'LEAD_SLA'];
 /* v170.9: کلیدهای لازمی که در Property خالی‌اند (فقط نام). روی دیپلوی آزمایشی سنجیده می‌شود؛ هر کدام خالی = انتشار متوقف */
 function cfgMissing_() {
   var o = cfgPropGet_();

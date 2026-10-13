@@ -41,6 +41,7 @@
     "ai.gs",
     "psy2.gs",
     "migrate.gs",
+    "migsms.gs",
     "psy3.gs",
     "sesslen.gs",
     "assist.gs",
