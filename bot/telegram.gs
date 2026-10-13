@@ -2578,7 +2578,8 @@ function tgPrivate_(m) {
   // مدرسه v95: ویزاردهای دانش‌آموختگان و اپلای تراپیست، چون عکس و فایل هم می‌گیرند
   if (typeof tgSchMedia_ === 'function' && tgSchMedia_(chat, m)) return;
 
-  if (typeof ps3Route_ === 'function' && ps3Route_(chat, m)) return;   /* v170.23.9: روان‌پزشکی (فرم اداری، تکمیل اطلاعات، نمای مسئول) */
+  if (typeof ps3Route_ === 'function' && ps3Route_(chat, m)) return;
+  if (typeof psrRoute_ === 'function' && psrRoute_(chat, m)) return;   /* v170.66: ارجاع روان‌پزشکی از درمانگر */   /* v170.23.9: روان‌پزشکی (فرم اداری، تکمیل اطلاعات، نمای مسئول) */
   if ((m.photo || m.document) && tgGetVal_('psyrc', chat) && typeof tgPsyReceipt_ === 'function' && tgPsyReceipt_(chat, m)) return;
   if (m.text && typeof tgPsyText_ === 'function' && tgPsyText_(chat, m.text)) return;
   if (m.photo && tgGetVal_('pro', chat)) {
@@ -4707,6 +4708,7 @@ function tgOnCallback_(cq) {
   if ((data.indexOf('crq:') === 0 || data.indexOf('vnr:') === 0) && typeof chgCb_ === 'function') return chgCb_(chat, data);   /* v170.23.31: درخواست تغییر و اعلان نسخه (changes.gs) */
   if (data.indexOf('evl:') === 0 && typeof evlCb_ === 'function') return evlCb_(chat, data, name, uname);   /* v170.23.38: رویداد سبک */
   if (data.indexOf('ktb:') === 0 && typeof ktbCb_ === 'function') return ktbCb_(chat, data);   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
+  if (data.indexOf('psr:') === 0 && typeof psrCb_ === 'function') return psrCb_(chat, data);   /* v170.66: پروندهٔ ارجاع روان‌پزشکی */
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
   if (data.indexOf('ps2:') === 0 && typeof ps2Cb_ === 'function') return ps2Cb_(chat, data);   /* v170.23.8: اتصال روان‌پزشک */   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
@@ -6167,6 +6169,7 @@ function tgTherMenu_() {
       [{ text: '✉️ پیام به پذیرش' }, { text: '🧾 پیگیری‌های من' }],
       [{ text: '👤 پروفایل من' }, { text: '📊 هفتهٔ من' }],
       [{ text: TG_INP_BTN }],
+      [{ text: typeof PSR_BTN !== 'undefined' ? PSR_BTN : '🩺 ارجاع به روان‌پزشک' }],   /* v170.66: ارجاع روان‌پزشکی */
       [{ text: TG_PQ_BTN }],
       [{ text: TG_PQK_BTN }],
       [{ text: '💳 مالی' }, { text: '🎓 مدرسه' }],
@@ -7163,6 +7166,7 @@ function tgWatchdog(e) {
   S('tgMeetRemindTick_', 'must', tgMeetRemindTick_);
   S('tgSessRemindTick_', 'must', tgSessRemindTick_);
   S('ps3Tick_', 'must', typeof ps3Tick_ === 'function' ? ps3Tick_ : null);   /* v170.23.9: یادآوری ویزیت و فرم بعد از ویزیت */
+  S('psrTick_', 'must', typeof psrTick_ === 'function' ? psrTick_ : null);   /* v170.66: یادآوری ارجاع روان‌پزشکی */
   S('dqHourly_', 'must', typeof dqHourly_ === 'function' ? dqHourly_ : null);   /* v170: پیگیری صف ارسال و وضعیت تیکت */
   S('tgEvFlush_', 'must', tgEvFlush_);   /* بافر رویدادها در کش فقط ۱۷۰ دقیقه می‌ماند */
   /* سبک */
@@ -7649,6 +7653,7 @@ function tgApiRoute_(p) {
     else if (api === 'ther.week') out = tgApiGuard_(p, 'درمانگر') || tgApiT_(p, 'درمانگر', '📊 هفتهٔ من');
     else if (api === 'ther.inperson') out = tgApiGuard_(p, 'درمانگر') || tgApiT_(p, 'درمانگر', '/inperson');
     else if (api === 'ther.rate') out = tgApiGuard_(p, 'درمانگر') || tgApiT_(p, 'درمانگر', '/work');
+    else if (api === 'ther.psyref') out = tgApiGuard_(p, 'درمانگر') || tgApiT_(p, 'درمانگر', '/psyref');   /* v170.66 */
     else if (api === 'ther.refer') out = tgApiGuard_(p, 'درمانگر') || tgApiC_(p, 'درمانگر', ['rf:']);
     else if (api === 'ther.held') out = tgApiGuard_(p, 'درمانگر') || tgApiC_(p, 'درمانگر', ['mt:']);
     else if (api === 'ther.fin') out = tgApiGuard_(p, 'درمانگر') || tgApiT_(p, 'درمانگر', '💳 مالی');
@@ -7739,7 +7744,7 @@ function tgApiRoute_(p) {
     /* ---------- روان‌پزشکی و سازمانی ---------- */
     else if (api === 'psy.report') out = tgApiGuard_(p, 'روان‌پزشکی') || tgApiT_(p, 'روان‌پزشکی', '📊 گزارش بخش من');
     else if (api === 'psy.ann') out = tgApiGuard_(p, 'روان‌پزشکی') || tgApiT_(p, 'روان‌پزشکی', '📣 اطلاعیه‌ها');
-    else if (api === 'psy.act') out = tgApiGuard_(p, 'روان‌پزشکی') || tgApiC_(p, 'روان‌پزشکی', ['ann:', 'ld:', 'rf:']);
+    else if (api === 'psy.act') out = tgApiGuard_(p, 'روان‌پزشکی') || tgApiC_(p, 'روان‌پزشکی', ['ann:', 'ld:', 'rf:', 'psr:']);
     else if (api === 'psy.say') out = tgApiGuard_(p, 'روان‌پزشکی') || tgApiT_(p, 'روان‌پزشکی', p.text);
     else if (api === 'org.report') out = tgApiGuard_(p, 'سازمانی') || tgApiT_(p, 'سازمانی', '📊 گزارش بخش من');
     else if (api === 'org.ann') out = tgApiGuard_(p, 'سازمانی') || tgApiT_(p, 'سازمانی', '📣 اطلاعیه‌ها');
@@ -28247,6 +28252,7 @@ var TG_CAP = [
 { key: 'ther_week', page: 'ther', label: 'کارنامهٔ هفتهٔ من', roles: ['درمانگر'], bot: true, api: 'ther.week', app: true },
 { key: 'ther_inperson', page: 'ther', label: 'حضوری من و درخواست پیوستن', roles: ['درمانگر'], bot: true, api: 'ther.inperson', app: true },
 { key: 'ther_rate', page: 'ther', label: 'نرخ و ظرفیت من', roles: ['درمانگر'], bot: true, api: 'ther.rate', app: true },
+{ key: 'ther_psyref', page: 'ther', label: 'ارجاع به روان‌پزشک', roles: ['درمانگر'], bot: true, api: 'ther.psyref', app: true },
 { key: 'ther_refer', page: 'ther', label: 'کارت ارجاع و پاسخ به آن', roles: ['درمانگر'], bot: true, api: 'ther.refer', app: true },
 { key: 'ther_held', page: 'ther', label: 'جلسه‌های درمان و تأیید برگزاری', roles: ['درمانگر'], bot: true, api: 'ther.held', app: true },
 { key: 'ther_fin', page: 'ther', label: 'بخش مالی درمانگر', roles: ['درمانگر'], bot: true, api: 'ther.fin', app: true },
@@ -28402,7 +28408,7 @@ var TG_API_CB_CLIENT = ['t:', 'g:', 'nd:', 'pf:', 'ag:', 'md:', 'z:', 'b:', 's:'
   'fu:', 'ct:', 'fd:', 'f:', 'ann:', 'tc:', 'ip:', 'iy:', 'it:', 'py:', 'sj:', 'mz:', 'pq:',
   'hm', 'go', 'edu', 'em:ask', 'cancelmeet', 'lc:', 'lh:'];
 var TG_API_CB_THER = ['p:', 'd:', 'h:', 'n:', 'c:', 'rw:', 'iq:', 'ic:', 'ip:', 'iy:', 'it:', 'md:',
-  'pq:', 'py:', 'rf:', 'mt:', 'z:', 'b:', 's:', 'cancelmeet'];
+  'pq:', 'py:', 'rf:', 'mt:', 'z:', 'b:', 's:', 'cancelmeet', 'psr:'];
 
 function tgApiCb1_(p, role, cb) { return tgApiDo_(p, { role: role, cb: tgCbResolve_(cb) }); }
 function tgApiFn_(p, role, fn) { return tgApiDo_(p, { role: role, fn: fn }); }
