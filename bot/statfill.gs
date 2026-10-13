@@ -98,6 +98,16 @@ function sfDry() {
     return d.iso + ': تازه ' + d.fresh + '، فعال ' + d.active + '، لید ' + d.leadNew + '، معارفه ' + d.meet + '، عضویت ' + d.req + '، اپلای ' + d.apply + '، رویداد ' + d.evReg;
   }).join(' | ');
 }
+/* v170.60: خروجی یک‌باره بیش از ۲۰۰ نویسه بریده می‌شود؛ پس فشرده و چهار روز در هر بخش.
+   «ماه-روز:تازه/فعال/لید/معارفه/عضویت/اپلای/رویداد»؛ k از ۱ */
+function sfDryPart(k) {
+  var have = sfHave_(), list = sfCount_(SF_FROM, sfToday_()).filter(function (d) { return !have[d.jal]; });
+  var part = list.slice((k - 1) * 4, k * 4);
+  if (!part.length) return 'خشک ' + k + ': روزی نیست (کل ' + list.length + ')';
+  return 'خشک ' + k + ' از ' + Math.ceil(list.length / 4) + ' · ' + part.map(function (d) {
+    return d.iso.slice(5) + ':' + [d.fresh, d.active, d.leadNew, d.meet, d.req, d.apply, d.evReg].join('/');
+  }).join(' ');
+}
 /* ردیف تب آمار برای یک روز بازسازی‌شده: فقط ستون‌های جریانی */
 function sfRow_(d) {
   var row = TG_STAT_HEAD.map(function () { return ''; });
@@ -108,6 +118,9 @@ function sfRow_(d) {
 
 /* یک‌بارهٔ خودکار v170.58: فقط خشک */
 function tgV17058StatFillDry() { return sfDry(); }
+function tgV17060StatFillDry1() { return sfDryPart(1); }
+function tgV17060StatFillDry2() { return sfDryPart(2); }
+function tgV17060StatFillDry3() { return sfDryPart(3); }
 
 function sfTests() {
   var log = [], fail = 0;
@@ -135,6 +148,8 @@ function sfTests() {
     TG_MEM['sf:stat'] = [[days[0].jal]];
     var dry = sfDry();
     ok('خشک: روزی که ردیف دارد کنار می‌رود و خروجی فقط عدد است', /· 2 روز ·/.test(dry) && dry.indexOf('2026-10-07') < 0 && /2026-10-08: تازه 1، فعال 0، لید 1، معارفه 1، عضویت 1/.test(dry) && !/u1|aaa/.test(dry), dry);
+    var p1 = sfDryPart(1), p2 = sfDryPart(2);
+    ok('خشک فشرده: زیر ۲۰۰ نویسه، چهار روز در هر بخش', p1 === 'خشک 1 از 1 · 10-08:1/0/1/1/1/0/0 10-09:0/1/0/0/0/1/2' && /روزی نیست/.test(p2) && p1.length < 200, p1 + ' | ' + p2);
     var row = sfRow_(d8);
     ok('ردیف: فقط ستون‌های جریانی پر، بقیه خالی', row.length === TG_STAT_HEAD.length && row[0] === j16 && row[13] === 1 && row[16] === 1 && row[2] === '' && row[12] === '' && row[17] === '');
   } catch (e) { fail++; log.push('✗ خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300)); }

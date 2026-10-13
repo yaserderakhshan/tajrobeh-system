@@ -80,7 +80,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.59`
+نسخهٔ کد: `v170.60`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -120,7 +120,7 @@
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
 | `kartable.gs` | ۴۷۷ | ۳۵ |
 | `prauto.gs` | ۳۹۳ | ۲۷ |
-| `statfill.gs` | ۱۴۵ | ۱۲ |
+| `statfill.gs` | ۱۶۰ | ۱۶ |
 | `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `migrate.gs` | ۵۶۲ | ۵۶ |
