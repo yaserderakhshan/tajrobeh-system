@@ -104,7 +104,7 @@
 | `publish.gs` | ۱۵۷۸ | ۱۲۰ |
 | `v168.gs` | ۲۴۹۴ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
-| `stuck.gs` | ۴۷۹ | ۳۴ |
+| `stuck.gs` | ۵۴۸ | ۳۸ |
 | `leadmodel.gs` | ۷۷۹ | ۴۱ |
 | `comments.gs` | ۱۰۷۸ | ۶۸ |
 | `dq.gs` | ۶۰۲ | ۴۹ |
