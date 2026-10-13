@@ -23,6 +23,11 @@ var STK_HEAD = ['کد لید', 'نوع', 'حالت', 'شهر یا مکان', 'د
 var STK_F = ['lead', 'type', 'mode', 'place', 'detail', 'since', 'owner', 'next', 'st', 'code', 'at', 'card', 'key', 'done', 'reason'];
 var STK_ST = { OPEN: 'باز', WORK: 'در حال حل', DONE: 'حل شد' };
 var STK_HELD = 'نگه‌داشته تا تأیید یاسر';
+var STK_DAILY = 'در خلاصهٔ روزانه';
+/* v170.43: برچسب کوتاه هر علت در خلاصه؛ فوری‌ها با کد لید می‌آیند */
+var STK_SHORT = { lead_nonext: 'موعد اقدام گذشته یا اقدام بعدی خالی', lead_comment3: 'کامنت باز بیش از ۳ روز', lead_meetstale: 'معارفهٔ بی‌نتیجه یا بی تاریخ',
+  lead_closednext: 'لید بسته با اقدام بعدی باز', lead_abroad: 'خارج از ایران بی‌تماس', lead_new48: 'جدید بی‌تماس بیش از ۴۸ ساعت' };
+var STK_URGENT = ['lead_abroad', 'lead_new48'];
 var STK_R = {
   inp_noapproved: { part: 'حضوری', label: 'مکان بی ساعت تأییدشده', next: 'ساعت‌های ثبت‌شده را بررسی و تأیید کنید تا به مراجع نشان داده شوند.', btn: ['📋 باز کردن فهرست بررسی', 'q'] },
   inp_wait48: { part: 'حضوری', label: 'تأیید ساعت بیش از ۴۸ ساعت معطل', next: 'ساعت‌های منتظر را همین امروز تأیید یا رد کنید.', btn: ['📋 باز کردن فهرست بررسی', 'q'] },
@@ -69,20 +74,26 @@ function stkSheet_() {
   }
   return sh;
 }
+/* v170.46: حافظهٔ یک‌اجرایی. پیش از این هر stkRaise_ کل تب را دو بار می‌خواند و هر ردیف را حتی بی تغییر دوباره می‌نوشت؛
+   با حدود ۳۰۰ ردیف، اسکن و سلامت لید از سقف ۶ دقیقهٔ اجرا گذشت و خلاصهٔ یک‌بارهٔ v170.43 هرگز نرسید. */
+var STK_X = null;
 function stkRows_() {
   if (stkDry_()) return (TG_MEM['stk:rows'] = TG_MEM['stk:rows'] || []);
+  if (STK_X) return STK_X;
   var sh = stkSheet_(), n = sh.getLastRow();
-  if (n < 2) return [];
-  return sh.getRange(2, 1, n - 1, STK_HEAD.length).getDisplayValues().map(function (v, i) {
-    var r = { row: i + 2 }; STK_F.forEach(function (f, j) { r[f] = v[j]; }); return r;
+  if (n < 2) return (STK_X = []);
+  STK_X = sh.getRange(2, 1, n - 1, STK_HEAD.length).getDisplayValues().map(function (v, i) {
+    var r = { row: i + 2 }; STK_F.forEach(function (f, j) { r[f] = v[j]; }); r._sig = stkArr_(r).join('\u0001'); return r;
   }).filter(function (r) { return r.code; });
+  return STK_X;
 }
 function stkArr_(r) { return STK_F.map(function (f) { return r[f] === undefined || r[f] === null ? '' : r[f]; }); }
 function stkWrite_(r) {
   if (stkDry_()) { var a = stkRows_(), i = a.map(function (x) { return x.code; }).indexOf(r.code); if (i < 0) a.push(r); else a[i] = r; return; }
-  var sh = stkSheet_();
-  if (r.row) sh.getRange(r.row, 1, 1, STK_HEAD.length).setValues([stkArr_(r)]);
-  else { sh.appendRow(stkArr_(r)); r.row = sh.getLastRow(); }
+  var sh = stkSheet_(), arr = stkArr_(r), sig = arr.join('\u0001');
+  if (r.row) { if (r._sig === sig) return; sh.getRange(r.row, 1, 1, STK_HEAD.length).setValues([arr]); }
+  else { sh.appendRow(arr); r.row = sh.getLastRow(); if (STK_X && STK_X.indexOf(r) < 0) STK_X.push(r); }
+  r._sig = sig;
 }
 function stkOpen_(r) { return r.st !== STK_ST.DONE; }
 
@@ -152,8 +163,8 @@ function stkRaise_(o) {
     place: o.place || '', since: since || stkStamp_(), owner: o.owner || (boss ? boss.name : ''), next: def.next, st: STK_ST.OPEN, card: '', key: key, done: '' };
   stkWrite_(r);
   try { var lc = (/^L-\d+$/.exec(r.lead) || [''])[0]; if (lc) tgLeadEv_({ code: lc, actor: 'بات', channel: 'درخواست متوقف', what: 'توقف', to: def.label, note: r.code + ' · ' + String(r.detail).slice(0, 200), type: r.type }); } catch (eE) {}
-  if (!stkSendOn_()) { r.card = STK_HELD; stkWrite_(r); return r; }
-  stkSend_(r);
+  /* v170.43 (سیاست دائمی یاسر، اسپم نه): هیچ کارت جدایی نمی‌رود؛ همه در خلاصهٔ روزانهٔ هر مسئول (stkDigest_) */
+  r.card = STK_DAILY; stkWrite_(r);
   return r;
 }
 /* بعد از تأیید یاسر: کارت‌های نگه‌داشته می‌روند (همان قاعدهٔ هر نفر و هر علت روزی یک کارت) و یک فهرست کامل برای یاسر */
@@ -342,9 +353,11 @@ function stkCb_(chat, data) {
   if (act === 'send') {
     if (!isOwner) return tgSend_(chat, 'ارسال کارت‌ها فقط با تأیید یاسر است.');
     if (stkSendOn_()) return tgSend_(chat, 'کارت‌ها قبلاً فرستاده شده‌اند.');
-    var res = stkRelease_();
-    return tgSend_(chat, '📤 ارسال شد: ' + tgFa_(res.cards) + ' کارت برای مسئول پذیرش (از ' + tgFa_(res.held) + ' مورد نگه‌داشته؛ بقیه با همان علت در تب و خلاصهٔ صبح). از این به بعد کارت‌های تازه خودکار می‌روند.');
+    stkProp_('STK_SEND_OK', '1');
+    var res = stkDigest_(true);
+    return tgSend_(chat, '📤 خلاصه برای ' + tgFa_(res.sent) + ' مسئول رفت (' + tgFa_(res.rows) + ' مورد باز). از این به بعد روزی یک خلاصه، نه کارت جدا.');
   }
+  if (act === 'open') return tgDeskOpen_(chat);   /* v170.43: دکمهٔ خلاصه */
   var r = stkRows_().filter(function (x) { return x.code === code; })[0];
   if (act === 'q') return tgInpQueue_(chat);
   if (!r) return tgSend_(chat, 'این مورد پیدا نشد.');
@@ -381,14 +394,83 @@ function stkHourly_() {
   if (h >= 9 && stkProp_('STK_SUM_DAY') !== day) {
     stkProp_('STK_SUM_DAY', day);
     try { if (typeof lmHealth_ === 'function') lmHealth_(); } catch (eH) { tgErr_('lmHealth_', eH); }   /* سلامت لید هر صبح */
-    var t = stkSendOn_() ? stkSummaryText_() : '';
-    if (t) {
-      tgSend_(String(TG_OWNER_CHAT), t); sum = 1;
-      var bs = stkBoss_(); if (bs && bs.chat !== String(TG_OWNER_CHAT)) tgSend_(bs.chat, t);
-    }
+    if (stkSendOn_()) try { sum = stkDigest_(false).sent; } catch (eD) { tgErr_('stkDigest_', eD); }   /* v170.43: روزی یک خلاصه برای هر مسئول */
     if (!stkDry_()) { var P = PropertiesService.getScriptProperties(); P.getKeys().forEach(function (k) { if (k.indexOf('STK_SENT:') === 0 && k !== 'STK_SENT:' + day) P.deleteProperty(k); }); }
   }
   return { live: n, summary: sum, lm: lm, ms: Date.now() - t0 };
+}
+
+/* ---------------- v170.43 · خلاصهٔ روزانهٔ هر مسئول (به جای کارت جدا) ---------------- */
+/* گیرندهٔ هر «مسئول» تب: «پذیرش» یا خالی یعنی مسئول پذیرش؛ نام دیگر از «تیم پذیرش»، وگرنه «افراد» */
+function stkWho_(owner) {
+  owner = String(owner || '').trim();
+  var boss = stkBoss_();
+  if (!owner || owner === 'پذیرش' || /^بات/.test(owner)) return boss;
+  if (stkDry_()) { var m = (TG_MEM['stk:who'] || {})[owner]; return m ? { name: owner, chat: m } : boss; }
+  var n = tgNorm_(owner), hit = null;
+  try { (tgDeskRows_() || []).forEach(function (d) { if (!hit && d.chat && (tgNorm_(d.name) === n || tgNorm_(d.name).indexOf(n) === 0)) hit = { name: d.name, chat: String(tgChatIds_(d.chat)[0] || '') }; }); } catch (e) {}
+  if (!hit) try { (tgPeopleList_() || []).forEach(function (p) { if (!hit && p.chat && /فعال|^$/.test(String(p.status || '')) && (tgNorm_(p.name) === n || tgNorm_(p.name).indexOf(n) === 0)) hit = { name: p.name, chat: String(tgChatIds_(p.chat)[0] || '') }; }); } catch (e2) {}
+  return hit && hit.chat ? hit : boss;
+}
+function stkDigestText_(rows) {
+  var by = {}, order = [];
+  rows.forEach(function (r) { var k = String(r.key).split(':')[0]; if (!by[k]) { by[k] = []; order.push(k); } by[k].push(r); });
+  order.sort(function (a, b) { return (STK_URGENT.indexOf(b) > -1) - (STK_URGENT.indexOf(a) > -1) || by[b].length - by[a].length; });
+  var L = ['🧭 <b>خلاصهٔ درخواست‌های متوقف</b> · ' + tgFa_(rows.length) + ' مورد باز', ''];
+  order.forEach(function (k) {
+    var lab = STK_SHORT[k] || (STK_R[k] ? STK_R[k].label : k), urgent = STK_URGENT.indexOf(k) > -1;
+    L.push((urgent ? '🔴 ' : '• ') + tgEsc_(lab) + ': ' + tgFa_(by[k].length));
+    if (urgent) {
+      var codes = by[k].map(function (r) { return (/^L-\d+/.exec(r.lead) || [''])[0]; }).filter(String);
+      if (codes.length) L.push('   ' + codes.slice(0, 15).map(function (c) { return '<code>' + c + '</code>'; }).join('، ') + (codes.length > 15 ? ' و ' + tgFa_(codes.length - 15) + ' لید دیگر' : ''));
+    }
+  });
+  L.push(''); L.push('فوری‌ها اول. فهرست کامل در تب «درخواست‌های متوقف».');
+  return L.join('\n');
+}
+/** force: یک‌بارهٔ امروز (روزی یک بار را نمی‌سنجد). همهٔ ردیف‌های باز، گروه‌بندی بر اساس مسئول؛ یک پیام برای هر گیرنده */
+function stkDigest_(force) {
+  var day = stkDay_();
+  if (!force && stkProp_('STK_DIG_DAY') === day) return { sent: 0, rows: 0 };
+  stkProp_('STK_DIG_DAY', day);
+  var open = stkRows_().filter(stkOpen_), groups = {}, sent = 0, mark = 'در خلاصه فرستاده شد ' + stkStamp_(), tot = [];
+  open.forEach(function (r) {
+    var w = stkWho_(r.owner); if (!w || !w.chat) return;
+    (groups[w.chat] = groups[w.chat] || { who: w, rows: [] }).rows.push(r);
+  });
+  var marked = [];
+  Object.keys(groups).forEach(function (c) {
+    var g = groups[c], k = 'STK_DIG:' + day + ':' + c;
+    /* v170.46: هر گیرنده روزی یک پیام، حتی اگر اجرا وسط کار قطع و دوباره اجرا شود */
+    if (stkProp_(k) !== '1') {
+      var st = tgNotify_(c, TG_NK.task, stkDigestText_(g.rows), { ref: 'STK-DAY', markup: { inline_keyboard: [[{ text: '📥 کارهای روی زمین', callback_data: 'sk:open:-' }]] } });
+      if (st !== 'رفت' && st !== 'صف') return;
+      stkProp_(k, '1');
+    }
+    sent++; tot.push(g.rows.length);
+    g.rows.forEach(function (r) { r.card = mark; marked.push(r); });
+  });
+  stkCardsWrite_(marked);
+  if (sent && String(TG_OWNER_CHAT)) tgNotify_(String(TG_OWNER_CHAT), TG_NK.report, '🧭 خلاصهٔ درخواست‌های متوقف برای ' + tgFa_(sent) + ' مسئول رفت (' + tot.map(tgFa_).join('، ') + ' مورد).', { ref: 'STK-DAY' });
+  return { sent: sent, rows: open.length };
+}
+/* v170.46: ستون «کارت» ردیف‌های خلاصه‌شده در یک نوشتن (نه یک نوشتن برای هر ردیف) */
+function stkCardsWrite_(rows) {
+  if (!rows.length) return;
+  if (stkDry_()) { rows.forEach(function (r) { stkWrite_(r); }); return; }
+  var sh = stkSheet_(), n = sh.getLastRow(); if (n < 2) return;
+  var col = STK_F.indexOf('card') + 1, rng = sh.getRange(2, col, n - 1, 1), v = rng.getValues();
+  rows.forEach(function (r) { if (r.row >= 2 && r.row - 2 < v.length) { v[r.row - 2][0] = r.card; r._sig = stkArr_(r).join('\u0001'); } });
+  rng.setValues(v);
+}
+/* یک‌بارهٔ خودکار v170.43 (تأیید یاسر): اول دوباره سنجیدن (حل‌شده‌ها «حل شد» می‌شوند)، بعد یک خلاصه برای هر مسئول. فقط شمار. */
+function tgV17043StkDigest() {
+  var before = stkRows_().filter(stkOpen_).length;
+  try { stkScan_(); } catch (e) { tgErr_('tgV17043 scan', e); }
+  try { if (typeof lmHealth_ === 'function') lmHealth_(); } catch (e2) { tgErr_('tgV17043 health', e2); }
+  stkProp_('STK_SEND_OK', '1');
+  var r = stkDigest_(true);
+  return { out: 'باز پیش از سنجش ' + before + ' · بعد ' + r.rows + ' · خلاصه برای ' + r.sent + ' مسئول' };
 }
 
 /* ---------------- تست خشک ---------------- */
@@ -413,8 +495,7 @@ function stkTests() {
     stkScan_();
     var g = stkRows_().filter(function (r) { return r.key === 'inp_noapproved:gandhi'; })[0];
     ok('گاندی: کارت با عدد دقیق (ساعت ثبت‌شده، ۰ تأییدشده، در انتظار از ۲۰ شهریور)', g && /۱۰ ساعت ثبت شده، ۰ تأییدشده؛ ۱۰ ساعت از ۲۰ شهریور در انتظار بررسی پذیرش/.test(g.detail));
-    ok('کارت کامل برای مسئول پذیرش و یک خط برای یاسر، با اقدام لازم و دکمهٔ فهرست بررسی', cards('7101').length >= 1 && TG_OUTBOX.some(function (o) { return o.chat === OWN && /^⛔️ S-/.test(o.text || ''); }) && !cards(OWN).length &&
-      /اقدام لازم/.test(cards('7101')[0].text) && JSON.stringify(cards('7101')[0].markup).indexOf('sk:q:') > -1);
+    ok('v170.43: کارت جدا نمی‌رود؛ ردیف «در خلاصهٔ روزانه»', !cards('7101').length && !TG_OUTBOX.some(function (o) { return o.chat === OWN && /^⛔️ S-/.test(o.text || ''); }) && g.card === STK_DAILY);
     var nr = stkRows_().filter(function (r) { return r.key === 'inp_noroom:vanak'; })[0];
     ok('ساعت تأییدشده بی اتاق جدا ثبت می‌شود', nr && /۱ ردیف \(۲ ساعت در هفته\)/.test(nr.detail));
     var n1 = cards('7101').length;
@@ -446,7 +527,7 @@ function stkTests() {
     TG_OUTBOX = [];
     stkScan_();
     var b = stkRows_().filter(function (r) { return r.key === 'lead_botowner:L-1250'; })[0], ab = stkRows_().filter(function (r) { return r.key === 'lead_abroad:L-1272'; })[0];
-    ok('مسئول «بات — خودرزرو» ← هشدار با دکمهٔ واگذاری', b && b.lead === 'L-1250' && cards('7101').some(function (o) { return JSON.stringify(o.markup).indexOf('ld:asg:L-1250') > -1; }));
+    ok('مسئول «بات — خودرزرو» ← مورد ثبت می‌شود، بی کارت', b && b.lead === 'L-1250' && !cards('7101').length);
     ok('لید خارج بیش از ۴ ساعت داخل پنجرهٔ تماس بی تماس؛ ۴۵ دقیقه نه (v170.23.22)', ab && /دقیقه بی تماس/.test(ab.detail) && !stkRows_().some(function (r) { return r.key === 'lead_abroad:L-1300'; }));
     ok('نام مراجع در هیچ کارت و ردیفی نیست', !TG_OUTBOX.some(function (o) { return /نام آزمایشی/.test(o.text || ''); }) && JSON.stringify(stkRows_()).indexOf('نام آزمایشی') < 0);
     /* آنلاین */
@@ -466,7 +547,19 @@ function stkTests() {
     TG_MEM['stk:now'] = pbTehran_(2026, 10, 5, 8, 0).getTime(); stkHourly_();
     ok('پیش از ۹ خلاصه نمی‌رود', !TG_OUTBOX.some(function (o) { return /درخواست‌های متوقف باز/.test(o.text || ''); }));
     TG_MEM['stk:now'] = pbTehran_(2026, 10, 5, 9, 5).getTime(); stkHourly_(); stkHourly_();
-    ok('ساعت ۹ یک بار خلاصهٔ موردهای باز برای یاسر', TG_OUTBOX.filter(function (o) { return o.chat === OWN && /درخواست‌های متوقف باز/.test(o.text || ''); }).length === 1);
+    var dg = TG_OUTBOX.filter(function (o) { return o.chat === '7101' && /خلاصهٔ درخواست‌های متوقف/.test(o.text || ''); });
+    ok('v170.43: ساعت ۹ یک خلاصه برای مسئول، دسته‌بندی بر اساس علت، دکمهٔ کارهای روی زمین', dg.length === 1 && /خارج از ایران بی‌تماس: ۱/.test(dg[0].text) && /<code>L-1272<\/code>/.test(dg[0].text) &&
+      JSON.stringify(dg[0].markup).indexOf('sk:open') > -1 && !/نام آزمایشی/.test(dg[0].text), dg[0] && dg[0].text);
+    ok('v170.43: یاسر فقط یک خط شمار می‌گیرد، نه کارت', TG_OUTBOX.filter(function (o) { return o.chat === OWN && /برای ۱ مسئول رفت/.test(o.text || ''); }).length === 1);
+    ok('v170.43: ستون «کارت» ← «در خلاصه فرستاده شد + تاریخ»', stkRows_().filter(stkOpen_).every(function (r) { return /^در خلاصه فرستاده شد /.test(r.card); }));
+    TG_MEM['stk:who'] = { 'عرفان': '7202' }; stkRaise_({ reason: 'lead_new48', key: 'L-1400', lead: 'L-1400', owner: 'عرفان', detail: 'L-1400: جدید.' });
+    TG_MEM['stk:now'] = pbTehran_(2026, 10, 6, 9, 5).getTime();   /* روز بعد */
+    TG_OUTBOX = []; var d2 = stkDigest_(true), m2 = TG_OUTBOX.filter(function (o) { return /خلاصهٔ درخواست‌های متوقف/.test(o.text || ''); });
+    ok('v170.43: هر مسئول یک پیام؛ «پذیرش» یعنی مسئول پذیرش', d2.sent === 2 && m2.length === 2 && m2.some(function (o) { return o.chat === '7202' && /جدید بی‌تماس بیش از ۴۸ ساعت: ۱/.test(o.text) && /L-1400/.test(o.text); }));
+    ok('v170.43: روزی یک بار (بی force دوباره نمی‌رود)', stkDigest_(false).sent === 0);
+    TG_OUTBOX = []; stkDigest_(true);
+    ok('v170.46: اجرای دوبارهٔ همان روز (قطع و تکرار) پیام دوم نمی‌فرستد ولی ستون «کارت» را می‌نویسد', !TG_OUTBOX.some(function (o) { return /خلاصهٔ درخواست‌های متوقف/.test(o.text || ''); }) && stkRows_().filter(stkOpen_).every(function (r) { return /^در خلاصه فرستاده شد /.test(r.card); }));
+    ok('v170.43: دکمهٔ خلاصه کارهای روی زمین را باز می‌کند', (function () { var k = tgDeskOpen_; var hit = 0; tgDeskOpen_ = function () { hit++; }; try { stkCb_(OWN, 'sk:open:-'); } finally { tgDeskOpen_ = k; } return hit === 1; })());
     ok('روز تازه، کارت تازه برای همان علت', cards('7101').length >= 0 && stkSentToday_('7101', 'lead_abroad') === false);
     var w48 = stkRows_().filter(function (r) { return r.key === 'inp_wait48:gandhi'; })[0];
     ok('هشدار جدای تأیید ساعت بیش از ۴۸ ساعت', w48 && /بیش از ۴۸ ساعت در انتظار تأیید/.test(w48.detail) && w48.since === '۲۰ شهریور');

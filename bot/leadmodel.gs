@@ -613,8 +613,8 @@ function lmTests() {
     ok('اجرای دوباره لید تکراری نمی‌سازد', TG_MEM['lm:leads'].length === n0);
     ok('رویداد ساخت لید با نوع ثبت می‌شود', TG_OUTBOX.some(function (o) { return o.kind === 'leadev' && o.o.what === 'ساخت لید' && o.o.type === LM_T.T; }));
     /* کارت‌های متوقف ساخته ولی نگه‌داشته */
-    var held = stkRows_().filter(function (r) { return r.card === STK_HELD; });
-    ok('کارت‌های موردهای فعلی ساخته و نگه‌داشته؛ چیزی برای پذیرشی نرفت', held.length >= 1 && !TG_OUTBOX.some(function (o) { return o.chat === '7101' && /درخواست متوقف/.test(o.text || ''); }));
+    var held = stkRows_().filter(function (r) { return r.card === STK_DAILY; });   /* v170.43: کارت جدا نه، خلاصهٔ روزانه */
+    ok('موردهای فعلی ثبت شده برای خلاصهٔ روزانه؛ کارت جدایی برای پذیرشی نرفت', held.length >= 1 && !TG_OUTBOX.some(function (o) { return o.chat === '7101' && /درخواست متوقف/.test(o.text || ''); }));
     var rep = TG_OUTBOX.filter(function (o) { return o.chat === OWN && /مدل لید اجرا شد/.test(o.text || ''); });
     ok('گزارش اجرای اول یک بار برای یاسر با دکمهٔ «ارسال کارت‌ها»', rep.length === 1 && JSON.stringify(rep[0].markup).indexOf('sk:send') > -1);
     var city = stkRows_().filter(function (r) { return r.key === 'inp_nocity:شیراز'; })[0];
@@ -623,7 +623,7 @@ function lmTests() {
     stkCb_('7101', 'sk:send:all');
     ok('فقط یاسر کارت‌ها را آزاد می‌کند', !stkSendOn_());
     stkCb_(OWN, 'sk:send:all');
-    ok('بعد از تأیید یاسر کارت‌ها برای پذیرشی می‌روند', stkSendOn_() && TG_OUTBOX.some(function (o) { return o.chat === '7101' && /درخواست متوقف/.test(o.text || ''); }));
+    ok('بعد از تأیید یاسر یک خلاصه برای پذیرشی می‌رود (v170.43)', stkSendOn_() && TG_OUTBOX.filter(function (o) { return o.chat === '7101' && /خلاصهٔ درخواست‌های متوقف/.test(o.text || ''); }).length === 1);
     ok('نام مراجع و متقاضی در هیچ کارتی نیست', !TG_OUTBOX.some(function (o) { return /متقاضی آزمایشی|متقاضی دوم/.test(o.text || ''); }));
 
     /* پیشنهاد کاربر */
