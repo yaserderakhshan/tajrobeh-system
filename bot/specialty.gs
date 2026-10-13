@@ -271,7 +271,7 @@ function spKidAsk_(chat) {
   }
   return false;
 }
-/* دکمه‌ها: kq:<پرسش>:<شمارهٔ گزینه|x> */
+/* دکمه‌ها: kq:<پرسش>:<شمارهٔ گزینه|x>. sec:public (مراجع در فرم پذیرش خودش؛ فقط کلید همین چت را می‌نویسد) */
 function spKidCb_(chat, data) {
   var p = String(data).split(':'), q = p[1], Q = SP_KQ[q];
   if (!Q || tgGetVal_('kq' + q, chat)) return true;
