@@ -1,5 +1,5 @@
 /**
- * psyref.gs · v170.66 · پروندهٔ ارجاع روان‌پزشکی از درمانگر (تصمیم یاسر)
+ * psyref.gs · v170.68 · پروندهٔ ارجاع روان‌پزشکی از درمانگر (تصمیم یاسر)
  *
  * هر درمانگر (tgWhoTherapist_) با «🩺 ارجاع به روان‌پزشک» در منوی خودش، یا همان مسیر در مینی‌اپ (ther.psyref)،
  * مراجعش را به روان‌پزشکی ارجاع می‌دهد: نام را می‌نویسد یا از مراجعان خودش (لیدهایی که «درمانگر معارفه» آن‌ها خود اوست)
@@ -290,4 +290,4 @@ function psrTests() {
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_DRY_THER = keep.th; }
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
-try { if (TG_SUITES.every(function (s) { return s[1] !== 'psrTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['روان‌پزشکی: پروندهٔ ارجاع (v170.66)', 'psrTests']); } catch (ePsr) {}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'psrTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['روان‌پزشکی: پروندهٔ ارجاع (v170.68)', 'psrTests']); } catch (ePsr) {}
