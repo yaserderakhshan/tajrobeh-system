@@ -80,7 +80,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.60`
+نسخهٔ کد: `v170.61`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -121,6 +121,7 @@
 | `kartable.gs` | ۴۷۷ | ۳۵ |
 | `prauto.gs` | ۳۹۳ | ۲۷ |
 | `statfill.gs` | ۱۶۰ | ۱۶ |
+| `leadfix.gs` | ۷۳ | ۶ |
 | `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `migrate.gs` | ۵۶۲ | ۵۶ |
@@ -227,7 +228,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadspeed.gs` `leadclaim.gs` `agents.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadfix.gs` `leadspeed.gs` `leadclaim.gs` `agents.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -408,6 +409,7 @@
 | کارتابل تأیید یاسر (v170.23.5) | `ktbTests` |
 | انتشار خودکار پروفایل و گارد (v170.56) | `praTests` |
 | بازسازی آمار روزانه (v170.58) | `sfTests` |
+| اصلاح یک‌بارهٔ شروع درمان (v170.61) | `lfTests` |
 | جمنای به‌جای گروک (v170.23.7) | `aiTests` |
 | روان‌پزشکی: نقش و اتصال (v170.23.8) | `ps2Tests` |
 | مهاجرت مراجعان به نسخهٔ ۲ (v170.23.6.3) | `migTests` |
