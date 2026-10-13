@@ -4748,6 +4748,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('ap:') === 0) return tgOnAp_(cq, data.slice(3));
   if (data.indexOf('pz:') === 0) return tgOnPz_(cq, data.slice(3));
   if (data === 'edu') return tgEduSignup_(chat);
+  if (data.indexOf('pra:') === 0 && typeof praCb_ === 'function') return praCb_(chat, data);   /* v170.52: «↩️ برگرداندن» خلاصهٔ پروفایل‌ها */
   if (data.indexOf('pq:') === 0) return tgPqCb_(chat, data.slice(3));
   if (data.indexOf('pr:') === 0) return tgPrCb_(cq, data.slice(3));
   if (data.indexOf('ut:') === 0 && tgUtmCallback_(chat, data)) return;
@@ -7170,6 +7171,7 @@ function tgWatchdog(e) {
   S('ebiHourly_', 'light', typeof ebiHourly_ === 'function' ? ebiHourly_ : null);
   S('aiRetryTick_', 'light', typeof aiRetryTick_ === 'function' ? aiRetryTick_ : null);   /* v170.23.7: ویس‌های بی‌متن */
   S('ktbHourly_', 'light', typeof ktbHourly_ === 'function' ? ktbHourly_ : null);
+  S('praDaily_', 'must', typeof praDaily_ === 'function' ? function () { return praDaily_(); } : null);   /* v170.52: خلاصهٔ تغییر پروفایل‌ها، ۱۰ صبح؛ بیرون از آن ساعت فقط یک خواندن Property */
   S('asWeeklyMaybe_', 'light', typeof asWeeklyMaybe_ === 'function' ? asWeeklyMaybe_ : null);   /* v170.23.17: گزارش هفتگی تیم‌های دستیار، شنبه یک بار */
   S('nuTick_', 'light', typeof nuTick_ === 'function' ? nuTick_ : null);   /* v170.23.13: پیگیری گیرکرده‌ها */
   S('reTick_', 'light', typeof reTick_ === 'function' ? reTick_ : null);   /* v170.23.14: کارت دستهٔ بازگرداندن */
@@ -13933,10 +13935,10 @@ var TG_PQ_GUIDE = 'https://tajrobeh.life/wp-content/uploads/2026/09/tjl-profile-
 var TG_PQ_SITE  = 'https://tajrobeh.life/#therapists';
 var TG_PQ_FIX   = ['id', 'name', 'roles', 'chat', 'src', 'status', 'pct', 'started', 'updated', 'invited', 'skipped', 'review', 'onsite',
                    'stamp', 'rstamp', 'notified', 'drive', 'site_name', 'site_sp', 'site_city', 'site_tags', 'site_photo', 'crop',
-                   'page', 'page_photo', 'page_voice', 'site_slug', 'congrats', 'pub_title', 'pub_headline', 'pub_method', 'pub_first', 'pub_trainings', 'pub_teach', 'pub_articles', 'pub_extra', 'teaminv', 'newq', 'pub_resume', 'modechk', 'csask', 'remind', 'inpoffer', 'pub_resume_draft', 'basis'];
+                   'page', 'page_photo', 'page_voice', 'site_slug', 'congrats', 'pub_title', 'pub_headline', 'pub_method', 'pub_first', 'pub_trainings', 'pub_teach', 'pub_articles', 'pub_extra', 'teaminv', 'newq', 'pub_resume', 'modechk', 'csask', 'remind', 'inpoffer', 'pub_resume_draft', 'basis', 'pub_snap', 'pub_prev', 'today_change', 'guard_note', 'typo_note'];
 var TG_PQ_FIXL  = ['شناسه', 'نام', 'نقش‌ها', 'chat_id', 'منبع', 'وضعیت', 'درصد تکمیل', 'شروع', 'آخرین پاسخ', 'دعوت', 'رد شده‌ها', 'بازبینی تیم', 'روی سایت',
                    'زمان آخرین پاسخ', 'زمان بازبینی', 'خبر به ناظر', 'فایل‌ها در درایو', 'نام روی سایت', 'خط رویکرد روی سایت', 'شهر روی سایت', 'تگ‌های کارت', 'عکس روی سایت', 'قاب عکس',
-                   'صفحهٔ شخصی', 'عکس صفحه (نسخه)', 'ویس صفحه (نسخه)', 'آدرس انگلیسی صفحه', 'پیام جشن انتشار', 'عنوان (ویرایش تیم)', 'یک جمله (ویرایش تیم)', 'روش درمان (ویرایش تیم)', 'جلسهٔ اول (ویرایش تیم)', 'آموزش‌ها (ویرایش تیم)', 'درس‌ها (ویرایش تیم)', 'نوشته‌ها (ویرایش تیم)', 'نقش‌های دیگر', 'دعوت به دیدن تیم', 'سؤال‌های تازه', 'رزومهٔ سبک (ویرایش تیم)', 'پرسش شکل جلسه', 'یادآوری اجازهٔ انتشار', 'یادآوری تکمیل', 'پیشنهاد حضوری', 'رزومهٔ سبک (پیش‌نویس جمنای)', 'پشتوانهٔ انتشار'];
+                   'صفحهٔ شخصی', 'عکس صفحه (نسخه)', 'ویس صفحه (نسخه)', 'آدرس انگلیسی صفحه', 'پیام جشن انتشار', 'عنوان (ویرایش تیم)', 'یک جمله (ویرایش تیم)', 'روش درمان (ویرایش تیم)', 'جلسهٔ اول (ویرایش تیم)', 'آموزش‌ها (ویرایش تیم)', 'درس‌ها (ویرایش تیم)', 'نوشته‌ها (ویرایش تیم)', 'نقش‌های دیگر', 'دعوت به دیدن تیم', 'سؤال‌های تازه', 'رزومهٔ سبک (ویرایش تیم)', 'پرسش شکل جلسه', 'یادآوری اجازهٔ انتشار', 'یادآوری تکمیل', 'پیشنهاد حضوری', 'رزومهٔ سبک (پیش‌نویس جمنای)', 'پشتوانهٔ انتشار', 'نسخهٔ منتشرشده (خودکار)', 'نسخهٔ پیش از تغییر', 'تغییر امروز', 'گارد خراب‌کاری', 'غلط تایپی احتمالی'];
 /* عکس کوچک‌تر از این (ضلع کوتاه، پیکسل) یک بار مؤدبانه پس داده می‌شود */
 var TG_PQ_MINPX = 720;
 var T_PQ_SMALL  = 'این عکس برای صفحهٔ سایت کمی کوچک است و آنجا تار دیده می‌شود. اگر عکس بزرگ‌تر یا واضح‌تری دارید بفرستید؛ بهتر است به شکل «فایل» بفرستید تا تلگرام فشرده‌اش نکند. اگر عکس دیگری ندارید، همین را دوباره بفرستید.';
@@ -14050,7 +14052,7 @@ var T_PQ_INTRO_D = '🏛 <b>دانشگاه شما</b>\n\nدو سؤال کوتا�
   'و می‌خواهیم بدانیم دانشجوهایمان از کجا آمده‌اند.';
 var T_PQ_LATER  = 'باشد. هر وقت خواستید، «' + TG_PQ_BTN + '» را بزنید و از همین‌جا ادامه می‌دهیم.';
 var T_PQ_NOID   = 'اسم شما را هنوز در فهرست درمانگرها یا مدرسه پیدا نکردم. اول وصل شوید، بعد همین را دوباره بزنید.';
-var T_PQ_DONE_T = '🙏 ممنون. پاسخ‌ها رسید.\n\nتیم تجربه همه را می‌خواند و کارت و صفحهٔ شما را در سایت به‌روز می‌کند. ' +
+var T_PQ_DONE_T = '🙏 ممنون. پاسخ‌ها رسید.\n\nکارت و صفحهٔ شما در سایت چند ساعت بعد خودکار به‌روز می‌شود. ' +
   'وقتی منتشر شد، لینک صفحه‌تان را همین‌جا می‌فرستیم؛ تا لینک نیامده، یعنی هنوز منتشر نشده. هر وقت خواستید چیزی را عوض کنید، دوباره «' + TG_PQ_BTN + '» را بزنید.';
 var T_PQ_DONE_D = '🙏 ممنون، ثبت شد.';
 
@@ -14197,6 +14199,18 @@ function tgPqConsent_(chat) {
   var id = tgPqId_(who);
   tgPqRec_(id, true, { name: who.name, roles: w, chat: String(chat), src: who.ther ? 'درمانگران' : 'افراد', status: 'در حال تکمیل', started: tgPqNow_() });
   var st = { id: id, w: w, name: who.name, todo: ['consent'], i: 0, pick: [], n: 1, ther: !!who.ther };
+  return tgPqAsk_(chat, st);
+}
+
+/* v170.52: فقط یک پرسش را دوباره می‌پرسد (دکمهٔ پیام «این بخش منتشر نشد») */
+function tgPqField_(chat, k) {
+  var q = tgPqQ_(k), who = tgPqWho_(chat);
+  var w = who.w.replace('D', '') || who.w;
+  if (!w) { tgSend_(chat, T_PQ_NOID); return; }
+  if (!q || !q.w.split('').some(function (c) { return w.indexOf(c) > -1; })) return tgSend_(chat, 'این پرسش دیگر باز نیست. «' + TG_PQ_BTN + '» را بزنید.');
+  var id = tgPqId_(who);
+  tgPqRec_(id, true, { name: who.name, roles: w, chat: String(chat), src: who.ther ? 'درمانگران' : 'افراد', status: 'در حال تکمیل', started: tgPqNow_() });
+  var st = { id: id, w: w, name: who.name, todo: [k], i: 0, pick: [], n: 1, ther: !!who.ther };
   return tgPqAsk_(chat, st);
 }
 
@@ -14384,6 +14398,7 @@ function tgPqCb_(chat, arg) {
   if (arg === 'cs') return tgPqConsent_(chat);
   if (arg === 'mo' || arg === 'mk') return tgPqModeAns_(chat, arg === 'mo');
   if (arg === 'iy' || arg === 'in') return tgInpOfferAns_(chat, arg === 'iy');
+  if (arg.indexOf('f:') === 0) return tgPqField_(chat, arg.slice(2));   /* v170.52: دکمهٔ پیام فیلد ردشده، همان یک پرسش */
   var st = tgPqGet_(chat);
   if (arg === 're') {
     if (!st) return tgPqEntry_(chat);
@@ -14396,7 +14411,6 @@ function tgPqCb_(chat, arg) {
   if (!q) return tgPqFinish_(chat, st);
   if (arg === 'lt') {
     tgDel_('pq', chat);
-    try { tgPrNotify_(st.id); } catch (e) { tgErr_('prNotify: ' + e); }
     return tgSend_(chat, T_PQ_LATER, st.ther ? tgTherMenu_() : null);
   }
   if (arg === 'sk') {
@@ -14480,17 +14494,18 @@ function tgPqFinish_(chat, st) {
     return;
   }
   var pct = tgPqPct_(v, st.w);
-  tgPqPut_(st.id, { pct: pct, status: pct >= 60 ? 'منتظر بازبینی' : 'نیمه‌کاره', updated: tgPqNow_() });
-  if (st.w === 'D') return tgSend_(chat, T_PQ_DONE_D, tgSchoolMenu_('دانشجو'));
+  /* v170.52: بازبینی آدم نیست. دانشجو صفحهٔ عمومی ندارد و خودکار تأیید می‌شود؛ بقیه به صف انتشار خودکار با گارد (prauto.gs) */
+  if (st.w === 'D') {
+    tgPqPut_(st.id, { pct: pct, status: 'بازبینی شد', review: tgPqNow_() + ' · خودکار', rstamp: String(Date.now()), updated: tgPqNow_() });
+    return tgSend_(chat, T_PQ_DONE_D, tgSchoolMenu_('دانشجو'));
+  }
+  tgPqPut_(st.id, { pct: pct, status: pct >= 60 ? 'در صف انتشار' : 'نیمه‌کاره', updated: tgPqNow_() });
   var miss = tgPqList_(st.w).filter(function (q) {
     return !tgPqAnswered_(v, q) && (!q.when || String(v[q.when] || '').indexOf('بله') === 0);
   }).map(function (q) { return q.l; });
   var L = [T_PQ_DONE_T, '', 'پروفایل شما: <b>' + tgFa_(pct) + '٪</b> کامل'];
   if (miss.length) L.push('هنوز خالی: ' + tgEsc_(miss.slice(0, 6).join('، ')) + (miss.length > 6 ? ' و …' : ''));
   tgSend_(chat, L.join('\n'), { inline_keyboard: [[{ text: '🌐 سایت تجربه', url: TG_PQ_SITE }]] });
-  var note = '🪪 <b>پروفایل سایت</b> · ' + tgEsc_(st.name) + ' · ' + tgFa_(pct) + '٪\nدر تب «' + TG_PQ_TAB + '» منتظر بازبینی است.';
-  try { tgPrNotify_(st.id, note + '\nهمین‌جا بازبینی و منتشرش کن.'); } catch (e) { tgErr_('prNotify: ' + e); }
-  if (st.w.indexOf('T') < 0) { try { if (!TG_DRY) tgSchoolNotify_(note); } catch (e) {} }
   if (String(v.mode || '') === 'حضوری' && !String(v.modechk || '')) {
     tgPqPut_(st.id, { modechk: 'پرسیده شد · ' + tgPqNow_() });
     tgSend_(chat, T_PQ_MODECHK, TG_PQ_MODEKB);
@@ -14678,7 +14693,7 @@ function tgPqTests() {
     TG_OUTBOX = []; tgPqCb_(901, 'sk');
     ok('اجازهٔ بخش‌های انتخابی رد نمی‌شود', said().indexOf('اجازهٔ بخش‌های انتخابی') > -1 && said().indexOf('pq:sk') < 0);
     TG_OUTBOX = []; tgPqCb_(901, 'o:0');
-    ok('در پایان درصد و وضعیت ثبت می‌شود', Number(TG_MEM['pqrows'][id].pct) > 60 && TG_MEM['pqrows'][id].status === 'منتظر بازبینی');
+    ok('در پایان درصد و وضعیت ثبت می‌شود', Number(TG_MEM['pqrows'][id].pct) > 60 && TG_MEM['pqrows'][id].status === 'در صف انتشار' && !said().match(/بازبینی و منتشرش کن/));
     ok('پیام پایان لینک سایت دارد', said().indexOf('tajrobeh.life') > -1 && said().indexOf('٪') > -1);
     ok('حالت پاک شد', tgPqGet_(901) === null);
 
@@ -14790,7 +14805,6 @@ function tgPqModeAns_(chat, both) {
   var put = { modechk: (both ? 'آنلاین هم' : 'فقط حضوری') + ' · ' + tgPqNow_() };
   if (both) { put.mode = 'آنلاین، حضوری'; put.updated = tgPqNow_(); put.stamp = String(Date.now()); }
   tgPqPut_(id, put);
-  if (both) { try { tgPrNotify_(id, '🪪 ' + tgEsc_(who.name) + ' شکل جلسه را «آنلاین و حضوری» کرد.\nبا انتشار دوباره روی صفحه‌اش می‌نشیند.'); } catch (e) { tgErr_('prNotify: ' + e); } }
   return tgSend_(chat, both ? '✅ ممنون، ثبت شد: آنلاین و حضوری. به‌زودی روی صفحهٔ شما هم به‌روز می‌شود.' : 'ممنون. همان «حضوری» می‌ماند.');
 }
 
@@ -15323,37 +15337,12 @@ function tgPrList_(chat) {
   return tgSend_(chat, '🪪 <b>صف بازبینی پروفایل</b> · ' + tgFa_(q.length) + ' نفر\nروی هر اسم بزن تا کارت سایتش را ببینی.', { inline_keyboard: rows });
 }
 
-/* خبر به ناظر: یک بار برای هر پاسخ تازه */
-function tgPrNotify_(id, note) {
-  var rec = tgPqRec_(id, false);
-  if (!rec) return;
-  var v = rec.v, st = String(tgPrStamp_(v));
-  v.roles = tgPrRoles_(v);
-  if (!tgPrNeeds_(v) || String(v.notified || '') === st) return;
-  var ids = TG_DRY ? (TG_MEM['watch'] || []) : tgWatchIds_();
-  var kb = { inline_keyboard: [[{ text: '🔎 بازبینی', callback_data: 'pr:sh:' + rec.row + ':' + tgPrH_(id) }]] };
-  var text = note || ('🪪 <b>پروفایل تازه</b> · ' + tgEsc_(v.name) + ' · ' + tgFa_(v.pct || tgPqPct_(v, v.roles || 'T')) + '٪\nپاسخ تازه داده و منتظر بازبینی توست.');
-  for (var i = 0; i < ids.length; i++) tgSend_(ids[i], text, kb);
-  tgPqPut_(id, { notified: st });
-}
+/* v170.52 (تصمیم یاسر): یاسر و ناظر از چرخهٔ بازبینی پروفایل بیرون‌اند؛ هیچ خبری دربارهٔ پروفایل به آن‌ها نمی‌رود.
+   پاسخ تازه نیم ساعت بعد با گارد خراب‌کاری خودکار منتشر می‌شود (prauto.gs). این تابع برای سازگاری می‌ماند و کاری نمی‌کند. */
+function tgPrNotify_(id, note) { return; }
 
-/* ساعتی: کسی که وسط کار رها کرده هم بعد از نیم ساعت به صف خبر داده می‌شود */
-function tgPrTick_() {
-  var q = tgPrQueue_(), now = Date.now(), fresh = [];
-  for (var i = 0; i < q.length; i++) {
-    var v = q[i].v, st = tgPrStamp_(v);
-    if (String(v.notified || '') === String(st)) continue;
-    if (st > 1 && now - st < 30 * 60 * 1000) continue;
-    fresh.push(q[i]);
-  }
-  if (!fresh.length) return 0;
-  var ids = TG_DRY ? (TG_MEM['watch'] || []) : tgWatchIds_();
-  var rows = fresh.slice(0, 12).map(function (r) { return [{ text: '🔎 ' + tgPrCut_(r.v.name, 28), callback_data: 'pr:sh:' + r.row + ':' + tgPrH_(r.v.id) }]; });
-  for (var j = 0; j < ids.length; j++)
-    tgSend_(ids[j], '🪪 ' + tgFa_(fresh.length) + ' پروفایل تازه منتظر بازبینی است.', { inline_keyboard: rows });
-  fresh.forEach(function (r) { tgPqPut_(r.v.id, { notified: String(tgPrStamp_(r.v)) }); });
-  return fresh.length;
-}
+/* ساعت‌های سنگین: صف پاسخ‌های تازه ← انتشار خودکار با گارد (praTick_) */
+function tgPrTick_() { return typeof praTick_ === 'function' ? praTick_() : 0; }
 
 /* ───── عکس و قاب ───── */
 function tgPrCrop_(v) {
@@ -15521,7 +15510,8 @@ function tgPrErrText_(e) {
 function tgPrPublish_(chat, r, opts) {
   opts = opts || {};
   var p = tgPrPlan_(r), v = r.v;
-  if (p.blocked) return tgSend_(chat, '⛔ برای ' + tgEsc_(v.name) + ' تصمیم تیم «روی سایت نمی‌رود» است. چیزی منتشر نشد.');
+  if (opts.omit && opts.omit.length) p.omit = opts.omit;   /* v170.52: فیلدهای ردشدهٔ گارد؛ نسخهٔ فعلی سایت می‌ماند */
+  if (p.blocked) return opts.quiet ? { ok: false, errs: [], pageErr: 'تصمیم تیم', name: p.name } : tgSend_(chat, '⛔ برای ' + tgEsc_(v.name) + ' تصمیم تیم «روی سایت نمی‌رود» است. چیزی منتشر نشد.');
   if (!p.canPublish) {
     if (p.siteErr && !opts.dry) splNote_(r, opts, 'شکست', '', 'سایت جواب نداد: ' + p.siteErr);   /* v170.23.3: نتیجه در هاب و صف تلاش دوباره */
     if (opts.quiet) return { ok: false, errs: [], pageErr: p.siteErr || 'چیزی برای انتشار نیست', name: p.name };
@@ -15567,7 +15557,7 @@ function tgPrPublish_(chat, r, opts) {
   });
   var ok = (lines.length > 0 || !!page) && !errs.length && !pageErr;
   var onsite = pages.filter(function (x) { return x.saved; }).map(function (x) { return x.title; }).join('، ');
-  tgPqPut_(v.id, Object.assign({ review: tgPqNow_() + ' · ' + tgPrWho_(chat), rstamp: String(Date.now()), notified: String(tgPrStamp_(v)),
+  tgPqPut_(v.id, Object.assign({ review: tgPqNow_() + ' · ' + (opts.who || tgPrWho_(chat)), rstamp: String(Date.now()), notified: String(tgPrStamp_(v)),
                    status: ok ? 'روی سایت' : 'منتشر نشد', onsite: onsite || String(v.onsite || ''), basis: String(v.basis || '').trim() || tgPrBasis_() }, put));
   if (lines.length && p.isT && !TG_DRY) {
     try {
@@ -15589,10 +15579,13 @@ function tgPrPublish_(chat, r, opts) {
   var savedT = pages.filter(function (x) { return x.saved; }).map(function (x) { return pgName(x.page); }).concat(page ? ['صفحهٔ تیم'] : []);
   var why = errs.map(function (e) { return pgName(e.page) + ': ' + tgPrErrText_(e.error); }).concat(pageErr ? ['صفحهٔ تیم: ' + pageErr] : []).join(' · ');
   splNote_(r, opts, ok ? 'موفق' : (savedT.length ? 'نیمه' : 'شکست'), savedT.join('، '), why);
-  if (opts.quiet) return { res: res, ok: ok, errs: errs, page: page, pageErr: pageErr, name: p.name };
-  if (page) nkb.unshift([{ text: '🌐 دیدن صفحهٔ ' + tgPrCut_(p.name, 24), url: page }]);
-  tgSend_(chat, msg, { inline_keyboard: nkb });
-  if (ok && v.chat) {
+  if (opts.quiet && !opts.auto) return { res: res, ok: ok, errs: errs, page: page, pageErr: pageErr, name: p.name };
+  /* v170.52: انتشار خودکار پیامی به ناظر ندارد؛ به خود عضو فقط پیام جشن صفحهٔ تازه (بقیه را praAutoOne_ یک‌جا می‌فرستد) */
+  if (!opts.auto) {
+    if (page) nkb.unshift([{ text: '🌐 دیدن صفحهٔ ' + tgPrCut_(p.name, 24), url: page }]);
+    tgSend_(chat, msg, { inline_keyboard: nkb });
+  }
+  if (ok && v.chat && (!opts.auto || (page && !hadPage))) {
     try {
       var to = String(v.chat).split(/[,،;\s]+/)[0];
       if (page && !hadPage) tgPrCongrats_(to, page, v);
@@ -15600,6 +15593,7 @@ function tgPrPublish_(chat, r, opts) {
         'هر وقت خواستید چیزی را عوض کنید، «' + TG_PQ_BTN + '» را بزنید.', { inline_keyboard: [[{ text: page ? '🌐 دیدن صفحهٔ من' : '🌐 دیدن در سایت', url: page || TG_PQ_SITE }]] });
     } catch (e) {}
   }
+  if (opts.auto) return { res: res, ok: ok, errs: errs, page: page, pageErr: pageErr, name: p.name, first: !!(page && !hadPage) };
   return res;
 }
 
@@ -15707,6 +15701,7 @@ function tgPrPage_(p, b64) {
             alum: p.school ? 'مدرسهٔ تجربه' : '' };
   TG_PR_PAGE.forEach(function (k) { o[k] = String(v['pub_' + k] || '').trim() || String(v[k] || '').trim(); });
   o.ages = p.ages || o.ages;
+  (p.omit || []).forEach(function (k) { if (k in o && (TG_PR_PAGE.indexOf(k) > -1 || k === 'city')) delete o[k]; });   /* v170.52: فیلد ردشده فرستاده نمی‌شود؛ سایت نسخهٔ قبلی را نگه می‌دارد */
   o.extra = String(v.pub_extra || '').split(/\s*[،,]\s*/).filter(String);
   o.resume = p.extraOk ? String(v.pub_resume || '').trim() : '';   /* v170.23.6: رزومهٔ کامل و ویس فقط با اجازهٔ جدا */
   o.cv_url = p.extraOk && /^https?:\/\//i.test(String(v.resume || '').trim()) ? String(v.resume).trim() : '';
@@ -15759,7 +15754,7 @@ function tgPrCongrats_(to, page, v) {
   var t = '🎉 <b>صفحهٔ شما در سایت تجربه منتشر شد</b>\n\n' + tgEsc_(tgPrUrl_(page)) + '\n\n' +
     'روش کارتان، مسیر حرفه‌ای' + (hasVoice ? '، صدای خودتان' : '') + ' و دکمهٔ رزرو معارفه برای کسانی که می‌خواهند با شما کار کنند، حالا یک‌جا در دسترس است.\n\n' +
     '🔗 این لینک مال شماست؛ اگر دوست داشتید در بیوی اینستاگرام، لینکدین، امضای ایمیل یا برای مراجعانتان بگذارید.\n' +
-    '✏️ هر وقت خواستید چیزی را عوض کنید، «' + TG_PQ_BTN + '» را بزنید؛ تغییرها بعد از بازبینی روی صفحه می‌نشیند.\n' +
+    '✏️ هر وقت خواستید چیزی را عوض کنید، «' + TG_PQ_BTN + '» را بزنید؛ تغییرها چند ساعت بعد خودکار روی صفحه می‌نشیند.\n' +
     '🤝 تیم تجربه هم برای بهترشدن صفحه‌ها وقت می‌گذارد؛ اگر پیشنهادی برای کامل‌ترشدن صفحهٔ شما داشتیم، همین‌جا با شما در میان می‌گذاریم.';
   return tgSend_(to, t, { inline_keyboard: [[{ text: '🌐 دیدن صفحهٔ من', url: page }], [{ text: '↗️ فرستادن لینک برای دیگران', url: share }]] });
 }
@@ -16087,7 +16082,7 @@ function tgPrTests() {
     TG_MEM['pqrows']['ther:بازبینی‌شده'].stamp = '300';
     tgPrNotify_('ther:بازبینی‌شده');
     tgPrNotify_('ther:بازبینی‌شده');
-    ok('خبر به ناظر فقط یک بار برای هر پاسخ', TG_OUTBOX.filter(function (x) { return x.chat === '700'; }).length === 1);
+    ok('v170.52: هیچ خبری دربارهٔ پروفایل به ناظر نمی‌رود', TG_OUTBOX.filter(function (x) { return x.chat === '700'; }).length === 0);
 
     TG_OUTBOX = [];
     tgPrMaybe_(700, { text: '/review' });
@@ -16432,7 +16427,7 @@ function tgInpOfferAns_(chat, yes) {
   if (!who.name) return tgSend_(chat, T_PQ_NOID);
   var id = tgPqId_(who), rec = tgPqRec_(id, false), p = rec ? tgInpOfferFor_(rec.v) : null;
   tgPqPut_(id, { inpoffer: (yes ? 'علاقه دارد' : 'فعلاً نه') + (p ? ' · ' + tgInpLabel_(p) : '') + ' · ' + tgPqNow_() });
-  if (yes) { try { tgPrNotify_(id, '🏢 <b>حضوری</b> · ' + tgEsc_(who.name) + ' دوست دارد در ' + tgEsc_(p ? tgInpLabel_(p) : 'شهرش') + ' حضوری هم ببیند. برای اتاق هماهنگ کنید.'); } catch (e) {} }
+  if (yes) { try { tgDeskSay_('🏢 <b>حضوری</b> · ' + tgEsc_(who.name) + ' دوست دارد در ' + tgEsc_(p ? tgInpLabel_(p) : 'شهرش') + ' حضوری هم ببیند. برای اتاق هماهنگ کنید.'); } catch (e) {} }
   return tgSend_(chat, yes ? '✅ ممنون. پذیرش برای برنامهٔ اتاق با شما هماهنگ می‌کند.' : 'باشد، هر وقت خواستید به پذیرش بگویید.');
 }
 /* پیش‌نمایش: اگر پیشنهاد روشن شود، به چه کسانی می‌رسد؟ چیزی فرستاده نمی‌شود مگر send */
