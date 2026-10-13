@@ -87,7 +87,7 @@
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۲۵۳ | ۲۰۶۸ |
+| `telegram.gs` | ۳۸۲۶۲ | ۲۰۶۸ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -118,7 +118,7 @@
 | `sec.gs` | ۱۰۷ | ۱ |
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
-| `kartable.gs` | ۴۴۷ | ۳۴ |
+| `kartable.gs` | ۴۷۹ | ۳۵ |
 | `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `migrate.gs` | ۵۶۲ | ۵۶ |
@@ -170,7 +170,7 @@
 |---|---|---|
 | `AB_FN_TAB` | «قیف خارج از ایران» | `leadspeed.gs` |
 | `AB_FX_TAB` | «اصلاح دادهٔ لیدها · پیش‌نمایش» | `leadspeed.gs` |
-| `AB_PV_TAB` | «مبنای ارجاع · پیش‌نمایش» | `leadspeed.gs` |
+| `AB_PV_TAB` | «مبنای ارجاع · پیش‌نمایش» | `kartable.gs` `leadspeed.gs` |
 | `AG_COST_TAB` | «هزینهٔ ایجنت‌ها» | `agents.gs` |
 | `AG_SEO_TAB` | «تغییرات سئو» | `agents.gs` |
 | `AS_IDX_TAB` | «نمایهٔ دانش» | `assist.gs` |
