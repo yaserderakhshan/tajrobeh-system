@@ -4748,7 +4748,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('ap:') === 0) return tgOnAp_(cq, data.slice(3));
   if (data.indexOf('pz:') === 0) return tgOnPz_(cq, data.slice(3));
   if (data === 'edu') return tgEduSignup_(chat);
-  if (data.indexOf('pra:') === 0 && typeof praCb_ === 'function') return praCb_(chat, data);   /* v170.52: «↩️ برگرداندن» خلاصهٔ پروفایل‌ها */
+  if (data.indexOf('pra:') === 0 && typeof praCb_ === 'function') return praCb_(chat, data);   /* v170.54: «↩️ برگرداندن» خلاصهٔ پروفایل‌ها */
   if (data.indexOf('pq:') === 0) return tgPqCb_(chat, data.slice(3));
   if (data.indexOf('pr:') === 0) return tgPrCb_(cq, data.slice(3));
   if (data.indexOf('ut:') === 0 && tgUtmCallback_(chat, data)) return;
@@ -7171,7 +7171,7 @@ function tgWatchdog(e) {
   S('ebiHourly_', 'light', typeof ebiHourly_ === 'function' ? ebiHourly_ : null);
   S('aiRetryTick_', 'light', typeof aiRetryTick_ === 'function' ? aiRetryTick_ : null);   /* v170.23.7: ویس‌های بی‌متن */
   S('ktbHourly_', 'light', typeof ktbHourly_ === 'function' ? ktbHourly_ : null);
-  S('praDaily_', 'must', typeof praDaily_ === 'function' ? function () { return praDaily_(); } : null);   /* v170.52: خلاصهٔ تغییر پروفایل‌ها، ۱۰ صبح؛ بیرون از آن ساعت فقط یک خواندن Property */
+  S('praDaily_', 'must', typeof praDaily_ === 'function' ? function () { return praDaily_(); } : null);   /* v170.54: خلاصهٔ تغییر پروفایل‌ها، ۱۰ صبح؛ بیرون از آن ساعت فقط یک خواندن Property */
   S('asWeeklyMaybe_', 'light', typeof asWeeklyMaybe_ === 'function' ? asWeeklyMaybe_ : null);   /* v170.23.17: گزارش هفتگی تیم‌های دستیار، شنبه یک بار */
   S('nuTick_', 'light', typeof nuTick_ === 'function' ? nuTick_ : null);   /* v170.23.13: پیگیری گیرکرده‌ها */
   S('reTick_', 'light', typeof reTick_ === 'function' ? reTick_ : null);   /* v170.23.14: کارت دستهٔ بازگرداندن */
@@ -14202,7 +14202,7 @@ function tgPqConsent_(chat) {
   return tgPqAsk_(chat, st);
 }
 
-/* v170.52: فقط یک پرسش را دوباره می‌پرسد (دکمهٔ پیام «این بخش منتشر نشد») */
+/* v170.54: فقط یک پرسش را دوباره می‌پرسد (دکمهٔ پیام «این بخش منتشر نشد») */
 function tgPqField_(chat, k) {
   var q = tgPqQ_(k), who = tgPqWho_(chat);
   var w = who.w.replace('D', '') || who.w;
@@ -14398,7 +14398,7 @@ function tgPqCb_(chat, arg) {
   if (arg === 'cs') return tgPqConsent_(chat);
   if (arg === 'mo' || arg === 'mk') return tgPqModeAns_(chat, arg === 'mo');
   if (arg === 'iy' || arg === 'in') return tgInpOfferAns_(chat, arg === 'iy');
-  if (arg.indexOf('f:') === 0) return tgPqField_(chat, arg.slice(2));   /* v170.52: دکمهٔ پیام فیلد ردشده، همان یک پرسش */
+  if (arg.indexOf('f:') === 0) return tgPqField_(chat, arg.slice(2));   /* v170.54: دکمهٔ پیام فیلد ردشده، همان یک پرسش */
   var st = tgPqGet_(chat);
   if (arg === 're') {
     if (!st) return tgPqEntry_(chat);
@@ -14494,7 +14494,7 @@ function tgPqFinish_(chat, st) {
     return;
   }
   var pct = tgPqPct_(v, st.w);
-  /* v170.52: بازبینی آدم نیست. دانشجو صفحهٔ عمومی ندارد و خودکار تأیید می‌شود؛ بقیه به صف انتشار خودکار با گارد (prauto.gs) */
+  /* v170.54: بازبینی آدم نیست. دانشجو صفحهٔ عمومی ندارد و خودکار تأیید می‌شود؛ بقیه به صف انتشار خودکار با گارد (prauto.gs) */
   if (st.w === 'D') {
     tgPqPut_(st.id, { pct: pct, status: 'بازبینی شد', review: tgPqNow_() + ' · خودکار', rstamp: String(Date.now()), updated: tgPqNow_() });
     return tgSend_(chat, T_PQ_DONE_D, tgSchoolMenu_('دانشجو'));
@@ -15337,7 +15337,7 @@ function tgPrList_(chat) {
   return tgSend_(chat, '🪪 <b>صف بازبینی پروفایل</b> · ' + tgFa_(q.length) + ' نفر\nروی هر اسم بزن تا کارت سایتش را ببینی.', { inline_keyboard: rows });
 }
 
-/* v170.52 (تصمیم یاسر): یاسر و ناظر از چرخهٔ بازبینی پروفایل بیرون‌اند؛ هیچ خبری دربارهٔ پروفایل به آن‌ها نمی‌رود.
+/* v170.54 (تصمیم یاسر): یاسر و ناظر از چرخهٔ بازبینی پروفایل بیرون‌اند؛ هیچ خبری دربارهٔ پروفایل به آن‌ها نمی‌رود.
    پاسخ تازه نیم ساعت بعد با گارد خراب‌کاری خودکار منتشر می‌شود (prauto.gs). این تابع برای سازگاری می‌ماند و کاری نمی‌کند. */
 function tgPrNotify_(id, note) { return; }
 
@@ -15510,7 +15510,7 @@ function tgPrErrText_(e) {
 function tgPrPublish_(chat, r, opts) {
   opts = opts || {};
   var p = tgPrPlan_(r), v = r.v;
-  if (opts.omit && opts.omit.length) p.omit = opts.omit;   /* v170.52: فیلدهای ردشدهٔ گارد؛ نسخهٔ فعلی سایت می‌ماند */
+  if (opts.omit && opts.omit.length) p.omit = opts.omit;   /* v170.54: فیلدهای ردشدهٔ گارد؛ نسخهٔ فعلی سایت می‌ماند */
   if (p.blocked) return opts.quiet ? { ok: false, errs: [], pageErr: 'تصمیم تیم', name: p.name } : tgSend_(chat, '⛔ برای ' + tgEsc_(v.name) + ' تصمیم تیم «روی سایت نمی‌رود» است. چیزی منتشر نشد.');
   if (!p.canPublish) {
     if (p.siteErr && !opts.dry) splNote_(r, opts, 'شکست', '', 'سایت جواب نداد: ' + p.siteErr);   /* v170.23.3: نتیجه در هاب و صف تلاش دوباره */
@@ -15580,7 +15580,7 @@ function tgPrPublish_(chat, r, opts) {
   var why = errs.map(function (e) { return pgName(e.page) + ': ' + tgPrErrText_(e.error); }).concat(pageErr ? ['صفحهٔ تیم: ' + pageErr] : []).join(' · ');
   splNote_(r, opts, ok ? 'موفق' : (savedT.length ? 'نیمه' : 'شکست'), savedT.join('، '), why);
   if (opts.quiet && !opts.auto) return { res: res, ok: ok, errs: errs, page: page, pageErr: pageErr, name: p.name };
-  /* v170.52: انتشار خودکار پیامی به ناظر ندارد؛ به خود عضو فقط پیام جشن صفحهٔ تازه (بقیه را praAutoOne_ یک‌جا می‌فرستد) */
+  /* v170.54: انتشار خودکار پیامی به ناظر ندارد؛ به خود عضو فقط پیام جشن صفحهٔ تازه (بقیه را praAutoOne_ یک‌جا می‌فرستد) */
   if (!opts.auto) {
     if (page) nkb.unshift([{ text: '🌐 دیدن صفحهٔ ' + tgPrCut_(p.name, 24), url: page }]);
     tgSend_(chat, msg, { inline_keyboard: nkb });
@@ -15701,7 +15701,7 @@ function tgPrPage_(p, b64) {
             alum: p.school ? 'مدرسهٔ تجربه' : '' };
   TG_PR_PAGE.forEach(function (k) { o[k] = String(v['pub_' + k] || '').trim() || String(v[k] || '').trim(); });
   o.ages = p.ages || o.ages;
-  (p.omit || []).forEach(function (k) { if (k in o && (TG_PR_PAGE.indexOf(k) > -1 || k === 'city')) delete o[k]; });   /* v170.52: فیلد ردشده فرستاده نمی‌شود؛ سایت نسخهٔ قبلی را نگه می‌دارد */
+  (p.omit || []).forEach(function (k) { if (k in o && (TG_PR_PAGE.indexOf(k) > -1 || k === 'city')) delete o[k]; });   /* v170.54: فیلد ردشده فرستاده نمی‌شود؛ سایت نسخهٔ قبلی را نگه می‌دارد */
   o.extra = String(v.pub_extra || '').split(/\s*[،,]\s*/).filter(String);
   o.resume = p.extraOk ? String(v.pub_resume || '').trim() : '';   /* v170.23.6: رزومهٔ کامل و ویس فقط با اجازهٔ جدا */
   o.cv_url = p.extraOk && /^https?:\/\//i.test(String(v.resume || '').trim()) ? String(v.resume).trim() : '';
@@ -16082,7 +16082,7 @@ function tgPrTests() {
     TG_MEM['pqrows']['ther:بازبینی‌شده'].stamp = '300';
     tgPrNotify_('ther:بازبینی‌شده');
     tgPrNotify_('ther:بازبینی‌شده');
-    ok('v170.52: هیچ خبری دربارهٔ پروفایل به ناظر نمی‌رود', TG_OUTBOX.filter(function (x) { return x.chat === '700'; }).length === 0);
+    ok('v170.54: هیچ خبری دربارهٔ پروفایل به ناظر نمی‌رود', TG_OUTBOX.filter(function (x) { return x.chat === '700'; }).length === 0);
 
     TG_OUTBOX = [];
     tgPrMaybe_(700, { text: '/review' });
@@ -22740,6 +22740,11 @@ function tgLeadEdited_(row, c1, c2, actor, oldValue) {
             '\nوضعیت‌ها: ' + TG_LEAD_ST.join(' ← '));
         }
         if (tgStClosed_(fixed)) {
+          /* v170.50: بستن یا «شروع درمان» از شیت هم اقدام بعدی را پاک می‌کند (پیش از این فقط مسیر بات پاک می‌کرد) */
+          if (l.next || l.nextDate) {
+            const chN = {}; if (l.next) chN['اقدام بعدی'] = ''; if (l.nextDate) chN['تاریخ اقدام بعدی'] = '';
+            tgLeadSet_(row, chN, 'بات', 'شیت', 'خودکار: لید بسته اقدام بعدی ندارد');
+          }
           const o = tgDeskByName_(l.owner);
           if (o && o.chat) tgSend_(o.chat, '✅ لید ' + tgEsc_(code) + ' ' + (fixed === TG_ST.START ? 'به «شروع درمان» رسید' : 'بسته شد') + (nz.changed ? ' (' + tgEsc_(st) + ')' : '') + '\nاز پیگیری‌های بات بیرون رفت.');
         }

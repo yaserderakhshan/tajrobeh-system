@@ -327,7 +327,8 @@ function lmHealth_() {
     var st = tgStOf_(l.status) || l.status || TG_ST.NEW, type = l.type || lmGuessType_(l.src, l.text), own = cmHuman_(l.owner);
     var R = function (reason, det) { live[reason + ':' + l.code] = 1; stkRaise_({ reason: reason, key: l.code, lead: l.code, type: type, owner: own, mode: 'لید', detail: det }); };
     if (tgStClosed_(l.status)) {
-      if (l.next) R('lead_closednext', l.code + ': «' + st + '» است ولی اقدام بعدی باز دارد: «' + l.next + '»' + (l.nextDate ? ' (' + l.nextDate + ')' : '') + '.');
+      /* v170.50 (تصمیم یاسر): لید بسته یا «شروع درمان» اقدام بعدی ندارد. این دیگر کار تیم نیست؛ بات خودش پاک می‌کند. */
+      if (l.next || l.nextDate) lmClosedClear_(l, 'سلامت لید');
       return;
     }
     if (tgSection_(l.src, '') === 'مدرسه') return;
@@ -344,6 +345,21 @@ function lmHealth_() {
   });
   stkSettle_(LM_HEALTH, live);
   return Object.keys(live).length;
+}
+
+/* v170.50: اقدام بعدی و تاریخش در لید بسته یا «شروع درمان»، از همان tgLeadSet_ (رویداد هر فیلد در «رویدادهای لید») */
+function lmClosedClear_(l, why) {
+  var ch = {}; if (l.next) ch['اقدام بعدی'] = ''; if (l.nextDate) ch['تاریخ اقدام بعدی'] = '';
+  if (!Object.keys(ch).length || !l.row) return false;
+  if (stkDry_()) { TG_OUTBOX.push({ kind: 'leadset', row: l.row, changes: ch, actor: 'بات', code: l.code }); l.next = ''; l.nextDate = ''; return true; }
+  try { tgLeadSet_(l.row, ch, 'بات', 'خودکار', 'خودکار: لید بسته اقدام بعدی ندارد (' + why + ')'); return true; } catch (e) { tgErr_('lmClosedClear_', e, l.code); return false; }
+}
+/* یک‌بارهٔ خودکار v170.50 (تأیید یاسر): لیدهای بستهٔ فعلی با اقدام بعدی، و ردیف‌های lead_closednext در «درخواست‌های متوقف» ← «حل شد». فقط شمار. */
+function tgV17050ClosedNext() {
+  var n = 0;
+  lmLeadIdx_().list.forEach(function (l) { if (l.code && tgStClosed_(l.status) && (l.next || l.nextDate) && lmClosedClear_(l, 'اصلاح یک‌باره')) n++; });
+  var s = 0; stkRows_().forEach(function (r) { if (stkOpen_(r) && /^lead_closednext:/.test(r.key)) { r.st = STK_ST.DONE; r.done = stkStamp_(); stkWrite_(r); s++; } });
+  return { out: 'لید بسته‌ای که اقدامش پاک شد: ' + n + ' · ردیف «لید بسته با اقدام بعدی باز» حل شد: ' + s };
 }
 
 /* ---------------- پیشنهاد کاربر و تقاضای حضوری (قلاب‌ها) ---------------- */
@@ -776,3 +792,29 @@ function lmSafeTests() {
   return { pass: pass, fail: fail, out: out };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'lmSafeTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['پشتیبان مدل لید (v170.4)', 'lmSafeTests']); } catch (eLs) {}
+
+/* v170.50: آزمون پاک شدن اقدام بعدی لید بسته و یک‌بارهٔ آن */
+function lmClosedNextTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX };
+  TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
+  try {
+    TG_MEM['lm:leads'] = [
+      { row: 5, code: 'L-5005', status: TG_ST.START, next: 'پرسیدن شروع درمان', nextDate: '2026-10-01', name: 'x' },
+      { row: 6, code: 'L-5006', status: TG_ST.CLOSED, next: 'بستن', nextDate: '', name: 'x' },
+      { row: 7, code: 'L-5007', status: TG_ST.FOLLOW, next: 'تماس', nextDate: '2026-10-20', name: 'x' }];
+    TG_MEM['stk:rows'] = [{ code: 'S-1', key: 'lead_closednext:L-5005', st: STK_ST.OPEN, reason: 'لید بسته با اقدام بعدی باز' },
+                          { code: 'S-2', key: 'lead_nonext:L-5007', st: STK_ST.OPEN }];
+    var o = tgV17050ClosedNext().out, sets = TG_OUTBOX.filter(function (x) { return x.kind === 'leadset'; });
+    ok('شروع درمان و بسته: اقدام و تاریخ پاک؛ لید باز دست نمی‌خورد', sets.length === 2 && sets[0].changes['اقدام بعدی'] === '' && sets[0].changes['تاریخ اقدام بعدی'] === '' &&
+      sets[1].code === 'L-5006' && !('تاریخ اقدام بعدی' in sets[1].changes) && !sets.some(function (x) { return x.code === 'L-5007'; }), JSON.stringify(sets));
+    ok('ردیف lead_closednext حل شد؛ بقیه دست نخورد', TG_MEM['stk:rows'][0].st === STK_ST.DONE && TG_MEM['stk:rows'][1].st === STK_ST.OPEN && /حل شد: 1/.test(o), o);
+    TG_OUTBOX = []; tgV17050ClosedNext();
+    ok('اجرای دوباره کاری نمی‌کند', !TG_OUTBOX.some(function (x) { return x.kind === 'leadset'; }));
+    ok('نگهبان tgLeadSet_: لید بسته اقدام بعدی نمی‌گیرد', (function () { var p = v168NextPlan_({ status: TG_ST.START, next: 'پرسیدن شروع درمان', nextDate: '2026-10-01' }, { 'نتیجه': 'x' }, '2026-10-13'); return p.add['اقدام بعدی'] === '' && p.add['تاریخ اقدام بعدی'] === ''; })());
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300)); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; }
+  return tgTestTally_(log, fail);
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'lmClosedNextTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['اقدام بعدی لید بسته (v170.50)', 'lmClosedNextTests']); } catch (eCn) {}
