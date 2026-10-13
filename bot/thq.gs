@@ -289,6 +289,20 @@ function thqDryRun_(codes) {
   });
   return 'پرسش از درمانگران (خشک، بی ارسال): ' + out.join(' | ');
 }
+/* یک‌باره v170.67: دستهٔ اول «آمادهٔ ارسال». پیش‌نویسی که تیم در تب عوض کرده دست نمی‌خورد (فقط ردیف‌های همین کدها).
+   اگر در ساعت ۹ تا ۲۱ تهران است همین حالا می‌رود، وگرنه با تیک ساعتی بعدی در ساعت ۹ */
+function thqGo_(codes) {
+  var n = 0;
+  thqRows_().forEach(function (row) {
+    var code = String(row['کد']).trim();
+    if (codes.indexOf(code) < 0 || String(row['وضعیت']).trim() !== THQ_ST.DRAFT) return;
+    pbSet_('e', THQ_TAB, THQ_HEAD, row, { 'وضعیت': THQ_ST.READY }); n++;
+  });
+  var t = thqTick_();
+  return 'آمادهٔ ارسال: ' + n + ' پرسش · ' + t;
+}
+function tgV17067ThqGo() { return thqGo_(['SQ-01', 'SQ-02', 'SQ-03', 'SQ-04']); }
+
 /* یک‌باره v170.66: تب‌ها، چهار پرسش دستهٔ اول به‌صورت پیش‌نویس، و اجرای خشک */
 function tgV17066ThqSetup() { return thqSeed_() + ' · ' + thqDryRun_(); }
 
@@ -371,6 +385,12 @@ function thqTests() {
     TG_MEM['thq:now'] = Date.UTC(2026, 9, 19, 8, 0);
     thqTick_();
     ok('یادآوری فقط یک بار', msgs('7401').length === 1);
+    TG_MEM['pb:' + THQ_TAB] = null; TG_OUTBOX = []; TG_MEM['thq:now'] = Date.UTC(2026, 9, 20, 7, 0);
+    Object.keys(TG_MEM).filter(function (k) { return k.indexOf('thqp:') === 0; }).forEach(function (k) { delete TG_MEM[k]; });
+    thqSeed_();
+    var go = thqGo_(['SQ-01', 'SQ-02', 'SQ-03', 'SQ-04']);
+    ok('یک‌بارهٔ ارسال: چهار پرسش آمادهٔ ارسال و همان لحظه ارسال در ساعت کاری', /آمادهٔ ارسال: 4 پرسش/.test(go) && msgs('7301').length === 1 && msgs('7401').length === 1 && thqRow_('SQ-01')['وضعیت'] === THQ_ST.SENT, go);
+    ok('یک‌بارهٔ ارسال دوباره چیزی نمی‌فرستد', /آمادهٔ ارسال: 0 پرسش/.test(thqGo_(['SQ-01', 'SQ-02', 'SQ-03', 'SQ-04'])) && msgs('7301').length === 1);
     ok('canon: گزینهٔ «کودک زیر ۱۲ سال» ← «کودک زیر ۱۲»', thqCanon_('خدمات تخصصی', 'کودک زیر ۱۲ سال') === 'کودک زیر ۱۲' && thqCanon_('خدمات تخصصی', 'مشاورهٔ جدایی و طلاق') === 'جدایی و طلاق');
   } catch (e) { fail++; log.push('✗ خطا: ' + e + ' ' + String(e.stack || '').slice(0, 400)); }
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; }
