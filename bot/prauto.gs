@@ -230,12 +230,12 @@ function praDaily_(force) {
 }
 
 /* ───── برگرداندن ───── */
-function praCanRb_(chat) {
-  if (String(chat) === String(TG_OWNER_CHAT)) return true;
+function praDeskOk_(chat) {
   try { if (praDry_()) return (TG_MEM['pra:desk'] || []).indexOf(String(chat)) > -1; return !!tgWhoDesk_(chat, ''); } catch (e) { return false; }
 }
+/* فقط تیم پذیرش (ردیف تب پذیرش) یا مالک */
 function praCb_(chat, data) {
-  if (!praCanRb_(chat)) return tgSend_(chat, 'این دکمه فقط برای تیم پذیرش است.');
+  if (String(chat) !== String(TG_OWNER_CHAT) && !praDeskOk_(chat)) return tgSend_(chat, 'این دکمه فقط برای تیم پذیرش است.');
   var a = String(data).split(':');
   if (a[1] === 'rb') return praRollback_(chat, Number(a[2]), a[3], a[4]);
   return null;
