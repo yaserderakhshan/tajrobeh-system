@@ -1,5 +1,5 @@
 /**
- * prauto.gs · v170.54 · ۲۱ مهر ۱۴۰۵ · انتشار خودکار پروفایل با گارد خراب‌کاری (تصمیم یاسر)
+ * prauto.gs · v170.56 · ۲۱ مهر ۱۴۰۵ · انتشار خودکار پروفایل با گارد خراب‌کاری (تصمیم یاسر)
  *
  * یاسر از چرخهٔ بازبینی پروفایل بیرون است: هیچ کارت، خبر یا دکمه‌ای دربارهٔ پروفایل به او نمی‌رود.
  *   ۱) درمانگر خودش پروفایل را به‌روز می‌کند (همان پرسش‌نامهٔ «🪪 صفحهٔ من در سایت»).
@@ -389,4 +389,4 @@ function praTests() {
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; }
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
-try { if (TG_SUITES.every(function (s) { return s[1] !== 'praTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['انتشار خودکار پروفایل و گارد (v170.54)', 'praTests']); } catch (ePra) {}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'praTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['انتشار خودکار پروفایل و گارد (v170.56)', 'praTests']); } catch (ePra) {}
