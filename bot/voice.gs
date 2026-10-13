@@ -35,7 +35,14 @@ var VX_DRY_TEXT = null;  // در TG_DRY: متن جعلی ترانویسی
 
 function vxDry_() { return (typeof TG_DRY !== 'undefined') ? !!TG_DRY : false; }
 function vxP_() { return PropertiesService.getScriptProperties(); }
-function vxErr_(where, e) { try { tgErr_('voice ' + where, String(e && e.stack ? e.stack : e)); } catch (x) {} }
+/* v170.49: «کلید پولی جمنای تأیید نشده» خطا نیست؛ قاعدهٔ حریم خصوصی است (ویس مراجع به جمنای رایگان نمی‌رود).
+   پیش از این در تب «خطاها» می‌نشست و پایش بعد از انتشار، اگر همان لحظه ویسی می‌آمد، انتشار سالم را برمی‌گرداند (اجرای 38383013637). */
+var VX_UNPAID_RE = /کلید پولی جمنای تأیید نشده/;
+function vxErr_(where, e) {
+  var msg = String(e && e.stack ? e.stack : e);
+  if (VX_UNPAID_RE.test(msg)) { try { console.log('voice ' + where + ': ' + 'بی کلید پولی جمنای، متن خصوصی ساخته نشد'); } catch (x0) {} return; }
+  try { tgErr_('voice ' + where, msg); } catch (x) {}
+}
 function vxEsc_(s) { return tgEsc_(String(s == null ? '' : s)); }
 function vxB_(t, d) { return { text: t, callback_data: d }; }
 function vxNoDash_(s) { return String(s || '').replace(/\s*[—–]\s*/g, '، '); }
@@ -1063,6 +1070,11 @@ function vxTests() {
   ok('حدس بی‌مدل: همسر ← rel', vxcGuess_('با همسرم دعوا داریم') === 'rel');
   ok('امضای لینک ثابت است', vxSig_('E-4001', '1') === vxSig_('E-4001', '1') && vxSig_('E-4001', '1') !== vxSig_('E-4001', '2'));
   ok('تکه‌تکه‌کردن متن بلند', vxTextChunks_(new Array(40).join('پاراگراف نسبتاً بلند برای تست. ') + '\n\n' + new Array(40).join('دومی. '), 600).length >= 2);
+  var keepD = TG_DRY, keepE = TG_MEM['errs']; TG_DRY = true; TG_MEM['errs'] = [];
+  vxErr_('vxc llm', new Error('کلید پولی جمنای تأیید نشده')); var quiet = !(TG_MEM['errs'] || []).length;
+  vxErr_('vxc llm', new Error('خطای واقعی')); var loud = (TG_MEM['errs'] || []).length === 1;
+  TG_MEM['errs'] = keepE; TG_DRY = keepD;
+  ok('v170.49: نبود کلید پولی جمنای در تب خطاها نمی‌نشیند، خطای واقعی می‌نشیند', quiet && loud);
   return out;
 }
 

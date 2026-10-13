@@ -80,7 +80,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.46`
+نسخهٔ کد: `v170.49`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -96,7 +96,7 @@
 | `school2.gs` | ۴۳۹ | ۳۲ |
 | `mag_contrib.gs` | ۱۲۴۳ | ۹۷ |
 | `author.gs` | ۱۴۸ | ۱۰ |
-| `voice.gs` | ۱۱۰۵ | ۹۳ |
+| `voice.gs` | ۱۱۱۷ | ۹۳ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
