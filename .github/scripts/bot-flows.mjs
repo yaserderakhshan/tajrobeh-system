@@ -77,6 +77,26 @@ export function runFlows(botDir) {
     const pend = JSON.parse(b.props.getProperty('TG_DUTY_PEND') || '[]');
     chk('کشیک: صف قدیمی {r} به کد لید تبدیل و هشدارش فرستاده می‌شود', t.alerts.length === 1 && /منتظر/.test(t.alerts[0]) && pend.length === 1 && /^L-\d+$/.test(pend[0].k) && !pend[0].r, JSON.stringify(pend));
   }
+  // v170.59: «شروع درمان؟» (ستون ۲۳) = بله در شیت ← وضعیت «شروع درمان» از مسیر اصلی ثبت تغییر، با رویداد لید
+  {
+    const { b, sh, add } = leadsBot(botDir);
+    const r = add('شروع نمونه', 1);
+    sh.getRange(r, 9).setValue('معارفه رزرو شد');
+    sh.getRange(r, 23).setValue('بله');
+    b.run(`tgLeadEdited_(${r}, 23, 23, 'شیت', '')`);
+    const ev = b.book(b.run('TG_SHEET_ID')).getSheetByName(b.run('TG_LEAD_EV_TAB'));
+    const evRows = ev ? ev.getRange(2, 1, Math.max(ev.getLastRow() - 1, 1), 10).getValues().filter((x) => x[5]) : [];
+    chk('شروع درمان؟: «بله» وضعیت را «شروع درمان» می‌کند', sh.getRange(r, 9).getValue() === b.run('TG_ST.START'), String(sh.getRange(r, 9).getValue()));
+    chk('شروع درمان؟: رویداد تغییر وضعیت ثبت می‌شود', evRows.some((x) => x[5] === 'وضعیت' && String(x[7]) === b.run('TG_ST.START')), JSON.stringify(evRows.map((x) => [x[5], x[7]])));
+    const n0 = evRows.length;
+    b.run(`tgLeadEdited_(${r}, 23, 23, 'شیت', 'بله')`);
+    const evRows2 = ev.getRange(2, 1, Math.max(ev.getLastRow() - 1, 1), 10).getValues().filter((x) => x[5] === 'وضعیت');
+    chk('شروع درمان؟: وقتی وضعیت از قبل «شروع درمان» است، تغییر تازه‌ای نمی‌سازد', evRows2.length === evRows.filter((x) => x[5] === 'وضعیت').length, String(n0));
+    const r2 = add('شروع نه', 1);
+    sh.getRange(r2, 9).setValue('معارفه رزرو شد'); sh.getRange(r2, 23).setValue('خیر');
+    b.run(`tgLeadEdited_(${r2}, 23, 23, 'شیت', '')`);
+    chk('شروع درمان؟: «خیر» وضعیت را عوض نمی‌کند', sh.getRange(r2, 9).getValue() === 'معارفه رزرو شد');
+  }
   // ۳) فرم سایت (۲.۹): رقم فارسی، فرم اصلاح‌شده، فرم تکراری
   {
     const { b, sh } = leadsBot(botDir);
