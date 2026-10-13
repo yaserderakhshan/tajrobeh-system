@@ -29,6 +29,7 @@ function leadsBot(botDir) {
          tgDutyClinic_ = function () { return true; };
          lcPlan_ = function (now) { return { live: true, owner: { name: 'کشیک نمونه', chat: '111', role: 'پذیرش', start: 0, end: 24, days: 'همهٔ روزها' }, at: now, promise: 15 }; };   // v170.23.43: قول پاسخ، مستقل از ساعت آزمون
          BG_DUTY_FROM = 0; BG_DUTY_NIGHT_MIN = 0;   // v170.23.42: آزمون جریان به ساعت روز وابسته نیست
+         lcWorkStart_ = function (o, t) { return t; };   // آزمون جریان شب هم سبز بماند: شروع قول همان لحظه، نه ساعت کاری صبح
          var __sent = []; tgSend_ = function (c, t) { __sent.push([String(c), String(t)]); return { ok: true }; };`);
   const tick = () => { b.run('__sent = []'); const r = b.run('tgDutyTick({})'); return { r, alerts: b.run('__sent.map(function (x) { return x[1]; })') }; };
   return { b, sh, add, tick };
