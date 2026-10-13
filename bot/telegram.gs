@@ -7171,6 +7171,10 @@ function tgWatchdog(e) {
   S('ebiHourly_', 'light', typeof ebiHourly_ === 'function' ? ebiHourly_ : null);
   S('aiRetryTick_', 'light', typeof aiRetryTick_ === 'function' ? aiRetryTick_ : null);   /* v170.23.7: ویس‌های بی‌متن */
   S('ktbHourly_', 'light', typeof ktbHourly_ === 'function' ? ktbHourly_ : null);
+  /* v170.57: آمار شبانه واجب است، نه سنگین. از ۷ مهر هر روز در ستون «ردشده» سهمیه بودند (مصرف بالای ۵۵ دقیقه) و از ۱۴ مهر ردیفی ننوشتند.
+     خودشان روزی یک بار و فقط از ساعت ۲۲ تهران کار می‌کنند؛ بقیهٔ ساعت‌ها فقط یک خواندن Property است. */
+  S('tgStatTick_', 'must', tgStatTick_);
+  S('tgRmStatTick_', 'must', tgRmStatTick_);
   S('praDaily_', 'must', typeof praDaily_ === 'function' ? function () { return praDaily_(); } : null);   /* v170.56: خلاصهٔ تغییر پروفایل‌ها، ۱۰ صبح؛ بیرون از آن ساعت فقط یک خواندن Property */
   S('asWeeklyMaybe_', 'light', typeof asWeeklyMaybe_ === 'function' ? asWeeklyMaybe_ : null);   /* v170.23.17: گزارش هفتگی تیم‌های دستیار، شنبه یک بار */
   S('nuTick_', 'light', typeof nuTick_ === 'function' ? nuTick_ : null);   /* v170.23.13: پیگیری گیرکرده‌ها */
@@ -7222,13 +7226,11 @@ function tgWatchdog(e) {
     S('tgRmTick_', 'heavy', tgRmTick_);
     S('tgRmChTick_', 'heavy', tgRmChTick_);
     S('tgEvAfterTick_', 'heavy', tgEvAfterTick_);
-    S('tgRmStatTick_', 'heavy', tgRmStatTick_);
     S('tgClsTick_', 'heavy', tgClsTick_);
     S('tgCrmTick_', 'heavy', tgCrmTick_);
     S('tgInpTick_', 'heavy', tgInpTick_);
     S('tgPrTick_', 'heavy', tgPrTick_);
     S('tgSchDailyTick_', 'heavy', tgSchDailyTick_);
-    S('tgStatTick_', 'heavy', tgStatTick_);
   }
   } finally { bgFlush_(); tgRunStat_('tgWatchdog', rs0); }
 }
@@ -27762,6 +27764,8 @@ function tgStatTests() {
     tgStatTick_();
     ok('تیک شبانه در حالت خشک ساکت است', TG_OUTBOX.length === 0);
   ok('نوشتن شبانهٔ آمار روشن است', TG_STAT_ON === true);
+  ok('v170.57: آمار شبانه قدم واجب نگهبان است، نه سنگین (سهمیه ردش نمی‌کند)', /S\('tgStatTick_', 'must'/.test(String(tgWatchdog)) && /S\('tgRmStatTick_', 'must'/.test(String(tgWatchdog)) &&
+    !/S\('tgStatTick_', 'heavy'/.test(String(tgWatchdog)) && !/S\('tgRmStatTick_', 'heavy'/.test(String(tgWatchdog)));
 
     var kb = tgWatchMenu_();
     var flat = JSON.stringify(kb.keyboard);
