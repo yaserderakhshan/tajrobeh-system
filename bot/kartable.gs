@@ -16,7 +16,9 @@ cfg_('TG_CONTRACT_VER', '');   /* v170.23.6: نسخهٔ قرارداد همکا�
 var KTB_SLA_D = 3;
 var KTB_REMIND_H = 9;
 var KTB_KIND = { review: 'پروفایل منتظر بازبینی', reviewed: 'بازبینی‌شده ولی منتشرنشده', failed: 'منتشر نشد، بعد از تلاش دوباره', resume: 'رزومهٔ سبک برای تأیید', voice: 'ویس معرفی برای انتشار' };
-var KTB_ORDER = ['review', 'failed', 'reviewed', 'resume', 'voice'];
+/* v170.56 (تصمیم یاسر): یاسر از چرخهٔ بازبینی پروفایل کاملاً بیرون است؛ هیچ مورد پروفایلی در کارتابل و یادآوری ۹ صبح او نمی‌آید.
+   پروفایل‌ها با گارد خراب‌کاری خودکار منتشر می‌شوند (prauto.gs)، ویس معرفی با همان انتشار، و «منتشر نشد» با صف تلاش دوباره. */
+var KTB_ORDER = [];
 
 function ktbDry_() { return typeof TG_DRY !== 'undefined' && TG_DRY; }
 function ktbNow_() { return ktbDry_() && TG_MEM['ktb:now'] ? Number(TG_MEM['ktb:now']) : Date.now(); }
@@ -70,9 +72,6 @@ function ktbShow_(chat) {
     kb.push([{ text: KTB_KIND[k] + ' · ' + tgFa_(I[k].length), callback_data: 'ktb:l:' + k }]);
   });
   if (I.retry.length) L.push('', '🔁 ' + tgFa_(I.retry.length) + ' پروفایل «منتشر نشد» همین حالا خودکار دوباره فرستاده می‌شود؛ اگر باز نشد اینجا می‌آید.');
-  var cvNo = I.resumeWait.filter(function (r) { return ktbCvNo_(r); }).length, cvGo = I.resumeWait.length - cvNo;
-  if (cvGo) L.push('📝 نسخهٔ سبک ' + tgFa_(cvGo) + ' رزومه در حال ساخت است.');
-  if (cvNo) L.push('📄 ' + tgFa_(cvNo) + ' رزومه PDF یا تصویر نیست (مثلاً Word)؛ نسخهٔ سبکش دستی نوشته شود.');
   L.push('', 'مهلت هر مورد ' + tgFa_(KTB_SLA_D) + ' روز است؛ هر صبح ساعت ' + tgFa_(KTB_REMIND_H) + ' یادآوری می‌آید.');
   return tgSend_(chat, L.join('\n'), kb.length ? { inline_keyboard: kb } : null);
 }
@@ -213,7 +212,6 @@ function ktbHourly_() {
   try { ktbFixMaybe_(); } catch (eF) { tgErr_('ktbFixMaybe_', eF); }
   var I = ktbItems_();
   if (I.retry.length) ktbRetry_(I.retry);
-  I.resumeWait.filter(function (r) { return !ktbCvNo_(r); }).slice(0, 2).forEach(function (r) { ktbResumeMake_(r); });
   return ktbRemind_(I);
 }
 function ktbRemind_(I) {
@@ -423,7 +421,7 @@ function ktbTests() {
     TG_OUTBOX = [];
     ktbShow_(700);
     var said = TG_OUTBOX.map(function (o) { return o.text + JSON.stringify(o.markup || ''); }).join(' ');
-    ok('نما: شمار هر دسته و دکمه', /منتظر تأیید تو/.test(said) && /ktb:l:review/.test(said) && /ktb:l:resume/.test(said) && /⏰/.test(said));
+    ok('v170.56: هیچ مورد پروفایلی در کارتابل یاسر نیست', /منتظر تأیید تو/.test(said) && !/ktb:l:/.test(said) && /چیزی منتظر تو نیست/.test(said));
     ok('نما: غیرناظر راه ندارد', (function () { TG_OUTBOX = []; ktbShow_(901); return !TG_OUTBOX.some(function (o) { return /منتظر تأیید تو/.test(o.text); }); })());
     ok('دکمهٔ منو و /ok', ktbMaybe_(700, { text: KTB_BTN }) === true && ktbMaybe_(700, { text: '/ok' }) === true && ktbMaybe_(901, { text: KTB_BTN }) === false);
     var rT = ktbItems_().resume[0];
@@ -432,7 +430,7 @@ function ktbTests() {
     ok('تأیید رزومه ← ستون رزومهٔ سبک و پاک شدن پیش‌نویس', /تحصیلات/.test(TG_MEM['pqrows']['ther:ت'].pub_resume) && !TG_MEM['pqrows']['ther:ت'].pub_resume_draft);
     ok('کارت کهنه رد می‌شود', (function () { TG_OUTBOX = []; ktbCb_(700, 'ktb:ra:' + rT.row + ':zzzz'); return /کهنه/.test(TG_OUTBOX.map(function (o) { return o.text; }).join(' ')); })());
     /* یادآوری ساعت ۹، روزی یک بار */
-    ok('یادآوری ۹ صبح، روزی یک بار', !!ktbRemind_() && ktbRemind_() === '' && (TG_MEM['ktb:remind'] || []).length === 1);
+    ok('v170.56: یادآوری ۹ صبح دربارهٔ پروفایل به یاسر نمی‌رود', ktbRemind_() === '' && !(TG_MEM['ktb:remind'] || []).length);
     /* مسیریابی منتظرهای دیگران */
     TG_CFG_ = { TG_NAMES: { ops: 'مدیر نمونه', reception: 'پذیرش نمونه' }, TG_ROUTE: {} };
     TG_MEM['ktb:tk'] = [{ id: 'M-1', owner: 'پذیرش نمونه', st: 'پاسخ داده شد', reply: '' }, { id: 'M-2', owner: 'پذیرش نمونه', st: 'پاسخ داده شد', reply: 'ساعت را عوض کردیم و خبر دادیم' }, { id: 'M-3', owner: '', st: 'تازه', reply: '' }];
