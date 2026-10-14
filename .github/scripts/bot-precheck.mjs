@@ -20,6 +20,7 @@ import { versionSelfTest } from './bot-version.mjs';
 import { suitesSelfTest } from './bot-suites.mjs';
 import { partsSelfTest, check as partsCheck, loadTimes, mainTitles, plan as partsPlan } from './bot-parts.mjs';
 import { prevSelfTest } from './bot-prev-test.mjs';
+import { timeoutSelfTest } from './bot-timeouts.mjs';
 import vm from 'node:vm';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -188,6 +189,7 @@ try {
   for (const b of suitesSelfTest()) problems.push('انتخاب مجموعه‌های روز (v170.16.2): ' + b);
   // v170.22.1: تقسیم «اصلی» بر اساس زمان واقعی؛ زمان ثبت‌شدهٔ هر تکه یا مجموعه بیش از ۴ دقیقه = هشدار (نه توقف)
   for (const b of partsSelfTest()) problems.push('تقسیم آزمون‌ها بر اساس زمان (v170.22.1): ' + b);
+  for (const b of timeoutSelfTest()) problems.push('زمان‌گذر آزمون‌ها (v170.70): ' + b);
   {
     const titles = mainTitles(readFileSync(join(BOT, 'telegram.gs'), 'utf8')), times = loadTimes(), pl = partsPlan(titles, times);
     console.log(`تقسیم «اصلی»: ${titles.length} سناریو در ${pl.n} تکه · بار تخمینی (ثانیه): ${pl.load.join('، ')}`);

@@ -6,6 +6,7 @@
 import { appendFileSync, readFileSync } from 'node:fs';
 import { scope } from './bot-suites.mjs';
 import { plan as partsPlan, merge as partsMerge, loadTimes, saveTimes, mainTitles, check as partsCheck } from './bot-parts.mjs';
+import { classify, isTimeout, suiteFns } from './bot-timeouts.mjs';
 
 const EXEC = process.env.BOT_EXEC_URL;
 const KEY = readFileSync(`${process.env.RUNNER_TEMP}/ci_key`, 'utf8').trim();   // کلید یک‌بارمصرف گام قبل
@@ -140,41 +141,76 @@ if (!st.ok) fail(`شروع تست‌ها نشد: ${st.error}`);
 if (only && st.all && st.suites === st.all) console.log('::warning::این نسخه دور محدود را نمی‌شناسد یا فهرست خالی شد؛ دور کامل اجرا می‌شود.');
 console.log(`تست‌ها شروع شد: ${st.suites} مجموعه${st.all ? ` از ${st.all}` : ''}.`);
 
-// ۳) پیگیری
-const t0 = now();
-let s = null, lastCount = -1, lastMove = now(), kicks = 0;
-for (;;) {
-  await sleep(30000);
-  s = await call('status').catch((e) => ({ ok: false, error: String(e) }));
-  if (!s.ok) { console.log(`وضعیت خوانده نشد: ${s.error}`); continue; }
-  if (s.done) break;
-  const count = s.count || 0;
-  const cur = s.current ? ` · در حال اجرا: ${s.current.name} (${s.current.secs}ث)${s.current.sub ? ' › ' + s.current.sub : ''}` : '';
-  console.log(`دور ${s.run || '(هنوز شروع نشده)'}: ${count} از ${s.total} مجموعه · ${s.pass || 0} قبول · ${s.fail || 0} مردود${cur}`);
-  if (count !== lastCount) { lastCount = count; lastMove = now(); }
-  if (now() - lastMove > STALL_MIN * 60 * 1000) {
-    if (kicks >= MAX_KICKS) fail(`زنجیرهٔ تست ${STALL_MIN} دقیقه پیش نرفت و ${MAX_KICKS} بار ادامه دادن هم فایده نداشت`);
-    kicks++;
-    const k = s.run ? await call('kick') : await callStart(only, PLAN);
-    if (!k.ok) kicks--;   // خطای گذرای شبکه ادامه حساب نمی‌شود
-    console.log(`زنجیره پیش نمی‌رفت؛ ادامهٔ دوباره (${kicks}): ${JSON.stringify(k)}`);
-    lastMove = now();
+// ۳) پیگیری. v170.70: سکون زنجیره یا سقف کل زمان «زمان‌گذر» است، نه مردودی (برگشت خودکار نمی‌آورد)
+async function follow(onlyNow) {
+  const t0 = now();
+  let s = null, lastCount = -1, lastMove = now(), kicks = 0;
+  for (;;) {
+    await sleep(30000);
+    s = await call('status').catch((e) => ({ ok: false, error: String(e) }));
+    if (!s.ok) { console.log(`وضعیت خوانده نشد: ${s.error}`); continue; }
+    if (s.done) return { s };
+    const count = s.count || 0;
+    const cur = s.current ? ` · در حال اجرا: ${s.current.name} (${s.current.secs}ث)${s.current.sub ? ' › ' + s.current.sub : ''}` : '';
+    console.log(`دور ${s.run || '(هنوز شروع نشده)'}: ${count} از ${s.total} مجموعه · ${s.pass || 0} قبول · ${s.fail || 0} مردود${cur}`);
+    if (count !== lastCount) { lastCount = count; lastMove = now(); }
+    if (now() - lastMove > STALL_MIN * 60 * 1000) {
+      if (kicks >= MAX_KICKS) return { s, slow: `زنجیرهٔ تست ${STALL_MIN} دقیقه پیش نرفت و ${MAX_KICKS} بار ادامه دادن هم فایده نداشت` };
+      kicks++;
+      const k = s.run ? await call('kick') : await callStart(onlyNow, PLAN);
+      if (!k.ok) kicks--;   // خطای گذرای شبکه ادامه حساب نمی‌شود
+      console.log(`زنجیره پیش نمی‌رفت؛ ادامهٔ دوباره (${kicks}): ${JSON.stringify(k)}`);
+      lastMove = now();
+    }
+    if (now() - t0 > TOTAL_MIN * 60 * 1000) return { s, slow: `تست‌ها بعد از ${TOTAL_MIN} دقیقه تمام نشد (${count} از ${s.total})` };
   }
-  if (now() - t0 > TOTAL_MIN * 60 * 1000) fail(`تست‌ها بعد از ${TOTAL_MIN} دقیقه تمام نشد (${count} از ${s.total})`);
+}
+// v166.8: مجموعهٔ بی‌نتیجه (۰ و ۰) و مجموعهٔ جامانده هم مردودند (جامانده: زمان‌گذر)
+function settle(s) {
+  for (const x of s.suites || []) if (!x.pass && !x.fail) { x.fail = 1; x.text = x.text || 'این مجموعه هیچ چیزی نسنجید (۰ قبول و ۰ مردود)'; s.fail++; }
+  if ((s.count || 0) < (s.total || 0)) { s.suites = s.suites || []; s.suites.push({ name: `${s.total - s.count} مجموعهٔ جامانده`, pass: 0, fail: s.total - s.count, secs: 0, text: 'نتیجهٔ این مجموعه‌ها در تب «تست‌ها» نیامد' }); s.fail = (s.fail || 0) + s.total - s.count; }
+  return s;
+}
+function keepTimes(s) {
+  // v170.22.1: زمان‌های این دور برای تقسیم بعدی (گردش کار دیپلوی فایل را با [skip ci] روی main می‌گذارد)
+  try {
+    const next = partsMerge(loadTimes(), { ...s, plan: PLAN }, TITLES);
+    saveTimes(next);
+    for (const w of partsCheck(next, TITLES)) console.log(`::warning::${w}`);
+    console.log(`زمان‌ها: ${Object.keys(s.stimes || {}).length} سناریو ثبت شد${s.parts ? ` · تکه‌های این دور: ${s.parts}` : ''}.`);
+  } catch (e) { console.log(`::warning::زمان‌های آزمون ذخیره نشد: ${String(e).slice(0, 160)}`); }
 }
 
-// ۴) نتیجه
-// v166.8: مجموعهٔ بی‌نتیجه (۰ و ۰) و مجموعهٔ جامانده هم مردودند
-for (const x of s.suites) if (!x.pass && !x.fail) { x.fail = 1; x.text = x.text || 'این مجموعه هیچ چیزی نسنجید (۰ قبول و ۰ مردود)'; s.fail++; }
-if (s.count < s.total) { s.suites.push({ name: `${s.total - s.count} مجموعهٔ جامانده`, pass: 0, fail: s.total - s.count, secs: 0, text: 'نتیجهٔ این مجموعه‌ها در تب «تست‌ها» نیامد' }); s.fail += s.total - s.count; }
-const bad = s.suites.filter((x) => x.fail > 0);
-// v170.22.1: زمان‌های این دور برای تقسیم بعدی (گردش کار دیپلوی فایل را با [skip ci] روی main می‌گذارد)
-try {
-  const next = partsMerge(TIMES, { ...s, plan: PLAN }, TITLES);
-  saveTimes(next);
-  for (const w of partsCheck(next, TITLES)) console.log(`::warning::${w}`);
-  console.log(`زمان‌ها: ${Object.keys(s.stimes || {}).length} سناریو ثبت شد${s.parts ? ` · تکه‌های این دور: ${s.parts}` : ''}.`);
-} catch (e) { console.log(`::warning::زمان‌های آزمون ذخیره نشد: ${String(e).slice(0, 160)}`); }
+let f = await follow(only);
+let s = settle(f.s || { suites: [], pass: 0, fail: 0, count: 0, total: 0 });
+keepTimes(s);
+let { real, slow } = classify(s.suites);
+let slowWhy = f.slow || '';
+// زمان‌گذر بی مردودی واقعی: یک بار فقط همان مجموعه‌ها (سکون کل زنجیره دوباره امتحان نمی‌شود)
+if (!real.length && slow.length && !f.slow) {
+  const fns = suiteFns(slow.map((x) => x.name));
+  if (fns) {
+    console.log(`::warning::زمان‌گذر در ${slow.map((x) => x.name).join('، ')}؛ یک بار جدا دوباره اجرا می‌شود: ${fns.join(' ')}`);
+    summary(`- ⏱ زمان‌گذر در ${slow.map((x) => x.name).join('، ')}؛ یک بار جدا دوباره اجرا شد.`);
+    const st2 = await callStart(fns, PLAN);
+    if (st2.ok) {
+      const first = s;
+      f = await follow(fns);
+      s = settle(f.s || { suites: [], pass: 0, fail: 0, count: 0, total: 0 });
+      keepTimes(s);
+      ({ real, slow } = classify(s.suites));
+      slowWhy = f.slow || '';
+      /* نتیجهٔ دور اول (بی زمان‌گذرها) هم در گزارش بماند */
+      const again = new Set(s.suites.map((x) => x.name));
+      s.suites = first.suites.filter((x) => !isTimeout(x) && !again.has(x.name)).concat(s.suites);
+      s.pass = s.suites.reduce((a, x) => a + (x.pass || 0), 0);
+      s.fail = s.suites.reduce((a, x) => a + (x.fail || 0), 0);
+      s.count = s.suites.length;
+    } else slowWhy = `اجرای دوبارهٔ زمان‌گذرها شروع نشد: ${st2.error}`;
+  } else slowWhy = 'نام تابع مجموعهٔ زمان‌گذر پیدا نشد';
+}
+if (slowWhy && !real.length && !slow.length) slow = [{ name: 'زنجیره', fail: 1, text: slowWhy }];
+const bad = real.concat(slow);
 const head = `بات ${LABEL} · Version ${VERSION} · دور ${s.run}: ${s.count} مجموعه · ${s.pass} قبول · ${s.fail} مردود`;
 console.log(head);
 for (const x of s.suites) console.log(`${x.fail ? '❌' : '✅'} ${x.name}: ${x.pass} قبول · ${x.fail} مردود · ${x.secs}ث`);
@@ -187,6 +223,14 @@ for (const x of bad) summary(`\n<details><summary>${x.name}</summary>\n\n\`\`\`\
 
 output('pass', s.pass);
 output('fail', s.fail);
+// v170.70: فقط زمان‌گذر (بعد از یک بار تکرار) ← انتشار عقب می‌افتد؛ گام بعدی گردش کار کد پروژه را به bot-live برمی‌گرداند، بی برگشت و PR معکوس
+if (!real.length && (slow.length || slowWhy)) {
+  output('tests', 'timeout');
+  const why = slowWhy || slow.map((x) => x.name).join('، ');
+  console.log(`::warning::زمان‌گذر آزمون (مردود واقعی: ۰): ${why}. انتشار عقب افتاد؛ برگشت خودکار نه.`);
+  summary(`\n**⏱ زمان‌گذر آزمون، بی مردودی واقعی:** ${why}. انتشار اصلی انجام نشد و برگشت خودکار هم نه؛ با اجرای دوباره منتشر می‌شود.`);
+  process.exit(0);
+}
 if (s.fail > 0) {
   output('tests', 'fail');
   console.log(`::error::${s.fail} تست مردود: ${bad.map((x) => `${x.name} (${x.fail})`).join('، ')}`);

@@ -327,9 +327,30 @@ jobs:
           PAGE_SHA: ${{ steps.page.outputs.sha }}
         run: node .github/scripts/bot-tests.mjs
 
+      # v170.70: فقط زمان‌گذر (مردود واقعی صفر، بعد از یک بار تکرار جدا): انتشار عقب می‌افتد. نه انتشار اصلی، نه برگشت خودکار و PR معکوس.
+      # کد پروژه به bot-live برمی‌گردد (کارهای زمان‌دار با کد زنده ادامه دارند). اجرای دوبارهٔ همین گردش کار منتشرش می‌کند.
+      - name: زمان‌گذر آزمون، انتشار عقب افتاد (بی برگشت خودکار)
+        id: defer
+        if: steps.tests.outputs.tests == 'timeout'
+        env:
+          BOT_API_URL: ${{ secrets.BOT_API_URL }}
+          BOT_API_KEY: ${{ secrets.BOT_API_KEY }}
+          REPORT_CHAT_ID: ${{ secrets.REPORT_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -e
+          echo "DEFER=1" >> "$GITHUB_ENV"
+          if [ "$NIGHTLY" != "1" ]; then
+            bash .github/scripts/bot-prev.sh rollback-src "$(git rev-parse 'refs/tags/bot-live^{commit}')" /tmp/defer_back bot/.clasp.json
+            (cd /tmp/defer_back && clasp push --force)
+          fi
+          echo "::warning::زمان‌گذر آزمون؛ مردود واقعی نبود. کد پروژه همان bot-live است و انتشار با اجرای دوباره انجام می‌شود."
+          { echo ""; echo "## ⏱ انتشار عقب افتاد"; echo ""; echo "- آزمون‌ها فقط زمان‌گذر داشتند، نه مردودی. برگشت خودکار و PR معکوس لازم نبود."; echo "- کد پروژه و دیپلوی اصلی همان bot-live است. برای انتشار: همین گردش کار را دوباره اجرا کنید."; } >> "$GITHUB_STEP_SUMMARY"
+          node -e "import('./site/tools/site-lib.mjs').then(m => m.report('آزمون بات فقط زمان‌گذر داشت (مردود واقعی نبود). انتشار عقب افتاد، برگشت خودکار نه. جزئیات: ' + process.env.RUN_URL, { type: 'گزارش', ref: 'BOT-DEFER' }))" || true
+
       - name: انتشار روی دیپلوی اصلی (فقط بعد از سبز شدن همهٔ تست‌ها)
         id: promote
-        if: env.NIGHTLY != '1'
+        if: env.NIGHTLY != '1' && env.DEFER != '1'
         working-directory: bot
         env:
           DESC: ${{ steps.label.outputs.label }} · ${{ steps.label.outputs.short }} · GitHub Actions
@@ -350,6 +371,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: نشانی اصلی و ادامهٔ کارهای زمان‌دار
+        if: success() && env.DEFER != '1'
         env:
           # v170.16.2: شب دیپلوی اصلی عوض نمی‌شود؛ ادامهٔ کارهای زمان‌دار، دود و سلامت از نشانی آزمایشی
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.NIGHTLY == '1' && steps.stage.outputs.staging || env.DEPLOYMENT_ID }}/exec
@@ -358,7 +380,7 @@ jobs:
 
       # v169.4: سکرت‌های وردپرس (کاربر Editor) به Script Properties. مقدار در کد یا لاگ نمی‌آید (گیت‌هاب سکرت‌ها را می‌پوشاند و اسکریپت چاپشان نمی‌کند).
       - name: سکرت‌های وردپرس به Script Properties
-        if: env.NIGHTLY != '1'
+        if: env.NIGHTLY != '1' && env.DEFER != '1'
         continue-on-error: true
         env:
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
@@ -372,7 +394,7 @@ jobs:
         run: node .github/scripts/bot-monitor.mjs props
 
       - name: پایش خطاها بعد از انتشار
-        if: env.NIGHTLY != '1'
+        if: env.NIGHTLY != '1' && env.DEFER != '1'
         env:
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
           CI_BUILD: ${{ steps.key.outputs.build }}
@@ -383,13 +405,13 @@ jobs:
       # v170.9.2: برچسب فقط بعد از پایش سبز. پیش از این قبل از پایش زده می‌شد و اگر پایش قرمز و برگشت از پشتیبان کد زنده بود،
       # برچسب روی کدی می‌ماند که دیگر زنده نبود (اجرای 37152498810).
       - name: برچسب bot-live روی کد زنده
-        if: env.NIGHTLY != '1'
+        if: env.NIGHTLY != '1' && env.DEFER != '1'
         run: |
           git tag -f bot-live HEAD
           git push -f origin refs/tags/bot-live || echo "::warning::برچسب bot-live فرستاده نشد"
 
       - name: برچسب گیت نسخه (bot-<نسخه>)
-        if: success() && steps.label.outputs.version != '' && env.NIGHTLY != '1'
+        if: success() && steps.label.outputs.version != '' && env.NIGHTLY != '1' && env.DEFER != '1'
         env:
           V: ${{ steps.label.outputs.version }}
         run: |
@@ -412,7 +434,7 @@ jobs:
 
       # v166.22: کارهای یک‌بارهٔ CI_ONCE_AUTO (ci.gs) بعد از هر انتشار سبز، اگر قبلاً اجرا نشده‌اند. شکستش انتشار را برنمی‌گرداند.
       - name: کارهای یک‌بارهٔ خودکار
-        if: success() && env.NIGHTLY != '1'
+        if: success() && env.NIGHTLY != '1' && env.DEFER != '1'
         continue-on-error: true
         env:
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
@@ -421,7 +443,7 @@ jobs:
 
       # v169.4: بعد از انتشار و پایش سبز، اگر برگهٔ مینی‌اپ عوض شده، روی برگهٔ 503886 (و فقط همان) نوشته می‌شود. شکستش انتشار بات را برنمی‌گرداند.
       - name: انتشار برگهٔ مینی‌اپ (503886)
-        if: success() && env.NIGHTLY != '1'
+        if: success() && env.NIGHTLY != '1' && env.DEFER != '1'
         continue-on-error: true
         env:
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec
@@ -431,7 +453,7 @@ jobs:
 
       # فقط اجرای دستی با run_once، فقط بعد از انتشار و پایش سبز. شکستش انتشار را برنمی‌گرداند.
       - name: اجرای یک‌بارهٔ تابع نگهداری
-        if: success() && github.event_name == 'workflow_dispatch' && inputs.run_once != ''
+        if: success() && github.event_name == 'workflow_dispatch' && inputs.run_once != '' && env.DEFER != '1'
         continue-on-error: true
         env:
           BOT_EXEC_URL: https://script.google.com/macros/s/${{ env.DEPLOYMENT_ID }}/exec

@@ -1544,7 +1544,12 @@ function tgImgTests() {
 
 var TG_TEST_TAB = 'تست‌ها';
 var TG_TEST_BUDGET_MS = 200000;
-var TG_TEST_MAX_CHAIN = 6;
+var TG_TEST_MAX_CHAIN = 20;   /* v170.70: ۶ ← ۲۰؛ تکهٔ «اصلی» که وسطش ایست می‌کند یک ادامهٔ بیشتر می‌خواهد */
+/* v170.70: ایست سناریویی. شروع اجرای فعلی tgRun؛ سناریوی تازهٔ «اصلی» بعد از TG_SCEN_STOP_MS در این اجرا شروع نمی‌شود
+   و همان تکه در اجرای بعدی از سناریوی بعدی ادامه پیدا می‌کند (TG_TEST_PROG). هیچ اجرایی به سقف ۶ دقیقه نمی‌رسد. */
+var TG_EXEC_T0 = null;
+var TG_SCEN_STOP_MS = 240000;
+var TG_ROWS_MEMO_ = {};   /* v170.70: حافظهٔ همین اجرا برای ردیف‌های درمانگران و میز پذیرش، فقط در آزمون زیر tgRun */
 
 var TG_SUITES = [
   ['تست مهاجرت', 'tgMigTests'],
@@ -1832,6 +1837,7 @@ function tgRunReset() {
   p.deleteProperty('TG_TEST_CHAIN');
   p.deleteProperty('TG_TEST_BEAT');
   p.deleteProperty('CI_TEST_KILLED');
+  p.deleteProperty('TG_TEST_PROG');
   return 'شمارنده صفر شد. حالا tgRun را بزنید.';
 }
 
@@ -1852,11 +1858,14 @@ function tgRun() {
      سر سقف ۶ دقیقه بکشد، فقط همان یک مجموعه گم می‌شود. TG_TEST_BEAT مجموعهٔ در حال اجرا را نگه می‌دارد (ci.gs از آن
      می‌فهمد کدام مجموعه قطع شد). */
   var t0 = Date.now(), done = 0, sh = null;
+  TG_EXEC_T0 = t0;
   try { sh = tgTestSheet_(); } catch (e) { Logger.log('تب تست‌ها باز نشد: ' + e); }
   while (at < TG_SUITES.length && Date.now() - t0 < TG_TEST_BUDGET_MS) {
     var nm = TG_SUITES[at][0], fnName = TG_SUITES[at][1], s0 = Date.now(), r;
     p.setProperty('TG_TEST_BEAT', JSON.stringify({ run: runId, at: at, name: nm, t: s0, t0: t0 }));
     try { r = tgTestCall_(fnName); } catch (e) { r = { pass: 0, fail: 1, text: 'خطا: ' + e }; }
+    /* v170.70: تکه‌ای که وسطش ایست کرد؛ همین مجموعه در اجرای بعدی ادامه پیدا می‌کند (TG_TEST_AT جلو نمی‌رود) */
+    if (r && r.partial) { Logger.log(nm + ': ایست سناریویی؛ ادامه در اجرای بعدی'); break; }
     /* v166.29.1: خطای گذرای سرویس گوگل (نه مردودی واقعی) فقط یک بار همان مجموعه را دوباره اجرا می‌کند */
     if (r.fail && tgTestTransient_(r.text)) {
       var r2; try { r2 = tgTestCall_(fnName); } catch (e2) { r2 = { pass: 0, fail: 1, text: 'خطا: ' + e2 }; }
@@ -3767,6 +3776,8 @@ function tgDeskCacheClear_() { try { CacheService.getScriptCache().remove('drows
 function tgDeskRows_() {
   const c = TG_DRY ? null : CacheService.getScriptCache();
   if (c) { const hit = tgCacheGet_('drows'); if (hit) { try { return JSON.parse(hit); } catch (e) {} } }
+  /* v170.70: آزمون زیر tgRun روی Apps Script شیت زندهٔ هاب را در هر سناریو دوباره نخواند (کندی و زمان‌گذر شبانه) */
+  if (TG_DRY && TG_EXEC_T0 && TG_ROWS_MEMO_['drows']) return JSON.parse(TG_ROWS_MEMO_['drows']);
   const sh = tgDeskSheet_();
   const last = sh.getLastRow();
   if (last < 2) return [];
@@ -3787,6 +3798,7 @@ function tgDeskRows_() {
     });
   }
   if (c) c.put('drows', JSON.stringify(out), 1800);
+  if (TG_DRY && TG_EXEC_T0) TG_ROWS_MEMO_['drows'] = JSON.stringify(out);
   return out;
 }
 
@@ -6106,6 +6118,8 @@ function tgFaqAnswer_(chat, row) {
 function tgTherapistRows_() {
   const c = TG_DRY ? null : CacheService.getScriptCache();
   if (c) { const hit = tgCacheGet_('trows'); if (hit) { try { return JSON.parse(hit); } catch (e) {} } }
+  /* v170.70: آزمون زیر tgRun روی Apps Script شیت زندهٔ هاب را در هر سناریو دوباره نخواند (کندی و زمان‌گذر شبانه) */
+  if (TG_DRY && TG_EXEC_T0 && TG_ROWS_MEMO_['trows']) return JSON.parse(TG_ROWS_MEMO_['trows']);
   const sh = tgSS_().getSheetByName(TG_THER);
   const out = [];
   if (sh && sh.getLastRow() >= 4) {
@@ -6139,6 +6153,7 @@ function tgTherapistRows_() {
     }
   }
   if (c) c.put('trows', JSON.stringify(out), 900);
+  if (TG_DRY && TG_EXEC_T0) TG_ROWS_MEMO_['trows'] = JSON.stringify(out);
   return out;
 }
 
@@ -7324,6 +7339,21 @@ function tgClearCache() {
 
 /* ---------- تست خودکار مسیرها ---------- */
 
+/* v170.70: پیشرفت تکهٔ «اصلی» در Property «TG_TEST_PROG» ({run، at، i، done: {هش: 1}، rp، rf، bad، و بررسی‌های بیرون از run در اجرای اول}).
+   پیشرفتِ دور یا مجموعهٔ دیگر کهنه است و از نو شروع می‌شود. */
+function tgTestProgLoad_(part) {
+  var P = PropertiesService.getScriptProperties(), run = P.getProperty('TG_TEST_RUN') || '', at = P.getProperty('TG_TEST_AT') || '';
+  var o = null; try { o = JSON.parse(P.getProperty('TG_TEST_PROG') || 'null'); } catch (e) {}
+  if (o && o.run === run && String(o.at) === String(at) && o.i === part.i) return o;
+  return { run: run, at: at, i: part.i, done: {}, rp: 0, rf: 0, bad: [] };
+}
+function tgTestProgSave_(o) {
+  var P = PropertiesService.getScriptProperties();
+  if (!o) { P.deleteProperty('TG_TEST_PROG'); return; }
+  o.bad = o.bad.slice(-20).map(function (x) { return String(x).slice(0, 400); });
+  P.setProperty('TG_TEST_PROG', JSON.stringify(o));
+}
+
 function tgRunTests() {
   TG_DRY = true;
   const log = [];
@@ -7332,11 +7362,17 @@ function tgRunTests() {
   const part = TG_RUN_PART;
 
   const STIMES = {};
+  /* v170.70: پیشرفت تکه فقط زیر tgRun (TG_EXEC_T0)؛ اجرای محلی و مستقیم همان رفتار قبلی را دارد */
+  const PROG = part && TG_EXEC_T0 ? tgTestProgLoad_(part) : null;
+  let STOP = false, ranHere = 0;
   function run(title, updates, expects) {
     const myIdx = runIdx++;
     const th = tgTestHash_(title);
     const pa = part && part.a && part.a[th] !== undefined && Number(part.a[th]) < part.of ? Number(part.a[th]) : (part ? myIdx % part.of : -1);
     if (part && pa !== part.i) return;
+    if (PROG && PROG.done[th]) return;   /* v170.70: در اجرای قبلی همین تکه انجام شد */
+    if (PROG && (STOP || (ranHere > 0 && Date.now() - TG_EXEC_T0 > TG_SCEN_STOP_MS))) { STOP = true; return; }
+    ranHere++;
     const tr0 = Date.now();
     /* v166.22: نام تستی که در حال اجراست؛ اگر اجرا وسط آن قطع شود، لاگ دیپلوی همین را نشان می‌دهد */
     try { PropertiesService.getScriptProperties().setProperty('TG_TEST_SUB', JSON.stringify({ n: title, t: Date.now() })); } catch (eSub) {}
@@ -7356,6 +7392,7 @@ function tgRunTests() {
       rBad.push(log[log.length - 1]);
     } else { pass++; rPass++; log.push('✅ ' + title); }
     STIMES[th] = Math.round((Date.now() - tr0) / 100) / 10;
+    if (PROG) { PROG.done[th] = 1; PROG.rp += bad.length ? 0 : 1; PROG.rf += bad.length ? 1 : 0; if (bad.length) PROG.bad.push(rBad[rBad.length - 1]); tgTestProgSave_(PROG); }
   }
 
   const P = function (text) {
@@ -7555,6 +7592,14 @@ function tgRunTests() {
     SP.setProperty('TG_TEST_STIMES', JSON.stringify(cur));
   } catch (eT) {}
   Logger.log(log.join('\n') + '\n\nنتیجه: ' + pass + ' قبول · ' + fail + ' مردود');
+  /* v170.70: ایست سناریویی؛ نتیجه بعد از آخرین اجرای همین تکه */
+  if (PROG) {
+    if (!PROG.first) { PROG.first = 1; PROG.op = pass - rPass; PROG.of = fail - rFail; PROG.obad = log.filter(function (l) { return String(l).indexOf('❌') === 0 && rBad.indexOf(l) < 0; }); }
+    if (STOP) { tgTestProgSave_(PROG); return { pass: 0, fail: 0, text: '', partial: true }; }
+    tgTestProgSave_(null);
+    var pp = PROG.rp + (part.i === 0 ? PROG.op : 0), pf = PROG.rf + (part.i === 0 ? PROG.of : 0);
+    return { pass: pp, fail: pf, text: (part.i === 0 ? PROG.obad : []).concat(PROG.bad).join('\n').slice(0, 1500) };
+  }
   /* بخش‌های ۲ و ۳ فقط سناریوهای خودشان را گزارش می‌کنند؛ بررسی‌های بیرون از run() در بخش ۱ شمرده می‌شوند */
   if (part && part.i > 0) return { pass: rPass, fail: rFail, text: rBad.join('\n').slice(0, 1500) };
   return { pass: pass, fail: fail, text: log.filter(function (l) { return String(l).indexOf('❌') === 0; }).join('\n').slice(0, 1500) };
