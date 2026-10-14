@@ -116,6 +116,40 @@ function sfRow_(d) {
   return row;
 }
 
+/* ───── v170.71: نوشتن با تأیید یاسر (۲۳ مهر) و سنجش با خروجی خشک ─────
+   خشک v170.60 در لاگ دیپلوی (تازه/فعال/لید/معارفه/عضویت/اپلای/رویداد). فقط روزهای کامل ۱۵ تا ۲۱ مهر؛ امروز (۲۲ مهر) را آمار
+   شبانه خودش می‌نویسد. روزی که از پیش ردیف دارد دست نمی‌خورد. اگر عدد هر روزی که نوشته می‌شود با خشک فرق کند، هیچ روزی نوشته
+   نمی‌شود. ردیف‌ها به ترتیب تاریخ جا می‌گیرند (داشبورد آخرین ردیف را «امروز» می‌خواند) و هیچ ردیف دیگری عوض نمی‌شود. */
+var SF_TO = '2026-10-13';
+var SF_EXPECT = { '2026-10-07': '11/37/3/0/0/1/0', '2026-10-08': '13/21/7/0/0/0/0', '2026-10-09': '4/27/2/1/0/1/0', '2026-10-10': '7/25/2/3/0/0/0',
+                  '2026-10-11': '12/35/7/1/0/1/0', '2026-10-12': '14/23/8/1/1/2/0', '2026-10-13': '12/28/8/1/1/2/0' };
+function sfKey_(d) { return [d.fresh, d.active, d.leadNew, d.meet, d.req, d.apply, d.evReg].join('/'); }
+/* جای درج: اولین ردیف موجود با تاریخ (ستون B) بعد از این روز؛ نبود ← ته تب */
+function sfInsertAt_(dates, iso) {
+  for (var i = 0; i < dates.length; i++) if (dates[i] && dates[i] > iso) return i + 2;
+  return 0;
+}
+function sfGo_() {
+  var have = sfHave_(), all = sfCount_(SF_FROM, SF_TO), list = all.filter(function (d) { return !have[d.jal]; });
+  var bad = list.filter(function (d) { return SF_EXPECT[d.iso] !== sfKey_(d); });
+  if (bad.length) return 'ایست، چیزی نوشته نشد: فرق با خشک در ' + bad.map(function (d) { return d.iso.slice(5) + ' ' + sfKey_(d) + ' (خشک ' + (SF_EXPECT[d.iso] || '-') + ')'; }).join('، ');
+  if (!list.length) return 'بازسازی آمار: روز جامانده‌ای نیست (همه ردیف دارند)';
+  var skip = all.length - list.length, n = 0;
+  if (sfDry_()) { TG_MEM['sf:written'] = list.map(function (d) { return sfRow_(d); }); n = list.length; }
+  else {
+    var sh = tgStatSheet_();
+    list.forEach(function (d) {
+      var last = sh.getLastRow(), dates = last < 2 ? [] : sh.getRange(2, 2, last - 1, 1).getValues().map(function (r) { return r[0] instanceof Date ? Utilities.formatDate(r[0], TG_TZ, 'yyyy-MM-dd') : ''; });
+      var at = sfInsertAt_(dates, d.iso), row = sfRow_(d);
+      if (at) { sh.insertRowBefore(at); sh.getRange(at, 1, 1, row.length).setValues([row]); try { sh.getRange(at, 1).setNote(SF_NOTE); } catch (eN) {} }
+      else { sh.appendRow(row); try { sh.getRange(sh.getLastRow(), 1).setNote(SF_NOTE); } catch (eN2) {} }
+      n++;
+    });
+  }
+  return 'بازسازی آمار: ' + n + ' روز نوشته شد، همان خشک' + (skip ? ' · از پیش ردیف داشت: ' + skip : '') + ' · ' + list.map(function (d) { return d.iso.slice(5); }).join(' ');
+}
+function tgV17071StatFill() { return sfGo_(); }
+
 /* یک‌بارهٔ خودکار v170.58: فقط خشک */
 function tgV17058StatFillDry() { return sfDry(); }
 function tgV17060StatFillDry1() { return sfDryPart(1); }
@@ -152,6 +186,18 @@ function sfTests() {
     ok('خشک فشرده: زیر ۲۰۰ نویسه، چهار روز در هر بخش', p1 === 'خشک 1 از 1 · 10-08:1/0/1/1/1/0/0 10-09:0/1/0/0/0/1/2' && /روزی نیست/.test(p2) && p1.length < 200, p1 + ' | ' + p2);
     var row = sfRow_(d8);
     ok('ردیف: فقط ستون‌های جریانی پر، بقیه خالی', row.length === TG_STAT_HEAD.length && row[0] === j16 && row[13] === 1 && row[16] === 1 && row[2] === '' && row[12] === '' && row[17] === '');
+    /* v170.71: نوشتن فقط وقتی عدد هر روز همان خشک است */
+    var keepX = SF_EXPECT, exp = {};
+    try {
+      sfCount_(SF_FROM, SF_TO).forEach(function (d) { exp[d.iso] = sfKey_(d); });
+      SF_EXPECT = Object.assign({}, exp, { '2026-10-08': '9/9/9/9/9/9/9' });
+      var h = sfGo_();
+      ok('نوشتن: فرق با خشک ← ایست، هیچ ردیفی نوشته نمی‌شود', /^ایست/.test(h) && /10-08/.test(h) && !TG_MEM['sf:written'], h);
+      SF_EXPECT = exp;
+      var g = sfGo_(), w = TG_MEM['sf:written'] || [];
+      ok('نوشتن: همان خشک؛ روزِ دارای ردیف کنار، تا ۲۱ مهر (امروز نه)', w.length === 6 && w[0][0] === days[1].jal && /6 روز نوشته شد، همان خشک/.test(g) && /از پیش ردیف داشت: 1/.test(g) && g.indexOf('10-14') < 0 && g.length < 200, g);
+    } finally { SF_EXPECT = keepX; }
+    ok('جای درج: پیش از اولین روز بعدی، وگرنه ته تب', sfInsertAt_(['2026-10-05', '2026-10-06', '2026-10-14'], '2026-10-07') === 4 && sfInsertAt_(['2026-10-05', ''], '2026-10-07') === 0);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300)); }
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; }
   return tgTestTally_(log, fail);
