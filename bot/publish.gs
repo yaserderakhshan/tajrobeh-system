@@ -79,7 +79,10 @@ var PB_CFG_DEF = [
   ['traffic_tab', 'سئو · نقشه صفحات', 'تب هاب آمار برای ترتیب ترافیک در gem_seo_batch'],
   ['api_hourly_max', '30', 'سقف فراخوانی درگاه در ساعت'],
   ['err_alert_n', '3', 'خطایی که در ۲۴ ساعت بیش از این تکرار شد، به یاسر خبر داده می‌شود'],
-  ['late_hours', '6', 'پست صف که بیش از این ساعت دیر شده باشد نمی‌رود'],
+  ['late_hours', '6', 'پست صف که بیش از این ساعت دیر شده باشد سر وقتش نمی‌رود و به نوبت بعدی می‌رود (v170.69)'],
+  ['late_moves', '2', 'پست دیرشده چند بار به نوبت بعدی برود؛ بعد «دیر شد · نرفت»'],
+  ['late_slot_from', '10:00', 'پست دیرشده از این ساعت همان روز می‌رود (تهران)'],
+  ['late_slot_to', '21:00', 'پست دیرشده بعد از این ساعت به next_day_time فردا می‌رود (تهران)'],
   ['pkg_auto', 'بله', 'بستهٔ انتشار خودکار مطلب تازه با جمنای (v170.45)؛ «خیر» خاموش'],
   ['pkg_auto_hours', '2', 'چند ساعت بعد از ثبت مطلب، اگر بسته‌اش دستی ساخته نشد، بات خودش می‌سازد'],
   ['new_post_check_time', '09:00', 'ساعت چک روزانهٔ مطلب تازه (فقط خبر به سردبیر؛ v168.9)']
@@ -101,6 +104,7 @@ var PB_TPL_DEF = [
   ['editor_new_daily', '📰 مطلب تازه در سایت:\n{list}\nبرای ثبت، «🚀 انتشار مطلب تازه» را بزنید.', 'چک روزانهٔ ساعت ۹ (v168.9)'],
   ['editor_sent', '📣 پست در کانال رفت.\n{title}\n{link}', ''],
   ['editor_moved', 'امروز یک پست مجله در کانال رفته است. این پست به {when} منتقل شد.\n{title}', ''],
+  ['editor_late_moved', 'این پست از وقتش جا ماند و به {when} رفت.\n{title}', ''],
   ['editor_late', 'این پست دیر شد و نرفت: {title}\nاگر هنوز لازم است، از «🚀 انتشار مطلب تازه» دوباره بفرستید.', ''],
   ['editor_failed', 'این پست نرفت: {title}\nعلت: {err}', ''],
   ['err_alert', '⚠️ خطای {id} در ۲۴ ساعت {n} بار تکرار شد.\n{where}: {msg}', '']
@@ -623,9 +627,10 @@ function pbQueueRun_(now, force) {
     if (!t) { pbSet_('e', PB_T_Q, PB_Q_HEAD, r, { 'وضعیت': 'خطا: زمان خوانده نشد' }); continue; }
     if (t.getTime() > now.getTime()) { if (!soon || t.getTime() < soon) soon = t.getTime(); if (!r['رویداد تقویم']) { try { pbCalFor_(r); } catch (e) {} } continue; }
     if (now.getTime() - t.getTime() > lateH * 3600000) {
-      pbSet_('e', PB_T_Q, PB_Q_HEAD, r, { 'وضعیت': PB_ST.late });
-      pbNotifyEditors_(pbTpl_('editor_late', { title: tgEsc_(pbQTitle_(r)) }));
-      continue;
+      /* v170.69: پست تأییدشده (در صف) که جا ماند به نوبت بعدی می‌رود؛ فقط بعد از دو بار جابه‌جایی «دیر شد · نرفت» */
+      var nx = pbLateNext_(r, rows, now);
+      if (nx && nx.getTime() > now.getTime()) { if (!soon || nx.getTime() < soon) soon = nx.getTime(); continue; }
+      if (!nx) continue;
     }
     if (!r['منبع']) pbSet_('e', PB_T_Q, PB_Q_HEAD, r, { 'منبع': 'شیت' });
     var res = pbSendRow_(r, rows);
@@ -635,6 +640,29 @@ function pbQueueRun_(now, force) {
   }
   pbProp_('PB_NEXT', soon ? String(soon) : null);
   return n;
+}
+/* v170.69: پست دیرشده ← نوبت بعدی: اگر الان ساعت کانال است (late_slot_from تا late_slot_to) همین تیک، وگرنه اولین next_day_time بعدی؛
+   قاعدهٔ روزی یک پست مجله هم سنجیده می‌شود. شمار جابه‌جایی در PB_LATE_MV:<شناسه>؛ بیش از late_moves ← «دیر شد · نرفت». خروجی: زمان تازه یا null */
+function pbLateNext_(r, rows, now) {
+  var id = String(r['شناسه']).trim(), k = 'PB_LATE_MV:' + id, n = Number(pbProp_(k) || 0);
+  if (n >= pbCfgN_('late_moves', 2)) {
+    pbSet_('e', PB_T_Q, PB_Q_HEAD, r, { 'وضعیت': PB_ST.late });
+    pbNotifyEditors_(pbTpl_('editor_late', { title: tgEsc_(pbQTitle_(r)) }));
+    return null;
+  }
+  var p = pbParts_(now), h = p.h + p.mi / 60, a = pbHm_(pbCfg_('late_slot_from'), [10, 0]), b = pbHm_(pbCfg_('late_slot_to'), [21, 0]), t;
+  if (h >= a[0] + a[1] / 60 && h < b[0] + b[1] / 60) t = new Date(now.getTime());
+  else {
+    var hm = pbHm_(pbCfg_('next_day_time'), [10, 0]), d = h < a[0] + a[1] / 60 ? p : pbParts_(new Date(now.getTime() + 86400000));
+    t = pbTehran_(d.y, d.m, d.d, hm[0], hm[1]);
+  }
+  t = pbFitDay_(t, rows, r).when;
+  pbProp_(k, String(n + 1));
+  pbSet_('e', PB_T_Q, PB_Q_HEAD, r, { 'زمان': pbFmt_(t), 'رویداد تقویم': '', 'یادداشت': 'از وقتش جا ماند؛ به نوبت بعدی ' + pbFmt_(t) + ' رفت' });
+  r['زمان'] = pbFmt_(t);
+  pbNotifyEditors_(pbTpl_('editor_late_moved', { when: pbFaWhen_(t), title: tgEsc_(pbQTitle_(r)) }));
+  pbNextAt_(t);
+  return t;
 }
 function pbQueueList_(p) {
   var all = String((p && p.all) || '') === 'true' || (p && p.all === true);
@@ -1426,7 +1454,16 @@ function pbTests() {
     ok('تیک: سطرهای سررسیده (دستی و api) رفتند؛ گیف با sendAnimation', sent === 2 && pbs().some(function (o) { return o.method === 'sendAnimation'; }) && TG_MEM['pb:' + PB_T_Q].filter(function (r) { return r['منبع'] === 'شیت'; }).length === 1);
     pbAdd_('e', PB_T_Q, PB_Q_HEAD, { 'شناسه': 'Q-10', 'زمان': '2026-10-01 08:00', 'کانال': 'public', 'نوع': 'اطلاعیه', 'کپشن': cap, 'وضعیت': PB_ST.q });
     pbQueueRun_(pbNow_(), true);
-    ok('تیک: پست خیلی دیر نمی‌رود', pbQById_('Q-10')['وضعیت'] === PB_ST.late);
+    ok('تیک v170.69: پست تأییدشدهٔ دیرشده در ساعت کانال همین نوبت می‌رود', pbQById_('Q-10')['وضعیت'] === PB_ST.sent && /نوبت بعدی/.test(pbQById_('Q-10')['یادداشت']) && /^https:\/\/t\.me\//.test(pbQById_('Q-10')['لینک پیام']), pbQById_('Q-10')['وضعیت']);
+    pbAdd_('e', PB_T_Q, PB_Q_HEAD, { 'شناسه': 'Q-12', 'زمان': '2026-10-02 08:00', 'کانال': 'public', 'نوع': 'اطلاعیه', 'کپشن': cap, 'وضعیت': PB_ST.q });
+    TG_MEM['pb:now'] = pbTehran_(2026, 10, 2, 22, 30).getTime(); TG_OUTBOX = [];
+    pbQueueRun_(pbNow_(), true);
+    ok('تیک v170.69: بیرون از ساعت کانال ← فردا ساعت next_day_time، با خبر به سردبیر', pbQById_('Q-12')['وضعیت'] === PB_ST.q && pbQById_('Q-12')['زمان'] === '2026-10-03 10:00' &&
+       TG_OUTBOX.some(function (o) { return /جا ماند/.test(o.text || ''); }), pbQById_('Q-12')['زمان']);
+    TG_MEM['pbp:PB_LATE_MV:Q-12'] = '2'; TG_MEM['pb:now'] = pbTehran_(2026, 10, 3, 18, 0).getTime();
+    pbQueueRun_(pbNow_(), true);
+    ok('تیک v170.69: بعد از دو جابه‌جایی «دیر شد · نرفت»', pbQById_('Q-12')['وضعیت'] === PB_ST.late);
+    TG_MEM['pb:now'] = pbTehran_(2026, 10, 2, 18, 45).getTime();
 
     /* channel_edit */
     ok('channel_edit dry_run', gw({ action: 'channel_edit', chat: 'public', message_id: 901, caption_html: cap, dry_run: true }).data.would === 'editMessageCaption');
