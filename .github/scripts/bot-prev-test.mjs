@@ -95,6 +95,27 @@ export function prevSelfTest() {
     t('prev-ref: برچسب ناهمخوان حتی با فایل بازبینی ← توقف', r.status !== 0 && !existsSync(join(T, 'bakP')), r.stdout + r.stderr);
     r = run(['prev-ref', same, join(T, 'nolive')], pr);
     t('prev-ref: کد زندهٔ کشیده‌نشده ← توقف', r.status !== 0, r.stdout + r.stderr);
+
+    // v170.64: آزمون شبانه کد خودش را در پروژه جا گذاشت و برگشت خودکار #171 را پوشاند (۲۲ مهر). کد زندهٔ آشنا (کامیت گیت) شناخته
+    // می‌شود و پیش از انتشار به bot-live برمی‌گردد؛ آزمون شبانه هم در پایان کد پروژه را به bot-live برمی‌گرداند.
+    r = run(['known', liveP, other, same], pr);
+    t('known: کد زنده عین یکی از کامیت‌ها ← همان کامیت', r.status === 0 && r.stdout.trim() === same, r.stdout + r.stderr);
+    r = run(['known', liveP, other], pr);
+    t('known: کد زندهٔ ناآشنا ← توقف', r.status !== 0 && !r.stdout.trim(), r.stdout + r.stderr);
+    r = run(['known', liveP, 'نبود', same], pr);
+    t('known: کامیت نامعتبر نادیده گرفته می‌شود', r.status === 0 && r.stdout.trim() === same, r.stdout + r.stderr);
+    r = run(['known', join(T, 'nolive'), same], pr);
+    t('known: کد زندهٔ کشیده‌نشده ← توقف', r.status !== 0, r.stdout + r.stderr);
+    const guard = wf.slice(wf.indexOf('id: guard'), wf.indexOf('- name: وضعیت فعلی (برای برگشت)'));
+    t('گام بررسی کد زنده: کد آشنای گیت ← resync، ناآشنا همچنان توقف',
+      /bot-prev\.sh known \$R \$\(git rev-list --first-parent -n 40 HEAD\)/.test(guard) && /echo "resync=\$K" >> "\$GITHUB_OUTPUT"; exit 0/.test(guard) &&
+      guard.indexOf('known $R') < guard.indexOf('کد زنده تغییرهایی بیرون از گیت دارد'));
+    const rs = wf.slice(wf.indexOf('- name: کد پروژه به bot-live'), wf.indexOf('id: prev'));
+    t('پیش از «وضعیت فعلی»: کد پروژه با کد bot-live جایگزین و دوباره کشیده می‌شود',
+      rs.length > 0 && /if: steps\.guard\.outputs\.resync != ''/.test(rs) && /rollback-src "\$\(git rev-parse 'refs\/tags\/bot-live\^\{commit\}'\)"/.test(rs) && /clasp push --force/.test(rs) && /clasp pull/.test(rs));
+    const nb = wf.slice(wf.indexOf('- name: آزمون شبانه، کد پروژه به bot-live'), wf.indexOf('- name: برگشت خودکار به نسخهٔ قبل'));
+    t('آزمون شبانه، سبز یا قرمز، کد پروژه را به bot-live برمی‌گرداند',
+      nb.length > 0 && /if: always\(\) && env\.NIGHTLY == '1' && steps\.push\.outcome == 'success'/.test(nb) && /rollback-src "\$\(git rev-parse 'refs\/tags\/bot-live\^\{commit\}'\)"/.test(nb) && /clasp push --force/.test(nb));
   } catch (e) {
     bad.push('خطای اجرای تست: ' + e.message);
   } finally {
