@@ -81,11 +81,26 @@ prev_ref() {
   echo "$tag"
 }
 
+# v170.64: کد زندهٔ پروژه دقیقاً کد یکی از این کامیت‌هاست؟ همان کامیت را چاپ می‌کند، وگرنه ۱.
+# برای وقتی که کد پروژه کامیت دیگری از گیت است، نه bot-live (۲۲ مهر: آزمون شبانه کد خودش را در پروژه جا گذاشت و برگشت را پوشاند).
+known() {
+  local live="$1" snap=/tmp/known_ref_code want c; shift || true
+  [ -d "$live" ] && [ -n "$(ls -A "$live" 2>/dev/null)" ] || return 1
+  want=$(fp "$live")
+  for c in "$@"; do
+    git cat-file -e "$c^{commit}" 2>/dev/null || continue
+    ref_code "$c" "$snap" 2>/dev/null || continue
+    if [ "$(fp "$snap")" = "$want" ]; then echo "$c"; return 0; fi
+  done
+  return 1
+}
+
 cmd="${1:-}"; shift || true
 case "$cmd" in
   fp) fp "$@" ;;
   rollback-src) rollback_src "$@" ;;
   prev-ref) prev_ref "$@" ;;
+  known) known "$@" ;;
   firstrun) firstrun "$@" ;;
-  *) echo "usage: bot-prev.sh fp|firstrun|rollback-src|prev-ref ..." >&2; exit 2 ;;
+  *) echo "usage: bot-prev.sh fp|firstrun|rollback-src|prev-ref|known ..." >&2; exit 2 ;;
 esac
