@@ -7212,6 +7212,7 @@ function tgWatchdog(e) {
   /* v170.57: آمار شبانه واجب است، نه سنگین. از ۷ مهر هر روز در ستون «ردشده» سهمیه بودند (مصرف بالای ۵۵ دقیقه) و از ۱۴ مهر ردیفی ننوشتند.
      خودشان روزی یک بار و فقط از ساعت ۲۲ تهران کار می‌کنند؛ بقیهٔ ساعت‌ها فقط یک خواندن Property است. */
   S('tgStatTick_', 'must', tgStatTick_);
+  S('tgDailyTick_', 'must', tgDailyTick_);   /* v170.72: گزارش ۲۴ ساعته (tgDaily) تریگر جدا نداشت و از ۱۵ مهر نرفت */
   S('tgRmStatTick_', 'must', tgRmStatTick_);
   S('thqTick_', 'must', typeof thqTick_ === 'function' ? thqTick_ : null);   /* v170.64: پرسش از درمانگران، ۹ تا ۲۱ تهران؛ یادآوری ۴۸ ساعته */
   S('praDaily_', 'must', typeof praDaily_ === 'function' ? function () { return praDaily_(); } : null);   /* v170.56: خلاصهٔ تغییر پروفایل‌ها، ۱۰ صبح؛ بیرون از آن ساعت فقط یک خواندن Property */
@@ -10699,6 +10700,7 @@ function tgDayChart() {
 
 function tgDaily(e) {
   if (ciPaused_(e, 'tgDaily', 'defer')) return;
+  try { if (e && e.triggerUid) { var pd = PropertiesService.getScriptProperties(), dd = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd'); if (pd.getProperty('TG_DAILY_DAY') === dd) return; pd.setProperty('TG_DAILY_DAY', dd); } } catch (eD) {}   /* v170.72: یک بار در روز، چه از تریگر چه از نگهبان */
   var rs0 = Date.now(); try {   /* v166.18: سنجش زمان اجرا (بدنه بی‌تغییر) */
   const d = tgDayWin_();
   const txt = tgDayReport_(d);
@@ -27712,6 +27714,20 @@ function tgStatDaily() {
 }
 
 /* روزی یک بار، داخل tgWatchdog. قفل روز مثل tgSchDailyTick_ */
+/* v170.72: گزارش ۲۴ ساعتهٔ ناظرها و کارهای پایان روز (tgDaily) از نگهبان، روزی یک بار از ساعت ۲۱ تهران.
+   تریگر جدای ۲۱:۰۰ در جمع‌وجور کردن تریگرها رفته بود و از ۱۵ مهر نه گزارش رفت، نه خط «قول تماس اول». اگر تریگر خودش هنوز باشد
+   همان روز دوباره اجرا نمی‌شود (TG_DAILY_DAY). */
+function tgDailyTick_() {
+  if (TG_DRY) return;
+  try {
+    var p = PropertiesService.getScriptProperties();
+    var day = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd');
+    if (String(p.getProperty('TG_DAILY_DAY') || '') === day) return;
+    if (Number(Utilities.formatDate(new Date(), TG_TZ, 'H')) < 21) return;
+    p.setProperty('TG_DAILY_DAY', day);
+    tgDaily();
+  } catch (e) { tgErr_('tgDailyTick_: ' + e); }
+}
 function tgStatTick_() {
   if (TG_DRY || !TG_STAT_ON) return;
   try {
@@ -27847,6 +27863,7 @@ function tgStatTests() {
   ok('نوشتن شبانهٔ آمار روشن است', TG_STAT_ON === true);
   ok('v170.57: آمار شبانه قدم واجب نگهبان است، نه سنگین (سهمیه ردش نمی‌کند)', /S\('tgStatTick_', 'must'/.test(String(tgWatchdog)) && /S\('tgRmStatTick_', 'must'/.test(String(tgWatchdog)) &&
     !/S\('tgStatTick_', 'heavy'/.test(String(tgWatchdog)) && !/S\('tgRmStatTick_', 'heavy'/.test(String(tgWatchdog)));
+  ok('v170.72: گزارش ۲۴ ساعته قدم واجب نگهبان، روزی یک بار از ساعت ۲۱', /S\('tgDailyTick_', 'must'/.test(String(tgWatchdog)) && /TG_DAILY_DAY/.test(String(tgDailyTick_)) && /< 21/.test(String(tgDailyTick_)) && /TG_DAILY_DAY/.test(String(tgDaily)));
 
     var kb = tgWatchMenu_();
     var flat = JSON.stringify(kb.keyboard);

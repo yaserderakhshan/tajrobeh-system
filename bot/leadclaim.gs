@@ -280,6 +280,9 @@ function lcStepCore_(x, l, now, code, st, cf) {
     var pr = morning ? cf.morning : cf.claim;
     lcCard_(code, st, owner, now, pr, l, true);
     st.s = now; st.p0 = pr;
+    /* v170.72: قول از رسیدن کارت شروع می‌شود، نه زودتر. لید ۱۸ و ۱۹ مهر کارتشان دیرتر از شروع قول رسید (تیک نوبت یا صبح ۹) و
+       «مهلت گذشت» همان لحظهٔ واگذاری رفت و یادآوری دقیقهٔ ۱۰ هیچ‌وقت نرفت */
+    if (st.cs && now - st.cs >= cf.remind * 60000) st.cs = now;   /* عقب‌افتادگی کوتاه (چند دقیقه) همان قول از ساخت لید می‌ماند */
     tgLeadEv_({ code: code, row: l.row, actor: 'بات', channel: 'نوبت پذیرش', what: LC_EV.start, from: '', to: owner.name, note: morning ? 'صبح روز کاری بعد · ' + pr + ' دقیقه' : 'ساعت کاری · ' + pr + ' دقیقه', type: l.type || '' });
     lcSave_(code, st); x.sent = 1;
     x.n = 1; x.t = st.t; x.pr = st.pr; delete x.at; return true;
@@ -527,6 +530,15 @@ function lcSlaTests() {
     lcStep_(x1, l1, T('10', '10:40'));
     ok('یادآوری و خبر تکرار نمی‌شوند', notes('9101', /۱۰ دقیقه از قول/).length === 1 && notes('9100', /مهلت ۱۵/).length === 1);
     ok('شمار امروز: یک مهلت گذشته', day('10').miss === 1 && !day('10').ok);
+    /* v170.72: کارت دیرتر از ساخت لید رسید (تیک نوبت دیر): قول از رسیدن کارت؛ نه «مهلت گذشت» همان لحظه، یادآوری ۱۰ دقیقه بعد از کارت */
+    reset();
+    var l9 = lead('L-8109'), x9 = { k: 'L-8109', n: 0, a: T('10', '13:20') };
+    lcStep_(x9, l9, T('10', '13:47'));
+    ok('v170.72: کارت دیر ← شروع قول همان رسیدن کارت، بی «مهلت گذشت» همان لحظه', lcSt_('L-8109').cs === T('10', '13:47') && !evs(LC_EV.late, 'L-8109').length && !notes('9100', /مهلت ۱۵/).length && x9.d === T('10', '13:57'), String(lcSt_('L-8109').cs));
+    lcStep_(x9, l9, T('10', '13:57'));
+    ok('v170.72: یادآوری دقیقهٔ ۱۰ بعد از کارت', notes('9101', /۱۰ دقیقه از قول تماس اول/).length === 1 && evs(LC_EV.remind, 'L-8109').length === 1);
+    lcStep_(x9, l9, T('10', '14:02'));
+    ok('v170.72: خبر سرپرست دقیقهٔ ۱۵ بعد از کارت', evs(LC_EV.late, 'L-8109').length === 1 && notes('9100', /مهلت ۱۵ دقیقه‌ای تماس اول/).length === 1);
     var l1b = lead('L-8102'), x1b = { k: 'L-8102', n: 0, a: T('10', '11:00') };
     lcStep_(x1b, l1b, T('10', '11:01')); TG_MEM['lc:now'] = T('10', '11:12');
     lcOnContact_('L-8102', 'کشیک الف');
