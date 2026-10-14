@@ -14,7 +14,8 @@ var SO_TAB_LNK = 'سوشال · لینک‌ها';
 var SO_ROLE = 'سوشال';
 var SO_CHANNEL = cfg_('TG_MAIN_CHANNEL', '');   /* v170.14: شناسهٔ عددی کانال اصلی در تنظیمات خصوصی */
 var SO_CHANNEL_USER = 'tajrobeh_life';
-var SO_OUT_HEAD = ['کد', 'برای', 'تاریخ شمسی', 'ساعت', 'متن (HTML)', 'پیوست‌ها (URL با کاما)', 'دکمه (متن|لینک)', 'وضعیت', 'شناسه پیام', 'زمان ارسال', 'یادداشت', 'سازنده'];
+var SO_OUT_HEAD = ['کد', 'برای', 'تاریخ شمسی', 'ساعت', 'متن (HTML)', 'پیوست‌ها (URL با کاما)', 'دکمه (متن|لینک)', 'وضعیت', 'شناسه پیام', 'زمان ارسال', 'یادداشت', 'سازنده', 'نظرسنجی'];   /* v170.73: «نظرسنجی» آخر، ستون‌های قبلی جابه‌جا نشد */
+var SO_ST_POLLBAD = 'خطای قالب نظرسنجی';
 var SO_ST_QUEUE = 'در صف';
 var SO_ST_SENT = 'فرستاده شد';
 
@@ -35,9 +36,27 @@ function soFaToEn_(s) {
     .replace(/[٠-٩]/g, function (d) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)); });
 }
 
+/* v170.73: شیت گاهی «1405-07-22» را تاریخ میلادی سال ۱۴۰۵ می‌گیرد (عدد -180591) و «18:45» را کسر روز (0.78125).
+   هر دو برگردانده می‌شوند: عدد سریال یا Date با سال پیش از ۱۷۰۰ همان رشتهٔ شمسی تایپ‌شده است؛ Date میلادی واقعی به شمسی. */
+function soYmd_(y, m, d) { return y + '-' + ('0' + m).slice(-2) + '-' + ('0' + d).slice(-2); }
+function soNum_(v) {
+  if (typeof v === 'number' && isFinite(v)) return v;
+  var t = soFaToEn_(v).trim();
+  return /^-?\d+(\.\d+)?$/.test(t) ? Number(t) : null;
+}
 /** «۱۴۰۵/۶/۲۹» یا «1405-06-29» ← «1405-06-29» */
 function soDay_(v) {
-  if (v instanceof Date) return '';
+  if (v instanceof Date) {
+    if (isNaN(v.getTime())) return '';
+    if (v.getFullYear() < 1700) return soYmd_(v.getFullYear(), v.getMonth() + 1, v.getDate());
+    var jd = tgJalali_(v, TG_TZ); return soYmd_(jd.y, jd.m, jd.d);
+  }
+  var n = soNum_(v);
+  if (n !== null && (n < 0 || n >= 20000)) {   /* سریال شیت: منفی (سال ۱۴۰۵ میلادی) یا تاریخ امروزی؛ «1405» تنها سریال نیست */
+    var g = new Date(Date.UTC(1899, 11, 30) + Math.round(n) * 86400000);
+    if (g.getUTCFullYear() < 1700) return soYmd_(g.getUTCFullYear(), g.getUTCMonth() + 1, g.getUTCDate());
+    var jg = tgJalali_(new Date(g.getTime() + 12 * 3600000), TG_TZ); return soYmd_(jg.y, jg.m, jg.d);
+  }
   var m = soFaToEn_(v).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
   if (!m) return '';
   return m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2);
@@ -51,6 +70,8 @@ function soToday_() {
 /** «۲۱:۰۰» ← دقیقه از نیمه‌شب؛ خالی یعنی -1 */
 function soMin_(v) {
   if (v instanceof Date) return v.getHours() * 60 + v.getMinutes();
+  var n = soNum_(v);   /* v170.73: کسر روز (0.78125 ← ۱۸:۴۵)، یا سریال تاریخ و ساعت */
+  if (n !== null && n !== Math.floor(n)) { var f = n - Math.floor(n); return Math.round(f * 1440) % 1440; }   /* عدد صحیح (مثل «9») همان رفتار قبلی */
   var m = soFaToEn_(v).match(/(\d{1,2})\D+(\d{1,2})/);
   if (!m) return -1;
   return Number(m[1]) * 60 + Number(m[2]);
@@ -66,10 +87,13 @@ function soDueRows_(countOnly) {
   var sh = soSheet_(SO_TAB_OUT);
   if (!sh) return [];
   var rows = sh.getDataRange().getValues(), today = soToday_(), now = soNowMin_(), out = [];
+  /* v170.73: تاریخ و ساعت از متن نمایش‌داده‌شده (همان چیزی که آدم در شیت می‌بیند)؛ عدد خام و Date هم فهمیده می‌شود */
+  var shown = countOnly || rows.length < 2 ? [] : sh.getRange(1, 3, rows.length, 2).getDisplayValues();
   for (var i = 1; i < rows.length; i++) {
     var r = rows[i];
     if (String(r[7] || '').trim() !== SO_ST_QUEUE) continue;
     if (countOnly) { out.push(i + 1); continue; }
+    if (shown[i]) { if (soDay_(shown[i][0])) r[2] = shown[i][0]; if (soMin_(shown[i][1]) > -1) r[3] = shown[i][1]; }
     var day = soDay_(r[2]);
     if (day && day > today) continue;
     var at = soMin_(r[3]);
@@ -153,7 +177,7 @@ function soSendOne_(chat, text, files, kb) {
   var capOk = text.replace(/<[^>]+>/g, '').length <= 1000;   // سقف کپشن تلگرام ۱۰۲۴ حرفِ دیدنی است
   function done(j) { if (j && j.ok) { var r = j.result; (r instanceof Array ? r : [r]).forEach(function (x) { if (x && x.message_id) ids.push(x.message_id); }); return true; } return false; }
   var j;
-  if (!imgs.length || !capOk) {
+  if (text && (!imgs.length || !capOk)) {   /* v170.73: سطر نظرسنجی بی متن، فقط پیوست */
     var body = { chat_id: String(chat), text: text, parse_mode: 'HTML', disable_web_page_preview: 'true' };
     if (kb && !imgs.length) body.reply_markup = JSON.stringify(kb);
     j = soPost_('sendMessage', body);
@@ -203,15 +227,25 @@ function soSendRow_(sh, rowNum) {
   var chats = soResolve_(r[1]);
   if (!chats.length) { sh.getRange(rowNum, 8).setValue('خطا: گیرنده پیدا نشد'); return; }
   var text = String(r[4] || '').trim();
-  if (!text) { sh.getRange(rowNum, 8).setValue('خطا: متن خالی است'); return; }
   var files = String(r[5] || '').split(/[,\n]/).map(function (s) { return s.trim(); }).filter(Boolean);
+  /* v170.73: ستون «نظرسنجی»؛ قالب نادرست ← سطر نمی‌رود */
+  var poll = String(r[12] || '').trim() ? soPollParse_(r[12]) : null;
+  if (poll && !poll.ok) { sh.getRange(rowNum, 8).setValue(SO_ST_POLLBAD); sh.getRange(rowNum, 11).setValue(poll.err); return; }
+  if (!text && !poll) { sh.getRange(rowNum, 8).setValue('خطا: متن خالی است'); return; }
   var kb = soKb_(r[6]);
   sh.getRange(rowNum, 8).setValue('در حال ارسال'); SpreadsheetApp.flush();   // اول علامت بزن تا دوبار نرود
   var allIds = [], errs = [];
   chats.forEach(function (c) {
-    var o = soSendOne_(c, text, files, kb);
-    allIds = allIds.concat(o.ids);
-    if (!o.ok) errs.push(o.err);
+    if (text || files.length) {
+      var o = soSendOne_(c, text, files, kb);
+      allIds = allIds.concat(o.ids);
+      if (!o.ok) { errs.push(o.err); return; }
+    }
+    if (poll) {
+      var jp = soPost_('sendPoll', soPollPayload_(c, poll, soIsChannel_(r[1])));
+      if (jp && jp.ok && jp.result && jp.result.message_id) allIds.push(jp.result.message_id);
+      else errs.push((jp && jp.description) || 'sendPoll');
+    }
   });
   var stamp = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm');
   sh.getRange(rowNum, 8, 1, 3).setValues([[errs.length ? 'خطا: ' + errs.join(' ؛ ') : SO_ST_SENT, allIds.join(','), stamp]]);
@@ -222,6 +256,71 @@ function soSendRow_(sh, rowNum) {
       soPost_('sendMessage', { chat_id: String(c), text: '📣 پست «' + String(r[0] || '') + '» در کانال منتشر شد.\n' + link, disable_web_page_preview: 'true' });
     });
   }
+}
+
+/* ───── v170.73: نظرسنجی و کوییز تلگرام از ستون «نظرسنجی» ─────
+   قالب، هر کلید در یک خط:  نوع: نظرسنجی | کوییز · پرسش: … · گزینه‌ها: الف | ب | پ · درست: 3 (کوییز، از ۱)
+   توضیح: … (کوییز، اختیاری، تا ۲۰۰) · چندجوابی: بله | خیر (نظرسنجی) · ناشناس: بله | خیر (پیش‌فرض بله؛ کانال همیشه ناشناس)
+   خروجی: {ok، err، quiz، q، opts، correct (از ۰)، expl، multi، anon} */
+function soPollParse_(raw) {
+  var kv = {}, keys = { 'نوع': 'type', 'پرسش': 'q', 'سوال': 'q', 'سؤال': 'q', 'گزینهها': 'opts', 'درست': 'ok', 'توضیح': 'expl', 'چندجوابی': 'multi', 'ناشناس': 'anon' };
+  String(raw || '').replace(/\r/g, '').split('\n').forEach(function (line) {
+    var m = line.match(/^\s*([^:：]+?)\s*[:：]\s*(.*)$/);
+    if (!m) return;
+    var k = keys[m[1].replace(/[\u200c\s]/g, '')];   /* «گزینه‌ها»، «گزینه ها» و «چند جوابی» یکی‌اند */
+    if (k) kv[k] = m[2].trim();
+  });
+  var yes = function (s) { return /^(بله|آره|yes|true|1)$/i.test(String(s || '').trim()); };
+  var no = function (s) { return /^(خیر|نه|no|false|0)$/i.test(String(s || '').trim()); };
+  var t = String(kv.type || 'نظرسنجی').trim(), quiz = /کوییز|کوئیز|quiz/i.test(t);
+  if (!quiz && !/نظرسنجی|poll/i.test(t)) return { ok: false, err: 'نوع باید «نظرسنجی» یا «کوییز» باشد' };
+  var q = String(kv.q || '').trim();
+  if (!q) return { ok: false, err: 'پرسش خالی است' };
+  if (q.length > 300) return { ok: false, err: 'پرسش بیش از ۳۰۰ نویسه است' };
+  var opts = String(kv.opts || '').split('|').map(function (s) { return s.trim(); }).filter(Boolean);
+  if (opts.length < 2) return { ok: false, err: 'دست‌کم دو گزینه لازم است' };
+  if (opts.length > 10) return { ok: false, err: 'بیش از ۱۰ گزینه' };
+  for (var i = 0; i < opts.length; i++) if (opts[i].length > 100) return { ok: false, err: 'گزینهٔ ' + tgFa_(i + 1) + ' بیش از ۱۰۰ نویسه است' };
+  var o = { ok: true, err: '', quiz: quiz, q: q, opts: opts, correct: -1, expl: '', multi: false, anon: kv.anon === undefined || !no(kv.anon) };
+  if (quiz) {
+    var c = Number(soFaToEn_(kv.ok || '').trim());
+    if (!kv.ok || !(c >= 1 && c <= opts.length && Math.floor(c) === c)) return { ok: false, err: 'کوییز «درست» ندارد یا شمارهٔ گزینه نادرست است (۱ تا ' + tgFa_(opts.length) + ')' };
+    o.correct = c - 1;
+    o.expl = String(kv.expl || '').trim();
+    if (o.expl.length > 200) return { ok: false, err: 'توضیح بیش از ۲۰۰ نویسه است' };
+  } else {
+    o.multi = yes(kv.multi);
+  }
+  return o;
+}
+function soPollPayload_(chat, p, isChannel) {
+  var b = { chat_id: String(chat), question: p.q, options: JSON.stringify(p.opts.map(function (x) { return { text: x }; })),
+            is_anonymous: String(isChannel ? true : p.anon), type: p.quiz ? 'quiz' : 'regular' };
+  if (p.quiz) { b.correct_option_id = String(p.correct); if (p.expl) b.explanation = p.expl; }
+  else if (p.multi) b.allows_multiple_answers = 'true';
+  return b;
+}
+/* یک‌باره v170.73: ستون «نظرسنجی» بعد از «سازنده»، و قفل متن ساده روی «تاریخ شمسی» و «ساعت».
+   خانه‌ای که شیت پیش از این به عدد یا تاریخ تبدیل کرده بود همان متن نمایش‌داده‌شده‌اش را می‌گیرد. خروجی فقط شمار */
+function tgV17073SoSetup() {
+  var sh = soSheet_(SO_TAB_OUT);
+  if (!sh) return 'تب صف ارسال نیست';
+  var out = [];
+  var lc = sh.getLastColumn(), head = sh.getRange(1, 1, 1, Math.max(lc, 12)).getValues()[0].map(function (h) { return String(h).trim(); });
+  if (head.indexOf('نظرسنجی') < 0) {
+    if (lc > 12 && String(head[12] || '')) return 'ستون ۱۳ خالی نیست؛ دستی بررسی شود';
+    if (sh.getMaxColumns() < 13) sh.insertColumnAfter(12);
+    sh.getRange(1, 13).setValue('نظرسنجی').setFontWeight('bold');
+    try { sh.getRange(2, 13, sh.getMaxRows() - 1, 1).setWrap(true); } catch (eW) {}
+    out.push('ستون نظرسنجی: ساخته شد');
+  } else out.push('ستون نظرسنجی: بود');
+  var n = sh.getMaxRows() - 1, fix = 0;
+  var rng = sh.getRange(2, 3, n, 2), vals = rng.getValues(), shown = rng.getDisplayValues();
+  var put = vals.map(function (row, i) { return row.map(function (v, j) { if (v instanceof Date || typeof v === 'number') { fix++; return shown[i][j]; } return v; }); });
+  rng.setNumberFormat('@');
+  if (fix) rng.setValues(put);
+  out.push('قفل متن ساده: ستون‌های تاریخ و ساعت · خانهٔ تبدیل‌شده که متن شد: ' + fix);
+  return out.join(' · ');
 }
 
 /** هدف تریگر پنج‌دقیقه‌ای */
@@ -338,3 +437,37 @@ function soDesk_(chat, text, uname) {
   }
   return tgSend_(chat, '📣 <b>میز سوشال</b>\nتقویم انتشار، لینک‌های رهگیری‌دار، صف ارسال و نتیجهٔ کمپین‌ها همین‌جاست.', soMenu_());
 }
+
+/* ───── آزمون v170.73: نظرسنجی، کوییز، ساعت و تاریخ عددی ───── */
+function soPollTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  try {
+    var p1 = soPollParse_('نوع: نظرسنجی\nپرسش: کدام روز برای وبینار بهتر است؟\nگزینه ها: شنبه | یکشنبه | دوشنبه\nچند جوابی: بله\nناشناس: خیر');
+    ok('پارس نظرسنجی: پرسش، سه گزینه، چندجوابی و ناشناس', p1.ok && !p1.quiz && p1.opts.length === 3 && p1.opts[1] === 'یکشنبه' && p1.multi === true && p1.anon === false, JSON.stringify(p1));
+    var p0 = soPollParse_('پرسش: بله یا نه؟\nگزینه‌ها: بله | نه');
+    ok('پیش‌فرض: نوع نظرسنجی، ناشناس، تک‌جوابی', p0.ok && !p0.quiz && p0.anon === true && p0.multi === false, JSON.stringify(p0));
+    var q1 = soPollParse_('نوع: کوییز\nپرسش: مکتب «اتاق درمان» از کیست؟\nگزینه‌ها: فروید | یونگ | وینیکات\nدرست: ۳\nتوضیح: وینیکات از «محیط نگهدارنده» گفت.');
+    ok('کوییز درست: شمارهٔ فارسی، گزینهٔ درست از صفر، توضیح', q1.ok && q1.quiz && q1.correct === 2 && /وینیکات/.test(q1.expl), JSON.stringify(q1));
+    var bad = function (raw) { var o = soPollParse_(raw); return o.ok ? '' : o.err; };
+    ok('کوییز بی «درست» رد می‌شود', /درست/.test(bad('نوع: کوییز\nپرسش: الف؟\nگزینه‌ها: یک | دو')));
+    ok('کوییز با «درست» بیرون از گزینه‌ها رد می‌شود', /درست/.test(bad('نوع: کوییز\nپرسش: الف؟\nگزینه‌ها: یک | دو\nدرست: 4')));
+    ok('کمتر از دو گزینه رد می‌شود', /دو گزینه/.test(bad('پرسش: الف؟\nگزینه‌ها: فقط یکی')));
+    ok('گزینهٔ بیش از ۱۰۰ نویسه رد می‌شود', /۱۰۰/.test(bad('پرسش: الف؟\nگزینه‌ها: کوتاه | ' + new Array(102).join('ب'))));
+    ok('توضیح کوییز بیش از ۲۰۰ نویسه رد می‌شود', /۲۰۰/.test(bad('نوع: کوییز\nپرسش: الف؟\nگزینه‌ها: یک | دو\nدرست: 1\nتوضیح: ' + new Array(202).join('ج'))));
+    ok('نوع ناشناخته رد می‌شود', /نوع/.test(bad('نوع: آزمون\nپرسش: الف؟\nگزینه‌ها: یک | دو')));
+    var pl = soPollPayload_('-100123', q1, true), pc = soPollPayload_('555', p1, false);
+    ok('بستهٔ sendPoll کوییز: quiz، گزینهٔ درست، توضیح، کانال همیشه ناشناس', pl.type === 'quiz' && pl.correct_option_id === '2' && /وینیکات/.test(pl.explanation) && pl.is_anonymous === 'true' && JSON.parse(pl.options).length === 3 && JSON.parse(pl.options)[0].text === 'فروید');
+    ok('بستهٔ sendPoll نظرسنجی: چندجوابی و غیرناشناس برای آدم', pc.type === 'regular' && pc.allows_multiple_answers === 'true' && pc.is_anonymous === 'false' && !pc.correct_option_id);
+    ok('ساعت عددی: 0.78125 ← ۱۸:۴۵', soMin_(0.78125) === 18 * 60 + 45 && soMin_('0.78125') === 1125);
+    ok('ساعت عددی: 0.8333 ← ۲۰:۰۰؛ سریال تاریخ و ساعت', soMin_(0.8333333333333334) === 1200 && soMin_(46310.5) === 720);
+    ok('ساعت متنی بی‌تغییر: «18:45»، «۲۱:۰۰»، «9» بی ساعت', soMin_('18:45') === 1125 && soMin_('۲۱:۰۰') === 1260 && soMin_('9') === -1 && soMin_('') === -1);
+    ok('تاریخ عددی: -180591 ← 1405-07-22', soDay_(-180591) === '1405-07-22' && soDay_('-180591') === '1405-07-22');
+    ok('تاریخ Date با سال ۱۴۰۵ ← همان رشتهٔ شمسی', soDay_(new Date(1405, 6, 22)) === '1405-07-22');
+    ok('تاریخ متنی بی‌تغییر و «1405» تنها تاریخ نیست', soDay_('۱۴۰۵/۷/۲۲') === '1405-07-22' && soDay_('1405-07-22') === '1405-07-22' && soDay_('1405') === '');
+    ok('تاریخ میلادی واقعی (Date) ← شمسی', soDay_(new Date(2026, 9, 14, 12, 0)) === '1405-07-22', soDay_(new Date(2026, 9, 14, 12, 0)));
+    ok('ستون «نظرسنجی» آخر، بی جابه‌جایی ستون‌های قبلی', SO_OUT_HEAD.length === 13 && SO_OUT_HEAD[11] === 'سازنده' && SO_OUT_HEAD[12] === 'نظرسنجی' && SO_OUT_HEAD[7] === 'وضعیت' && SO_OUT_HEAD[8] === 'شناسه پیام');
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300)); }
+  return tgTestTally_(log, fail);
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'soPollTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['صف سوشال: نظرسنجی و تاریخ و ساعت عددی (v170.73)', 'soPollTests']); } catch (eSo) {}
