@@ -272,6 +272,18 @@ function thqDryRun_() {
 /* یک‌باره v170.64: فقط خشک */
 function tgV17064ThqDry() { return thqDryRun_(); }
 
+/* ---------- v170.65: ساخت و ارسال ---------- */
+/* تب‌ها و چهار پرسش دستهٔ اول با وضعیت «آمادهٔ ارسال». ردیف موجود دست نمی‌خورد. ارسال ۹ تا ۲۱ تهران (همین حالا یا تیک بعدی) */
+function thqGo_() {
+  var have = {}; thqRows_().forEach(function (r) { have[String(r['کد']).trim()] = 1; });
+  var add = THQ_SEED.filter(function (r) { return !have[r['کد']]; }).map(function (r) { var o = {}; Object.keys(r).forEach(function (k) { o[k] = r[k]; }); o['وضعیت'] = THQ_ST.READY; return o; });
+  pbAddMany_('e', THQ_TAB, THQ_HEAD, add);
+  pbRows_('e', THQ_ANS, THQ_ANS_HEAD);
+  return 'آمادهٔ ارسال: ' + add.length + ' پرسش · ' + thqTick_();
+}
+/* یک‌باره v170.65: ستون‌ها و «اعلام‌شده»، استخرهای تازه، واژگان، کدهای start، و دستهٔ اول پرسش‌ها */
+function tgV17065SpGo() { return [spSetup_(), spVocabAdd_(), spStartRows_(), thqGo_()].join(' · '); }
+
 function thqTests() {
   var log = [], fail = 0;
   function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
@@ -350,3 +362,21 @@ function thqTests() {
   return tgTestTally_(log, fail);
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'thqTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['K07 پرسش از درمانگران (v170.64)', 'thqTests']); } catch (eThq) {}
+
+function thqGoTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, desk: tgDeskRows_ };
+  TG_DRY = true; TG_MEM = { 'thq:now': Date.UTC(2026, 9, 14, 6, 0) }; TG_OUTBOX = [];
+  try {
+    tgDeskRows_ = function () { return []; };
+    TG_MEM['thq:ther'] = [{ name: 'درمانگر الف', chat: '7301', status: 'فعال' }];
+    TG_MEM['people'] = [{ name: 'سردبیر نمونه', chat: '7401', roles: ['سردبیر'], status: 'فعال' }];
+    var g = thqGo_();
+    ok('ساخت: چهار پرسش «آمادهٔ ارسال» و همان لحظه ارسال در ساعت کاری', /آمادهٔ ارسال: 4 پرسش/.test(g) && TG_OUTBOX.filter(function (x) { return x.chat === '7301'; }).length === 1 && TG_OUTBOX.filter(function (x) { return x.chat === '7401'; }).length === 1 && thqRow_('SQ-01')['وضعیت'] === THQ_ST.SENT, g);
+    ok('اجرای دوباره چیزی اضافه یا ارسال نمی‌کند', /آمادهٔ ارسال: 0 پرسش/.test(thqGo_()) && TG_OUTBOX.filter(function (x) { return x.chat === '7301'; }).length === 1);
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300)); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; tgDeskRows_ = keep.desk; }
+  return tgTestTally_(log, fail);
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'thqGoTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['K07 ارسال دستهٔ اول (v170.65)', 'thqGoTests']); } catch (eTg) {}
