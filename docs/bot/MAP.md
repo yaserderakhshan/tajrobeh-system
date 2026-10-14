@@ -101,7 +101,7 @@
 | `seo_gemini.gs` | ۲۳۱ | ۱۶ |
 | `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۷۵۶ | ۱۲۹ |
+| `publish.gs` | ۱۷۹۳ | ۱۳۰ |
 | `v168.gs` | ۲۴۹۴ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
@@ -119,7 +119,7 @@
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
 | `kartable.gs` | ۴۷۷ | ۳۵ |
-| `prauto.gs` | ۳۹۳ | ۲۷ |
+| `prauto.gs` | ۴۵۴ | ۳۰ |
 | `statfill.gs` | ۱۶۰ | ۱۶ |
 | `leadfix.gs` | ۷۳ | ۶ |
 | `specialty.gs` | ۴۶۱ | ۳۵ |

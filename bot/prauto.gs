@@ -136,6 +136,8 @@ function praAutoOne_(r) {
   put.pub_snap = JSON.stringify(nsnap);
   put.rstamp = String(now); put.notified = String(tgPrStamp_(v));
   if (!res) put.review = tgPqNow_() + ' · خودکار';
+  /* v170.69: وضعیت انتظار قدیمی («منتظر بازبینی»، «در صف انتشار») وقتی چیزی برای انتشار نبود هم روشن می‌شود */
+  if (!res && PRA_WAIT_ST.test(String(v.status || ''))) put.status = praS_(v.page) || praS_(v.onsite) ? 'روی سایت' : 'بازبینی شد';
   put.guard_note = badK.map(function (k) { return praLabel_(k) + ': ' + (PRA_WHY[g.bad[k]] || g.bad[k]); }).join(' · ');
   /* نسخهٔ پیش از اولین تغییر این دوره (تا خلاصهٔ بعدی) برای برگرداندن و خلاصهٔ پذیرش */
   var prev = praJ_(v.pub_prev);
@@ -278,6 +280,45 @@ function tgV17052PrAuto() {
   return 'نسخهٔ پایه: ' + seed + ' · دانشجو تأیید خودکار: ' + stu + ' · صف: منتشر ' + t.pub + '، بی انتشار ' + t.none + '، ناموفق ' + t.fail + '، با فیلد ردشده ' + t.bad + ' · ماند برای ساعت‌های بعد: ' + t.left;
 }
 
+/* ───── v170.69: پروفایل‌های جامانده در «منتظر بازبینی» ─────
+   این وضعیت را کد پیش از v170.56 می‌نوشت و صف خودکار فقط پاسخ تازه را برمی‌دارد، پس ردیفی که پاسخ تازه نداشت همیشه منتظر می‌ماند.
+   دانشجو و نقش بی صفحهٔ عمومی ← «بازبینی شد» (مثل v170.52). درمانگر و استاد با پروفایل ← همان روند خودکار با گارد (praAutoOne_).
+   بی هیچ پاسخ پروفایل ← «نیمه‌کاره». خروجی (لاگ عمومی دیپلوی) فقط شمار است. */
+var PRA_WAIT_ST = /^(منتظر بازبینی|در صف انتشار)$/;
+function praStuckFix_() {
+  var now = praNow_(), o = { all: 0, stu: 0, auto: 0, half: 0, fail: 0, st: {} };
+  tgPrAll_().forEach(function (r) {
+    var v = r.v;
+    if (String(v.status || '').trim() !== 'منتظر بازبینی') return;
+    o.all++;
+    if (!/[TES]/.test(String(v.roles || ''))) { tgPqPut_(v.id, { status: 'بازبینی شد', review: tgPqNow_() + ' · خودکار', rstamp: String(now) }); o.stu++; o.st['بازبینی شد'] = (o.st['بازبینی شد'] || 0) + 1; return; }
+    var has = ['photo', 'title', 'city', 'headline', 'method', 'trainings', 'resume'].some(function (k) { return praS_(v[k]); });
+    if (!has) { tgPqPut_(v.id, { status: 'نیمه‌کاره', rstamp: String(now) }); o.half++; o.st['نیمه‌کاره'] = (o.st['نیمه‌کاره'] || 0) + 1; return; }
+    try { praAutoOne_(r); o.auto++; } catch (e) { tgErr_('praStuckFix_', e); o.fail++; }
+    var after = String((tgPrAll_().filter(function (x) { return x.v.id === v.id; })[0] || { v: {} }).v.status || '').trim() || 'خالی';
+    o.st[after] = (o.st[after] || 0) + 1;
+  });
+  return o;
+}
+/* Q-5 (پست مجلهٔ تأییدشده) اگر «دیر شد · نرفت» یا خطا ماند، با همان قاعدهٔ تازه به نوبت بعدی می‌رود */
+function praQ5_(id) {
+  var r = pbQRows_().filter(function (x) { return String(x['شناسه']).trim() === id; })[0];
+  if (!r) return id + ': نیست';
+  var st = String(r['وضعیت']).trim();
+  if (st === PB_ST.sent) return id + ': رفته · لینک ' + (praS_(r['لینک پیام']) ? 'ثبت شده' : 'ثبت نشده');
+  if (st !== PB_ST.late && !/^خطا/.test(st) && st !== PB_ST.q) return id + ': دست نخورد (' + st + ')';
+  pbProp_('PB_LATE_MV:' + id, null);
+  pbSet_('e', PB_T_Q, PB_Q_HEAD, r, { 'وضعیت': PB_ST.q });
+  var t = pbLateNext_(r, pbQRows_(), pbNow_());
+  return id + ': در صف برای ' + (t ? pbFmt_(t) : '؟');
+}
+function tgV17069PrStuck() {
+  var o = praStuckFix_(), q = '';
+  try { q = praQ5_('Q-5'); } catch (e) { q = 'Q-5: خطا ' + String(e.message || e).slice(0, 60); }
+  var st = Object.keys(o.st).map(function (k) { return k + ' ' + o.st[k]; }).join('، ');
+  return 'منتظر بازبینی: ' + o.all + ' · بی صفحهٔ عمومی ' + o.stu + ' · روند خودکار ' + o.auto + ' · نیمه‌کاره ' + o.half + ' · خطا ' + o.fail + (st ? ' · حالا: ' + st : '') + ' · ' + q;
+}
+
 /* ───── آزمون ───── */
 function praTests() {
   var out = [], pass = 0, fail = 0, ok = function (n, c, d) { c ? pass++ : fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !d ? '' : ' · ' + d)); };
@@ -385,6 +426,26 @@ function praTests() {
     ok('یک‌باره: دانشجوی منتظر بازبینی خودکار تأیید شد', TG_MEM['pqrows']['person:نمونه دانشجو'].status === 'بازبینی شد' && /دانشجو تأیید خودکار: 1/.test(o1), o1);
     ok('یک‌باره: خروجی فقط شمار است، بی نام', !/نمونه/.test(o1));
     ok('یک‌باره: به یاسر چیزی نرفت', !msgs().some(function (x) { return String(x.chat) === String(TG_OWNER_CHAT) || String(x.chat) === '700'; }));
+
+    /* v170.69: جامانده در «منتظر بازبینی» بی پاسخ تازه */
+    TG_MEM['pra:now'] = T0;
+    var w4 = { id: 'ther:نمونه چهار', name: 'نمونه چهار', roles: 'T', chat: '904', photo: 'tg:photo:F4', title: 'روان‌شناس', headline: 'کنار شما هستم.', page: 'https://tajrobeh.life/team/x/',
+               review: 'x', status: 'منتظر بازبینی', stamp: String(T0 - 9e6), rstamp: String(T0 - 5e6) };
+    w4.pub_snap = JSON.stringify(praSnapOf_(w4, T0 - 5e6));
+    TG_MEM['pqrows']['ther:نمونه چهار'] = w4;
+    TG_MEM['pqrows']['ther:نمونه پنج'] = { id: 'ther:نمونه پنج', name: 'نمونه پنج', roles: 'T', chat: '905', status: 'منتظر بازبینی', stamp: '0', rstamp: '0' };
+    TG_MEM['pqrows']['person:نمونه دانشجو دو'] = { id: 'person:نمونه دانشجو دو', name: 'نمونه دانشجو دو', roles: 'D', status: 'منتظر بازبینی' };
+    ok('جامانده: صف خودکار برشان نمی‌دارد (ریشه)', !tgPrNeeds_(w4) && !tgPrNeeds_(TG_MEM['pqrows']['ther:نمونه پنج']));
+    TG_MEM['pb:' + PB_T_Q] = [{ 'شناسه': 'Q-5', 'زمان': '2026-10-01 08:00', 'کانال': 'public', 'نوع': 'اطلاعیه', 'کپشن': 'متن نمونه', 'وضعیت': PB_ST.late }];
+    TG_MEM['pb:now'] = pbTehran_(2026, 10, 14, 12, 0).getTime();
+    TG_OUTBOX = [];
+    var o9 = tgV17069PrStuck();
+    var left = Object.keys(TG_MEM['pqrows']).filter(function (k) { return TG_MEM['pqrows'][k].status === 'منتظر بازبینی'; });
+    ok('یک‌بارهٔ v170.69: هیچ ردیفی «منتظر بازبینی» نماند', left.length === 0, left.join('، ') + ' · ' + o9);
+    ok('یک‌بارهٔ v170.69: منتشرشدهٔ بی تغییر ← «روی سایت»، بی انتشار دوباره', TG_MEM['pqrows']['ther:نمونه چهار'].status === 'روی سایت' && dirs('person').length === 0);
+    ok('یک‌بارهٔ v170.69: بی پاسخ پروفایل ← «نیمه‌کاره»؛ دانشجو ← «بازبینی شد»', TG_MEM['pqrows']['ther:نمونه پنج'].status === 'نیمه‌کاره' && TG_MEM['pqrows']['person:نمونه دانشجو دو'].status === 'بازبینی شد');
+    ok('یک‌بارهٔ v170.69: Q-5 دیرشده دوباره در صف نوبت بعدی', pbQById_('Q-5')['وضعیت'] === PB_ST.q && /Q-5: در صف/.test(o9), o9);
+    ok('یک‌بارهٔ v170.69: خروجی فقط شمار است، بی نام', !/نمونه/.test(o9) && o9.length < 200, o9);
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 400), false); }
   finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; }
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
