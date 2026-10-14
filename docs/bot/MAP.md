@@ -80,14 +80,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.71`
+نسخهٔ کد: `v170.72`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۳۵۵ | ۲۰۷۱ |
+| `telegram.gs` | ۳۸۳۷۲ | ۲۰۷۲ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -132,7 +132,7 @@
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۱۴۶۵ | ۱۱۴ |
 | `leadspeed.gs` | ۱۱۵۶ | ۸۷ |
-| `leadclaim.gs` | ۶۰۳ | ۴۳ |
+| `leadclaim.gs` | ۶۱۵ | ۴۳ |
 | `nurture.gs` | ۲۸۹ | ۳۰ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 | `guard.gs` | ۳۲۹ | ۲۵ |
