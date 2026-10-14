@@ -337,6 +337,7 @@ function ciStart_(only, parts) {
   var pl = ciPartsClean_(parts);
   if (pl) P.setProperty('TG_TEST_PARTS', JSON.stringify(pl)); else P.deleteProperty('TG_TEST_PARTS');
   P.deleteProperty('TG_TEST_STIMES');
+  P.deleteProperty('TG_TEST_PROG');   /* v170.70 */
   /* v170.16.2: دور محدود (فقط مجموعه‌های مربوط به تغییر)؛ بی only یعنی دور کامل */
   if (only && only.length) P.setProperty(CI_ONLY_PROP, JSON.stringify({ at: Date.now(), fns: only.map(String).slice(0, 300) }));
   else P.deleteProperty(CI_ONLY_PROP);
