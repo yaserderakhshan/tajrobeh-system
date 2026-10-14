@@ -80,14 +80,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.61`
+نسخهٔ کد: `v170.63`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۲۷۱ | ۲۰۶۹ |
+| `telegram.gs` | ۳۸۲۹۰ | ۲۰۶۹ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۳۴۱ | ۲۵ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -122,6 +122,7 @@
 | `prauto.gs` | ۳۹۳ | ۲۷ |
 | `statfill.gs` | ۱۶۰ | ۱۶ |
 | `leadfix.gs` | ۷۳ | ۶ |
+| `specialty.gs` | ۳۷۴ | ۳۰ |
 | `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `migrate.gs` | ۵۶۲ | ۵۶ |
@@ -228,7 +229,7 @@
 | `TG_INP_PLACES` | «مکان‌های حضوری» | `telegram.gs` `v168.gs` |
 | `TG_INP_ROOMS` | «اتاق‌های حضوری» | `telegram.gs` |
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
-| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadfix.gs` `leadspeed.gs` `leadclaim.gs` `agents.gs` |
+| `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadfix.gs` `specialty.gs` `leadspeed.gs` `leadclaim.gs` `agents.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
 | `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
@@ -244,7 +245,7 @@
 | `TG_PN_TAB` | «صفحهٔ پارتنر» | `telegram.gs` `partners.gs` |
 | `TG_POLICY_TAB` | «سیاست پیام» | `telegram.gs` |
 | `TG_POL_TAB` | «سیاست‌ها» | `telegram.gs` |
-| `TG_POOLS_TAB` | «استخرها» | `telegram.gs` |
+| `TG_POOLS_TAB` | «استخرها» | `telegram.gs` `specialty.gs` |
 | `TG_PQ_QTAB` | «پرسش‌نامهٔ پروفایل» | `telegram.gs` |
 | `TG_PQ_TAB` | «پروفایل سایت» | `telegram.gs` |
 | `TG_PSY_T_APPT` | «نوبت‌ها» | `telegram.gs` |
@@ -269,7 +270,7 @@
 | `TG_STAT_TAB` | «آمار روزانهٔ بات» | `telegram.gs` |
 | `TG_SUP_TAB` | «درخواست سوپرویژن» | `telegram.gs` |
 | `TG_TEST_TAB` | «تست‌ها» | `telegram.gs` |
-| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` `psy2.gs` `sesslen.gs` `leadspeed.gs` |
+| `TG_THER` | «درمانگران» | `telegram.gs` `v168.gs` `specialty.gs` `psy2.gs` `sesslen.gs` `leadspeed.gs` |
 | `TG_TK_TAB` | «پیام‌های درمانگران» | `telegram.gs` `kartable.gs` |
 | `TG_TSK_TAB` | «کارها» | `telegram.gs` |
 | `TG_USERS_TAB` | «کاربران بات» | `telegram.gs` `ebi.gs` |
@@ -278,7 +279,7 @@
 | `TG_WF_TAB` | «بازخورد وبینار» | `telegram.gs` |
 | `UP_TAB` | «پایش سایت» | `uptime.gs` |
 | `V168_T_QUEUE` | «کارتابل پیگیری» | `v168.gs` |
-| `V168_T_VOCAB` | «واژگان» | `v168.gs` |
+| `V168_T_VOCAB` | «واژگان» | `v168.gs` `specialty.gs` |
 | `V17013_OF_TAB` | «کمپین‌های مراجعان» | `v17013.gs` |
 | `V17013_SCHO_TAB` | «بورسیه» | `v17013.gs` |
 
@@ -410,6 +411,8 @@
 | انتشار خودکار پروفایل و گارد (v170.56) | `praTests` |
 | بازسازی آمار روزانه (v170.58) | `sfTests` |
 | اصلاح یک‌بارهٔ شروع درمان (v170.61) | `lfTests` |
+| K07 خط‌های تخصصی: اعلام‌شده، استخرها، مچ‌میکینگ (v170.62) | `spTests` |
+| K07 برچسب لید (v170.63) | `spLabelTests` |
 | جمنای به‌جای گروک (v170.23.7) | `aiTests` |
 | روان‌پزشکی: نقش و اتصال (v170.23.8) | `ps2Tests` |
 | مهاجرت مراجعان به نسخهٔ ۲ (v170.23.6.3) | `migTests` |
