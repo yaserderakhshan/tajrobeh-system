@@ -248,7 +248,8 @@ function soSendRow_(sh, rowNum) {
     }
   });
   var stamp = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd HH:mm');
-  sh.getRange(rowNum, 8, 1, 3).setValues([[errs.length ? 'خطا: ' + errs.join(' ؛ ') : SO_ST_SENT, allIds.join(','), stamp]]);
+  try { sh.getRange(rowNum, 9).setNumberFormat('@'); } catch (eF) {}   /* v170.74: «46748,46749» عدد نشود */
+  sh.getRange(rowNum, 8, 1, 3).setValues([[errs.length ? 'خطا: ' + errs.join(' ؛ ') : SO_ST_SENT, soIdsText_(allIds), stamp]]);
   if (!errs.length && soIsChannel_(r[1]) && allIds.length) {
     var link = 'https://t.me/' + SO_CHANNEL_USER + '/' + allIds[0];
     sh.getRange(rowNum, 11).setValue(link);
@@ -300,6 +301,19 @@ function soPollPayload_(chat, p, isChannel) {
   else if (p.multi) b.allows_multiple_answers = 'true';
   return b;
 }
+/* v170.74: شناسه‌ها همیشه متن، با کاما و بی فاصله */
+function soIdsText_(ids) { return (ids || []).map(String).join(','); }
+/* یک‌باره v170.74: ستون «شناسه پیام» متن ساده؛ خانه‌ای که شیت شناسه‌های کاما‌دار را عدد کرده بود فقط علامت می‌خورد
+   (عدد اصلی برنمی‌گردد؛ رقم‌ها به‌هم چسبیده‌اند). خروجی فقط شمار */
+function tgV17074SoIds() {
+  var sh = soSheet_(SO_TAB_OUT);
+  if (!sh) return 'تب صف ارسال نیست';
+  var n = sh.getMaxRows() - 1, rng = sh.getRange(2, 9, n, 1), v = rng.getValues(), bad = 0;
+  rng.setNumberFormat('@');
+  v.forEach(function (r, i) { if (typeof r[0] === 'number' && r[0] > 1e12) { bad++; sh.getRange(i + 2, 11).setValue(String(sh.getRange(i + 2, 11).getValue() || '') + ' · شناسهٔ پیام‌ها را شیت عدد کرده بود (v170.74)'); } });
+  return 'ستون شناسه پیام: متن ساده · خانهٔ عددشده: ' + bad;
+}
+
 /* یک‌باره v170.73: ستون «نظرسنجی» بعد از «سازنده»، و قفل متن ساده روی «تاریخ شمسی» و «ساعت».
    خانه‌ای که شیت پیش از این به عدد یا تاریخ تبدیل کرده بود همان متن نمایش‌داده‌شده‌اش را می‌گیرد. خروجی فقط شمار */
 function tgV17073SoSetup() {
@@ -466,6 +480,7 @@ function soPollTests() {
     ok('تاریخ Date با سال ۱۴۰۵ ← همان رشتهٔ شمسی', soDay_(new Date(1405, 6, 22)) === '1405-07-22');
     ok('تاریخ متنی بی‌تغییر و «1405» تنها تاریخ نیست', soDay_('۱۴۰۵/۷/۲۲') === '1405-07-22' && soDay_('1405-07-22') === '1405-07-22' && soDay_('1405') === '');
     ok('تاریخ میلادی واقعی (Date) ← شمسی', soDay_(new Date(2026, 9, 14, 12, 0)) === '1405-07-22', soDay_(new Date(2026, 9, 14, 12, 0)));
+    ok('v170.74: شناسه‌های چندپیامی متن با کاما', soIdsText_([46748, 46749]) === '46748,46749' && soIdsText_([]) === '' && /setNumberFormat\('@'\)/.test(String(soSendRow_)));
     ok('ستون «نظرسنجی» آخر، بی جابه‌جایی ستون‌های قبلی', SO_OUT_HEAD.length === 13 && SO_OUT_HEAD[11] === 'سازنده' && SO_OUT_HEAD[12] === 'نظرسنجی' && SO_OUT_HEAD[7] === 'وضعیت' && SO_OUT_HEAD[8] === 'شناسه پیام');
   } catch (e) { fail++; log.push('✗ خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300)); }
   return tgTestTally_(log, fail);
