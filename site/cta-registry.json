@@ -551,10 +551,10 @@
       ],
       "pages": [
         "site/pages/504776-guide.html"
-        ],
-        "links": 1
-      },
-      {
+      ],
+      "links": 1
+    },
+    {
       "code": "pz-assist",
       "line": "pz",
       "label": "دستیار › سؤال دارم",
@@ -631,6 +631,18 @@
       "label": "شروع تراپی › grief",
       "aliases": [
         "gt-grief"
+      ],
+      "pages": [
+        "site/pages/297-get-therapy.html"
+      ],
+      "links": 1
+    },
+    {
+      "code": "pz-gt-hero",
+      "line": "pz",
+      "label": "شروع تراپی › hero (گفت‌وگو با پذیرش در تلگرام)",
+      "aliases": [
+        "gt-hero"
       ],
       "pages": [
         "site/pages/297-get-therapy.html"
