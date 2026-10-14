@@ -80,7 +80,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.74`
+نسخهٔ کد: `v170.73`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -89,7 +89,7 @@
 | `Code.gs` | ۴۲۱ | ۳۳ |
 | `telegram.gs` | ۳۸۳۷۲ | ۲۰۷۲ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
-| `social.gs` | ۴۸۹ | ۳۳ |
+| `social.gs` | ۴۷۴ | ۳۱ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
 | `maint.gs` | ۴ | ۱ |
 | `v162.gs` | ۸۰۰ | ۶۴ |
