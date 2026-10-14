@@ -1736,6 +1736,9 @@ function tgTestTally_(log, fail) {
 
 /* v166.8: مجموعه‌ای که هیچ چیزی نسنجید (۰ قبول و ۰ مردود) مردود حساب می‌شود؛ پیش از این «سبز» دیده می‌شد. */
 function tgTestNorm_(r) {
+  /* v170.75: تکهٔ «اصلی» که با ایست سناریویی (v170.70) وسطش ایستاد ۰ و ۰ برمی‌گرداند و باید «partial» بماند، نه «هیچ چیزی نسنجید».
+     پیش از این همین‌جا partial می‌افتاد و مجموعه مردود ثبت می‌شد (دیپلوی v170.74، اجرای 38599659701). */
+  if (r && typeof r === 'object' && r.partial) return { pass: 0, fail: 0, text: '', partial: true };
   var n = tgTestNorm0_(r);
   if (!n.pass && !n.fail) return { pass: 0, fail: 1, text: n.text || 'این مجموعه هیچ چیزی نسنجید (۰ قبول و ۰ مردود)' };
   return n;

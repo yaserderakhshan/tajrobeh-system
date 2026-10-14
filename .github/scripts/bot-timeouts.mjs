@@ -64,8 +64,9 @@ export function timeoutSelfTest() {
     var out = {};
     [1, 2].forEach(function (k) {
       TG_EXEC_T0 = null; var ref = tgRunPart_(k);
+      /* v170.75: از همان مسیر tgRun (tgTestCall_ و tgTestNorm_)، نه صدا زدن مستقیم */
       TG_EXEC_T0 = Date.now() - 1e9; var n = 0, x = { partial: true };
-      while (x.partial && n < 60) { x = tgRunPart_(k); n++; }
+      while (x.partial && n < 60) { x = tgTestCall_('tgRunTests' + k); n++; }
       out[k] = { ref: ref.pass + '/' + ref.fail, got: x.pass + '/' + x.fail, n: n, left: P.getProperty('TG_TEST_PROG') };
     });
     /* پیشرفت کهنه (مجموعهٔ دیگر) نادیده گرفته می‌شود */
@@ -82,6 +83,7 @@ export function timeoutSelfTest() {
     t(`ایست سناریویی تکهٔ ${k}: نتیجهٔ نهایی همان اجرای یک‌جا`, o[k].ref === o[k].got, JSON.stringify(o[k]));
     t(`ایست سناریویی تکهٔ ${k}: پیشرفت پاک شد`, o[k].left === null, JSON.stringify(o[k]));
   }
+  t('tgTestNorm_ تکهٔ ایستاده را partial نگه می‌دارد، نه مردود', bot.run("(function(){ var r = tgTestNorm_({ pass: 0, fail: 0, text: '', partial: true }); return r.partial === true && r.fail === 0; })()") === true);
   t('پیشرفت کهنهٔ مجموعهٔ دیگر نادیده', o.stale.a === o.stale.b && !o.stale.partial, JSON.stringify(o.stale));
   return bad;
 }
