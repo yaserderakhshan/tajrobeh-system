@@ -730,6 +730,16 @@ function tjp_render($id) {
         if (strpos($f('supervision'), 'بله') === 0) $faq[] = array('کار بالینی زیر نظر سوپروایزر است؟', 'بله؛ ' . tjp_3p($f('supervision')) . (strpos($f('personal'), 'الان') === 0 ? ' و در تراپی شخصی هم هست.' : '.') . ' سوپرویژن و تراپی شخصی از معیارهای بالینی تجربه برای درمانگرهاست.');
     }
     if (isset($roles['sup'])) $faq[] = array('چطور می‌توانم سوپرویژن بگیرم؟', 'از راه مدرسهٔ تجربه. در بات تجربه به مدرسه وصل شوید و درخواست سوپرویژن را بنویسید؛ مدرسه ظرفیت و زمان را هماهنگ می‌کند.');
+    /* ── فضای حضوری پارتنر برای درمانگر (۲۲ مهر ۱۴۰۵): اسلاگ درمانگر به صفحهٔ پارتنر؛ هر پارتنر تازه یک سطر ── */
+    $tjpPx = array(
+        'simin-ghrbani' => array('/partners/germany/', 'تجربه پارتنر اسن، آلمان', 'محلهٔ بوربک · شنبه‌ها ۸ صبح تا ۸ شب · حضوری و آنلاین', 'اسن'),
+    );
+    $tjpSl = (string) get_post_field('post_name', $id);
+    if ($isT && isset($tjpPx[$tjpSl])) {
+        $tx = $tjpPx[$tjpSl];
+        $faq[] = array('جلسهٔ حضوری هم ممکن است؟', 'بله. جلسه‌های حضوری در ' . $tx[1] . ' برگزار می‌شود (' . $tx[2] . '). جلسهٔ معارفه آنلاین و رایگان است و نشانی دقیق را پذیرش بعد از قطعی شدن وقت می‌فرستد.');
+        $body .= '<section class="tjp-sec" id="inperson" style="padding-block:22px"><div class="wrap"><a href="' . esc_url($tx[0]) . '" style="display:flex;align-items:center;gap:14px;max-width:760px;margin-inline:auto;background:#fff;border:1.5px solid var(--tj-red-400,#d9737a);border-radius:18px;padding:12px 16px;color:inherit;text-decoration:none"><span style="flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--tj-tint,#faeced);font-size:20px" aria-hidden="true">🏠</span><span style="flex:1;min-width:0;line-height:1.8"><b style="display:block;color:var(--tj-ink,#0e0e0e)">جلسهٔ حضوری در ' . esc_html($tx[3]) . ': ' . esc_html($tx[1]) . '</b><small style="display:block;color:var(--tj-soft,#4e4e4e);font-size:13.5px">' . esc_html($tx[2]) . '</small></span><span style="flex:none;color:var(--tj-red,#c83f49);font-weight:700;font-size:14px;white-space:nowrap">دیدن فضا ←</span></a></div></section>';
+    }
     $faqH = '';
     foreach ($faq as $q) $faqH .= '<details><summary>' . tjp_e($q[0]) . '</summary><div class="ans"><p>' . tjp_e($q[1]) . '</p></div></details>';
     if ($faqH) $body .= '<section class="faq" id="faq"><div class="wrap"><div class="center rv"><span class="eyebrow">پرسش‌های رایج</span><h2 class="h2">' . ($isT ? 'دربارهٔ جلسه‌ها' : 'دربارهٔ سوپرویژن') . '</h2></div><div class="faq-list rv">' . $faqH . '</div></div></section>';
