@@ -4385,6 +4385,7 @@ function tgQuizMode_(chat, key) {
 
 function tgQuizFinish_(chat, key) {
   tgSetVal_('qm', chat, key);
+  if (typeof spKidAsk_ === 'function' && spKidAsk_(chat)) return;   /* v170.64: پرسش‌های والد کودک و نوجوان */
   if (typeof v1689Ask_ === 'function' && v1689Ask_(chat)) return;   /* v168.9: کشور و آشنایی پیش از شماره */
   tgAskPhone_(chat);
 }
@@ -4499,6 +4500,7 @@ function tgOnPhone_(chat, name, uname, phone) {
   if (ztz) extra['منطقهٔ زمانی'] = ztz;   /* v170.23.21 */
   if (typeof v168ModeExtras_ === 'function') v168ModeExtras_(chat, extra);   /* v168 فاز ۶ */
   if (typeof v1689Extras_ === 'function') v1689Extras_(chat, extra);   /* v168.9: کشور و آشنایی */
+  if (typeof spKidExtras_ === 'function') spKidExtras_(chat, extra);   /* v170.64: پرسش‌های والد */
   if (typeof v17013Extras_ === 'function') v17013Extras_(chat, extra);   /* v170.13: آفر کمپین */
   var known = tgLeadByPhone_(p);
   if (known < 2) { try { const byChat = tgFindLead_(chat); if (byChat >= 2) known = byChat; } catch (eK) {} }
@@ -4703,6 +4705,7 @@ function tgOnCallback_(cq) {
   if (typeof VK_CUR !== 'undefined') VK_CUR = String(chat);
   if (data.indexOf('vk:') === 0 && typeof vkCb_ === 'function') return vkCb_(cq, data.slice(3), chat, name, uname);
   if (data.indexOf('ebi:') === 0 && typeof ebiCb_ === 'function') return ebiCb_(cq, chat, data, name, uname);   /* v170.16: کمپین C-004 */
+  if (data.indexOf('tq:') === 0 && typeof thqCb_ === 'function') return thqCb_(cq, chat, data);   /* v170.64: پرسش از درمانگران */
   try { tgMyRoles_(chat, cq.from && cq.from.username); } catch (e) {}
 
   if (tgV1Cb_(chat, data, name, uname)) return;
@@ -4789,6 +4792,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('ag:') === 0) return tgQuizMode_(chat, data.slice(3));
   if (data.indexOf('md:') === 0) return tgInpMode_(chat, data.slice(3));
   if ((data.indexOf('lc:') === 0 || data.indexOf('lh:') === 0) && typeof v1689Cb_ === 'function') { v1689Cb_(chat, data); return; }   /* v168.9 */
+  if (data.indexOf('kq:') === 0 && typeof spKidCb_ === 'function') { spKidCb_(chat, data); return; }   /* v170.64 */
   if (data.indexOf('ip:') === 0) return tgInpPick_(chat, data.slice(3));
   if (data.indexOf('iy:') === 0) return tgInpDayPick_(chat, data.slice(3));
   if (data.indexOf('it:') === 0) return tgInpWho_(chat, data.slice(3));
@@ -6198,6 +6202,7 @@ function tgTherRoute_(chat, who, text, m) {
 
   // اگر وسط فرم پروفایل است، همان‌جا ادامه بدهد
   if (tgProStep_(chat, text, m) === true) return;
+  if (typeof thqText_ === 'function' && thqText_(chat, text)) return;   /* v170.64: پاسخ متنی پرسش از درمانگران */
   if (typeof tgScSetText_ === 'function' && tgScSetText_(chat, who, text)) return;
   if (typeof tgScHourText_ === 'function' && tgScHourText_(chat, who, text)) return;
   if (String(text || '').indexOf('طول جلسه و استراحت') > -1 && typeof tgScSetStart_ === 'function') return tgScSetStart_(chat, who);
@@ -7189,6 +7194,7 @@ function tgWatchdog(e) {
      خودشان روزی یک بار و فقط از ساعت ۲۲ تهران کار می‌کنند؛ بقیهٔ ساعت‌ها فقط یک خواندن Property است. */
   S('tgStatTick_', 'must', tgStatTick_);
   S('tgRmStatTick_', 'must', tgRmStatTick_);
+  S('thqTick_', 'must', typeof thqTick_ === 'function' ? thqTick_ : null);   /* v170.64: پرسش از درمانگران، ۹ تا ۲۱ تهران؛ یادآوری ۴۸ ساعته */
   S('praDaily_', 'must', typeof praDaily_ === 'function' ? function () { return praDaily_(); } : null);   /* v170.56: خلاصهٔ تغییر پروفایل‌ها، ۱۰ صبح؛ بیرون از آن ساعت فقط یک خواندن Property */
   S('asWeeklyMaybe_', 'light', typeof asWeeklyMaybe_ === 'function' ? asWeeklyMaybe_ : null);   /* v170.23.17: گزارش هفتگی تیم‌های دستیار، شنبه یک بار */
   S('nuTick_', 'light', typeof nuTick_ === 'function' ? nuTick_ : null);   /* v170.23.13: پیگیری گیرکرده‌ها */
@@ -21976,6 +21982,7 @@ function tgLeadOfRow_(v, row, hm) {
     noans: Number(tgLatinDigits_(String(tgLeadHv_(v, hm, 'شمار بی‌پاسخ') || '0'))) || 0,
     reason: String(tgLeadHv_(v, hm, 'دلیل بستن') || '').trim(),
     offer: String(tgLeadHv_(v, hm, 'آفر') || '').trim(),   /* v170.13 */
+    kidq: String(tgLeadHv_(v, hm, 'پرسش‌های والد') || '').trim(),   /* v170.64: فقط کارت لید پذیرش */
     tz: String(tgLeadHv_(v, hm, 'منطقهٔ زمانی') || '').trim(), best: String(tgLeadHv_(v, hm, 'زمان مناسب') || '').trim(),   /* v170.23.22 */
     country: String(tgLeadHv_(v, hm, 'کشور محل زندگی') || '').trim(), topic: String(tgLeadHv_(v, hm, 'موضوع اصلی') || '').trim(),
     follow: String(tgLeadHv_(v, hm, 'پیگیری خودکار') || '').trim(),   /* v170.23.13: دنبالهٔ پیگیری و «دیگر پیام نده» */
@@ -22005,6 +22012,7 @@ function tgLeadCardText_(l) {
   t += '\n' + tgEsc_(l.src || 'منبع نامعلوم');
   if (l.region) t += ' · ' + tgEsc_(l.region);
   if (l.offer) t += '\n🎁 آفر: ' + tgEsc_(l.offer);   /* v170.13 */
+  if (l.kidq) t += '\n👪 ' + tgEsc_(l.kidq);   /* v170.64 */
   if (!l.closed && (String(l.region || '').indexOf('خارج') > -1 || l.tz || l.best)) { try { t += '\n🕘 پنجرهٔ تماس (تهران): ' + abWinLabel_(abLeadTz_(l), abLeadBest_(l)); } catch (eW) {} }   /* v170.23.22 */
   if (l.phone) t += '\n📱 <code>' + tgEsc_(l.phone) + '</code>';
   t += '\n' + (l.stage === 'first'

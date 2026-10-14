@@ -156,6 +156,7 @@ jobs:
       # بی‌صدا پاک می‌شد. پس کد زنده باید یا با آخرین دیپلوی این مسیر (برچسب bot-live) یکی باشد، یا با
       # شاخهٔ اصلی پیش از این مرج، یا با همین کامیت. وگرنه کار می‌ایستد (مگر force).
       - name: بررسی کد زنده پیش از بازنویسی
+        id: guard
         env:
           BEFORE: ${{ github.event.before }}
           FORCE: ${{ inputs.force }}
@@ -203,6 +204,12 @@ jobs:
             if snap "$c" /tmp/snap && same_as /tmp/snap; then echo "کد زنده با $c یکی است؛ بازنویسی امن است."; exit 0; fi
           done
 
+          # v170.64: کد زنده عین کد یکی از کامیت‌های اخیر شاخهٔ اصلی است (مثلاً آزمون شبانه کد خودش را جا گذاشته بود). در گیت هست،
+          # پس گام بعد کد پروژه را به bot-live برمی‌گرداند و انتشار عادی ادامه می‌یابد. کد ناشناخته همچنان توقف است.
+          if K=$(bash .github/scripts/bot-prev.sh known $R $(git rev-list --first-parent -n 40 HEAD)); then
+            echo "::warning::کد زندهٔ پروژه همان کامیت $K گیت است، نه bot-live؛ پیش از انتشار به bot-live برمی‌گردد."
+            echo "resync=$K" >> "$GITHUB_OUTPUT"; exit 0
+          fi
           echo "::warning::کد زندهٔ Apps Script با هیچ‌کدام از این‌ها یکی نیست: $CANDS"
           snap HEAD /tmp/snap
           for f in $(cd $R && ls -1); do
@@ -213,6 +220,17 @@ jobs:
           if [ "$FORCE" = "true" ]; then echo "::warning::force روشن است؛ بازنویسی می‌شود."; exit 0; fi
           echo "::error::کد زنده تغییرهایی بیرون از گیت دارد. اول آن‌ها را به مخزن بیاور، یا اجرای دستی را با force بزن."
           exit 1
+
+      # v170.64: کد پروژه کامیت دیگری از گیت بود (گام قبل)؛ پیش از هر چیز به کد bot-live برمی‌گردد تا پشتوانهٔ برگشت درست باشد
+      - name: کد پروژه به bot-live
+        if: steps.guard.outputs.resync != ''
+        run: |
+          set -e
+          bash .github/scripts/bot-prev.sh rollback-src "$(git rev-parse 'refs/tags/bot-live^{commit}')" /tmp/resync bot/.clasp.json
+          (cd /tmp/resync && clasp push --force)
+          R=/tmp/remote; rm -rf $R; mkdir -p $R; cp bot/.clasp.json $R/
+          (cd $R && clasp pull > /dev/null); rm -f $R/.clasp.json $R/ci_key.gs
+          echo "::notice::کد پروژه از ${{ steps.guard.outputs.resync }} به bot-live برگشت."
 
       - name: وضعیت فعلی (برای برگشت)
         id: prev
@@ -432,6 +450,16 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           node -e "import('./site/tools/site-lib.mjs').then(m => m.report('آزمون کامل شبانهٔ بات روی Apps Script قرمز شد. کد زنده عوض نشده است. جزئیات: ' + process.env.RUN_URL, { type: 'گزارش', ref: 'BOT-NIGHTLY' }))"
+
+      # v170.64: آزمون شبانه کد خودش را برای تست در پروژه می‌گذارد؛ در پایان (سبز یا قرمز) کد پروژه به bot-live برمی‌گردد.
+      # پیش از این اجرای سبز شبانه کد را جا می‌گذاشت و اگر بعد از یک برگشت خودکار اجرا می‌شد، برگشت را می‌پوشاند (۲۲ مهر، #171).
+      - name: آزمون شبانه، کد پروژه به bot-live
+        if: always() && env.NIGHTLY == '1' && steps.push.outcome == 'success'
+        run: |
+          set -e
+          bash .github/scripts/bot-prev.sh rollback-src "$(git rev-parse 'refs/tags/bot-live^{commit}')" /tmp/nightly_back bot/.clasp.json
+          (cd /tmp/nightly_back && clasp push --force)
+          echo "::notice::آزمون شبانه تمام شد؛ کد پروژه همان bot-live است."
 
       # ---------- برگشت خودکار: فقط اگر کد push شده بود و گامی بعد از آن قرمز شد ----------
       - name: برگشت خودکار به نسخهٔ قبل

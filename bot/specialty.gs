@@ -371,3 +371,90 @@ function spLabelTests() {
   return tgTestTally_(log, fail);
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'spLabelTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['K07 برچسب لید (v170.63)', 'spLabelTests']); } catch (eSl) {}
+/* ============================================================================
+   بخش ۳ (v170.64): کودک و نوجوان در فرم پذیرش بات (تصمیم D49: هیچ‌کدام الزامی نیست)
+   - نوع «کودک زیر ۱۲»: «پرکنندهٔ فرم والد یا سرپرست است؟» و سن کودک.
+   - نوع «نوجوان ۱۲ تا ۱۷»: «والد در جریان هست و موافق است؟» (اختیاری).
+   پرسش پیش از کشور و شماره می‌آید (tgQuizFinish_). جواب فقط در ستون «پرسش‌های والد» لید و کارت لید پذیرش دیده می‌شود.
+   پذیرش خودش تصمیم می‌گیرد؛ هیچ مسیری قفل نمی‌شود.
+   ============================================================================ */
+var SP_COL_KIDQ = 'پرسش‌های والد';
+var SP_SKIP = '⏭ رد کردن';
+var SP_KQ = {
+  par:  { t: 'پرکنندهٔ فرم والد یا سرپرست است؟', o: ['بله', 'خیر'], skip: true, lbl: 'پرکنندهٔ فرم والد یا سرپرست' },
+  age:  { t: 'سن کودک؟', o: ['زیر ۳ سال', '۳ تا ۶ سال', '۷ تا ۹ سال', '۱۰ تا ۱۲ سال'], skip: true, lbl: 'سن کودک' },
+  tpar: { t: 'والد در جریان هست و موافق است؟', o: ['بله', 'هنوز نه', 'ترجیح می‌دهم نگویم'], skip: false, lbl: 'والد در جریان و موافق' }
+};
+try { if (TG_LEAD_FIELDS.indexOf(SP_COL_KIDQ) < 0) TG_LEAD_FIELDS.push(SP_COL_KIDQ); } catch (eKq) {}
+function spKidSeq_(chat) {
+  var k = spKindOfChat_(chat);
+  if (k === 'کودک زیر ۱۲') return ['par', 'age'];
+  if (k === 'نوجوان ۱۲ تا ۱۷') return ['tpar'];
+  return [];
+}
+/* پرسش بعدی را می‌فرستد؛ true اگر پرسید */
+function spKidAsk_(chat) {
+  var seq = spKidSeq_(chat);
+  for (var i = 0; i < seq.length; i++) {
+    var q = seq[i];
+    if (tgGetVal_('kq' + q, chat)) continue;
+    var Q = SP_KQ[q], rows = Q.o.map(function (o, j) { return [{ text: o, callback_data: 'kq:' + q + ':' + j }]; });
+    if (Q.skip) rows.push([{ text: SP_SKIP, callback_data: 'kq:' + q + ':x' }]);
+    tgSend_(chat, Q.t, { inline_keyboard: rows });
+    return true;
+  }
+  return false;
+}
+/* دکمه‌ها: kq:<پرسش>:<شمارهٔ گزینه|x>. sec:public (مراجع در فرم پذیرش خودش؛ فقط کلید همین چت را می‌نویسد) */
+function spKidCb_(chat, data) {
+  var p = String(data).split(':'), q = p[1], Q = SP_KQ[q];
+  if (!Q || tgGetVal_('kq' + q, chat)) return true;
+  var v = p[2] === 'x' ? '-' : (Q.o[Number(p[2])] || '-');
+  tgSetVal_('kq' + q, chat, v);
+  if (v !== '-') tgSend_(chat, '✅ ' + tgEsc_(v));
+  if (spKidAsk_(chat)) return true;
+  if (typeof v1689Ask_ === 'function' && v1689Ask_(chat)) return true;
+  tgAskPhone_(chat);
+  return true;
+}
+/* از tgOnPhone_: جواب‌ها در ستون «پرسش‌های والد» */
+function spKidExtras_(chat, extra) {
+  try {
+    var parts = [];
+    spKidSeq_(chat).forEach(function (q) { var v = tgGetVal_('kq' + q, chat); if (v && v !== '-') parts.push(SP_KQ[q].lbl + ': ' + v); });
+    if (parts.length) extra[SP_COL_KIDQ] = parts.join(' · ');
+  } catch (e) { tgErr_('spKidExtras_', e); }
+  return extra;
+}
+
+
+function spKidTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX };
+  TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
+  var lastT = function () { var m = TG_OUTBOX.filter(function (x) { return x.text; }); return m.length ? m[m.length - 1] : {}; };
+  try {
+    spStartArg_(901, 'th_kid');
+    tgQuizFinish_(901, 'on');
+    var m1 = lastT();
+    ok('کودک زیر ۱۲: پیش از شماره «پرکنندهٔ فرم والد یا سرپرست است؟» با «رد کردن»', m1.text === SP_KQ.par.t && JSON.stringify(m1.markup).indexOf('kq:par:x') > -1, JSON.stringify(m1).slice(0, 200));
+    spKidCb_(901, 'kq:par:0');
+    ok('بعد: سن کودک', lastT().text === SP_KQ.age.t);
+    spKidCb_(901, 'kq:age:x');
+    ok('رد کردن سن: مسیر به کشور و شماره ادامه می‌دهد', lastT().text !== SP_KQ.age.t && tgGetVal_('kqage', 901) === '-');
+    var ex1 = spKidExtras_(901, {});
+    ok('جواب در ستون «پرسش‌های والد»؛ ردشده نمی‌آید', ex1[SP_COL_KIDQ] === 'پرکنندهٔ فرم والد یا سرپرست: بله', JSON.stringify(ex1));
+    TG_OUTBOX = []; spStartArg_(902, 'th_teen'); tgQuizFinish_(902, 'on');
+    ok('نوجوان: یک پرسش اختیاری با «ترجیح می‌دهم نگویم»', lastT().text === SP_KQ.tpar.t && JSON.stringify(lastT()).indexOf('kq:tpar:2') > -1);
+    spKidCb_(902, 'kq:tpar:1');
+    ok('نوجوان: «هنوز نه» ثبت می‌شود و مسیر قفل نمی‌شود', spKidExtras_(902, {})[SP_COL_KIDQ] === 'والد در جریان و موافق: هنوز نه' && lastT().text !== SP_KQ.tpar.t);
+    TG_OUTBOX = []; tgQuizFinish_(903, 'on');
+    ok('بی نوع کودک و نوجوان: پرسش تازه نمی‌آید', !TG_OUTBOX.some(function (x) { return x.text === SP_KQ.par.t || x.text === SP_KQ.tpar.t; }));
+    ok('کارت لید پذیرش جواب را نشان می‌دهد', tgLeadCardText_({ name: 'نمونه', kidq: 'سن کودک: ۷ تا ۹ سال' }).indexOf('سن کودک: ۷ تا ۹ سال') > -1);
+    ok('ستون «پرسش‌های والد» در فهرست ستون‌های لید (در انتها ساخته می‌شود)', TG_LEAD_FIELDS.indexOf(SP_COL_KIDQ) > -1);
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300)); }
+  finally { TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; }
+  return tgTestTally_(log, fail);
+}
+try { if (TG_SUITES.every(function (s) { return s[1] !== 'spKidTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['K07 پرسش‌های والد کودک و نوجوان (v170.64)', 'spKidTests']); } catch (eSk) {}
