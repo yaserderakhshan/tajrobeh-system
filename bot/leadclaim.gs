@@ -154,7 +154,11 @@ function lcNext_(st, now) {
 function lcPass_(code, st, l, now, why) {
   var from = st.to || '', boss = lcBoss_(), nx = lcNext_(st, now), waited = Math.round((now - (st.s || st.t || now)) / 60000), cf = lcCfg_();
   var told = st.lt && now - st.lt < 5 * 60000;   /* خبر «مهلت تماس اول» همین الان رفته؛ پیام دوم به سرپرست نه */
+  /* v170.77: ته زنجیره (کس دیگری در ساعت کاری نیست) خبر سرپرست فقط یک بار برای هر لید. پیش از این هر ۳۰ دقیقه تکرار می‌شد
+     (۱۳ و ۱۴ مهر هر روز حدود ۴۰۰ پیام برای همان ۱۴ لید در گروه پذیرش) */
+  if (!nx && st.bn) told = true;
   if (why === 'مهلت' && boss && lcNorm_(boss.name) !== lcNorm_(from) && !told) {
+    if (!nx) st.bn = now;
     tgNotify_(boss.chat, TG_NK.task, '⏱ <b>لید ' + tgEsc_(code) + ' در قول برداشته نشد</b>\n' + tgFa_(waited) + ' دقیقه از شروع قول گذشته و «برداشتم» نخورد. ' +
       (nx ? 'به نفر بعدی رسید: ' + tgEsc_(nx.name) + '.' : 'کس دیگری در ساعت کاری نیست؛ لطفاً خودتان پیگیری کنید.') + '\n\n' + tgLeadLine_(l), { ref: code });
   }
@@ -481,6 +485,17 @@ function lcTests() {
     TG_OUTBOX = [];
     var l8 = lead('L-7008'), x8 = { k: 'L-7008', n: 2, t: T('10', '10:00'), to: 'کشیک الف', a: T('10', '09:55') };
     ok('صف پیش از این نسخه: کارت و رد دوباره نمی‌گیرد', lcStep_(x8, l8, T('10', '10:40')) && x8.n === 3 && !TG_OUTBOX.some(function (o) { return o.kind === 'msg'; }) && !evs(LC_EV.claim).length);
+
+    /* v170.77: ته زنجیره، خبر سرپرست فقط یک بار */
+    var cnt77 = function () { return (TG_MEM['notify'] || []).concat(TG_MEM['queue'] || []).filter(function (n) { return n.chat === '9100' && /L-7077 در قول برداشته نشد/.test(n.text || ''); }).length; };
+    var l77 = lead('L-7077'), st77 = { a: T('10', '22:00'), s: T('10', '22:00'), t: T('10', '22:00'), pr: 15, to: 'کشیک ب', tr: ['کشیک الف', 'کشیک ب'] };
+    var c0 = cnt77();
+    var nx77 = lcPass_('L-7077', st77, l77, T('10', '23:00'), 'مهلت');
+    ok('v170.77: ته زنجیره (کسی در ساعت کاری نیست): یک خبر به سرپرست', nx77 === null && cnt77() === c0 + 1 && !!st77.bn, String(cnt77() - c0));
+    lcPass_('L-7077', st77, l77, T('10', '23:30'), 'مهلت'); lcPass_('L-7077', st77, l77, T('11', '00:00'), 'مهلت');
+    ok('v170.77: نوبت‌های بعدی همان لید خبر تکراری ندارند', cnt77() === c0 + 1, String(cnt77() - c0));
+    ok('v170.77: وضعیتی که فقط پذیرش بعد از تماس می‌گذارد تماس اول است؛ «جدید» و «معارفه رزرو شد» نه',
+      tgDutyActed_(TG_ST.NOANS) && tgDutyActed_(TG_ST.FOLLOW) && tgDutyActed_(TG_ST.REF) && !tgDutyActed_(TG_ST.NEW) && !tgDutyActed_(TG_ST.BOOKED) && !tgDutyActed_('') && /tgDutyActed_\(l\.status\)/.test(String(tgDutyRun_)));
 
     /* داشبورد */
     var E = function (code, what, to, note, t) { return { t: t || T('10', '12:00'), code: code, what: what, to: to, note: note || '' }; };
