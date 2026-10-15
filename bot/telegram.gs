@@ -10554,12 +10554,38 @@ var TG_NIGHT_LINES = [];
 /* v170.23.12.1: خط‌ها دادهٔ واقعی می‌خوانند؛ یک بار در هر اجرا (گزارش هر ناظر جدا ساخته می‌شود) و در آزمون خشک هرگز
    (آزمون «دامنهٔ گزارش» چهار بار tgDayReport_ می‌سازد و دیپلوی v170.23.13 روی همین ۵۵ دقیقه ماند) */
 var TG_NIGHT_MEMO = null;
+/* v170.76: از ۱۶ مهر گزارش ۲۴ ساعته هر شب در سقف ۶ دقیقهٔ Apps Script وسط همین خط‌ها کشته می‌شد (ردیف «سهمیهٔ اجرا» که خط اول
+   می‌نویسد هر شب آمد، «نظارت روزانه» و پیام نه). حالا هر خط زمان خودش را در TG_DAILY_MS می‌نویسد و اگر از شروع tgDaily
+   بیش از TG_NIGHT_BUDGET_MS گذشته باشد، بقیهٔ خط‌ها نمی‌آیند و نامشان در یک خط می‌آید. */
+var TG_DAILY_T0 = 0, TG_NIGHT_BUDGET_MS = 120000, TG_DAILY_EXTRA_MS = 210000;
 function tgNightLines_() {
   if (typeof TG_DRY !== 'undefined' && TG_DRY) return [];
   if (TG_NIGHT_MEMO) return TG_NIGHT_MEMO;
-  var out = TG_NIGHT_MEMO = [];
-  for (var i = 0; i < TG_NIGHT_LINES.length; i++) { try { var l = TG_NIGHT_LINES[i](); if (l) out.push(l); } catch (e) { try { tgErr_('tgNightLines_', e); } catch (e2) {} } }
+  return (TG_NIGHT_MEMO = tgNightRun_(TG_NIGHT_LINES, TG_DAILY_T0, TG_NIGHT_BUDGET_MS, function () { return Date.now(); }, tgDailyMs_));
+}
+/** اجرای خط‌ها با سقف زمان از t0 (t0 صفر یعنی بی سقف، مثل گزارش درخواستی ناظر) */
+function tgNightRun_(lines, t0, budget, now, rec) {
+  var out = [], skip = [];
+  for (var i = 0; i < lines.length; i++) {
+    var f = lines[i], nm = (f && f.name) || ('خط ' + i);
+    if (t0 && now() - t0 > budget) { skip.push(nm); continue; }
+    var a = now();
+    try { var l = f(); if (l) out.push(l); } catch (e) { try { tgErr_('tgNightLines_', e); } catch (e2) {} }
+    if (rec) rec(nm, now() - a);
+  }
+  if (skip.length) out.push('⏳ برای زمان اجرا نیامد: ' + skip.join('، '));
   return out;
+}
+/** زمان هر قدم گزارش شبانه، فقط برای عیب‌یابی (ci 'stats' ← bot-monitor چاپ می‌کند)؛ جدا از RS تا در جمع سهمیه دوبار شمرده نشود */
+function tgDailyMs_(name, ms) {
+  if (typeof TG_DRY !== 'undefined' && TG_DRY) return;
+  try {
+    var p = PropertiesService.getScriptProperties(), day = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd'), o = {};
+    try { o = JSON.parse(p.getProperty('TG_DAILY_MS') || '{}') || {}; } catch (e) { o = {}; }
+    if (o.day !== day) o = { day: day, s: {} };
+    o.s[name] = Math.round(ms / 100) / 10;
+    p.setProperty('TG_DAILY_MS', JSON.stringify(o));
+  } catch (e) {}
 }
 function tgDayReport_(d) {
   const L = [];
@@ -10703,16 +10729,19 @@ function tgDayChart() {
 
 function tgDaily(e) {
   if (ciPaused_(e, 'tgDaily', 'defer')) return;
-  try { if (e && e.triggerUid) { var pd = PropertiesService.getScriptProperties(), dd = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd'); if (pd.getProperty('TG_DAILY_DAY') === dd) return; pd.setProperty('TG_DAILY_DAY', dd); } } catch (eD) {}   /* v170.72: یک بار در روز، چه از تریگر چه از نگهبان */
+  /* v170.76: قفل روز (TG_DAILY_DAY) فقط بعد از فرستادن گزارش. پیش از این اول کار گذاشته می‌شد و اجرایی که در سقف ۶ دقیقه
+     کشته می‌شد جلوی اجرای دوبارهٔ نگهبان (tgDailyTick_) را هم می‌گرفت. شروع هر تلاش در TG_DAILY_TRY (روز|شمار|زمان). */
+  var pd = null, dd = '';
+  try {
+    pd = PropertiesService.getScriptProperties(); dd = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd');
+    if (e && e.triggerUid) { if (pd.getProperty('TG_DAILY_DAY') === dd || !tgDailyMayTry_(pd, dd)) return; tgDailyTryMark_(pd, dd); }
+  } catch (eD) {}
+  TG_DAILY_T0 = Date.now(); TG_NIGHT_MEMO = null;
   var rs0 = Date.now(); try {   /* v166.18: سنجش زمان اجرا (بدنه بی‌تغییر) */
   const d = tgDayWin_();
+  tgDailyMs_('tgDayWin_', Date.now() - rs0);
   const txt = tgDayReport_(d);
   try { tgDayWrite_(d); } catch (e) { tgErr_('tgDayWrite_: ' + e); }
-  try { tgDayChart(); } catch (e) { tgErr_('tgDayChart: ' + e); }
-  try { tgTqRemind_(); } catch (e) { tgErr_('tgTqRemind_: ' + e); }   /* v166.21: درخواست اتصال بی‌جواب */
-  try { if (typeof scDaily_ === 'function') scDaily_(new Date()); } catch (e) { tgErr_('scDaily_: ' + e); }   /* v166.25: یادآوری جلسهٔ بالینی، اتصال دانشجو */
-  try { if (typeof opsNightly_ === 'function') opsNightly_(); } catch (e) { tgErr_('opsNightly_: ' + e); }   /* v169.2: پایان روز حضور، گزارش گاندی، کارکرد هفتگی */
-  try { tgFillJalali_(false); } catch (e) { tgErr_('tgFillJalali_: ' + e); }
   const targets = tgWatchTargets_();
   const cache = {};
   var sent = 0;
@@ -10721,8 +10750,33 @@ function tgDaily(e) {
     if (cache[key] === undefined) cache[key] = tgDayReport_(tgDayView_(d, tgScope_(key)));
     for (var j = 0; j < targets[i].ids.length; j++) { tgSend_(targets[i].ids[j], cache[key]); sent++; }
   }
+  try { if (pd && dd) pd.setProperty('TG_DAILY_DAY', dd); } catch (eL) {}
+  tgDailyMs_('گزارش', Date.now() - rs0);
+  /* کارهای پایان روز بعد از گزارش؛ اگر وقت کم است، نگهبان ساعت بعد (tgDailyTick_ ← tgDailyExtra_) */
+  if (Date.now() - TG_DAILY_T0 > TG_DAILY_EXTRA_MS) { try { if (pd) pd.setProperty('TG_DAILY_EXTRA', dd); } catch (eX) {} }
+  else tgDailyExtra_();
   return sent ? txt : 'هیچ ناظری با chat_id ثبت نشده؛ گزارش فقط در تب نوشته شد.\n\n' + txt;
-  } finally { tgRunStat_('tgDaily', rs0); }
+  } finally { TG_DAILY_T0 = 0; tgRunStat_('tgDaily', rs0); }
+}
+/** کارهای پایان روز که پیش از v170.76 پیش از گزارش می‌رفتند */
+function tgDailyExtra_() {
+  var t0 = Date.now();
+  try { tgDayChart(); } catch (e) { tgErr_('tgDayChart: ' + e); }
+  try { tgTqRemind_(); } catch (e) { tgErr_('tgTqRemind_: ' + e); }   /* v166.21: درخواست اتصال بی‌جواب */
+  try { if (typeof scDaily_ === 'function') scDaily_(new Date()); } catch (e) { tgErr_('scDaily_: ' + e); }   /* v166.25: یادآوری جلسهٔ بالینی، اتصال دانشجو */
+  try { if (typeof opsNightly_ === 'function') opsNightly_(); } catch (e) { tgErr_('opsNightly_: ' + e); }   /* v169.2: پایان روز حضور، گزارش گاندی، کارکرد هفتگی */
+  try { tgFillJalali_(false); } catch (e) { tgErr_('tgFillJalali_: ' + e); }
+  tgDailyMs_('کارهای پایان روز', Date.now() - t0);
+}
+/** تلاش تازه مجاز است؟ هر روز حداکثر ۳ تلاش، و تا ۷ دقیقه بعد از شروع تلاش قبلی نه (شاید هنوز در حال اجراست) */
+function tgDailyMayTry_(p, day) {
+  var a = String(p.getProperty('TG_DAILY_TRY') || '').split('|');
+  if (a[0] !== day) return true;
+  return Number(a[1] || 0) < 3 && Date.now() - Number(a[2] || 0) > 7 * 60000;
+}
+function tgDailyTryMark_(p, day) {
+  var a = String(p.getProperty('TG_DAILY_TRY') || '').split('|');
+  p.setProperty('TG_DAILY_TRY', day + '|' + ((a[0] === day ? Number(a[1] || 0) : 0) + 1) + '|' + Date.now());
 }
 
 /* تریگر: هر شب ساعت ۲۱ به وقت تهران، فقط همین یکی. */
@@ -27725,9 +27779,14 @@ function tgDailyTick_() {
   try {
     var p = PropertiesService.getScriptProperties();
     var day = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd');
-    if (String(p.getProperty('TG_DAILY_DAY') || '') === day) return;
+    if (String(p.getProperty('TG_DAILY_DAY') || '') === day) {
+      /* v170.76: کارهای پایان روزی که برای زمان اجرا عقب افتادند */
+      if (String(p.getProperty('TG_DAILY_EXTRA') || '') === day) { p.deleteProperty('TG_DAILY_EXTRA'); tgDailyExtra_(); }
+      return;
+    }
     if (Number(Utilities.formatDate(new Date(), TG_TZ, 'H')) < 21) return;
-    p.setProperty('TG_DAILY_DAY', day);
+    if (!tgDailyMayTry_(p, day)) return;   /* v170.76: قفل روز بعد از فرستادن گزارش؛ تلاش ناتمام تا ۳ بار دوباره */
+    tgDailyTryMark_(p, day);
     tgDaily();
   } catch (e) { tgErr_('tgDailyTick_: ' + e); }
 }
@@ -27867,6 +27926,24 @@ function tgStatTests() {
   ok('v170.57: آمار شبانه قدم واجب نگهبان است، نه سنگین (سهمیه ردش نمی‌کند)', /S\('tgStatTick_', 'must'/.test(String(tgWatchdog)) && /S\('tgRmStatTick_', 'must'/.test(String(tgWatchdog)) &&
     !/S\('tgStatTick_', 'heavy'/.test(String(tgWatchdog)) && !/S\('tgRmStatTick_', 'heavy'/.test(String(tgWatchdog)));
   ok('v170.72: گزارش ۲۴ ساعته قدم واجب نگهبان، روزی یک بار از ساعت ۲۱', /S\('tgDailyTick_', 'must'/.test(String(tgWatchdog)) && /TG_DAILY_DAY/.test(String(tgDailyTick_)) && /< 21/.test(String(tgDailyTick_)) && /TG_DAILY_DAY/.test(String(tgDaily)));
+  /* v170.76: قفل روز بعد از فرستادن، تلاش دوباره، سقف زمان خط‌های شبانه، کارهای پایان روز بعد از گزارش */
+  var src76 = String(tgDaily);
+  ok('v170.76: قفل روز بعد از فرستادن گزارش است، نه اول کار', src76.indexOf("setProperty('TG_DAILY_DAY'") > src76.indexOf('tgSend_(') && src76.indexOf('tgSend_(') > -1);
+  ok('v170.76: کارهای پایان روز بعد از گزارش', src76.indexOf('tgDailyExtra_()') > src76.indexOf('tgSend_(') && src76.indexOf('tgDayChart') < 0 && /tgDayChart/.test(String(tgDailyExtra_)) && /opsNightly_/.test(String(tgDailyExtra_)));
+  ok('v170.76: نگهبان کار عقب‌افتادهٔ پایان روز را می‌رود', /TG_DAILY_EXTRA/.test(String(tgDailyTick_)) && /tgDailyExtra_/.test(String(tgDailyTick_)) && /tgDailyMayTry_/.test(String(tgDailyTick_)));
+  var P76 = { v: {}, getProperty: function (k) { return this.v[k] || null; }, setProperty: function (k, x) { this.v[k] = String(x); } };
+  ok('v170.76: تلاش اول روز مجاز', tgDailyMayTry_(P76, '2026-10-15') === true);
+  tgDailyTryMark_(P76, '2026-10-15');
+  ok('v170.76: تا ۷ دقیقه بعد از شروع، تلاش دوم نه', tgDailyMayTry_(P76, '2026-10-15') === false && /^2026-10-15\|1\|/.test(P76.v.TG_DAILY_TRY));
+  P76.v.TG_DAILY_TRY = '2026-10-15|1|' + (Date.now() - 8 * 60000);
+  ok('v170.76: تلاش ناتمام بعد از ۷ دقیقه دوباره', tgDailyMayTry_(P76, '2026-10-15') === true);
+  P76.v.TG_DAILY_TRY = '2026-10-15|3|1';
+  ok('v170.76: بیشتر از ۳ تلاش در روز نه', tgDailyMayTry_(P76, '2026-10-15') === false && tgDailyMayTry_(P76, '2026-10-16') === true);
+  var clk = 0, rec76 = {}, L76 = [function a76() { clk += 50; return 'الف'; }, function b76() { clk += 100; return 'ب'; }, function c76() { clk += 10; return 'ج'; }];
+  var o76 = tgNightRun_(L76, 1, 120, function () { return 1 + clk; }, function (n, ms) { rec76[n] = ms; });
+  ok('v170.76: خط‌های شبانه بعد از سقف زمان نمی‌آیند و نامشان می‌آید', o76.length === 3 && o76[0] === 'الف' && o76[1] === 'ب' && /c76/.test(o76[2]) && rec76.a76 === 50 && rec76.b76 === 100 && !('c76' in rec76), JSON.stringify(o76));
+  clk = 0;
+  ok('v170.76: بی سقف (گزارش درخواستی ناظر) همهٔ خط‌ها', tgNightRun_(L76, 0, 120, function () { return clk; }, null).join('|') === 'الف|ب|ج');
 
     var kb = tgWatchMenu_();
     var flat = JSON.stringify(kb.keyboard);

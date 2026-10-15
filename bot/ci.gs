@@ -279,7 +279,8 @@ function ciStats_() {
   p.getKeys().filter(function (k) { return k.indexOf('RS:') === 0; }).sort().forEach(function (k) {
     try { var o = JSON.parse(p.getProperty(k) || '{}'); delete o._c; out[k.slice(3)] = o; } catch (e) {}
   });
-  return { ok: true, days: out };
+  var dm = null; try { dm = JSON.parse(p.getProperty('TG_DAILY_MS') || 'null'); } catch (e) {}   /* v170.76: زمان قدم‌های گزارش شبانه */
+  return { ok: true, days: out, daily: dm };
 }
 
 /* ---------- خلاصهٔ تب «خطاها» برای پایش بعد از دیپلوی (v166.8) ---------- */
