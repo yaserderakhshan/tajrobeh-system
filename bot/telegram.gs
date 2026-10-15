@@ -32302,6 +32302,8 @@ function tgDutyFp_(v) {
   var d = v[0] instanceof Date ? Utilities.formatDate(v[0], TG_TZ, 'yyyy-MM-dd') : String(v[0] || '').trim();
   return 'f:' + tgHash_(d + '|' + String(v[1] || '').trim() + '|' + String(v[5] || '').trim() + '|' + String(v[3] || '').trim());
 }
+/* v170.77: «معارفه رزرو شد» نه، چون خودرزرو بات هم آن را می‌گذارد */
+function tgDutyActed_(st) { return [TG_ST.FOLLOW, TG_ST.NOANS, TG_ST.REF, TG_ST.HELD, TG_ST.START].indexOf(String(st || '')) > -1; }
 function tgDutyRun_(now) {
   if (TG_DRY) return 'dry';
   var P = PropertiesService.getScriptProperties();
@@ -32357,9 +32359,11 @@ function tgDutyRun_(now) {
     var l = leadOf(r, x.k);
     if (!l || !(l.name || l.phone)) continue;
     if (!x.a) x.a = now.getTime() - (l.age || 0) * 60000;
-    if (l.closed || l.touched) {
-      if (l.touched && typeof lcOnContact_ === 'function') { try { lcOnContact_(x.k, ''); } catch (eLc) {} }   /* v170.23.43 */
-      if (x.n) tgDutyLog_(l, x, l.touched ? 'تماس اول گرفته شد' : 'بسته شد', x.t ? Math.round((now.getTime() - x.t) / 60000) : null);
+    /* v170.77: وضعیتی که فقط پذیرش بعد از تماس می‌گذارد (از کامنت یا شیت، بی ستون «آخرین تماس») هم تماس اول است */
+    var acted = l.touched || tgDutyActed_(l.status);
+    if (l.closed || acted) {
+      if (acted && typeof lcOnContact_ === 'function') { try { lcOnContact_(x.k, ''); } catch (eLc) {} }   /* v170.23.43 */
+      if (x.n) tgDutyLog_(l, x, acted ? 'تماس اول گرفته شد' : 'بسته شد', x.t ? Math.round((now.getTime() - x.t) / 60000) : null);
       if (x.n && typeof opsAdaptLeadDone_ === 'function') opsAdaptLeadDone_(x.k);
       continue;
     }
