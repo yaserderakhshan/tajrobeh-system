@@ -116,6 +116,8 @@ if (mode === 'promote') {
       const o = st.days[d];
       console.log(`RS ${d} ` + Object.keys(o).sort((a, b) => o[b][1] - o[a][1]).map((f) => `${f}=${o[f][0]}x/${(o[f][1] / 60000).toFixed(1)}m/${(o[f][2] / 1000).toFixed(0)}s`).join(' '));
     }
+    // v170.76: زمان هر قدم گزارش ۲۴ ساعته (ثانیه)
+    if (st.daily && st.daily.s) console.log(`گزارش شبانه ${st.daily.day}: ` + Object.keys(st.daily.s).map((k) => `${k}=${st.daily.s[k]}s`).join(' '));
   }
   process.exit(0);
 }
