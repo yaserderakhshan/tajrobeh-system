@@ -80,14 +80,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.77`
+نسخهٔ کد: `v170.78`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۴۵۶ | ۲۰۷۸ |
+| `telegram.gs` | ۳۸۴۵۹ | ۲۰۷۸ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -140,6 +140,7 @@
 | `uptime.gs` | ۱۵۴ | ۱۱ |
 | `agents.gs` | ۲۶۸ | ۲۰ |
 | `evlite.gs` | ۶۹۶ | ۶۰ |
+| `ws.gs` | ۱۰۸۴ | ۷۵ |
 
 ### کارهای زمان‌دار
 
@@ -162,6 +163,7 @@
 | `tgWatchdog` | `telegram.gs` | everyHours(1) | عقب |
 | `vkTick` | `building.gs` | onEdit / دستی | رد |
 | `vxTick` | `voice.gs` | after(پویا) | رد |
+| `wsTick` | `ws.gs` | everyMinutes(5) | رد |
 | `ciRunDeferred` | `ci.gs` | at(پویا)، after(5000)، after(60 * 1000) | متوقف نمی‌شود |
 | `evlRun` | `evlite.gs` | after(1000) | متوقف نمی‌شود |
 | `tgPoll` | `telegram.gs` | everyMinutes(1) | متوقف نمی‌شود |
@@ -448,6 +450,7 @@
 | پایش سایت | `upTests` |
 | ایجنت‌های کنسول | `agTests` |
 | رویداد سبک J-07 | `evlTests` |
+| موتور میز کار (v170.78) | `wsTests` |
 | کمپین C-004 · شب‌ها و گزارش (v170.17) | `ebiNightTests` |
 
 ### درخواست‌های ci (فقط گردش کار دیپلوی، با کلید یک‌بارمصرف)

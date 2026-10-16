@@ -2539,6 +2539,7 @@ function tgPrivate_(m) {
   if (m.text && tgEvnText_(chat, name, m.text)) return;
   if (m.text && tgGetVal_('inpd', chat) && tgInpDeskText_(chat, m.text)) return;
   if (typeof tgBcRoute_ === 'function' && tgBcRoute_(m, chat, name, uname)) return;
+  if (typeof wsRoute_ === 'function' && wsRoute_(chat, m)) return;   /* v170.78: «🗂 میز کار» برای اعضای تیم (ws.gs) */
   /* v166: موتور صدا (voice.gs): مچ‌میکینگ صوتی، اصلاح متن صدا */
   if (typeof vxRoute_ === 'function' && vxRoute_(chat, m, name, uname)) return;
   /* v163: مشارکت در مجله (mag_contrib.gs): start=co-/rv-/mymag، دکمهٔ «مطالب من در مجله» و ورودی‌های حالت‌دار (متن، ویس، فایل) */
@@ -11108,6 +11109,7 @@ function tgRoleRow_() {
   var rows = (TG_MULTI ? [[T_ROLE_SWITCH]] : []).concat(typeof vkMenuRow_ === 'function' ? vkMenuRow_() : []);
   if (typeof tnkMenuRow_ === 'function') rows = rows.concat(tnkMenuRow_());
   if (typeof tgBcMenuRow_ === 'function') rows = rows.concat(tgBcMenuRow_());
+  if (typeof wsMenuRow_ === 'function') rows = rows.concat(wsMenuRow_());   /* v170.78: میز کار، فقط اعضای تیم */
   if (typeof TG_PA_ON !== 'undefined' && TG_PA_ON) rows = rows.concat([[{ text: TG_PA_BTN }]]);
   if (typeof ptMenuRow_ === 'function' && typeof PT_CUR !== 'undefined' && PT_CUR && TG_PA_ON) rows = rows.concat(ptMenuRow_(PT_CUR));
   return rows;
@@ -11189,6 +11191,7 @@ function tgMyRoles_(chat, uname) {
   try { if (typeof PT_CUR !== 'undefined') PT_CUR = String(chat); } catch (eP1) {}
   try { if (typeof TG_PA_ON !== 'undefined') TG_PA_ON = out.indexOf('پارتنر') > -1 || out.indexOf('ناظر') > -1 || out.indexOf('راهبر') > -1 || out.indexOf('پذیرش') > -1; } catch (eP) {}  // v142: ناظر و پذیرش هم «🏢 میز پارتنر» (نمای همهٔ فضاها) دارند
   try { if (typeof TG_BC_ON !== 'undefined') TG_BC_ON = (out.indexOf('ناظر') > -1 || out.indexOf('راهبر') > -1); } catch (eB) {}
+  try { if (typeof WS_CUR !== 'undefined') WS_CUR = String(chat); } catch (eW) {}
   TG_MULTI = out.length > 1;
   return out;
 }
@@ -19298,7 +19301,7 @@ function tgSecretMask_(s) {
   return String(s == null ? '' : s)
     .replace(/bot\d{5,}:[A-Za-z0-9_-]{20,}/g, 'bot<رمز>')
     .replace(/\b\d{6,12}:AA[A-Za-z0-9_-]{20,}/g, '<رمز>')
-    .replace(/([?&#](?:key|api_key|apikey|token|access_token|secret|sig|signature|password|pass)=)[^&#\s'"]+/gi, '$1<رمز>')
+    .replace(/([?&#](?:key|api_key|apikey|token|access_token|secret|sig|signature|password|pass|tk)=)[^&#\s'"]+/gi, '$1<رمز>')
     .replace(/(Bearer\s+)[A-Za-z0-9._~+\/-]{16,}=*/gi, '$1<رمز>')
     .replace(/\bAIza[0-9A-Za-z_-]{30,}/g, '<رمز>')
     .replace(/\bya29\.[0-9A-Za-z_-]{20,}/g, '<رمز>')
