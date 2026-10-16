@@ -245,30 +245,22 @@
 @media (max-width:760px){.yd .vgrid{grid-template-columns:1fr}.yd .vlist{grid-template-columns:1fr}}
 
 /* == stage: تئاتر و روانکاوی (مهر ۱۴۰۵) == */
-.yd .stage{background:#0e0e0e;color:#cfcfd2;position:relative;overflow:hidden;padding-block:72px}
-.yd .stage::before{content:"";position:absolute;inset:-20% 10% auto;height:120%;background:radial-gradient(ellipse at 50% 0,rgba(255,236,214,.16),rgba(255,236,214,.04) 38%,transparent 62%);pointer-events:none;animation:ydSpot 7s ease-in-out infinite}
-.yd .stage::after{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,transparent,#c83f49 30%,#c83f49 70%,transparent);opacity:.8}
-@keyframes ydSpot{0%,100%{opacity:.75;transform:translateX(-2%)}50%{opacity:1;transform:translateX(2%)}}
-@media (prefers-reduced-motion:reduce){.yd .stage::before{animation:none}}
-.yd .stage .wrap{position:relative;z-index:1}
-.yd .stage .eyebrow{color:#d9737a}
-.yd .stage .h2{color:#fefefe}
-.yd .stage .lede{color:#bdbdc2;max-width:640px}
-.yd .st-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:32px;align-items:start;margin-top:26px}
+.yd .stage{padding-block:clamp(24px,3vw,40px)}
+.yd .st-card{max-width:860px;margin-inline:auto;display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:center;background:#fff;border:1px solid var(--tj-line);border-radius:18px;padding:14px}
 .yd .st-video{margin:0}
-.yd .st-video video{width:100%;aspect-ratio:16/9;display:block;border-radius:14px;background:#000;box-shadow:0 30px 80px -30px rgba(255,236,214,.25),0 0 0 1px rgba(255,255,255,.06)}
-.yd .st-video figcaption{font-size:13px;color:#8d8d92;margin-top:10px}
-.yd .st-side blockquote{margin:0 0 20px;font-size:22px;line-height:1.75;color:#fefefe;border-inline-start:3px solid #c83f49;padding-inline-start:16px}
-.yd .st-clips{display:grid;gap:8px;margin-bottom:16px}
-.yd .st-clip{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:12px;padding:11px 14px;border:1px solid rgba(255,255,255,.12);border-radius:12px;font-size:15px;color:#e9e9e9;transition:border-color .2s,background .2s}
-.yd .st-clip small{color:#8d8d92;font-size:13px}
-.yd .st-clip:hover,.yd .st-clip.on{border-color:#c83f49;background:rgba(200,63,73,.08)}
-.yd .st-side details{font-size:15px;line-height:1.95;color:#bdbdc2;margin-bottom:16px}
-.yd .st-side summary{cursor:pointer;color:#d9737a;font-size:14px}
-.yd .st-links{display:flex;flex-wrap:wrap;gap:8px}
-.yd .st-links a{border:1px solid rgba(217,115,122,.6);color:#f0c4c7;border-radius:999px;padding:6px 14px;font-size:14px;text-decoration:none}
-.yd .st-links a:hover{background:#c83f49;color:#fff;border-color:#c83f49}
-@media (max-width:760px){.yd .stage{padding-block:52px}.yd .st-grid{grid-template-columns:minmax(0,1fr);gap:20px}.yd .st-side blockquote{font-size:19px}}
+.yd .st-video video{width:100%;aspect-ratio:16/9;display:block;border-radius:12px;background:#0e0e0e;object-fit:cover}
+.yd .st-video figcaption{font-size:11.5px;color:#9a9a9e;margin-top:6px;line-height:1.6}
+.yd .st-body .eyebrow{margin-bottom:6px;font-size:12px;padding:3px 10px}
+.yd .st-body h2{font-size:18px;margin-bottom:4px}
+.yd .st-body p{font-size:14.5px;line-height:1.9;color:var(--tj-soft);margin-bottom:10px}
+.yd .st-clips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.yd .st-clip{all:unset;cursor:pointer;font-size:13px;line-height:1.5;padding:4px 12px;border-radius:999px;border:1px solid var(--tj-line);color:var(--tj-ink-2);transition:.15s}
+.yd .st-clip small{color:#9a9a9e;font-size:11.5px;margin-inline-start:4px}
+.yd .st-clip:hover,.yd .st-clip.on{border-color:var(--tj-red-400);color:var(--tj-red);background:var(--tj-tint-2)}
+.yd .st-links{font-size:13px;color:#9a9a9e}
+.yd .st-links a{color:var(--tj-red);border-bottom:1px solid transparent}
+.yd .st-links a:hover{border-color:currentColor}
+@media (max-width:700px){.yd .st-card{grid-template-columns:minmax(0,1fr);gap:12px;padding:12px}}
 </style>
 
 <div class="yd alignfull" id="yd">
@@ -297,18 +289,18 @@
 </section>
 <section class="stage" id="stage">
 <div class="wrap">
-<div class="head rv"><div><span class="eyebrow">تئاتر و روانکاوی</span><h2 class="h2">روی صحنه، مثل اتاق درمان</h2><p class="lede">در نشست «پلی‌لیستِ ابی» و پیشگیری از خودکشی (انصاف‌نیوز، مهر ۱۴۰۵) دربارهٔ نسبت تئاتر و روان‌درمانی حرف زدم: چرا فروید به پزشک‌ها می‌گفت «هملت» بخوانند، و چرا فهرستِ ابی بازیِ کودکی است با زخمی که هنوز کلمه ندارد.</p></div></div>
-<div class="st-grid">
-<figure class="st-video rv"><video id="stV" controls preload="none" playsinline poster="/wp-content/uploads/2026/10/tjl-ebi-panel-yaser.jpg" src="/wp-content/uploads/2026/10/tjl-ebi-yaser-theatre.mp4"></video><figcaption id="stC">تئاتر و روان‌درمانی · ۱:۲۴ · تصویر: انصاف‌نیوز</figcaption></figure>
-<div class="st-side rv">
-<blockquote>«هر کسی که از مرگ حرف می‌زند، حتماً دارد از زندگی هم حرف می‌زند.»</blockquote>
+<div class="st-card rv">
+<figure class="st-video"><video id="stV" controls preload="none" playsinline poster="/wp-content/uploads/2026/10/tjl-ebi-panel-yaser.jpg" src="/wp-content/uploads/2026/10/tjl-ebi-yaser-theatre.mp4"></video><figcaption id="stC">تئاتر و روان‌درمانی · ۱:۲۴ · تصویر: انصاف‌نیوز</figcaption></figure>
+<div class="st-body">
+<span class="eyebrow">تئاتر و روانکاوی</span>
+<h2>روی صحنه، مثل اتاق درمان</h2>
+<p>چند دقیقه از صحبتم در نشست «پلی‌لیستِ ابی» و پیشگیری از خودکشی، انصاف‌نیوز، مهر ۱۴۰۵.</p>
 <div class="st-clips">
-<button type="button" class="st-clip on" data-src="/wp-content/uploads/2026/10/tjl-ebi-yaser-theatre.mp4" data-cap="تئاتر و روان‌درمانی · ۱:۲۴">تئاتر و روان‌درمانی <small>۱:۲۴</small></button>
-<button type="button" class="st-clip" data-src="/wp-content/uploads/2026/10/tjl-ebi-yaser-list.mp4" data-cap="یک فهرست، بازیِ کودک با زخم · ۱:۴۳">یک فهرست، بازیِ کودک با زخم <small>۱:۴۳</small></button>
-<button type="button" class="st-clip" data-src="/wp-content/uploads/2026/10/tjl-ebi-yaser-talk.mp4" data-cap="همهٔ صحبت‌هایم در نشست · ۵:۱۳">همهٔ صحبت‌هایم در نشست <small>۵:۱۳</small></button>
+<button type="button" class="st-clip on" data-src="/wp-content/uploads/2026/10/tjl-ebi-yaser-theatre.mp4" data-cap="تئاتر و روان‌درمانی · ۱:۲۴">تئاتر و روان‌درمانی<small>۱:۲۴</small></button>
+<button type="button" class="st-clip" data-src="/wp-content/uploads/2026/10/tjl-ebi-yaser-list.mp4" data-cap="فهرستِ ابی، بازیِ کودک با زخم · ۱:۴۳">فهرستِ ابی<small>۱:۴۳</small></button>
+<button type="button" class="st-clip" data-src="/wp-content/uploads/2026/10/tjl-ebi-yaser-talk.mp4" data-cap="همهٔ صحبت‌هایم در نشست · ۵:۱۳">کامل<small>۵:۱۳</small></button>
 </div>
-<details><summary>متن صحبت</summary><p>تئاتر خیلی به روان‌درمانی نزدیکه؛ از این نزدیک‌تر نمی‌شه. فکر کنید یک نفر توی اتاق درمان با یه روان‌درمانگر صحبت می‌کنه. داره چی کار می‌کنه؟ داره یه چیزی رو تعریف می‌کنه. تئاتر هم خیلی شبیه همین صحنه‌ست. فروید یه مقاله داره، «دربارهٔ روان‌درمانی»؛ اونجا به پزشک‌ها می‌گه هملت رو بخونید تا بفهمید روان‌درمانی اساساً چطور کار می‌کنه. برای همین تئاتر رسانهٔ خیلی خوبی برای این پیام‌هاست؛ چون آدم‌ها یک ساعت و بیشتر اونجا می‌شینن و کاملاً با اون پیام درگیر می‌شن. هر کسی که از مرگ حرف می‌زنه، حتماً داره از زندگی هم حرف می‌زنه. گاهی برای اینکه بگی زندگی چقدر مهمه، باید نشون بدی اون طرف چقدر می‌تونه سخت باشه.</p></details>
-<div class="st-links"><a href="/mag/ebis-playlist-suicide-prevention-panel/">گزارش کامل نشست</a><a href="/ebis-playlist/">نمایش پلی‌لیستِ ابی</a><a href="/mag/psychoanalysis-and-art/">روانکاوی و هنر</a></div>
+<div class="st-links"><a href="/mag/ebis-playlist-suicide-prevention-panel/">گزارش نشست</a> · <a href="/ebis-playlist/">نمایش پلی‌لیستِ ابی</a></div>
 </div>
 </div>
 </div>
