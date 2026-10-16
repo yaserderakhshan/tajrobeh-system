@@ -496,6 +496,15 @@
   "active": false
  },
  {
+  "id": 506549,
+  "file": "506549.php",
+  "title": "Tajrobeh — میز کار تجربه (tjws) v1",
+  "type": "php",
+  "location": "everywhere",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
   "id": null,
   "file": "ga4-visitor-tz.html",
   "title": "Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz، is_abroad) v1",
