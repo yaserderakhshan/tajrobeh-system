@@ -80,7 +80,46 @@ add_action( 'rest_api_init', function () {
 	register_rest_route( 'tj/v1', '/ws-sync', array( 'methods' => 'POST', 'permission_callback' => $bot, 'callback' => 'tjws_sync' ) );
 	register_rest_route( 'tj/v1', '/ws-outbox', array( 'methods' => 'POST', 'permission_callback' => $bot, 'callback' => 'tjws_outbox' ) );
 	register_rest_route( 'tj/v1', '/ws-act', array( 'methods' => 'POST', 'permission_callback' => '__return_true', 'callback' => 'tjws_act' ) );
+	register_rest_route( 'tj/v1', '/go-stats', array( 'methods' => 'POST', 'permission_callback' => $bot, 'callback' => 'tjws_go_stats' ) );
 } );
+
+/* شمار کلیک لینک‌های کوتاه /go/<نام>: فقط شمار روزانه، بی هیچ دادهٔ بازدیدکننده؛ ربات‌ها شمرده نمی‌شوند. */
+add_action( 'init', function () {
+	$path = trim( (string) wp_parse_url( isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '', PHP_URL_PATH ), '/' );
+	if ( strpos( $path, 'go/' ) !== 0 ) { return; }
+	$slug = sanitize_title( substr( $path, 3 ) );
+	if ( $slug === '' || strlen( $slug ) > 60 ) { return; }
+	$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( (string) $_SERVER['HTTP_USER_AGENT'] ) : '';
+	if ( $ua === '' || preg_match( '/bot|crawl|spider|preview|facebookexternalhit|telegram|whatsapp|curl|wget|python/', $ua ) ) { return; }
+	$day = wp_date( 'Y-m-d' );
+	$c   = get_option( 'tjws_go_clicks', array() );
+	if ( ! is_array( $c ) ) { $c = array(); }
+	if ( ! isset( $c[ $day ] ) ) {
+		$c[ $day ] = array();
+		if ( count( $c ) > 120 ) { ksort( $c ); $c = array_slice( $c, -120, null, true ); }
+	}
+	if ( ! isset( $c[ $day ][ $slug ] ) && count( $c[ $day ] ) >= 500 ) { return; }
+	$c[ $day ][ $slug ] = isset( $c[ $day ][ $slug ] ) ? $c[ $day ][ $slug ] + 1 : 1;
+	update_option( 'tjws_go_clicks', $c, false );
+}, 1 );
+function tjws_go_stats( WP_REST_Request $r ) {
+	$d    = json_decode( $r->get_body(), true );
+	$days = is_array( $d ) && ! empty( $d['days'] ) ? max( 1, min( 120, (int) $d['days'] ) ) : 90;
+	$c    = get_option( 'tjws_go_clicks', array() );
+	$from = wp_date( 'Y-m-d', time() - ( $days - 1 ) * DAY_IN_SECONDS );
+	$out  = array();
+	$tot  = array();
+	foreach ( (array) $c as $day => $row ) {
+		if ( $day < $from ) { continue; }
+		foreach ( (array) $row as $slug => $n ) {
+			$out[]        = array( 'day' => $day, 'slug' => $slug, 'clicks' => (int) $n );
+			$tot[ $slug ] = ( isset( $tot[ $slug ] ) ? $tot[ $slug ] : 0 ) + (int) $n;
+		}
+	}
+	$items = array();
+	foreach ( $tot as $slug => $n ) { $items[] = array( 'slug' => $slug, 'clicks' => $n ); }
+	return rest_ensure_response( array( 'ok' => true, 'items' => $items, 'daily' => $out, 'since' => $from ) );
+}
 
 function tjws_sync( WP_REST_Request $r ) {
 	$d = json_decode( $r->get_body(), true );
@@ -125,6 +164,12 @@ function tjws_outbox( WP_REST_Request $r ) {
 		return rest_ensure_response( array( 'ok' => true ) );
 	}
 	$new = array_values( array_filter( $box, function ( $it ) { return $it['st'] === 'new'; } ) );
+	foreach ( $new as &$it ) {
+		$dd        = isset( $it['data'] ) && is_array( $it['data'] ) ? $it['data'] : array();
+		$it['key'] = ! empty( $dd['code'] ) ? (string) $dd['code'] : ( ! empty( $dd['post'] ) ? 'post-' . (int) $dd['post'] : $it['id'] );
+		$it['by']  = array( 'w' => $it['w'], 'admin' => $it['w'] === 'admin' );
+	}
+	unset( $it );
 	return rest_ensure_response( array( 'ok' => true, 'items' => $new, 'v' => TJWS_VER ) );
 }
 
