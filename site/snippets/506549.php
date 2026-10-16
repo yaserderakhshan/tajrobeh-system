@@ -16,6 +16,10 @@ function tjws_key() { return (string) get_option( 'tj_dir_key', '' ); }
 function tjws_sets() {
 	return array( 'mag_topics', 'mag_writers', 'ws_people', 'so_queue', 'so_calendar', 'so_links', 'so_dm', 'so_reels', 'ig_daily' );
 }
+/* هر حوزهٔ تازه بدون تغییر کد: نام مجموعه با پیشوند مجاز، حداکثر ۳۰۰۰ سطر و ۱.۵ مگابایت. */
+function tjws_set_ok( $s ) {
+	return is_string( $s ) && ( in_array( $s, tjws_sets(), true ) || preg_match( '/^(mag|ws|so|ig|ev|sc|mx)_[a-z0-9_]{1,40}$/', $s ) );
+}
 function tjws_get( $set ) {
 	$v = get_option( 'tjws_set_' . $set, array() );
 	return is_array( $v ) ? $v : array();
@@ -80,10 +84,13 @@ add_action( 'rest_api_init', function () {
 
 function tjws_sync( WP_REST_Request $r ) {
 	$d = json_decode( $r->get_body(), true );
-	if ( ! is_array( $d ) || empty( $d['set'] ) || ! in_array( $d['set'], tjws_sets(), true ) ) {
+	if ( ! is_array( $d ) || empty( $d['set'] ) || ! tjws_set_ok( $d['set'] ) ) {
 		return new WP_Error( 'tjws_set', 'bad set', array( 'status' => 400 ) );
 	}
 	$rows = isset( $d['rows'] ) && is_array( $d['rows'] ) ? $d['rows'] : array();
+	if ( count( $rows ) > 3000 || strlen( $r->get_body() ) > 1572864 ) {
+		return new WP_Error( 'tjws_big', 'too big', array( 'status' => 413 ) );
+	}
 	update_option( 'tjws_set_' . $d['set'], $rows, false );
 	update_option( 'tjws_at_' . $d['set'], time(), false );
 	return rest_ensure_response( array( 'ok' => true, 'set' => $d['set'], 'n' => count( $rows ), 'v' => TJWS_VER ) );
@@ -275,6 +282,7 @@ add_action( 'template_redirect', function () {
 	if ( ! tjws_me() && current_user_can( 'manage_options' ) ) {
 		tjws_set_cookie( 'admin', implode( ',', tjws_roles_all() ), time() + 30 * DAY_IN_SECONDS );
 	}
+	if ( ! tjws_me() ) { return; }
 	status_header( 200 );
 	tjws_render();
 	exit;
