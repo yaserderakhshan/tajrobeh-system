@@ -55,7 +55,8 @@
     "changes.gs",
     "uptime.gs",
     "agents.gs",
-    "evlite.gs"
+    "evlite.gs",
+    "ws.gs"
   ],
   "htmlExtensions": [
     ".html"
