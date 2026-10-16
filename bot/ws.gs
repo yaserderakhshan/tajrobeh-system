@@ -76,13 +76,14 @@ var WS_SYNC_SEED = [
 ];
 
 /* ستون‌ها و مقدارها: «ستون=مقدار» با «؛» یا خط تازه. {now} زمان، {by} نام کننده، {key} کلید، {data.x} فیلد رویداد.
-   پیام به چه نقشی: نام نقش‌ها با کاما، «مدیر»، یا «@ستون» یعنی chat همان سطر. ستون کلید خالی یعنی سطر تازه افزوده شود. */
+   پیام به چه نقشی: نام نقش‌ها با کاما، «مدیر»، «@ستون» یعنی chat همان سطر، یا «@data.x» یعنی chat فیلد x رویداد
+   (فقط اگر آن chat در برگهٔ افراد فعال باشد). «الف|ب» یعنی اگر «الف» گیرنده‌ای نداشت، «ب». ستون کلید خالی یعنی سطر تازه افزوده شود. */
 var WS_ACT_SEED = [
   /* سایت الان این پنج را می‌فرستد. متن‌ها از تیم (۲۴ مهر ۱۴۰۵)؛ {title} عنوان مطلب از data.title */
   ['take', 'هاب محتوا', 'موضوعات مجله', 'کد', 'نویسنده={by}؛ وضعیت=رزرو شد؛ آخرین تغییر میز={now}', 'سردبیر', 'موضوع «{title}» برداشته شد.', '', '', 'بله', 'خیر'],
   ['submitted', 'هاب محتوا', 'نویسندگان مجله', 'شماره', 'وضعیت=تحویل شد؛ لینک متن={data.doc}؛ آخرین تغییر میز={now}', 'سردبیر', 'مطلب «{title}» برای بازبینی رسید.', '', '', 'بله', 'بله'],
   ['returned', 'هاب محتوا', 'نویسندگان مجله', 'شماره', 'وضعیت=در حال نوشتن؛ یادداشت سردبیر={data.note}؛ آخرین تغییر میز={now}', '@chat_id', 'مطلب «{title}» با یادداشت سردبیر برگشت.', 'سردبیر', '', 'بله', 'بله'],
-  ['to_clinical', 'هاب محتوا', 'نویسندگان مجله', 'شماره', 'وضعیت=بازبینی علمی؛ آخرین تغییر میز={now}', 'بازبین علمی', 'مطلب «{title}» برای بازبینی علمی آماده است.', 'سردبیر', '', 'بله', 'بله'],
+  ['to_clinical', 'هاب محتوا', 'نویسندگان مجله', 'شماره', 'وضعیت=بازبینی علمی؛ آخرین تغییر میز={now}', '@data.reviewer_w|سردبیر', 'مطلب «{title}» برای بازبینی علمی آماده است.', 'سردبیر', '', 'بله', 'بله'],
   ['propose', 'هاب محتوا', 'موضوعات مجله', '', 'کد={data.code}؛ موضوع={data.title}؛ زاویه یا توضیح={data.angle}؛ وضعیت=پیشنهاد؛ نویسنده={by}؛ آخرین تغییر میز={now}', 'سردبیر', 'پیشنهاد موضوع تازه: «{title}»', '', '', 'بله', 'بله'],
   /* سایت «decided» را نمی‌فرستد؛ خاموش */
   ['decided', 'هاب محتوا', 'نویسندگان مجله', 'شماره', 'وضعیت={data.status}؛ یادداشت سردبیر={data.note}؛ آخرین تغییر میز={now}', '@chat_id', WS_TEAM_TEXT, 'سردبیر', '', 'خیر', 'خیر'],
@@ -484,20 +485,33 @@ function wsNotify_(cfg, ev, r) {
   if (!to) return;
   var txt = wsS_(cfg['متن کوتاه پیام']);
   if (!txt || txt.indexOf(WS_TEAM_TEXT) > -1) txt = '🗂 {act} · {key}';   /* تا تیم متن بنویسد: فقط نام کنش و کلید */
-  wsSendTo_(to, r && r.rowObj, tgEsc_(wsTpl_(txt, ev, wsByName_(ev), r && r.rowObj)), wsOn_(cfg['دکمهٔ میز']));
+  wsSendTo_(to, r && r.rowObj, tgEsc_(wsTpl_(txt, ev, wsByName_(ev), r && r.rowObj)), wsOn_(cfg['دکمهٔ میز']), ev);
 }
-/* to: «مدیر»، نام نقش‌ها با کاما، یا «@ستون» (chat همان سطر) */
+/* to: «مدیر»، نام نقش‌ها با کاما، «@ستون» (chat همان سطر)، «@data.x» (chat فیلد رویداد، فقط اگر در برگهٔ افراد فعال است).
+   «الف|ب»: اگر «الف» گیرنده‌ای نداشت، «ب» (مثل «@data.reviewer_w|سردبیر») */
 /* withDesk: زیر پیام دکمهٔ «میز کار» با لینک امضاشدهٔ همان گیرنده (فقط اگر گیرنده نقش تیمی دارد) */
-function wsSendTo_(to, rowObj, html, withDesk) {
-  var chats = [];
-  wsList_(to).forEach(function (t) {
-    if (t === WS_MANAGER) chats.push(String(TG_OWNER_CHAT));
-    else if (t.charAt(0) === '@') { var c = rowObj ? wsS_(rowObj[t.slice(1)]) : ''; if (c) chats = chats.concat(c.split(/[,،;\s]+/).filter(String)); }
-    else tgPeopleList_().forEach(function (p) {
+function wsSendTo_(to, rowObj, html, withDesk, ev) {
+  var split = function (c) { return wsS_(c).split(/[,،;\s]+/).filter(String); };
+  var one = function (t) {
+    if (t === WS_MANAGER) return [String(TG_OWNER_CHAT)];
+    if (/^@data\.[A-Za-z0-9_]{1,40}$/.test(t)) {
+      var w = wsS_(((ev && ev.data) || {})[t.slice(6)]);
+      if (!/^-?\d{3,20}$/.test(w)) return [];
+      return tgPeopleList_().some(function (p) { return String(p.status || '').indexOf('غیرفعال') < 0 && tgChatIn_(p.chat, w); }) ? [w] : [];
+    }
+    if (t.charAt(0) === '@') return rowObj ? split(rowObj[t.slice(1)]) : [];
+    var out = [];
+    tgPeopleList_().forEach(function (p) {
       if (String(p.status || '').indexOf('غیرفعال') > -1 || (p.roles || []).indexOf(t) < 0) return;
-      var c1 = wsS_(p.chat).split(/[,،;\s]+/).filter(String)[0];
-      if (c1) chats.push(c1);
+      var c1 = split(p.chat)[0];
+      if (c1) out.push(c1);
     });
+    return out;
+  };
+  var chats = [];
+  wsList_(to).forEach(function (grp) {
+    var alts = grp.split('|').map(function (x) { return x.trim(); }).filter(String);
+    for (var i = 0; i < alts.length; i++) { var got = one(alts[i]); if (got.length) { chats = chats.concat(got); break; } }
   });
   chats.filter(function (c, i) { return /^-?\d{3,20}$/.test(c) && chats.indexOf(c) === i; }).forEach(function (c) {
     var kb = null;
@@ -929,7 +943,7 @@ function wsTests() {
     /* مدیر وردپرس (by.admin): مدیر است و برگهٔ افراد سنجیده نمی‌شود؛ decided خاموش است */
     TG_MEM['wssrc:سوشال · صف ارسال'].rows[0][1] = 'منتظر برو';
     TG_MEM['wssrc:نویسندگان مجله'] = { head: ['شماره', 'موضوع', 'وضعیت', 'chat_id'], rows: [['21', 'خشم', 'تحویل شد', '5002'], ['22', 'شرم', 'تحویل شد', '7777']] };
-    TG_MEM.people.push({ name: 'نمونه بازبین', chat: '5005', roles: ['بازبین علمی'], status: 'فعال' });
+    TG_MEM.people.push({ name: 'نمونه بازبین', chat: '5005', roles: ['استاد'], status: 'فعال' });
     TG_OUTBOX = [];
     outbox = [{ id: 'a1', act: 'so_go', key: 'Q-1', w: '9999', by: { w: '9999', admin: true } }, { id: 'a2', act: 'decided', key: '21', by: { w: '5001' } },
               { id: 'a3', act: 'returned', key: '21', data: { title: 'خشم', note: 'کوتاه‌تر' }, by: { w: '5001' } },
@@ -942,8 +956,14 @@ function wsTests() {
     var rt = msgs('5002').filter(function (m) { return /برگشت/.test(m.text); })[0];
     ok('returned به نویسندهٔ همان سطر با دکمهٔ میز', !!rt && rt.text === 'مطلب «خشم» با یادداشت سردبیر برگشت.' && rt.markup && rt.markup.inline_keyboard[0][0].url === deskLink('5002', ['سوشال']));
     ok('returned به نویسندهٔ غیرتیمی: پیام بی دکمه', msgs('7777').length === 1 && !msgs('7777')[0].markup && ea.done.indexOf('a4') > -1);
-    ok('to_clinical به بازبین علمی با دکمه', msgs('5005').some(function (m) { return m.text === 'مطلب «خشم» برای بازبینی علمی آماده است.' && !!m.markup; }));
+    ok('to_clinical بی reviewer_w به سردبیر با دکمه', msgs('5001').some(function (m) { return m.text === 'مطلب «خشم» برای بازبینی علمی آماده است.' && !!m.markup; }) && msgs('5005').length === 0);
     ok('admin: false مدیر نمی‌سازد؛ مراجع رد می‌شود', ea.orphan.indexOf('a6') > -1);
+    TG_OUTBOX = [];
+    outbox = [{ id: 'a7', act: 'to_clinical', key: '21', data: { title: 'خشم', reviewer_w: '5005' }, by: { w: '5001' } },
+              { id: 'a8', act: 'to_clinical', key: '22', data: { title: 'شرم', reviewer_w: '8888' }, by: { w: '5001' } }];
+    wsEventsRun_();
+    ok('to_clinical با reviewer_w فقط به همان نفر', msgs('5005').some(function (m) { return /خشم/.test(m.text); }) && !msgs('5001').some(function (m) { return /خشم/.test(m.text); }));
+    ok('reviewer_w بیرون از برگهٔ افراد: به سردبیر، نه آن chat', msgs('8888').length === 0 && msgs('5001').some(function (m) { return /شرم/.test(m.text); }));
     ok('پنج act سایت روشن‌اند، decided خاموش', ['take', 'propose', 'submitted', 'returned', 'to_clinical'].every(function (a) { return WS_ACT_SEED.some(function (r) { return r[0] === a && r[9] === 'بله' && r[6].indexOf(WS_TEAM_TEXT) < 0; }); })
       && WS_ACT_SEED.filter(function (r) { return r[0] === 'decided'; })[0][9] === 'خیر');
     ok('فرمول از دادهٔ رویداد اجرا نمی‌شود', pbCell_('=IMPORTXML("x")').charAt(0) === "'");
