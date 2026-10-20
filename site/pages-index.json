@@ -1,5 +1,32 @@
 [
  {
+  "id": 507263,
+  "slug": "de",
+  "status": "publish",
+  "title": "Psychologische Beratung auf Persisch (Farsi)",
+  "parent": 500984,
+  "template": "",
+  "link": "https://tajrobeh.life/persian-therapy/de/"
+ },
+ {
+  "id": 507260,
+  "slug": "usa",
+  "status": "publish",
+  "title": "Persian therapist online in the USA",
+  "parent": 503836,
+  "template": "",
+  "link": "https://tajrobeh.life/persian-therapy/en/usa/"
+ },
+ {
+  "id": 507259,
+  "slug": "canada",
+  "status": "publish",
+  "title": "Persian speaking therapist in Canada",
+  "parent": 503836,
+  "template": "",
+  "link": "https://tajrobeh.life/persian-therapy/en/canada/"
+ },
+ {
   "id": 507253,
   "slug": "uk",
   "status": "publish",
