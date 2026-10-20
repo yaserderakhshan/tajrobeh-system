@@ -50,3 +50,32 @@ add_filter( 'language_attributes', function ( $output ) {
 	}
 	return preg_replace( '/lang="[^"]*"/', 'lang="' . esc_attr( $lang ) . '"', $output );
 } );
+
+/* زبان برگه برای بقیهٔ اسنیپت‌ها (۲۸ مهر ۱۴۰۵): برگه‌ای که در خوشه نیست یا fa-* است، fa برمی‌گرداند؛ وگرنه en یا de. ویجت‌ها و نوار پیشنهاد از همین می‌خوانند. */
+if ( ! function_exists( 'tajrobeh_page_lang' ) ) {
+	function tajrobeh_page_lang( $id = 0 ) {
+		$id = $id ? (int) $id : (int) get_queried_object_id();
+		if ( ! $id ) {
+			return 'fa';
+		}
+		$lang = array_search( $id, tajrobeh_hreflang_cluster(), true );
+		if ( false === $lang || 0 === strpos( $lang, 'fa' ) ) {
+			return 'fa';
+		}
+		return strtolower( substr( $lang, 0, 2 ) );
+	}
+}
+/* لینک پرش به محتوا (skip link قالب) روی برگه‌های انگلیسی و آلمانی به زبان خود برگه */
+add_filter( 'gettext', function ( $t, $text, $domain ) {
+	if ( 'Skip to content' !== $text || is_admin() || ! did_action( 'wp' ) ) {
+		return $t;
+	}
+	$l = tajrobeh_page_lang();
+	if ( 'de' === $l ) {
+		return 'Zum Inhalt springen';
+	}
+	if ( 'en' === $l ) {
+		return 'Skip to content';
+	}
+	return $t;
+}, 10, 3 );

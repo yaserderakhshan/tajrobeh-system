@@ -3,8 +3,10 @@
 (function(){
 var FA='۰۱۲۳۴۵۶۷۸۹';
 function fa(n){return String(n).replace(/\d/g,function(d){return FA[d];});}
-function isEn(form){return (document.documentElement.lang||'').indexOf('en')===0 || form.closest('[dir=ltr],[lang^=en]')!==null;}
+var DE=(document.documentElement.lang||'').toLowerCase().indexOf('de')===0; /* برگه‌های آلمانی: همان رفتار LTR انگلیسی، با متن آلمانی */
+function isEn(form){return DE || (document.documentElement.lang||'').indexOf('en')===0 || form.closest('[dir=ltr],[lang^=en]')!==null;}
 var PRIV_FA='اطلاعات شما فقط در اختیار مسئول مربوطه در مرکز تجربه زندگی قرار می‌گیرد و بدون رضایت شما منتشر یا با کسی به اشتراک گذاشته نمی‌شود.';
+var PRIV_DE='Ihre Angaben erhält nur die zuständige Person im Tajrobeh Life Experience Center. Ohne Ihre Zustimmung werden sie weder veröffentlicht noch weitergegeben.';
 var PRIV_EN='Your details are shared only with the responsible person at Tajrobeh Life Center and are never published or shared with anyone without your consent.';
 var LOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
@@ -36,7 +38,7 @@ function floatLabels(form){
     var l=document.createElement('label');
     l.className='tjf-lbl';
     if(el.id){l.setAttribute('for',el.id);}
-    var m=text.match(/^(.*?)\s*(\((?:اختیاری|optional)[^)]*\))\s*$/i);
+    var m=text.match(/^(.*?)\s*(\((?:اختیاری|optional|freiwillig)[^)]*\))\s*$/i);
     if(m){l.textContent=m[1]+' ';var s=document.createElement('span');s.className='tjf-opt';s.textContent=m[2];l.appendChild(s);}
     else{l.textContent=text;}
     box.insertBefore(l,box.firstChild);
@@ -51,7 +53,7 @@ function floatLabels(form){
 function privacy(form){
   if(form.querySelector('.tjf-privacy')){return;}
   if(form.textContent.indexOf('بدون رضایت')>-1){return;}
-  if(/without your consent/i.test(form.textContent)){return;}
+  if(/without your consent|ohne ihre zustimmung/i.test(form.textContent)){return;}
   var wrap=form.querySelector('.ff_submit_btn_wrapper');
   if(!wrap){return;}
   var p=document.createElement('p');
@@ -59,7 +61,7 @@ function privacy(form){
   var en=isEn(form);
   if(en){p.setAttribute('dir','ltr');}
   p.innerHTML=LOCK+'<span></span>';
-  p.querySelector('span').textContent=en?PRIV_EN:PRIV_FA;
+  p.querySelector('span').textContent=en?(DE?PRIV_DE:PRIV_EN):PRIV_FA;
   wrap.appendChild(p);
 }
 
@@ -84,7 +86,7 @@ function phoneCC(form){
     var box=el.closest('.ff-el-input--content');
     if(!box){return;}
     var row=document.createElement('div');row.className='tjf-phone';
-    var sel=document.createElement('select');sel.className='tjf-cc';sel.setAttribute('aria-label',isEn(form)?'Country code':'کد کشور');
+    var sel=document.createElement('select');sel.className='tjf-cc';sel.setAttribute('aria-label',isEn(form)?(DE?'Ländervorwahl':'Country code'):'کد کشور');
     var def=defaultCC(),picked=false;
     CC.forEach(function(c){var o=document.createElement('option');o.value=c[0];o.textContent=c[1];if(!picked){if(c[0]===def){o.selected=true;picked=true;}}sel.appendChild(o);});
     var fl=box.classList.contains('tjf-fl');
@@ -145,7 +147,7 @@ function stepify(form){
   var nav=document.createElement('div');nav.className='tjs-nav';
   nav.innerHTML='<button type="button" class="tjs-prev"></button><button type="button" class="tjs-next"></button>';
   var prev=nav.querySelector('.tjs-prev'),next=nav.querySelector('.tjs-next');
-  prev.textContent=en?'Back':'قبلی';next.textContent=en?'Next':'بعدی';
+  prev.textContent=en?(DE?'Zurück':'Back'):'قبلی';next.textContent=en?(DE?'Weiter':'Next'):'بعدی';
   subw.parentElement.insertBefore(nav,subw);
   function show(k,focus){
     idx=k;
@@ -156,8 +158,8 @@ function stepify(form){
       if(has){c.classList.toggle('tjs-hide',!vis);}
     });
     prog.querySelectorAll('.tjs-seg i').forEach(function(x,j){x.classList.toggle('on',j<=k);});
-    prog.querySelector('.tjs-now').innerHTML=en?('Step <b>'+(k+1)+'</b> of '+N):('مرحلهٔ <b>'+fa(k+1)+'</b> از '+fa(N));
-    prog.querySelector('.tjs-left').textContent=k===N-1?(en?'Last step':'مرحلهٔ آخر'):'';
+    prog.querySelector('.tjs-now').innerHTML=en?(DE?('Schritt <b>'+(k+1)+'</b> von '+N):('Step <b>'+(k+1)+'</b> of '+N)):('مرحلهٔ <b>'+fa(k+1)+'</b> از '+fa(N));
+    prog.querySelector('.tjs-left').textContent=k===N-1?(en?(DE?'Letzter Schritt':'Last step'):'مرحلهٔ آخر'):'';
     prev.classList.toggle('tjs-hide',k===0);
     next.classList.toggle('tjs-hide',k===N-1);
     subw.classList.toggle('tjs-hide',k!==N-1);
@@ -175,10 +177,10 @@ function stepify(form){
         var req=el.getAttribute('aria-required')==='true'||el.required;
         var v=(el.value||'').trim(),bad='';
         if(el.type==='checkbox'||el.type==='radio'){
-          if(req){var any=g.querySelector('input:checked');if(!any){bad=en?'Please choose an option.':'یکی از گزینه‌ها را انتخاب کنید.';}}
+          if(req){var any=g.querySelector('input:checked');if(!any){bad=en?(DE?'Bitte wählen Sie eine Option.':'Please choose an option.'):'یکی از گزینه‌ها را انتخاب کنید.';}}
         }else{
-          if(req){if(!v){bad=en?'This field is required.':'این مورد لازم است.';}}
-          if(!bad){if(v){if(el.type==='email'){if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){bad=en?'Please enter a valid email.':'نشانی ایمیل درست نیست.';}}}}
+          if(req){if(!v){bad=en?(DE?'Dieses Feld ist erforderlich.':'This field is required.'):'این مورد لازم است.';}}
+          if(!bad){if(v){if(el.type==='email'){if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){bad=en?(DE?'Bitte geben Sie eine gültige E-Mail-Adresse ein.':'Please enter a valid email.'):'نشانی ایمیل درست نیست.';}}}}
         }
         var old=g.querySelector(':scope .tjs-err');if(old){old.remove();}
         if(bad){
