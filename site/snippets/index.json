@@ -505,6 +505,15 @@
   "active": true
  },
  {
+  "id": 507293,
+  "file": "507293.css",
+  "title": "Tajrobeh — حروف لاتین نشانه‌دار (ü ö ä ß)",
+  "type": "css",
+  "location": "site_wide_footer",
+  "loc": "site_wide_footer",
+  "active": true
+ },
+ {
   "id": null,
   "file": "ga4-visitor-tz.html",
   "title": "Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz، is_abroad) v1",
