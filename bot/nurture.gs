@@ -1,30 +1,27 @@
 /**
- * nurture.gs · v170.23.13 · پیگیری گیرکرده‌ها: دنبالهٔ پیام کوتاه در تلگرام (چارچوب leadflow: مرحله‌های ۶ و ۷)
+ * nurture.gs · پیگیری لید گیرکرده با یک پیام (چارچوب leadflow: مرحله‌های ۶ و ۷)
  *
- * دو گروه (لیدهای پذیرش، tgDutyClinic_، با chat تلگرام):
- *   «فرم»: فرم پر کرده ولی معارفه رزرو نکرده (جدید، در پیگیری، پاسخ نداد)، از ۲ روز بعد از ثبت.
- *   «معارفه»: معارفه برگزار شده ولی شروع نکرده، از ۳ روز بعد از معارفه.
- * حداکثر سه پیام برای هر نفر، با فاصلهٔ ۲، ۵ و ۱۰ روز (روز اول، +۳، +۸)، فقط تلگرام، فقط ۹ تا ۲۱ تهران.
- * توقف: هر پیام خود مراجع (nuSeen_ در tgPrivate_)، هر اقدام پذیرش (تماس تازه یا عوض شدن وضعیت لید)، یا دکمهٔ «دیگر پیام نده»
- *   (ستون «پیگیری خودکار» لید هم «دیگر پیام نده» می‌شود و پیگیری ۳۰ و ۶۰ روزهٔ قبلی هم دیگر نمی‌رود).
- * متن‌ها: کلیدهای NURTURE_1 تا NURTURE_3 و NURTURE_INTRO_1 تا NURTURE_INTRO_3 تنظیمات خصوصی با جای {name}؛ خالی = پیش‌نویس همین فایل.
- *   هر پیام یک دکمه: «رزرو معارفه» (همان مسیر شروع درمان، go) یا «با پذیرش حرف بزنم» (hm)، و «دیگر پیام نده».
- * تأیید یاسر: پیش از اولین ارسال هر روز یک کارت با شمار گیرنده‌ها و متن‌ها و «بفرست» و «امروز نه». بعد از سه تأیید پشت‌سرهم،
- *   کارت فقط یک خط در گزارش شبانه می‌شود و ارسال خودکار ادامه دارد، مگر یاسر «امروز نه» بزند (/nuno).
+ * v170.92 (E13 و E14، تصمیم D235 تازه): **فقط یک پیام، تمام خودکار، بی کارت تأیید.**
+ *   دو گروه (لیدهای پذیرش، tgDutyClinic_، با chat تلگرام):
+ *     «فرم»: فرم پر کرده ولی معارفه رزرو نکرده (جدید، در پیگیری، پاسخ نداد)، از ۱ روز بعد از ثبت.
+ *     «معارفه»: معارفه برگزار شده ولی شروع نکرده، از ۱ روز بعد از معارفه.
+ *   یک پیام که می‌پرسد مراجع چه می‌خواهد، با دکمه‌های قدم بعدی: «رزرو معارفه» (فقط گروه فرم)، «با پذیرش حرف بزنم»،
+ *   «دیدن درمانگران» (مینی‌اپ) و «فعلاً نه». بی پاسخ یا «فعلاً نه» یعنی دیگر هیچ یادآوری‌ای نمی‌رود.
+ *   فقط تلگرام، فقط ۹ تا ۲۱ تهران، با سقف روزانهٔ «دعوت». فقط لیدهای تا ۷ روز (NU_MAX_AGE_D).
+ *   توقف پیش از ارسال: هر پیام خود مراجع (nuSeen_)، هر اقدام پذیرش (تماس تازه یا عوض شدن وضعیت لید)، بسته شدن لید.
+ * متن: کلیدهای NURTURE_1 (گروه فرم) و NURTURE_INTRO_1 (گروه معارفه) تنظیمات خصوصی با جای {name}؛ خالی = پیش‌نویس همین فایل.
+ * سلامت (v170.90): نتیجهٔ روزانه در NU_RES؛ ۳ روز موعد بی هیچ ارسال ← خط ⚠️ در گزارش شبانه و یک پیام سیستم به مالک.
+ * هیچ پیام دیگری دربارهٔ پیگیری به مالک نمی‌رود (E13: پیام عملیاتی خودکار منتظر تأیید آدم نمی‌ماند).
  * وضعیت هر نفر در برگهٔ «دنبالهٔ پیگیری» هاب پذیرش. همه پشت NURTURE_ENABLED = «بله».
  *
- * v170.90 (E11، باگ زنده): از ۲۱ شهریور ۵۱ دنباله شروع شد و هیچ پیامی نرفت. ریشه: کارت تأیید روزانه با نوع «کار» و سقف
- * ۱۰ پیام در روز مالک می‌رفت و نتیجهٔ tgNotify_ دیده نمی‌شد؛ با سقف پرشده (هشدارهای مهلت) کارت «سقف» می‌خورد و نمی‌رسید،
- * ولی روز علامت «کارت رفت» می‌خورد، پس nuTick_ تا فردا منتظر تأییدی می‌ماند که هرگز نمی‌آمد. هر روز همین.
- * حالا: کارت بی سقف (force) و فقط اگر رسید علامت می‌خورد؛ نتیجهٔ هر کارت و هر ارسال روزانه در NU_RES ثبت می‌شود؛
- * اگر دنباله ۳ روز موعد داشت و هیچ پیامی نرفت، خط ⚠️ در گزارش شبانه و یک پیام سیستم به مالک (روزی یک بار).
- * دنبالهٔ کهنه: اولین پیام فقط تا ۷ روز بعد از «شروع»؛ بعد از آن «قدیمی» و بی پیام (به لید کهنه پیام دیرهنگام نمی‌رود).
+ * پیشینه: v170.23.13 سه پیام با کارت تأیید روزانهٔ مالک بود. v170.90 ریشهٔ توقف خاموش را پیدا کرد (کارت تأیید در سقف
+ * «کار» مالک می‌ماند و از ۲۱ شهریور هیچ پیامی نرفت). E13 و E14 کارت را برداشتند و دنباله را یک پیام کردند.
  */
 var NU_TAB = 'دنبالهٔ پیگیری';
 var NU_HEAD = ['کد لید', 'گروه', 'chat', 'شروع', 'مرحله', 'آخرین ارسال', 'وضعیت', 'دلیل توقف', 'وضعیت لید'];
 var NU_G = { form: 'فرم', intro: 'معارفه' };
-var NU_ENTRY = { 'فرم': 2, 'معارفه': 3 };
-var NU_GAPS = [0, 3, 8];   /* روز ۲، ۵ و ۱۰ برای «فرم»؛ ۳، ۶ و ۱۱ برای «معارفه» */
+var NU_ENTRY = { 'فرم': 1, 'معارفه': 1 };   /* v170.92: یک روز بعد */
+var NU_STEPS = 1;   /* v170.92 (E14): فقط یک پیام */
 var NU_FORM_ST = ['جدید', 'در پیگیری', 'پاسخ نداد'];
 var NU_MAX_AGE_D = 7;      /* v170.90: پیام اول فقط تا ۷ روز بعد از شروع دنباله */
 var NU_STALL_D = 3;        /* v170.90: این‌قدر روز موعد بی هیچ ارسال = ایستاده */
@@ -57,9 +54,14 @@ function nuText_(g, step, name) {
   var first = String(name || '').trim().split(/\s+/)[0] || '';
   return t.replace(/\s*\{name\}/g, first ? ' ' + first : '').replace(/^سلام\s+،/, 'سلام،');
 }
+/* v170.92 (E14): دکمه‌های قدم بعدی */
 function nuKb_(g, code) {
-  return { inline_keyboard: [[g === NU_G.intro ? { text: 'با پذیرش حرف بزنم', callback_data: 'hm' } : { text: 'رزرو معارفه', callback_data: 'go' }],
-    [{ text: 'دیگر پیام نده', callback_data: 'nu:off:' + code }]] };
+  var rows = [];
+  if (g !== NU_G.intro) rows.push([{ text: '🗓 رزرو معارفه', callback_data: 'go' }]);
+  rows.push([{ text: '💬 با پذیرش حرف بزنم', callback_data: 'hm' }]);
+  rows.push([{ text: '👥 دیدن درمانگران', web_app: { url: TG_APP_URL } }]);
+  rows.push([{ text: 'فعلاً نه', callback_data: 'nu:off:' + code }]);
+  return { inline_keyboard: rows };
 }
 
 /* ───── ورود به دنباله (روزی یک بار) ───── */
@@ -100,9 +102,9 @@ function nuDue_() {
   var today = nuDay_(), out = [], t = nuTab_();
   t.rows.forEach(function (o) {
     if (o['وضعیت'] !== 'فعال') return;
-    var step = Number(o['مرحله'] || 0); if (step >= 3) { nuStop_(o, 'پایان'); return; }
+    var step = Number(o['مرحله'] || 0); if (step >= NU_STEPS) { nuStop_(o, 'پایان'); return; }
     if (step === 0 && !String(o['آخرین ارسال'] || '') && nuOld_(o['شروع'], today)) { nuStop_(o, 'قدیمی'); return; }   /* v170.90 */
-    if (nuAddDays_(o['شروع'], NU_GAPS[step]) > today) return;
+    if (String(o['شروع']).slice(0, 10) > today) return;
     if (String(o['آخرین ارسال'] || '').slice(0, 10) === today) return;
     var row = typeof tgLeadByCode_ === 'function' ? tgLeadByCode_(o['کد لید']) : 0, l = row > 1 ? tgLeadRead_(row) : null;
     if (nuDry_() && TG_MEM['nu:lead']) l = TG_MEM['nu:lead'](o['کد لید']);
@@ -115,39 +117,6 @@ function nuDue_() {
   return out;
 }
 
-/* ───── تأیید یاسر ───── */
-function nuAuto_() { return Number(nuProp_('NU_STREAK') || 0) >= 3; }
-function nuApproved_() {
-  var today = nuDay_();
-  if (nuProp_('NU_NO_DAY') === today) return false;
-  if (nuProp_('NU_OK_DAY') === today) return true;
-  return nuAuto_();
-}
-/* v170.23.25 (یاسر): کارت به فارسی ساده، بی نام کلید؛ هر گروه یک خط با متن پیامی که می‌گیرند */
-var NU_WHO = { 'فرم': 'فرم پر کرده‌اند ولی هنوز معارفه نگرفته‌اند', 'معارفه': 'معارفه رفته‌اند ولی هنوز درمان را شروع نکرده‌اند' };
-var NU_STEP_FA = ['یادآوری اول', 'یادآوری دوم', 'یادآوری آخر'];
-function nuCardText_(due) {
-  var by = {}, order = [];
-  due.forEach(function (x) { var k = x.o['گروه'] + '|' + x.step; if (!by[k]) { by[k] = 0; order.push(k); } by[k]++; });
-  order.sort();
-  var T = ['📨 <b>پیام پیگیری امروز · ' + tgFa_(due.length) + ' نفر</b>', ''];
-  order.forEach(function (k) {
-    var g = k.split('|')[0], step = Number(k.split('|')[1]);
-    T.push('• ' + tgFa_(by[k]) + ' نفر ' + (NU_WHO[g] || g) + ' (' + NU_STEP_FA[step] + ').', '   پیامی که می‌گیرند: «' + tgEsc_(nuText_(g, step, '[نام]')) + '»', '');
-  });
-  T.push('پیام فقط در تلگرام و بین ۹ تا ۲۱ می‌رود. با جواب، اقدام پذیرش یا دکمهٔ «دیگر پیام نده» قطع می‌شود.');
-  return T.join('\n');
-}
-function nuCardKb_(today) {
-  return { inline_keyboard: [[{ text: '✅ امروز بفرست', callback_data: 'nu:go:' + today }, { text: '⏸ امروز نه', callback_data: 'nu:no:' + today }], [{ text: '👀 فهرست نفرات', callback_data: 'nu:ls:' + today }]] };
-}
-/* فهرست نفرات: فقط کد لید و مرحله، بی نام و شماره */
-function nuListText_(due) {
-  if (!due.length) return 'امروز کسی در فهرست پیام پیگیری نیست.';
-  return '👀 <b>فهرست امروز · ' + tgFa_(due.length) + ' نفر</b>\n' + due.map(function (x) {
-    return tgEsc_(String(x.o['کد لید'] || '')) + ' · ' + (x.o['گروه'] === NU_G.intro ? 'معارفه رفته، شروع نکرده' : 'فرم بی معارفه') + ' · ' + NU_STEP_FA[x.step];
-  }).join('\n');
-}
 /* v170.90: نتیجهٔ روزانه (فقط شمار): {روز: {موعد, «کارت رفت»، «کارت سقف»، «ارسال رفت»، «ارسال خاموش»، …}}؛ ۱۴ روز آخر */
 function nuRes_(k, v) {
   var o = nuJson_('NU_RES', {}), d = nuDay_(), x = o[d] = o[d] || {};
@@ -156,30 +125,17 @@ function nuRes_(k, v) {
   nuProp_('NU_RES', JSON.stringify(o));
   return x;
 }
-function nuCard_(due) {
-  var today = nuDay_(); if (nuProp_('NU_CARD_DAY') === today) return false;
-  if (!TG_OWNER_CHAT) { nuRes_('کارت بی مالک'); return false; }
-  /* v170.90: کارت تأیید سقف روزانهٔ «کار» مالک را نمی‌شمرد؛ روز فقط وقتی علامت می‌خورد که کارت واقعاً رفت (یا در صف شب نشست) */
-  var r = tgNotify_(String(TG_OWNER_CHAT), TG_NK.task, nuCardText_(due), { ref: 'NU-' + today, markup: nuCardKb_(today), force: true });
-  nuRes_('کارت ' + r);
-  if (r !== 'رفت' && r !== 'صف') return false;
-  nuProp_('NU_CARD_DAY', today);
-  return true;
-}
-
 /* ───── تیک ساعتی (از tgWatchdog) ───── */
 function nuTick_() {
   if (!nuOn_()) return 0;
   var h = Number(Utilities.formatDate(new Date(nuNow_()), TG_TZ, 'H')), today = nuDay_();
   if (h < 9 || h >= 21) return 0;
-  /* v170.23.12.5 (سهمیهٔ اجرا): بعد از کارت امروز (بی تأیید)، «امروز نه» یا ارسال امروز، تا فردا بی خواندن شیت */
-  if (nuProp_('NU_DONE_DAY') === today || nuProp_('NU_NO_DAY') === today) return 0;
-  if (!nuApproved_() && nuProp_('NU_CARD_DAY') === today) return 0;
+  /* v170.23.12.5 (سهمیهٔ اجرا): بعد از ارسال امروز، تا فردا بی خواندن شیت */
+  if (nuProp_('NU_DONE_DAY') === today) return 0;
   if (nuProp_('NU_ENR_DAY') !== today) { nuProp_('NU_ENR_DAY', today); try { nuEnroll_(); } catch (e) { tgErr_('nuEnroll_', e); } }
   var due = nuDue_(); nuRes_('موعد', due.length);
   if (!due.length) { nuProp_('NU_DONE_DAY', today); return 0; }
-  if (!nuApproved_()) { nuCard_(due); return 0; }
-  var n = nuSend_(due); nuProp_('NU_DONE_DAY', today); return n;
+  var n = nuSend_(due); nuProp_('NU_DONE_DAY', today); return n;   /* v170.92 (E13): بی کارت تأیید */
 }
 function nuSend_(due) {
   var t = nuTab_(), n = 0, stamp = Utilities.formatDate(new Date(nuNow_()), TG_TZ, 'yyyy-MM-dd HH:mm');
@@ -189,6 +145,7 @@ function nuSend_(due) {
     if (r === 'خطا') { nuStop_(x.o, 'نرسید'); return; }
     if (r === 'سقف' || r === 'خاموش') return;   /* سقف روزانه یا سیاست پیام: فردا دوباره، مرحله جلو نمی‌رود */
     t.set(x.o._row, 'مرحله', x.step + 1); t.set(x.o._row, 'آخرین ارسال', stamp); x.o['مرحله'] = x.step + 1; x.o['آخرین ارسال'] = stamp;
+    if (x.step + 1 >= NU_STEPS) nuStop_(x.o, 'پایان');   /* v170.92 (E14): یک پیام؛ بی پاسخ هم یادآوری دیگری نیست */
     try { tgLeadNote_(x.l.row, 'پیگیری خودکار ' + x.o['گروه'] + ' · پیام ' + (x.step + 1) + ' رفت', 'بات'); } catch (e) {}
     n++;
   });
@@ -215,22 +172,7 @@ function nuCb_(chat, data) {
     try { var row = tgLeadByCode_(a[2]); if (row > 1) tgLeadSet_(row, { 'پیگیری خودکار': 'دیگر پیام نده' }, 'مراجع', 'تلگرام', 'دکمهٔ دیگر پیام نده'); } catch (e) {}
     return tgSend_(chat, 'باشد، دیگر پیامی نمی‌فرستیم. هر وقت خواستی، همین‌جا بنویس.');
   }
-  if (String(chat) !== String(TG_OWNER_CHAT)) return tgSend_(chat, 'این دکمه مخصوص یاسر است.');
-  if (act === 'go') {
-    var today = nuDay_(); if (a[2] && a[2] !== today) return tgSend_(chat, 'این کارت مال روز دیگری است.');
-    nuProp_('NU_OK_DAY', today); nuProp_('NU_STREAK', String(Number(nuProp_('NU_STREAK') || 0) + 1));
-    var n = nuSend_();
-    return tgSend_(chat, '✅ ' + tgFa_(n) + ' پیام رفت.' + (nuAuto_() ? ' از فردا پیام‌ها خودکار می‌روند و فقط یک خط در گزارش شبانه می‌آید. برای یک روز توقف، /nuno را بفرست.' : ''));
-  }
-  if (act === 'no') { nuNo_(); return tgSend_(chat, '⏸ امروز پیامی نمی‌رود. فردا دوباره کارت می‌آید.'); }
-  if (act === 'ls') return tgSend_(chat, nuListText_(nuDue_()));
-  return null;
-}
-function nuNo_() { nuProp_('NU_NO_DAY', nuDay_()); nuProp_('NU_STREAK', '0'); }
-function nuOwnerCmd_(chat, t) {
-  if (String(chat) !== String(TG_OWNER_CHAT) || t !== '/nuno') return false;
-  nuNo_(); tgSend_(chat, '⏸ امروز پیگیری گیرکرده‌ها نمی‌رود و از فردا دوباره با کارت تأیید است.');
-  return true;
+  return null;   /* v170.92 (E13): دکمه‌های کارت تأیید مالک (go، no، ls) برداشته شد */
 }
 
 /* ───── گزارش شبانه ───── */
@@ -255,9 +197,8 @@ function nuNightLine_() {
   var today = nuDay_(), c = nuJson_('NU_COUNT', {}), R = nuTab_().rows;
   var act = R.filter(function (o) { return o['وضعیت'] === 'فعال'; }).length;
   var why = function (w) { return R.filter(function (o) { return o['دلیل توقف'] === w; }).length; };
-  var mode = nuProp_('NU_NO_DAY') === today ? 'امروز نه' : (nuAuto_() ? 'خودکار (برای توقف یک روز /nuno)' : 'با کارت تأیید');
-  return '📨 پیگیری گیرکرده‌ها: امروز ' + tgFa_(c[today] || 0) + ' پیام · فعال ' + tgFa_(act) + ' نفر · توقف: پاسخ ' + tgFa_(why('پاسخ مراجع')) +
-    '، اقدام پذیرش ' + tgFa_(why('اقدام پذیرش')) + '، «دیگر پیام نده» ' + tgFa_(why('دیگر پیام نده')) + '، قدیمی ' + tgFa_(why('قدیمی')) + ' · ' + mode + (stall ? '\n' + stall : '');
+  return '📨 پیگیری لید (یک پیام): امروز ' + tgFa_(c[today] || 0) + ' پیام · منتظر ' + tgFa_(act) + ' نفر · توقف: پاسخ ' + tgFa_(why('پاسخ مراجع')) +
+    '، اقدام پذیرش ' + tgFa_(why('اقدام پذیرش')) + '، «دیگر پیام نده» ' + tgFa_(why('دیگر پیام نده')) + '، «فعلاً نه» ' + tgFa_(why('دیگر پیام نده')) + '، قدیمی ' + tgFa_(why('قدیمی')) + (stall ? '\n' + stall : '');
 }
 try { TG_NIGHT_LINES.push(nuNightLine_); } catch (eNl) {}
 
@@ -272,7 +213,7 @@ function nuV17090Count() {
     if (Number(o['مرحله'] || 0) === 0 && !String(o['آخرین ارسال'] || '') && nuOld_(o['شروع'], today)) c.old++; else c.fresh++;
   });
   return 'دنبالهٔ پیگیری: ' + c.all + ' ردیف، با ارسال ' + c.sent + ' · فعال ' + c.act + ' (قدیمی و بی پیام می‌ماند ' + c.old + '، تازه ' + c.fresh + ')' +
-    ' · روشن: ' + (nuOn_() ? 'بله' : 'نه') + ' · خودکار: ' + (nuAuto_() ? 'بله' : 'نه') + ' · ' + Object.keys(by).sort().map(function (k) { return k + ' ' + by[k]; }).join('، ');
+    ' · روشن: ' + (nuOn_() ? 'بله' : 'نه') + ' · ' + Object.keys(by).sort().map(function (k) { return k + ' ' + by[k]; }).join('، ');
 }
 
 /* ───── آزمون ───── */
@@ -284,89 +225,69 @@ function nuTests() {
   try {
     tgDutyClinic_ = function () { return true; }; tgLeadNote_ = function () { return 'x'; };
     var sets = []; tgLeadByCode_ = function () { return 5; }; tgLeadSet_ = function (r, c) { sets.push(c); return 'x'; };
-    var L = function (o) { return Object.assign({ row: 2, code: 'L-1', name: 'مراجع نمونه', chatId: '501', status: 'جدید', booked: false, closed: false, touched: false, idle: 0, age: 3 * 1440, meetDate: '', follow: '' }, o); };
-    var leads = [L({}), L({ code: 'L-2', chatId: '502', age: 1 * 1440 }), L({ code: 'L-3', chatId: '503', status: 'معارفه برگزار شد', meetDate: '2026-10-06', age: 20 * 1440 }),
-      L({ code: 'L-4', chatId: '', age: 5 * 1440 }), L({ code: 'L-5', chatId: '505', follow: 'منتفی (خود مراجع)' }), L({ code: 'L-6', chatId: '506', status: 'معارفه رزرو شد', booked: true })];
+    var L = function (o) { return Object.assign({ row: 2, code: 'L-1', name: 'مراجع نمونه', chatId: '501', status: 'جدید', booked: false, closed: false, touched: false, idle: 0, age: 2 * 1440, meetDate: '', follow: '' }, o); };
+    var leads = [L({}), L({ code: 'L-2', chatId: '502', age: 600 }), L({ code: 'L-3', chatId: '503', status: 'معارفه برگزار شد', meetDate: '2026-10-08', age: 20 * 1440 }),
+      L({ code: 'L-4', chatId: '', age: 5 * 1440 }), L({ code: 'L-5', chatId: '505', follow: 'منتفی (خود مراجع)' }), L({ code: 'L-6', chatId: '506', status: 'معارفه رزرو شد', booked: true }),
+      L({ code: 'L-7', chatId: '507', age: 12 * 1440 })];
     TG_MEM['ls:leads'] = leads;
     var cur = {}; leads.forEach(function (l) { cur[l.code] = l; }); TG_MEM['nu:lead'] = function (c) { return cur[c]; };
-    ok('فقط گیرکرده‌ها با chat وارد دنباله می‌شوند', nuEnroll_() === 2 && TG_MEM['as:' + NU_TAB].map(function (o) { return o['کد لید'] + o['گروه']; }).join() === 'L-1فرم,L-3معارفه');
-    /* کارت تأیید پیش از اولین ارسال */
-    ok('بی تأیید یاسر هیچ پیامی نمی‌رود؛ کارت با شمار و متن', nuTick_() === 0 && TG_OUTBOX.filter(function (x) { return x.chat === '501'; }).length === 0 &&
-      TG_MEM.notify.some(function (x) { return x.chat === '9001' && /پیام پیگیری امروز · ۲ نفر/.test(x.text) && x.text.indexOf('[نام]') > -1; }));
-    ok('کارت به فارسی ساده: هر گروه یک خط، قاعدهٔ ۹ تا ۲۱، بی نام کلید', (function () { var c = TG_MEM.notify.filter(function (x) { return x.chat === '9001'; })[0] || {}; return /۱ نفر فرم پر کرده‌اند ولی هنوز معارفه نگرفته‌اند/.test(c.text) && /۱ نفر معارفه رفته‌اند ولی هنوز درمان را شروع نکرده‌اند/.test(c.text) && /بین ۹ تا ۲۱ می‌رود/.test(c.text) && !/NURTURE|nu:/.test(c.text); })());
-    ok('فهرست نفرات: فقط کد لید و مرحله', (function () { TG_OUTBOX = []; nuCb_('9001', 'nu:ls:2026-10-10'); var m = TG_OUTBOX.slice(-1)[0] || {}; return /L-1 · فرم بی معارفه · یادآوری اول/.test(m.text) && /L-3 · معارفه رفته، شروع نکرده/.test(m.text) && TG_MEM['as:' + NU_TAB][0]['مرحله'] === 0; })());
-    ok('کارت روزی یک بار', nuTick_() === 0 && TG_MEM.notify.filter(function (x) { return x.chat === '9001'; }).length === 1);
-    ok('دکمهٔ «بفرست» فقط برای یاسر', (TG_OUTBOX = [], nuCb_('777', 'nu:go:2026-10-10'), TG_MEM['as:' + NU_TAB][0]['مرحله'] === 0));
-    nuCb_('9001', 'nu:go:2026-10-10');
-    var m1 = TG_OUTBOX.filter(function (x) { return x.chat === '501'; })[0], m3 = TG_OUTBOX.filter(function (x) { return x.chat === '503'; })[0];
-    ok('بعد از «بفرست»: پیام اول با نام کوچک و یک دکمه', m1 && m1.text.indexOf('سلام مراجع،') === 0 && /رزرو معارفه/.test(JSON.stringify(m1)) && /nu:off:L-1/.test(JSON.stringify(m1)), JSON.stringify(m1).slice(0, 200));
-    ok('گروه معارفه با «با پذیرش حرف بزنم»', m3 && /با پذیرش حرف بزنم/.test(JSON.stringify(m3)) && /امیدواریم/.test(m3.text));
-    ok('همان روز دوباره نمی‌رود', (TG_OUTBOX = [], nuTick_() === 0));
-    /* پیام دوم سه روز بعد؛ پاسخ مراجع متوقف می‌کند */
-    TG_MEM['nu:now'] = new Date('2026-10-13T10:00:00+03:30').getTime();
-    ok('روز دوم بی کارت نمی‌رود (هنوز خودکار نیست)', nuTick_() === 0);
-    nuSeen_('503'); TG_OUTBOX = []; TG_MEM['capdry'] = {};
-    nuCb_('9001', 'nu:go:2026-10-13');
-    ok('پیام دوم فقط به کسی که پاسخ نداده', TG_OUTBOX.some(function (x) { return x.chat === '501' && /اگر سؤالی مانده/.test(x.text); }) && !TG_OUTBOX.some(function (x) { return x.chat === '503'; }));
-    ok('دلیل توقف: پاسخ مراجع', TG_MEM['as:' + NU_TAB][1]['دلیل توقف'] === 'پاسخ مراجع');
-    /* اقدام پذیرش متوقف می‌کند */
-    TG_MEM['nu:now'] = new Date('2026-10-18T10:00:00+03:30').getTime();
-    cur['L-1'] = L({ status: 'در پیگیری' });
-    TG_OUTBOX = []; TG_MEM['capdry'] = {}; nuCb_('9001', 'nu:go:2026-10-18');
-    ok('اقدام پذیرش (وضعیت عوض شد) دنباله را می‌ایستاند', TG_OUTBOX.filter(function (x) { return x.chat === '501'; }).length === 0 && TG_MEM['as:' + NU_TAB][0]['دلیل توقف'] === 'اقدام پذیرش');
-    ok('بعد از سه «بفرست» پشت‌سرهم خودکار', nuAuto_() === true);
-    /* خودکار، دیگر پیام نده، /nuno */
-    TG_MEM['as:' + NU_TAB] = []; cur['L-1'] = L({}); TG_MEM['nup:NU_ENR_DAY'] = ''; TG_MEM['nup:NU_OFF'] = '';
-    TG_MEM['nu:now'] = new Date('2026-10-19T10:00:00+03:30').getTime(); TG_MEM.notify = []; TG_OUTBOX = []; TG_MEM['capdry'] = {};
-    leads[0].age = 4 * 1440;
-    ok('حالت خودکار: بی کارت می‌رود', nuTick_() >= 1 && !TG_MEM.notify.some(function (x) { return x.chat === '9001'; }));
-    nuCb_('501', 'nu:off:L-1');
-    ok('«دیگر پیام نده»: توقف و ستون لید', TG_MEM['as:' + NU_TAB][0]['دلیل توقف'] === 'دیگر پیام نده' && sets.some(function (c) { return c['پیگیری خودکار'] === 'دیگر پیام نده'; }));
-    TG_MEM['as:' + NU_TAB] = []; TG_MEM['nup:NU_ENR_DAY'] = ''; leads[2].meetDate = '2026-10-15';   /* v170.90: معارفهٔ کهنه‌تر از ۷ روز وارد نمی‌شود */
-    ok('کسی که «دیگر پیام نده» زده دوباره وارد نمی‌شود', nuEnroll_() === 1 && TG_MEM['as:' + NU_TAB].every(function (o) { return o['chat'] !== '501'; }));
-    nuOwnerCmd_('9001', '/nuno');
-    ok('/nuno: امروز نه و برگشت به کارت', !nuApproved_() && !nuAuto_());
-    TG_MEM['nu:now'] = new Date('2026-10-19T22:00:00+03:30').getTime();
+    ok('فقط گیرکرده‌های تازه با chat وارد می‌شوند (یک روز بعد، تا ۷ روز)', nuEnroll_() === 2 && TG_MEM['as:' + NU_TAB].map(function (o) { return o['کد لید'] + o['گروه']; }).join() === 'L-1فرم,L-3معارفه');
+    TG_MEM['as:' + NU_TAB] = []; TG_MEM['nup:NU_ENR_DAY'] = '';
+    /* v170.92 (E13، E14): بی کارت تأیید، یک پیام */
+    var n = nuTick_();
+    var m1 = TG_OUTBOX.filter(function (x) { return x.chat === '501'; }), m3 = TG_OUTBOX.filter(function (x) { return x.chat === '503'; });
+    ok('بی هیچ کارت تأیید، پیام خودکار می‌رود (روی کد قبلی مردود)', n === 2 && m1.length === 1 && m3.length === 1, n);
+    ok('هیچ پیامی دربارهٔ پیگیری به مالک نمی‌رود (روی کد قبلی مردود)', !TG_OUTBOX.some(function (x) { return x.chat === '9001'; }) && !TG_MEM.notify.some(function (x) { return x.chat === '9001'; }));
+    var kb1 = JSON.stringify(m1[0] || {}), kb3 = JSON.stringify(m3[0] || {});
+    ok('گروه فرم: رزرو معارفه، پذیرش، دیدن درمانگران و «فعلاً نه» (روی کد قبلی مردود)', /رزرو معارفه/.test(kb1) && /"callback_data":"go"/.test(kb1) && /"callback_data":"hm"/.test(kb1) && /دیدن درمانگران/.test(kb1) && /web_app/.test(kb1) && /فعلاً نه/.test(kb1) && /nu:off:L-1/.test(kb1), kb1.slice(0, 300));
+    ok('گروه معارفه: بی «رزرو معارفه»، با پذیرش و درمانگران', !/رزرو معارفه/.test(kb3) && /"callback_data":"hm"/.test(kb3) && /دیدن درمانگران/.test(kb3) && /nu:off:L-3/.test(kb3));
+    ok('پیام با نام کوچک', m1[0] && m1[0].text.indexOf('سلام مراجع،') === 0);
+    ok('بعد از یک پیام دنباله تمام می‌شود', TG_MEM['as:' + NU_TAB].every(function (o) { return o['وضعیت'] === 'متوقف' && o['دلیل توقف'] === 'پایان' && Number(o['مرحله']) === 1; }));
+    /* بی پاسخ: هیچ یادآوری دیگری */
+    [11, 13, 18, 25].forEach(function (d) { TG_MEM['nu:now'] = new Date('2026-10-' + d + 'T10:00:00+03:30').getTime(); TG_MEM['capdry'] = {}; nuTick_(); });
+    ok('بی پاسخ: هیچ یادآوری دیگری، هرگز (روی کد قبلی مردود)', TG_OUTBOX.filter(function (x) { return x.chat === '501' || x.chat === '503'; }).length === 2);
+    /* «فعلاً نه» */
+    TG_MEM['as:' + NU_TAB] = []; TG_MEM['nup:NU_ENR_DAY'] = ''; TG_MEM['nup:NU_DONE_DAY'] = ''; TG_MEM['nu:now'] = new Date('2026-10-26T10:00:00+03:30').getTime();
+    cur['L-8'] = L({ code: 'L-8', chatId: '508', age: 2 * 1440 }); leads.push(cur['L-8']);
+    nuEnroll_(); TG_OUTBOX = [];
+    nuCb_('508', 'nu:off:L-8');
+    ok('«فعلاً نه»: توقف، ستون لید و جواب کوتاه', TG_MEM['as:' + NU_TAB].filter(function (o) { return o['chat'] === '508'; }).every(function (o) { return o['دلیل توقف'] === 'دیگر پیام نده'; }) && sets.some(function (c) { return c['پیگیری خودکار'] === 'دیگر پیام نده'; }) && /دیگر پیامی نمی‌فرستیم/.test((TG_OUTBOX[0] || {}).text || ''));
+    TG_MEM['nup:NU_DONE_DAY'] = ''; TG_OUTBOX = []; nuTick_();
+    ok('بعد از «فعلاً نه» چیزی نمی‌رود و دوباره وارد نمی‌شود', !TG_OUTBOX.some(function (x) { return x.chat === '508'; }) && (TG_MEM['nup:NU_ENR_DAY'] = '', nuEnroll_(), TG_MEM['as:' + NU_TAB].filter(function (o) { return o['chat'] === '508'; }).length === 1));
+    /* پاسخ مراجع پیش از ارسال */
+    TG_MEM['as:' + NU_TAB] = []; TG_MEM['nup:NU_ENR_DAY'] = ''; TG_MEM['nup:NU_DONE_DAY'] = ''; TG_MEM['nup:NU_OFF'] = '';
+    cur['L-9'] = L({ code: 'L-9', chatId: '509', age: 2 * 1440 }); leads.push(cur['L-9']);
+    nuEnroll_(); nuSeen_('509'); TG_OUTBOX = []; nuTick_();
+    ok('پاسخ مراجع پیش از ارسال: پیام نمی‌رود', !TG_OUTBOX.some(function (x) { return x.chat === '509'; }));
+    /* اقدام پذیرش */
+    TG_MEM['as:' + NU_TAB] = [{ _row: 2, 'کد لید': 'L-10', 'گروه': 'فرم', 'chat': '510', 'شروع': '2026-10-26', 'مرحله': 0, 'آخرین ارسال': '', 'وضعیت': 'فعال', 'دلیل توقف': '', 'وضعیت لید': 'جدید' }];
+    cur['L-10'] = L({ code: 'L-10', chatId: '510', status: 'در پیگیری' }); TG_MEM['nup:NU_DONE_DAY'] = ''; TG_OUTBOX = [];
+    nuDue_();
+    ok('اقدام پذیرش (وضعیت عوض شد) پیام را نگه می‌دارد', TG_MEM['as:' + NU_TAB][0]['دلیل توقف'] === 'اقدام پذیرش');
+    TG_MEM['nu:now'] = new Date('2026-10-26T22:00:00+03:30').getTime();
     ok('بیرون از ۹ تا ۲۱ هیچ', nuTick_() === 0);
-    ok('خط گزارش شبانه', /پیگیری گیرکرده‌ها: امروز .* · فعال .* · توقف: پاسخ/.test(nuNightLine_()), nuNightLine_());
+    /* سلامت (v170.90) */
+    TG_MEM['nu:now'] = new Date('2026-10-20T10:00:00+03:30').getTime();
+    var res = {}; ['2026-10-18', '2026-10-19', '2026-10-20'].forEach(function (d) { res[d] = { 'موعد': 4, 'ارسال سقف': 2 }; });
+    TG_MEM['nup:NU_RES'] = JSON.stringify(res); TG_MEM['nup:NU_ALERT_DAY'] = ''; TG_MEM.notify = [];
+    var nl = nuNightLine_();
+    ok('سه روز موعد بی ارسال: خط ⚠️ و یک پیام سیستم به مالک', /⚠️ پیگیری خودکار ایستاده است: ۳ روز موعد داشت \(امروز ۴ نفر\)/.test(nl) && /ارسال سقف ۶/.test(nl) && TG_MEM.notify.filter(function (x) { return x.chat === '9001' && /ایستاده/.test(x.text); }).length === 1, nl);
+    ok('پیام ایستاده روزی یک بار', (nuNightLine_(), TG_MEM.notify.filter(function (x) { return /ایستاده/.test(x.text); }).length === 1));
+    res['2026-10-19']['ارسال رفت'] = 2; TG_MEM['nup:NU_RES'] = JSON.stringify(res);
+    ok('با یک روز ارسال، ایستاده نیست', nuStall_() === '');
+    ok('خط گزارش شبانه', /پیگیری لید \(یک پیام\): امروز .* · منتظر .* · توقف: پاسخ/.test(nuNightLine_()), nuNightLine_());
+    /* دنبالهٔ کهنه */
+    TG_MEM['as:' + NU_TAB] = [{ _row: 2, 'کد لید': 'L-1', 'گروه': 'فرم', 'chat': '501', 'شروع': '2026-10-01', 'مرحله': 0, 'آخرین ارسال': '', 'وضعیت': 'فعال', 'دلیل توقف': '', 'وضعیت لید': 'جدید' }];
+    cur['L-1'] = L({});
+    ok('شمار یک‌باره بی نام و کد', /فعال 1 \(قدیمی و بی پیام می‌ماند 1، تازه 0\)/.test(nuV17090Count()) && !/L-1|501/.test(nuV17090Count()), nuV17090Count());
+    ok('دنبالهٔ بیش از ۷ روزه «قدیمی» و بی پیام', nuDue_().length === 0 && TG_MEM['as:' + NU_TAB][0]['دلیل توقف'] === 'قدیمی');
+    ok('یک‌بارهٔ شمار در کارهای خودکار', CI_ONCE_AUTO.indexOf('nuV17090Count') > -1);
+    ok('کارت تأیید و دستور /nuno دیگر نیستند', typeof nuCard_ === 'undefined' && typeof nuOwnerCmd_ === 'undefined' && typeof nuApproved_ === 'undefined');
     TG_CFG_.NURTURE_1 = 'سلام {name}، متن تازه.';
     ok('متن از کلید تنظیمات و بی نام', nuText_(NU_G.form, 0, '') === 'سلام، متن تازه.');
     TG_CFG_.NURTURE_ENABLED = '';
     ok('خاموش: هیچ', nuTick_() === 0 && nuSeen_('502') === false && nuNightLine_() === '');
-    /* v170.90 (E11): ریشهٔ توقف خاموش */
-    TG_CFG_.NURTURE_ENABLED = 'بله';
-    TG_MEM['as:' + NU_TAB] = []; TG_MEM['nup:NU_ENR_DAY'] = ''; TG_MEM['nup:NU_OFF'] = ''; TG_MEM['nup:NU_STREAK'] = '0'; TG_MEM['nup:NU_NO_DAY'] = '';
-    TG_MEM['nup:NU_CARD_DAY'] = ''; TG_MEM['nup:NU_DONE_DAY'] = ''; TG_MEM['nup:NU_RES'] = ''; TG_MEM.notify = []; TG_OUTBOX = [];
-    TG_MEM['nu:now'] = new Date('2026-10-20T10:00:00+03:30').getTime();
-    leads.forEach(function (l) { l.age = 3 * 1440; }); cur = {}; leads.forEach(function (l) { cur[l.code] = l; });
-    TG_MEM['capdry'] = { '9001|کار': 10 };   /* سقف «کار» مالک امروز پر است */
-    nuTick_();
-    var cardsTo = TG_MEM.notify.filter(function (x) { return x.chat === '9001' && /پیام پیگیری امروز/.test(x.text); });
-    ok('کارت تأیید با سقف پرشدهٔ «کار» هم می‌رسد (روی کد قبلی مردود)', cardsTo.length === 1 && TG_OUTBOX.some(function (x) { return x.chat === '9001' && /پیام پیگیری امروز/.test(x.text); }));
-    ok('نتیجهٔ کارت و موعد امروز ثبت شد', (function () { var r = JSON.parse(TG_MEM['nup:NU_RES'])['2026-10-20']; return r['کارت رفت'] === 1 && r['موعد'] >= 1; })());
-    /* کارتی که نرسید: روز علامت نمی‌خورد و ساعت بعد دوباره */
-    var keepN = tgNotify_; tgNotify_ = function () { return 'خطا'; };
-    TG_MEM['nup:NU_CARD_DAY'] = '';
-    ok('کارت نرسیده روز را «کارت رفت» نمی‌کند (روی کد قبلی مردود)', nuCard_([]) === false && TG_MEM['nup:NU_CARD_DAY'] === '' && JSON.parse(TG_MEM['nup:NU_RES'])['2026-10-20']['کارت خطا'] === 1);
-    tgNotify_ = keepN;
-    /* ایستاده: سه روز موعد و هیچ ارسال ← خط ⚠️ و یک پیام سیستم به مالک */
-    var res = {}; ['2026-10-18', '2026-10-19', '2026-10-20'].forEach(function (d) { res[d] = { 'موعد': 4, 'کارت سقف': 1 }; });
-    TG_MEM['nup:NU_RES'] = JSON.stringify(res); TG_MEM['nup:NU_ALERT_DAY'] = ''; TG_MEM.notify = [];
-    var nl = nuNightLine_();
-    ok('سه روز موعد بی ارسال: خط ⚠️ در گزارش شبانه با علت (روی کد قبلی مردود)', /⚠️ پیگیری خودکار ایستاده است: ۳ روز موعد داشت \(امروز ۴ نفر\)/.test(nl) && /کارت سقف ۳/.test(nl), nl);
-    ok('و یک پیام سیستم به مالک، روزی یک بار', TG_MEM.notify.filter(function (x) { return x.chat === '9001' && /ایستاده/.test(x.text); }).length === 1 && (nuNightLine_(), TG_MEM.notify.filter(function (x) { return /ایستاده/.test(x.text); }).length === 1));
-    res['2026-10-19']['ارسال رفت'] = 2; TG_MEM['nup:NU_RES'] = JSON.stringify(res);
-    ok('با یک روز ارسال، ایستاده نیست', nuStall_() === '');
-    /* دنبالهٔ کهنه: پیام اول فقط تا ۷ روز بعد از شروع */
-    TG_MEM['as:' + NU_TAB] = [{ _row: 2, 'کد لید': 'L-1', 'گروه': 'فرم', 'chat': '501', 'شروع': '2026-10-01', 'مرحله': 0, 'آخرین ارسال': '', 'وضعیت': 'فعال', 'دلیل توقف': '', 'وضعیت لید': 'جدید' },
-      { _row: 3, 'کد لید': 'L-3', 'گروه': 'معارفه', 'chat': '503', 'شروع': '2026-10-15', 'مرحله': 0, 'آخرین ارسال': '', 'وضعیت': 'فعال', 'دلیل توقف': '', 'وضعیت لید': 'معارفه برگزار شد' }];
-    ok('شمار یک‌باره بی نام و کد: یک قدیمی، یک تازه', /فعال 2 \(قدیمی و بی پیام می‌ماند 1، تازه 1\)/.test(nuV17090Count()) && !/L-1|L-3|501/.test(nuV17090Count()), nuV17090Count());
-    var d2 = nuDue_();
-    ok('دنبالهٔ بیش از ۷ روزه بی پیام «قدیمی» می‌شود و پیام دیرهنگام نمی‌رود (روی کد قبلی مردود)', TG_MEM['as:' + NU_TAB][0]['دلیل توقف'] === 'قدیمی' && d2.every(function (x) { return x.o['کد لید'] !== 'L-1'; }) && d2.some(function (x) { return x.o['کد لید'] === 'L-3'; }));
-    leads.forEach(function (l) { l.age = 20 * 1440; }); TG_MEM['as:' + NU_TAB] = []; TG_MEM['nup:NU_ENR_DAY'] = '';
-    ok('لید فرمِ بیش از ۹ روزه وارد دنباله نمی‌شود', (nuEnroll_(), TG_MEM['as:' + NU_TAB].every(function (o) { return o['گروه'] !== 'فرم'; })));
-    ok('یک‌باره در کارهای خودکار بعد از انتشار', CI_ONCE_AUTO.indexOf('nuV17090Count') > -1 && CI_ONCE_ALLOW.indexOf('nuV17090Count') > -1);
-    ok('پیش‌نویس‌ها حداکثر دو جمله، بی تخفیف', Object.keys(NU_DRAFT).every(function (k) { return NU_DRAFT[k].split(/[.!؟]/).filter(function (s) { return s.trim(); }).length <= 2 && !/تخفیف|٪|درصد/.test(NU_DRAFT[k]); }));
+    ok('پیش‌نویس‌ها حداکثر دو جمله، بی تخفیف', Object.keys(NU_DRAFT).every(function (k) { return NU_DRAFT[k].split(/[.!؟]/).filter(function (x) { return x.trim(); }).length <= 2 && !/تخفیف|٪|درصد/.test(NU_DRAFT[k]); }));
   } catch (e) { ok('خطا: ' + e + ' ' + String(e.stack || '').slice(0, 300), false); }
   finally {
     tgDutyClinic_ = st.clin; tgLeadNote_ = st.note; tgLeadByCode_ = st.by; tgLeadSet_ = st.set;
