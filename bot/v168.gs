@@ -2113,8 +2113,7 @@ var V1691_WEEKLY = [
   { fn: 'tgTherWeekly', wd: 4, h: 10, heavy: true },
   { fn: 'tgMonWeekly', wd: 6, h: 10, heavy: false },
   { fn: 'tgRmAnnTher', wd: 6, h: 11, heavy: false },
-  { fn: 'tgRmAnnSch', wd: 6, h: 11, heavy: false },
-  { fn: 'gemWeekly', wd: 7, h: 9, heavy: false }      /* v171.0: گزارش هفتگی Gemini برای یاسر، یکشنبه ۹ */
+  { fn: 'tgRmAnnSch', wd: 6, h: 11, heavy: false }
 ];
 var V1691_HOURLY = ['ptTick', 'vkTick'];
 
@@ -2133,8 +2132,7 @@ function v1691Stamp_(k, v) {
 function v1691Run_(fn, e) {
   if (TG_DRY) { (TG_MEM['v1691:calls'] = TG_MEM['v1691:calls'] || []).push(fn); return; }
   var map = { ptTick: function (x) { return ptTick(x); }, vkTick: function (x) { return vkTick(x); }, tgTherWeekly: function (x) { return tgTherWeekly(x); },
-    tgMonWeekly: function (x) { return tgMonWeekly(x); }, tgRmAnnTher: function () { return tgRmAnnTher(); }, tgRmAnnSch: function () { return tgRmAnnSch(); },
-    gemWeekly: function () { return gemWeekly(); } };
+    tgMonWeekly: function (x) { return tgMonWeekly(x); }, tgRmAnnTher: function () { return tgRmAnnTher(); }, tgRmAnnSch: function () { return tgRmAnnSch(); } };
   if (map[fn]) map[fn](e);
 }
 /* از tgWatchdog: هر ساعت یک بار */

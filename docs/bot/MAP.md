@@ -82,7 +82,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.81`
+نسخهٔ کد: `v170.80`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -98,19 +98,19 @@
 | `school2.gs` | ۴۳۹ | ۳۲ |
 | `mag_contrib.gs` | ۱۲۴۳ | ۹۷ |
 | `author.gs` | ۱۴۸ | ۱۰ |
-| `voice.gs` | ۱۱۱۸ | ۹۳ |
+| `voice.gs` | ۱۱۱۷ | ۹۳ |
 | `review.gs` | ۶۲۳ | ۵۳ |
-| `seo_gemini.gs` | ۲۳۲ | ۱۶ |
-| `gemini_setup.gs` | ۲۴۰ | ۱۸ |
+| `seo_gemini.gs` | ۲۳۱ | ۱۶ |
+| `gemini_setup.gs` | ۳۵ | ۳ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۷۹۴ | ۱۳۰ |
-| `v168.gs` | ۲۴۹۶ | ۱۵۶ |
+| `publish.gs` | ۱۷۹۳ | ۱۳۰ |
+| `v168.gs` | ۲۴۹۴ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
-| `comments.gs` | ۱۰۷۹ | ۶۸ |
+| `comments.gs` | ۱۰۷۸ | ۶۸ |
 | `dq.gs` | ۶۰۲ | ۴۹ |
-| `cfg.gs` | ۱۹۵ | ۱۴ |
+| `cfg.gs` | ۱۹۴ | ۱۴ |
 | `ops.gs` | ۱۱۳۲ | ۱۰۰ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -191,7 +191,6 @@
 | `CR_FX_TAB` | «لیدهای بحران · پیش‌نمایش» | `telegram.gs` |
 | `DQ_TAB` | «صف ارسال» | `dq.gs` |
 | `EBI_MIRROR_TAB` | «پلی‌لیست ابی · ثبت‌نام‌ها» | `ebi.gs` |
-| `GEM_LEDGER_TAB` | «Gemini · هزینه» | `gemini_setup.gs` |
 | `HUB_GUIDE` | «راهنما» | `ops.gs` |
 | `HUB_MINE` | «کارهای من» | `ops.gs` |
 | `HUB_QUEUES` | «صف‌ها» | `ops.gs` |
@@ -402,13 +401,12 @@
 | تجربه پارتنرز ۲ | `ptTests` |
 | برنامهٔ من (v118) | `tgV118Tests` |
 | اشغال گاندی (v144) | `tgOccTests` |
-| نسخهٔ ۱۶۲ | `tgV162Tests` |
 | بستهٔ انتشار خودکار (v170.45) | `pbPkgTests` |
 | سهمیهٔ زمان اجرا (v170.23.12.5) | `bgTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | اقدام بعدی لید بسته (v170.50) | `lmClosedNextTests` |
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |
-| Gemini: هزینه و گزارش هفتگی v170.81 | `gemTests` |
+| نسخهٔ ۱۶۲ | `tgV162Tests` |
 | v170.13: سقف پذیرش، بورسیه، آفر | `v17013Tests` |
 | کمپین C-004 (پلی‌لیست ابی) | `ebiTests` |
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |
