@@ -107,7 +107,7 @@
 | `v168.gs` | ۲۴۹۶ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `cover.gs` | ۳۸۵ | ۲۷ |
-| `magseo.gs` | ۲۸۵ | ۱۸ |
+| `magseo.gs` | ۳۱۷ | ۲۰ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |

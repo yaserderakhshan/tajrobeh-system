@@ -12,6 +12,11 @@
  * ۴) ساعت ۱۰ یک پیام کوتاه برای سردبیر وقتی پیشنهاد تازه هست.
  * نمونه: تا یاسر «ادامه» نزده، روزی ۳ مقاله. بعد MAGSEO_DAILY (۱۵).
  * فقط متن منتشرشدهٔ مقاله به Gemini می‌رود. خاموش: MAGSEO_ON = 0 در «تنظیمات تیم».
+ *
+ * E12 (لین F): ۲۷۱ مقالهٔ بازنویسی‌شدهٔ دور ۱ و ۲ کنار می‌مانند. تا قاعدهٔ لین F برسد: هر مقاله‌ای که پیش از
+ * MAGSEO_SKIP_AFTER (پیش‌فرض 2026-10-07 = ۱۵ مهر ۱۴۰۵) منتشر و بعد از آن ویرایش شده، بی هیچ تماس با Gemini کنار
+ * می‌رود (Property «MS_SKIP»). مقالهٔ تازه (منتشرشده بعد از همان تاریخ) و مقاله‌ای که دست نخورده، پردازش می‌شود.
+ * فهرست جدای لین F: MAGSEO_SKIP_IDS (شناسه‌ها با ویرگول). تیتر هرگز خودکار عوض نمی‌شود؛ فقط پیشنهاد سردبیر است.
  */
 var MS_TAB = 'صف سردبیر · Gemini';
 var MS_HEAD = ['تاریخ', 'شناسه', 'آدرس', 'نوع', 'فعلی', 'پیشنهادی', 'دلیل', 'وضعیت', 'یادداشت سردبیر'];
@@ -20,6 +25,8 @@ var MS_SEO_APPLIED = 'اعمال شد: متا و alt';
 var MS_ON = String(cfg_('MAGSEO_ON', ''));   /* خالی یا 1 = روشن، 0 = خاموش */
 var MS_DAILY = Number(cfg_('MAGSEO_DAILY', 0)) || 15;
 var MS_SAMPLE = 3, MS_PER_RUN = 2, MS_NEW_DAYS = 14, MS_SUM_HOUR = 10;
+var MS_SKIP_AFTER = String(cfg_('MAGSEO_SKIP_AFTER', '') || '2026-10-07');   /* E12: ۱۵ مهر ۱۴۰۵ */
+var MS_SKIP_IDS = String(cfg_('MAGSEO_SKIP_IDS', '') || '');
 var MS_REVIEW_MODELS = ['gemini-pro-latest', 'gemini-flash-latest'];
 var MS_KINDS = ['خط تیره', 'واژهٔ ممنوع', 'ادعای بی‌منبع', 'ادعای بالینی', 'منبع کم', 'جزئیات شناسایی‌پذیر', 'ساختار', 'نگارش'];
 
@@ -39,8 +46,18 @@ function msAdd_(id, url, kind, now, sug, why, st) {
 }
 
 /* ترتیب: تازه‌ها، بعد ترافیک؛ هر مقاله یک بار (هر چه در «بستهٔ سئو» یا صف سردبیر هست، انجام‌شده است) */
+function msSkipSet_() {
+  var o = {}; try { o = JSON.parse(msProp_('MS_SKIP') || '{}') || {}; } catch (e) {}
+  MS_SKIP_IDS.split(/[,،\s]+/).forEach(function (x) { if (x) o[x] = 1; });
+  return o;
+}
+/* E12: مقالهٔ قدیمیِ بازنویسی‌شده؟ (پیش از تاریخ برش منتشر، بعد از آن ویرایش) */
+function msReworked_(post) {
+  var cut = MS_SKIP_AFTER, pub = String(post.date || '').slice(0, 10), mod = String(post.modified || '').slice(0, 10);
+  return !!(pub && mod && pub < cut && mod >= cut);
+}
 function msOrder_() {
-  var done = {};
+  var done = msSkipSet_();
   pbRows_('c', PB_T_SEO, PB_SEO_HEAD).forEach(function (r) { done[String(r['شناسه']).trim()] = 1; });
   pbRows_('c', MS_TAB, MS_HEAD).forEach(function (r) { done[String(r['شناسه']).trim()] = 1; });
   var m = pbArtMap_(), now = msNow_().getTime(), out = [], seen = {};
@@ -141,9 +158,11 @@ function msApply_(row) {
 
 /** یک مقاله: بسته، بازبینی، اعمال. */
 function msOne_(id) {
+  var post = pbWp_('/wp-json/wp/v2/posts/' + id + '?_fields=id,link,title,content,categories,date,modified');
+  /* E12: بازنویسی‌شده‌ها پیش از هر تماس با Gemini کنار می‌روند و دیگر در صف نمی‌آیند */
+  if (msReworked_(post)) { var sk = {}; try { sk = JSON.parse(msProp_('MS_SKIP') || '{}') || {}; } catch (e) {} sk[String(id)] = 1; msProp_('MS_SKIP', JSON.stringify(sk)); return 'reworked'; }
   var r = pbGemSeo_(id, false);
   if (!r.ok) throw new Error(r.error || 'بستهٔ سئو');
-  var post = pbWp_('/wp-json/wp/v2/posts/' + id + '?_fields=id,link,title,content,categories');
   var url = decodeURI(String(post.link || '')), text = seoStrip_(post.content.rendered);
   msReview_(id, url, seoStrip_(post.title.rendered), text);
   var row = pbRows_('c', PB_T_SEO, PB_SEO_HEAD).filter(function (x) { return String(x['شناسه']).trim() === String(id); }).pop();
@@ -161,9 +180,11 @@ function msHourly_() {
   catch (e0) { if (e0 !== 'later') tgErr_('msApply_', e0); }
   if (h >= 1 && h < 9) {
     var used = Number(msProp_('MS_DAY:' + day) || 0), ids = msOrder_();
-    while (n < MS_PER_RUN && used < msLimit_() && ids.length && pbGemLeft_() > 2) {
-      var id = ids.shift();
-      try { msOne_(id); } catch (e1) { msAdd_(id, '', 'خطا', '', '', String(e1.message || e1).slice(0, 200)); tgErr_('msOne_', e1); }
+    var looked = 0;
+    while (n < MS_PER_RUN && used < msLimit_() && ids.length && pbGemLeft_() > 2 && looked < 30) {
+      var id = ids.shift(), res = ''; looked++;
+      try { res = msOne_(id); } catch (e1) { msAdd_(id, '', 'خطا', '', '', String(e1.message || e1).slice(0, 200)); tgErr_('msOne_', e1); }
+      if (res === 'reworked') continue;   /* E12: کنارگذاشته از سهم روز کم نمی‌کند */
       used++; n++; msProp_('MS_DAY:' + day, String(used));
     }
   }
@@ -202,7 +223,7 @@ try { TG_SUITES.push(['بستهٔ سئو و بازبینی اول v170.83', 'msT
 function msTests() {
   var log = [], fail = 0;
   function ok(n, c) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n); } }
-  var keep = TG_DRY, memK = TG_MEM, outK = TG_OUTBOX, cfgK = [MS_ON, MS_DAILY];
+  var keep = TG_DRY, memK = TG_MEM, outK = TG_OUTBOX, cfgK = [MS_ON, MS_DAILY, MS_SKIP_IDS];
   TG_DRY = true; TG_MEM = {}; TG_OUTBOX = []; MS_ON = '1'; MS_DAILY = 15;
   try {
     var D = 86400000, t0 = pbTehran_(2026, 10, 21, 2, 5).getTime(), owner = String(TG_OWNER_CHAT);
@@ -215,6 +236,7 @@ function msTests() {
     TG_MEM['pb:traffic'] = [{ u: 'https://tajrobeh.life/sep/', n: 900 }];
     var html = '<p>متن مقاله دربارهٔ اضطراب و خواب — با یک خط تیره و واژهٔ بیمار.</p><img src="https://tajrobeh.life/u/a-1024x576.webp">';
     TG_MEM['wp:/wp-json/wp/v2/posts/901?_fields=id,link,title,content,categories'] = { id: 901, link: 'https://tajrobeh.life/sleep/', title: { rendered: 'اضطراب و خواب' }, content: { rendered: html }, categories: [] };
+    TG_MEM['wp:/wp-json/wp/v2/posts/901?_fields=id,link,title,content,categories,date,modified'] = Object.assign({ date: '2026-10-18T10:00:00', modified: '2026-10-18T10:00:00' }, TG_MEM['wp:/wp-json/wp/v2/posts/901?_fields=id,link,title,content,categories']);
     var title = 'اضطراب شبانه و بی‌خوابی: چرا ذهن آرام نیست؟' + SEO_SUFFIX;
     while (title.length < 52) title = 'چرا ' + title;
     var meta = 'وقتی شب‌ها ذهن آرام نمی‌گیرد، اضطراب خواب را می‌دزدد. در این مقاله می‌خوانید اضطراب شبانه از کجا می‌آید و روان‌درمانی چطور کمک می‌کند تا آرام شوید.';
@@ -225,6 +247,15 @@ function msTests() {
     var calls = [];
     TG_MEM['ms:wp'] = function (path, body) { calls.push({ path: path, body: body }); return { code: 200, json: { ok: true, meta_applied: false, prev_meta: 'متای قدیمی', title_now: 'اضطراب و خواب | تجربه زندگی', alts_set: 1 } }; };
 
+    /* E12: بازنویسی‌شده‌ها کنار، بی تماس با Gemini */
+    TG_MEM['wp:/wp-json/wp/v2/posts/55?_fields=id,link,title,content,categories,date,modified'] = { id: 55, link: 'https://tajrobeh.life/old/', title: { rendered: 'قدیمی' }, content: { rendered: '<p>x</p>' }, date: '2025-03-01T10:00:00', modified: '2026-10-17T09:00:00' };
+    var gemBefore = JSON.stringify(TG_MEM['gem:ledger'] || []);
+    ok('E12: مقالهٔ قدیمیِ بازنویسی‌شده (ویرایش بعد از ۱۵ مهر) کنار می‌رود، بی Gemini (روی کد قبلی مردود)', msOne_('55') === 'reworked' && JSON.stringify(TG_MEM['gem:ledger'] || []) === gemBefore &&
+      !pbRows_('c', PB_T_SEO, PB_SEO_HEAD).some(function (r) { return String(r['شناسه']) === '55'; }) && !!JSON.parse(TG_MEM['msp:MS_SKIP'])['55']);
+    TG_MEM['pb:' + PB_T_ART].push({ 'شناسه': '55', 'عنوان': 'قدیمی', 'لینک': 'https://tajrobeh.life/old/', 'تاریخ انتشار': new Date(t0 - 300 * D) });
+    TG_MEM['pb:traffic'].push({ u: 'https://tajrobeh.life/old/', n: 5000 });
+    ok('E12: کنارگذاشته دیگر در صف شبانه نمی‌آید؛ فهرست MAGSEO_SKIP_IDS هم', msOrder_().indexOf('55') < 0 && (MS_SKIP_IDS = '104', msOrder_().indexOf('104') < 0) && (MS_SKIP_IDS = '', true));
+    ok('E12: مقالهٔ تازه (منتشرشده بعد از برش) و دست‌نخورده پردازش می‌شود', !msReworked_({ date: '2026-10-18', modified: '2026-10-19' }) && !msReworked_({ date: '2025-01-01', modified: '2025-06-01' }) && msReworked_({ date: '2025-01-01', modified: '2026-10-07' }));
     ok('نمونه: پیش از «ادامه» روزی ۳، بعد سقف تنظیم (روی کد قبلی مردود)', msLimit_() === 3 && (msProp_('MS_SAMPLE_OK', '1'), msLimit_() === 15));
     TG_MEM['msp:MS_SAMPLE_OK'] = '';
     var ord = msOrder_();
@@ -251,6 +282,7 @@ function msTests() {
     /* گیت مردود: هیچ چیز روی سایت نمی‌رود */
     calls = [];
     TG_MEM['wp:/wp-json/wp/v2/posts/104?_fields=id,link,title,content,categories'] = { id: 104, link: 'https://tajrobeh.life/sep/', title: { rendered: 'اضطراب جدایی' }, content: { rendered: '<p>متن</p>' }, categories: [] };
+    TG_MEM['wp:/wp-json/wp/v2/posts/104?_fields=id,link,title,content,categories,date,modified'] = Object.assign({ date: '2026-10-18T10:00:00', modified: '2026-10-18T10:00:00' }, TG_MEM['wp:/wp-json/wp/v2/posts/104?_fields=id,link,title,content,categories']);
     TG_MEM['pb:gem'] = JSON.parse(JSON.stringify(TG_MEM['pb:gem'])); TG_MEM['pb:gem'].meta_description = 'کوتاه';
     var b = msOne_('104');
     ok('گیت مردود: متا اعمال نمی‌شود و به سردبیر گزارش می‌شود', b === 'skip' && calls.length === 0 && pbRows_('c', MS_TAB, MS_HEAD).some(function (r) { return r['شناسه'] === '104' && r['نوع'] === 'بستهٔ سئو'; }));
@@ -278,7 +310,7 @@ function msTests() {
     ok('کلیدهای بستهٔ سئو اختیاری‌اند', ['MAGSEO_ON', 'MAGSEO_DAILY'].every(function (k) { return CFG_OPTIONAL.indexOf(k) > -1; }));
     ok('سیم‌کشی: واچ‌داگ ساعتی و مسیر دکمهٔ msq:', String(tgWatchdog).indexOf('msHourly_') > -1 && String(tgOnCallback_).indexOf("'msq:'") > -1);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
-  TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; MS_ON = cfgK[0]; MS_DAILY = cfgK[1]; GEM_TASK = '';
+  TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; MS_ON = cfgK[0]; MS_DAILY = cfgK[1]; MS_SKIP_IDS = cfgK[2]; GEM_TASK = '';
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ بستهٔ سئو و بازبینی اول درست است'));
   return tgTestTally_(log, fail);
 }
