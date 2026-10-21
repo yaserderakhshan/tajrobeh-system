@@ -225,7 +225,6 @@ function cmAi_(batch) {
     'conf عددی بین ۰ و ۱ است؛ اگر مطمئن نیستی کمتر از ۰.۷۵ بده. فقط JSON.\n\n' +
     batch.map(function (b) { return '[' + b.i + '] نویسنده: ' + (b.author || '?') + ' · متن: ' + b.text; }).join('\n');
   var out = {};
-  gemTask_('کامنت‌ها');
   try { (gemJson_(p, CM_SCHEMA) || []).forEach(function (r) { if (r && r.i !== undefined) out[r.i] = r; }); } catch (e) { tgErr_('cmAi_', e); }
   return out;
 }

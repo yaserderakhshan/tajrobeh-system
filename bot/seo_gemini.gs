@@ -158,7 +158,6 @@ function seoTab_() {
 
 function seoPackage(id) {
   id = id || SEO_PRIORITY[0];
-  gemTask_('سئو');
   var post = seoGet_('/wp-json/wp/v2/posts/' + id + '?_fields=id,link,title,content,categories,yoast_head_json');
   var html = post.content.rendered, text = seoStrip_(html);
   var imgs = [], m, re = /<img[^>]+src="([^"]+)"[^>]*>/g;
