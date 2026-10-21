@@ -1082,6 +1082,7 @@ function pbGemSeo_(postId, dry) {
   if (dry) return { ok: true, data: { would: 'gemini', post_id: id, text_chars: text.length, images_without_alt: imgs.length, quota_left: pbGemLeft_() } };
   var cands = pbSeoCands_(post, text), o = null, bad = [], fb = '';
   for (var i = 0; i < 3; i++) {
+    gemTask_('سئوی انتشار');
     try { o = TG_DRY ? JSON.parse(JSON.stringify(TG_MEM['pb:gem'])) : gemJson_(pbSeoPrompt_(post, text, imgs, cands, fb), PB_SEO_SCHEMA); pbGemUse_(true); }
     catch (e) { pbGemUse_(false, e.message); return { ok: false, error: 'جمنای: ' + String(e.message || e).slice(0, 160) }; }
     try { o = seoFixAll_(Object.assign({ short_answer: '' }, o)); } catch (e) {}
