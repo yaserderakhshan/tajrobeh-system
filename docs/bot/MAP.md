@@ -89,7 +89,7 @@
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۴۶۱ | ۲۰۷۸ |
+| `telegram.gs` | ۳۸۴۶۰ | ۲۰۷۸ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -135,7 +135,7 @@
 | `assist.gs` | ۱۴۶۵ | ۱۱۴ |
 | `leadspeed.gs` | ۱۱۵۶ | ۸۷ |
 | `leadclaim.gs` | ۶۳۰ | ۴۳ |
-| `nurture.gs` | ۳۷۸ | ۳۴ |
+| `nurture.gs` | ۲۹۹ | ۲۶ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 | `guard.gs` | ۳۲۹ | ۲۵ |
 | `changes.gs` | ۲۶۵ | ۲۸ |
