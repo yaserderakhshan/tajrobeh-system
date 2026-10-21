@@ -121,6 +121,8 @@ function cfgSync_() {
   });
   if (n) cfgPropSet_(cur);
   if (bad.length) { try { tgErr_('cfgSync_', 'مقدار ناخوانا در «' + CFG_TAB + '»: ' + bad.join('، ')); } catch (e) {} }
+  /* v170.87 (E10): کلید Vertex از ردیف یک‌بارهٔ VERTEX_API_KEY_INBOX به Script Properties؛ هرگز در TG_CFG نمی‌رود */
+  if (typeof vtxInbox_ === 'function') { try { vtxInbox_(rows); } catch (eV) { try { tgErr_('vtxInbox_', eV); } catch (e3) {} } }
   return { ok: true, changed: n, bad: bad, read: read };
 }
 function tgCfgSync() { return cfgSync_(); }
