@@ -161,6 +161,8 @@ function vtxSaveKey() {
   if (!k) out = 'VTX_KEY_PASTE خالی است. کلید را بین دو علامت نقل‌قول بگذار، ذخیره کن و دوباره اجرا کن.';
   else if (/\s/.test(k) || k.length < 20 || k.length > 200) out = 'این شبیه کلید API نیست (فاصله دارد یا طولش نادرست است). چیزی ذخیره نشد.';
   else {
+    /* VERTEX_PROJECT تازه در تب «تنظیمات خصوصی بات» بی صبر برای همگام‌سازی ساعتی خوانده شود */
+    if (!TG_DRY) { try { cfgSync_(); TG_CFG_ = null; VTX_PROJECT = String(cfg_('VERTEX_PROJECT', '') || '').trim(); VTX_LOCATION = String(cfg_('VERTEX_LOCATION', '') || '').trim() || 'global'; } catch (eS) {} }
     vtxProp_('VERTEX_API_KEY', k);
     vtxProp_('VTX_PROBE', '');   /* قدم نگهبان دوباره می‌سنجد و نتیجه را به مالک پیام می‌دهد */
     out = 'کلید در VERTEX_API_KEY ذخیره شد (اثر انگشت ' + vtxFp_(k) + '). ' +
