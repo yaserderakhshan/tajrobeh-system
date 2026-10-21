@@ -71,9 +71,21 @@ env:
   PAUSE_MIN: 75
 
 jobs:
+  # v170.96 (E17، تصمیم مالک): هر اجرای آزمون روی Apps Script یک نسخه می‌سازد و پروژه سقف ۲۰۰ نسخه دارد.
+  # دیپلوی آزمایشی HEAD (/dev) فقط با ورود مالک جواب می‌دهد و آزمون‌ها بی ورودند، پس آزمون شبانه رد می‌شود (سبز، بی نسخه).
+  # آزمون کامل: آزمون محلی هر انتشار (bot-precheck) و اجرای دستی با scope: full که خودش یک انتشار است.
+  nightly-skip:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "::notice::آزمون شبانه روی Apps Script رد شد تا نسخهٔ تازه‌ای ساخته نشود (سقف ۲۰۰ نسخه، E17)."
+          echo "آزمون شبانه رد شد: هر اجرا یک نسخهٔ Apps Script می‌سازد و سقف ۲۰۰ است (E17)." >> "$GITHUB_STEP_SUMMARY"
+
   # v170.5: قفل انتشار. دو انتشار هرگز هم‌زمان نیستند؛ انتشار دوم صبر می‌کند تا اولی و پایشش تمام شود.
   lock:
-    if: (github.event_name == 'workflow_dispatch' && inputs.mode != 'snapshot') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) || github.event_name == 'schedule'
+    # v170.96 (E17، تصمیم مالک): اجرای شبانه نسخهٔ Apps Script نمی‌سازد؛ کار nightly-skip جایش است.
+    if: (github.event_name == 'workflow_dispatch' && inputs.mode != 'snapshot') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch)
     runs-on: ubuntu-latest
     timeout-minutes: 340
     steps:
@@ -90,7 +102,8 @@ jobs:
 
   deploy:
     needs: lock
-    if: (github.event_name == 'workflow_dispatch' && inputs.mode != 'snapshot') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) || github.event_name == 'schedule'
+    # v170.96 (E17، تصمیم مالک): اجرای شبانه نسخهٔ Apps Script نمی‌سازد؛ کار nightly-skip جایش است.
+    if: (github.event_name == 'workflow_dispatch' && inputs.mode != 'snapshot') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch)
     runs-on: ubuntu-latest
     # v170.9: همهٔ رمزها و شناسهٔ پروژه فقط در Environment «production» (فقط main به آن دسترسی دارد)
     environment: production
@@ -253,8 +266,11 @@ jobs:
           echo "staging_id=$STAGING_ID" >> "$GITHUB_OUTPUT"
           echo "کد فعلی (bot-live): $PREV_REF · نسخهٔ فعلی دیپلوی اصلی: $PREV_VERSION · دیپلوی آزمایشی: ${STAGING_ID:-هنوز ساخته نشده} · بزرگ‌ترین شمارهٔ نسخه: $MAXV"
           # Apps Script حداکثر ۲۰۰ نسخه نگه می‌دارد؛ بعدش ساخت نسخهٔ تازه شکست می‌خورد و نسخه‌های قدیمی باید از ادیتور پاک شوند
-          if [ "$VCOUNT" -ge 197 ]; then echo "::error::پروژهٔ Apps Script $VCOUNT نسخه دارد و سقف ۲۰۰ است. نسخه‌های قدیمی را از ادیتور (Project history) پاک کنید؛ انتشار انجام نمی‌شود."; exit 1; fi
-          if [ "$VCOUNT" -ge 185 ]; then echo "::warning::پروژهٔ Apps Script $VCOUNT نسخه دارد؛ نزدیک سقف ۲۰۰ است."; fi
+          # v170.96 (E17): این انتشار یک نسخه می‌سازد؛ بعدش دست‌کم یک جای خالی بماند. از ۱۶ جای خالی (دو هفته با یک انتشار در روز) هشدار.
+          FREE=$(( 200 - VCOUNT ))
+          echo "نسخه‌های Apps Script: $VCOUNT از ۲۰۰ · جای خالی پیش از این انتشار: $FREE"
+          if [ "$FREE" -lt 2 ]; then echo "::error::پروژهٔ Apps Script $VCOUNT نسخه دارد؛ بعد از این انتشار جای خالی نمی‌ماند. نسخه‌های قدیمی را از ادیتور (Project history) پاک کنید؛ انتشار انجام نمی‌شود."; exit 1; fi
+          if [ "$FREE" -le 16 ]; then echo "::warning::فقط $FREE جای خالی برای نسخهٔ Apps Script مانده (هر انتشار یکی). پیش از پر شدن، نسخه‌های قدیمی را از ادیتور پاک کنید."; fi
 
       - name: ساخت کلید یک‌بارمصرف و زمان توقف کارهای زمان‌دار
         id: key

@@ -82,14 +82,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.95`
+نسخهٔ کد: `v170.96`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۴۶۱ | ۲۰۷۸ |
+| `telegram.gs` | ۳۸۴۷۲ | ۲۰۷۸ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -101,16 +101,18 @@
 | `voice.gs` | ۱۱۱۸ | ۹۳ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۲ | ۱۶ |
-| `gemini_setup.gs` | ۵۴۴ | ۳۸ |
+| `gemini_setup.gs` | ۵۴۶ | ۳۸ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۷۹۴ | ۱۳۰ |
 | `v168.gs` | ۲۴۹۶ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
+| `cover.gs` | ۳۸۵ | ۲۷ |
+| `magseo.gs` | ۳۵۰ | ۲۱ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |
 | `dq.gs` | ۶۰۲ | ۴۹ |
-| `cfg.gs` | ۱۹۹ | ۱۴ |
+| `cfg.gs` | ۲۰۱ | ۱۴ |
 | `ops.gs` | ۱۱۳۲ | ۱۰۰ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -135,9 +137,9 @@
 | `assist.gs` | ۱۴۶۵ | ۱۱۴ |
 | `leadspeed.gs` | ۱۱۵۶ | ۸۷ |
 | `leadclaim.gs` | ۶۸۱ | ۴۷ |
-| `nurture.gs` | ۳۷۸ | ۳۴ |
+| `nurture.gs` | ۲۹۹ | ۲۶ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
-| `guard.gs` | ۳۲۹ | ۲۵ |
+| `guard.gs` | ۳۷۸ | ۳۰ |
 | `changes.gs` | ۲۶۵ | ۲۸ |
 | `uptime.gs` | ۱۵۴ | ۱۱ |
 | `agents.gs` | ۲۶۸ | ۲۰ |
@@ -200,6 +202,7 @@
 | `KTB_FX_TAB` | «اصلاح پروفایل‌ها · پیش‌نمایش» | `kartable.gs` |
 | `KTB_RT_TAB` | «مسیریابی منتظرها · پیش‌نمایش» | `kartable.gs` |
 | `LM_DASH` | «داشبورد لید» | `leadmodel.gs` |
+| `MS_REBUILT_TAB` | «سئو · بازسازی مجله» | `magseo.gs` |
 | `OPS_LISTS_TAB` | «فهرست‌ها» | `ops.gs` |
 | `OPS_REG_TAB` | «هاب‌ها» | `ops.gs` |
 | `OPS_TAB` | «کارها» | `ops.gs` |
@@ -406,10 +409,12 @@
 | Gemini: هزینه و گزارش هفتگی v170.81 | `gemTests` |
 | بستهٔ انتشار خودکار (v170.45) | `pbPkgTests` |
 | سهمیهٔ زمان اجرا (v170.23.12.5) | `bgTests` |
+| Gemini: مسیر Vertex AI v170.84 | `vtxTests` |
+| کارخانهٔ کاور v170.82 | `cvTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | اقدام بعدی لید بسته (v170.50) | `lmClosedNextTests` |
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |
-| Gemini: مسیر Vertex AI v170.84 | `vtxTests` |
+| بستهٔ سئو و بازبینی اول v170.83 | `msTests` |
 | v170.13: سقف پذیرش، بورسیه، آفر | `v17013Tests` |
 | کمپین C-004 (پلی‌لیست ابی) | `ebiTests` |
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |
