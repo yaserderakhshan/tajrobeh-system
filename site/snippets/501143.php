@@ -27,6 +27,7 @@ function tajrobeh_lead_to_sheet($entryId, $formData, $form) {
         7  => array('پذیرش',   'فرم شروع تراپی'),
         5  => array('پذیرش',   'تراپی فارسی (خارج از ایران)'),
         9  => array('پذیرش',   'Persian therapy (English)'),
+        18 => array('پذیرش',   'Persian therapy (Deutsch)'),
         10 => array('پذیرش',   'فرم تماس با ما'),
         6  => array('مدرسه',   'پیش‌ثبت‌نام دوره'),
         8  => array('مدرسه',   'کامیونیتی دانشجویان'),
