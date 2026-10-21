@@ -24,6 +24,10 @@
  * به ترتیب VTX_ALIAS امتحان می‌شوند و اولی که ۴۰۴ نشد در Property می‌ماند. با هر کلید تازه، vtxProbeTick_ یک بار
  * geminiCheck را اجرا می‌کند و نتیجه را با پیام خصوصی به مالک می‌دهد (Q14: نگه داشتن #194 و #195 تا سبز شدن همین).
  * کلید (محدود به Vertex AI، حساب سرویس با نقش Agent Platform User) فقط یک بار با vtxSaveKey در ویرایشگر ذخیره می‌شود.
+ *
+ * v170.87 (E10): راه بی ویرایشگر. مالک کلید را در ستون مقدار ردیف VERTEX_API_KEY_INBOX تب «تنظیمات خصوصی بات» می‌گذارد.
+ * همگام‌سازی ساعتی (cfgSync_) آن را برمی‌دارد: اول خانه پاک می‌شود، بعد کلید در Script Property «VERTEX_API_KEY» می‌نشیند
+ * (هرگز در TG_CFG یا لاگ؛ فقط اثر انگشت)، بررسی سلامت Vertex اجرا می‌شود و نتیجه با پیام خصوصی به مالک می‌رود.
  */
 var GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/';
 var GEM_LEDGER_TAB = 'Gemini · هزینه';
@@ -159,7 +163,7 @@ var VTX_KEY_PASTE = '';
 function vtxSaveKey() {
   var k = String(VTX_KEY_PASTE || '').trim(), out;
   if (!k) out = 'VTX_KEY_PASTE خالی است. کلید را بین دو علامت نقل‌قول بگذار، ذخیره کن و دوباره اجرا کن.';
-  else if (/\s/.test(k) || k.length < 20 || k.length > 200) out = 'این شبیه کلید API نیست (فاصله دارد یا طولش نادرست است). چیزی ذخیره نشد.';
+  else if (!vtxKeyShape_(k)) out = 'این شبیه کلید API نیست (فاصله دارد یا طولش نادرست است). چیزی ذخیره نشد.';
   else {
     /* VERTEX_PROJECT تازه در تب «تنظیمات خصوصی بات» بی صبر برای همگام‌سازی ساعتی خوانده شود */
     if (!TG_DRY) { try { cfgSync_(); TG_CFG_ = null; VTX_PROJECT = String(cfg_('VERTEX_PROJECT', '') || '').trim(); VTX_LOCATION = String(cfg_('VERTEX_LOCATION', '') || '').trim() || 'global'; } catch (eS) {} }
@@ -171,6 +175,37 @@ function vtxSaveKey() {
   }
   Logger.log(out);
   return out;
+}
+
+var VTX_INBOX_KEY = 'VERTEX_API_KEY_INBOX';
+/* کلید شبیه کلید API است؟ (بی فاصله، طول معقول) */
+function vtxKeyShape_(k) { return !!k && !/\s/.test(k) && k.length >= 20 && k.length <= 200; }
+function vtxInboxClear_(i) {
+  if (TG_DRY) { TG_MEM['cfg:tab'][i][1] = ''; return; }
+  SpreadsheetApp.openById(TG_SHEET_ID).getSheetByName(CFG_TAB).getRange(i + 2, 2).setValue('');
+}
+/** از cfgSync_ (ساعتی، و هر بار tgCfgSync): ردیف یک‌بارهٔ کلید در تب تنظیمات. true یعنی چیزی برداشته شد. */
+function vtxInbox_(rows) {
+  var i = -1;
+  (rows || []).some(function (r, j) { if (String(r[0]).trim() === VTX_INBOX_KEY && String(r[1]).trim()) { i = j; return true; } return false; });
+  if (i < 0) return false;
+  var k = String(rows[i][1]).trim(), msg;
+  vtxInboxClear_(i); rows[i][1] = '';   /* اول پاک، تا هیچ مسیر خطایی کلید را در خانه جا نگذارد */
+  if (!vtxKeyShape_(k)) {
+    msg = '⚠️ <b>کلید Vertex</b>\nمقدار ردیف ' + VTX_INBOX_KEY + ' شبیه کلید API نبود (فاصله داشت یا طولش نادرست بود). خانه پاک شد و چیزی ذخیره نشد.';
+  } else {
+    vtxProp_('VERTEX_API_KEY', k);
+    if (!TG_DRY) { try { TG_CFG_ = null; VTX_PROJECT = String(cfg_('VERTEX_PROJECT', '') || '').trim() || VTX_PROJECT; } catch (eP) {} }
+    var line = '', ok = false;
+    try { line = gemBackend_() === 'vertex' ? geminiCheck() : 'مسیر Vertex خاموش است (GEM_BACKEND = ai)'; ok = gemCheckOk_(line); } catch (eC) { line = 'خطا: ' + String(eC.message || eC).slice(0, 80); }
+    /* همان اثری که vtxProbeTick_ می‌سازد، تا پیام دوم برای همین کلید نرود (ناموفق: ۶ ساعت بعد دوباره) */
+    vtxProp_('VTX_PROBE', JSON.stringify({ fp: vtxFp_(k), ok: ok, at: gemNow_().getTime(), n: 1 }));
+    msg = (ok ? '✅' : '⚠️') + ' <b>کلید Vertex از تب تنظیمات برداشته و ذخیره شد</b> (اثر انگشت ' + vtxFp_(k) + ')؛ خانه پاک شد.\n' +
+      (VTX_PROJECT ? '' : 'VERTEX_PROJECT خالی است؛ نشانی بی پروژه امتحان شد.\n') + tgEsc_(line);
+  }
+  Logger.log(msg.replace(/<[^>]+>/g, ''));
+  tgSend_(TG_OWNER_CHAT, msg);
+  return true;
 }
 
 /** قدم سبک tgWatchdog: با کلید تازهٔ Vertex یک بار geminiCheck و پیام خصوصی به مالک؛ ناموفق هر ۶ ساعت دوباره. */
@@ -418,6 +453,23 @@ function vtxTests() {
     VTX_KEY_PASTE = '';
     ok('vtxSaveKey کلید را ذخیره می‌کند، بررسی سلامت را اجرا می‌کند و کلید را چاپ نمی‌کند (روی کد قبلی مردود)', TG_MEM['vtxp:VERTEX_API_KEY'] === 'test-only-not-a-real-key-0123456789' &&
       /ذخیره شد/.test(sv) && /متن[^·]*: OK/.test(sv) && sv.indexOf('test-only-not') < 0 && !TG_MEM['vtxp:VTX_PROBE']);
+    /* E10: ردیف یک‌بارهٔ کلید در تب تنظیمات */
+    TG_MEM['vtxp:VERTEX_API_KEY'] = ''; TG_MEM['vtxp:VTX_PROBE'] = ''; TG_OUTBOX = [];
+    TG_MEM['gem:fakeFn'] = function (url, p) { return JSON.parse(JSON.stringify(p.generationConfig && p.generationConfig.responseModalities ? IMG : TXT)); };
+    TG_MEM['cfg:tab'] = [['VERTEX_API_KEY_INBOX', '', ''], ['GEM_ALERT_PCT', '80', '']];
+    ok('ردیف خالی: کاری نمی‌کند', vtxInbox_(TG_MEM['cfg:tab']) === false && TG_OUTBOX.length === 0);
+    TG_MEM['cfg:tab'] = [['GEM_ALERT_PCT', '80', ''], ['VERTEX_API_KEY_INBOX', '  test-only-not-a-real-key-0123456789 ', '']];
+    cfgSync_();
+    var im = TG_OUTBOX.map(function (x) { return x.text; }).join('\n');
+    ok('همگام‌سازی کلید را از تب برمی‌دارد و در VERTEX_API_KEY می‌گذارد (روی کد قبلی مردود)', TG_MEM['vtxp:VERTEX_API_KEY'] === 'test-only-not-a-real-key-0123456789');
+    ok('خانهٔ کلید در تب پاک شد', TG_MEM['cfg:tab'][1][1] === '');
+    ok('کلید در TG_CFG، پیام یا لاگ نمی‌آید', String(TG_MEM['cfg:prop'] || '').indexOf('test-only-not') < 0 && im.indexOf('test-only-not') < 0);
+    ok('پیام ✅ با نتیجهٔ بررسی سلامت فقط برای مالک', TG_OUTBOX.length === 1 && String(TG_OUTBOX[0].chat) === String(TG_OWNER_CHAT) && /✅/.test(im) && /از تب تنظیمات برداشته/.test(im) && /تصویر pro[^·]*: OK/.test(im));
+    ok('قدم نگهبان همان کلید را دوباره نمی‌سنجد', vtxProbeTick_() === false && TG_OUTBOX.length === 1);
+    TG_MEM['cfg:tab'] = [['VERTEX_API_KEY_INBOX', 'not a key', '']];
+    cfgSync_();
+    ok('متن نادرست: خانه پاک، چیزی ذخیره نمی‌شود، هشدار', TG_MEM['cfg:tab'][0][1] === '' && TG_MEM['vtxp:VERTEX_API_KEY'] === 'test-only-not-a-real-key-0123456789' && /⚠️/.test(TG_OUTBOX[1].text) && /چیزی ذخیره نشد/.test(TG_OUTBOX[1].text));
+    ok('cfgSync_ ردیف کلید را می‌سپارد به vtxInbox_', String(cfgSync_).indexOf('vtxInbox_') > -1);
     ok('خلاصهٔ سبز فقط وقتی متن و هر دو تصویر OK', gemCheckOk_('مسیر Vertex AI · متن (m): OK · تصویر flash (a): OK · تصویر pro (b): OK') && !gemCheckOk_('مسیر Vertex AI · متن: OK · تصویر flash (a): OK · تصویر pro (b): 404 '));
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; GEM_TASK = '';
