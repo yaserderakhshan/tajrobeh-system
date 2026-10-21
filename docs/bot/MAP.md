@@ -101,7 +101,7 @@
 | `voice.gs` | ۱۱۱۸ | ۹۳ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۲ | ۱۶ |
-| `gemini_setup.gs` | ۲۴۰ | ۱۸ |
+| `gemini_setup.gs` | ۲۴۱ | ۱۸ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۷۹۴ | ۱۳۰ |
 | `v168.gs` | ۲۴۹۶ | ۱۵۶ |

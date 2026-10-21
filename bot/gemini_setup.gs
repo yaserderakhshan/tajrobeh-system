@@ -230,6 +230,7 @@ function gemTests() {
     ok('انتخاب مدل تصویری از فهرست', gemPickImg_(['gemini-3-pro-image-preview', 'gemini-3.1-flash-image'], 'pro') === 'gemini-3-pro-image-preview'
       && gemPickImg_(['gemini-3.1-flash-image'], 'flash') === 'gemini-3.1-flash-image' && gemPickImg_(['gemini-flash-latest'], 'pro') === '');
     ok('گزارش هفتگی در کارهای هفتگی (یکشنبه ۹) و اجراکننده آن را می‌شناسد', V1691_WEEKLY.some(function (j) { return j.fn === 'gemWeekly' && j.wd === 7 && j.h === 9; }) && String(v1691Run_).indexOf('gemWeekly') > -1);
+    ok('کلیدهای Gemini اختیاری‌اند و خالی‌بودنشان جلوی انتشار را نمی‌گیرد (روی کد قبلی مردود)', ['GEM_CREDIT_USD', 'GEM_CREDIT_END', 'GEM_SPENT_ADJ_USD'].every(function (k) { return CFG_OPTIONAL.indexOf(k) > -1; }));
     ok('بررسی سلامت بعد از انتشار خودکار اجرا می‌شود', CI_ONCE_AUTO.indexOf('gemV17081Check') > -1 && CI_ONCE_ALLOW.indexOf('gemV17081Check') > -1);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; GEM_TASK = '';
