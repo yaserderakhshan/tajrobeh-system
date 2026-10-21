@@ -80,15 +80,32 @@ function lcSlotIdx_(t) {
   for (var i = 0; i < TG_DUTY_SLOTS.length; i++) if (h >= TG_DUTY_SLOTS[i][1] && h < TG_DUTY_SLOTS[i][2]) return i;
   return -1;
 }
-/** نفرهای نوبتِ لحظهٔ t به ترتیب خانه؛ خانهٔ خالی = مسئول پذیرش؛ «—» یا جمعهٔ خالی = بسته (null) */
+/* v170.95 (E16، D242 و D243): کارکنان پذیرش با chat (بی مسئول پذیرش)، به ترتیب چرخش. نام‌ها فقط از هاب */
+function lcStaff_() {
+  return lcDesk_().filter(function (p) { var r = String(p.role || ''); return p.chat && /پذیرش/.test(r) && r.indexOf('مسئول پذیرش') < 0; });
+}
+function lcRotate_(list) {
+  if (!list.length) return list;
+  var i = Number(lcProp_('LC_RR') || 0) % list.length;
+  return list.slice(i).concat(list.slice(0, i));
+}
+/* چرخش یک قدم جلو (یک بار برای هر لید تازه) */
+function lcRotateNext_() { lcProp_('LC_RR', String(Number(lcProp_('LC_RR') || 0) + 1)); }
+/* خانهٔ خالی یا نام‌های ناشناس: چرخش میان کارکنان پذیرش (اول آن‌ها که در ساعت t کار می‌کنند)؛ فقط اگر کسی نبود، مسئول پذیرش */
+function lcRotation_(t) {
+  var all = lcStaff_(), live = all.filter(function (p) { return lcInHours_(p, t); });
+  var ppl = lcRotate_(live.length ? live : all);
+  if (ppl.length) return ppl;
+  var boss = lcBoss_(); return boss ? [boss] : null;
+}
+/** نفرهای نوبتِ لحظهٔ t به ترتیب خانه؛ خانهٔ خالی = چرخش میان کارکنان پذیرش (v170.95)؛ «—» یا جمعهٔ خالی = بسته (null) */
 function lcSlotPeople_(t) {
   var s = lcSlotIdx_(t); if (s < 0) return null;
   var d = tgDutyDayIdx_(new Date(t)), cell = String((tgDutyGrid_()[d] || [])[s] || '').trim();
   if (cell === '—' || cell === '-') return null;
-  var boss = lcBoss_();
-  if (!cell) return d === 6 ? null : (boss ? [boss] : null);
+  if (!cell) return d === 6 ? null : lcRotation_(t);
   var ppl = cell.split(/[،,؛;\/|]+/).map(function (x) { return lcByName_(x.trim()); }).filter(function (p) { return p && p.chat; });
-  return ppl.length ? ppl : (boss ? [boss] : null);
+  return ppl.length ? ppl : lcRotation_(t);
 }
 /** ساعت ۹ نزدیک‌ترین روز کاری بعد (روزی که نوبت صبحش باز است) */
 function lcNextMorning_(now) {
@@ -100,9 +117,12 @@ function lcNextMorning_(now) {
   return now + 86400000;
 }
 /** برنامهٔ لید در لحظهٔ now: live یعنی همین حالا کسی در ساعت کاری‌اش هست */
-function lcPlan_(now) {
+function lcPlan_(now, prefer) {
   var ppl = lcSlotPeople_(now);
   var live = (ppl || []).filter(function (p) { return lcInHours_(p, now); });
+  /* v170.95: صاحبی که هنگام ساخت لید برگزیده شد، اگر همین حالا در نوبت است، می‌ماند (چرخش لید را جابه‌جا نکند) */
+  var pref = prefer ? live.filter(function (p) { return lcNorm_(p.name) === lcNorm_(prefer); })[0] : null;
+  if (pref) return { live: true, owner: pref, at: now, promise: LC_PROMISE_MIN };
   if (live.length) return { live: true, owner: live[0], at: now, promise: LC_PROMISE_MIN };
   var m = lcNextMorning_(now), pm = lcSlotPeople_(m);
   return { live: false, owner: (pm && pm[0]) || lcBoss_(), at: m, promise: LC_MORNING_MIN };
@@ -113,7 +133,11 @@ function lcOwnerFor_(o) {
   if (sec !== 'پذیرش') return tgOwnerFor_(sec);
   var now = o && o.when ? new Date(o.when).getTime() : (lcDry_() && TG_MEM['lc:now'] ? Number(TG_MEM['lc:now']) : Date.now());
   var pl = lcPlan_(now);
-  return pl.owner ? pl.owner.name : tgOwnerFor_('پذیرش');
+  lcRotateNext_();   /* v170.95: لید بعدی نفر بعدیِ چرخش را می‌گیرد */
+  if (pl.owner) return pl.owner.name;
+  /* v170.95 (E16): «پذیرش» بی نام برای لید تازه نه؛ یک نفر از کارکنان، وگرنه مسئول پذیرش */
+  var any = lcRotation_(now);
+  return any && any[0] ? any[0].name : tgOwnerFor_('پذیرش');
 }
 
 /* ───── کارت، رد، برداشت ───── */
@@ -157,9 +181,13 @@ function lcPass_(code, st, l, now, why) {
   /* v170.77: ته زنجیره (کس دیگری در ساعت کاری نیست) خبر سرپرست فقط یک بار برای هر لید. پیش از این هر ۳۰ دقیقه تکرار می‌شد
      (۱۳ و ۱۴ مهر هر روز حدود ۴۰۰ پیام برای همان ۱۴ لید در گروه پذیرش) */
   if (!nx && st.bn) told = true;
-  if (why === 'مهلت' && boss && lcNorm_(boss.name) !== lcNorm_(from) && !told) {
+  /* v170.95 (E16): خبر دیرکرد به سرپرست؛ اگر خود سرپرست صاحب لید است، به نفر بعدیِ نوبت. هر لید فقط یک بار (st.bo) */
+  var alertTo = boss && lcNorm_(boss.name) !== lcNorm_(from) ? boss : (nx || lcStaff_().filter(function (p) { return lcNorm_(p.name) !== lcNorm_(from) && lcInHours_(p, now); })[0] || null);
+  if (st.bo) told = true;
+  if (why === 'مهلت' && alertTo && !told) {
     if (!nx) st.bn = now;
-    tgNotify_(boss.chat, TG_NK.task, '⏱ <b>لید ' + tgEsc_(code) + ' در قول برداشته نشد</b>\n' + tgFa_(waited) + ' دقیقه از شروع قول گذشته و «برداشتم» نخورد. ' +
+    st.bo = now;
+    tgNotify_(alertTo.chat, TG_NK.task, '⏱ <b>لید ' + tgEsc_(code) + ' در قول برداشته نشد</b>\n' + tgFa_(waited) + ' دقیقه از شروع قول گذشته و «برداشتم» نخورد. ' +
       (nx ? 'به نفر بعدی رسید: ' + tgEsc_(nx.name) + '.' : 'کس دیگری در ساعت کاری نیست؛ لطفاً خودتان پیگیری کنید.') + '\n\n' + tgLeadLine_(l), { ref: code });
   }
   if (nx) {
@@ -267,7 +295,7 @@ function lcStepCore_(x, l, now, code, st, cf) {
   }
   if (!st.s) {
     if (st.at && now < st.at) { x.n = 0; x.at = st.at; return true; }
-    var morning = !!st.at, pl = lcPlan_(now), ab = lcAbroad_(l), owner = pl.owner;
+    var morning = !!st.at, pl = lcPlan_(now, l.owner), ab = lcAbroad_(l), owner = pl.owner;
     /* شروع قول: از ساخت لید، فقط داخل ساعت کاری صاحب لید (لید خارج: اشتراک با «زمان مناسب» مراجع) */
     if (!st.cs) st.cs = lcWorkStart_(owner, pl.live ? st.a : now, ab);
     if (st.cs > now || !pl.live) {
@@ -389,7 +417,7 @@ function lcTests() {
     TG_MEM['lc:now'] = T('10', '10:00');
     ok('صاحب لید پذیرش در ساعت کاری: اولین نام نوبت', lcOwnerFor_({ source: 'بات' }) === 'کشیک الف');
     TG_MEM['lc:now'] = T('10', '19:00');
-    ok('خانهٔ خالی ۱۸ تا ۲۲ = مسئول پذیرش (بیرون از ساعتش، پس صاحب نوبت صبح)', lcOwnerFor_({ source: 'بات' }) === 'کشیک الف');
+    ok('خانهٔ خالی ۱۸ تا ۲۲ (v170.95، E16): کارمند پذیرشی که همین حالا در ساعت کاری است، نه مسئول پذیرش', lcOwnerFor_({ source: 'بات' }) === 'کشیک ب');
     TG_MEM['lc:now'] = T('10', '23:30');
     ok('لید شب: صاحب نوبت صبح فردا', lcOwnerFor_({ source: 'بات' }) === 'کشیک الف');
     ok('لید بخش دیگر: مسئول همان بخش', lcOwnerFor_({ source: 'سایت › مدرسه' }) === tgOwnerFor_('مدرسه'));
@@ -506,6 +534,28 @@ function lcTests() {
     ok('داشبورد: درصد در قول (۱ از ۳)', rows[3][1] === '33%' && rows[3][2] === 3, JSON.stringify(rows));
     ok('داشبورد لید بلوک قول را دارد', /lcDashRows_/.test(String(lmDashRows_)));
     ok('tgDutyRun_ لیدها را با lcStep_ پیش می‌برد', /lcStep_\(/.test(String(tgDutyRun_)) && /lcOwnerFor_\(/.test(String(tgAppendLead_)));
+
+    /* v170.95 (E16، D242 و D243): جدول نوبت خالی */
+    TG_MEM['duty'] = TG_DUTY_DAYS.map(function () { return ['', '', '']; }); TG_MEM['duty'][6] = ['', '', ''];
+    TG_MEM['lcp:LC_RR'] = '0'; TG_MEM['lc:now'] = T('10', '10:00');
+    var owners = [lcOwnerFor_({ source: 'بات' }), lcOwnerFor_({ source: 'بات' }), lcOwnerFor_({ source: 'بات' }), lcOwnerFor_({ source: 'بات' })];
+    ok('E16: جدول خالی، لیدها میان کارکنان پذیرش می‌چرخند، نه همه برای یک نفر (روی کد قبلی مردود)', owners.join() === 'کشیک الف,کشیک ب,کشیک الف,کشیک ب', owners.join());
+    ok('E16: مسئول پذیرش در چرخش نیست مگر کسی نباشد', owners.indexOf('سرپرست نمونه') < 0);
+    TG_MEM['lc:now'] = T('10', '23:30');
+    var o5 = lcOwnerFor_({ source: 'بات' });
+    ok('E16: لید شب هم صاحب نام‌دار دارد، نه «پذیرش»', o5 && o5 !== 'پذیرش' && /کشیک/.test(o5), o5);
+    var keepDesk = TG_MEM['lc:desk']; TG_MEM['lc:desk'] = [keepDesk[2]];
+    ok('E16: بی هیچ کارمند پذیرش، مسئول پذیرش', lcOwnerFor_({ source: 'بات' }) === 'سرپرست نمونه');
+    TG_MEM['lc:desk'] = keepDesk;
+    /* خبر دیرکرد وقتی خود سرپرست صاحب لید است */
+    TG_MEM['duty'][0][0] = 'سرپرست نمونه'; TG_OUTBOX = []; TG_MEM['notify'] = [];
+    var l9 = lead('L-7901'), x9 = { k: 'L-7901', n: 0, a: T('10', '10:00') };
+    lcStep_(x9, l9, T('10', '10:01'));
+    lcPass_('L-7901', lcSt_('L-7901'), l9, T('10', '10:20'), 'مهلت');
+    var late = (TG_MEM['notify'] || []).filter(function (n) { return /در قول برداشته نشد/.test(n.text); });
+    ok('E16: سرپرست صاحب لید است؛ خبر دیرکرد به نفر بعدیِ نوبت می‌رود (روی کد قبلی مردود)', late.length === 1 && (late[0].chat === '9101' || late[0].chat === '9102'), JSON.stringify(late.map(function (n) { return n.chat; })));
+    lcPass_('L-7901', lcSt_('L-7901'), l9, T('10', '10:50'), 'مهلت');
+    ok('E16: خبر دیرکرد برای هر لید فقط یک بار', (TG_MEM['notify'] || []).filter(function (n) { return /در قول برداشته نشد/.test(n.text); }).length === 1);
   } catch (e) { fail++; text.push('❌ خطا: ' + (e && e.stack || e)); }
   finally { TG_DRY = kD; TG_MEM = kM; TG_OUTBOX = kO; }
   return { pass: pass, fail: fail, text: text.join('\n') };
@@ -594,13 +644,14 @@ function lcSlaTests() {
     lcStep_(x3b, l3b, T('10', '10:01'));
     ok('لید خارج بی اشتراک (شب او بیرون از ساعت صاحب لید): همان ساعت کاری صاحب لید', lcSt_('L-8302').cs === T('10', '10:00'));
 
-    /* ۴) بی‌مسئول: خانهٔ خالی نوبت ← مسئول پذیرش؛ بی هیچ کس ← بی خطا در صف */
+    /* ۴) بی‌مسئول (v170.95، E16): خانهٔ خالی نوبت ← چرخش میان کارکنان پذیرش، نه مسئول پذیرش */
     reset(); TG_MEM['duty'][0][0] = '';
     var l4 = lead('L-8401'), x4 = { k: 'L-8401', n: 0, a: T('10', '10:00') };
     lcStep_(x4, l4, T('10', '10:00'));
-    ok('بی‌مسئول: کارت و قول با مسئول پذیرش', TG_OUTBOX.some(function (o) { return o.kind === 'msg' && o.chat === '9100'; }) && lcSt_('L-8401').cs === T('10', '10:00'));
+    var own4 = lcSt_('L-8401').ch;
+    ok('بی‌مسئول: کارت و قول با یکی از کارکنان پذیرش، نه مسئول پذیرش (روی کد قبلی مردود)', (own4 === '9101' || own4 === '9102') && !TG_OUTBOX.some(function (o) { return o.kind === 'msg' && o.chat === '9100'; }) && lcSt_('L-8401').cs === T('10', '10:00'));
     lcStep_(x4, l4, T('10', '10:10')); lcStep_(x4, l4, T('10', '10:15'));
-    ok('بی‌مسئول: یادآوری ۱۰ و خبر ۱۵ به مسئول پذیرش', notes('9100', /۱۰ دقیقه از قول/).length === 1 && notes('9100', /مهلت ۱۵/).length === 1);
+    ok('بی‌مسئول: یادآوری ۱۰ به صاحب لید و خبر ۱۵ به مسئول پذیرش', notes(own4, /۱۰ دقیقه از قول/).length === 1 && notes('9100', /مهلت ۱۵/).length === 1);
     reset(); TG_MEM['lc:desk'] = [];
     var l5 = lead('L-8501'), x5 = { k: 'L-8501', n: 0, a: T('10', '10:00') }, kept = false, threw = '';
     try { kept = lcStep_(x5, l5, T('10', '10:00')); lcStep_(x5, l5, T('10', '10:20')); } catch (e5) { threw = String(e5); }
