@@ -4751,6 +4751,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
   if (data.indexOf('ps2:') === 0 && typeof ps2Cb_ === 'function') return ps2Cb_(chat, data);   /* v170.23.8: اتصال روان‌پزشک */   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
+  if (data.indexOf('cv:') === 0 && typeof cvOnCb_ === 'function') return cvOnCb_(chat, data, cq);   /* v170.82: تأیید کاورهای Gemini (فقط مالک) */
   if (data.indexOf('cm:') === 0 && typeof cmCb_ === 'function') return cmCb_(chat, data);     /* v170.2: کامنت‌های هاب (پرسش ترجیح) */
   if (data.indexOf('rv:t:') === 0 && typeof rvToggleCb_ === 'function') return rvToggleCb_(chat, data);   /* v169: بازبینی علمی */
   if (data.indexOf('rv:') === 0 && typeof rvOnCb_ === 'function') return rvOnCb_(chat, data);
@@ -7274,6 +7275,7 @@ function tgWatchdog(e) {
       try { if (typeof v168MonthTick_ === 'function') v168MonthTick_(); } catch (eMc) { tgErr_('tgMonthClose', eMc); } } : null);
     S('tgApMirror_', 'heavy', function () { if (Number(Utilities.formatDate(new Date(), TG_TZ, 'm')) < 10) tgApMirror_(); });
     S('tgFeedTick_', 'heavy', tgFeedTick_);
+    S('cvHourly_', 'heavy', typeof cvHourly_ === 'function' ? cvHourly_ : null);   /* v170.82: کارخانهٔ کاور Gemini */
     S('tgMagTick_', 'heavy', tgMagTick_);
     S('mcTick_', 'heavy', typeof mcTick_ === 'function' ? mcTick_ : null);
     S('tgRmTick_', 'heavy', tgRmTick_);
