@@ -12,6 +12,11 @@
  *        ۳ روز بعد ← مسئول پذیرش.
  * هر هشدار یک سطر در «رویدادهای لید» (tgLeadEv_، کانال «نگهبان مهلت») و هر مرحله فقط یک بار (Script Property «GRD_STATE»).
  * تست: grdTests (مجموعهٔ «نگهبان مهلت»).
+ *
+ * v170.91 (E11، تصمیم D233): هشدار مهلت تماس اول برای هر لید حداکثر دو پیام: صاحب لید یک بار، سرپرست یک بار.
+ *   یک دفتر مشترک (Script Property «FCA_SENT»، fcaOk_) برای همهٔ مسیرها: یادآوری قول تماس اول (leadclaim)، زنجیرهٔ J-01
+ *   (tgSlaTick_، لید داخل و خارج) و J-04 مدرسه. پیش از این هر مسیر جدا می‌فرستاد و مرحله در ستون برچسب شیت بود که با ویرایش
+ *   دستی پاک می‌شد و زنجیره از نو می‌رفت (۱۶۹ هشدار در یک ماه برای ۱۱۸ کار باز). مرحلهٔ سوم فقط خط جمع‌بندی است، نه پیام.
  */
 
 var GRD_PROP = 'GRD_STATE';
@@ -65,6 +70,40 @@ function grdWorkMin_(from, to) {
   for (var x = from; x + step <= to && n < 60 * 24 * 14; x += step) if (grdInHours_(x)) n += 15;
   return n;
 }
+
+/* ───── v170.91 (D233): سقف دو هشدار تماس اول برای هر لید ───── */
+var FCA_PROP = 'FCA_SENT', FCA_KEEP_D = 10;
+function fcaDayN_() { return Math.floor(grdNow_() / GRD_DAY_MS); }
+function fcaLoad_() {
+  var raw = grdDry_() ? (TG_MEM['fca'] || '') : (PropertiesService.getScriptProperties().getProperty(FCA_PROP) || '');
+  try { return JSON.parse(raw || '{}') || {}; } catch (e) { return {}; }
+}
+function fcaSave_(o) {
+  var s = JSON.stringify(o);
+  if (grdDry_()) TG_MEM['fca'] = s; else PropertiesService.getScriptProperties().setProperty(FCA_PROP, s);
+}
+/** هشدار مهلت تماس اول این لید برای این گیرنده مجاز است؟ who: 'o' صاحب لید، 's' سرپرست. true یعنی بفرست (و ثبت شد). */
+function fcaOk_(code, who) {
+  if (!code) return true;
+  var o = fcaLoad_(), k = String(code), r = o[k] || {}, today = fcaDayN_(), b = o._b || {};
+  if (r[who]) { b[today] = b[today] || { n: 0, x: 0 }; b[today].x++; o._b = b; fcaSave_(o); return false; }
+  r[who] = today; o[k] = r;
+  b[today] = b[today] || { n: 0, x: 0 }; b[today].n++; o._b = b;
+  Object.keys(o).forEach(function (c) {
+    if (c === '_b') return;
+    var x = o[c]; if (Math.max(x.o || 0, x.s || 0) < today - FCA_KEEP_D) delete o[c];
+  });
+  Object.keys(b).forEach(function (d) { if (Number(d) < today - FCA_KEEP_D) delete b[d]; });
+  fcaSave_(o);
+  return true;
+}
+/** خط گزارش شبانه: امروز چند هشدار تماس اول رفت و چند تکراری نرفت */
+function fcaNightLine_() {
+  var b = (fcaLoad_()._b || {})[fcaDayN_()];
+  if (!b) return '';
+  return '⏱ هشدار مهلت تماس اول (سقف دو پیام برای هر لید، D233): امروز ' + tgFa_(b.n || 0) + ' رفت، ' + tgFa_(b.x || 0) + ' تکراری نرفت.';
+}
+try { TG_NIGHT_LINES.push(fcaNightLine_); } catch (eFn) {}
 
 /* ───── ثبت و خبر ───── */
 function grdEv_(o) {
@@ -127,7 +166,7 @@ function grdSchool_() {
     else if (want === 2) { to = chief; head = '⏰ <b>یک روز از مهلت تماس اول لید مدرسه گذشته</b>'; }
     r.s = want; r.t = now; n++;
     if (want < 3) {
-      if (to && to.chat) {
+      if (to && to.chat && fcaOk_('S:' + (l.code || l.id), want === 1 ? 'o' : 's')) {
         grdSend_(to.chat, head);
         try { if (!grdDry_()) tgSlCardSend_(String(to.chat).split(/[,،;\s]+/)[0], l.row); } catch (e3) {}
       }
@@ -246,6 +285,16 @@ function grdTests() {
   var keepDry = TG_DRY, keepMem = TG_MEM, keepOut = TG_OUTBOX, keepSt = GRD_ST;
   TG_DRY = true; TG_MEM = {}; TG_OUTBOX = []; GRD_ST = null;
   try {
+    /* v170.91 (D233): سقف دو هشدار تماس اول */
+    TG_MEM['grd:now'] = new Date('2026-10-12T10:00:00+03:30').getTime();
+    ok('D233: صاحب لید یک بار، سرپرست یک بار (روی کد قبلی مردود)', fcaOk_('L-9', 'o') === true && fcaOk_('L-9', 'o') === false && fcaOk_('L-9', 's') === true && fcaOk_('L-9', 's') === false);
+    ok('D233: لید دیگر جداست', fcaOk_('L-10', 'o') === true);
+    ok('D233: خط شبانه با شمار رفته و تکراری', /امروز ۳ رفت، ۲ تکراری نرفت/.test(fcaNightLine_()), fcaNightLine_());
+    TG_MEM['grd:now'] += 11 * GRD_DAY_MS; fcaOk_('L-11', 'o');
+    ok('D233: لید کهنه‌تر از ۱۰ روز از دفتر پاک می‌شود', !JSON.parse(TG_MEM['fca'])['L-9'] && !!JSON.parse(TG_MEM['fca'])['L-11']);
+    ok('D233: همهٔ مسیرهای هشدار تماس اول از سقف رد می‌شوند', String(tgSlaTick_).split('fcaOk_(').length - 1 >= 2 && String(lcStep_).split('fcaOk_(').length - 1 >= 2 && String(grdSchool_).indexOf('fcaOk_(') > -1);
+    ok('D233: مرحلهٔ سوم لید خارج پیام نیست، خط جمع‌بندی است', String(tgSlaTick_).indexOf('ws === 3 && TG_OWNER_CHAT') < 0);
+    TG_MEM = {};
     /* J-01 */
     ok('J-01 (D17): پیش از ۱۵ دقیقه هیچ، فوری و عادی یکسان', tgSlaWant_(14, false) === 0 && tgSlaWant_(14, true) === 0);
     ok('J-01 (D17): ۱۵ دقیقه ← مسئول لید، فوری و عادی', tgSlaWant_(15, false) === 1 && tgSlaWant_(15, true) === 1);

@@ -2557,7 +2557,6 @@ function tgPrivate_(m) {
   if (m.text && typeof tgLenPick_ === 'function' && (String(m.text).trim() === '/sesslen' || String(m.text).trim() === TG_LEN_DESK_BTN)) { if (tgLenCanOthers_(chat)) { tgDel_('lnt', chat); tgLenPick_(chat, 0); } else tgLenStart_(chat); return; }
   if (typeof nuSeen_ === 'function') { try { nuSeen_(chat); } catch (eNu) { tgErr_('nuSeen_', eNu); } }   /* v170.23.13: پاسخ مراجع دنبالهٔ پیگیری را می‌ایستاند */
   if (typeof reSeen_ === 'function') { try { reSeen_(chat); } catch (eRe) { tgErr_('reSeen_', eRe); } }   /* v170.23.14: پاسخ به پیام بازگرداندن */
-  if (m.text && typeof nuOwnerCmd_ === 'function' && nuOwnerCmd_(chat, String(m.text).trim())) return;
   if (typeof asRoute_ === 'function' && asRoute_(chat, m)) return;   /* v170.23.11: دستیار پاسخ‌گو (assist.gs)؛ بحران را خودش اول می‌سنجد */
   if (m.text && typeof migOwnerCmd_ === 'function' && migOwnerCmd_(chat, String(m.text).trim())) return;
 
@@ -3655,9 +3654,15 @@ function tgSlaTick_() {
       const ws = abSlaStage_(l, now.getTime());
       if (!ws || ws <= stage) continue;
       if (ws === 1 && typeof lcSlaOwn_ === 'function' && lcSlaOwn_(l.code)) { sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ۱ ' + stamp); continue; }   /* v170.23.44: قول تماس اول را leadclaim.gs پایش می‌کند */
+      /* v170.91 (D233): مرحلهٔ سوم دیگر پیام به یاسر نیست؛ خط جمع‌بندی (مثل J-01) */
+      if (ws === 3) {
+        if (typeof grdJ01Late_ === 'function') grdJ01Late_(l.code || tgLeadCode_(l.row), l.row, l.name, l.owner);
+        sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(ws) + ' ' + stamp);
+        continue;
+      }
       var toA = ws === 1 ? to : boss;
-      if (ws === 3 && TG_OWNER_CHAT) toA = { chat: TG_OWNER_CHAT, name: 'یاسر', style: TG_DESK_STYLES[0] };
-      if (ws < 3 && !tgDeskOnDuty_(toA, now)) continue;
+      if (!tgDeskOnDuty_(toA, now)) continue;
+      if (typeof fcaOk_ === 'function' && !fcaOk_(l.code || tgLeadCode_(l.row), ws === 1 ? 'o' : 's')) { sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(ws) + ' ' + stamp); continue; }   /* D233 */
       const headA = ws === 1 ? '🌍 <b>پنجرهٔ تماس مراجع خارج الان باز است</b>' : (ws === 2 ? '⏰ <b>دو ساعت کاری در پنجرهٔ تماس گذشت، هنوز تماس اول نه</b>' : '🔺 <b>چهار ساعت کاری در پنجرهٔ تماس، لید خارج هنوز بی‌تماس</b>');
       const lrA = tgLeadRead_(l.row);
       if (lrA) { if (!lrA.code) lrA.code = tgLeadCode_(l.row); tgNotify_(toA.chat, TG_NK.urgent, headA + '\n\n' + tgLeadCardText_(lrA), { ref: lrA.code, markup: tgLeadKb_(lrA) }); }
@@ -3684,6 +3689,8 @@ function tgSlaTick_() {
     const duty = tgDeskOnDuty_(to, now);
     const styleOk = l.urgent ? (to.style !== '') : (to.style === TG_DESK_STYLES[0]);
     if (!duty || !styleOk) continue;   // بیرون از ساعت یا سبک جمع‌بندی: می‌ماند برای دایجست
+    /* v170.91 (D233): هر لید حداکثر یک هشدار به صاحبش و یک هشدار به سرپرست، از همهٔ مسیرها با هم */
+    if (typeof fcaOk_ === 'function' && !fcaOk_(l.code || tgLeadCode_(l.row), wantStage === 1 ? 'o' : 's')) { sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(wantStage) + ' ' + stamp); continue; }
 
     const head = l.urgent
       ? (l.booked ? '📅 <b>یک معارفه رزرو شد</b>' : '🌍 <b>مراجع خارج از ایران</b>')
@@ -4744,6 +4751,8 @@ function tgOnCallback_(cq) {
   if (data.indexOf('ps3:') === 0 && typeof ps3Cb_ === 'function') return ps3Cb_(chat, data);   /* v170.23.9: ویزیت روان‌پزشکی */
   if (data.indexOf('ps2:') === 0 && typeof ps2Cb_ === 'function') return ps2Cb_(chat, data);   /* v170.23.8: اتصال روان‌پزشک */   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
+  if (data.indexOf('cv:') === 0 && typeof cvOnCb_ === 'function') return cvOnCb_(chat, data, cq);   /* v170.82: تأیید کاورهای Gemini (فقط مالک) */
+  if (data.indexOf('msq:') === 0 && typeof msOnCb_ === 'function') return msOnCb_(chat, data);   /* v170.83: بستهٔ سئو، «ادامه» (فقط مالک) */
   if (data.indexOf('cm:') === 0 && typeof cmCb_ === 'function') return cmCb_(chat, data);     /* v170.2: کامنت‌های هاب (پرسش ترجیح) */
   if (data.indexOf('rv:t:') === 0 && typeof rvToggleCb_ === 'function') return rvToggleCb_(chat, data);   /* v169: بازبینی علمی */
   if (data.indexOf('rv:') === 0 && typeof rvOnCb_ === 'function') return rvOnCb_(chat, data);
@@ -7253,6 +7262,7 @@ function tgWatchdog(e) {
   S('grdTick_', 'light', typeof grdTick_ === 'function' ? grdTick_ : null);   /* v170.23.30: نگهبان مهلت‌ها J-04، J-02، J-06 (guard.gs) */
   S('evlTick_', 'light', typeof evlTick_ === 'function' ? evlTick_ : null);   /* v170.23.38: رویداد سبک: بستن ۴۸ ساعته، یادآوری تأیید */
   S('vnTick_', 'light', typeof vnTick_ === 'function' ? function () { if (typeof grdInHours_ === 'function' && !grdInHours_(Date.now())) return; return vnTick_(); } : null);   /* v170.23.31: اعلان نسخه با «خواندم» (changes.gs) */
+  S('msHourly_', 'light', typeof msHourly_ === 'function' ? msHourly_ : null);   /* v170.83: بستهٔ سئو و بازبینی اول (شب ۱ تا ۸) و خلاصهٔ ۱۰ صبح سردبیر */
   S('agCostTick_', 'light', typeof agCostTick_ === 'function' ? agCostTick_ : null);   /* v170.23.33: خرج ایجنت‌های کنسول، روزی یک بار (agents.gs) */
   /* سنگین: فقط ساعت‌های BG_HEAVY_HOURS */
   if (heavyHour) {
@@ -7267,6 +7277,7 @@ function tgWatchdog(e) {
       try { if (typeof v168MonthTick_ === 'function') v168MonthTick_(); } catch (eMc) { tgErr_('tgMonthClose', eMc); } } : null);
     S('tgApMirror_', 'heavy', function () { if (Number(Utilities.formatDate(new Date(), TG_TZ, 'm')) < 10) tgApMirror_(); });
     S('tgFeedTick_', 'heavy', tgFeedTick_);
+    S('cvHourly_', 'heavy', typeof cvHourly_ === 'function' ? cvHourly_ : null);   /* v170.82: کارخانهٔ کاور Gemini */
     S('tgMagTick_', 'heavy', tgMagTick_);
     S('mcTick_', 'heavy', typeof mcTick_ === 'function' ? mcTick_ : null);
     S('tgRmTick_', 'heavy', tgRmTick_);

@@ -86,7 +86,9 @@ function gemHttp_(url, payload, keyFn) {
   if (TG_DRY) {
     (TG_MEM['gem:urls'] = TG_MEM['gem:urls'] || []).push(url);
     if (typeof TG_MEM['gem:fakeFn'] === 'function') return TG_MEM['gem:fakeFn'](url, payload);
-    if (TG_MEM['gem:fake']) return JSON.parse(JSON.stringify(TG_MEM['gem:fake']));
+    /* یک پاسخ ساختگی، یا فهرستی که به ترتیب برمی‌گردد (آخری تکرار می‌شود) */
+    var fk = TG_MEM['gem:fake'];
+    if (fk) return JSON.parse(JSON.stringify(Array.isArray(fk) ? (fk.length > 1 ? fk.shift() : fk[0]) : fk));
   }
   var opt = { method: payload ? 'post' : 'get', muteHttpExceptions: true,
     headers: { 'x-goog-api-key': keyFn() }, contentType: 'application/json' };

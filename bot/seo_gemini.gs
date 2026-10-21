@@ -46,10 +46,10 @@ function seoPool_() {
 var SEO_MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-3.8-flash', 'gemini-3.5-flash'];
 
 /** با تلاش دوباره و مدل جایگزین وقتی گوگل شلوغ است (۵۰۳) یا سهمیهٔ یک مدل پر شده (۴۲۹). */
-function gemJson_(prompt, schema) {
-  var last = '';
-  for (var k = 0; k < SEO_MODELS.length * 2; k++) {
-    var mdl = SEO_MODELS[k % SEO_MODELS.length];
+function gemJson_(prompt, schema, models) {
+  var last = '', ML = models || SEO_MODELS;   /* v170.83: فهرست مدل اختیاری (بازبینی اول با Pro) */
+  for (var k = 0; k < ML.length * 2; k++) {
+    var mdl = ML[k % ML.length];
     var res = gemFetch_('models/' + mdl + ':generateContent', {
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature: 0.4 }
@@ -62,7 +62,7 @@ function gemJson_(prompt, schema) {
     last = mdl + ' ' + res.code;
     Logger.log('تلاش ' + (k + 1) + ': ' + last);
     if (res.code === 400 || res.code === 403) break;
-    Utilities.sleep(5000 + 5000 * Math.floor(k / SEO_MODELS.length));
+    if (!TG_DRY) Utilities.sleep(5000 + 5000 * Math.floor(k / ML.length));
   }
   throw new Error('Gemini ناموفق: ' + last);
 }
