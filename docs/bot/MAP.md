@@ -82,7 +82,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.89`
+نسخهٔ کد: `v170.94`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -137,7 +137,7 @@
 | `assist.gs` | ۱۴۶۵ | ۱۱۴ |
 | `leadspeed.gs` | ۱۱۵۶ | ۸۷ |
 | `leadclaim.gs` | ۶۳۰ | ۴۳ |
-| `nurture.gs` | ۲۸۹ | ۳۰ |
+| `nurture.gs` | ۳۷۸ | ۳۴ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 | `guard.gs` | ۳۲۹ | ۲۵ |
 | `changes.gs` | ۲۶۵ | ۲۸ |
