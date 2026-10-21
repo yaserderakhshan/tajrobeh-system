@@ -107,7 +107,7 @@
 | `v168.gs` | ۲۴۹۶ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `cover.gs` | ۳۸۵ | ۲۷ |
-| `magseo.gs` | ۳۱۷ | ۲۰ |
+| `magseo.gs` | ۳۵۰ | ۲۱ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |
@@ -202,6 +202,7 @@
 | `KTB_FX_TAB` | «اصلاح پروفایل‌ها · پیش‌نمایش» | `kartable.gs` |
 | `KTB_RT_TAB` | «مسیریابی منتظرها · پیش‌نمایش» | `kartable.gs` |
 | `LM_DASH` | «داشبورد لید» | `leadmodel.gs` |
+| `MS_REBUILT_TAB` | «سئو · بازسازی مجله» | `magseo.gs` |
 | `OPS_LISTS_TAB` | «فهرست‌ها» | `ops.gs` |
 | `OPS_REG_TAB` | «هاب‌ها» | `ops.gs` |
 | `OPS_TAB` | «کارها» | `ops.gs` |
