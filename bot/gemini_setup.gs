@@ -9,6 +9,12 @@
  *   بعد از انتشار سبز همین را اجرا می‌کند و خلاصه را در گزارش گردش کار می‌گذارد.
  * - gemWeekly: گزارش هفتگی با پیام خصوصی بات برای یاسر (یکشنبه ۹، از V1691_WEEKLY؛ بی تریگر تازه).
  * تنظیم‌ها از تب «تنظیمات تیم»: GEM_CREDIT_USD (۳۰۰)، GEM_CREDIT_END (2026-12-22)، GEM_SPENT_ADJ_USD (۰).
+ *
+ * v170.85 (E7، Q13): سقف ۱۵ دلار نیست. اعتبار آزمایشی ۲۶۴ یورو تا 2027-01-19 است و هدف مصرف کامل آن است:
+ * بودجهٔ ماهانه حدود ۹۰ یورو، خط مصرف هفته در برابر بودجه در گزارش هفتگی، و هشدار یک‌باره به مالک وقتی
+ * مصرف به ۸۰ درصد اعتبار برسد (gemAlertTick_، روزی یک بار). دفتر هزینه همچنان دلاری است؛ گزارش یورو است.
+ * کلیدهای اختیاری: GEM_CREDIT_EUR (۲۶۴)، GEM_MONTH_EUR (۹۰)، GEM_EUR_USD (نرخ، ۱٫۱۵)، GEM_ALERT_PCT (۸۰).
+ * GEM_CREDIT_USD اگر پر باشد همچنان بر GEM_CREDIT_EUR برتری دارد.
  */
 var GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/';
 var GEM_LEDGER_TAB = 'Gemini · هزینه';
@@ -24,8 +30,12 @@ var GEM_PRICE = [
   { re: /pro/, inM: 2, outM: 12, img: 0 }
 ];
 /* از تب «تنظیمات تیم» (cfg.gs)؛ در سطح بالا تا کلیدها در تب دیده شوند */
-var GEM_CREDIT_USD = Number(cfg_('GEM_CREDIT_USD', 0)) || 300;   /* کلید خالی ← ۳۰۰ */
-var GEM_CREDIT_END = String(cfg_('GEM_CREDIT_END', '') || '2026-12-22');
+var GEM_EUR_USD = Number(cfg_('GEM_EUR_USD', 0)) || 1.15;
+var GEM_CREDIT_EUR = Number(cfg_('GEM_CREDIT_EUR', 0)) || 264;   /* E7: اعتبار آزمایشی ۲۶۴ یورو */
+var GEM_CREDIT_USD = Number(cfg_('GEM_CREDIT_USD', 0)) || Math.round(GEM_CREDIT_EUR * GEM_EUR_USD * 100) / 100;
+var GEM_CREDIT_END = String(cfg_('GEM_CREDIT_END', '') || '2027-01-19');
+var GEM_MONTH_EUR = Number(cfg_('GEM_MONTH_EUR', 0)) || 90;
+var GEM_ALERT_PCT = Number(cfg_('GEM_ALERT_PCT', 0)) || 80;
 var GEM_SPENT_ADJ_USD = Number(cfg_('GEM_SPENT_ADJ_USD', 0)) || 0;
 var GEM_IMG_PREFER = { flash: ['gemini-3.1-flash-image', 'gemini-3.1-flash-image-preview', 'gemini-2.5-flash-image'],
   pro: ['gemini-3-pro-image', 'gemini-3-pro-image-preview'] };
@@ -107,10 +117,11 @@ function gemBudget_() {
   var now = gemNow_(), day = 86400000, rows = gemLedgerRows_();
   var credit = GEM_CREDIT_USD, adj = GEM_SPENT_ADJ_USD;
   var end = new Date(GEM_CREDIT_END + 'T23:59:00+03:30');
-  var total = adj, week = 0, calls = 0, imgs = 0, fails = 0, byTask = {};
+  var total = adj, week = 0, month = 0, calls = 0, imgs = 0, fails = 0, byTask = {};
   rows.forEach(function (r) {
     var t = r[0] instanceof Date ? r[0].getTime() : new Date(r[0]).getTime(), c = Number(r[7] || 0);
     total += c;
+    if (t >= now.getTime() - 30 * day && t <= now.getTime()) month += c;
     if (t >= now.getTime() - 7 * day && t <= now.getTime()) {
       week += c; calls++; imgs += Number(r[6] || 0);
       if (Number(r[3]) !== 200) fails++;
@@ -121,8 +132,11 @@ function gemBudget_() {
   var projected = week / 7 * daysLeft;
   return { credit: credit, total: total, week: week, calls: calls, imgs: imgs, fails: fails, byTask: byTask,
     left: left, daysLeft: daysLeft, projected: projected, burnsAll: projected >= left,
-    needPerDay: daysLeft ? left / daysLeft : 0 };
+    needPerDay: daysLeft ? left / daysLeft : 0, month: month,
+    rate: GEM_EUR_USD, monthBudgetUsd: GEM_MONTH_EUR * GEM_EUR_USD, weekBudgetUsd: GEM_MONTH_EUR * GEM_EUR_USD * 7 / 30,
+    usedPct: credit ? total / credit * 100 : 0, alert: credit ? total >= credit * GEM_ALERT_PCT / 100 : false };
 }
+function gemEur_(usd) { return gemUsd_(Number(usd || 0) / GEM_EUR_USD); }
 
 function gemWeeklyText_(b) {
   var tasks = Object.keys(b.byTask).sort(function (x, y) { return b.byTask[y] - b.byTask[x]; })
@@ -133,9 +147,26 @@ function gemWeeklyText_(b) {
       gemUsd_(b.left - b.projected) + ' دلار می‌سوزد. برای مصرف کامل روزی حدود ' + gemUsd_(b.needPerDay) + ' دلار لازم است.';
   return ['🤖 <b>گزارش هفتگی Gemini</b>',
     'مصرف این هفته: ' + gemUsd_(b.week) + ' دلار (' + tgFa_(b.calls) + ' درخواست، ' + tgFa_(b.imgs) + ' تصویر' + (b.fails ? '، ' + tgFa_(b.fails) + ' ناموفق' : '') + ')',
-    'مصرف تا امروز: ' + gemUsd_(b.total) + ' از ' + gemUsd_(b.credit) + ' دلار',
+    'بودجه: این هفته ' + gemEur_(b.week) + ' از حدود ' + gemEur_(b.weekBudgetUsd) + ' یورو · ۳۰ روز اخیر ' + gemEur_(b.month) + ' از ' + gemEur_(b.monthBudgetUsd) + ' یورو',
+    'مصرف تا امروز: ' + gemUsd_(b.total) + ' از ' + gemUsd_(b.credit) + ' دلار (' + tgFa_(Math.round(b.usedPct)) + ' درصد)',
     'مانده: ' + gemUsd_(b.left) + ' دلار · ' + tgFa_(b.daysLeft) + ' روز تا سوختن',
     verdict].concat(tasks.length ? ['', 'به تفکیک کار:'].concat(tasks) : []).concat(['', 'عددها برآوردی از دفتر هزینه‌اند؛ عدد دقیق در کنسول Billing.']).join('\n');
+}
+
+/** قدم سبک tgWatchdog، روزی یک بار: هشدار یک‌باره به مالک وقتی مصرف به GEM_ALERT_PCT درصد اعتبار برسد. */
+function gemAlertTick_() {
+  var P = TG_DRY ? null : PropertiesService.getScriptProperties();
+  var get = function (k) { return TG_DRY ? (TG_MEM['gemp:' + k] || '') : (P.getProperty(k) || ''); };
+  var set = function (k, v) { if (TG_DRY) TG_MEM['gemp:' + k] = String(v); else P.setProperty(k, String(v)); };
+  var day = Utilities.formatDate(gemNow_(), 'Asia/Tehran', 'yyyy-MM-dd');
+  if (get('GEM_ALERT_DAY') === day) return false;
+  set('GEM_ALERT_DAY', day);
+  var b = gemBudget_(), mark = GEM_CREDIT_END + ':' + GEM_ALERT_PCT;
+  if (!b.alert || get('GEM_ALERT_SENT') === mark) return false;
+  set('GEM_ALERT_SENT', mark);
+  tgSend_(TG_OWNER_CHAT, '⚠️ <b>اعتبار Gemini</b>\nمصرف به ' + tgFa_(Math.round(b.usedPct)) + ' درصد اعتبار رسید: ' + gemUsd_(b.total) + ' از ' + gemUsd_(b.credit) +
+    ' دلار. مانده ' + gemEur_(b.left) + ' یورو برای ' + tgFa_(b.daysLeft) + ' روز. بعد از تمام شدن اعتبار، هزینه از کارت برداشت می‌شود.');
+  return true;
 }
 
 /** از V1691_WEEKLY (یکشنبه ۹). فقط برای یاسر. */
@@ -188,9 +219,9 @@ try { TG_SUITES.push(['Gemini: هزینه و گزارش هفتگی v170.81', 'ge
 function gemTests() {
   var log = [], fail = 0;
   function ok(n, c) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n); } }
-  var keep = TG_DRY, memK = TG_MEM, outK = TG_OUTBOX, cfgK = [GEM_CREDIT_USD, GEM_CREDIT_END, GEM_SPENT_ADJ_USD];
+  var keep = TG_DRY, memK = TG_MEM, outK = TG_OUTBOX, cfgK = [GEM_CREDIT_USD, GEM_CREDIT_END, GEM_SPENT_ADJ_USD, GEM_EUR_USD, GEM_MONTH_EUR, GEM_ALERT_PCT];
   TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
-  GEM_CREDIT_USD = 300; GEM_CREDIT_END = '2026-12-22'; GEM_SPENT_ADJ_USD = 0;
+  GEM_CREDIT_USD = 300; GEM_CREDIT_END = '2026-12-22'; GEM_SPENT_ADJ_USD = 0; GEM_EUR_USD = 1.2; GEM_MONTH_EUR = 90; GEM_ALERT_PCT = 80;
   try {
     ok('هزینهٔ متن Flash: یک میلیون ورودی و یک میلیون خروجی ۲٫۸ دلار', Math.abs(gemCost_('gemini-flash-latest', { promptTokenCount: 1e6, candidatesTokenCount: 5e5, thoughtsTokenCount: 5e5 }, 0) - 2.8) < 1e-6);
     ok('هزینهٔ تصویر Pro حدود ۱۳ سنت و Flash حدود ۴ سنت', Math.abs(gemCost_('gemini-3-pro-image', { promptTokenCount: 0, candidatesTokenCount: 1290 }, 1) - 0.134) < 1e-6
@@ -223,6 +254,16 @@ function gemTests() {
     var msg = TG_OUTBOX.filter(function (x) { return String(x.chat) === String(TG_OWNER_CHAT); }).map(function (x) { return x.text; }).join('\n');
     ok('گزارش هفتگی با پیام خصوصی برای یاسر رفت (روی کد قبلی مردود)', r && /گزارش هفتگی Gemini/.test(msg) && msg.indexOf('۱۴٫۰۰') > -1 && msg.indexOf('۲۶۰٫۰۰') > -1 && /می‌سوزد/.test(msg));
     ok('گزارش فقط برای یاسر است', TG_OUTBOX.length === 1);
+    /* Q13: ۹۰ یورو در ماه با نرخ ۱٫۲ = ۱۰۸ دلار؛ هفته ۲۵٫۲ دلار = ۲۱ یورو. این هفته ۱۴ دلار = ۱۱٫۶۷ یورو؛ ۳۰ روز ۴۰ دلار = ۳۳٫۳۳ یورو */
+    ok('خط بودجه: هفته و ۳۰ روز در برابر ۹۰ یورو (روی کد قبلی مردود)', /بودجه: این هفته ۱۱٫۶۷ از حدود ۲۱٫۰۰ یورو · ۳۰ روز اخیر ۳۳٫۳۳ از ۹۰٫۰۰ یورو/.test(msg) && /\(۱۳ درصد\)/.test(msg));
+    ok('زیر ۸۰ درصد هشداری نمی‌رود', gemAlertTick_() === false && TG_OUTBOX.length === 1);
+    TG_MEM['gem:ledger'].push([new Date(now - 4 * d), 'کاور', 'gemini-3-pro-image', 200, 0, 0, 300, 201]);
+    ok('هشدار ۸۰ درصد فردا یک بار می‌رود (روی کد قبلی مردود)', gemAlertTick_() === false && (TG_MEM['gem:now'] = String(now + d), gemAlertTick_() === true) && /⚠️ <b>اعتبار Gemini<\/b>/.test(TG_OUTBOX[1].text) && /۸۰ درصد/.test(TG_OUTBOX[1].text) && String(TG_OUTBOX[1].chat) === String(TG_OWNER_CHAT));
+    TG_MEM['gem:now'] = String(now + 2 * d);
+    ok('هشدار تکرار نمی‌شود', gemAlertTick_() === false && TG_OUTBOX.length === 2);
+    TG_MEM['gem:now'] = String(now); TG_MEM['gem:ledger'].pop();
+    ok('هشدار در نگهبان ثبت است و کلیدهای بودجه اختیاری‌اند', typeof gemAlertTick_ === 'function' && String(tgWatchdog).indexOf('gemAlertTick_') > -1 &&
+      ['GEM_CREDIT_EUR', 'GEM_MONTH_EUR', 'GEM_EUR_USD', 'GEM_ALERT_PCT'].every(function (k) { return CFG_OPTIONAL.indexOf(k) > -1; }));
     ok('گزارش خط تیرهٔ وسط جمله ندارد', !/[—–]/.test(msg));
     TG_MEM['gem:ledger'].push([new Date(now - 3 * d), 'کاور', 'gemini-3-pro-image', 200, 0, 0, 100, 60]);
     ok('اگر سرعت کافی باشد، پیام سوختن نمی‌دهد', gemBudget_().burnsAll === true && /پیش از سوختن مصرف می‌شود/.test(gemWeeklyText_(gemBudget_())));
@@ -234,7 +275,7 @@ function gemTests() {
     ok('بررسی سلامت بعد از انتشار خودکار اجرا می‌شود', CI_ONCE_AUTO.indexOf('gemV17081Check') > -1 && CI_ONCE_ALLOW.indexOf('gemV17081Check') > -1);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; GEM_TASK = '';
-  GEM_CREDIT_USD = cfgK[0]; GEM_CREDIT_END = cfgK[1]; GEM_SPENT_ADJ_USD = cfgK[2];
+  GEM_CREDIT_USD = cfgK[0]; GEM_CREDIT_END = cfgK[1]; GEM_SPENT_ADJ_USD = cfgK[2]; GEM_EUR_USD = cfgK[3]; GEM_MONTH_EUR = cfgK[4]; GEM_ALERT_PCT = cfgK[5];
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ هزینه و گزارش Gemini درست است'));
   return tgTestTally_(log, fail);
 }
