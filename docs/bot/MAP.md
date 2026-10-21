@@ -135,7 +135,7 @@
 | `assist.gs` | ۱۴۶۵ | ۱۱۴ |
 | `leadspeed.gs` | ۱۱۵۶ | ۸۷ |
 | `leadclaim.gs` | ۶۳۰ | ۴۳ |
-| `nurture.gs` | ۲۸۹ | ۳۰ |
+| `nurture.gs` | ۳۷۸ | ۳۴ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 | `guard.gs` | ۳۷۸ | ۳۰ |
 | `changes.gs` | ۲۶۵ | ۲۸ |
