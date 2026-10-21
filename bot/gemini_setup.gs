@@ -412,12 +412,12 @@ function vtxTests() {
     ok('vtxSaveKey بی کلید چیزی ذخیره نمی‌کند', /خالی است/.test(vtxSaveKey()) && !TG_MEM['vtxp:VERTEX_API_KEY']);
     VTX_KEY_PASTE = 'bad key with spaces';
     ok('vtxSaveKey متن نادرست را رد می‌کند', /چیزی ذخیره نشد/.test(vtxSaveKey()) && !TG_MEM['vtxp:VERTEX_API_KEY']);
-    VTX_KEY_PASTE = '  AIzaFAKE-only-for-test_0123456789abcd  ';
+    VTX_KEY_PASTE = '  test-only-not-a-real-key-0123456789  ';
     TG_MEM['vtxp:VTX_PROBE'] = '{"fp":"x","ok":true}';
     var sv = vtxSaveKey();
     VTX_KEY_PASTE = '';
-    ok('vtxSaveKey کلید را ذخیره می‌کند، بررسی سلامت را اجرا می‌کند و کلید را چاپ نمی‌کند (روی کد قبلی مردود)', TG_MEM['vtxp:VERTEX_API_KEY'] === 'AIzaFAKE-only-for-test_0123456789abcd' &&
-      /ذخیره شد/.test(sv) && /متن[^·]*: OK/.test(sv) && sv.indexOf('AIzaFAKE') < 0 && !TG_MEM['vtxp:VTX_PROBE']);
+    ok('vtxSaveKey کلید را ذخیره می‌کند، بررسی سلامت را اجرا می‌کند و کلید را چاپ نمی‌کند (روی کد قبلی مردود)', TG_MEM['vtxp:VERTEX_API_KEY'] === 'test-only-not-a-real-key-0123456789' &&
+      /ذخیره شد/.test(sv) && /متن[^·]*: OK/.test(sv) && sv.indexOf('test-only-not') < 0 && !TG_MEM['vtxp:VTX_PROBE']);
     ok('خلاصهٔ سبز فقط وقتی متن و هر دو تصویر OK', gemCheckOk_('مسیر Vertex AI · متن (m): OK · تصویر flash (a): OK · تصویر pro (b): OK') && !gemCheckOk_('مسیر Vertex AI · متن: OK · تصویر flash (a): OK · تصویر pro (b): 404 '));
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; GEM_TASK = '';
