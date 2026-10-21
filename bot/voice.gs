@@ -65,6 +65,7 @@ function vxTyping_(chat) { if (!vxDry_()) try { tgApi_('sendChatAction', { chat_
 /** Gemini با چند بخش (متن + صدا) و خروجی JSON. */
 function vxGem_(parts, schema) {
   var last = '';
+  gemTask_('ویس');
   for (var k = 0; k < VX_GEM_MODELS.length * 2; k++) {
     var mdl = VX_GEM_MODELS[k % VX_GEM_MODELS.length];
     var res = gemFetch_('models/' + mdl + ':generateContent', {
