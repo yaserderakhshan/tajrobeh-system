@@ -82,14 +82,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.85`
+نسخهٔ کد: `v170.86`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۴۶۰ | ۲۰۷۸ |
+| `telegram.gs` | ۳۸۴۶۱ | ۲۰۷۸ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -101,7 +101,7 @@
 | `voice.gs` | ۱۱۱۸ | ۹۳ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۲ | ۱۶ |
-| `gemini_setup.gs` | ۲۸۲ | ۲۰ |
+| `gemini_setup.gs` | ۴۹۲ | ۳۵ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۷۹۴ | ۱۳۰ |
 | `v168.gs` | ۲۴۹۶ | ۱۵۶ |
@@ -110,7 +110,7 @@
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |
 | `dq.gs` | ۶۰۲ | ۴۹ |
-| `cfg.gs` | ۱۹۶ | ۱۴ |
+| `cfg.gs` | ۱۹۷ | ۱۴ |
 | `ops.gs` | ۱۱۳۲ | ۱۰۰ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -403,12 +403,13 @@
 | برنامهٔ من (v118) | `tgV118Tests` |
 | اشغال گاندی (v144) | `tgOccTests` |
 | نسخهٔ ۱۶۲ | `tgV162Tests` |
+| Gemini: هزینه و گزارش هفتگی v170.81 | `gemTests` |
 | بستهٔ انتشار خودکار (v170.45) | `pbPkgTests` |
 | سهمیهٔ زمان اجرا (v170.23.12.5) | `bgTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | اقدام بعدی لید بسته (v170.50) | `lmClosedNextTests` |
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |
-| Gemini: هزینه و گزارش هفتگی v170.81 | `gemTests` |
+| Gemini: مسیر Vertex AI v170.84 | `vtxTests` |
 | v170.13: سقف پذیرش، بورسیه، آفر | `v17013Tests` |
 | کمپین C-004 (پلی‌لیست ابی) | `ebiTests` |
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |
