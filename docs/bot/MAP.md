@@ -82,14 +82,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.84`
+نسخهٔ کد: `v170.86`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۴۶۰ | ۲۰۷۸ |
+| `telegram.gs` | ۳۸۴۶۱ | ۲۰۷۸ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -101,7 +101,7 @@
 | `voice.gs` | ۱۱۱۸ | ۹۳ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۲ | ۱۶ |
-| `gemini_setup.gs` | ۴۱۷ | ۳۲ |
+| `gemini_setup.gs` | ۴۹۰ | ۳۵ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۷۹۴ | ۱۳۰ |
 | `v168.gs` | ۲۴۹۶ | ۱۵۶ |
@@ -110,7 +110,7 @@
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |
 | `dq.gs` | ۶۰۲ | ۴۹ |
-| `cfg.gs` | ۱۹۶ | ۱۴ |
+| `cfg.gs` | ۱۹۷ | ۱۴ |
 | `ops.gs` | ۱۱۳۲ | ۱۰۰ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
