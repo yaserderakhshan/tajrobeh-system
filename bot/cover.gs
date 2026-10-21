@@ -375,6 +375,7 @@ function cvTests() {
     ok('ساعتی شب: ساخت کاور بعدی از صف', cvHourly_() >= 1 && cvRows_().filter(function (r) { return r['شناسه'] === '50'; })[0]['وضعیت'] === CV_ST.made);
     CV_ON = '0';
     ok('COVER_ON = 0 همه را خاموش می‌کند', cvHourly_() === 'off');
+    ok('کلیدهای کاور اختیاری‌اند و خالی‌بودنشان جلوی انتشار را نمی‌گیرد', ['COVER_ON', 'COVER_DAILY', 'COVER_REFS'].every(function (k) { return CFG_OPTIONAL.indexOf(k) > -1; }));
     ok('سیم‌کشی: واچ‌داگ ساعتی و مسیر دکمهٔ cv:', String(tgWatchdog).indexOf('cvHourly_') > -1 && String(tgOnCallback_).indexOf("'cv:'") > -1);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; CV_ON = cfgK[0]; CV_DAILY = cfgK[1]; CV_REFS = cfgK[2]; GEM_TASK = '';
