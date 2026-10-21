@@ -7213,6 +7213,7 @@ function tgWatchdog(e) {
   S('ebiHourly_', 'light', typeof ebiHourly_ === 'function' ? ebiHourly_ : null);
   S('aiRetryTick_', 'light', typeof aiRetryTick_ === 'function' ? aiRetryTick_ : null);   /* v170.23.7: ویس‌های بی‌متن */
   S('ktbHourly_', 'light', typeof ktbHourly_ === 'function' ? ktbHourly_ : null);
+  S('vtxProbeTick_', 'light', typeof vtxProbeTick_ === 'function' ? vtxProbeTick_ : null);   /* v170.84: با کلید تازهٔ Vertex یک بار بررسی سلامت Gemini و پیام به مالک */
   /* v170.57: آمار شبانه واجب است، نه سنگین. از ۷ مهر هر روز در ستون «ردشده» سهمیه بودند (مصرف بالای ۵۵ دقیقه) و از ۱۴ مهر ردیفی ننوشتند.
      خودشان روزی یک بار و فقط از ساعت ۲۲ تهران کار می‌کنند؛ بقیهٔ ساعت‌ها فقط یک خواندن Property است. */
   S('tgStatTick_', 'must', tgStatTick_);
