@@ -242,13 +242,13 @@ function lcStep_(x, l, now) {
     if (!st.r10 && e >= cf.remind * 60000 && e < cf.first * 60000) {
       st.r10 = now; changed = true;
       var hc = st.cbc || st.ch;
-      if (hc) tgNotify_(hc, TG_NK.urgent, '⏰ <b>' + tgFa_(cf.remind) + ' دقیقه از قول تماس اول لید ' + tgEsc_(code) + ' گذشته</b>\nتا ' + tgFa_(cf.first) + ' دقیقه تماس بگیرید و نتیجه را از کارت ثبت کنید.', { ref: code });
+      if (hc && (typeof fcaOk_ !== 'function' || fcaOk_(code, 'o'))) tgNotify_(hc, TG_NK.urgent, '⏰ <b>' + tgFa_(cf.remind) + ' دقیقه از قول تماس اول لید ' + tgEsc_(code) + ' گذشته</b>\nتا ' + tgFa_(cf.first) + ' دقیقه تماس بگیرید و نتیجه را از کارت ثبت کنید.', { ref: code });
       tgLeadEv_({ code: code, row: l.row, actor: 'بات', channel: 'نوبت پذیرش', what: LC_EV.remind, from: '', to: cf.remind, note: '', type: l.type || '' });
     }
     if (!st.lt && e >= cf.first * 60000) {
       st.lt = now; st.r10 = st.r10 || now; changed = true;
       var b = lcBoss_();
-      if (b) tgNotify_(b.chat, TG_NK.task, '⏱ <b>مهلت ' + tgFa_(cf.first) + ' دقیقه‌ای تماس اول لید ' + tgEsc_(code) + ' گذشت</b>\n' + (st.c ? 'برداشته شده ولی تماس اول ثبت نشده.' : '«برداشتم» هم نخورده.') + '\n\n' + tgLeadLine_(l), { ref: code });
+      if (b && (typeof fcaOk_ !== 'function' || fcaOk_(code, 's'))) tgNotify_(b.chat, TG_NK.task, '⏱ <b>مهلت ' + tgFa_(cf.first) + ' دقیقه‌ای تماس اول لید ' + tgEsc_(code) + ' گذشت</b>\n' + (st.c ? 'برداشته شده ولی تماس اول ثبت نشده.' : '«برداشتم» هم نخورده.') + '\n\n' + tgLeadLine_(l), { ref: code });
       tgLeadEv_({ code: code, row: l.row, actor: 'بات', channel: 'نوبت پذیرش', what: LC_EV.late, from: '', to: cf.first, note: LC_OUT, type: l.type || '' });
       lcDayAdd_(st.cs, function (d) { d.miss++; });
     }

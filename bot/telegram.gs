@@ -3655,9 +3655,15 @@ function tgSlaTick_() {
       const ws = abSlaStage_(l, now.getTime());
       if (!ws || ws <= stage) continue;
       if (ws === 1 && typeof lcSlaOwn_ === 'function' && lcSlaOwn_(l.code)) { sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ۱ ' + stamp); continue; }   /* v170.23.44: قول تماس اول را leadclaim.gs پایش می‌کند */
+      /* v170.91 (D233): مرحلهٔ سوم دیگر پیام به یاسر نیست؛ خط جمع‌بندی (مثل J-01) */
+      if (ws === 3) {
+        if (typeof grdJ01Late_ === 'function') grdJ01Late_(l.code || tgLeadCode_(l.row), l.row, l.name, l.owner);
+        sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(ws) + ' ' + stamp);
+        continue;
+      }
       var toA = ws === 1 ? to : boss;
-      if (ws === 3 && TG_OWNER_CHAT) toA = { chat: TG_OWNER_CHAT, name: 'یاسر', style: TG_DESK_STYLES[0] };
-      if (ws < 3 && !tgDeskOnDuty_(toA, now)) continue;
+      if (!tgDeskOnDuty_(toA, now)) continue;
+      if (typeof fcaOk_ === 'function' && !fcaOk_(l.code || tgLeadCode_(l.row), ws === 1 ? 'o' : 's')) { sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(ws) + ' ' + stamp); continue; }   /* D233 */
       const headA = ws === 1 ? '🌍 <b>پنجرهٔ تماس مراجع خارج الان باز است</b>' : (ws === 2 ? '⏰ <b>دو ساعت کاری در پنجرهٔ تماس گذشت، هنوز تماس اول نه</b>' : '🔺 <b>چهار ساعت کاری در پنجرهٔ تماس، لید خارج هنوز بی‌تماس</b>');
       const lrA = tgLeadRead_(l.row);
       if (lrA) { if (!lrA.code) lrA.code = tgLeadCode_(l.row); tgNotify_(toA.chat, TG_NK.urgent, headA + '\n\n' + tgLeadCardText_(lrA), { ref: lrA.code, markup: tgLeadKb_(lrA) }); }
@@ -3684,6 +3690,8 @@ function tgSlaTick_() {
     const duty = tgDeskOnDuty_(to, now);
     const styleOk = l.urgent ? (to.style !== '') : (to.style === TG_DESK_STYLES[0]);
     if (!duty || !styleOk) continue;   // بیرون از ساعت یا سبک جمع‌بندی: می‌ماند برای دایجست
+    /* v170.91 (D233): هر لید حداکثر یک هشدار به صاحبش و یک هشدار به سرپرست، از همهٔ مسیرها با هم */
+    if (typeof fcaOk_ === 'function' && !fcaOk_(l.code || tgLeadCode_(l.row), wantStage === 1 ? 'o' : 's')) { sh.getRange(l.row, fc).setValue((stage ? flag + ' · ' : '') + 'مرحلهٔ ' + tgFa_(wantStage) + ' ' + stamp); continue; }
 
     const head = l.urgent
       ? (l.booked ? '📅 <b>یک معارفه رزرو شد</b>' : '🌍 <b>مراجع خارج از ایران</b>')
