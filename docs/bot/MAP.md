@@ -108,8 +108,8 @@
 | `publish.gs` | ۱۷۹۴ | ۱۳۰ |
 | `v168.gs` | ۲۴۹۶ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
-| `cover.gs` | ۳۸۴ | ۲۷ |
-| `magseo.gs` | ۲۸۴ | ۱۸ |
+| `cover.gs` | ۳۸۵ | ۲۷ |
+| `magseo.gs` | ۲۸۵ | ۱۸ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |
