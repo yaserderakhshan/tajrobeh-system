@@ -39,7 +39,9 @@ function gemTask_(t) { GEM_TASK = String(t || ''); }
 
 function gemFetch_(path, payload) {
   var res;
-  if (TG_DRY && TG_MEM['gem:fake']) res = JSON.parse(JSON.stringify(TG_MEM['gem:fake']));
+  /* خشک: یک پاسخ ساختگی، یا فهرستی که به ترتیب برمی‌گردد (آخری تکرار می‌شود) */
+  var fk = TG_DRY ? TG_MEM['gem:fake'] : null;
+  if (fk) res = JSON.parse(JSON.stringify(Array.isArray(fk) ? (fk.length > 1 ? fk.shift() : fk[0]) : fk));
   else {
     var opt = { method: payload ? 'post' : 'get', muteHttpExceptions: true,
       headers: { 'x-goog-api-key': gemKey_() }, contentType: 'application/json' };
