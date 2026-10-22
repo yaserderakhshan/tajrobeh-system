@@ -2559,6 +2559,7 @@ function tgPrivate_(m) {
   if (typeof reSeen_ === 'function') { try { reSeen_(chat); } catch (eRe) { tgErr_('reSeen_', eRe); } }   /* v170.23.14: پاسخ به پیام بازگرداندن */
   if (typeof asRoute_ === 'function' && asRoute_(chat, m)) return;   /* v170.23.11: دستیار پاسخ‌گو (assist.gs)؛ بحران را خودش اول می‌سنجد */
   if (m.text && typeof migOwnerCmd_ === 'function' && migOwnerCmd_(chat, String(m.text).trim())) return;
+  if (m.text && typeof msOwnerCmd_ === 'function' && msOwnerCmd_(chat, String(m.text).trim())) return;   /* v170.97 (E21): /seobatch مالک */
 
   if (m.contact && m.contact.phone_number) {
     // v164: وسط اتصال درمانگر، شماره یعنی تأیید هویت (نه لید تازه، دام ۱۲)
