@@ -203,19 +203,59 @@ function msHourly_() {
   /* ردیف‌های سبزی که اسنیپت نبود، دوباره */
   try { pbRows_('c', PB_T_SEO, PB_SEO_HEAD).filter(function (r) { return r['وضعیت'] === 'در انتظار اعمال'; }).slice(0, 3).forEach(function (r) { if (msApply_(r) === 'later') throw 'later'; }); }
   catch (e0) { if (e0 !== 'later') tgErr_('msApply_', e0); }
-  if (h >= 1 && h < 9 && msRebuilt_() === null) { tgErr_('msHourly_', 'تب «' + MS_REBUILT_TAB + '» خوانده نشد؛ امشب هیچ مقاله‌ای پردازش نمی‌شود'); h = -1; }   /* E15 */
+  if (h >= 1 && h < 9 && msRebuilt_() === null) { tgErr_('msHourly_', 'تب «' + MS_REBUILT_TAB + '» خوانده نشد؛ امشب هیچ مقاله‌ای پردازش نمی‌شود'); msNight_(day, 'tab'); h = -1; }   /* E15 */
   if (h >= 1 && h < 9) {
     var used = Number(msProp_('MS_DAY:' + day) || 0), ids = msOrder_();
     var looked = 0;
+    msNight_(day, 'run');
     while (n < MS_PER_RUN && used < msLimit_() && ids.length && pbGemLeft_() > 2 && looked < 30) {
       var id = ids.shift(), res = ''; looked++;
-      try { res = msOne_(id); } catch (e1) { msAdd_(id, '', 'خطا', '', '', String(e1.message || e1).slice(0, 200)); tgErr_('msOne_', e1); }
-      if (res === 'reworked') continue;   /* E15: بازسازی‌شده از سهم روز کم نمی‌کند */
+      try { res = msOne_(id); } catch (e1) { msAdd_(id, '', 'خطا', '', '', String(e1.message || e1).slice(0, 200)); tgErr_('msOne_', e1); res = 'err'; }
+      if (res === 'reworked') { msNight_(day, 'rw'); continue; }   /* E15: بازسازی‌شده از سهم روز کم نمی‌کند */
+      msNight_(day, res === 'err' ? 'err' : 'done');
       used++; n++; msProp_('MS_DAY:' + day, String(used));
     }
+    /* E20: چرا این ساعت بیشتر نرفت (برای خط گزارش شبانه) */
+    if (used >= msLimit_()) msNight_(day, 'limit');
+    else if (!ids.length) msNight_(day, 'empty');
+    else if (pbGemLeft_() <= 2) msNight_(day, 'cap');
   }
   if (h >= MS_SUM_HOUR) { try { msSummary_(day); } catch (e2) { tgErr_('msSummary_', e2); } }
   return n;
+}
+
+/* E20 (۱ آبان): شمار هر شب در Property «MS_NIGHT:<روز>»؛ خط گزارش شبانه از همین. پیش از این شبی که هیچ نکرد دیده نمی‌شد. */
+var MS_WHY = { tab: 'تب «' + MS_REBUILT_TAB + '» هاب آمار خوانده نشد', cap: 'سقف روزانهٔ Gemini پر بود', empty: 'مقالهٔ تازه‌ای در صف نبود', limit: 'سهم شب پر شد' };
+function msNight_(day, k) {
+  var o = {}; try { o = JSON.parse(msProp_('MS_NIGHT:' + day) || '{}') || {}; } catch (e) {}
+  o[k] = (o[k] || 0) + 1; msProp_('MS_NIGHT:' + day, JSON.stringify(o)); return o;
+}
+function msNightLine_() {
+  if (MS_ON === '0') return '🧾 بستهٔ سئوی شبانه: خاموش (MAGSEO_ON = 0)';
+  var day = msDay_(), o = {}; try { o = JSON.parse(msProp_('MS_NIGHT:' + day) || '{}') || {}; } catch (e) {}
+  var skip = 0; try { skip = Number((bgJson_('BGS:' + day) || {}).msHourly_ || 0); } catch (e3) {}
+  var why = Object.keys(MS_WHY).filter(function (k) { return o[k]; }).map(function (k) { return MS_WHY[k]; });
+  if (skip) why.push(tgFa_(skip) + ' ساعت به‌خاطر سهمیهٔ اجرا رد شد');
+  var head = '🧾 بستهٔ سئوی شبانه (ساعت ۱ تا ۸): ' + tgFa_(o.done || 0) + ' مقاله' + (o.rw ? '، ' + tgFa_(o.rw) + ' بازسازی‌شده فقط سنجیده شد' : '') + (o.err ? '، خطا ' + tgFa_(o.err) : '') +
+    ' · سهم شب ' + tgFa_(msLimit_()) + (msProp_('MS_SAMPLE_OK') ? '' : ' (نمونه تا «ادامه»)');
+  if (!o.run && !o.tab) why.unshift('هیچ ساعت شبی اجرا نشد');
+  return (o.done ? '' : '⚠️ ') + head + (why.length ? ' · ' + why.join('، ') : '');
+}
+try { TG_NIGHT_LINES.push(msNightLine_); } catch (eNl) {}
+
+/** یک‌بارهٔ خودکار v170.97 (E20)، فقط خواندن: چرا بستهٔ سئوی شبانه چیزی ننوشت. بی نام و بی متن مقاله. */
+function msV17097Diag() {
+  var day = msDay_(), y = Utilities.formatDate(new Date(msNow_().getTime() - 86400000), TG_TZ, 'yyyy-MM-dd'), out = [];
+  var rb = msRebuilt_(), ids = [];
+  try { ids = msOrder_(); } catch (e) { out.push('صف: خطا ' + String(e.message || e).slice(0, 120)); }
+  var bgs = function (d) { try { return Number((bgJson_('BGS:' + d) || {}).msHourly_ || 0); } catch (e) { return -1; } };
+  var rsw = function (d) { try { var x = (bgJson_('RSW:' + d) || {}).msHourly_; return x ? x[0] : 0; } catch (e) { return -1; } };
+  out.unshift('روشن: ' + (MS_ON === '0' ? 'نه' : 'بله') + ' · تب بازسازی‌شده: ' + (rb === null ? 'خوانده نشد' : Object.keys(rb).length + ' شناسه') +
+    ' · صف: ' + ids.length + ' مقاله · سهم شب: ' + msLimit_() + (msProp_('MS_SAMPLE_OK') ? '' : ' (نمونه)') + ' · Gemini باقی امروز: ' + pbGemLeft_() +
+    ' · دیروز ' + y + ': اجرا ' + rsw(y) + ' بار، رد سهمیه ' + bgs(y) + '، شمار ' + (msProp_('MS_NIGHT:' + y) || '-') + '، ثبت‌شده ' + (msProp_('MS_DAY:' + y) || 0) +
+    ' · امروز: اجرا ' + rsw(day) + '، رد ' + bgs(day) + '، ثبت‌شده ' + (msProp_('MS_DAY:' + day) || 0) +
+    ' · ردیف «بستهٔ سئو» ' + pbRows_('c', PB_T_SEO, PB_SEO_HEAD).length + '، صف سردبیر ' + pbRows_('c', MS_TAB, MS_HEAD).length);
+  return out.join(' · ');
 }
 
 /* ساعت ۱۰: یک خط برای سردبیر؛ و تا پیش از «ادامه»، نمونه برای یاسر */
@@ -338,6 +378,20 @@ function msTests() {
       TG_OUTBOX.some(function (x) { return x.chat === owner && JSON.stringify(x.markup || '').indexOf('msq:full') > -1; }) && msSummary_('2026-10-21') === false);
     msOnCb_('777', 'msq:full');
     ok('فقط یاسر «ادامه» می‌زند', msLimit_() === 3 && (msOnCb_(owner, 'msq:full'), msLimit_() === 15));
+    /* E20: خط گزارش شبانه می‌گوید چرا شب چیزی نرفت */
+    TG_MEM['msp:MS_NIGHT:2026-10-21'] = '';
+    MS_REBUILT_MEMO = null; TG_MEM['ms:rebuilt'] = null; TG_MEM['ms:now'] = String(pbTehran_(2026, 10, 21, 4, 5).getTime());
+    msHourly_();
+    var nl = msNightLine_();
+    ok('E20: تب خوانده‌نشده در خط شبانه با ⚠️ (روی کد قبلی مردود)', /^⚠️/.test(nl) && nl.indexOf(MS_REBUILT_TAB) > -1 && TG_NIGHT_LINES.indexOf(msNightLine_) > -1, nl);
+    TG_MEM['ms:rebuilt'] = []; MS_REBUILT_MEMO = null; TG_MEM['msp:MS_NIGHT:2026-10-21'] = '';
+    TG_MEM['pbp:PB_GEM:' + pbDay_(pbNow_())] = '999';
+    msHourly_();
+    ok('E20: سقف Gemini پر، دلیل در خط شبانه', /سقف روزانهٔ Gemini/.test(msNightLine_()), msNightLine_());
+    TG_MEM['pbp:PB_GEM:' + pbDay_(pbNow_())] = '';
+    TG_MEM['msp:MS_NIGHT:2026-10-21'] = JSON.stringify({ run: 2, done: 3, rw: 1, limit: 1 });
+    ok('E20: شب موفق بی ⚠️ با شمار', !/^⚠️/.test(msNightLine_()) && /۳ مقاله/.test(msNightLine_()) && /بازسازی‌شده/.test(msNightLine_()), msNightLine_());
+    ok('E20: یک‌بارهٔ فقط‌خواندنی در فهرست خودکار', CI_ONCE_AUTO.indexOf('msV17097Diag') > -1 && CI_ONCE_ALLOW.indexOf('msV17097Diag') > -1 && /صف: \d+ مقاله/.test(msV17097Diag()), msV17097Diag());
     MS_ON = '0';
     ok('MAGSEO_ON = 0 خاموش می‌کند', msHourly_() === 'off');
     ok('کلیدهای بستهٔ سئو اختیاری‌اند', ['MAGSEO_ON', 'MAGSEO_DAILY'].every(function (k) { return CFG_OPTIONAL.indexOf(k) > -1; }));

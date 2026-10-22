@@ -82,7 +82,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.96`
+نسخهٔ کد: `v170.97`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -107,7 +107,7 @@
 | `v168.gs` | ۲۴۹۶ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `cover.gs` | ۳۸۵ | ۲۷ |
-| `magseo.gs` | ۳۵۰ | ۲۱ |
+| `magseo.gs` | ۴۰۴ | ۲۴ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |
