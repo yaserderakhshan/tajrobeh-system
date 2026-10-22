@@ -112,7 +112,7 @@ var PB_TPL_DEF = [
 
 /* ================= لایهٔ جدول (نام سرستون؛ در حالت خشک در حافظه) ================= */
 var PB_HEAD_X = {};
-function pbSS_(hub) { return hub === 'c' ? tgCSS_() : tgSS_(); }
+function pbSS_(hub) { return hub === 'c' ? tgCSS_() : hub === 's' ? SpreadsheetApp.openById(SEO_SHEET) : tgSS_(); }   /* v170.97: 's' = هاب آمار (E21) */
 function pbTab_(hub, tab, head, seed) {
   var ss = pbSS_(hub), sh = ss.getSheetByName(tab);
   if (!sh) {
@@ -1011,16 +1011,21 @@ var PB_SEO_SCHEMA = {
     faq: { type: 'ARRAY', items: { type: 'OBJECT', properties: { q: { type: 'STRING' }, a: { type: 'STRING' } }, required: ['q', 'a'] } },
     image_alts: { type: 'ARRAY', items: { type: 'OBJECT', properties: { src: { type: 'STRING' }, alt: { type: 'STRING' } }, required: ['src', 'alt'] } },
     backlinks: { type: 'ARRAY', items: { type: 'OBJECT', properties: { url: { type: 'STRING' }, paragraph: { type: 'STRING' }, sentence: { type: 'STRING' } }, required: ['url', 'paragraph', 'sentence'] } },
-    wikimedia: { type: 'ARRAY', items: { type: 'OBJECT', properties: { section: { type: 'STRING' }, query: { type: 'STRING' } }, required: ['section', 'query'] } }
+    wikimedia: { type: 'ARRAY', items: { type: 'OBJECT', properties: { section: { type: 'STRING' }, query: { type: 'STRING' } }, required: ['section', 'query'] } },
+    /* v170.97 (E21): اختیاری؛ درگاه انتشار به آن‌ها تکیه ندارد */
+    short_answer: { type: 'STRING' },
+    internal_links: { type: 'ARRAY', items: { type: 'OBJECT', properties: { url: { type: 'STRING' }, anchor: { type: 'STRING' } }, required: ['url', 'anchor'] } },
+    pull_quote: { type: 'STRING' }
   },
   required: ['focus_keyword', 'secondary_keywords', 'seo_title', 'meta_description', 'faq', 'image_alts', 'backlinks', 'wikimedia']
 };
 function pbGemUse_(ok, err) {
   var day = pbDay_(pbNow_());
-  pbProp_('PB_GEM:' + day, String(Number(pbProp_('PB_GEM:' + day) || 0) + 1));
+  if (!PB_GEM_NOCAP) pbProp_('PB_GEM:' + day, String(Number(pbProp_('PB_GEM:' + day) || 0) + 1));   /* دستهٔ E21 سهم روزانهٔ درگاه انتشار را نمی‌خورد */
   if (!ok) pbProp_('PB_GEM_ERR', pbFmt_(pbNow_()) + ' · ' + tgSecretMask_(String(err || '')).slice(0, 120));
 }
-function pbGemLeft_() { return pbCfgN_('gem_daily_cap', 40) - Number(pbProp_('PB_GEM:' + pbDay_(pbNow_())) || 0); }
+var PB_GEM_NOCAP = false;   /* v170.97 (E21): اجرای دسته‌ای بستهٔ سئو سقف خودش را دارد (یورو و سهمیهٔ اجرا) */
+function pbGemLeft_() { return PB_GEM_NOCAP ? 999 : pbCfgN_('gem_daily_cap', 40) - Number(pbProp_('PB_GEM:' + pbDay_(pbNow_())) || 0); }
 /* سه تا شش مقالهٔ قدیمی نزدیک به موضوع، با چند پاراگراف اولشان (فقط متن منتشرشده) */
 function pbSeoCands_(post, text) {
   var m = pbArtMap_(), bag = {};
@@ -1046,6 +1051,9 @@ function pbSeoPrompt_(post, text, imgs, cands, fb) {
     '۵. backlinks دقیقاً سه مقالهٔ قدیمی از فهرست «نامزدها» که باید به همین مطلب لینک بدهند: url همان آدرس نامزد، paragraph چند واژهٔ آغاز پاراگراف هدف (عیناً از متن نامزد)، sentence یک جملهٔ طبیعی که لینک در آن بنشیند.',
     '۶. wikimedia برای هر بخش اصلی مطلب یک عبارت جست‌وجو (انگلیسی یا فارسی) در Wikimedia Commons برای عکس با مجوز آزاد.',
     '۷. هیچ خط تیرهٔ بلند یا کوتاه (— یا –). «بیمار»، «مشتری» و «ارگانیک» ننویس. «مراجع» فقط برای کسی که در جلسهٔ درمان است.',
+    '۸. short_answer بلوک پاسخ زیر تیتر اصلی: ۴۰ تا ۶۰ واژه، پاسخ مستقیم به پرسش اصلی مطلب، فقط از خود متن.',
+    '۹. internal_links دو تا چهار لینک از همین مطلب به مقاله‌های «نامزدها»: url همان آدرس نامزد، anchor عبارتی که عیناً در متن همین مطلب هست.',
+    '۱۰. pull_quote یک جملهٔ برجسته عیناً از متن، کوتاه و گویا (زیر ۲۰۰ نویسه).',
     fb ? 'ایرادهای نسخهٔ قبلی که باید رفع شود: ' + fb : '',
     '',
     'عنوان: ' + seoStrip_(post.title.rendered),
@@ -1071,12 +1079,12 @@ function pbSeoGate_(o, cands, text) {
   if (o.backlinks.length < 2) bad.push('لینک از مقالهٔ قدیمی کم');
   return bad;
 }
-function pbGemSeo_(postId, dry) {
-  var id = String(postId || '').replace(/\D/g, '');
+function pbGemSeo_(postId, dry, kind) {
+  var id = String(postId || '').replace(/\D/g, ''), page = kind === 'pages';   /* v170.97 (E21): برگه فقط پیشنهاد */
   if (!id) return { ok: false, error: 'post_id لازم است' };
   if (pbGemLeft_() <= 0) return { ok: false, error: 'سقف روزانهٔ جمنای پر است' };
   var post;
-  try { post = pbWp_('/wp-json/wp/v2/posts/' + id + '?_fields=id,link,title,content,categories'); } catch (e) { return { ok: false, error: String(e.message || e) }; }
+  try { post = pbWp_('/wp-json/wp/v2/' + (page ? 'pages' : 'posts') + '/' + id + '?_fields=id,link,title,content' + (page ? '' : ',categories')); } catch (e) { return { ok: false, error: String(e.message || e) }; }
   var html = post.content.rendered, text = seoStrip_(html), imgs = [], m, re = /<img[^>]+src="([^"]+)"[^>]*>/g;
   while ((m = re.exec(html)) && imgs.length < 12) { if (!/alt="[^"]{3,}"/.test(m[0])) imgs.push(m[1].split('/').pop()); }
   if (dry) return { ok: true, data: { would: 'gemini', post_id: id, text_chars: text.length, images_without_alt: imgs.length, quota_left: pbGemLeft_() } };
@@ -1092,23 +1100,21 @@ function pbGemSeo_(postId, dry) {
     fb = bad.join('، ');
     Utilities.sleep(4000);
   }
-  var row = { 'تاریخ': pbFmt_(pbNow_()), 'شناسه': id, 'آدرس': decodeURI(post.link), 'کلیدواژهٔ اصلی': o.focus_keyword,
+  var row = { 'تاریخ': pbFmt_(pbNow_()), 'شناسه': (page ? 'p' : '') + id, 'آدرس': decodeURI(post.link), 'کلیدواژهٔ اصلی': o.focus_keyword,
     'کلیدواژه‌های فرعی': o.secondary_keywords.join('، '), 'تیتر سئو': o.seo_title, 'طول تیتر': o.seo_title.length,
     'متا': o.meta_description, 'طول متا': o.meta_description.length,
     'پرسش‌های پرتکرار': o.faq.map(function (f, k) { return (k + 1) + '. ' + f.q + '\n' + f.a; }).join('\n\n'),
     'متن جایگزین تصویرها': o.image_alts.map(function (a) { return a.src + ' ← ' + a.alt; }).join('\n'),
     'لینک از مقاله‌های قدیمی': o.backlinks.map(function (b) { return b.url + '\nپاراگراف: ' + b.paragraph + '\nجمله: ' + b.sentence; }).join('\n\n'),
     'جست‌وجوی Wikimedia': o.wikimedia.map(function (w) { return w.section + ' ← ' + w.query; }).join('\n'),
-    'ایرادهای گیت': bad.join('، '), 'وضعیت': bad.length ? 'اصلاح لازم' : 'در انتظار اعمال', 'مدل': o._model || '' };
+    'ایرادهای گیت': bad.join('، '), 'وضعیت': bad.length ? 'اصلاح لازم' : page ? 'پیشنهاد (برگه)' : 'در انتظار اعمال', 'مدل': o._model || '' };
   pbAdd_('c', PB_T_SEO, PB_SEO_HEAD, row);
-  return { ok: true, data: { post_id: id, seo_title: o.seo_title, meta: o.meta_description, focus_keyword: o.focus_keyword, gate: bad, status: row['وضعیت'] } };
+  return { ok: true, data: { post_id: id, seo_title: o.seo_title, meta: o.meta_description, focus_keyword: o.focus_keyword, gate: bad, status: row['وضعیت'] }, pack: o };
 }
 /* مقاله‌های قدیمی به ترتیب ترافیک (تب traffic_tab هاب آمار، ستون آدرس و کلیک/بازدید)؛ هر کدام یک بار */
-function pbTrafficOrder_() {
-  var ids = [], m = pbArtMap_(), byUrl = {};
-  Object.keys(m).forEach(function (id) { if (m[id].u) byUrl[decodeURI(m[id].u).replace(/\/$/, '')] = id; });
+function pbTrafficRows_() {
   try {
-    var rows = TG_DRY ? (TG_MEM['pb:traffic'] || []) : (function () {
+    return TG_DRY ? (TG_MEM['pb:traffic'] || []).slice() : (function () {
       var sh = SpreadsheetApp.openById(SEO_SHEET).getSheetByName(pbCfg_('traffic_tab'));
       if (!sh) return [];
       var v = sh.getDataRange().getValues(), hr = 0;
@@ -1118,11 +1124,15 @@ function pbTrafficOrder_() {
       if (cu < 0 || cn < 0) return [];
       return v.slice(hr + 1).map(function (r) { return { u: String(r[cu]), n: Number(r[cn]) || 0 }; });
     })();
-    rows.sort(function (a, b) { return b.n - a.n; }).forEach(function (r) {
-      var u = decodeURI(String(r.u)).replace(/\/$/, ''), id = byUrl[u] || byUrl[PB_SITE + u];
-      if (id && ids.indexOf(id) < 0) ids.push(id);
-    });
-  } catch (e) { tgErr_('pbTrafficOrder_', e); }
+  } catch (e) { tgErr_('pbTrafficOrder_', e); return []; }
+}
+function pbTrafficOrder_() {
+  var ids = [], m = pbArtMap_(), byUrl = {};
+  Object.keys(m).forEach(function (id) { if (m[id].u) byUrl[decodeURI(m[id].u).replace(/\/$/, '')] = id; });
+  pbTrafficRows_().sort(function (a, b) { return b.n - a.n; }).forEach(function (r) {
+    var u = decodeURI(String(r.u)).replace(/\/$/, ''), id = byUrl[u] || byUrl[PB_SITE + u];
+    if (id && ids.indexOf(id) < 0) ids.push(id);
+  });
   (typeof SEO_PRIORITY !== 'undefined' ? SEO_PRIORITY : []).map(String).concat(Object.keys(m).sort(function (a, b) { return Number(b) - Number(a); }))
     .forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
   return ids;
