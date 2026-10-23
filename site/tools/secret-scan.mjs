@@ -14,7 +14,7 @@ for (const l of diff.split('\n')) {
   const h = l.match(/^@@ -\d+(?:,\d+)? \+(\d+)/);
   if (h) { line = Number(h[1]); continue; }
   if (!l.startsWith('+') || l.startsWith('+++')) { continue; }
-  if (/^site\/tools\/test\//.test(file)) { line++; continue; } // تست‌ها عمداً نمونهٔ ساختگی رمز دارند
+  if (/^site\/tools\/test\/|^edge\/[^/]+\/test\//.test(file)) { line++; continue; } // تست‌ها عمداً نمونهٔ ساختگی رمز دارند (v170.99: تست ورکرهای لبه هم)
   const generic = !/^bot\/|\.lock$|package-lock\.json$/.test(file);
   const found = scanLine(l.slice(1), { generic });
   if (found.length) hits.push(`${file}:${line} ${found.join('، ')}`);
