@@ -82,14 +82,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.97`
+نسخهٔ کد: `v170.98`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۴۷۳ | ۲۰۷۸ |
+| `telegram.gs` | ۳۸۴۷۶ | ۲۰۷۸ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -103,11 +103,12 @@
 | `seo_gemini.gs` | ۲۳۲ | ۱۶ |
 | `gemini_setup.gs` | ۵۴۶ | ۳۸ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
-| `publish.gs` | ۱۸۰۴ | ۱۳۱ |
+| `publish.gs` | ۱۸۳۵ | ۱۳۳ |
 | `v168.gs` | ۲۴۹۶ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `cover.gs` | ۳۸۵ | ۲۷ |
-| `magseo.gs` | ۴۹۷ | ۳۳ |
+| `magseo.gs` | ۵۸۲ | ۴۰ |
+| `panel.gs` | ۲۱۵ | ۲۰ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |
@@ -411,10 +412,11 @@
 | سهمیهٔ زمان اجرا (v170.23.12.5) | `bgTests` |
 | Gemini: مسیر Vertex AI v170.84 | `vtxTests` |
 | کارخانهٔ کاور v170.82 | `cvTests` |
+| بستهٔ سئو و بازبینی اول v170.83 | `msTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | اقدام بعدی لید بسته (v170.50) | `lmClosedNextTests` |
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |
-| بستهٔ سئو و بازبینی اول v170.83 | `msTests` |
+| ورود به پنل و موج دعوت v170.98 | `pnlTests` |
 | v170.13: سقف پذیرش، بورسیه، آفر | `v17013Tests` |
 | کمپین C-004 (پلی‌لیست ابی) | `ebiTests` |
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |

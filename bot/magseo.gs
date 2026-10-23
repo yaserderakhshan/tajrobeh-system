@@ -48,7 +48,8 @@ function msOrder_() {
   var done = msDone_();
   pbRows_('c', PB_T_SEO, PB_SEO_HEAD).forEach(function (r) { done[String(r['شناسه']).trim()] = 1; });
   pbRows_('c', MS_TAB, MS_HEAD).forEach(function (r) { done[String(r['شناسه']).trim()] = 1; });
-  var m = pbArtMap_(), now = msNow_().getTime(), out = [], seen = {};
+  var m = pbArtMap_(), now = msNow_().getTime(), out = [], seen = {}, touched = msTouched_();
+  Object.keys(m).forEach(function (id) { if (touched[msPath_(m[id].u)]) done[id] = 1; });   /* E25 */
   var t = function (d) { return typeof d === 'number' ? d : (d instanceof Date ? d.getTime() : ((pbWhen_(d) || new Date(0)).getTime())); };
   Object.keys(m).filter(function (id) { return t(m[id].d) >= now - MS_NEW_DAYS * 86400000; })
     .sort(function (a, b) { return t(m[b].d) - t(m[a].d); }).forEach(function (id) { seen[id] = 1; if (!done[id]) out.push(id); });
@@ -144,6 +145,50 @@ function msApply_(row) {
   return 'applied';
 }
 
+/* ─────────────────────────── E25: زمینهٔ هر صفحه از هاب آمار ─────────────────────────── */
+var MS_STAT_MEMO = {};
+function msStat_(tab) {
+  if (MS_STAT_MEMO[tab]) return MS_STAT_MEMO[tab];
+  var v = [];
+  if (TG_DRY) v = TG_MEM['ms:stat:' + tab] || [];
+  else { try { var sh = SpreadsheetApp.openById(SEO_SHEET).getSheetByName(tab); if (sh && sh.getLastRow() > 1) v = sh.getDataRange().getValues(); } catch (e) { tgErr_('msStat_', tab + ': ' + e); } }
+  var h = (v[0] || []).map(function (x) { return String(x).trim(); });
+  return (MS_STAT_MEMO[tab] = v.slice(1).map(function (r) { var o = {}; h.forEach(function (k, j) { if (k) o[k] = r[j]; }); return o; }));
+}
+function msPath_(u) { var x = String(u || ''); try { x = decodeURI(x); } catch (e) {} x = x.replace(/^https?:\/\/[^/]+/, '').trim(); if (!x) return ''; if (x[0] !== '/') x = '/' + x; return x.replace(/\/?$/, '/'); }
+function msJal_(v) {
+  if (v instanceof Date) return v;
+  var m = tgLatinDigits_(String(v || '')).match(/(1[34]\d\d)[-\/](\d{1,2})[-\/](\d{1,2})/);
+  return m ? tgJalaliToGreg_(Number(m[1]), Number(m[2]), Number(m[3])) : null;
+}
+/* کلیدواژه‌های ۲۸ روزهٔ سرچ کنسول یک صفحه (تب «کوئری‌ها»: صفحهٔ هدف، ایمپرشن)، پرایمپرشن اول */
+function msQueries_(path) {
+  var rows = msStat_('کوئری‌ها'), last = 0;
+  rows.forEach(function (r) { var d = msJal_(r['تاریخ برداشت']); if (d && d.getTime() > last) last = d.getTime(); });
+  var seen = {}, out = [];
+  rows.filter(function (r) { var d = msJal_(r['تاریخ برداشت']); return msPath_(r['صفحهٔ هدف']) === path && (!d || d.getTime() >= last - 28 * 86400000); })
+    .sort(function (a, b) { return Number(b['ایمپرشن'] || 0) - Number(a['ایمپرشن'] || 0); })
+    .forEach(function (r) { var q = String(r['کوئری'] || '').trim(); if (q && !seen[q]) { seen[q] = 1; out.push(q); } });
+  return out.slice(0, 6);
+}
+/* صفحه‌هایی که لین F در ۲۸ روز اخیر دست زده یا هنوز در پنجرهٔ سنجش است («کارتابل بهینه‌سازی»: تاریخ در «وضعیت»، «تاریخ بررسی» آینده) */
+function msTouched_() {
+  var now = msNow_().getTime(), out = {};
+  msStat_('کارتابل بهینه‌سازی').forEach(function (r) {
+    var p = msPath_(r['صفحه / محل']); if (!p) return;
+    var done = msJal_(r['وضعیت']), rev = msJal_(r['تاریخ بررسی']);
+    if ((done && now - done.getTime() < 28 * 86400000) || (rev && rev.getTime() > now)) out[p] = 1;
+  });
+  return out;
+}
+/* پرسش‌های فعلی صفحه: بلوک FAQ یوست، summary، و تیترهای پرسشی */
+function msFaqs_(html) {
+  var out = [], seen = {}, add = function (q) { q = seoStrip_(q); if (q && q.length < 200 && !seen[q]) { seen[q] = 1; out.push(q); } }, m;
+  var res = [/class="schema-faq-question"[^>]*>([\s\S]*?)<\/(?:strong|span|h\d)>/g, /<summary[^>]*>([\s\S]*?)<\/summary>/g, /<h[2-4][^>]*>([^<]*[؟?])\s*<\/h[2-4]>/g];
+  res.forEach(function (re) { while ((m = re.exec(String(html || '')))) add(m[1]); });
+  return out.slice(0, 15);
+}
+
 /* ─────────────────────────── E21: ردیف تب «سئو · پیشنهاد Gemini» هاب آمار ─────────────────────────── */
 var MS_SEO_HEAD = SEO_HEAD.concat(['نوع', 'جملهٔ برجسته', 'لینک از مقاله‌های قدیمی']);
 function msWords_(s) { return String(s || '').trim().split(/\s+/).filter(String).length; }
@@ -175,7 +220,8 @@ function msOne_(ref, opts) {
   ref = String(ref); var page = /^p\d+$/.test(ref), id = ref.replace(/\D/g, ''), kind = page ? 'pages' : 'posts';
   var post = pbWp_('/wp-json/wp/v2/' + kind + '/' + id + '?_fields=id,link,title,content' + (page ? '' : ',categories'));
   var cur = {}; try { cur = pbWp_('/wp-json/wp/v2/' + kind + '/' + id + '?_fields=id,yoast_head_json').yoast_head_json || {}; } catch (eY) {}
-  var r = pbGemSeo_(id, false, kind);
+  var ctx = { queries: msQueries_(msPath_(post.link)), faqs: msFaqs_(post.content && post.content.rendered) };   /* E25 */
+  var r = pbGemSeo_(id, false, kind, ctx);
   if (!r.ok) throw new Error(r.error || 'بستهٔ سئو');
   var url = decodeURI(String(post.link || '')), text = seoStrip_(post.content.rendered);
   msSeoRow_(ref, page, url, cur, r.pack || {}, r.data.gate || []);
@@ -252,10 +298,12 @@ function msPages_() {
   return out;
 }
 function msBatchOrder_() {
-  var done = msDone_(), m = pbArtMap_(), byUrl = {}, out = [], seen = {};
-  var add = function (ref) { if (ref && !seen[ref] && !done[ref]) { seen[ref] = 1; out.push(ref); } };
+  var done = msDone_(), m = pbArtMap_(), byUrl = {}, out = [], seen = {}, touched = msTouched_();
+  var path = {};
+  var add = function (ref) { if (ref && !seen[ref] && !done[ref] && !touched[path[ref]]) { seen[ref] = 1; out.push(ref); } };   /* E25: کار لین F کنار */
+  Object.keys(m).forEach(function (id) { path[id] = msPath_(m[id].u); });
   Object.keys(m).forEach(function (id) { if (m[id].u) byUrl[decodeURI(m[id].u).replace(/\/$/, '')] = id; });
-  var pages = msPages_(); pages.forEach(function (x) { byUrl[x.u.replace(/\/$/, '')] = 'p' + x.id; });
+  var pages = msPages_(); pages.forEach(function (x) { byUrl[x.u.replace(/\/$/, '')] = 'p' + x.id; path['p' + x.id] = msPath_(x.u); });
   pbTrafficRows_().sort(function (a, b) { return b.n - a.n; }).forEach(function (r) {
     var u = decodeURI(String(r.u)).replace(/\/$/, ''); add(byUrl[u] || byUrl[PB_SITE + u]);
   });
@@ -295,14 +343,14 @@ function msBatchRun(e) {
     if (bud.month >= bud.monthBudgetUsd) { b.stop = 'سقف ماهانهٔ Gemini (' + tgFa_(GEM_MONTH_EUR) + ' یورو) پر است'; msBatchArm_(0, msNextNight_()); return 'budget'; }
     if (typeof bgUsedMin_ === 'function' && bgUsedMin_() >= MS_BATCH_QUOTA_MIN) { b.stop = 'سهمیهٔ اجرای امروز؛ ادامه ساعت ۱ بامداد'; msBatchArm_(0, msNextNight_()); return 'quota'; }
     b.stop = '';
-    var ids = msBatchOrder_();
+    var ids = (b.only || []).length ? b.only.slice() : msBatchOrder_();
     PB_GEM_NOCAP = true;
     try {
       while (b.left > 0 && ids.length && Date.now() - t0 < MS_BATCH_RUN_MS) {
         var ref = ids.shift();
         try { msOne_(ref, { review: false }); b.done++; msNight_(day, 'batch'); }
         catch (e1) { b.err++; msMark_(ref); msNight_(day, 'err'); tgErr_('msBatchRun', String(ref) + ': ' + String(e1.message || e1).slice(0, 160)); }
-        b.left--; n++;
+        b.left--; n++; if ((b.only || []).length) b.only.shift();
       }
     } finally { PB_GEM_NOCAP = false; }
     if (!ids.length) b.left = 0;
@@ -321,6 +369,19 @@ function msOwnerCmd_(chat, t) {
   var n = msBatch(Number(String(m[1]).replace(/[۰-۹]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d); })));
   tgSend_(chat, '🧾 دستهٔ بستهٔ سئو روی ' + tgFa_(n) + ' مطلب شروع شد (پربازدیدها اول، نوشته و برگه). خروجی در تب «' + SEO_TAB + '» هاب آمار. «/seobatch» وضعیت را می‌گوید.');
   return true;
+}
+
+/** یک‌بارهٔ خودکار v170.98 (E25): ردیف‌هایی که لین F در تب «سئو · پیشنهاد Gemini» «رد» زده، با دستور کار تازه یک بار دوباره (دسته با فهرست ثابت) */
+function msV17098Redo() {
+  var ids = [], seen = {};
+  pbRows_('s', SEO_TAB, MS_SEO_HEAD).forEach(function (r) { var k = String(r['شناسه']).trim(); if (String(r['وضعیت']).trim() === 'رد' && k && !seen[k]) { seen[k] = 1; ids.push(k); } });
+  ids = ids.slice(0, 10);
+  if (!ids.length) return 'ردیف ردشده‌ای نیست';
+  var d = {}; try { d = JSON.parse(msProp_('MS_DONE') || '{}') || {}; } catch (e) {}
+  ids.forEach(function (k) { delete d[k]; }); msProp_('MS_DONE', JSON.stringify(d));
+  msProp_('MS_BATCH', JSON.stringify({ left: ids.length, total: ids.length, done: 0, err: 0, from: pbFmt_(msNow_()), stop: '', only: ids }));
+  msBatchArm_(60000);
+  return 'دوباره در صف: ' + ids.length + ' مطلب';
 }
 
 /** یک‌بارهٔ خودکار v170.97 (E20)، فقط خواندن: وضعیت بستهٔ سئو. بی نام و بی متن مقاله. */
@@ -484,13 +545,37 @@ function msTests() {
     msBatch(10); TG_MEM['gem:ledger'] = [[new Date(Number(TG_MEM['ms:now'])), 'کاور', 'm', 200, 0, 0, 0, GEM_MONTH_EUR * GEM_EUR_USD + 1]];
     TG_MEM['gem:now'] = TG_MEM['ms:now'];
     ok('E21: سقف ماهانهٔ ۹۰ یورو دسته را تا شب بعد نگه می‌دارد', msBatchRun() === 'budget' && /سقف ماهانه/.test(msBatchState_().stop) && msBatchState_().left === 10 && TG_MEM['ms:arm'] > Number(TG_MEM['ms:now']), msBatchState_().stop);
+    /* E25: دستور کار تازه از داوری لین F */
+    MS_STAT_MEMO = {};
+    TG_MEM['ms:stat:کوئری‌ها'] = [['تاریخ برداشت', 'کوئری', 'کلیک', 'ایمپرشن', 'CTR', 'رتبه', 'نیت', 'صفحهٔ هدف'],
+      ['1405-07-20', 'اضطراب جدایی کودکان', '3', '120', '0.02', '9', 'اطلاعاتی', '/sep/'], ['1405-07-20', 'اضطراب جدایی', '9', '900', '0.01', '7', 'اطلاعاتی', '/sep/'],
+      ['1405-05-01', 'کوئری کهنه', '1', '5000', '0', '9', 'اطلاعاتی', '/sep/'], ['1405-07-20', 'خواب', '1', '50', '0', '9', 'اطلاعاتی', '/sleep/']];
+    ok('E25 الف: کلیدواژه‌های ۲۸ روزهٔ همان صفحه، پرایمپرشن اول، کهنه نه (روی کد قبلی مردود)', JSON.stringify(msQueries_('/sep/')) === JSON.stringify(['اضطراب جدایی', 'اضطراب جدایی کودکان']), JSON.stringify(msQueries_('/sep/')));
+    var pr = pbSeoPrompt_({ title: { rendered: 'اضطراب جدایی' } }, 'متن', [], [], '', { queries: ['اضطراب جدایی'], faqs: ['اضطراب جدایی چیست؟'] });
+    ok('E25: پرامپت کلیدواژه، پرسش‌های موجود و قاعدهٔ alt بی نام را دارد', pr.indexOf('اضطراب جدایی چیست؟') > -1 && /focus_keyword همان اولی/.test(pr) && /هرگز نام هیچ شخصی/.test(pr));
+    var g0 = JSON.parse(JSON.stringify(TG_MEM['pb:gem']));
+    ok('E25 الف: تیتری که کلیدواژهٔ اول را ندارد از گیت رد می‌شود', pbSeoGate_(g0, [], 'متن', { queries: ['واژه‌ای که در تیتر نیست'] }).some(function (x) { return /در تیتر نیست/.test(x); }) &&
+      !pbSeoGate_(JSON.parse(JSON.stringify(TG_MEM['pb:gem'])), [], 'متن', { queries: ['اضطراب شبانه'] }).some(function (x) { return /در تیتر نیست/.test(x); }));
+    TG_MEM['pb:names'] = ['نام آزمونی خانوادگی']; PB_NAMES_MEMO = null;
+    var c0 = pbSeoClean_({ image_alts: [{ src: 'a-1024x576.webp', alt: 'ماه در شب' }, { src: 'ساختگی.webp', alt: 'تصویر' }, { src: 'b.webp', alt: 'عکس خانوادگی در جلسه' }],
+      faq: [{ q: 'اضطراب جدایی چیست؟', a: 'x' }, { q: 'چه زمانی کمک بگیریم؟', a: 'y' }] }, ['https://tajrobeh.life/u/a-1024x576.webp', 'b.webp'], { faqs: ['اضطراب جدایی چیست'] });
+    ok('E25 ب و ج: alt فقط برای فایل واقعی و بی نام شخص؛ پرسش تکراری حذف (روی کد قبلی مردود)', c0.image_alts.length === 1 && c0.image_alts[0].src === 'a-1024x576.webp' && c0.faq.length === 1 && c0.faq[0].q === 'چه زمانی کمک بگیریم؟', JSON.stringify(c0));
+    ok('E25: پرسش‌های فعلی صفحه از HTML', JSON.stringify(msFaqs_('<h3>اضطراب چیست؟</h3><summary>درمان چقدر طول می‌کشد؟</summary><h2>مقدمه</h2>')) === JSON.stringify(['درمان چقدر طول می‌کشد؟', 'اضطراب چیست؟']), JSON.stringify(msFaqs_('<h3>اضطراب چیست؟</h3><summary>درمان چقدر طول می‌کشد؟</summary>')));
+    TG_MEM['ms:stat:کارتابل بهینه‌سازی'] = [['#', 'صفحه / محل', 'کار', 'نوع', 'اولویت', 'وضعیت', 'شاخص هدف', 'عدد قبل', 'عدد بعد', 'تاریخ بررسی'],
+      ['1', '/dream/', 'تیتر تازه', 'سئو', '۱', 'انجام شد ۱۴۰۵-۰۷-۲۵', 'CTR', '', '', ''], ['2', '/legal/', 'متا', 'سئو', '۲', 'در کار', '', '', '', '۱۴۰۶-۰۱-۰۱'],
+      ['3', '/get-therapy/', 'قدیمی', 'سئو', '۱', 'انجام شد ۱۴۰۵-۰۴-۰۱', '', '', '', '۱۴۰۵-۰۵-۰۱']];
+    MS_STAT_MEMO = {}; TG_MEM['msp:MS_DONE'] = '';
+    var bo2 = msBatchOrder_(), T = msTouched_();
+    ok('E25 د: صفحه‌های دست‌خوردهٔ ۲۸ روز اخیر و در پنجرهٔ سنجش کنار؛ کار کهنه نه (روی کد قبلی مردود)', T['/dream/'] && T['/legal/'] && !T['/get-therapy/'] && bo2.indexOf('77') < 0 && bo2.indexOf('p12') < 0 && msOrder_().indexOf('77') < 0, JSON.stringify(T) + ' ' + bo2.join(','));
+    pbRows_('s', SEO_TAB, MS_SEO_HEAD).push({ 'شناسه': '104', 'وضعیت': 'رد' }, { 'شناسه': '104', 'وضعیت': 'رد' });
+    ok('E25: یک‌بارهٔ «رد»ها: همان شناسه‌ها با فهرست ثابت دوباره در صف', /۱|1/.test(msV17098Redo()) && JSON.stringify(msBatchState_().only) === '["104"]' && CI_ONCE_AUTO.indexOf('msV17098Redo') > -1, JSON.stringify(msBatchState_()));
     ok('E21: سیم‌کشی /seobatch در پیام‌ها', String(tgPrivate_).indexOf('msOwnerCmd_') > -1);
     MS_ON = '0';
     ok('MAGSEO_ON = 0 خاموش می‌کند', msHourly_() === 'off');
     ok('کلیدهای بستهٔ سئو اختیاری‌اند', ['MAGSEO_ON', 'MAGSEO_DAILY'].every(function (k) { return CFG_OPTIONAL.indexOf(k) > -1; }));
     ok('سیم‌کشی: واچ‌داگ ساعتی و مسیر دکمهٔ msq:', String(tgWatchdog).indexOf('msHourly_') > -1 && String(tgOnCallback_).indexOf("'msq:'") > -1);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
-  TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; MS_ON = cfgK[0]; MS_DAILY = cfgK[1]; PB_GEM_NOCAP = false; GEM_TASK = '';
+  TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; MS_ON = cfgK[0]; MS_DAILY = cfgK[1]; PB_GEM_NOCAP = false; PB_NAMES_MEMO = null; MS_STAT_MEMO = {}; GEM_TASK = '';
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ بستهٔ سئو و بازبینی اول درست است'));
   return tgTestTally_(log, fail);
 }
