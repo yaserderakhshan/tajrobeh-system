@@ -1041,7 +1041,8 @@ function pbSeoCands_(post, text) {
   });
   return list;
 }
-function pbSeoPrompt_(post, text, imgs, cands, fb) {
+function pbSeoPrompt_(post, text, imgs, cands, fb, ctx) {
+  ctx = ctx || {};
   return [
     'تو ویراستار سئوی «مجلهٔ تجربه» هستی؛ مجلهٔ روان‌درمانی و روانکاوی مرکز تجربه زندگی. خروجی فقط JSON طبق اسکیما.',
     '۱. focus_keyword یک کوئری واقعی جست‌وجوی فارسی؛ secondary_keywords دقیقاً سه کوئری فرعی.',
@@ -1054,6 +1055,9 @@ function pbSeoPrompt_(post, text, imgs, cands, fb) {
     '۸. short_answer بلوک پاسخ زیر تیتر اصلی: ۴۰ تا ۶۰ واژه، پاسخ مستقیم به پرسش اصلی مطلب، فقط از خود متن.',
     '۹. internal_links دو تا چهار لینک از همین مطلب به مقاله‌های «نامزدها»: url همان آدرس نامزد، anchor عبارتی که عیناً در متن همین مطلب هست.',
     '۱۰. pull_quote یک جملهٔ برجسته عیناً از متن، کوتاه و گویا (زیر ۲۰۰ نویسه).',
+    '۱۱. image_alts فقط برای نام فایل‌های فهرست «تصویرهای بی alt»، با همان نام فایل عیناً؛ اگر فهرست «ندارد» است، image_alts خالی. هرگز نام هیچ شخصی (نویسنده، درمانگر، مراجع، هیچ‌کس) در alt نیاور.',
+    (ctx.queries || []).length ? '۱۲. کلیدواژه‌هایی که این صفحه همین حالا در گوگل با آن‌ها دیده می‌شود (۲۸ روز اخیر، به ترتیب ایمپرشن): ' + ctx.queries.join(' ، ') + '. focus_keyword همان اولی باشد و seo_title عین همان عبارت را داشته باشد؛ کلیدواژه‌ای را که صفحه با آن رتبه دارد حذف نکن.' : '',
+    (ctx.faqs || []).length ? '۱۳. پرسش‌هایی که همین حالا در صفحه هست: ' + ctx.faqs.join(' | ') + '. faq فقط پرسش‌های تازه‌ای باشد که در این فهرست نیست (یک تا پنج).' : '',
     fb ? 'ایرادهای نسخهٔ قبلی که باید رفع شود: ' + fb : '',
     '',
     'عنوان: ' + seoStrip_(post.title.rendered),
@@ -1062,7 +1066,8 @@ function pbSeoPrompt_(post, text, imgs, cands, fb) {
     'نامزدها:', cands.map(function (c) { return '• ' + c.t + ' :: ' + c.u + '\n' + c.paras.map(function (p) { return '  • ' + p.slice(0, 220); }).join('\n'); }).join('\n')
   ].join('\n');
 }
-function pbSeoGate_(o, cands, text) {
+function pbSeoGate_(o, cands, text, ctx) {
+  ctx = ctx || {};
   var bad = [], urls = {};
   cands.forEach(function (c) { urls[c.u] = 1; });
   var tl = o.seo_title.length, ml = o.meta_description.length;
@@ -1074,12 +1079,37 @@ function pbSeoGate_(o, cands, text) {
   if (/بیمار|مشتری|ارگانیک/.test(all)) bad.push('واژهٔ ممنوع');
   if (/مراجع/.test(all) && !/مراجع/.test(text || '')) bad.push('«مراجع» بی‌جا');
   if ((o.secondary_keywords || []).length !== 3) bad.push('کلیدواژهٔ فرعی ' + (o.secondary_keywords || []).length);
-  if (o.faq.length < 3 || o.faq.length > 5) bad.push('پرسش ' + o.faq.length);
+  if (o.faq.length < ((ctx.faqs || []).length ? 1 : 3) || o.faq.length > 5) bad.push('پرسش ' + o.faq.length);
+  /* v170.98 (E25): کلیدواژه‌ای که صفحه با آن رتبه دارد باید در تیتر بماند */
+  var nz = function (x) { return String(x || '').replace(/[\u200c\s]+/g, ' ').trim(); };
+  if ((ctx.queries || []).length && nz(o.seo_title).indexOf(nz(ctx.queries[0])) < 0) bad.push('کلیدواژهٔ «' + ctx.queries[0] + '» در تیتر نیست');
   o.backlinks = (o.backlinks || []).filter(function (b) { return urls[decodeURI(b.url)] || urls[b.url]; });
   if (o.backlinks.length < 2) bad.push('لینک از مقالهٔ قدیمی کم');
   return bad;
 }
-function pbGemSeo_(postId, dry, kind) {
+/* v170.98 (E25): alt فقط برای تصویر واقعی صفحه و بی نام هیچ شخص؛ پرسش تکراری صفحه حذف */
+function pbSeoClean_(o, imgs, ctx) {
+  var have = {}, nz = function (x) { return String(x || '').replace(/[\u200c\s؟?.!،]+/g, '').trim(); }, names = pbNames_();
+  imgs.forEach(function (f) { have[String(f).split('/').pop()] = 1; });
+  o.image_alts = (o.image_alts || []).filter(function (a) { var f = String(a.src || '').split('/').pop(); return have[f] && !names.some(function (n) { return String(a.alt || '').indexOf(n) > -1; }); });
+  var old = {}; ((ctx || {}).faqs || []).forEach(function (q) { old[nz(q)] = 1; });
+  o.faq = (o.faq || []).filter(function (f) { return !old[nz(f.q)]; });
+  return o;
+}
+/* نام همکاران و افراد (TG_NAMES، «افراد»، درمانگران): نام کامل و نام خانوادگی سه‌حرفی به بالا */
+var PB_NAMES_MEMO = null;
+function pbNames_() {
+  if (PB_NAMES_MEMO) return PB_NAMES_MEMO;
+  var out = {}, add = function (n) { n = String(n || '').trim(); if (n.length < 3) return; out[n] = 1; var p = n.split(/\s+/); if (p.length > 1 && p[p.length - 1].length >= 3) out[p[p.length - 1]] = 1; };
+  if (TG_DRY) (TG_MEM['pb:names'] || []).forEach(add);
+  else {
+    try { var o = cfg_('TG_NAMES', {}) || {}; Object.keys(o).forEach(function (k) { add(o[k]); }); } catch (e) {}
+    try { tgPeopleList_().forEach(function (x) { add(x.name); }); } catch (e2) {}
+    try { tgTherapistRows_().forEach(function (x) { add(x.name); }); } catch (e3) {}
+  }
+  return (PB_NAMES_MEMO = Object.keys(out));
+}
+function pbGemSeo_(postId, dry, kind, ctx) {
   var id = String(postId || '').replace(/\D/g, ''), page = kind === 'pages';   /* v170.97 (E21): برگه فقط پیشنهاد */
   if (!id) return { ok: false, error: 'post_id لازم است' };
   if (pbGemLeft_() <= 0) return { ok: false, error: 'سقف روزانهٔ جمنای پر است' };
@@ -1091,11 +1121,12 @@ function pbGemSeo_(postId, dry, kind) {
   var cands = pbSeoCands_(post, text), o = null, bad = [], fb = '';
   for (var i = 0; i < 3; i++) {
     gemTask_('سئوی انتشار');
-    try { o = TG_DRY ? JSON.parse(JSON.stringify(TG_MEM['pb:gem'])) : gemJson_(pbSeoPrompt_(post, text, imgs, cands, fb), PB_SEO_SCHEMA); pbGemUse_(true); }
+    try { o = TG_DRY ? JSON.parse(JSON.stringify(TG_MEM['pb:gem'])) : gemJson_(pbSeoPrompt_(post, text, imgs, cands, fb, ctx), PB_SEO_SCHEMA); pbGemUse_(true); }
     catch (e) { pbGemUse_(false, e.message); return { ok: false, error: 'جمنای: ' + String(e.message || e).slice(0, 160) }; }
     try { o = seoFixAll_(Object.assign({ short_answer: '' }, o)); } catch (e) {}
     o.secondary_keywords = (o.secondary_keywords || []).map(seoFix_);
-    bad = pbSeoGate_(o, cands, text);
+    pbSeoClean_(o, imgs, ctx);
+    bad = pbSeoGate_(o, cands, text, ctx);
     if (!bad.length || TG_DRY) break;
     fb = bad.join('، ');
     Utilities.sleep(4000);
