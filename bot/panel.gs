@@ -64,7 +64,11 @@ function pnlSendLink_(chat) {
   if (who.code) pnlMark_(who.code, 'دکمه');
   return true;
 }
-function pnlOnCb_(chat, data) { if (data === 'pnl:go') pnlSendLink_(chat); return true; }
+function pnlOnCb_(chat, data) {
+  if (!pnlWho_(chat)) { tgSend_(chat, T_PNL_NO); return true; }   /* فقط درمانگر یا عضو وصل‌شده */
+  if (data === 'pnl:go') pnlSendLink_(chat);
+  return true;
+}
 
 /* ───── موج دعوت ───── */
 function pnlRows_() { return pbRows_('h', PNL_TAB, PNL_HEAD); }
@@ -191,7 +195,7 @@ function pnlTests() {
     TG_OUTBOX = [];
     ok('دوباره /wave همان موج: تکراری نمی‌رود', (pnlCmd_('9001', '/wave موج ۱'), !TG_OUTBOX.some(function (x) { return x.chat === '5550001' && /پنل تازه/.test(x.text); })));
     /* پیامک بی چت */
-    TG_MEM['pnlp:KAVENEGAR_API_KEY'] = 'test-only-sms-key'; TG_MEM['pnl:phones'] = { T2: '09120000000' };
+    TG_MEM['pnlp:KAVENEGAR_API_KEY'] = 'test-only-sms-key'; TG_MEM['pnl:phones'] = { T2: '09120000000' };   /* pii:ok شمارهٔ ساختگی آزمون */
     R[1]['وضعیت'] = '';
     pnlWave_('موج ۱');
     ok('بی چت با کلید پیامک: پیامک با لینک کوتاه بات، بی توکن', (TG_MEM['pnl:sms'] || []).length === 1 && /t\.me\/tajrobehlife_bot\?start=panel/.test(TG_MEM['pnl:sms'][0].text) && !/#t=/.test(TG_MEM['pnl:sms'][0].text) && R[1]['وضعیت'] === 'پیامک رفت', JSON.stringify(TG_MEM['pnl:sms']) + ' ' + R[1]['وضعیت']);
