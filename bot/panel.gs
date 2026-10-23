@@ -8,9 +8,10 @@
  *    لینک کوتاه‌عمر است، پس دکمه‌ها لینک ثابت ندارند: «ورود به پنل» (pnl:go) هر بار لینک تازه می‌سازد.
  *    ph فقط از شمارهٔ دکمهٔ اشتراک تماس تلگرام است؛ این بات آن را جدا نگه نمی‌دارد، پس فعلاً فرستاده نمی‌شود.
  * ۲) «/panel» (و /start panel) برای هر درمانگر یا عضو وصل‌شده. کس دیگری لینک نمی‌گیرد.
- * ۳) موج دعوت: تب «دعوت موج‌ها» هاب تجربه (ستون کد درمانگر؛ نام و شماره از خود هاب). ارسال فقط با «/wave <موج>» مالک.
- *    یادآوری یک بار، ۴۸ ساعت بعد، اگر دکمه زده نشده. بی چت تلگرام: پیامک کاوه‌نگار با لینک کوتاه بات، اگر کلید
- *    KAVENEGAR_API_KEY در Script Properties باشد. پیام‌ها کوتاه‌اند و متن واقعی موج را لین A پیش از ارسال دیده است.
+ * ۳) موج دعوت (v170.99، E28 و E30): دعوت اصلی و پیامک از خود پل می‌رود. ردیف تب «دعوت موج‌ها» هاب تجربه را لین A یا پل
+ *    می‌گذارد (موج، تاریخ، کد درمانگر). ساعت ۱۰ تهرانِ همان تاریخ یک کارت با دکمهٔ «ارسال موج» در پیام خصوصی مالک می‌آید
+ *    (بی فرمان تایپی)؛ با دکمه، پیام تلگرام با دکمهٔ ورود برای درمانگران می‌رود. یادآوری یک بار، ۴۸ ساعت بعد، اگر دکمه
+ *    زده نشده. بات پیامک نمی‌فرستد.
  */
 var BR_HANDOFF_URL = 'https://bridge.tajrobeh.life/auth/telegram/handoff#t=';
 var BR_TTL_S = 180;
@@ -20,7 +21,7 @@ var PNL_REMIND_MS = 48 * 3600000;
 var T_PNL_INVITE = 'سلام {نام}. پنل تازهٔ درمانگران تجربه آماده است و جای شما آنجاست. با دکمهٔ زیر وارد شوید.';
 var T_PNL_REMIND = 'یادآوری: هنوز وارد پنل تازه نشده‌اید. با دکمهٔ زیر وارد شوید.';
 var T_PNL_LINK = '🔐 لینک ورود شما به پنل آماده است. فقط یک بار و تا ۳ دقیقه کار می‌کند؛ اگر دیر شد، دوباره «ورود به پنل» را بزنید.';
-var T_PNL_SMS = 'تجربه: پنل تازهٔ درمانگران آماده است. ورود: {لینک}';
+var PNL_HOUR = 10;
 var T_PNL_NO = 'این بخش برای درمانگران و همکاران وصل‌شده به بات است.';
 var T_PNL_OFF = 'ورود به پنل هنوز آماده نیست. کمی بعد دوباره امتحان کنید.';
 var PNL_BTN = 'ورود به پنل';
@@ -65,6 +66,14 @@ function pnlSendLink_(chat) {
   return true;
 }
 function pnlOnCb_(chat, data) {
+  if (data.indexOf('pnl:w:') === 0) {   /* ارسال موج: فقط مالک */
+    if (String(chat) !== String(TG_OWNER_CHAT)) { tgSend_(chat, T_PNL_NO); return true; }
+    var id = data.slice(6), w = Object.keys(pnlDueWaves_()).filter(function (k) { return pnlWid_(k) === id; })[0] || '';
+    if (!w) { tgSend_(chat, '📨 این موج دیگر ردیف سررسیدهٔ ارسال‌نشده ندارد.'); return true; }
+    var o = pnlWave_(w);
+    tgSend_(chat, '📨 موج «' + tgEsc_(w) + '»: دعوت تلگرام ' + tgFa_(o.tg) + '، بی چت ' + tgFa_(o.none) + '.');
+    return true;
+  }
   if (!pnlCan_(chat)) { tgSend_(chat, T_PNL_NO); return true; }   /* فقط درمانگر یا عضو وصل‌شده */
   if (data === 'pnl:go') pnlSendLink_(chat);
   return true;
@@ -82,47 +91,59 @@ function pnlTher_(code) {
   var list = []; try { list = TG_DRY ? (TG_MEM['pnl:thers'] || []) : tgTherapistRows_(); } catch (e) {}
   return list.filter(function (t) { return String(t.code).trim() === String(code).trim(); })[0] || null;
 }
-/* شمارهٔ درمانگرِ بی چت از تب «افراد» با همان نام (فقط برای پیامک) */
-function pnlPhone_(t) {
-  if (!t) return '';
-  if (TG_DRY) return (TG_MEM['pnl:phones'] || {})[String(t.code)] || '';
-  var list = []; try { list = tgPeopleList_(); } catch (e) {}
-  var p = list.filter(function (x) { return String(x.name || '').trim() === String(t.name).trim() && String(x.status).trim() !== 'غیرفعال'; })[0];
-  return p ? String(p.phone || '') : '';
-}
 function pnlChatOf_(t) { return String(t && t.chat || '').split(/[,،\s]+/).filter(String)[0] || ''; }
-/* پیامک کاوه‌نگار؛ کلید فقط در Script Properties و هرگز در لاگ */
-function pnlSms_(phone, text) {
-  var key = pnlProp_('KAVENEGAR_API_KEY');
-  var ph = tgLatinDigits_(String(phone || '')).replace(/\D/g, '');
-  if (!key || ph.length < 10) return false;
-  if (TG_DRY) { (TG_MEM['pnl:sms'] = TG_MEM['pnl:sms'] || []).push({ to: ph, text: text }); return true; }
-  var r = UrlFetchApp.fetch('https://api.kavenegar.com/v1/' + encodeURIComponent(key) + '/sms/send.json',
-    { method: 'post', muteHttpExceptions: true, payload: { receptor: ph, message: text } });
-  if (r.getResponseCode() !== 200) { tgErr_('pnlSms_', 'HTTP ' + r.getResponseCode()); return false; }
-  return true;
+/* تاریخ ردیف (شمسی ۱۴۰۵-۰۸-۱۰ یا تاریخ برگه)؛ خالی یعنی سررسیده */
+function pnlDue_(v, now) {
+  if (v === '' || v == null) return true;
+  var d = v instanceof Date ? v : null;
+  if (!d) { var m = tgLatinDigits_(String(v)).match(/(1[34]\d\d)[-\/](\d{1,2})[-\/](\d{1,2})/); d = m ? tgJalaliToGreg_(Number(m[1]), Number(m[2]), Number(m[3])) : pbWhen_(v); }
+  if (!d) return false;
+  return Utilities.formatDate(d, TG_TZ, 'yyyy-MM-dd') <= Utilities.formatDate(new Date(now), TG_TZ, 'yyyy-MM-dd');
 }
-/** ارسال یک موج (فقط با «/wave <موج>» مالک). خروجی: {tg, sms, none} */
-function pnlWave_(wave) {
-  var out = { tg: 0, sms: 0, none: 0 }, now = pbFmt_(new Date(pnlNow_()));
+/* ردیف‌های سررسیدهٔ بی ارسال، به تفکیک موج */
+function pnlDueWaves_() {
+  var now = pnlNow_(), w = {};
   pnlRows_().forEach(function (r) {
-    if (String(r['موج']).trim() !== String(wave).trim() || String(r['ارسال'] || '') || String(r['پیامک'] || '')) return;
-    var t = pnlTher_(r['کد درمانگر']), chat = pnlChatOf_(t);
-    var nm = t ? String(t.name).split(/\s+/)[0] : '';
-    if (chat) {
-      tgSend_(chat, T_PNL_INVITE.replace('{نام}', nm || 'همکار گرامی').replace('سلام همکار گرامی.', 'سلام.'), pnlKb_());
-      pbSet_('h', PNL_TAB, PNL_HEAD, r, { 'ارسال': now, 'وضعیت': 'دعوت رفت' }); out.tg++;
-    } else if (pnlSms_(pnlPhone_(t), T_PNL_SMS.replace('{لینک}', 't.me/' + tgBotName_() + '?start=panel'))) {
-      pbSet_('h', PNL_TAB, PNL_HEAD, r, { 'پیامک': now, 'وضعیت': 'پیامک رفت' }); out.sms++;
-    } else { pbSet_('h', PNL_TAB, PNL_HEAD, r, { 'وضعیت': t ? 'بی چت و بی پیامک' : 'کد پیدا نشد' }); out.none++; }
+    var k = String(r['موج'] || '').trim();
+    if (!k || !String(r['کد درمانگر'] || '').trim() || String(r['ارسال'] || '') || String(r['وضعیت'] || '') || !pnlDue_(r['تاریخ'], now)) return;
+    w[k] = (w[k] || 0) + 1;
+  });
+  return w;
+}
+/** ارسال یک موج، فقط بعد از دکمهٔ مالک (E28 بند ۳). دعوت اصلی و پیامک از پل می‌رود؛ این فقط پیام تلگرام است. خروجی: {tg, none} */
+function pnlWave_(wave) {
+  var out = { tg: 0, none: 0 }, now = pnlNow_(), at = pbFmt_(new Date(now));
+  pnlRows_().forEach(function (r) {
+    if (String(r['موج']).trim() !== String(wave).trim() || !String(r['کد درمانگر'] || '').trim() || String(r['ارسال'] || '') || String(r['وضعیت'] || '') || !pnlDue_(r['تاریخ'], now)) return;
+    var t = pnlTher_(r['کد درمانگر']), chat = pnlChatOf_(t), nm = t ? String(t.name).split(/\s+/)[0] : '';
+    if (!chat) { pbSet_('h', PNL_TAB, PNL_HEAD, r, { 'وضعیت': t ? 'بی چت تلگرام (دعوت از پل)' : 'کد پیدا نشد' }); out.none++; return; }
+    tgSend_(chat, T_PNL_INVITE.replace('{نام}', nm || 'همکار گرامی'), pnlKb_());
+    pbSet_('h', PNL_TAB, PNL_HEAD, r, { 'ارسال': at, 'وضعیت': 'دعوت رفت' }); out.tg++;
   });
   return out;
 }
-/** قدم سبک واچ‌داگ: یادآوری یک‌باره ۴۸ ساعت بعد، ۹ تا ۲۱ تهران */
+/* ساعت ۱۰: برای هر موج سررسیده یک کارت با دکمهٔ «ارسال» در پیام خصوصی مالک؛ هر موج یک بار در روز */
+function pnlCards_() {
+  var w = pnlDueWaves_(), day = Utilities.formatDate(new Date(pnlNow_()), TG_TZ, 'yyyy-MM-dd'), n = 0;
+  Object.keys(w).forEach(function (k) {
+    var key = 'PNL_CARD:' + k;
+    if (pnlProp_(key) === day) return;
+    pnlPropSet_(key, day);
+    tgSend_(String(TG_OWNER_CHAT), '📨 <b>موج دعوت «' + tgEsc_(k) + '»</b>\n' + tgFa_(w[k]) + ' درمانگر سررسیده‌اند. با دکمهٔ زیر پیام تلگرام دعوت به پنل برایشان می‌رود (دعوت اصلی و پیامک از خود پل است).',
+      { inline_keyboard: [[{ text: '📨 ارسال موج', callback_data: 'pnl:w:' + pnlWid_(k) }]] });
+    n++;
+  });
+  return n;
+}
+/* شناسهٔ کوتاه موج برای دادهٔ دکمه (سقف ۶۴ بایت تلگرام) */
+function pnlWid_(k) { return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(k).trim()).slice(0, 5).map(function (b) { return ('0' + (b & 255).toString(16)).slice(-2); }).join(''); }
+function pnlPropSet_(k, v) { if (TG_DRY) TG_MEM['pnlp:' + k] = String(v); else PropertiesService.getScriptProperties().setProperty(k, String(v)); }
+/** قدم سبک واچ‌داگ: کارت موج ساعت ۱۰ و یادآوری یک‌باره ۴۸ ساعت بعد، ۹ تا ۲۱ تهران */
 function pnlTick_() {
   var h = Number(Utilities.formatDate(new Date(pnlNow_()), TG_TZ, 'H'));
   if (h < 9 || h >= 21) return 0;
   var n = 0;
+  if (h >= PNL_HOUR) { try { pnlCards_(); } catch (eC) { tgErr_('pnlCards_', eC); } }
   pnlRows_().forEach(function (r) {
     if (!String(r['ارسال'] || '') || String(r['دکمه'] || '') || String(r['یادآوری'] || '')) return;
     var at = pbWhen_(r['ارسال']);
@@ -134,20 +155,11 @@ function pnlTick_() {
   });
   return n;
 }
-/* «/panel» و «/start panel» برای همه؛ «/wave» فقط مالک */
+/* «/panel» و «/start panel» برای درمانگر یا عضو وصل‌شده (ارسال موج فرمان تایپی ندارد؛ E28، E30) */
 function pnlCmd_(chat, t) {
   t = String(t || '').trim();
   if (/^\/panel(@\w+)?$/.test(t) || /^\/start(@\w+)?\s+panel$/.test(t)) { pnlSendLink_(chat); return true; }
-  var m = t.match(/^\/wave(?:@\w+)?(?:\s+(.+))?$/);
-  if (!m || String(chat) !== String(TG_OWNER_CHAT)) return false;
-  if (!m[1]) {
-    var w = {}; pnlRows_().forEach(function (r) { var k = String(r['موج']).trim(); if (!k) return; w[k] = w[k] || [0, 0]; w[k][0]++; if (r['ارسال'] || r['پیامک']) w[k][1]++; });
-    tgSend_(chat, Object.keys(w).length ? '📨 موج‌های دعوت:\n' + Object.keys(w).map(function (k) { return '• ' + tgEsc_(k) + ': ' + tgFa_(w[k][0]) + ' نفر، رفته ' + tgFa_(w[k][1]); }).join('\n') + '\nارسال: «/wave نام موج»' : '📨 تب «' + PNL_TAB + '» هاب خالی است.');
-    return true;
-  }
-  var o = pnlWave_(m[1]);
-  tgSend_(chat, '📨 موج «' + tgEsc_(m[1].trim()) + '»: تلگرام ' + tgFa_(o.tg) + '، پیامک ' + tgFa_(o.sms) + '، نرسید ' + tgFa_(o.none) + '.');
-  return true;
+  return false;
 }
 
 /* ─────────────────────────── آزمون ─────────────────────────── */
@@ -182,27 +194,29 @@ function pnlTests() {
     TG_MEM['pnlp:TG_BRIDGE_HANDOFF_SECRET'] = 'test-only-handoff-secret';
     ok('/start panel هم', pnlCmd_('5550001', '/start panel') === true);
 
-    /* موج */
+    /* موج: کارت با دکمه برای مالک، بی فرمان تایپی، بی پیامک */
     TG_OUTBOX = [];
     TG_MEM['pnl:thers'] = [{ name: 'سارا آزمون', code: 'T1', chat: '5550001' }, { name: 'بی چت', code: 'T2', chat: '' }];
-    TG_MEM['pnl:phones'] = {};
-    pbRows_('h', PNL_TAB, PNL_HEAD).push({ 'موج': 'موج ۱', 'کد درمانگر': 'T1' }, { 'موج': 'موج ۱', 'کد درمانگر': 'T2' }, { 'موج': 'موج ۲', 'کد درمانگر': 'T1' }, { 'موج': 'موج ۱', 'کد درمانگر': 'T9' });
-    ok('/wave فقط مالک', pnlCmd_('5550001', '/wave موج ۱') === false && !TG_OUTBOX.some(function (x) { return /پنل تازه/.test(x.text); }));
+    pbRows_('h', PNL_TAB, PNL_HEAD).push({ 'موج': 'موج ۱', 'تاریخ': '۱۴۰۵-۰۸-۰۲', 'کد درمانگر': 'T1' }, { 'موج': 'موج ۱', 'تاریخ': '1405-08-02', 'کد درمانگر': 'T2' }, { 'موج': 'موج ۲', 'تاریخ': '1405-09-01', 'کد درمانگر': 'T1' }, { 'موج': 'موج ۱', 'تاریخ': '', 'کد درمانگر': 'T9' });
     var R = pnlRows_();
-    ok('/wave مالک: دعوت با دکمهٔ pnl:go فقط برای همان موج؛ وضعیت‌ها ثبت', pnlCmd_('9001', '/wave موج ۱') === true &&
-      TG_OUTBOX.filter(function (x) { return x.chat === '5550001' && /سلام سارا/.test(x.text) && JSON.stringify(x.markup).indexOf('pnl:go') > -1; }).length === 1 &&
-      R[0]['وضعیت'] === 'دعوت رفت' && R[1]['وضعیت'] === 'بی چت و بی پیامک' && R[3]['وضعیت'] === 'کد پیدا نشد' && !R[2]['ارسال'], JSON.stringify(R.map(function (r) { return r['وضعیت']; })));
+    ok('«/wave» دیگر فرمان نیست (E30)', pnlCmd_('9001', '/wave موج ۱') === false && !TG_OUTBOX.length);
+    TG_MEM['pnl:now'] = String(Date.UTC(2026, 9, 24, 4, 0, 0));
+    ok('پیش از ساعت ۱۰ کارتی نمی‌رود', (pnlTick_(), !TG_OUTBOX.length));
+    TG_MEM['pnl:now'] = String(Date.UTC(2026, 9, 24, 7, 0, 0));
+    pnlTick_();
+    ok('ساعت ۱۰: یک کارت «ارسال موج» فقط برای موج سررسیده، فقط به مالک؛ هنوز هیچ دعوتی نرفته (روی کد قبلی مردود)', TG_OUTBOX.length === 1 && TG_OUTBOX[0].chat === '9001' && JSON.stringify(TG_OUTBOX[0].markup).indexOf('pnl:w:' + pnlWid_('موج ۱')) > -1 && !R[0]['ارسال'], JSON.stringify(TG_OUTBOX));
+    ok('کارت همان موج همان روز دوباره نمی‌آید', (TG_OUTBOX = [], pnlTick_(), !TG_OUTBOX.length));
+    ok('دکمهٔ موج برای غیرمالک کار نمی‌کند', (pnlOnCb_('5550001', 'pnl:w:' + pnlWid_('موج ۱')), !R[0]['ارسال']));
     TG_OUTBOX = [];
-    ok('دوباره /wave همان موج: تکراری نمی‌رود', (pnlCmd_('9001', '/wave موج ۱'), !TG_OUTBOX.some(function (x) { return x.chat === '5550001' && /پنل تازه/.test(x.text); })));
-    /* پیامک بی چت */
-    TG_MEM['pnlp:KAVENEGAR_API_KEY'] = 'test-only-sms-key'; TG_MEM['pnl:phones'] = { T2: '09120000000' };   /* pii:ok شمارهٔ ساختگی آزمون */
-    R[1]['وضعیت'] = '';
-    pnlWave_('موج ۱');
-    ok('بی چت با کلید پیامک: پیامک با لینک کوتاه بات، بی توکن', (TG_MEM['pnl:sms'] || []).length === 1 && /t\.me\/tajrobehlife_bot\?start=panel/.test(TG_MEM['pnl:sms'][0].text) && !/#t=/.test(TG_MEM['pnl:sms'][0].text) && R[1]['وضعیت'] === 'پیامک رفت', JSON.stringify(TG_MEM['pnl:sms']) + ' ' + R[1]['وضعیت']);
+    pnlOnCb_('9001', 'pnl:w:' + pnlWid_('موج ۱'));
+    ok('دکمهٔ مالک: دعوت با pnl:go فقط برای سررسیده‌های همان موج؛ بی پیامک', TG_OUTBOX.filter(function (x) { return x.chat === '5550001' && /سلام سارا/.test(x.text) && JSON.stringify(x.markup).indexOf('pnl:go') > -1; }).length === 1 &&
+      R[0]['وضعیت'] === 'دعوت رفت' && /بی چت/.test(R[1]['وضعیت']) && R[3]['وضعیت'] === 'کد پیدا نشد' && !R[2]['ارسال'] && typeof pnlSms_ === 'undefined', JSON.stringify(R.map(function (r) { return r['وضعیت']; })));
+    TG_OUTBOX = [];
+    ok('دوباره دکمه: تکراری نمی‌رود', (pnlOnCb_('9001', 'pnl:w:' + pnlWid_('موج ۱')), !TG_OUTBOX.some(function (x) { return x.chat === '5550001'; })));
     /* یادآوری */
     TG_OUTBOX = [];
     ok('یادآوری پیش از ۴۸ ساعت نه', pnlTick_() === 0);
-    TG_MEM['pnl:now'] = String(Number(TG_MEM['pnl:now']) + PNL_REMIND_MS + 60000);
+    TG_MEM['pnl:now'] = String(Number(TG_MEM['pnl:now']) + PNL_REMIND_MS + 60000); R[2]['تاریخ'] = '1405-12-01';
     ok('یادآوری بعد از ۴۸ ساعت یک بار با دکمه (روی کد قبلی مردود)', pnlTick_() === 1 && TG_OUTBOX.some(function (x) { return x.text === T_PNL_REMIND && JSON.stringify(x.markup).indexOf('pnl:go') > -1; }) && pnlTick_() === 0);
     R[0]['یادآوری'] = ''; pnlOnCb_('5550001', 'pnl:go');
     ok('دکمه زده شد: ستون «دکمه» پر و دیگر یادآوری نیست', !!R[0]['دکمه'] && pnlTick_() === 0);

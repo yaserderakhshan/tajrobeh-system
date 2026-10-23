@@ -37,7 +37,18 @@ function msProp_(k, v) {
   P.setProperty(k, String(v)); return v;
 }
 function msNoDash_(s) { return String(s == null ? '' : s).replace(/\s*[—–]\s*/g, '، ').trim(); }
-function msLimit_() { return msProp_('MS_SAMPLE_OK') ? Math.max(1, MS_DAILY) : Math.min(MS_SAMPLE, Math.max(1, MS_DAILY)); }
+function msLimit_() { return msProp_('MS_SAMPLE_OK') || msAutoOk_() ? Math.max(1, MS_DAILY) : Math.min(MS_SAMPLE, Math.max(1, MS_DAILY)); }
+/* E28 (۱ آبان، قاعدهٔ مالک: بی دکمهٔ «ادامه»): داوری لین F در ستون «وضعیت» تب «سئو · پیشنهاد Gemini»؛ «شروع با رد» یعنی رد */
+function msVerdict_(st) { st = String(st || '').trim(); return /^رد/.test(st) ? 'rej' : /^(تأیید|تایید|اعمال|پذیرفت)/.test(st) ? 'acc' : ''; }
+var MS_AUTO_MIN = 5, MS_AUTO_RATE = 0.6, MS_AUTO_N = 80, MS_AUTO_MEMO = null;
+/* نرخ پذیرش ردیف‌های بعد از دستور کار E25؛ دست‌کم ۵ داوری و ۶۰٪ یعنی دسته‌های شبانه خودکار */
+function msAccept_() {
+  if (MS_AUTO_MEMO) return MS_AUTO_MEMO;
+  var from = Number(msProp_('MS_E25_FROM') || 0), a = 0, r = 0;
+  if (from) { try { pbRows_('s', SEO_TAB, MS_SEO_HEAD).forEach(function (x) { var t = x['تاریخ'] instanceof Date ? x['تاریخ'].getTime() : (pbWhen_(x['تاریخ']) || new Date(0)).getTime(); if (t < from) return; var v = msVerdict_(x['وضعیت']); if (v === 'acc') a++; else if (v === 'rej') r++; }); } catch (e) { tgErr_('msAccept_', e); } }
+  return (MS_AUTO_MEMO = { acc: a, rej: r, ok: a + r >= MS_AUTO_MIN && a / (a + r) >= MS_AUTO_RATE });
+}
+function msAutoOk_() { return msAccept_().ok; }
 function msAdd_(id, url, kind, now, sug, why, st) {
   pbAdd_('c', MS_TAB, MS_HEAD, { 'تاریخ': pbFmt_(msNow_()), 'شناسه': String(id), 'آدرس': url, 'نوع': kind,
     'فعلی': msNoDash_(now).slice(0, 2000), 'پیشنهادی': msNoDash_(sug).slice(0, 3000), 'دلیل': msNoDash_(why).slice(0, 500), 'وضعیت': st || MS_ST.wait });
@@ -242,6 +253,8 @@ function msHourly_() {
   try { pbRows_('c', PB_T_SEO, PB_SEO_HEAD).filter(function (r) { return r['وضعیت'] === 'در انتظار اعمال'; }).slice(0, 3).forEach(function (r) { if (msApply_(r) === 'later') throw 'later'; }); }
   catch (e0) { if (e0 !== 'later') tgErr_('msApply_', e0); }
   if (h >= 1 && h < 9) {
+    /* E28: داوری خوب بود ← هر شب یک دستهٔ خودکار تا سقف سهمیهٔ اجرا (بی فرمان مالک) */
+    if (msAutoOk_() && !msBatchState_().left && msProp_('MS_AUTO_DAY') !== day) { msProp_('MS_AUTO_DAY', day); msBatch(MS_AUTO_N); msNight_(day, 'auto'); }
     var used = Number(msProp_('MS_DAY:' + day) || 0), ids = msOrder_();
     msNight_(day, 'run');
     while (n < MS_PER_RUN && used < msLimit_() && ids.length && pbGemLeft_() > 2) {
@@ -274,7 +287,7 @@ function msNightLine_() {
   if (!o.run && !o.batch) why.unshift('هیچ ساعت شبی اجرا نشد');
   var b = msBatchState_(), done = (o.done || 0) + (o.batch || 0);
   var head = '🧾 بستهٔ سئو امروز: ' + tgFa_(done) + ' مطلب (شب ' + tgFa_(o.done || 0) + '، دسته ' + tgFa_(o.batch || 0) + ')' + (o.err ? '، خطا ' + tgFa_(o.err) : '') +
-    ' · سهم شب ' + tgFa_(msLimit_()) + (msProp_('MS_SAMPLE_OK') ? '' : ' (نمونه تا «ادامه»)') + (b.left ? ' · دسته: ' + tgFa_(b.left) + ' مانده' + (b.stop ? '، ' + b.stop : '') : '');
+    ' · سهم شب ' + tgFa_(msLimit_()) + (function () { var x = msAccept_(); return ' · داوری لین F: پذیرش ' + tgFa_(x.acc) + '، رد ' + tgFa_(x.rej) + (x.ok ? ' (دسته‌های شبانه خودکار)' : ''); })() + (b.left ? ' · دسته: ' + tgFa_(b.left) + ' مانده' + (b.stop ? '، ' + b.stop : '') : '');
   return (done ? '' : '⚠️ ') + head + (why.length && !done ? ' · ' + why.join('، ') : '');
 }
 try { TG_NIGHT_LINES.push(msNightLine_); } catch (eNl) {}
@@ -371,10 +384,16 @@ function msOwnerCmd_(chat, t) {
   return true;
 }
 
+/** یک‌بارهٔ خودکار v170.99 (E28): نمونهٔ ۵تایی با دستور کار E25 همین حالا، بی فرمان مالک؛ داوری لین F از این لحظه شمرده می‌شود */
+function msV17099Sample() {
+  msProp_('MS_E25_FROM', String(msNow_().getTime()));
+  return 'نمونه در صف: ' + msBatch(5) + ' مطلب';
+}
+
 /** یک‌بارهٔ خودکار v170.98 (E25): ردیف‌هایی که لین F در تب «سئو · پیشنهاد Gemini» «رد» زده، با دستور کار تازه یک بار دوباره (دسته با فهرست ثابت) */
 function msV17098Redo() {
   var ids = [], seen = {};
-  pbRows_('s', SEO_TAB, MS_SEO_HEAD).forEach(function (r) { var k = String(r['شناسه']).trim(); if (String(r['وضعیت']).trim() === 'رد' && k && !seen[k]) { seen[k] = 1; ids.push(k); } });
+  pbRows_('s', SEO_TAB, MS_SEO_HEAD).forEach(function (r) { var k = String(r['شناسه']).trim(); if (msVerdict_(r['وضعیت']) === 'rej' && k && !seen[k]) { seen[k] = 1; ids.push(k); } });
   ids = ids.slice(0, 10);
   if (!ids.length) return 'ردیف ردشده‌ای نیست';
   var d = {}; try { d = JSON.parse(msProp_('MS_DONE') || '{}') || {}; } catch (e) {}
@@ -408,11 +427,7 @@ function msSummary_(day) {
   var arts = {}; fresh.forEach(function (r) { arts[r['شناسه']] = r['آدرس']; });
   var n = Object.keys(arts).length;
   if (wait) pbNotifyEditors_('🧾 <b>پیشنهادهای تازهٔ Gemini</b>\n' + tgFa_(wait) + ' پیشنهاد برای ' + tgFa_(n) + ' مقاله در تب «' + MS_TAB + '» هاب محتوا منتظر شماست (تیتر، پرسش‌ها، لینک‌ها و بازبینی اول). هیچ‌کدام بی تأیید شما اعمال نمی‌شود.');
-  if (!msProp_('MS_SAMPLE_OK')) {
-    tgSend_(String(TG_OWNER_CHAT), '🧾 <b>نمونهٔ بستهٔ سئو</b>\nروی ' + tgFa_(n) + ' مقاله متا و alt خودکار اعمال شد (' + tgFa_(ap) + ' مورد، برگشت‌پذیر) و ' + tgFa_(wait) + ' پیشنهاد به صف سردبیر رفت.\n' +
-      Object.keys(arts).filter(function (k) { return arts[k]; }).map(function (k) { return '• ' + tgEsc_(arts[k]); }).join('\n') +
-      '\n\nاگر درست است، «ادامه» را بزنید تا هر شب تا ' + tgFa_(MS_DAILY) + ' مقاله برود.', { inline_keyboard: [[{ text: '▶️ ادامه', callback_data: 'msq:full' }]] });
-  }
+  /* E28: پیام نمونه با دکمهٔ «ادامه» برای مالک برداشته شد؛ ادامه با داوری لین F خودکار است (msAccept_) */
   return true;
 }
 function msOnCb_(chat, data) {
@@ -504,9 +519,9 @@ function msTests() {
     ok('روز (۱۴): مقالهٔ تازه پردازش نمی‌شود', pbRows_('c', PB_T_SEO, PB_SEO_HEAD).length === before);
     TG_OUTBOX = [];
     TG_MEM['msp:MS_SUM_DAY'] = ''; TG_MEM['msp:MS_SUM_ROW'] = '';
-    ok('ساعت ۱۰ به بعد: یک پیام برای سردبیر و نمونه با دکمهٔ «ادامه» برای یاسر (روی کد قبلی مردود)', msSummary_('2026-10-21') === true &&
+    ok('ساعت ۱۰ به بعد: یک پیام برای سردبیر؛ هیچ دکمهٔ «ادامه» برای مالک (E28، روی کد قبلی مردود)', msSummary_('2026-10-21') === true &&
       TG_OUTBOX.some(function (x) { return x.chat === '321' && /صف سردبیر/.test(x.text); }) &&
-      TG_OUTBOX.some(function (x) { return x.chat === owner && JSON.stringify(x.markup || '').indexOf('msq:full') > -1; }) && msSummary_('2026-10-21') === false);
+      !TG_OUTBOX.some(function (x) { return x.chat === owner; }) && msSummary_('2026-10-21') === false);
     msOnCb_('777', 'msq:full');
     ok('فقط یاسر «ادامه» می‌زند', msLimit_() === 3 && (msOnCb_(owner, 'msq:full'), msLimit_() === 15));
     /* E20: خط گزارش شبانه می‌گوید چرا شب چیزی نرفت */
@@ -569,13 +584,32 @@ function msTests() {
     ok('E25 د: صفحه‌های دست‌خوردهٔ ۲۸ روز اخیر و در پنجرهٔ سنجش کنار؛ کار کهنه نه (روی کد قبلی مردود)', T['/dream/'] && T['/legal/'] && !T['/get-therapy/'] && bo2.indexOf('77') < 0 && bo2.indexOf('p12') < 0 && msOrder_().indexOf('77') < 0, JSON.stringify(T) + ' ' + bo2.join(','));
     pbRows_('s', SEO_TAB, MS_SEO_HEAD).push({ 'شناسه': '104', 'وضعیت': 'رد' }, { 'شناسه': '104', 'وضعیت': 'رد' });
     ok('E25: یک‌بارهٔ «رد»ها: همان شناسه‌ها با فهرست ثابت دوباره در صف', /۱|1/.test(msV17098Redo()) && JSON.stringify(msBatchState_().only) === '["104"]' && CI_ONCE_AUTO.indexOf('msV17098Redo') > -1, JSON.stringify(msBatchState_()));
+    /* E28: نمونه و دستهٔ خودکار با داوری لین F */
+    TG_MEM['msp:MS_BATCH'] = ''; TG_MEM['ms:arm'] = 0;
+    ok('E28: یک‌بارهٔ نمونه ۵ مطلب را بی فرمان مالک در صف می‌گذارد (روی کد قبلی مردود)', /نمونه در صف: ۵|5/.test(msV17099Sample()) && msBatchState_().left === 5 && CI_ONCE_AUTO.indexOf('msV17099Sample') > -1);
+    ok('E28: «رد (لین F، …)» رد شمرده می‌شود، نه فقط «رد»', msVerdict_('رد (لین F، ۱ آبان)') === 'rej' && msVerdict_('تأیید شد') === 'acc' && msVerdict_('در انتظار تأیید') === '');
+    var from = Number(TG_MEM['msp:MS_E25_FROM']);
+    TG_MEM['msp:MS_BATCH'] = '';
+    var addV = function (st, n) { for (var k = 0; k < n; k++) pbRows_('s', SEO_TAB, MS_SEO_HEAD).push({ 'تاریخ': new Date(from + 1000), 'شناسه': 'v' + st + k, 'وضعیت': st }); };
+    addV('تأیید', 2); addV('رد (لین F)', 2); MS_AUTO_MEMO = null;
+    ok('E28: زیر ۵ داوری، دستهٔ خودکار نیست', !msAutoOk_());
+    addV('تأیید', 2); MS_AUTO_MEMO = null;
+    ok('E28: ۴ از ۶ (۶۷٪) ← خودکار؛ سهم شب بالا می‌رود', msAutoOk_() && msLimit_() === 15);
+    pbRows_('s', SEO_TAB, MS_SEO_HEAD).push({ 'تاریخ': new Date(from - 86400000), 'شناسه': 'old', 'وضعیت': 'رد' }, { 'تاریخ': new Date(from - 86400000), 'شناسه': 'old2', 'وضعیت': 'رد' }); MS_AUTO_MEMO = null;
+    ok('E28: داوری‌های پیش از نمونه شمرده نمی‌شوند', msAutoOk_());
+    TG_MEM['ms:now'] = String(pbTehran_(2026, 10, 22, 2, 5).getTime()); TG_MEM['msp:MS_AUTO_DAY'] = '';
+    msHourly_();
+    ok('E28: شب بعد دستهٔ خودکار ۸۰تایی، یک بار در روز', msBatchState_().total === MS_AUTO_N && TG_MEM['msp:MS_AUTO_DAY'] === msDay_() && (msProp_('MS_BATCH', JSON.stringify({ left: 0 })), msHourly_(), msBatchState_().left === 0));
+    addV('رد (لین F)', 4); MS_AUTO_MEMO = null;
+    ok('E28: نرخ زیر ۶۰٪ ← خودکار خاموش', !msAutoOk_());
+    MS_AUTO_MEMO = null;
     ok('E21: سیم‌کشی /seobatch در پیام‌ها', String(tgPrivate_).indexOf('msOwnerCmd_') > -1);
     MS_ON = '0';
     ok('MAGSEO_ON = 0 خاموش می‌کند', msHourly_() === 'off');
     ok('کلیدهای بستهٔ سئو اختیاری‌اند', ['MAGSEO_ON', 'MAGSEO_DAILY'].every(function (k) { return CFG_OPTIONAL.indexOf(k) > -1; }));
     ok('سیم‌کشی: واچ‌داگ ساعتی و مسیر دکمهٔ msq:', String(tgWatchdog).indexOf('msHourly_') > -1 && String(tgOnCallback_).indexOf("'msq:'") > -1);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
-  TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; MS_ON = cfgK[0]; MS_DAILY = cfgK[1]; PB_GEM_NOCAP = false; PB_NAMES_MEMO = null; MS_STAT_MEMO = {}; GEM_TASK = '';
+  TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; MS_ON = cfgK[0]; MS_DAILY = cfgK[1]; PB_GEM_NOCAP = false; PB_NAMES_MEMO = null; MS_STAT_MEMO = {}; MS_AUTO_MEMO = null; GEM_TASK = '';
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ بستهٔ سئو و بازبینی اول درست است'));
   return tgTestTally_(log, fail);
 }

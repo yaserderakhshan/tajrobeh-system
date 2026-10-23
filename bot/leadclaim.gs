@@ -541,6 +541,8 @@ function lcTests() {
     var owners = [lcOwnerFor_({ source: 'بات' }), lcOwnerFor_({ source: 'بات' }), lcOwnerFor_({ source: 'بات' }), lcOwnerFor_({ source: 'بات' })];
     ok('E16: جدول خالی، لیدها میان کارکنان پذیرش می‌چرخند، نه همه برای یک نفر (روی کد قبلی مردود)', owners.join() === 'کشیک الف,کشیک ب,کشیک الف,کشیک ب', owners.join());
     ok('E16: مسئول پذیرش در چرخش نیست مگر کسی نباشد', owners.indexOf('سرپرست نمونه') < 0);
+    var dw = tgDutyWho_(new Date(T('10', '10:00')));
+    ok('E26: هشدار فوری با خانهٔ خالی به کارمند چرخش می‌رسد، نه سرپرست (روی کد قبلی مردود)', dw && dw.p && /کشیک/.test(dw.p.name) && dw.fallback === true, JSON.stringify(dw && dw.p && dw.p.name));
     TG_MEM['lc:now'] = T('10', '23:30');
     var o5 = lcOwnerFor_({ source: 'بات' });
     ok('E16: لید شب هم صاحب نام‌دار دارد، نه «پذیرش»', o5 && o5 !== 'پذیرش' && /کشیک/.test(o5), o5);
