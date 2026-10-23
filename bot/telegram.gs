@@ -18487,8 +18487,10 @@ function tgSjFinish_(chat, d) {
   var course = d.course || '';
   var circle = d.circle || '';
 
-  /* اول فهرست تجربه: اگر هست، همین‌جا وصلش می‌کنیم و منتظر تأیید نمی‌ماند */
+  /* اول فهرست تجربه: فقط اگر همین چت از قبل به همان ردیف وصل است و نقش «دانشجو» است، بی تأیید ثبت می‌شود.
+     v170.101: تطبیق نام تنها (ردیف بی chat) یا نقش استاد و سوپروایزر و منتور همیشه به میز مسئول مدرسه می‌رود (همان قاعدهٔ E26) */
   var p = tgSjMatch_(d.name, chat);
+  if (p && !(p.chat && tgChatIn_(p.chat, chat) && role === 'دانشجو')) p = null;
   if (p) {
     p.chatNew = chat;
     tgSchGrantRole_(p, role, circle);
@@ -18519,6 +18521,36 @@ function tgSjFinish_(chat, d) {
   tgSend_(chat, T_SJ_SENT, tgMenu_());
   tgSjNotifyOwners_(id, d, chat);
   return true;
+}
+
+try { TG_SUITES.push(['عضویت مدرسه فقط با تأیید v170.101', 'tgSjSecTests']); } catch (eSu) {}
+function tgSjSecTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX };
+  var st = { ppl: tgPeopleList_, grant: tgSchGrantRole_, mem: tgSchAddMember_, tea: tgSchAddTeacher_, note: tgSchoolNotify_, own: tgSjNotifyOwners_, has: tgSchHasMember_ };
+  TG_DRY = true; TG_OUTBOX = []; TG_MEM = {};
+  var granted = [], asked = [];
+  try {
+    tgSchGrantRole_ = function (p, role) { granted.push(p.row + ':' + role); };
+    tgSchAddMember_ = function () {}; tgSchAddTeacher_ = function () {}; tgSchoolNotify_ = function () {}; tgSchHasMember_ = function () { return false; };
+    tgSjNotifyOwners_ = function (id, d, chat) { asked.push(chat + ':' + d.role); };
+    var free = { row: 9, name: 'استاد نمونهٔ آزمون', chat: '', roles: ['استاد'], status: 'فعال' };
+    var linked = { row: 10, name: 'دانشجوی نمونهٔ آزمون', chat: '5550031', roles: ['دانشجو'], status: 'فعال' };
+    tgPeopleList_ = function () { return [free, linked]; };
+    tgSjFinish_('5550030', { role: 'استاد', name: 'استاد نمونهٔ آزمون' });
+    ok('نام یک ردیف بی chat با نقش استاد: نقش داده نمی‌شود، درخواست به مدرسه (روی کد قبلی مردود)', !granted.length && asked.join() === '5550030:استاد' && (TG_MEM['schreq'] || []).length === 1, granted.join());
+    tgSjFinish_('5550032', { role: 'دانشجو', name: 'استاد نمونهٔ آزمون' });
+    ok('نام یک ردیف بی chat با نقش دانشجو هم بی تأیید وصل نمی‌شود (روی کد قبلی مردود)', !granted.length && asked.length === 2);
+    tgSjFinish_('5550031', { role: 'سوپروایزر', name: 'دانشجوی نمونهٔ آزمون' });
+    ok('چت وصل‌شده هم نقش بالاتر را بی تأیید نمی‌گیرد', !granted.length && asked.length === 3);
+    tgSjFinish_('5550031', { role: 'دانشجو', name: 'دانشجوی نمونهٔ آزمون' });
+    ok('همان چت وصل‌شده با نقش دانشجو مثل قبل همین حالا ثبت می‌شود', granted.join() === '10:دانشجو' && asked.length === 3);
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
+  tgPeopleList_ = st.ppl; tgSchGrantRole_ = st.grant; tgSchAddMember_ = st.mem; tgSchAddTeacher_ = st.tea; tgSchoolNotify_ = st.note; tgSjNotifyOwners_ = st.own; tgSchHasMember_ = st.has;
+  TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box;
+  Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ عضویت مدرسه فقط با تأیید درست است'));
+  return tgTestTally_(log, fail);
 }
 
 function tgSjMatch_(name, chat) {
