@@ -47,7 +47,7 @@ function brToken_(tid, ph) {
 function brUrl_(tid) { var t = brToken_(tid); return t ? BR_HANDOFF_URL + t : ''; }
 
 /* درمانگر یا عضو فعال وصل‌شده */
-function pnlWho_(chat) {
+function pnlCan_(chat) {
   var t = null; try { t = tgTherByChat_(chat); } catch (e) {}
   if (t) return { name: t.name, code: t.code };
   var p = null; try { p = tgPersonByChat_(chat); } catch (e2) {}
@@ -56,7 +56,7 @@ function pnlWho_(chat) {
 function pnlKb_() { return { inline_keyboard: [[{ text: '🔐 ' + PNL_BTN, callback_data: 'pnl:go' }]] }; }
 /** لینک تازه برای همان چت؛ ستون «دکمه» ردیف موجش را پر می‌کند. */
 function pnlSendLink_(chat) {
-  var who = pnlWho_(chat);
+  var who = pnlCan_(chat);
   if (!who) { tgSend_(chat, T_PNL_NO); return false; }
   var url = brUrl_(chat);
   if (!url) { tgSend_(chat, T_PNL_OFF); tgErr_('pnlSendLink_', 'TG_BRIDGE_HANDOFF_SECRET نیست'); return false; }
@@ -65,7 +65,7 @@ function pnlSendLink_(chat) {
   return true;
 }
 function pnlOnCb_(chat, data) {
-  if (!pnlWho_(chat)) { tgSend_(chat, T_PNL_NO); return true; }   /* فقط درمانگر یا عضو وصل‌شده */
+  if (!pnlCan_(chat)) { tgSend_(chat, T_PNL_NO); return true; }   /* فقط درمانگر یا عضو وصل‌شده */
   if (data === 'pnl:go') pnlSendLink_(chat);
   return true;
 }
