@@ -207,10 +207,10 @@ function vdTests() {
     var g = function (o) { return { code: 200, body: { usageMetadata: { promptTokenCount: 100000, candidatesTokenCount: 4000 }, candidates: [{ content: { parts: [{ text: JSON.stringify(o) }] } }] } }; };
     ok('زمان SRT و یوتیوب (روی کد قبلی مردود)', vdTs_(3725.5, true) === '01:02:05,500' && vdTs_(65) === '01:05' && vdTs_(3725) === '1:02:05');
     ok('یوتیوب و درایو شناخته می‌شوند', vdYt_('https://www.youtube.com/watch?v=abcDEF12345') && vdYt_('https://youtu.be/abcDEF12345') && !vdYt_('https://example.com/x') &&
-      vdDriveId_('https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz012345/view') === '1AbCdEfGhIjKlMnOpQrStUvWxYz012345');
+      vdDriveId_('https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz012345/view') === '1AbCdEfGhIjKlMnOpQrStUvWxYz012345');   /* pii:ok شناسهٔ ساختگی آزمون */
     TG_MEM['pb:' + VD_TAB] = [
       { 'نشانی یا فایل درایو': 'https://www.youtube.com/watch?v=abcDEF12345', 'عنوان': 'کاناپه: نشست اول' },
-      { 'نشانی یا فایل درایو': 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz012345/view', 'عنوان': 'ضبط جلسه' }];
+      { 'نشانی یا فایل درایو': 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz012345/view', 'عنوان': 'ضبط جلسه' }];   /* pii:ok شناسهٔ ساختگی آزمون */
     TG_MEM['vd:now'] = String(pbTehran_(2026, 10, 22, 14, 0).getTime());
     ok('روز: کاری نمی‌کند', vdHourly_() === 0 && !TG_MEM['gem:ledger']);
     TG_MEM['vd:now'] = String(pbTehran_(2026, 10, 22, 2, 0).getTime());
@@ -230,7 +230,7 @@ function vdTests() {
     ok('هیچ خروجی خط تیره ندارد', !/[—–]/.test(srt + rows[0]['فصل‌ها'] + rows[0]['پیشنهاد ریلز']));
     ok('فقط پیش‌نویس: هیچ پیامی به کانال یا کسی نرفت', !TG_OUTBOX.length || !TG_OUTBOX.some(function (x) { return x.kind === 'msg'; }));
     rows[1]['بی صدای مراجع'] = true; rows[1]['وضعیت'] = VD_ST.q;
-    TG_MEM['vd:blob:1AbCdEfGhIjKlMnOpQrStUvWxYz012345'] = { size: 1000, mime: 'audio/ogg', b64: 'T2dn' };
+    TG_MEM['vd:blob:1AbCdEfGhIjKlMnOpQrStUvWxYz012345'] = { size: 1000, mime: 'audio/ogg', b64: 'T2dn' };   /* pii:ok شناسهٔ ساختگی آزمون */
     TG_MEM['gem:fake'] = [g({ ended: true, cues: [{ s: 0, e: 2, t: 'ویس راهبر' }] }), g({ chapters: [{ s: 0, title: 'ویس' }], reels: [] })];
     vdHourly_();
     ok('فایل درایو با تیک: یک‌جا و پیش‌نویس آماده', rows[1]['وضعیت'] === VD_ST.done && /ویس راهبر/.test((TG_MEM['vd:drive'] || {})[rows[1]['زیرنویس SRT']] || ''));
