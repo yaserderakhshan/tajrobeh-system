@@ -111,6 +111,7 @@
 | `panel.gs` | ۲۲۹ | ۲۳ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
 | `bridge.gs` | ۱۶۱ | ۱۱ |
+| `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |
@@ -177,6 +178,7 @@
 | `tgPoll` | `telegram.gs` | everyMinutes(1) | متوقف نمی‌شود |
 | `tgRun` | `telegram.gs` | after(60 * 1000)، after(1000) | متوقف نمی‌شود |
 | `tgTick5` | `v168.gs` | everyMinutes(5) | متوقف نمی‌شود |
+| `wkRun` | `wink.gs` | after(ms) | متوقف نمی‌شود |
 
 ### تب‌های شیت
 
@@ -418,10 +420,11 @@
 | ورود به پنل و موج دعوت v170.98 | `pnlTests` |
 | صندوق راز و پاک‌سازی v170.99 | `secVaultTests` |
 | اتصال حساب فقط با تأیید v170.99 | `e26Tests` |
+| پیوند با پل: رونوشت و پشتیبان v170.99 | `brTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | اقدام بعدی لید بسته (v170.50) | `lmClosedNextTests` |
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |
-| پیوند با پل: رونوشت و پشتیبان v170.99 | `brTests` |
+| چشمک توتی یک‌باره v170.99 | `wkTests` |
 | v170.13: سقف پذیرش، بورسیه، آفر | `v17013Tests` |
 | کمپین C-004 (پلی‌لیست ابی) | `ebiTests` |
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |

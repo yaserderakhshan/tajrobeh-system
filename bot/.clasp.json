@@ -28,6 +28,7 @@
     "panel.gs",
     "secrets.gs",
     "bridge.gs",
+    "wink.gs",
     "stuck.gs",
     "leadmodel.gs",
     "comments.gs",
