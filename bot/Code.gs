@@ -76,6 +76,9 @@ function doPost(e) {
     if (body.ci && typeof ciRoute_ === 'function') return ciRoute_(body);   /* v166.7: مسیر دیپلوی خودکار (ci.gs) */
     if (body.vxkey && typeof vxKeyIn_ === 'function') { vxKeyIn_(body); return okJson_(); }   /* v166: کلید Auphonic، یک‌بار */
 
+    /* v170.99 (E31): پشتیبان رمزشدهٔ پل؛ فقط با امضای راز مشترک (bridge.gs) */
+    if (body.kind === 'bridge_backup' && typeof brBackupIn_ === 'function') return brBkJson_(brBackupIn_(body));
+
     if (body.update_id !== undefined) {
       // ↓ تلگرام
       var secret = tgHookSecret_(); // کش‌شده؛ PropertiesService در هر پیام کند است
@@ -86,6 +89,8 @@ function doPost(e) {
       /* v166.29.1: پینگ سلامت از tgWatchdog که از همان مسیر رلهٔ کلادفلر آمده؛ آپدیت تلگرام نیست */
       if (body.tj_ping) { PropertiesService.getScriptProperties().setProperty('TG_RELAY_PONG', String(Date.now())); return okJson_(); }
       tgHandle(body);
+      /* v170.99 (E29): رونوشت آپدیت چت‌های آزمایشی به پل؛ بعد از پاسخ بات و هرگز مانع آن نیست */
+      try { if (typeof brMirror_ === 'function') brMirror_(raw, body); } catch (eBr) {}
     } else if (body.action === 'assist.ask' && typeof asWeb_ === 'function') {
       /* v170.23.11: رابط وب واحد دستیار (assist.gs)؛ فقط با امضای درست سایت، پاسخ JSON */
       return asWeb_(e, raw, body);

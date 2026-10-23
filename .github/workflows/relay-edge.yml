@@ -1,0 +1,138 @@
+name: رلهٔ وبهوک · ورکر لبه
+
+# رلهٔ پایدار تلگرام و واتس‌اپ به بات (ورکر کلادفلر tajrobeh-relay، edge/relay). آزمون روی هر PR و push؛ انتشار فقط با اجرای دستی.
+# رمزهای لازم در GitHub Secrets (Environment «production»): CLOUDFLARE_API_TOKEN (دسترسی Workers Scripts)، CLOUDFLARE_ACCOUNT_ID،
+# RELAY_TG_SECRET (همان TG_HOOK_SECRET بات)، BOT_EXEC_URL، RELAY_WA_PATH، RELAY_WA_VERIFY.
+# اختیاری: RELAY_TG_SECRET_PREV (فقط روز تعویض رمز)، RELAY_WA_APP_SECRET، TELEGRAM_TOKEN (فقط برای set_webhook).
+# ذخیره در دیوریبل آبجکت SQLite است که با خود deploy ساخته می‌شود (migration در wrangler.toml)؛ KV یا Queue ساختنی نیست.
+on:
+  push:
+    branches: [main]
+    paths: ['edge/relay/**', '.github/workflows/relay-edge.yml']
+  pull_request:
+    paths: ['edge/relay/**', '.github/workflows/relay-edge.yml']
+  workflow_dispatch:
+    inputs:
+      set_webhook:
+        description: 'بعد از انتشار، setWebhook تلگرام با secret_token تازه (TELEGRAM_TOKEN لازم است)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: relay-edge
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: آزمون رله
+        run: node --test 'edge/relay/test/*.test.mjs'
+
+  deploy:
+    needs: test
+    # v170.99: جابه‌جایی رلهٔ زنده عمدی است؛ فقط با اجرای دستی روی main (نقشهٔ بی‌گم‌شدن در README). مرج خودش رله را عوض نمی‌کند.
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER: wrangler@4.20.0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: رمزها هست؟
+        id: gate
+        env:
+          TG: ${{ secrets.RELAY_TG_SECRET }}
+          BOT: ${{ secrets.BOT_EXEC_URL }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN یا CLOUDFLARE_ACCOUNT_ID در Secrets نیست؛ رله منتشر نشد."
+            echo "go=0" >> "$GITHUB_OUTPUT"
+          elif [ -z "$TG" ] || [ -z "$BOT" ]; then
+            echo "::warning::RELAY_TG_SECRET یا BOT_EXEC_URL در Secrets نیست؛ رله منتشر نشد (رلهٔ فعلی دست نخورد)."
+            echo "go=0" >> "$GITHUB_OUTPUT"
+          else echo "go=1" >> "$GITHUB_OUTPUT"; fi
+      - name: رمزهای ورکر، پیش از کد تازه
+        if: steps.gate.outputs.go == '1'
+        working-directory: edge/relay
+        env:
+          RELAY_TG_SECRET: ${{ secrets.RELAY_TG_SECRET }}
+          RELAY_TG_SECRET_PREV: ${{ secrets.RELAY_TG_SECRET_PREV }}
+          BOT_EXEC_URL: ${{ secrets.BOT_EXEC_URL }}
+          RELAY_WA_PATH: ${{ secrets.RELAY_WA_PATH }}
+          RELAY_WA_VERIFY: ${{ secrets.RELAY_WA_VERIFY }}
+          RELAY_WA_APP_SECRET: ${{ secrets.RELAY_WA_APP_SECRET }}
+        run: |
+          # رمزها اول می‌نشینند تا کد تازه از لحظهٔ اول آن‌ها را داشته باشد (کد قبلی این نام‌ها را نمی‌خواند).
+          # مقدار هیچ رمزی چاپ نمی‌شود: فقط از فایل موقت به wrangler می‌رسد. رمز خالی فرستاده نمی‌شود.
+          set -e -o pipefail
+          node -e '
+            const k=["RELAY_TG_SECRET","RELAY_TG_SECRET_PREV","BOT_EXEC_URL","RELAY_WA_PATH","RELAY_WA_VERIFY","RELAY_WA_APP_SECRET"];
+            const o={}; for (const n of k) if (process.env[n]) o[n]=process.env[n];
+            require("fs").writeFileSync("/tmp/relay-sec.json", JSON.stringify(o), {mode:0o600});'
+          if ! npx -y $WRANGLER secret bulk /tmp/relay-sec.json; then
+            echo "ورکر هنوز نیست؛ اول انتشار، بعد رمزها"
+            npx -y $WRANGLER deploy
+            npx -y $WRANGLER secret bulk /tmp/relay-sec.json
+          fi
+          rm -f /tmp/relay-sec.json
+          # رمز قبلی فقط تا وقتی در GitHub Secrets هست پذیرفته می‌شود
+          for n in RELAY_TG_SECRET_PREV RELAY_WA_APP_SECRET; do
+            if [ -z "${!n}" ] && npx -y $WRANGLER secret list | jq -e --arg n "$n" 'map(.name) | index($n)' >/dev/null; then
+              echo y | npx -y $WRANGLER secret delete "$n"; echo "$n از ورکر برداشته شد"
+            fi
+          done
+      - name: انتشار ورکر
+        if: steps.gate.outputs.go == '1'
+        working-directory: edge/relay
+        run: npx -y $WRANGLER deploy
+      - name: نشانی و سلامت رله
+        if: steps.gate.outputs.go == '1'
+        id: url
+        env:
+          TG: ${{ secrets.RELAY_TG_SECRET }}
+        run: |
+          SUB=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain')
+          URL="https://tajrobeh-relay.$SUB.workers.dev"
+          for i in 1 2 3 4 5 6; do
+            H=$(curl -fsS -H "x-telegram-bot-api-secret-token: $TG" "$URL/health" || true)
+            if echo "$H" | jq -e '.pending != null' >/dev/null 2>&1; then
+              echo "$H" | jq -r '"- رله: در انتظار \(.pending) · قدیمی‌ترین \(.oldest_age_s) ثانیه · برگشته ۲۴ساعته \(.recovered_24h) · ناموفق ۲۴ساعته \(.failed_24h) · توقف \(.paused)"' >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::/health رله جواب نداد"; exit 1
+      - name: setWebhook با secret_token تازه (فقط اجرای دستی)
+        if: steps.gate.outputs.go == '1' && github.event_name == 'workflow_dispatch' && inputs.set_webhook
+        env:
+          TG: ${{ secrets.RELAY_TG_SECRET }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        run: |
+          # نشانی فعلی وبهوک نگه داشته می‌شود و فقط ?t= از آن برداشته می‌شود؛ رمز فقط در سرآیند می‌ماند.
+          # فهرست allowed_updates همان tgAllowAll بات است. توکن و رمز چاپ نمی‌شوند.
+          [ -n "$TELEGRAM_TOKEN" ] || { echo "::error::TELEGRAM_TOKEN در Secrets نیست؛ در بات tgAllowAll را اجرا کنید"; exit 1; }
+          node -e '
+            const api=(m,b)=>fetch("https://api.telegram.org/bot"+process.env.TELEGRAM_TOKEN+"/"+m,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b||{})}).then(r=>r.json());
+            (async()=>{
+              const info=(await api("getWebhookInfo")).result||{};
+              if(!info.url){console.log("::error::وبهوکی ثبت نیست");process.exit(1);}
+              const u=new URL(info.url); u.searchParams.delete("t");
+              const r=await api("setWebhook",{url:u.toString(),secret_token:process.env.TG,drop_pending_updates:false,
+                allowed_updates:["message","edited_message","callback_query","channel_post","edited_channel_post","my_chat_member","chat_member"]});
+              console.log(r.ok?"وبهوک با رمز تازه ست شد":"::error::setWebhook نشد: "+String(r.description||"").replace(/bot\d+:[\w-]+/g,"***"));
+              process.exit(r.ok?0:1);
+            })();'

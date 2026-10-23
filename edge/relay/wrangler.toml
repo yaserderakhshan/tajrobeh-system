@@ -1,0 +1,18 @@
+# رلهٔ وبهوک تجربه. همان نام ورکر فعلی؛ انتشار فقط با گردش کار relay-edge.yml.
+# ذخیره در دیوریبل آبجکت SQLite (پلن رایگان هم دارد)؛ نه KV و نه Queue لازم است (دلیل در README).
+# هیچ رمز یا نشانی در این فایل نیست؛ همه با wrangler secret put.
+name = "tajrobeh-relay"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+workers_dev = true
+
+[[durable_objects.bindings]]
+name = "RELAY"
+class_name = "RelayQueue"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RelayQueue"]
+
+[triggers]
+crons = ["*/10 * * * *"]   # تور ایمنی کنار آلارم دیوریبل آبجکت

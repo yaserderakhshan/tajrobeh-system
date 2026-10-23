@@ -2457,7 +2457,7 @@ function tgHandle(update) {
     if (id && !TG_DRY) {
       const c = CacheService.getScriptCache();
       if (c.get('u' + id)) return;
-      c.put('u' + id, '1', 3600);
+      c.put('u' + id, '1', 21600);   /* v170.99 (E19): رلهٔ پایدار تا ۲۴ ساعت دوباره می‌فرستد؛ بیشترین عمر کش، ۶ ساعت */
     }
     /* v166.23: پاسخ دکمه پیش از هر خواندن شیت (خطای query is too old، E-1002، E-1005، E-1010، E-1012) */
     if (update.callback_query && update.callback_query.id && !update.callback_query._ans) {
@@ -2572,7 +2572,7 @@ function tgPrivate_(m) {
     // وسط اتصال مدرسه، شماره یعنی «با شماره‌ام پیدا کن»، نه لید تازه
     if (tgGetVal_('esign', chat) && typeof tgEduByPhone_ === 'function') return tgEduByPhone_(chat, m.contact, m.from.id);
     if (typeof tgSjContact_ === 'function' && tgSjContact_(chat, m.contact)) return;
-    return tgOnPhone_(chat, name, uname, m.contact.phone_number);
+    return tgOnPhone_(chat, name, uname, m.contact.phone_number, !!(m.contact.user_id && m.from && Number(m.contact.user_id) === Number(m.from.id)));   /* v170.99 (E26): شمارهٔ خود فرستنده */
   }
   if (m.document && tgGetVal_('mzu', chat) && typeof tgMagDeliver_ === 'function' && tgMagDeliver_(chat, m)) return;
   // رودمپ‌ها: حالت‌دار (بازتاب همراه، ویس راهبر) پیش از هر مسیریابی
@@ -4503,7 +4503,7 @@ function tgAskPhone_(chat) {
   });
 }
 
-function tgOnPhone_(chat, name, uname, phone) {
+function tgOnPhone_(chat, name, uname, phone, verified) {
   const p = tgLatinDigits_(phone).replace(/[^\d+]/g, '');
   const zk = tgGetVal_('tz', chat), ztz = zk ? tgZoneOf_(zk).tz : '';
   const region = abRegion_(p, ztz, '');   /* v170.23.21: انتخاب ساعت در بات مثل منطقهٔ زمانی مرورگر */
@@ -4528,8 +4528,12 @@ function tgOnPhone_(chat, name, uname, phone) {
   if (typeof v1689Extras_ === 'function') v1689Extras_(chat, extra);   /* v168.9: کشور و آشنایی */
   if (typeof spKidExtras_ === 'function') spKidExtras_(chat, extra);   /* v170.64: پرسش‌های والد */
   if (typeof v17013Extras_ === 'function') v17013Extras_(chat, extra);   /* v170.13: آفر کمپین */
-  var known = tgLeadByPhone_(p);
-  if (known < 2) { try { const byChat = tgFindLead_(chat); if (byChat >= 2) known = byChat; } catch (eK) {} }
+  var known = tgLeadByPhone_(p), byPhone = known >= 2;
+  if (known < 2) { try { const byChat = tgFindLead_(chat); if (byChat >= 2) { known = byChat; byPhone = false; } } catch (eK) {} }
+  /* v170.99 (E26 بند ۲): پروندهٔ پیداشده با شماره فقط با شمارهٔ تأییدشدهٔ دکمهٔ اشتراک تماس (همان فرستنده) به این حساب وصل می‌شود.
+     شمارهٔ تایپی یا تماسِ کس دیگر فقط یادداشت می‌شود و اتصال با پذیرش است. */
+  var bindOk = !byPhone || !!verified;
+  if (!bindOk) { try { if (tgFindLead_(chat) === known) bindOk = true; } catch (eB) {} }
 
   // منوی اصلی همین‌جا جای کیبورد شماره را می‌گیرد؛ پیام جدا برای remove_keyboard لازم نیست
   tgSend_(chat, known > 0 ? T_PHONE_KNOWN : (sc.answered ? T_AFTER_PHONE_Q : T_AFTER_PHONE), tgMenu_());
@@ -4542,7 +4546,9 @@ function tgOnPhone_(chat, name, uname, phone) {
   };
 
   var leadOk = true;
-  if (known > 0) {
+  if (known > 0 && !bindOk) {
+    try { tgLeadNote_(known, 'همین شماره از یک حساب تلگرام دیگر هم فرستاده شد (chat_id: ' + chat + '). شماره تأییدشده نبود، پس خودکار وصل نشد؛ اگر همین مراجع است، پذیرش وصل کند.', 'بات'); } catch (eNb) { tgErr_('tgOnPhone_ bind', eNb); }
+  } else if (known > 0) {
     tgUpdateLead_(known, extra, q, chat, uname, p);
   } else {
     leadOk = tgAppendLead_({
@@ -4754,8 +4760,9 @@ function tgOnCallback_(cq) {
   if (data.indexOf('ps2:') === 0 && typeof ps2Cb_ === 'function') return ps2Cb_(chat, data);   /* v170.23.8: اتصال روان‌پزشک */   /* v170.23.5: کارتابل تأیید یاسر */   /* v170.2: درخواست متوقف */
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
   if (data.indexOf('cv:') === 0 && typeof cvOnCb_ === 'function') return cvOnCb_(chat, data, cq);   /* v170.82: تأیید کاورهای Gemini (فقط مالک) */
-  if (data.indexOf('msq:') === 0 && typeof msOnCb_ === 'function') return msOnCb_(chat, data);
-  if (data.indexOf('pnl:') === 0 && typeof pnlOnCb_ === 'function') return pnlOnCb_(chat, data);   /* v170.98 (E24): لینک تازهٔ ورود به پنل؛ گیرنده در pnlSendLink_ سنجیده می‌شود */   /* v170.83: بستهٔ سئو، «ادامه» (فقط مالک) */
+  if (data.indexOf('msq:') === 0 && typeof msOnCb_ === 'function') return msOnCb_(chat, data);   /* v170.83: بستهٔ سئو، «ادامه» (فقط مالک) */
+  if (data.indexOf('pnl:') === 0 && typeof pnlOnCb_ === 'function') return pnlOnCb_(chat, data);   /* v170.98 (E24): لینک تازهٔ ورود به پنل؛ گیرنده در pnlSendLink_ سنجیده می‌شود */
+  if (data.indexOf('edu:') === 0 && typeof tgEduAskCb_ === 'function') return tgEduAskCb_(chat, data);   /* v170.99 (E26): تأیید اتصال مدرسه با نام */
   if (data.indexOf('cm:') === 0 && typeof cmCb_ === 'function') return cmCb_(chat, data);     /* v170.2: کامنت‌های هاب (پرسش ترجیح) */
   if (data.indexOf('rv:t:') === 0 && typeof rvToggleCb_ === 'function') return rvToggleCb_(chat, data);   /* v169: بازبینی علمی */
   if (data.indexOf('rv:') === 0 && typeof rvOnCb_ === 'function') return rvOnCb_(chat, data);
@@ -7204,6 +7211,7 @@ function tgWatchdog(e) {
         tgErr_('tgWatchdog', 'وبهوک گیر کرده: ' + (r.last_error_message || '') + ' · صف ' + (r.pending_update_count || 0));
       }
       tgRelayPing_(r.url);
+      try { if (typeof tgRelayHealth_ === 'function') tgRelayHealth_(r.url); } catch (eRh) {}   /* v170.99 (E19): صف رلهٔ پایدار */
     } else if (!hasPoll) tgUsePolling();
   } catch (e) { tgErr_('tgWatchdog: ' + e); }
   /* v170.23.12.5 (سهمیهٔ اجرا، bg* ته v168.gs): هر قدم رده و زمان جدا دارد (RSW:<روز>). واجب‌ها هر ساعت؛ سبک‌ها هر ساعت مگر
@@ -7266,7 +7274,8 @@ function tgWatchdog(e) {
   S('evlTick_', 'light', typeof evlTick_ === 'function' ? evlTick_ : null);   /* v170.23.38: رویداد سبک: بستن ۴۸ ساعته، یادآوری تأیید */
   S('vnTick_', 'light', typeof vnTick_ === 'function' ? function () { if (typeof grdInHours_ === 'function' && !grdInHours_(Date.now())) return; return vnTick_(); } : null);   /* v170.23.31: اعلان نسخه با «خواندم» (changes.gs) */
   S('msHourly_', 'light', typeof msHourly_ === 'function' ? msHourly_ : null);
-  S('pnlTick_', 'light', typeof pnlTick_ === 'function' ? pnlTick_ : null);   /* v170.98 (E22): یادآوری ۴۸ ساعتهٔ دعوت پنل */   /* v170.83: بستهٔ سئو و بازبینی اول (شب ۱ تا ۸) و خلاصهٔ ۱۰ صبح سردبیر */
+  S('pnlTick_', 'light', typeof pnlTick_ === 'function' ? pnlTick_ : null);
+  S('secWipeTick_', 'must', typeof secWipeTick_ === 'function' ? secWipeTick_ : null);   /* v170.99 (E27): پشتیبان تیک ۵ دقیقه‌ای */   /* v170.98 (E22): یادآوری ۴۸ ساعتهٔ دعوت پنل */   /* v170.83: بستهٔ سئو و بازبینی اول (شب ۱ تا ۸) و خلاصهٔ ۱۰ صبح سردبیر */
   S('agCostTick_', 'light', typeof agCostTick_ === 'function' ? agCostTick_ : null);   /* v170.23.33: خرج ایجنت‌های کنسول، روزی یک بار (agents.gs) */
   /* سنگین: فقط ساعت‌های BG_HEAVY_HOURS */
   if (heavyHour) {
@@ -9310,7 +9319,7 @@ function tgRolesOf_(chat, username) {
       const p = pp[i];
       if (p.status.indexOf('غیرفعال') > -1) continue;
       const byChat = tgChatIn_(p.chat, chat);
-      const byUser = u && p.user && p.user === u && !String(p.chat || '').trim();   /* v170.9 (امنیت): یوزرنیم فقط برای ردیف بی chat */
+      const byUser = u && p.user && p.user === u && !String(p.chat || '').trim() && !tgIsSchoolRow_(p);   /* v170.9: یوزرنیم فقط برای ردیف بی chat؛ v170.99 (E26): هرگز برای ردیف مدرسه */
       if (!byChat && !byUser) continue;
       res.person = p;
       if (!res.name) res.name = p.name;
@@ -12261,6 +12270,8 @@ function tgEduSignupName_(chat, text) {
   }
   var hits = exact.length ? exact : part;
   if (!hits.length) { tgEduMiss_(chat, 'اسم: ' + text); return tgSend_(chat, T_EDU_NONE, tgEduKb_()); }
+  /* v170.99 (E26 بند ۲): با نام تنها خودکار وصل نمی‌شود؛ درخواست به مدرسه با دکمهٔ تأیید (یا «با شماره‌ام پیدا کن») */
+  return tgEduAsk_(chat, hits.slice(0, 6));
   if (hits.length > 1) {
     // یک نفر دو بار در شیت آمده: فهرست انتخاب همان اسم را دوباره می‌آورد و حلقه می‌شد
     var n0 = tgNorm_(hits[0].name).replace(/\s/g, '');
@@ -12273,6 +12284,27 @@ function tgEduSignupName_(chat, text) {
   return tgEduConnect_(chat, hits[0]);
 }
 
+function tgEduAsk_(chat, hits) {
+  tgDel_('esign', chat);
+  var kb = hits.map(function (p) { return [{ text: '✅ ' + p.name, callback_data: 'edu:ok:' + chat + ':' + p.row }]; });
+  kb.push([{ text: '❌ هیچ‌کدام', callback_data: 'edu:no:' + chat }]);
+  var msg = '🎓 <b>درخواست اتصال حساب مدرسه با نام</b>\nیک حساب تلگرام (chat_id ' + chat + ') با نام «' + tgEsc_(hits[0].name) + '» اتصال خواست. اگر خودش است، ردیف درست را بزنید.';
+  if (TG_DRY) (TG_MEM['eduask'] = TG_MEM['eduask'] || []).push({ chat: String(chat), kb: kb });
+  else tgSchoolOwners_().forEach(function (o) { tgNotify_(o.chat, TG_NK.task, msg, { ref: 'مدرسه', markup: { inline_keyboard: kb } }); });
+  return tgSend_(chat, '📨 درخواست اتصال شما به مدرسه رفت. بعد از تأیید مدرسه همین‌جا خبر می‌دهیم. اگر شماره‌تان در مدرسه ثبت است، «📱 با شماره‌ام پیدا کن» فوری وصل می‌کند.', tgEduKb_());
+}
+/* دکمهٔ تأیید اتصال مدرسه: فقط مسئولان مدرسه (tgSchoolOwners_) */
+function tgEduCan_(chat) { if (TG_DRY && TG_MEM['eduowners']) return TG_MEM['eduowners'].indexOf(String(chat)) > -1; return tgSchoolOwners_().some(function (o) { return tgChatIn_(o.chat, chat); }); }
+function tgEduAskCb_(chat, data) {
+  var a = String(data).split(':');
+  if (!tgEduCan_(chat)) return tgSend_(chat, 'این دکمه مخصوص مدرسه است.');
+  var who = a[2];
+  if (a[1] === 'no') { tgSend_(who, 'درخواست اتصال شما پذیرفته نشد. اگر اشتباهی شده، با مدرسه صحبت کنید.'); return tgSend_(chat, '❌ رد شد.'); }
+  var p = tgPeopleList_().filter(function (x) { return String(x.row) === String(a[3]); })[0];
+  if (!p || !tgIsSchoolRow_(p)) return tgSend_(chat, 'این ردیف پیدا نشد.');
+  tgEduConnect_(who, p);
+  return tgSend_(chat, '✅ ' + tgEsc_(p.name) + ' وصل شد.');
+}
 function tgEduConnect_(chat, p) {
   var cur = String(p.chat || '').trim();
   var ids = cur ? cur.split(/[,،;\s]+/).filter(String) : [];
@@ -13916,7 +13948,7 @@ function tgEduMiss_(chat, what) {
 }
 
 function tgEduByPhone_(chat, contact, fromId) {
-  if (contact.user_id && fromId && Number(contact.user_id) !== Number(fromId)) {
+  if (!contact.user_id || !fromId || Number(contact.user_id) !== Number(fromId)) {   /* v170.99 (E26): فقط شمارهٔ خود فرستنده */
     return tgSend_(chat, 'شمارهٔ خودتان را با همان دکمهٔ «📱 با شماره‌ام پیدا کن» بفرستید.', tgEduKb_());
   }
   var ph = tgLatinDigits_(String(contact.phone_number || '')).replace(/\D/g, '').slice(-10);
@@ -14026,7 +14058,7 @@ function tgMagTests() {
       { row: 5, name: 'مینا کریمی', user: '', chat: '', roles: ['دانشجو'], circle: '۱۴', status: 'فعال', phone: '' },
       { row: 9, name: 'مینا  کریمی', user: '', chat: '', roles: ['دانشجو'], circle: '۱۴', status: 'فعال', phone: '' }];
     tgEduSignupName_(777, 'مینا کریمی');
-    ok('اسم تکراری در شیت حلقه نمی‌سازد', said().indexOf('وصل شدید') > -1);
+    ok('اسم تکراری در شیت حلقه نمی‌سازد؛ با نام تنها فقط درخواست تأیید می‌رود (v170.99، E26)', said().indexOf('درخواست اتصال شما به مدرسه رفت') > -1 && said().indexOf('وصل شدید') < 0);
     ok('حلقهٔ ۷ روی تقویم ۸ و ۹', TG_CIRCLE_CAL['7'] === TG_CIRCLE_CAL['8']);
     ok('منوی دانشجو دکمهٔ مجله دارد', JSON.stringify(tgSchoolMenu_('دانشجو')).indexOf(TG_MAG_BTN) > -1);
     ok('منوی درمانگر دکمهٔ مجله دارد', JSON.stringify(tgTherMenu_()).indexOf(TG_MAG_BTN) > -1);
@@ -20525,16 +20557,36 @@ function tgPsyWeeklyStep_(chat, act, val) {
   return null;
 }
 /* لینک دعوت روان‌پزشک: start=psy-<tok> (تجربه) یا start=psydr-<tok> (روان‌پزشک) */
-function tgPsyTok_(k) { return tgHash_('psy|' + k + '|' + String(TG_OWNER_CHAT)); }
+/* v170.99 (E26 بند ۱): هر لینک دعوت یک‌بارمصرف و ۷ روزه (Property «PSY_INV»)؛ لینک‌های ثابت قبلی دیگر معتبر نیستند */
+var TG_PSY_INV_MS = 7 * 86400000;
+function tgPsyInv_(o) {
+  if (TG_DRY) { if (o !== undefined) TG_MEM['psyinv'] = o; return TG_MEM['psyinv'] || {}; }
+  var P = PropertiesService.getScriptProperties();
+  if (o !== undefined) { P.setProperty('PSY_INV', JSON.stringify(o)); return o; }
+  try { return JSON.parse(P.getProperty('PSY_INV') || '{}') || {}; } catch (e) { return {}; }
+}
+function tgPsyTok_(k) {
+  var o = tgPsyInv_(), now = Date.now(), tok = Utilities.getUuid().replace(/-/g, '').slice(0, 16).toLowerCase();
+  Object.keys(o).forEach(function (t) { if (Number(o[t].exp) < now) delete o[t]; });
+  o[tok] = { k: k, exp: now + TG_PSY_INV_MS };
+  tgPsyInv_(o);
+  return tok;
+}
+function tgPsyTokUse_(k, tok) {
+  var o = tgPsyInv_(), x = o[String(tok || '').toLowerCase()];
+  if (!x || x.k !== k || Number(x.exp) < Date.now()) return false;
+  delete o[String(tok).toLowerCase()]; tgPsyInv_(o);
+  return true;
+}
 function tgPsyInviteLinks_(chat) {
   if (!tgPsyIsHead_(chat)) return tgSend_(chat, 'این لینک‌ها دست مسئول روان‌پزشکی است.');
   var bot = tgBotName_ ? tgBotName_() : '';
-  return tgSend_(chat, '🔗 <b>لینک دعوت روان‌پزشک</b>\nروان‌پزشک تجربه:\nhttps://t.me/' + bot + '?start=psy-' + tgPsyTok_('tj') + '\n\nمخصوص ' + TG_PSY_ACC.dr + ':\nhttps://t.me/' + bot + '?start=psydr-' + tgPsyTok_('dr') + '\n\nهر که با لینک وارد شود، نامش را می‌گیریم و برای تکمیل سطر درمانگران و استخر روان‌پزشکی به شما کار می‌آید.' + (typeof ps2JoinLink_ === 'function' ? '\n\n<b>اتصال روان‌پزشکِ ثبت‌شده به حسابش</b> (با تأیید شما، روی همان ردیف):\n' + ps2JoinLink_() : ''));
+  return tgSend_(chat, '🔗 <b>لینک دعوت روان‌پزشک</b>\nروان‌پزشک تجربه:\nhttps://t.me/' + bot + '?start=psy-' + tgPsyTok_('tj') + '\n\nمخصوص ' + TG_PSY_ACC.dr + ':\nhttps://t.me/' + bot + '?start=psydr-' + tgPsyTok_('dr') + '\n\nهر لینک فقط یک بار و تا ۷ روز کار می‌کند؛ برای هر نفر «/psylinks» را دوباره بزنید. هر که با لینک وارد شود، نامش را می‌گیریم و برای تکمیل سطر درمانگران و استخر روان‌پزشکی به شما کار می‌آید.' + (typeof ps2JoinLink_ === 'function' ? '\n\n<b>اتصال روان‌پزشکِ ثبت‌شده به حسابش</b> (با تأیید شما، روی همان ردیف):\n' + ps2JoinLink_() : ''));
 }
 function tgPsyJoin_(chat, uname, name, arg) {
   var m = String(arg || '').match(/^psy(dr)?-([0-9a-z]+)$/i); if (!m) return false;
   var kind = m[1] ? 'dr' : 'tj';
-  if (m[2] !== tgPsyTok_(kind)) { tgSend_(chat, 'این لینک معتبر نیست. از مسئول روان‌پزشکی لینک تازه بخواهید.'); return true; }
+  if (!tgPsyTokUse_(kind, m[2])) { tgSend_(chat, 'این لینک معتبر نیست یا استفاده شده یا کهنه است. از مسئول روان‌پزشکی لینک تازه بخواهید.'); return true; }
   var p = tgPersonByChat_(chat), id;
   var note = kind === 'dr' ? 'روان‌پزشک · تسویهٔ مستقیم (' + TG_PSY_ACC.dr + ')' : 'روان‌پزشک تجربه';
   if (p && p.row) id = tgPersonSet_(p.row, { addRole: 'درمانگر' }, 'بات', { why: 'لینک دعوت روان‌پزشک' });
@@ -20626,6 +20678,11 @@ function tgPsyTests() {
   ok('رویدادها ثبت شد', (TG_MEM['pev'] || []).length >= 2);
   ok('لینک دعوت با توکن غلط رد می‌شود', tgPsyJoin_('400', 'u', 'کسی', 'psy-zzz') === true && !(TG_MEM['people'] || []).some(function (p) { return p.name === 'کسی'; }));
   ok('لینک دعوت درست فرد می‌سازد و کار به مسئول', tgPsyJoin_('401', 'dr', 'دکتر تازه', 'psy-' + tgPsyTok_('tj')) === true && (TG_MEM['people'] || []).some(function (p) { return p.name === 'دکتر تازه'; }) && TG_MEM['tasks'].some(function (t) { return t.chat === '200' && t.title.indexOf('دکتر تازه') > -1; }));
+  var tk1 = tgPsyTok_('tj');
+  ok('E26: لینک دعوت یک‌بارمصرف (روی کد قبلی مردود)', tgPsyTokUse_('tj', tk1) === true && tgPsyTokUse_('tj', tk1) === false);
+  ok('E26: لینک ثابت قبلی و نوع اشتباه معتبر نیست', tgPsyTokUse_('tj', tgHash_('psy|tj|' + String(TG_OWNER_CHAT))) === false && tgPsyTokUse_('dr', tgPsyTok_('tj')) === false);
+  var tk2 = tgPsyTok_('dr'), inv = tgPsyInv_(); inv[tk2].exp = Date.now() - 1; tgPsyInv_(inv);
+  ok('E26: لینک کهنه‌تر از ۷ روز معتبر نیست', tgPsyTokUse_('dr', tk2) === false);
   tgPsyWeeklyStart_('200'); tgPsyWeeklyStep_('200', 'wn', 0); tgPsyWeeklyStep_('200', 'wd', 0); tgPsyWeeklyStep_('200', 'wh', 0);
   ok('وقت هفتگی از طرف مسئول ثبت می‌شود', !tgGetVal_('psw', '200') && (TG_MEM['pev'] || []).some(function (e) { return e[5] === 'وقت هفتگی'; }));
   TG_DRY = keepDry;
@@ -26157,8 +26214,8 @@ function tgTeaWho_(chat, uname) {
   var list = tgTeaRows_();
   for (var i = 0; i < list.length; i++) {
     if (list[i].chat && String(list[i].chat) === String(chat)) return list[i];
-    if (u && list[i].user && list[i].user === u) return list[i];
   }
+  /* v170.99 (E26 بند ۲): استاد با یوزرنیم تنها شناخته نمی‌شود؛ فقط chat وصل‌شده (یوزرنیم قابل بازیافت است) */
   return null;
 }
 
@@ -32334,7 +32391,13 @@ function tgDutyWho_(now) {
   if (s < 0) return null;
   var nm = tgDutyGrid_()[d][s];
   if (nm === '—' || nm === '-') return null;
-  if (!nm) { if (d === 6 || s === 2) return null; var b = tgDutyBoss_(); return b ? { p: b, d: d, s: s, fallback: true } : null; }
+  if (!nm) {
+    if (d === 6 || s === 2) return null;
+    /* v170.99 (E26 بند ۳، D242): خانهٔ خالی مثل واگذاری لید میان کارکنان پذیرش می‌چرخد؛ مسئول پذیرش فقط وقتی کارمندی نیست */
+    var rot = typeof lcRotation_ === 'function' ? lcRotation_(now.getTime()) : null;
+    if (rot && rot[0] && rot[0].chat) return { p: rot[0], d: d, s: s, fallback: true };
+    var b = tgDutyBoss_(); return b ? { p: b, d: d, s: s, fallback: true } : null;
+  }
   var p = tgDeskByName_(nm);
   return p && p.chat ? { p: p, d: d, s: s } : null;
 }

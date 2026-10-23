@@ -67,7 +67,7 @@ function ps2MyAppts_(chat) {
 function ps2JoinLink_() { var bot = ''; try { bot = tgBotName_(); } catch (e) {} return 'https://t.me/' + bot + '?start=psyjoin-' + tgPsyTok_('join'); }
 function ps2Join_(chat, uname, name, arg) {
   var m = /^psyjoin-([0-9a-z]+)$/i.exec(String(arg || '')); if (!m) return false;
-  if (m[1] !== tgPsyTok_('join')) { tgSend_(chat, 'این لینک معتبر نیست. از مسئول روان‌پزشکی لینک تازه بخواهید.'); return true; }
+  if (!tgPsyTokUse_('join', m[1])) { tgSend_(chat, 'این لینک معتبر نیست یا استفاده شده یا کهنه است. از مسئول روان‌پزشکی لینک تازه بخواهید.'); return true; }   /* v170.99 (E26): یک‌بارمصرف و ۷ روزه */
   if (ps2IsDoc_(chat)) { tgSend_(chat, 'حساب شما از قبل به بخش روان‌پزشکی وصل است.', ps2Menu_()); return true; }
   ps2Prop_('PS2_JOIN:' + chat, JSON.stringify({ chat: String(chat), uname: uname || '', name: name || '', at: Date.now() }));
   var cand = ps2People_().filter(function (p) { return !String(p.chat || '').trim(); });

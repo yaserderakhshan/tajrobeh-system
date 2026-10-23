@@ -82,14 +82,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.98`
+نسخهٔ کد: `v170.99`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۴۲۱ | ۳۳ |
-| `telegram.gs` | ۳۸۴۷۶ | ۲۰۷۸ |
+| `Code.gs` | ۴۲۶ | ۳۳ |
+| `telegram.gs` | ۳۸۵۳۹ | ۲۰۸۳ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -104,16 +104,18 @@
 | `gemini_setup.gs` | ۵۴۶ | ۳۸ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۸۳۵ | ۱۳۳ |
-| `v168.gs` | ۲۴۹۶ | ۱۵۶ |
+| `v168.gs` | ۲۴۹۷ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `cover.gs` | ۳۸۵ | ۲۷ |
-| `magseo.gs` | ۵۸۲ | ۴۰ |
-| `panel.gs` | ۲۱۵ | ۲۰ |
+| `magseo.gs` | ۶۱۶ | ۴۴ |
+| `panel.gs` | ۲۲۹ | ۲۳ |
+| `secrets.gs` | ۱۹۵ | ۱۱ |
+| `bridge.gs` | ۱۶۱ | ۱۱ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |
 | `dq.gs` | ۶۰۲ | ۴۹ |
-| `cfg.gs` | ۲۰۱ | ۱۴ |
+| `cfg.gs` | ۲۰۴ | ۱۴ |
 | `ops.gs` | ۱۱۳۲ | ۱۰۰ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -137,7 +139,7 @@
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۱۴۶۵ | ۱۱۴ |
 | `leadspeed.gs` | ۱۱۵۶ | ۸۷ |
-| `leadclaim.gs` | ۶۸۱ | ۴۷ |
+| `leadclaim.gs` | ۶۸۳ | ۴۷ |
 | `nurture.gs` | ۲۹۹ | ۲۶ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
 | `guard.gs` | ۳۷۸ | ۳۰ |
@@ -189,7 +191,7 @@
 | `AG_SEO_TAB` | «تغییرات سئو» | `agents.gs` |
 | `AS_IDX_TAB` | «نمایهٔ دانش» | `assist.gs` |
 | `BG_TAB` | «سهمیهٔ اجرا» | `v168.gs` |
-| `CFG_TAB` | «تنظیمات خصوصی بات» | `gemini_setup.gs` `cfg.gs` |
+| `CFG_TAB` | «تنظیمات خصوصی بات» | `gemini_setup.gs` `secrets.gs` `cfg.gs` |
 | `CM_FIX_TAB` | «اصلاح کامنت‌ها · پیش‌نمایش» | `comments.gs` |
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
 | `CR_FX_TAB` | «لیدهای بحران · پیش‌نمایش» | `telegram.gs` |
@@ -413,10 +415,13 @@
 | Gemini: مسیر Vertex AI v170.84 | `vtxTests` |
 | کارخانهٔ کاور v170.82 | `cvTests` |
 | بستهٔ سئو و بازبینی اول v170.83 | `msTests` |
+| ورود به پنل و موج دعوت v170.98 | `pnlTests` |
+| صندوق راز و پاک‌سازی v170.99 | `secVaultTests` |
+| اتصال حساب فقط با تأیید v170.99 | `e26Tests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | اقدام بعدی لید بسته (v170.50) | `lmClosedNextTests` |
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |
-| ورود به پنل و موج دعوت v170.98 | `pnlTests` |
+| پیوند با پل: رونوشت و پشتیبان v170.99 | `brTests` |
 | v170.13: سقف پذیرش، بورسیه، آفر | `v17013Tests` |
 | کمپین C-004 (پلی‌لیست ابی) | `ebiTests` |
 | کمپین C-004 · کدها و ویس (v170.16) | `ebiCodeTests` |

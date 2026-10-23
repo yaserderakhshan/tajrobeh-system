@@ -26,6 +26,8 @@
     "cover.gs",
     "magseo.gs",
     "panel.gs",
+    "secrets.gs",
+    "bridge.gs",
     "stuck.gs",
     "leadmodel.gs",
     "comments.gs",
