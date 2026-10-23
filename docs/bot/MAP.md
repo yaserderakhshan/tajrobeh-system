@@ -108,7 +108,7 @@
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `cover.gs` | ۳۸۵ | ۲۷ |
 | `magseo.gs` | ۵۸۲ | ۴۰ |
-| `panel.gs` | ۲۱۱ | ۲۰ |
+| `panel.gs` | ۲۱۵ | ۲۰ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۷۹ | ۶۸ |
