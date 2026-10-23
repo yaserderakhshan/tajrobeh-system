@@ -514,6 +514,15 @@
   "active": true
  },
  {
+  "id": 507325,
+  "file": "507325.php",
+  "title": "نقشهٔ سایت خبری (news-sitemap.xml)",
+  "type": "php",
+  "location": "everywhere",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
   "id": null,
   "file": "ga4-visitor-tz.html",
   "title": "Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz، is_abroad) v1",
