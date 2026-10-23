@@ -106,11 +106,12 @@
 | `publish.gs` | ۱۸۳۵ | ۱۳۳ |
 | `v168.gs` | ۲۴۹۷ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
-| `cover.gs` | ۳۸۵ | ۲۷ |
+| `cover.gs` | ۳۸۷ | ۲۷ |
 | `magseo.gs` | ۶۱۶ | ۴۴ |
 | `panel.gs` | ۲۲۹ | ۲۳ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
 | `bridge.gs` | ۱۶۱ | ۱۱ |
+| `wink.gs` | ۱۷۹ | ۱۱ |
 | `video.gs` | ۲۴۵ | ۲۱ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
@@ -178,6 +179,7 @@
 | `tgPoll` | `telegram.gs` | everyMinutes(1) | متوقف نمی‌شود |
 | `tgRun` | `telegram.gs` | after(60 * 1000)، after(1000) | متوقف نمی‌شود |
 | `tgTick5` | `v168.gs` | everyMinutes(5) | متوقف نمی‌شود |
+| `wkRun` | `wink.gs` | after(ms) | متوقف نمی‌شود |
 
 ### تب‌های شیت
 
@@ -420,6 +422,7 @@
 | صندوق راز و پاک‌سازی v170.99 | `secVaultTests` |
 | اتصال حساب فقط با تأیید v170.99 | `e26Tests` |
 | پیوند با پل: رونوشت و پشتیبان v170.99 | `brTests` |
+| چشمک توتی یک‌باره v170.99 | `wkTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | اقدام بعدی لید بسته (v170.50) | `lmClosedNextTests` |
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |
