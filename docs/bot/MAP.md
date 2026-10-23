@@ -106,7 +106,7 @@
 | `publish.gs` | ۱۸۳۵ | ۱۳۳ |
 | `v168.gs` | ۲۴۹۷ | ۱۵۶ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
-| `cover.gs` | ۳۸۵ | ۲۷ |
+| `cover.gs` | ۳۸۷ | ۲۷ |
 | `magseo.gs` | ۶۱۶ | ۴۴ |
 | `panel.gs` | ۲۲۹ | ۲۳ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |

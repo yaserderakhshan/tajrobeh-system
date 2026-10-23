@@ -264,7 +264,7 @@ function cvApply_() {
       cvSet_(r, { 'وضعیت': CV_ST.live, 'شناسهٔ کاور تازه': res.json.media_id || '', 'کاور قبلی': res.json.previous || '', 'یادداشت': '' });
       done++;
     } else if (res.code === 404 || res.code === 0) {
-      cvSet_(r, { 'یادداشت': res.code === 0 ? 'رمز کاربر وردپرس بات در Script Properties نیست' : 'اسنیپت کاور هنوز روی سایت نیست' });
+      cvSet_(r, { 'یادداشت': res.code === 0 ? 'اعمال روی سایت با لین F از کروم (E32)' : 'اسنیپت کاور روی سایت نیست؛ اعمال با لین F' });
       break;   /* تأییدشده می‌ماند و ساعت بعد دوباره */
     } else {
       cvSet_(r, { 'وضعیت': CV_ST.err, 'یادداشت': 'سایت HTTP ' + res.code + ' ' + String((res.json && (res.json.code || res.json.message)) || '').slice(0, 80) });
@@ -362,6 +362,8 @@ function cvTests() {
     var calls = [];
     TG_MEM['cv:wp'] = function (path, body) { calls.push({ path: path, body: body }); return { code: 404, json: { code: 'rest_no_route' } }; };
     ok('اسنیپت هنوز نیست: تأیید می‌ماند و یادداشت می‌گیرد', cvApply_() === 0 && rows[0]['وضعیت'] === CV_ST.ok && /اسنیپت/.test(rows[0]['یادداشت']));
+    TG_MEM['cv:wp'] = function () { return { code: 0, error: 'creds' }; };
+    ok('E32: بی رمز وردپرس، یادداشت اعمال با لین F است، نه درخواست رمز', cvApply_() === 0 && rows[0]['وضعیت'] === CV_ST.ok && /لین F/.test(rows[0]['یادداشت']) && !/رمز/.test(rows[0]['یادداشت']));
     calls = [];
     TG_MEM['cv:wp'] = function (path, body) { calls.push({ path: path, body: body }); return { code: 200, json: { ok: true, media_id: 7001, previous: 6001 } }; };
     ok('فقط تأییدشده روی سایت می‌رود؛ کاور قبلی نگه داشته می‌شود', cvApply_() === 1 && calls.length === 1 && calls[0].path === '/wp-json/tj/v1/cover' &&
