@@ -20755,7 +20755,35 @@ function tgEvSaveFile_(o, fid, label) {
     return f.createFile(tf.blob.setName(label + ext)).getUrl();
   } catch (e) { tgErr_('tgEvSaveFile_', e, o.code); return 'tg:' + fid; }
 }
-function tgEvTok_(code) { return tgHash_('ev|' + code + '|' + String(TG_OWNER_CHAT)); }
+/* v170.101+ (v170.102): توکن لینک ارائه‌دهنده HMAC-SHA256 با کلید تصادفی Script Property «EV_TOK_KEY» (خودکار ساخته می‌شود)؛
+   هش ۳۲ بیتی قبلی از کد رویداد و چت مالک قابل حدس بود. لینک‌های قبلی باطل می‌شوند؛ ارائه‌دهندهٔ وصل‌شده با chat_id می‌ماند */
+function tgEvTokKey_() {
+  if (TG_DRY) return TG_MEM['evtokkey'] || (TG_MEM['evtokkey'] = 'test-only-ev-key');
+  var P = PropertiesService.getScriptProperties(), k = P.getProperty('EV_TOK_KEY');
+  if (!k) { k = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, ''); P.setProperty('EV_TOK_KEY', k); }
+  return k;
+}
+function tgEvTok_(code) {
+  var sig = Utilities.computeHmacSha256Signature('evp|' + String(code), tgEvTokKey_());
+  return sig.slice(0, 8).map(function (b) { return ('0' + (b & 255).toString(16)).slice(-2); }).join('');
+}
+try { TG_SUITES.push(['توکن ارائه‌دهندهٔ رویداد v170.102', 'tgEvTokTests']); } catch (eSu) {}
+function tgEvTokTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  var keep = { dry: TG_DRY, mem: TG_MEM, own: TG_OWNER_CHAT };
+  TG_DRY = true; TG_MEM = {}; TG_OWNER_CHAT = '9001';
+  try {
+    var t = tgEvTok_('EV-2001');
+    ok('توکن ۱۶ رقم هگز و پایدار برای هر رویداد', /^[0-9a-f]{16}$/.test(t) && t === tgEvTok_('EV-2001') && t !== tgEvTok_('EV-2002'), t);
+    ok('دیگر از کد رویداد و چت مالک ساخته نمی‌شود (روی کد قبلی مردود)', t !== tgHash_('ev|EV-2001|9001'));
+    TG_MEM['evtokkey'] = 'test-only-ev-key-2';
+    ok('کلید دیگر، توکن دیگر', tgEvTok_('EV-2001') !== t);
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
+  TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OWNER_CHAT = keep.own;
+  Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ توکن ارائه‌دهنده درست است'));
+  return tgTestTally_(log, fail);
+}
 function tgEvIsSchool_(chat) { return String(chat) === String(TG_OWNER_CHAT) || tgSchoolOwners_().some(function (o) { return tgChatIn_(o.chat, chat); }); }
 /* مسئول مدرسه: لینک ارائه‌دهنده برای یک رویداد */
 function tgEvLinkAsk_(chat) {
