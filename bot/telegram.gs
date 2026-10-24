@@ -7275,6 +7275,7 @@ function tgWatchdog(e) {
   S('vnTick_', 'light', typeof vnTick_ === 'function' ? function () { if (typeof grdInHours_ === 'function' && !grdInHours_(Date.now())) return; return vnTick_(); } : null);   /* v170.23.31: اعلان نسخه با «خواندم» (changes.gs) */
   S('msHourly_', 'light', typeof msHourly_ === 'function' ? msHourly_ : null);
   S('pnlTick_', 'light', typeof pnlTick_ === 'function' ? pnlTick_ : null);
+  S('vdHourly_', 'light', typeof vdHourly_ === 'function' ? vdHourly_ : null);   /* v170.100: پیش‌نویس زیرنویس، فصل‌بندی و ریلز ویدیو با Gemini (شب ۱ تا ۸) */
   S('secWipeTick_', 'must', typeof secWipeTick_ === 'function' ? secWipeTick_ : null);   /* v170.99 (E27): پشتیبان تیک ۵ دقیقه‌ای */   /* v170.98 (E22): یادآوری ۴۸ ساعتهٔ دعوت پنل */   /* v170.83: بستهٔ سئو و بازبینی اول (شب ۱ تا ۸) و خلاصهٔ ۱۰ صبح سردبیر */
   S('agCostTick_', 'light', typeof agCostTick_ === 'function' ? agCostTick_ : null);   /* v170.23.33: خرج ایجنت‌های کنسول، روزی یک بار (agents.gs) */
   /* سنگین: فقط ساعت‌های BG_HEAVY_HOURS */
