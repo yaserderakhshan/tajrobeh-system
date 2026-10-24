@@ -5314,6 +5314,14 @@ function tgFreeSlots_(scope) {
   return out;
 }
 
+/** یک‌بارهٔ خودکار v170.104 (E37 بند ۲): سنجش فقط‌خواندنی روی دادهٔ زنده؛ هیچ رزروی نوشته نمی‌شود.
+    خروجی: شمار پیشنهادها، ساعت تکراری (باید ۰)، ساعتی که هم رزرو شده و هم پیشنهاد می‌شود (باید ۰)، ردیف آزاد لغوشده‌ای که هم‌ساعت قاعدهٔ هفتگی است */
+function bkV170104Check() {
+  var free = tgFreeSlots_(''), sv = tgSlotsRead_(), taken = tgTakenSet_(sv), seen = {}, dup = 0, both = 0;
+  free.forEach(function (x) { var k = x.therapist + '|' + x.dateIso + '|' + x.hhmm; if (seen[k]) dup++; seen[k] = 1; if (taken[k]) both++; });
+  var freedRows = sv.filter(function (r) { return String(r[5]).trim() === 'آزاد'; }).length;
+  return 'پیشنهاد: ' + free.length + ' · ساعت تکراری: ' + dup + ' · رزروشده و پیشنهادشده: ' + both + ' · ردیف آزاد در جدول: ' + freedRows;
+}
 try { TG_SUITES.push(['رزرو دوباره نه v170.104', 'bookFixTests']); } catch (eSu) {}
 function bookFixTests() {
   var log = [], fail = 0;
@@ -5347,7 +5355,8 @@ function bookFixTests() {
         TG_OUTBOX.some(function (x) { return /قبلاً رزرو/.test(x.text || ''); }));
       tgSvBook_('5550051', 'SL-9', 'دیگری', '');
       ok('سوپرویژن: نفر دیگر ثبت می‌شود', TG_MEM['svbook'].length === 2 && slot.taken === 2);
-      ok('سوپرویژن زیر قفل', /tgLock_\(\)[\s\S]{0,120}tryLock/.test(String(tgSvBook_)));
+      ok('یک‌بارهٔ سنجش زنده در فهرست CI', CI_ONCE_ALLOW.indexOf('bkV170104Check') >= 0 && CI_ONCE_AUTO.indexOf('bkV170104Check') >= 0);
+    ok('سوپرویژن زیر قفل', /tgLock_\(\)[\s\S]{0,120}tryLock/.test(String(tgSvBook_)));
     } finally { tgSvByCode_ = st.by; }
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box;
