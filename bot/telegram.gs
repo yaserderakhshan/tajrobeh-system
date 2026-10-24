@@ -18488,7 +18488,7 @@ function tgSjFinish_(chat, d) {
   var circle = d.circle || '';
 
   /* اول فهرست تجربه: فقط اگر همین چت از قبل به همان ردیف وصل است و نقش «دانشجو» است، بی تأیید ثبت می‌شود.
-     v170.101: تطبیق نام تنها (ردیف بی chat) یا نقش استاد و سوپروایزر و منتور همیشه به میز مسئول مدرسه می‌رود (همان قاعدهٔ E26) */
+     v170.105: تطبیق نام تنها (ردیف بی chat) یا نقش استاد و سوپروایزر و منتور همیشه به میز مسئول مدرسه می‌رود (همان قاعدهٔ E26) */
   var p = tgSjMatch_(d.name, chat);
   if (p && !(p.chat && tgChatIn_(p.chat, chat) && role === 'دانشجو')) p = null;
   if (p) {
@@ -18523,7 +18523,7 @@ function tgSjFinish_(chat, d) {
   return true;
 }
 
-try { TG_SUITES.push(['عضویت مدرسه فقط با تأیید v170.101', 'tgSjSecTests']); } catch (eSu) {}
+try { TG_SUITES.push(['عضویت مدرسه فقط با تأیید v170.105', 'tgSjSecTests']); } catch (eSu) {}
 function tgSjSecTests() {
   var log = [], fail = 0;
   function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
@@ -22906,15 +22906,40 @@ function tgLeadText_(chat, name, uname, text) {
 }
 
 // ویس پذیرش وقتی یادداشت لید در انتظار است: متنش گرفته می‌شود و مثل یادداشت متنی ثبت می‌شود
+/* v170.103 (E35 بند ۲، حریم خصوصی): ویس پذیرش روی لید هرگز به Gemini نمی‌رود، نه با کلید پولی و نه بی آن؛ فقط شناسهٔ فایل صدا
+   در یادداشت لید می‌ماند تا پذیرش خودش بشنود */
 function tgLeadVoice_(chat, m, name, uname) {
   if (!m || !m.voice || !tgGetVal_('ldn', chat)) return false;
-  var txt = '';
+  var dur = Number(m.voice.duration || 0);
+  return tgLeadText_(chat, name, uname, '🎙 ویس' + (dur ? ' ' + tgFa_(dur) + ' ثانیه' : '') + ' (متن نمی‌شود؛ فایل در تلگرام: ' + String(m.voice.file_id || '') + ')');
+}
+try { TG_SUITES.push(['ویس بی Gemini v170.103', 'e35PrivTests']); } catch (eSu) {}
+function e35PrivTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  var keep = { dry: TG_DRY, mem: TG_MEM, cfg: TG_CFG_, box: TG_OUTBOX };
+  var st = { lt: tgLeadText_, gv: tgGetVal_, tf: tgTgFile_, tr: aiTranscribe_, by: tgEvBy_, sv: tgEvSaveFile_ };
+  TG_DRY = true; TG_MEM = {}; TG_OUTBOX = []; TG_CFG_ = {};
+  var calls = [], texts = [];
   try {
-    const f = tgTgFile_(m.voice.file_id);
-    const tr = f && f.blob ? tgRmTranscribe_(f.blob.setName('note.ogg')) : null;
-    txt = (tr && tr.text) ? String(tr.text).trim() : '';
-  } catch (e) { txt = ''; }
-  return tgLeadText_(chat, name, uname, '🎙 ' + (txt || '(ویس، متن گرفته نشد)'));
+    aiTranscribe_ = function (blob, o) { calls.push(!!(o && o.priv)); if (o && o.priv && !aiPaid_()) return { text: '' }; return { text: 'متن آزمون' }; };
+    tgTgFile_ = function () { return { path: 'v.oga', blob: Utilities.newBlob('x', 'audio/ogg', 'v.ogg') }; };
+    tgLeadText_ = function (c, n, u, t) { texts.push(t); return true; };
+    tgGetVal_ = function () { return '1'; };
+    tgLeadVoice_('5550040', { voice: { file_id: 'test-file-1', duration: 12 } }, 'نمونه', '');
+    ok('ویس لید به Gemini نمی‌رود، فقط شناسهٔ فایل در یادداشت (روی کد قبلی مردود)', calls.length === 0 && /test-file-1/.test(texts[0]) && /متن نمی‌شود/.test(texts[0]), JSON.stringify(calls) + texts[0]);
+    TG_CFG_ = { GEMINI_PAID: 'بله' };
+    tgLeadVoice_('5550040', { voice: { file_id: 'test-file-2' } }, 'نمونه', '');
+    ok('با کلید پولی هم ویس لید متن نمی‌شود', calls.length === 0);
+    TG_CFG_ = {};
+    tgGetVal_ = st.gv;
+    ok('ویس بازخورد رویداد و ویس رویداد سبک با دروازهٔ GEMINI_PAID (priv) می‌روند (روی کد قبلی مردود)',
+      /tgRmTranscribe_\(tf\.blob, true\)/.test(String(tgEvfInput_)) && /priv: true/.test(String(evlTranscribe_)));
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
+  tgLeadText_ = st.lt; tgGetVal_ = st.gv; tgTgFile_ = st.tf; aiTranscribe_ = st.tr;
+  TG_DRY = keep.dry; TG_MEM = keep.mem; TG_CFG_ = keep.cfg; TG_OUTBOX = keep.box;
+  Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ ویس‌ها بی Gemini یا با دروازه درست است'));
+  return tgTestTally_(log, fail);
 }
 
 /* ---------- تریگر شیت: شیت به بات ---------- */

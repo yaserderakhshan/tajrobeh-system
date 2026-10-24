@@ -569,7 +569,7 @@ function tgEvfInput_(chat, m, name) {
   var file = '';
   if (fid) {
     file = tgEvSaveFile_(o, fid, 'بازخورد ' + String(Date.now()).slice(-6));
-    if (!TG_DRY) { try { var tf = tgTgFile_(fid); var tr = tgRmTranscribe_(tf.blob); if (tr && tr.text) text = tr.text; } catch (eT) {} }
+    if (!TG_DRY) { try { var tf = tgTgFile_(fid); var tr = tgRmTranscribe_(tf.blob, true); if (tr && tr.text) text = tr.text;   /* v170.103 (E35): فقط با GEMINI_PAID */ } catch (eT) {} }
   }
   var id = 'F-' + (TG_DRY ? (100 + tgEvfRows_().length + 1) : Date.now().toString(36).toUpperCase());
   var row = [id, TG_DRY ? '' : new Date(), o.code, o.title, name || '', String(chat), kind, text.slice(0, 1500), file, '', TG_EVF_ST.wait, ''];
