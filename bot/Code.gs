@@ -88,7 +88,8 @@ function doPost(e) {
       if (!secret || !tgSafeEq_(given, secret)) { logError_('webhook secret mismatch', e); return okJson_(); }
       /* v166.29.1: پینگ سلامت از tgWatchdog که از همان مسیر رلهٔ کلادفلر آمده؛ آپدیت تلگرام نیست */
       if (body.tj_ping) { PropertiesService.getScriptProperties().setProperty('TG_RELAY_PONG', String(Date.now())); return okJson_(); }
-      tgHandle(body);
+      /* v170.103 (E36): «BRIDGE_TEST_MUTE» برای چت‌های آزمایشی پاسخ را به پل می‌سپارد */
+      if (!(typeof brMuted_ === 'function' && brMuted_(body))) tgHandle(body);
       /* v170.99 (E29): رونوشت آپدیت چت‌های آزمایشی به پل؛ بعد از پاسخ بات و هرگز مانع آن نیست */
       try { if (typeof brMirror_ === 'function') brMirror_(raw, body); } catch (eBr) {}
     } else if (body.action === 'assist.ask' && typeof asWeb_ === 'function') {

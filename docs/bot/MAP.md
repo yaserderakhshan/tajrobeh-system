@@ -82,14 +82,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.99`
+نسخهٔ کد: `v170.103`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۴۲۶ | ۳۳ |
-| `telegram.gs` | ۳۸۵۳۹ | ۲۰۸۳ |
+| `Code.gs` | ۴۲۷ | ۳۳ |
+| `telegram.gs` | ۳۸۵۶۴ | ۲۰۸۴ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -101,7 +101,7 @@
 | `voice.gs` | ۱۱۱۸ | ۹۳ |
 | `review.gs` | ۶۲۳ | ۵۳ |
 | `seo_gemini.gs` | ۲۳۲ | ۱۶ |
-| `gemini_setup.gs` | ۵۴۶ | ۳۸ |
+| `gemini_setup.gs` | ۵۷۹ | ۴۰ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۸۳۵ | ۱۳۳ |
 | `v168.gs` | ۲۴۹۷ | ۱۵۶ |
@@ -110,7 +110,7 @@
 | `magseo.gs` | ۶۱۶ | ۴۴ |
 | `panel.gs` | ۲۲۹ | ۲۳ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
-| `bridge.gs` | ۱۶۱ | ۱۱ |
+| `bridge.gs` | ۲۰۴ | ۱۴ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
@@ -401,6 +401,7 @@
 | اصلی ۳ از ۳ | `tgRunTests3` |
 | دایرکتوری صفحهٔ اصلی p3 (v170.23.2) | `tgDirP3Tests` |
 | دادهٔ دکمه (v170.9.2) | `tgCbTests` |
+| ویس بی Gemini v170.103 | `e35PrivTests` |
 | مینی‌اپ ۲ | `tgApp2Tests` |
 | نسخهٔ ۱۱۶ | `tgV116Tests` |
 | پیام و بازخورد | `tgV117MsgTests` |
@@ -412,9 +413,10 @@
 | اشغال گاندی (v144) | `tgOccTests` |
 | نسخهٔ ۱۶۲ | `tgV162Tests` |
 | Gemini: هزینه و گزارش هفتگی v170.81 | `gemTests` |
+| Gemini: مسیر Vertex AI v170.84 | `vtxTests` |
 | بستهٔ انتشار خودکار (v170.45) | `pbPkgTests` |
 | سهمیهٔ زمان اجرا (v170.23.12.5) | `bgTests` |
-| Gemini: مسیر Vertex AI v170.84 | `vtxTests` |
+| سقف ماهانهٔ Gemini می‌بندد v170.103 | `gemCapTests` |
 | کارخانهٔ کاور v170.82 | `cvTests` |
 | بستهٔ سئو و بازبینی اول v170.83 | `msTests` |
 | ورود به پنل و موج دعوت v170.98 | `pnlTests` |

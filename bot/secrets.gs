@@ -44,7 +44,7 @@ function secRows_() {
   var rows = cfgTabRows_(); if (!rows) return 'تب نیست';
   var have = {}; rows.forEach(function (r) { have[String(r[0]).trim()] = 1; });
   var add = SEC_KEYS.filter(function (k) { return !have[k + '_INBOX']; }).map(function (k) { return [k + '_INBOX', '', 'یک‌باره: ' + SEC_NOTE[k] + '. همگام‌سازی ساعتی مقدار را به Script Properties می‌برد و خانه را پاک می‌کند.']; });
-  ['BRIDGE_TG_URL', 'BRIDGE_TEST_CHATS'].forEach(function (k) { if (!have[k]) add.push([k, '', CFG_NOTE[k] || '']); });   /* E29: کلیدهای خالی */
+  ['BRIDGE_TG_URL', 'BRIDGE_TEST_CHATS', 'BRIDGE_TEST_MUTE'].forEach(function (k) { if (!have[k]) add.push([k, '', CFG_NOTE[k] || '']); });   /* E29: کلیدهای خالی */
   if (!add.length) return 'ردیف‌ها بود';
   if (TG_DRY) { TG_MEM['cfg:tab'] = rows.concat(add); return 'ساخته شد: ' + add.length; }
   var sh = SpreadsheetApp.openById(TG_SHEET_ID).getSheetByName(CFG_TAB);
