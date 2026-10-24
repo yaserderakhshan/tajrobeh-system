@@ -4,6 +4,8 @@
  * ۱) رونوشت آپدیت چت‌های آزمایشی (E29): بعد از پاسخ عادی بات، اگر chat در فهرست BRIDGE_TEST_CHATS (تب پنهان تنظیمات؛
  *    خالی = فقط مالک) بود، بدنهٔ خام همان آپدیت به BRIDGE_TG_URL پل می‌رود، با سربرگ X-Telegram-Bot-Api-Secret-Token
  *    و راز BRIDGE_TG_SECRET (Script Property، از صندوق راز secrets.gs). شکست هرگز پاسخ بات را نمی‌گیرد: try/catch و یک خط لاگ.
+ *    v170.103 (E36): نشانی پیش‌فرض BR_TG_URL_DEF و راز ساخته‌شده از توکن بات (brSecret_)، پس بی دست انسان روشن است؛
+ *    BRIDGE_TEST_MUTE پاسخ بات قدیمی را برای چت‌های آزمایشی خاموش می‌کند.
  * ۲) گیرندهٔ پشتیبان رمزشدهٔ پل (E31): POST به همان /exec با بدنهٔ JSON
  *    {kind: 'bridge_backup', date: '<ISO>', sha256: '<hex>', name: '<اختیاری>', data: '<base64>', sig: '<hex>'}
  *    sig = HMAC-SHA256 با راز TG_BRIDGE_HANDOFF_SECRET روی «date + sha256». Apps Script سربرگ درخواست را نمی‌بیند، پس امضا در بدنه است.
@@ -23,6 +25,28 @@ function brChatOf_(u) {
   if (u.callback_query && u.callback_query.from) return String(u.callback_query.from.id);
   return '';
 }
+/* v170.103 (E36): نشانی پیش‌فرض گیرندهٔ پل؛ «off» در BRIDGE_TG_URL خاموش می‌کند، مقدار دیگر جایش می‌نشیند */
+var BR_TG_URL_DEF = 'https://bridge.tajrobeh.life/api/v2/communication/webhooks/telegram-webhook';
+var BR_SEC_LABEL = 'tajrobeh-bridge-telegram-mirror-v1';
+function brTgUrl_() {
+  var v = String(cfg_('BRIDGE_TG_URL', '') || '').trim();
+  if (/^(off|0|خاموش)$/i.test(v)) return '';
+  return v || BR_TG_URL_DEF;
+}
+/* راز سربرگ بی دست انسان (E36 بند ۳): اگر صندوق رازی نداده، HMAC-SHA256 با کلید توکن همین بات روی BR_SEC_LABEL (۶۴ رقم هگز).
+   پل توکن همین بات را دارد (پاسخ آزمایشی را با آن می‌فرستد)، پس همین مقدار را خودش می‌سازد؛ با عوض شدن توکن هر دو سو با هم عوض می‌شوند */
+function brSecret_() {
+  var s = typeof secProp_ === 'function' ? secProp_('BRIDGE_TG_SECRET') : '';
+  if (s) return s;
+  var tok = TG_DRY ? String(TG_MEM['br:token'] || '') : String(PropertiesService.getScriptProperties().getProperty('TELEGRAM_TOKEN') || '');
+  return tok ? brHex_(Utilities.computeHmacSha256Signature(BR_SEC_LABEL, tok)) : '';
+}
+/* E36 بند ۴: «بله» در BRIDGE_TEST_MUTE یعنی بات قدیمی به چت‌های آزمایشی جواب نمی‌دهد و فقط رونوشت به پل می‌رود (پیش‌فرض خاموش) */
+function brMuted_(u) {
+  if (!/^(1|بله|yes|on)$/i.test(String(cfg_('BRIDGE_TEST_MUTE', '') || '').trim()) || !brTgUrl_()) return false;
+  var chat = brChatOf_(u);
+  return !!chat && brTestChats_().indexOf(chat) > -1;
+}
 function brTestChats_() {
   var v = String(cfg_('BRIDGE_TEST_CHATS', '') || '').trim();
   return (v ? v.split(/[,،;\s]+/) : [String(TG_OWNER_CHAT)]).filter(String);
@@ -32,7 +56,7 @@ function brMirror_(raw, u) {
   try {
     var chat = brChatOf_(u);
     if (!chat || brTestChats_().indexOf(chat) < 0) return false;
-    var url = String(cfg_('BRIDGE_TG_URL', '') || '').trim(), sec = typeof secProp_ === 'function' ? secProp_('BRIDGE_TG_SECRET') : '';
+    var url = brTgUrl_(), sec = brSecret_();
     if (!url || !sec) return false;
     var h = {}; h[BR_MIRROR_HDR] = sec;
     if (TG_DRY) { (TG_MEM['br:mirror'] = TG_MEM['br:mirror'] || []).push({ url: url, raw: raw, h: h }); return true; }
@@ -128,6 +152,25 @@ function brTests() {
     ok('فهرست چت‌های آزمایشی از تنظیمات؛ دکمه هم', brMirror_('{}', { update_id: 3, callback_query: { from: { id: 8888 }, message: { chat: { id: 8888 } } } }) === true && brMirror_('{}', u1) === false);
     TG_CFG_ = {};
     ok('بی نشانی، رونوشتی نیست و خطایی نمی‌دهد', brMirror_('{}', u2) === false);
+    /* E36 */
+    TG_MEM['br:mirror'] = [];
+    ok('نشانی پیش‌فرض پل بی تنظیم (روی کد قبلی مردود)', brMirror_('{}', u1) === true && TG_MEM['br:mirror'][0].url === BR_TG_URL_DEF && /telegram-webhook$/.test(BR_TG_URL_DEF));
+    TG_CFG_ = { BRIDGE_TG_URL: 'off' };
+    ok('«off» رونوشت را خاموش می‌کند', brMirror_('{}', u1) === false && brTgUrl_() === '');
+    TG_CFG_ = {}; delete TG_MEM['pnlp:BRIDGE_TG_SECRET']; TG_MEM['br:token'] = 'test-only-bot-token';
+    var want = brHex_(Utilities.computeHmacSha256Signature('tajrobeh-bridge-telegram-mirror-v1', 'test-only-bot-token'));
+    TG_MEM['br:mirror'] = [];
+    ok('بی صندوق، راز سربرگ از توکن بات ساخته می‌شود و هر بار همان است (روی کد قبلی مردود)', brMirror_('{}', u1) === true && TG_MEM['br:mirror'][0].h[BR_MIRROR_HDR] === want && want.length === 64 && brSecret_() === want);
+    TG_MEM['br:token'] = '';
+    ok('بی توکن و بی صندوق، رونوشتی نیست', brMirror_('{}', u1) === false);
+    TG_MEM['br:token'] = 'test-only-bot-token';
+    ok('بی کلید خاموشی، بات قدیمی به چت آزمایشی هم جواب می‌دهد', brMuted_(u1) === false);
+    TG_CFG_ = { BRIDGE_TEST_MUTE: 'بله' };
+    ok('با «بله»، فقط چت آزمایشی بی پاسخ بات قدیمی است', brMuted_(u1) === true && brMuted_(u2) === false);
+    TG_CFG_ = { BRIDGE_TEST_MUTE: 'بله', BRIDGE_TG_URL: 'off' };
+    ok('رونوشت خاموش باشد، خاموشی پاسخ هم اثر ندارد', brMuted_(u1) === false);
+    TG_CFG_ = {};
+    ok('doPost پاسخ بات را فقط با brMuted_ کنار می‌گذارد', /brMuted_\(body\)[\s\S]{0,80}tgHandle\(body\)/.test(String(doPost)));
     ok('doPost بعد از پاسخ بات رونوشت می‌فرستد و مسیر پشتیبان دارد', /tgHandle\(body\);[\s\S]{0,200}brMirror_\(raw, body\)/.test(String(doPost)) && /bridge_backup/.test(String(doPost)));
 
     /* پشتیبان */

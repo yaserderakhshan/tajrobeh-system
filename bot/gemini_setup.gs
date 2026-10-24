@@ -71,8 +71,21 @@ function gemKey_() {
 }
 function gemTask_(t) { GEM_TASK = String(t || ''); }
 
+/* v170.103 (E35 بند ۳): در ۱۰۰٪ بودجهٔ ماهانه (GEM_MONTH_EUR، ۳۰ روز گذشته) هیچ درخواست تازه‌ای به Gemini نمی‌رود.
+   مصرف ماه ۱۰ دقیقه در کش می‌ماند تا هر درخواست دفتر را نخواند. خروجی بسته: کد ۴۰۳ تا aiGen_ دوباره امتحان نکند */
+function gemMonthFull_() {
+  var used;
+  if (TG_DRY) used = TG_MEM['gem:monthUsd'] !== undefined ? Number(TG_MEM['gem:monthUsd']) : 0;
+  else {
+    var c = CacheService.getScriptCache(), hit = c.get('gemMonthUsd');
+    if (hit !== null && hit !== undefined && hit !== '') used = Number(hit);
+    else { used = 0; try { used = gemBudget_().month; } catch (e) {} c.put('gemMonthUsd', String(used), 600); }
+  }
+  return used >= GEM_MONTH_EUR * GEM_EUR_USD;
+}
 function gemFetch_(path, payload) {
   var res, m = String(path).match(/^models\/([^:]+):generateContent$/);
+  if (payload && gemMonthFull_()) return { code: 403, body: { error: { message: 'سقف ماهانهٔ Gemini (' + GEM_MONTH_EUR + ' یورو) پر است' } } };
   if (gemBackend_() === 'vertex') {
     if (!payload) return vtxList_();
     if (m) return vtxGenerate_(m[1], payload);
@@ -541,5 +554,25 @@ function gemTests() {
   TG_DRY = keep; TG_MEM = memK; TG_OUTBOX = outK; GEM_TASK = '';
   GEM_CREDIT_USD = cfgK[0]; GEM_CREDIT_END = cfgK[1]; GEM_SPENT_ADJ_USD = cfgK[2]; GEM_EUR_USD = cfgK[3]; GEM_MONTH_EUR = cfgK[4]; GEM_ALERT_PCT = cfgK[5];
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ هزینه و گزارش Gemini درست است'));
+  return tgTestTally_(log, fail);
+}
+
+try { TG_SUITES.push(['سقف ماهانهٔ Gemini می‌بندد v170.103', 'gemCapTests']); } catch (eSu) {}
+function gemCapTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  var keep = { dry: TG_DRY, mem: TG_MEM, m: GEM_MONTH_EUR, r: GEM_EUR_USD };
+  TG_DRY = true; TG_MEM = {}; GEM_MONTH_EUR = 90; GEM_EUR_USD = 1.2;
+  try {
+    var hits = 0; TG_MEM['gem:fakeFn'] = function () { hits++; return { code: 200, body: { candidates: [] } }; };
+    TG_MEM['gem:monthUsd'] = 107.9;
+    ok('زیر سقف، درخواست می‌رود', gemFetch_('models/x:generateContent', { contents: [] }).code === 200 && hits === 1);
+    TG_MEM['gem:monthUsd'] = 108;
+    var r = gemFetch_('models/x:generateContent', { contents: [] });
+    ok('در ۱۰۰٪ سقف ماه، درخواست نمی‌رود و ۴۰۳ برمی‌گردد (روی کد قبلی مردود)', r.code === 403 && hits === 1 && /سقف ماهانه/.test(r.body.error.message));
+    ok('فهرست مدل‌ها (بی بدنه) بسته نمی‌شود', gemFetch_('models', null) && hits === 2);
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
+  TG_DRY = keep.dry; TG_MEM = keep.mem; GEM_MONTH_EUR = keep.m; GEM_EUR_USD = keep.r;
+  Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ سقف ماهانه درست است'));
   return tgTestTally_(log, fail);
 }

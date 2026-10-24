@@ -275,7 +275,7 @@ function evlTranscribe_(c) {
     if (evlDry_()) t = TG_MEM['ai:tr'] || 'متن آزمایشی ویس';
     else {
       var f = tgTgFile_(c['file_id']), ext = (String(f.path).split('.').pop() || 'ogg').replace('oga', 'ogg');
-      t = String(aiTranscribe_(f.blob.setName('v.' + ext), { priv: false, hint: 'حرف یکی از حاضران یک رویداد آموزشی دربارهٔ همان رویداد' }).text || '').trim();
+      t = String(aiTranscribe_(f.blob.setName('v.' + ext), { priv: true, hint: 'حرف یکی از حاضران یک رویداد آموزشی دربارهٔ همان رویداد' }).text || '').trim();
     }
     if (t) { c['متن'] = t.slice(0, 3000); evlPut_(EVL_C_TAB, EVL_C_HEAD, c); }
     return t;
