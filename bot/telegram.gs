@@ -5254,6 +5254,7 @@ function tgHHMM_(cell) {
 
 /* v166.26: تب «اسلات معارفه» در هر پیشنهاد وقت یک بار خوانده می‌شود، نه دو بار */
 function tgSlotsRead_() {
+  if (TG_DRY && TG_MEM['slotrows']) return TG_MEM['slotrows'];
   const sh = tgSS_().getSheetByName(TG_SLOTS);
   if (!sh || sh.getLastRow() < 4) return [];
   return sh.getRange(4, 1, sh.getLastRow() - 3, 7).getValues();
@@ -5276,8 +5277,8 @@ function tgFreeSlots_(scope) {
   const sv = tgSlotsRead_();
   const taken = tgTakenSet_(sv);
   const offHas = tgOffChecker_();
-  const out = [];
-  const now = new Date();
+  const out = [], seen = {};
+  const now = TG_DRY && TG_MEM['slotnow'] ? new Date(TG_MEM['slotnow']) : new Date();
   for (var d = 0; d < TG_WEEKS_AHEAD * 7; d++) {
     const day = new Date(now.getTime() + d * 86400000);
     const iso = Utilities.formatDate(day, TG_TZ, 'yyyy-MM-dd');
@@ -5287,6 +5288,7 @@ function tgFreeSlots_(scope) {
       if (!tgRecurOk_(rules[r].recur, rules[r].from, iso)) continue;
       if (taken[rules[r].name + '|' + iso + '|' + rules[r].hhmm]) continue;
       if (offHas(rules[r].name, iso)) continue;
+      seen[rules[r].name + '|' + iso + '|' + rules[r].hhmm] = true;
       out.push({ therapist: rules[r].name, dateIso: iso, hhmm: rules[r].hhmm, weekly: true });
     }
   }
@@ -5300,13 +5302,66 @@ function tgFreeSlots_(scope) {
       if (!(v[i][1] instanceof Date)) continue;
       const hhmm = tgHHMM_(v[i][3]);
       if (!hhmm) continue;
-      out.push({ therapist: String(v[i][0]).trim(),
-                 dateIso: Utilities.formatDate(v[i][1], TG_TZ, 'yyyy-MM-dd'),
-                 hhmm: hhmm, weekly: false, row: i + 4 });
+      const th = String(v[i][0]).trim(), diso = Utilities.formatDate(v[i][1], TG_TZ, 'yyyy-MM-dd'), key = th + '|' + diso + '|' + hhmm;
+      /* v170.104 (E35): ردیف «آزاد» لغوشده‌ای که قاعدهٔ هفتگی هم همان ساعت را می‌سازد، یا ساعتی که ردیف دیگری رزرو کرده، یا روز مرخصی
+         دوباره پیشنهاد نمی‌شود؛ پیش از این یک ساعت درمانگر دو بار رزرو می‌شد */
+      if (taken[key] || seen[key] || offHas(th, diso)) continue;
+      seen[key] = true;
+      out.push({ therapist: th, dateIso: diso, hhmm: hhmm, weekly: false, row: i + 4 });
     }
   }
   out.sort(function (a, b) { return (a.dateIso + a.hhmm) < (b.dateIso + b.hhmm) ? -1 : 1; });
   return out;
+}
+
+/** یک‌بارهٔ خودکار v170.104 (E37 بند ۲): سنجش فقط‌خواندنی روی دادهٔ زنده؛ هیچ رزروی نوشته نمی‌شود.
+    خروجی: شمار پیشنهادها، ساعت تکراری (باید ۰)، ساعتی که هم رزرو شده و هم پیشنهاد می‌شود (باید ۰)، ردیف آزاد لغوشده‌ای که هم‌ساعت قاعدهٔ هفتگی است */
+function bkV170104Check() {
+  var free = tgFreeSlots_(''), sv = tgSlotsRead_(), taken = tgTakenSet_(sv), seen = {}, dup = 0, both = 0;
+  free.forEach(function (x) { var k = x.therapist + '|' + x.dateIso + '|' + x.hhmm; if (seen[k]) dup++; seen[k] = 1; if (taken[k]) both++; });
+  var freedRows = sv.filter(function (r) { return String(r[5]).trim() === 'آزاد'; }).length;
+  return 'پیشنهاد: ' + free.length + ' · ساعت تکراری: ' + dup + ' · رزروشده و پیشنهادشده: ' + both + ' · ردیف آزاد در جدول: ' + freedRows;
+}
+try { TG_SUITES.push(['رزرو دوباره نه v170.104', 'bookFixTests']); } catch (eSu) {}
+function bookFixTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX };
+  TG_DRY = true; TG_OUTBOX = [];
+  try {
+    /* یکشنبه ۲۵ اکتبر ۲۰۲۶؛ قاعدهٔ هفتگی درمانگر آزمون یکشنبه‌ها ۱۸:۰۰ */
+    var day = new Date('2026-10-25T12:00:00+03:30'), wd = Number(Utilities.formatDate(day, TG_TZ, 'u'));
+    TG_MEM = { slotnow: '2026-10-25T08:00:00+03:30', weekrules: [{ name: 'درمانگر آزمون', iso: wd, hhmm: '18:00', pool: 'ایران', recur: '', from: '' }], offrows: [] };
+    var dt = new Date('2026-10-25T18:00:00+03:30');
+    function key(L) { return L.filter(function (x) { return x.therapist === 'درمانگر آزمون' && x.dateIso === '2026-10-25' && x.hhmm === '18:00'; }); }
+    TG_MEM['slotrows'] = [['درمانگر آزمون', dt, 'عصر', '18:00', 'آنلاین', 'آزاد', 'ایران']];
+    ok('ردیف لغوشدهٔ «آزاد» و قاعدهٔ هفتگی همان ساعت: فقط یک پیشنهاد (روی کد قبلی مردود)', key(tgFreeSlots_('')).length === 1, key(tgFreeSlots_('')).length);
+    TG_MEM['slotrows'] = [['درمانگر آزمون', dt, 'عصر', '18:00', 'آنلاین', 'آزاد', 'ایران'], ['درمانگر آزمون', dt, 'عصر', '18:00', 'آنلاین', 'رزرو شده', 'ایران']];
+    ok('ساعتی که ردیف دیگری رزرو کرده، با ردیف آزاد قدیمی دوباره پیشنهاد نمی‌شود (روی کد قبلی مردود)', key(tgFreeSlots_('')).length === 0);
+    TG_MEM['weekrules'] = [];
+    TG_MEM['slotrows'] = [['درمانگر آزمون', dt, 'عصر', '18:00', 'آنلاین', 'آزاد', 'ایران']];
+    ok('ردیف آزاد یک‌باره بی مرخصی پیشنهاد می‌شود', key(tgFreeSlots_('')).length === 1 && key(tgFreeSlots_(''))[0].row === 4);
+    TG_MEM['offrows'] = [{ name: 'درمانگر آزمون', from: '2026-10-24', to: '2026-10-26' }];
+    ok('ردیف آزاد یک‌باره در روز مرخصی پیشنهاد نمی‌شود (روی کد قبلی مردود)', key(tgFreeSlots_('')).length === 0);
+
+    /* سوپرویژن */
+    TG_MEM = { svbook: [] };
+    var st = { by: tgSvByCode_ }, slot = { code: 'SL-9', sup: 'سوپروایزر آزمون', type: 'گروهی', day: 'شنبه', time: '18:00', cap: 3, taken: 0, chat: '', status: 'باز' };
+    tgSvByCode_ = function () { return slot; };
+    try {
+      tgSvBook_('5550050', 'SL-9', 'دانشجو', '');
+      tgSvBook_('5550050', 'SL-9', 'دانشجو', '');
+      ok('سوپرویژن: همان نفر دو بار برای همان وقت ثبت نمی‌شود (روی کد قبلی مردود)', TG_MEM['svbook'].length === 1 && slot.taken === 1 &&
+        TG_OUTBOX.some(function (x) { return /قبلاً رزرو/.test(x.text || ''); }));
+      tgSvBook_('5550051', 'SL-9', 'دیگری', '');
+      ok('سوپرویژن: نفر دیگر ثبت می‌شود', TG_MEM['svbook'].length === 2 && slot.taken === 2);
+      ok('یک‌بارهٔ سنجش زنده در فهرست CI', CI_ONCE_ALLOW.indexOf('bkV170104Check') >= 0 && CI_ONCE_AUTO.indexOf('bkV170104Check') >= 0);
+    ok('سوپرویژن زیر قفل', /tgLock_\(\)[\s\S]{0,120}tryLock/.test(String(tgSvBook_)));
+    } finally { tgSvByCode_ = st.by; }
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
+  TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box;
+  Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ رزرو دوباره بسته است'));
+  return tgTestTally_(log, fail);
 }
 
 function tgSlotUtc_(s) {
@@ -26503,7 +26558,19 @@ function tgSvFree_(chat) {
                  { inline_keyboard: rows });
 }
 
+/* v170.104 (E35): رزرو سوپرویژن زیر قفل، با خواندن دوبارهٔ ظرفیت و بی ثبت تکراری همان نفر برای همان وقت */
 function tgSvBook_(chat, code, name, uname) {
+  var lock = tgLock_();
+  if (lock && !lock.tryLock(10000)) return tgSend_(chat, 'چند لحظهٔ دیگر دوباره بزنید.');
+  try {
+    if (!TG_DRY) tgSchDropCache_();
+    var mine = TG_DRY ? (TG_MEM['svbook'] || []) : tgSchRows_(TG_SCH_T_GRP, TG_SCH_GRP_HEAD, 12);
+    if (mine.some(function (r) { return String(r[1]).trim() === String(code).trim() && String(r[8]).trim() === String(chat) && String(r[10]).trim() === 'رزرو شد'; }))
+      return tgSend_(chat, 'این وقت را قبلاً رزرو کرده‌اید.');
+    return tgSvBookLocked_(chat, code, name, uname);
+  } finally { if (lock) lock.releaseLock(); }
+}
+function tgSvBookLocked_(chat, code, name, uname) {
   var s = tgSvByCode_(code);
   if (!s) return tgSend_(chat, 'این وقت پیدا نشد.');
   if (s.status === 'حذف شده' || s.status === 'بسته') return tgSend_(chat, 'این وقت دیگر باز نیست.');
