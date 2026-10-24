@@ -82,14 +82,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.103`
+نسخهٔ کد: `v170.105`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۷ | ۳۳ |
-| `telegram.gs` | ۳۸۵۶۴ | ۲۰۸۴ |
+| `telegram.gs` | ۳۸۵۹۶ | ۲۰۸۵ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -401,6 +401,7 @@
 | اصلی ۳ از ۳ | `tgRunTests3` |
 | دایرکتوری صفحهٔ اصلی p3 (v170.23.2) | `tgDirP3Tests` |
 | دادهٔ دکمه (v170.9.2) | `tgCbTests` |
+| عضویت مدرسه فقط با تأیید v170.105 | `tgSjSecTests` |
 | ویس بی Gemini v170.103 | `e35PrivTests` |
 | مینی‌اپ ۲ | `tgApp2Tests` |
 | نسخهٔ ۱۱۶ | `tgV116Tests` |
