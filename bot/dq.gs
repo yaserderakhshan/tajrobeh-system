@@ -371,8 +371,9 @@ function dqHourly_() {
   return n;
 }
 /* از tgTick5: هر ۱۰ دقیقه */
+var DQ_TICK_MIN = 30;   /* v170.106: صف ارسال هر ۳۰ دقیقه (پیش‌تر ۱۰)، سهمیه */
 function dqTick5_() {
-  if (!dqDry_() && !v16810Due_('DQ_TICK_AT', 10)) return 0;
+  if (!dqDry_() && !v16810Due_('DQ_TICK_AT', DQ_TICK_MIN)) return 0;
   if (!dqDry_()) v16810Prop_('DQ_TICK_AT', v16810Now_());
   var t0 = Date.now();
   if (dqFlag_() !== '1') { dqStat_(t0, true); return 0; }   /* کاری نیست: شیت خوانده نمی‌شود */

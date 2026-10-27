@@ -795,6 +795,8 @@ function wsGuard_(name, fn) {
 }
 
 /* ======================= تریگر ======================= */
+/* v170.106 (سهمیهٔ ۹۰ دقیقه‌ای تریگر، تصمیم یاسر): میز کار سایت فوری نیست؛ هر ۳۰ دقیقه به جای ۵ (هر اجرا حدود ۳۰ ثانیه) */
+var WS_TICK_MIN = 30;
 function wsTick(e) {
   if (ciPaused_(e, 'wsTick', 'skip')) return;
   var rs0 = Date.now();
@@ -810,6 +812,16 @@ function wsTick(e) {
     wsMutex_(false);
     try { tgRunStat_('wsTick', rs0); } catch (eR) {}
   }
+}
+/** یک‌بارهٔ خودکار v170.106: تریگر wsTick از ۵ به ۳۰ دقیقه؛ پرداخت (tgPayTick)، یادآوری جلسه (tgMeetTick) و tgTick5 دست نمی‌خورند.
+    خروجی: شمار تریگر هر کار، بی هیچ مقدار دیگری */
+function trgV170106Tune() {
+  var ts = ScriptApp.getProjectTriggers(), had = 0;
+  ts.forEach(function (t) { if (t.getHandlerFunction() === 'wsTick' && t.getEventType() === ScriptApp.EventType.CLOCK) { ScriptApp.deleteTrigger(t); had++; } });
+  if (had) ScriptApp.newTrigger('wsTick').timeBased().everyMinutes(WS_TICK_MIN).create();
+  var n = {}; ScriptApp.getProjectTriggers().forEach(function (t) { var f = t.getHandlerFunction(); n[f] = (n[f] || 0) + 1; });
+  return 'wsTick: ' + (had ? had + ' تریگر ۵ دقیقه‌ای ← یک تریگر ' + WS_TICK_MIN + ' دقیقه‌ای' : 'تریگری نبود؛ ساخته نشد') +
+    ' · همه: ' + Object.keys(n).sort().map(function (k) { return k + (n[k] > 1 ? '×' + n[k] : ''); }).join('، ');
 }
 /* قفل کوتاه + نشان اجرا در Script Properties تا قفل اسکریپت (که doPost هم دارد) چند دقیقه نگه داشته نشود */
 function wsMutex_(take) {
@@ -833,7 +845,7 @@ function wsSetup() {
     var ts = ScriptApp.getProjectTriggers();
     if (!ts.some(function (t) { return t.getHandlerFunction() === 'wsTick'; })) {
       if (ts.length >= 19) trig = 'ساخته نشد: سقف ۲۰ تریگر';
-      else { ScriptApp.newTrigger('wsTick').timeBased().everyMinutes(5).create(); trig = 'ساخته شد'; }
+      else { ScriptApp.newTrigger('wsTick').timeBased().everyMinutes(WS_TICK_MIN).create(); trig = 'ساخته شد'; }
     }
   }
   return 'برگه‌ها: ۶ · تریگر wsTick: ' + trig;
@@ -1087,7 +1099,8 @@ function wsTests() {
     ok('قفل: اجرای هم‌زمان رد می‌شود', wsMutex_(true) === true && wsMutex_(true) === false && wsMutex_(false) === true && wsMutex_(true) === true);
     wsMutex_(false);
     ok('wsTick خط اول توقف دیپلوی را دارد', /ciPaused_\(e, 'wsTick', 'skip'\)/.test(String(wsTick)));
-    ok('wsSetup فقط تریگر ۵ دقیقه‌ای wsTick', /newTrigger\('wsTick'\)\.timeBased\(\)\.everyMinutes\(5\)/.test(String(wsSetup)));
+    ok('یک‌بارهٔ تنظیم تریگر در فهرست CI و فقط wsTick را عوض می‌کند', CI_ONCE_AUTO.indexOf('trgV170106Tune') >= 0 && !/tgPayTick|tgMeetTick|tgTick5/.test(String(trgV170106Tune).replace(/\/\*[\s\S]*?\*\//g, '')));
+    ok('wsSetup فقط تریگر ۳۰ دقیقه‌ای wsTick (v170.106، سهمیه)', /newTrigger\('wsTick'\)\.timeBased\(\)\.everyMinutes\(WS_TICK_MIN\)/.test(String(wsSetup)) && WS_TICK_MIN === 30);
     ok('در رجیستری TG_CAP', TG_CAP.some(function (c) { return c.key === 'ws_desk' && c.appNa; }));
     ok('کد هیچ مقدار کلیدی ندارد', !/TG_DIR_KEY'\s*,\s*'[^']{8,}'/.test(String(wsKey_)));
   } catch (e) {
