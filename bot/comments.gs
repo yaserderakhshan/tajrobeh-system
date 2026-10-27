@@ -19,7 +19,8 @@ var CM_ST = { DRY: 'آزمایشی', DONE: 'اعمال شد', MAN: 'بررسی �
 var CM_CAT = { set: 'معارفه تعیین شد', cancel: 'معارفه لغو شد یا ارجاع دوباره', noans: 'بی‌پاسخ یا خاموش', start: 'شروع درمان',
   prefs: 'ترجیحات و شرح حال', psy: 'روانپزشکی', order: 'دستور ' + tgNm_('reception') + ' به تیم', other: 'سایر' };
 var CM_WHY = { hours: 'ساعت نخورد', inp: 'حضوری نشد', fit: 'رویکرد یا جنسیت یا سن', cmp: 'مقایسه', other: 'دلیل دیگر' };
-var CM_MIN = 15, CM_MARK = '🤖', CM_MAX_RUN = 25, CM_NOANS_MAX = 3, CM_CONF = 0.75;
+var CM_MIN = 30,   /* v170.106: ۱۵ ← ۳۰، سهمیه */
+    CM_MARK = '🤖', CM_MAX_RUN = 25, CM_NOANS_MAX = 3, CM_CONF = 0.75;
 /* v170.21: فهرست ثابت اولویت با کد لید (CM_PRIORITY) برداشته شد؛ ترتیب فقط با زمان کامنت */
 
 function cmOn_() { return lmOn_(); }

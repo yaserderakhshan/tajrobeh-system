@@ -82,7 +82,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.104`
+نسخهٔ کد: `v170.106`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -104,7 +104,7 @@
 | `gemini_setup.gs` | ۵۷۹ | ۴۰ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۸۳۵ | ۱۳۳ |
-| `v168.gs` | ۲۴۹۷ | ۱۵۶ |
+| `v168.gs` | ۲۵۱۲ | ۱۵۷ |
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `cover.gs` | ۳۸۷ | ۲۷ |
 | `magseo.gs` | ۶۱۶ | ۴۴ |
@@ -114,8 +114,8 @@
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
-| `comments.gs` | ۱۰۷۹ | ۶۸ |
-| `dq.gs` | ۶۰۲ | ۴۹ |
+| `comments.gs` | ۱۰۸۰ | ۶۸ |
+| `dq.gs` | ۶۰۳ | ۴۹ |
 | `cfg.gs` | ۲۰۴ | ۱۴ |
 | `ops.gs` | ۱۱۳۲ | ۱۰۰ |
 | `social_ig.gs` | ۳۳۰ | ۱۴ |
@@ -139,7 +139,7 @@
 | `psyref.gs` | ۲۹۴ | ۲۲ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۱۴۶۵ | ۱۱۴ |
-| `leadspeed.gs` | ۱۱۵۶ | ۸۷ |
+| `leadspeed.gs` | ۱۱۵۷ | ۸۷ |
 | `leadclaim.gs` | ۶۸۳ | ۴۷ |
 | `nurture.gs` | ۲۹۹ | ۲۶ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
@@ -148,7 +148,7 @@
 | `uptime.gs` | ۱۵۴ | ۱۱ |
 | `agents.gs` | ۲۶۸ | ۲۰ |
 | `evlite.gs` | ۶۹۶ | ۶۰ |
-| `ws.gs` | ۱۱۰۴ | ۷۵ |
+| `ws.gs` | ۱۱۱۷ | ۷۶ |
 
 ### کارهای زمان‌دار
 
@@ -172,7 +172,7 @@
 | `tgWatchdog` | `telegram.gs` | everyHours(1) | عقب |
 | `vkTick` | `building.gs` | onEdit / دستی | رد |
 | `vxTick` | `voice.gs` | after(پویا) | رد |
-| `wsTick` | `ws.gs` | everyMinutes(5) | رد |
+| `wsTick` | `ws.gs` | everyMinutes(WS_TICK_MIN) | رد |
 | `ciRunDeferred` | `ci.gs` | at(پویا)، after(5000)، after(60 * 1000) | متوقف نمی‌شود |
 | `evlRun` | `evlite.gs` | after(1000) | متوقف نمی‌شود |
 | `tgPoll` | `telegram.gs` | everyMinutes(1) | متوقف نمی‌شود |
@@ -418,6 +418,7 @@
 | بستهٔ انتشار خودکار (v170.45) | `pbPkgTests` |
 | سهمیهٔ زمان اجرا (v170.23.12.5) | `bgTests` |
 | سقف ماهانهٔ Gemini می‌بندد v170.103 | `gemCapTests` |
+| سهمیهٔ تریگر: کارهای غیرفوری هر ۳۰ دقیقه v170.106 | `quotaTuneTests` |
 | کارخانهٔ کاور v170.82 | `cvTests` |
 | بستهٔ سئو و بازبینی اول v170.83 | `msTests` |
 | ورود به پنل و موج دعوت v170.98 | `pnlTests` |

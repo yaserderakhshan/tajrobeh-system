@@ -313,7 +313,7 @@ function v17013ScholarFile_(chat, m) {
 function v17013ScholarTick_() {
   if (TG_DRY) return 0;
   var P = PropertiesService.getScriptProperties(), at = Number(P.getProperty('V17013_SCHO_AT') || 0);
-  if (Date.now() - at < 15 * 60000) return 0;
+  if (Date.now() - at < 30 * 60000) return 0;   /* v170.106: ۱۵ ← ۳۰، سهمیه */
   P.setProperty('V17013_SCHO_AT', String(Date.now()));
   var ss = tgSchSS_(), sh = ss.getSheetByName(V17013_SCHO_TAB);
   if (!sh || sh.getLastRow() < 2) return 0;

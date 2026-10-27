@@ -2066,9 +2066,10 @@ function tgV16810Tests() {
     ok('۵ دقیقه بعد tgCpTick و صف سوشال نمی‌روند، واجب‌ها می‌روند', calls().join() === 'tgDutyTick,dqTick5_,cmTick5_,lsTick_');   /* v170.23.12.5 */
     at(10); tgTick5({});
     var c10 = calls();
-    ok('۱۰ دقیقه بعد صف سوشال می‌رود، کمپین نه (هر ۳۰ دقیقه)', c10.indexOf('soTick') > -1 && c10.indexOf('tgCpTick') < 0);
+    ok('۱۰ دقیقه بعد صف سوشال هنوز نمی‌رود (v170.106: هر ۳۰ دقیقه)، کمپین هم نه', c10.indexOf('soTick') < 0 && c10.indexOf('tgCpTick') < 0);
     at(29.6); tgTick5({});
-    ok('بعد از ۲۹٫۶ دقیقه (لغزش تریگر) tgCpTick با کمپین فعال می‌رود', calls().indexOf('tgCpTick') > -1);
+    var c29 = calls();
+    ok('بعد از ۲۹٫۶ دقیقه (لغزش تریگر) tgCpTick با کمپین فعال و صف سوشال می‌روند', c29.indexOf('tgCpTick') > -1 && c29.indexOf('soTick') > -1);
     TG_MEM['bgp:BG_CP_ACTIVE'] = '0';
     at(60); tgTick5({});
     var c60 = calls();
@@ -2227,7 +2228,7 @@ var BG_DUTY_SAFE_MIN = 180;  /* بی هیچ نشانه‌ای هم هر ۳ سا�
 var BG_CP_ACTIVE_MIN = 30;   /* tgCpTick وقتی کمپین فعال است */
 var BG_CP_CHECK_MIN = 120;   /* بی کمپین فعال: هر ۲ ساعت فقط وضعیت کمپین‌ها (پنجرهٔ تأخیر رویداد ۶ ساعت است) */
 var BG_TH_MIN = 60;          /* فهرست همکاران به سایت، بی کمپین فعال */
-var BG_SO_MIN = 10;          /* صف ارسال سوشال */
+var BG_SO_MIN = 30;          /* صف ارسال سوشال (v170.106: ۱۰ ← ۳۰، سهمیه) */
 var BG_MEMO = null;
 
 function bgDry_() { return typeof TG_DRY !== 'undefined' && TG_DRY; }
@@ -2494,3 +2495,17 @@ function bgTests() {
   return { pass: pass, fail: fail, text: out.filter(function (x) { return x.indexOf('❌') === 0; }).join('\n') };
 }
 try { if (TG_SUITES.every(function (s) { return s[1] !== 'bgTests'; })) TG_SUITES.splice(TG_SUITES.length - 1, 0, ['سهمیهٔ زمان اجرا (v170.23.12.5)', 'bgTests']); } catch (eBg) {}
+
+try { TG_SUITES.push(['سهمیهٔ تریگر: کارهای غیرفوری هر ۳۰ دقیقه v170.106', 'quotaTuneTests']); } catch (eSu) {}
+function quotaTuneTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  try {
+    ok('میز کار سایت (wsTick) هر ۳۰ دقیقه (روی کد قبلی مردود)', WS_TICK_MIN === 30);
+    ok('صف ارسال، کامنت‌ها، سوشال و خبر بورسیه هر ۳۰ دقیقه (روی کد قبلی مردود)', DQ_TICK_MIN === 30 && CM_MIN === 30 && BG_SO_MIN === 30 && /30 \* 60000/.test(String(v17013ScholarTick_)));
+    ok('هشدار فوری و پاسخ ۱۰ دقیقه‌ای لید هنوز در هر تیک ۵ دقیقه‌ای', /run\('tgDutyTick'/.test(String(tgTick5)) && /lsTick_/.test(String(tgTick5)));
+    ok('پرداخت و یادآوری جلسه دست نخورده', /tgPayTick: 5, tgMeetTick: 15/.test(String(tgTrigTune)));
+  } catch (e) { fail++; log.push('✗ خطا: ' + e); }
+  Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ سهمیهٔ تریگر درست است'));
+  return tgTestTally_(log, fail);
+}

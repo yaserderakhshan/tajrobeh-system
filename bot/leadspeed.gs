@@ -1083,8 +1083,9 @@ function cmQuotaTests() {
   TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
   try {
     var t0 = new Date('2026-10-10T10:00:00+03:30').getTime(), M = 60000;
-    var at = function (min) { TG_MEM['stk:now'] = t0 + min * M; };
-    var iso = function (min) { return new Date(t0 + min * M).toISOString(); };
+    var u = CM_MIN / 15;   /* v170.106: CM_MIN از ۱۵ به ۳۰؛ زمان‌های آزمون با همان نسبت */
+    var at = function (min) { TG_MEM['stk:now'] = t0 + min * u * M; };
+    var iso = function (min) { return new Date(t0 + min * u * M).toISOString(); };
     var C = function (id, min, text) { return { id: id, content: text, author: { displayName: 'نمونه' }, createdTime: iso(min), quotedFileContent: { value: '' }, replies: [] }; };
     TG_MEM['stkp:LM_ON'] = '1'; TG_MEM['lm:leads'] = []; TG_MEM['cm:list'] = [C('k1', -600, 'کامنت قدیمی')]; TG_MEM['cm:fileAt'] = 1000;
     var fetches = function () { return TG_MEM['cm:fetchN'] || 0; }, checks = function () { return TG_MEM['cm:checkN'] || 0; };
@@ -1099,11 +1100,11 @@ function cmQuotaTests() {
     ok('پاسخ خود بات کار تازه نیست', fetches() === 1 && checks() === 2);
     TG_MEM['cm:list'].push(C('k2', 50, 'کامنت تازهٔ پذیرش'));
     TG_MEM['cm:fileAt'] = 4000; at(60); cmTick5_();
-    ok('کامنت تازه: اجرای کامل', fetches() === 2 && Number(TG_MEM['stkp:CM_FULL_AT']) === t0 + 60 * M);
-    at(70); ok('فاصلهٔ ۱۵ دقیقه همچنان رعایت می‌شود', cmTick5_() === 0 && TG_MEM['cm:fileAtN'] === 5);
+    ok('کامنت تازه: اجرای کامل', fetches() === 2 && Number(TG_MEM['stkp:CM_FULL_AT']) === t0 + 60 * u * M);
+    at(70); ok('فاصلهٔ CM_MIN همچنان رعایت می‌شود', cmTick5_() === 0 && TG_MEM['cm:fileAtN'] === 5);
     TG_MEM['stkp:CM_MORE'] = '1'; at(75); cmTick5_();
     ok('باقی‌مانده بیش از سقف اجرا: اجرای کامل بی انتظار تغییر', fetches() === 3 && !TG_MEM['stkp:CM_MORE']);
-    at(75 + CM_SAFE_MIN); cmTick5_();
+    TG_MEM['stk:now'] = t0 + 75 * u * M + CM_SAFE_MIN * M; cmTick5_();
     ok('ایمنی: دست‌کم هر ۲ ساعت یک اجرای کامل', fetches() === 4);
     ok('cmNewSince_: فقط کامنت یا پاسخ غیر از بات و بعد از زمان داده‌شده', cmNewSince_([C('a', 10, 'x')], t0) && !cmNewSince_([C('a', -10, 'x')], t0) && !cmNewSince_([C('a', 10, CM_MARK + ' x')], t0) && !cmNewSince_([{ createdTime: iso(10), content: 'x', resolved: true }], t0));
   } catch (e) { fail++; text.push('❌ خطا: ' + (e && e.stack || e)); }
