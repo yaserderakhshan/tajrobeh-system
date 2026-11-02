@@ -7777,12 +7777,7 @@ function tgVerifyInitData_(initData, tokenForTest) {
     // هر دو آرگومان باید بایت باشند؛ ترکیب رشته و بایت در Apps Script overload ندارد و همیشه خطا می‌داد (رزرو مینی‌اپ با «auth» می‌شکست)
     const secret = Utilities.computeHmacSha256Signature(Utilities.newBlob(token).getBytes(), Utilities.newBlob('WebAppData').getBytes());
     const sig = Utilities.computeHmacSha256Signature(Utilities.newBlob(pairs.join('\n')).getBytes(), secret);
-    let hex = '';
-    for (var j = 0; j < sig.length; j++) {
-      const b = (sig[j] < 0 ? sig[j] + 256 : sig[j]).toString(16);
-      hex += (b.length === 1 ? '0' : '') + b;
-    }
-    if (!tgSafeEq_(hex, hash)) return null;   /* v170.9: مقایسهٔ زمان‌ثابت */
+    if (!tgSafeEq_(brHex_(sig), hash)) return null;   /* v170.9: مقایسهٔ زمان‌ثابت */
     /* initData کهنه‌تر از ۲۴ ساعت پذیرفته نمی‌شود (جلوگیری از بازپخش). v170.9: بی auth_date هم پذیرفته نمی‌شود */
     var ad = 0;
     for (var a = 0; a < pairs.length; a++) if (pairs[a].indexOf('auth_date=') === 0) ad = Number(pairs[a].slice(10)) || 0;
@@ -14872,8 +14867,7 @@ function tgPqArchiveAll() {
 
 /* ───── سایت ───── */
 function tgDirSign_(ts, body, key) {
-  return Utilities.computeHmacSha256Signature(ts + '.' + body, key)
-    .map(function (b) { return ('0' + (b & 255).toString(16)).slice(-2); }).join('');
+  return brHex_(Utilities.computeHmacSha256Signature(ts + '.' + body, key));
 }
 
 function tgDirAscii_(s) {

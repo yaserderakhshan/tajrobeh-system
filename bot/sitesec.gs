@@ -21,9 +21,6 @@ function ssSecrets_() {
   return l;
 }
 
-function ssHex_(bytes) {
-  return bytes.map(function (b) { var h = (b & 0xff).toString(16); return h.length < 2 ? '0' + h : h; }).join('');
-}
 
 /* 'ok' | 'bad' | 'stale' | 'none' (بی امضا) | 'nokey' (رمز در بات نیست) */
 function ssVerify_(e, raw) {
@@ -36,7 +33,7 @@ function ssVerify_(e, raw) {
   if (!ts || Math.abs(now - ts) > 300) return 'stale';
   var given = String(p.sig).toLowerCase(), hit = -1;
   for (var j = 0; j < secs.length && hit < 0; j++) {
-    var calc = ssHex_(Utilities.computeHmacSha256Signature(String(ts) + '.' + raw, secs[j]));
+    var calc = brHex_(Utilities.computeHmacSha256Signature(String(ts) + '.' + raw, secs[j]));
     if (given.length !== calc.length) continue;
     var d = 0;
     for (var i = 0; i < calc.length; i++) d |= calc.charCodeAt(i) ^ given.charCodeAt(i);
@@ -202,7 +199,7 @@ function ssTests() {
     var raw = JSON.stringify({ name: 'نمونه', mobile: '+98 912 000 0000', note: '=HYPERLINK("x")' });
     TG_MEM['ss:secret'] = 'k'.repeat(40);
     TG_MEM['ss:now'] = 1790000000;
-    var sig = ssHex_(Utilities.computeHmacSha256Signature('1790000000.' + raw, 'k'.repeat(40)));
+    var sig = brHex_(Utilities.computeHmacSha256Signature('1790000000.' + raw, 'k'.repeat(40)));
     ok('امضای درست ok', ssVerify_({ parameter: { ts: '1790000000', sig: sig } }, raw) === 'ok');
     ok('امضای غلط bad', ssVerify_({ parameter: { ts: '1790000000', sig: sig.replace(/^./, sig[0] === 'a' ? 'b' : 'a') } }, raw) === 'bad');
     ok('بدنهٔ دست‌خورده bad', ssVerify_({ parameter: { ts: '1790000000', sig: sig } }, raw + ' ') === 'bad');
@@ -221,7 +218,7 @@ function ssTests() {
     ok('شماره و متن عادی دست نمی‌خورند', c.f === '+98 912 000 0000' && c.g === '09120000000' && c.h === 'سلام' && c.l === 5);  // pii:ok ساختگی
     /* v170.12: پیام امنیتی وردپرس */
     TG_MEM['ss:enforce'] = false; TG_MEM['ss:nonce'] = {}; TG_MEM['wpsec:owner'] = '700001';
-    function wsSig(b) { return { parameter: { ts: '1790000000', sig: ssHex_(Utilities.computeHmacSha256Signature('1790000000.' + b, 'k'.repeat(40))) } }; }
+    function wsSig(b) { return { parameter: { ts: '1790000000', sig: brHex_(Utilities.computeHmacSha256Signature('1790000000.' + b, 'k'.repeat(40))) } }; }
     var lb = JSON.stringify({ kind: 'wp_sec', event: 'login', user: 'admin<x>', when: '1405-07-12 10:00', ip: '203.0.113.5' });
     TG_OUTBOX = []; TG_MEM['notify'] = [];
     ok('هشدار ورود امضاشده به مالک می‌رود (و HTML پاک می‌شود)', wpSecIn_(wsSig(lb), lb, JSON.parse(lb)) === 'رفت' && TG_MEM['notify'].some(function (n) { return n.chat === '700001' && n.text.indexOf('admin&lt;x&gt;') > -1; }));
@@ -241,7 +238,7 @@ function ssTests() {
     TG_MEM['ss:enforce'] = true; TG_MEM['ss:nonce'] = {}; TG_MEM['ss:nowms'] = 1790000000000;
     var OLD = 'o'.repeat(40), NEW = 'n'.repeat(40);
     TG_MEM['ss:secret'] = ''; TG_MEM['ssp:' + SS_PROP] = OLD;
-    function sg(b, key) { return { parameter: { ts: '1790000000', sig: ssHex_(Utilities.computeHmacSha256Signature('1790000000.' + b, key)) } }; }
+    function sg(b, key) { return { parameter: { ts: '1790000000', sig: brHex_(Utilities.computeHmacSha256Signature('1790000000.' + b, key)) } }; }
     ok('رمز اول مستقیم می‌نشیند', ssRotIn_('X_SEC', NEW) === 'set' && TG_MEM['ssp:X_SEC'] === NEW);
     ok('رمز تازه روی رمز فعلی نمی‌نشیند و منتظر سایت می‌ماند', ssRotIn_(SS_PROP, NEW) === 'next' && TG_MEM['ssp:' + SS_PROP] === OLD && TG_MEM['ssp:' + SS_PROP + '_NEXT'] === NEW);
     ok('در فاصلهٔ دو انتشار لید با رمز قبلی سایت پذیرفته است', ssGate_(sg(raw, OLD), raw) === true && TG_MEM['ssp:' + SS_PROP] === OLD);
