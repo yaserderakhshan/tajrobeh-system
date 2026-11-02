@@ -36,7 +36,6 @@ var WS_PULL_LIMIT = 50;
 var WS_DONE_KEEP = 200;          /* چند id اجراشدهٔ آخر نگه داشته شود (سقف هر Script Property حدود ۹KB است) */
 var WS_TRY_MAX = 5;              /* رویدادی که این‌قدر شکست بخورد دیگر امتحان نمی‌شود و در «بی‌صاحب» ثبت می‌شود */
 var WS_TEAM_TEXT = '[متن از تیم]';
-var WS_STAMP = '{now}';
 var WS_SUM_DAYS = 90;
 var WS_DAILY_HOUR = 9;           /* ترکر و پیام تصمیم‌ها: ساعت ۹ تهران */
 

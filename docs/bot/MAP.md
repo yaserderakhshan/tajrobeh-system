@@ -88,24 +88,24 @@
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۳۹۷ | ۳۱ |
-| `telegram.gs` | ۳۷۶۰۷ | ۲۰۱۴ |
+| `Code.gs` | ۳۸۸ | ۳۱ |
+| `telegram.gs` | ۳۷۵۶۹ | ۲۰۱۴ |
 | `building.gs` | ۲۰۵۰ | ۱۶۹ |
 | `social.gs` | ۴۸۹ | ۳۳ |
-| `partners.gs` | ۱۹۲۰ | ۱۶۱ |
+| `partners.gs` | ۱۹۱۹ | ۱۶۱ |
 | `maint.gs` | ۴ | ۱ |
 | `v162.gs` | ۸۰۰ | ۶۴ |
 | `school2.gs` | ۴۳۹ | ۳۲ |
 | `mag_contrib.gs` | ۱۲۳۳ | ۹۶ |
 | `author.gs` | ۱۴۸ | ۱۰ |
 | `voice.gs` | ۱۱۱۶ | ۹۲ |
-| `review.gs` | ۶۲۳ | ۵۳ |
-| `seo_gemini.gs` | ۲۱۸ | ۱۴ |
+| `review.gs` | ۶۲۱ | ۵۳ |
+| `seo_gemini.gs` | ۲۱۷ | ۱۴ |
 | `gemini_setup.gs` | ۵۷۹ | ۴۰ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۸۳۵ | ۱۳۳ |
-| `v168.gs` | ۲۵۱۳ | ۱۵۷ |
-| `wppage.gs` | ۱۹۴ | ۱۵ |
+| `v168.gs` | ۲۵۱۰ | ۱۵۷ |
+| `wppage.gs` | ۱۹۳ | ۱۵ |
 | `cover.gs` | ۳۸۷ | ۲۷ |
 | `magseo.gs` | ۶۱۶ | ۴۴ |
 | `panel.gs` | ۲۰۹ | ۱۹ |
@@ -118,8 +118,8 @@
 | `comments.gs` | ۱۰۸۰ | ۶۸ |
 | `dq.gs` | ۶۰۳ | ۴۹ |
 | `cfg.gs` | ۲۰۴ | ۱۴ |
-| `ops.gs` | ۱۱۳۲ | ۱۰۰ |
-| `social_ig.gs` | ۳۳۰ | ۱۴ |
+| `ops.gs` | ۱۱۳۱ | ۱۰۰ |
+| `social_ig.gs` | ۳۲۹ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
 | `ebi.gs` | ۱۱۱۵ | ۸۲ |
 | `ci.gs` | ۵۴۵ | ۳۱ |
@@ -131,12 +131,12 @@
 | `prauto.gs` | ۴۵۴ | ۳۰ |
 | `statfill.gs` | ۲۰۶ | ۲۰ |
 | `leadfix.gs` | ۱۲۴ | ۱۰ |
-| `specialty.gs` | ۴۶۱ | ۳۵ |
+| `specialty.gs` | ۴۶۰ | ۳۵ |
 | `thq.gs` | ۳۸۳ | ۴۰ |
 | `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `migrate.gs` | ۵۶۲ | ۵۶ |
-| `psy3.gs` | ۳۴۳ | ۳۳ |
+| `psy3.gs` | ۳۴۲ | ۳۳ |
 | `psyref.gs` | ۲۹۴ | ۲۲ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
 | `assist.gs` | ۱۴۶۴ | ۱۱۳ |
@@ -149,7 +149,7 @@
 | `uptime.gs` | ۱۵۴ | ۱۱ |
 | `agents.gs` | ۲۶۸ | ۲۰ |
 | `evlite.gs` | ۶۹۶ | ۶۰ |
-| `ws.gs` | ۱۱۱۶ | ۷۵ |
+| `ws.gs` | ۱۱۱۵ | ۷۵ |
 
 ### کارهای زمان‌دار
 
