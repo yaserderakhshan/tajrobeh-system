@@ -11,11 +11,20 @@
  *    sig = HMAC-SHA256 با راز TG_BRIDGE_HANDOFF_SECRET روی «date + sha256». Apps Script سربرگ درخواست را نمی‌بیند، پس امضا در بدنه است.
  *    اختلاف ساعت بیش از ۱۰ دقیقه، هش نادرست یا امضای نادرست: رد و هیچ نوشتنی. پرونده بی تغییر در پوشهٔ «پشتیبان پل» درایو؛
  *    ۳۰ تای آخر می‌ماند و قدیمی‌ترها به سطل زباله می‌روند (نه حذف دائمی). بات پرونده را باز یا رمزگشایی نمی‌کند. لاگ: فقط تاریخ و اندازه.
+ *
+ * از v170.109 این فایل «آداپتور پل» است: هر چیزی که با پل حرف می‌زند همین‌جاست.
+ *   نشانی‌ها: BR_HANDOFF_URL (ورود)، BR_LEAD_URL_DEF (لید)، BR_TG_URL_DEF (رونوشت آپدیت)؛ گیرندهٔ پشتیبان (E31) در doPost.
+ *   ۳) توکن handoff ورود و دعوت (brToken_، brUrl_؛ E24، E38) برای login.gs و panel.gs.
+ *   ۴) لید تازهٔ بات (brLeadPush_، صف ۴۲۹، شمار روزانه؛ E39، E40) برای tgAppendLead_.
+ *   رابط کاربری (فرمان، دکمه، دعوت) در login.gs و panel.gs می‌ماند.
  */
 var BR_MIRROR_HDR = 'X-Telegram-Bot-Api-Secret-Token';
 var BR_BK_FOLDER = 'پشتیبان پل';
 var BR_BK_KEEP = 30;
 var BR_BK_SKEW_MS = 10 * 60000;
+var BR_HANDOFF_URL = 'https://bridge.tajrobeh.life/auth/telegram/handoff#t=';
+var BR_TTL_S = 180;
+var BR_LEAD_URL_DEF = 'https://bridge.tajrobeh.life/api/v2/reception/public-leads';
 
 /* chat آپدیت تلگرام (پیام، ویرایش، دکمه، عضویت) */
 function brChatOf_(u) {
@@ -138,6 +147,95 @@ function tgRelayHealth_(hookUrl) {
 /* ─────────────────────────── آزمون ─────────────────────────── */
 try { TG_SUITES.push(['پیوند با پل: رونوشت و پشتیبان v170.99', 'brTests']); } catch (eSu) {}
 
+/* ───── ۳) توکن handoff ورود ───── */
+function brB64_(x) { return Utilities.base64EncodeWebSafe(x).replace(/=+$/, ''); }
+/* شانزده بایت تصادفی (دو UUID تصادفی، بی خط) */
+function brJti_() {
+  if (TG_DRY && TG_MEM['br:jti']) return TG_MEM['br:jti'];
+  var hex = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '').slice(0, 32), b = [];
+  for (var i = 0; i < 32; i += 2) { var v = parseInt(hex.substr(i, 2), 16); b.push(v > 127 ? v - 256 : v); }
+  return brB64_(b);
+}
+/** توکن handoff؛ '' اگر رمز نیست. */
+function brToken_(tid, ph) {
+  var sec = pnlProp_('TG_BRIDGE_HANDOFF_SECRET');
+  if (!sec || !tid) return '';
+  var iat = Math.floor(pnlNow_() / 1000), p = { tid: Number(tid), iat: iat, exp: iat + BR_TTL_S, jti: brJti_() };
+  if (ph) p.ph = ph;
+  var payload = brB64_(JSON.stringify(p));
+  return payload + '.' + brB64_(Utilities.computeHmacSha256Signature(payload, sec));
+}
+function brUrl_(tid) { var t = brToken_(tid); return t ? BR_HANDOFF_URL + t : ''; }
+
+/* ───── ۴) لید تازهٔ بات به پل ───── */
+function brLeadUrl_() {
+  var v = String(cfg_('BRIDGE_LEAD_URL', '') || '').trim();
+  if (/^(off|0|خاموش)$/i.test(v)) return '';
+  return v || BR_LEAD_URL_DEF;
+}
+/** E40: شکل دقیق public-leads پل (camelCase). fullName اجباری؛ دست‌کم یکی از mobile یا telegramUsername؛ message حداکثر ۵۰۰؛ homepage همیشه خالی (فیلد دام) */
+function brLeadBody_(o, code, chat) {
+  var um = String(o.note || '').match(/@([A-Za-z0-9_]{4,32})/);
+  var msg = (code ? '[' + code + '] ' : '') + String(o.firstText || '');
+  return { fullName: String(o.name || '').trim() || 'بدون نام', mobile: String(o.phone || '').trim(), telegramUsername: um ? um[1] : '',
+    message: msg.slice(0, 500), source: 'Bot', homepage: '' };
+}
+/** یک POST امضاشده؛ خروجی کد HTTP (در آزمون از TG_MEM) */
+function brLeadPost_(url, body, sec) {
+  var ts = String(Math.floor(lgNow_() / 1000));
+  var h = { 'X-Tajrobeh-Timestamp': ts, 'X-Tajrobeh-Signature': brHex_(Utilities.computeHmacSha256Signature(ts + '.' + body, sec)) };
+  if (TG_DRY) { (TG_MEM['br:leads'] = TG_MEM['br:leads'] || []).push({ url: url, body: body, h: h }); var q = TG_MEM['br:leadCodes']; return Number(q && q.length ? q.shift() : (TG_MEM['br:leadCode'] || 200)); }
+  var r = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: body, headers: h, muteHttpExceptions: true, followRedirects: false });
+  BR_LAST_TXT = String(r.getContentText() || '').slice(0, 160);
+  return r.getResponseCode();
+}
+var BR_LAST_TXT = '';
+/** وضعیت یک‌جا در یک کلید (BRL): شمار امروز و صف ۴۲۹. جای کلیدهای روزانهٔ BRL:<روز> v170.107 */
+function brLeadState_(v) {
+  if (v !== undefined) { lgProp_('BRL', JSON.stringify(v)); return v; }
+  var day = Utilities.formatDate(new Date(lgNow_()), TG_TZ, 'yyyy-MM-dd'), c = {};
+  try { c = JSON.parse(lgProp_('BRL') || '{}') || {}; } catch (e) {}
+  if (c.day !== day) c = { day: day, ok: 0, fail: 0, q: c.q || [] };
+  c.q = c.q || []; return c;
+}
+var BR_LEAD_Q_MAX = 8;
+/** خروجی: 'ok' | 'skip' | 'fail' | 'later' (۴۲۹: در صف، تیک بعدی دوباره). هرگز خطا بالا نمی‌دهد. */
+function brLeadPush_(o, row) {
+  try {
+    var mm = String(o && o.note || '').match(/chat_id: (\d+)/);
+    if (!mm) return 'skip';   /* لید فرم سایت یا واتس‌اپ: سایت خودش به پل می‌فرستد */
+    var url = brLeadUrl_(), sec = pnlProp_('TG_BRIDGE_HANDOFF_SECRET');
+    if (!url || !sec) return 'skip';
+    var code = ''; try { code = row && typeof row === 'number' && typeof tgLeadCode_ === 'function' ? tgLeadCode_(row) : ''; } catch (eC) {}
+    var b = brLeadBody_(o, code, mm[1]);
+    if (!b.mobile && !b.telegramUsername) return 'skip';   /* پل بی موبایل و یوزرنیم ۴۰۰ می‌دهد */
+    var body = JSON.stringify(b), okc = brLeadPost_(url, body, sec), st = brLeadState_();
+    var res = okc >= 200 && okc < 300 ? 'ok' : okc === 429 ? 'later' : 'fail';
+    if (res === 'later') { st.q.push(body); if (st.q.length > BR_LEAD_Q_MAX) { st.q.shift(); st.fail++; } }
+    else st[res]++;
+    if (res !== 'ok') { try { Logger.log('brLeadPush_: پل HTTP ' + okc); } catch (eL) {} }
+    brLeadState_(st);
+    return res;
+  } catch (e) { try { Logger.log('brLeadPush_: ' + String(e.message || e).slice(0, 120)); } catch (e2) {} try { var s2 = brLeadState_(); s2.fail++; brLeadState_(s2); } catch (e3) {} return 'fail'; }
+}
+/** از tgTick5 (هر ۳۰ دقیقه): صف ۴۲۹ را به ترتیب دوباره می‌فرستد؛ با ۴۲۹ تازه می‌ایستد */
+function brLeadRetryTick_() {
+  var st = brLeadState_(); if (!st.q.length) return 0;
+  var url = brLeadUrl_(), sec = pnlProp_('TG_BRIDGE_HANDOFF_SECRET'); if (!url || !sec) return 0;
+  var n = 0;
+  while (st.q.length) {
+    var c = brLeadPost_(url, st.q[0], sec);
+    if (c === 429) break;
+    st.q.shift(); if (c >= 200 && c < 300) { st.ok++; n++; } else st.fail++;
+  }
+  brLeadState_(st);
+  return n;
+}
+function brLeadNightLine_() {
+  var c = brLeadState_();
+  var inv = 0; try { inv = Object.keys(JSON.parse(lgProp_('LG_INV') || '{}')).length; } catch (e2) {}
+  return '🌉 پل امروز: ' + tgFa_(c.ok || 0) + ' لید بات رسید' + (c.fail ? '، ' + tgFa_(c.fail) + ' شکست' : '') + (c.q.length ? '، ' + tgFa_(c.q.length) + ' در صف ۴۲۹' : '') + ' · دعوت «ورود به تجربه» تا امروز: ' + tgFa_(inv) + ' درمانگر';
+}
 function brTests() {
   var log = [], fail = 0;
   function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }

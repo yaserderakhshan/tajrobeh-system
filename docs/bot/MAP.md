@@ -108,10 +108,10 @@
 | `wppage.gs` | ۱۹۴ | ۱۵ |
 | `cover.gs` | ۳۸۷ | ۲۷ |
 | `magseo.gs` | ۶۱۶ | ۴۴ |
-| `panel.gs` | ۲۲۹ | ۲۳ |
+| `panel.gs` | ۲۰۹ | ۱۹ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
-| `bridge.gs` | ۲۰۴ | ۱۴ |
-| `login.gs` | ۲۸۸ | ۲۶ |
+| `bridge.gs` | ۳۰۲ | ۲۵ |
+| `login.gs` | ۲۲۰ | ۱۹ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۰۹ | ۳۳ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
