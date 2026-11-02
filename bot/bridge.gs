@@ -60,19 +60,27 @@ function brTestChats_() {
   var v = String(cfg_('BRIDGE_TEST_CHATS', '') || '').trim();
   return (v ? v.split(/[,،;\s]+/) : [String(TG_OWNER_CHAT)]).filter(String);
 }
-/** از doPost بعد از tgHandle؛ خروجی: true اگر رونوشت رفت */
+/** یک POST رونوشت؛ خروجی کد HTTP (در آزمون از TG_MEM) */
+function brMirrorPost_(url, raw, sec) {
+  var h = {}; h[BR_MIRROR_HDR] = sec;
+  if (TG_DRY) { (TG_MEM['br:mirror'] = TG_MEM['br:mirror'] || []).push({ url: url, raw: raw, h: h }); return Number(TG_MEM['br:mirrorCode'] || 200); }
+  return UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: raw, headers: h, muteHttpExceptions: true, followRedirects: false }).getResponseCode();
+}
+var BR_MIRROR_Q_MAX_LEN = 3000;
+/** از doPost بعد از tgHandle؛ خروجی: true اگر رونوشت رفت. v170.109: شکست موقت (۴۲۹، ۵xx، شبکه) در صف مشترک پل می‌ماند */
 function brMirror_(raw, u) {
+  var chat = '', url = '', sec = '';
   try {
-    var chat = brChatOf_(u);
+    chat = brChatOf_(u);
     if (!chat || brTestChats_().indexOf(chat) < 0) return false;
-    var url = brTgUrl_(), sec = brSecret_();
+    url = brTgUrl_(); sec = brSecret_();
     if (!url || !sec) return false;
-    var h = {}; h[BR_MIRROR_HDR] = sec;
-    if (TG_DRY) { (TG_MEM['br:mirror'] = TG_MEM['br:mirror'] || []).push({ url: url, raw: raw, h: h }); return true; }
-    var r = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: raw, headers: h, muteHttpExceptions: true, followRedirects: false });
-    if (r.getResponseCode() >= 300) Logger.log('brMirror_: پل HTTP ' + r.getResponseCode());
-    return r.getResponseCode() < 300;
-  } catch (e) { try { Logger.log('brMirror_: ' + String(e.message || e).slice(0, 120)); } catch (e2) {} return false; }
+    var c = brMirrorPost_(url, raw, sec);
+    if (c < 300) return true;
+    try { Logger.log('brMirror_: پل HTTP ' + c); } catch (eL) {}
+    if (c === 429 || c >= 500) brOutQueue_({ t: 'tg', b: raw });
+    return false;
+  } catch (e) { try { Logger.log('brMirror_: ' + String(e.message || e).slice(0, 120)); } catch (e2) {} if (url && sec) brOutQueue_({ t: 'tg', b: raw }); return false; }
 }
 
 /* ───── پشتیبان (E31) ───── */
@@ -145,7 +153,7 @@ function tgRelayHealth_(hookUrl) {
 }
 
 /* ─────────────────────────── آزمون ─────────────────────────── */
-try { TG_SUITES.push(['پیوند با پل: رونوشت و پشتیبان v170.99', 'brTests']); } catch (eSu) {}
+try { TG_SUITES.push(['پیوند با پل: رونوشت، صف مشترک و پشتیبان v170.109', 'brTests']); } catch (eSu) {}
 
 /* ───── ۳) توکن handoff ورود ───── */
 function brB64_(x) { return Utilities.base64EncodeWebSafe(x).replace(/=+$/, ''); }
@@ -199,6 +207,15 @@ function brLeadState_(v) {
   c.q = c.q || []; return c;
 }
 var BR_LEAD_Q_MAX = 8;
+/** صف مشترک پل (لید ۴۲۹ و رونوشت آپدیت ناموفق): رشته = بدنهٔ لید؛ {t:'tg', b} = آپدیت خام. پر شود، قدیمی‌ترین شکست شمرده می‌شود */
+function brOutQueue_(it) {
+  try {
+    if (it && it.t === 'tg' && String(it.b || '').length > BR_MIRROR_Q_MAX_LEN) return false;
+    var st = brLeadState_(); st.q.push(it);
+    if (st.q.length > BR_LEAD_Q_MAX) { st.q.shift(); st.fail++; }
+    brLeadState_(st); return true;
+  } catch (e) { return false; }
+}
 /** خروجی: 'ok' | 'skip' | 'fail' | 'later' (۴۲۹: در صف، تیک بعدی دوباره). هرگز خطا بالا نمی‌دهد. */
 function brLeadPush_(o, row) {
   try {
@@ -211,22 +228,24 @@ function brLeadPush_(o, row) {
     if (!b.mobile && !b.telegramUsername) return 'skip';   /* پل بی موبایل و یوزرنیم ۴۰۰ می‌دهد */
     var body = JSON.stringify(b), okc = brLeadPost_(url, body, sec), st = brLeadState_();
     var res = okc >= 200 && okc < 300 ? 'ok' : okc === 429 ? 'later' : 'fail';
-    if (res === 'later') { st.q.push(body); if (st.q.length > BR_LEAD_Q_MAX) { st.q.shift(); st.fail++; } }
-    else st[res]++;
     if (res !== 'ok') { try { Logger.log('brLeadPush_: پل HTTP ' + okc); } catch (eL) {} }
-    brLeadState_(st);
+    if (res === 'later') brOutQueue_(body); else { st[res]++; brLeadState_(st); }
     return res;
   } catch (e) { try { Logger.log('brLeadPush_: ' + String(e.message || e).slice(0, 120)); } catch (e2) {} try { var s2 = brLeadState_(); s2.fail++; brLeadState_(s2); } catch (e3) {} return 'fail'; }
 }
-/** از tgTick5 (هر ۳۰ دقیقه): صف ۴۲۹ را به ترتیب دوباره می‌فرستد؛ با ۴۲۹ تازه می‌ایستد */
+/** از tgTick5 (هر ۳۰ دقیقه): صف مشترک پل را به ترتیب دوباره می‌فرستد؛ با ۴۲۹ یا ۵xx تازه می‌ایستد. خروجی: شمار لیدهای رسیده */
 function brLeadRetryTick_() {
   var st = brLeadState_(); if (!st.q.length) return 0;
-  var url = brLeadUrl_(), sec = pnlProp_('TG_BRIDGE_HANDOFF_SECRET'); if (!url || !sec) return 0;
   var n = 0;
   while (st.q.length) {
-    var c = brLeadPost_(url, st.q[0], sec);
-    if (c === 429) break;
-    st.q.shift(); if (c >= 200 && c < 300) { st.ok++; n++; } else st.fail++;
+    var it = st.q[0], tg = it && typeof it === 'object' && it.t === 'tg', c;
+    var url = tg ? brTgUrl_() : brLeadUrl_(), sec = tg ? brSecret_() : pnlProp_('TG_BRIDGE_HANDOFF_SECRET');
+    if (!url || !sec) { st.q.shift(); continue; }   /* خاموش شد: دور ریخته می‌شود */
+    try { c = tg ? brMirrorPost_(url, it.b, sec) : brLeadPost_(url, it, sec); } catch (e) { c = 0; }
+    if (c === 429 || c === 0 || (tg && c >= 500)) break;
+    st.q.shift();
+    if (tg) continue;
+    if (c >= 200 && c < 300) { st.ok++; n++; } else st.fail++;
   }
   brLeadState_(st);
   return n;
@@ -240,7 +259,7 @@ function brTests() {
   var log = [], fail = 0;
   function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
   var keep = { dry: TG_DRY, mem: TG_MEM, own: TG_OWNER_CHAT, cfg: TG_CFG_ };
-  TG_DRY = true; TG_OWNER_CHAT = '9001'; TG_MEM = { 'pnlp:BRIDGE_TG_SECRET': 'test-only-bridge-secret-0123456789', 'pnlp:TG_BRIDGE_HANDOFF_SECRET': 'test-only-handoff-secret' };
+  TG_DRY = true; TG_OWNER_CHAT = '9001'; TG_MEM = { 'lg:now': String(Date.now()), 'pnlp:BRIDGE_TG_SECRET': 'test-only-bridge-secret-0123456789', 'pnlp:TG_BRIDGE_HANDOFF_SECRET': 'test-only-handoff-secret' };
   try {
     TG_CFG_ = { BRIDGE_TG_URL: 'https://bridge.example.test/tg' };
     var u1 = { update_id: 1, message: { chat: { id: 9001 }, text: 'سلام' } }, u2 = { update_id: 2, message: { chat: { id: 7777 }, text: 'x' } };
@@ -268,6 +287,18 @@ function brTests() {
     TG_CFG_ = { BRIDGE_TEST_MUTE: 'بله', BRIDGE_TG_URL: 'off' };
     ok('رونوشت خاموش باشد، خاموشی پاسخ هم اثر ندارد', brMuted_(u1) === false);
     TG_CFG_ = {};
+    /* v170.109: صف مشترک بادوام پل برای رونوشت ناموفق */
+    TG_MEM['br:mirror'] = []; TG_MEM['br:mirrorCode'] = 503;
+    var raw1 = JSON.stringify(u1);
+    ok('رونوشت با ۵xx در صف مشترک می‌ماند (روی کد قبلی مردود)', brMirror_(raw1, u1) === false && brLeadState_().q.length === 1 && brLeadState_().q[0].t === 'tg' && brLeadState_().q[0].b === raw1);
+    TG_MEM['br:mirrorCode'] = 400;
+    ok('۴۰۰ صف نمی‌شود (شکل بد، تکرار بی‌فایده)', brMirror_(raw1, u1) === false && brLeadState_().q.length === 1);
+    ok('آپدیت بزرگ صف نمی‌شود', brOutQueue_({ t: 'tg', b: new Array(4000).join('x') }) === false);
+    TG_MEM['br:mirrorCode'] = 503;
+    ok('تیک: پل هنوز ۵xx، صف می‌ماند', brLeadRetryTick_() === 0 && brLeadState_().q.length === 1);
+    TG_MEM['br:mirrorCode'] = 200; var nM = TG_MEM['br:mirror'].length;
+    ok('تیک: پل برگشت، همان بدنهٔ خام با سربرگ راز می‌رود و صف خالی', brLeadRetryTick_() === 0 && brLeadState_().q.length === 0 && TG_MEM['br:mirror'].length === nM + 1 &&
+      TG_MEM['br:mirror'][nM].raw === raw1 && !!TG_MEM['br:mirror'][nM].h[BR_MIRROR_HDR]);
     ok('doPost پاسخ بات را فقط با brMuted_ کنار می‌گذارد', /brMuted_\(body\)[\s\S]{0,80}tgHandle\(body\)/.test(String(doPost)));
     ok('doPost بعد از پاسخ بات رونوشت می‌فرستد و مسیر پشتیبان دارد', /tgHandle\(body\);[\s\S]{0,200}brMirror_\(raw, body\)/.test(String(doPost)) && /bridge_backup/.test(String(doPost)));
 
