@@ -78,12 +78,33 @@ function brLeadUrl_() {
   if (/^(off|0|خاموش)$/i.test(v)) return '';
   return v || BR_LEAD_URL_DEF;
 }
+/** E40: شکل دقیق public-leads پل (camelCase). fullName اجباری؛ دست‌کم یکی از mobile یا telegramUsername؛ message حداکثر ۵۰۰؛ homepage همیشه خالی (فیلد دام) */
 function brLeadBody_(o, code, chat) {
-  return { source: 'bot', telegram_id: Number(chat), lead_code: String(code || ''), name: String(o.name || ''), phone: String(o.phone || ''),
-    channel: String(o.channel || 'تلگرام'), region: String(o.region || ''), kind: String(o.kind || ''), topic: String(o.topic || ''),
-    message: String(o.firstText || ''), origin: String(o.source || 'Telegram bot'), created_at: new Date(lgNow_()).toISOString() };
+  var um = String(o.note || '').match(/@([A-Za-z0-9_]{4,32})/);
+  var msg = (code ? '[' + code + '] ' : '') + String(o.firstText || '');
+  return { fullName: String(o.name || '').trim() || 'بدون نام', mobile: String(o.phone || '').trim(), telegramUsername: um ? um[1] : '',
+    message: msg.slice(0, 500), source: 'Bot', homepage: '' };
 }
-/** خروجی: 'ok' | 'skip' | 'fail'. هرگز خطا بالا نمی‌دهد. */
+/** یک POST امضاشده؛ خروجی کد HTTP (در آزمون از TG_MEM) */
+function brLeadPost_(url, body, sec) {
+  var ts = String(Math.floor(lgNow_() / 1000));
+  var h = { 'X-Tajrobeh-Timestamp': ts, 'X-Tajrobeh-Signature': brHex_(Utilities.computeHmacSha256Signature(ts + '.' + body, sec)) };
+  if (TG_DRY) { (TG_MEM['br:leads'] = TG_MEM['br:leads'] || []).push({ url: url, body: body, h: h }); var q = TG_MEM['br:leadCodes']; return Number(q && q.length ? q.shift() : (TG_MEM['br:leadCode'] || 200)); }
+  var r = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: body, headers: h, muteHttpExceptions: true, followRedirects: false });
+  BR_LAST_TXT = String(r.getContentText() || '').slice(0, 160);
+  return r.getResponseCode();
+}
+var BR_LAST_TXT = '';
+/** وضعیت یک‌جا در یک کلید (BRL): شمار امروز و صف ۴۲۹. جای کلیدهای روزانهٔ BRL:<روز> v170.107 */
+function brLeadState_(v) {
+  if (v !== undefined) { lgProp_('BRL', JSON.stringify(v)); return v; }
+  var day = Utilities.formatDate(new Date(lgNow_()), TG_TZ, 'yyyy-MM-dd'), c = {};
+  try { c = JSON.parse(lgProp_('BRL') || '{}') || {}; } catch (e) {}
+  if (c.day !== day) c = { day: day, ok: 0, fail: 0, q: c.q || [] };
+  c.q = c.q || []; return c;
+}
+var BR_LEAD_Q_MAX = 8;
+/** خروجی: 'ok' | 'skip' | 'fail' | 'later' (۴۲۹: در صف، تیک بعدی دوباره). هرگز خطا بالا نمی‌دهد. */
 function brLeadPush_(o, row) {
   try {
     var mm = String(o && o.note || '').match(/chat_id: (\d+)/);
@@ -91,29 +112,48 @@ function brLeadPush_(o, row) {
     var url = brLeadUrl_(), sec = pnlProp_('TG_BRIDGE_HANDOFF_SECRET');
     if (!url || !sec) return 'skip';
     var code = ''; try { code = row && typeof row === 'number' && typeof tgLeadCode_ === 'function' ? tgLeadCode_(row) : ''; } catch (eC) {}
-    var body = JSON.stringify(brLeadBody_(o, code, mm[1])), ts = String(Math.floor(lgNow_() / 1000));
-    var h = { 'X-Tajrobeh-Timestamp': ts, 'X-Tajrobeh-Signature': brHex_(Utilities.computeHmacSha256Signature(ts + '.' + body, sec)) };
-    var okc;
-    if (TG_DRY) { (TG_MEM['br:leads'] = TG_MEM['br:leads'] || []).push({ url: url, body: body, h: h }); okc = Number(TG_MEM['br:leadCode'] || 200); }
-    else okc = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: body, headers: h, muteHttpExceptions: true, followRedirects: false }).getResponseCode();
-    var res = okc >= 200 && okc < 300 ? 'ok' : 'fail';
-    if (res === 'fail') { try { Logger.log('brLeadPush_: پل HTTP ' + okc); } catch (eL) {} }
-    brLeadCount_(res);
+    var b = brLeadBody_(o, code, mm[1]);
+    if (!b.mobile && !b.telegramUsername) return 'skip';   /* پل بی موبایل و یوزرنیم ۴۰۰ می‌دهد */
+    var body = JSON.stringify(b), okc = brLeadPost_(url, body, sec), st = brLeadState_();
+    var res = okc >= 200 && okc < 300 ? 'ok' : okc === 429 ? 'later' : 'fail';
+    if (res === 'later') { st.q.push(body); if (st.q.length > BR_LEAD_Q_MAX) { st.q.shift(); st.fail++; } }
+    else st[res]++;
+    if (res !== 'ok') { try { Logger.log('brLeadPush_: پل HTTP ' + okc); } catch (eL) {} }
+    brLeadState_(st);
     return res;
-  } catch (e) { try { Logger.log('brLeadPush_: ' + String(e.message || e).slice(0, 120)); } catch (e2) {} brLeadCount_('fail'); return 'fail'; }
+  } catch (e) { try { Logger.log('brLeadPush_: ' + String(e.message || e).slice(0, 120)); } catch (e2) {} try { var s2 = brLeadState_(); s2.fail++; brLeadState_(s2); } catch (e3) {} return 'fail'; }
 }
-function brLeadCount_(res) {
-  try {
-    var day = Utilities.formatDate(new Date(lgNow_()), TG_TZ, 'yyyy-MM-dd'), k = 'BRL:' + day, c = {};
-    try { c = JSON.parse(lgProp_(k) || '{}') || {}; } catch (e) {}
-    c[res] = (c[res] || 0) + 1; lgProp_(k, JSON.stringify(c));
-  } catch (e2) {}
+/** از tgTick5 (هر ۳۰ دقیقه): صف ۴۲۹ را به ترتیب دوباره می‌فرستد؛ با ۴۲۹ تازه می‌ایستد */
+function brLeadRetryTick_() {
+  var st = brLeadState_(); if (!st.q.length) return 0;
+  var url = brLeadUrl_(), sec = pnlProp_('TG_BRIDGE_HANDOFF_SECRET'); if (!url || !sec) return 0;
+  var n = 0;
+  while (st.q.length) {
+    var c = brLeadPost_(url, st.q[0], sec);
+    if (c === 429) break;
+    st.q.shift(); if (c >= 200 && c < 300) { st.ok++; n++; } else st.fail++;
+  }
+  brLeadState_(st);
+  return n;
 }
 function brLeadNightLine_() {
-  var day = Utilities.formatDate(new Date(lgNow_()), TG_TZ, 'yyyy-MM-dd'), c = {};
-  try { c = JSON.parse(lgProp_('BRL:' + day) || '{}') || {}; } catch (e) {}
+  var c = brLeadState_();
   var inv = 0; try { inv = Object.keys(JSON.parse(lgProp_('LG_INV') || '{}')).length; } catch (e2) {}
-  return '🌉 پل امروز: ' + tgFa_(c.ok || 0) + ' لید بات رسید' + (c.fail ? '، ' + tgFa_(c.fail) + ' شکست' : '') + ' · دعوت «ورود به تجربه» تا امروز: ' + tgFa_(inv) + ' درمانگر';
+  return '🌉 پل امروز: ' + tgFa_(c.ok || 0) + ' لید بات رسید' + (c.fail ? '، ' + tgFa_(c.fail) + ' شکست' : '') + (c.q.length ? '، ' + tgFa_(c.q.length) + ' در صف ۴۲۹' : '') + ' · دعوت «ورود به تجربه» تا امروز: ' + tgFa_(inv) + ' درمانگر';
+}
+/** یک‌بارهٔ خودکار v170.108 (E40): یک لید آزمایشی «آزمون لین E» به پل، و شمار دعوت و لید تا الان. خروجی در گزارش دیپلوی */
+function lgV170108TestLead() {
+  var url = brLeadUrl_(), sec = pnlProp_('TG_BRIDGE_HANDOFF_SECRET');
+  var out = 'دعوت تا الان: ' + Object.keys(lgInvited_()).length + ' · امروز ' + JSON.stringify((function (c) { return { ok: c.ok, fail: c.fail, q: c.q.length }; })(brLeadState_()));
+  if (!TG_DRY) try {   /* کلیدهای روزانهٔ v170.107 در یک کلید BRL جمع می‌شوند؛ شمار قدیمی در خروجی می‌ماند */
+    var P = PropertiesService.getScriptProperties();
+    P.getKeys().forEach(function (k) { if (/^BRL:\d{4}-/.test(k)) { out += ' · ' + k + '=' + P.getProperty(k); P.deleteProperty(k); } });
+  } catch (eK) {}
+  if (!url || !sec) return out + ' · لید آزمایشی: خاموش یا بی راز';
+  var body = JSON.stringify({ fullName: 'آزمون لین E', mobile: '', telegramUsername: 'tajrobeh_lane_e_test', message: 'لید آزمایشی بات (E40)؛ نادیده بگیرید.', source: 'Bot', homepage: '' });
+  var c = 0;
+  try { c = brLeadPost_(url, body, sec); } catch (e) { BR_LAST_TXT = String(e.message || e).slice(0, 120); }
+  return out + ' · لید آزمایشی: HTTP ' + c + (BR_LAST_TXT ? ' ' + BR_LAST_TXT : '');
 }
 try { TG_NIGHT_LINES.push(brLeadNightLine_); } catch (eNl) {}
 
@@ -166,12 +206,12 @@ function lgInviteRun() {
   if (lgInWindow_()) lgInviteTest_();
 }
 
-try { TG_SUITES.push(['ورود به تجربه، لید به پل، دعوت درمانگران v170.107', 'lgTests']); } catch (eSu) {}
+try { TG_SUITES.push(['ورود به تجربه، لید به پل (E40)، دعوت درمانگران v170.108', 'lgTests']); } catch (eSu) {}
 function lgTests() {
   var log = [], fail = 0;
   function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
   var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, own: TG_OWNER_CHAT, cfg: TG_CFG_ };
-  TG_DRY = true; TG_OUTBOX = []; TG_OWNER_CHAT = '9001'; TG_CFG_ = {};
+  TG_DRY = true; TG_OUTBOX = []; TG_OWNER_CHAT = '9001'; TG_CFG_ = {}; BR_LAST_TXT = '';
   TG_MEM = { 'pnlp:TG_BRIDGE_HANDOFF_SECRET': 'test-only-handoff-secret-0123456789', 'lg:now': String(new Date('2026-11-02T12:00:00+03:30').getTime()) };
   try {
     /* ورود */
@@ -191,18 +231,35 @@ function lgTests() {
     ok('بار دوم شمارهٔ کش‌شده: پیوند مستقیم', lgOnCb_('5550060', 'lgn:go') === true && TG_OUTBOX.length === 1 && TG_OUTBOX[0].markup.inline_keyboard[0][0].url);
     ok('مسیر پیام و دکمه وصل است', /lgCmd_\(chat/.test(String(tgPrivate_)) && /lgContact_\(chat, m\)/.test(String(tgPrivate_)) && /lgOnCb_\(chat, data\)/.test(String(tgOnCallback_)));
 
-    /* لید به پل */
-    var o = { name: 'مراجع آزمون', phone: '09000000000', note: 'chat_id: 5550061', firstText: 'سلام', kind: 'فردی', source: 'Telegram bot' };   /* pii:ok */
-    ok('لید بات به پل با source=bot و telegram_id و امضای HMAC (روی کد قبلی مردود)', brLeadPush_(o, 0) === 'ok' && TG_MEM['br:leads'].length === 1 &&
-      TG_MEM['br:leads'][0].url === BR_LEAD_URL_DEF && JSON.parse(TG_MEM['br:leads'][0].body).source === 'bot' && JSON.parse(TG_MEM['br:leads'][0].body).telegram_id === 5550061 &&
-      TG_MEM['br:leads'][0].h['X-Tajrobeh-Signature'] === brHex_(Utilities.computeHmacSha256Signature(TG_MEM['br:leads'][0].h['X-Tajrobeh-Timestamp'] + '.' + TG_MEM['br:leads'][0].body, 'test-only-handoff-secret-0123456789')));
+    /* لید به پل (E40: شکل دقیق camelCase) */
+    var o = { name: 'مراجع آزمون', phone: '09000000000', note: 'chat_id: 5550061 · @test_user9', firstText: 'سلام', kind: 'فردی', source: 'Telegram bot' };   /* pii:ok */
+    var L0 = function () { return TG_MEM['br:leads'][TG_MEM['br:leads'].length - 1]; };
+    ok('لید بات به پل', brLeadPush_(o, 0) === 'ok' && TG_MEM['br:leads'].length === 1 && L0().url === BR_LEAD_URL_DEF);
+    var b0 = JSON.parse(L0().body);
+    ok('E40: بدنه فقط fullName، mobile، telegramUsername، message، source=Bot، homepage خالی (روی کد قبلی مردود)',
+      Object.keys(b0).sort().join() === 'fullName,homepage,message,mobile,source,telegramUsername' && b0.source === 'Bot' && b0.homepage === '' &&
+      b0.fullName === 'مراجع آزمون' && b0.mobile === '09000000000' && b0.telegramUsername === 'test_user9' && b0.message === 'سلام', L0().body);
+    ok('امضای HMAC روی «timestamp.بدنه»', L0().h['X-Tajrobeh-Signature'] === brHex_(Utilities.computeHmacSha256Signature(L0().h['X-Tajrobeh-Timestamp'] + '.' + L0().body, 'test-only-handoff-secret-0123456789')));
+    var long = brLeadBody_({ name: '', firstText: new Array(700).join('ا'), note: '' }, 'L-1', '1');
+    ok('message حداکثر ۵۰۰ و نام خالی پر می‌شود', long.message.length === 500 && long.message.indexOf('[L-1] ') === 0 && !!long.fullName);
+    ok('بی موبایل و یوزرنیم به پل نمی‌رود (۴۰۰ می‌شد)', brLeadPush_({ name: 'x', note: 'chat_id: 5' }, 0) === 'skip' && TG_MEM['br:leads'].length === 1);
     ok('لید فرم سایت (بی chat_id) به پل نمی‌رود', brLeadPush_({ name: 'x', note: '' }, 0) === 'skip' && TG_MEM['br:leads'].length === 1);
     TG_MEM['br:leadCode'] = 500;
     ok('شکست پل خطا بالا نمی‌دهد و شمرده می‌شود', brLeadPush_(o, 0) === 'fail' && /۱ لید بات رسید، ۱ شکست/.test(brLeadNightLine_()), brLeadNightLine_());
+    TG_MEM['br:leadCode'] = 429;
+    ok('E40: ۴۲۹ شکست نیست؛ در صف می‌ماند', brLeadPush_(o, 0) === 'later' && brLeadState_().q.length === 1 && /۱ در صف ۴۲۹/.test(brLeadNightLine_()), brLeadNightLine_());
+    TG_MEM['br:leadCodes'] = [429];
+    ok('تیک: ۴۲۹ دوباره، صف می‌ماند', brLeadRetryTick_() === 0 && brLeadState_().q.length === 1);
+    TG_MEM['br:leadCode'] = 200;
+    ok('تیک: بعد از سقف، صف خالی و شمرده', brLeadRetryTick_() === 1 && brLeadState_().q.length === 0 && /۲ لید بات رسید/.test(brLeadNightLine_()), brLeadNightLine_());
+    ok('صف ۴۲۹ در tgTick5', /brLeadRetryTick_/.test(String(tgTick5)));
     TG_CFG_ = { BRIDGE_LEAD_URL: 'off' };
     ok('BRIDGE_LEAD_URL = off خاموش می‌کند', brLeadPush_(o, 0) === 'skip');
     TG_CFG_ = {};
     ok('tgAppendLead_ بعد از نوشتن سطر لید را به پل می‌فرستد', /brLeadPush_\(o, row\)/.test(String(tgAppendLead_)));
+    var tl = lgV170108TestLead(), tb = JSON.parse(L0().body);
+    ok('یک‌بارهٔ لید آزمایشی «آزمون لین E» با شکل E40، در فهرست CI', /HTTP 200/.test(tl) && tb.fullName === 'آزمون لین E' && tb.source === 'Bot' &&
+      CI_ONCE_AUTO.indexOf('lgV170108TestLead') >= 0 && CI_ONCE_ALLOW.indexOf('lgV170108TestLead') >= 0, tl);
 
     /* دعوت */
     TG_OUTBOX = []; TG_MEM['pnl:thers'] = [{ name: 'درمانگر یک', code: 'T1', chat: '5550071', status: 'فعال' }, { name: 'درمانگر دو', code: 'T2', chat: '', status: 'فعال' },
