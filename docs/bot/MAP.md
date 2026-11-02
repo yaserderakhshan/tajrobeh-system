@@ -82,14 +82,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.106`
+نسخهٔ کد: `v170.107`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۴۲۷ | ۳۳ |
-| `telegram.gs` | ۳۸۶۳۱ | ۲۰۸۷ |
+| `telegram.gs` | ۳۸۶۳۵ | ۲۰۸۷ |
 | `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۲۸ | ۱۶۲ |
@@ -111,6 +111,7 @@
 | `panel.gs` | ۲۲۹ | ۲۳ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
 | `bridge.gs` | ۲۰۴ | ۱۴ |
+| `login.gs` | ۲۳۱ | ۲۳ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
@@ -175,6 +176,7 @@
 | `wsTick` | `ws.gs` | everyMinutes(WS_TICK_MIN) | رد |
 | `ciRunDeferred` | `ci.gs` | at(پویا)، after(5000)، after(60 * 1000) | متوقف نمی‌شود |
 | `evlRun` | `evlite.gs` | after(1000) | متوقف نمی‌شود |
+| `lgInviteRun` | `login.gs` | at(at) | متوقف نمی‌شود |
 | `tgPoll` | `telegram.gs` | everyMinutes(1) | متوقف نمی‌شود |
 | `tgRun` | `telegram.gs` | after(60 * 1000)، after(1000) | متوقف نمی‌شود |
 | `tgTick5` | `v168.gs` | everyMinutes(5) | متوقف نمی‌شود |
@@ -425,6 +427,7 @@
 | صندوق راز و پاک‌سازی v170.99 | `secVaultTests` |
 | اتصال حساب فقط با تأیید v170.99 | `e26Tests` |
 | پیوند با پل: رونوشت و پشتیبان v170.99 | `brTests` |
+| ورود به تجربه، لید به پل، دعوت درمانگران v170.107 | `lgTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | اقدام بعدی لید بسته (v170.50) | `lmClosedNextTests` |
 | تنظیمات خصوصی (v170.8، v170.9) | `cfgTests` |

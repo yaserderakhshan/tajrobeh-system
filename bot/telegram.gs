@@ -2557,12 +2557,14 @@ function tgPrivate_(m) {
   if (m.text && typeof tgLenPick_ === 'function' && (String(m.text).trim() === '/sesslen' || String(m.text).trim() === TG_LEN_DESK_BTN)) { if (tgLenCanOthers_(chat)) { tgDel_('lnt', chat); tgLenPick_(chat, 0); } else tgLenStart_(chat); return; }
   if (typeof nuSeen_ === 'function') { try { nuSeen_(chat); } catch (eNu) { tgErr_('nuSeen_', eNu); } }   /* v170.23.13: پاسخ مراجع دنبالهٔ پیگیری را می‌ایستاند */
   if (typeof reSeen_ === 'function') { try { reSeen_(chat); } catch (eRe) { tgErr_('reSeen_', eRe); } }   /* v170.23.14: پاسخ به پیام بازگرداندن */
+  if (m.text && typeof lgCmd_ === 'function' && lgCmd_(chat, String(m.text).trim())) return;   /* v170.107 (E38): «ورود به تجربه» برای هر کاربر */
   if (m.text && typeof pnlCmd_ === 'function' && pnlCmd_(chat, String(m.text).trim())) return;   /* v170.98 (E24): /panel، /start panel، /wave مالک */
   if (typeof asRoute_ === 'function' && asRoute_(chat, m)) return;   /* v170.23.11: دستیار پاسخ‌گو (assist.gs)؛ بحران را خودش اول می‌سنجد */
   if (m.text && typeof migOwnerCmd_ === 'function' && migOwnerCmd_(chat, String(m.text).trim())) return;
   if (m.text && typeof msOwnerCmd_ === 'function' && msOwnerCmd_(chat, String(m.text).trim())) return;   /* v170.97 (E21): /seobatch مالک */
 
   if (m.contact && m.contact.phone_number) {
+    if (typeof lgContact_ === 'function' && lgContact_(chat, m)) return;   /* v170.107 (E38): شماره برای «ورود به تجربه» */
     // v164: وسط اتصال درمانگر، شماره یعنی تأیید هویت (نه لید تازه، دام ۱۲)
     if (tgGetVal_('tsg', chat)) return tgTherSignPhone_(chat, m, name, uname);
     // وسط ویزارد اپلای تراپیست، اشتراک شماره یعنی جواب پرسش شماره، نه لید تازهٔ پذیرش
@@ -4761,6 +4763,7 @@ function tgOnCallback_(cq) {
   if (data.indexOf('lm:') === 0 && typeof lmCb_ === 'function') return lmCb_(chat, data);     /* v170.2: مدل لید (پیامد، اجرا) */
   if (data.indexOf('cv:') === 0 && typeof cvOnCb_ === 'function') return cvOnCb_(chat, data, cq);   /* v170.82: تأیید کاورهای Gemini (فقط مالک) */
   if (data.indexOf('msq:') === 0 && typeof msOnCb_ === 'function') return msOnCb_(chat, data);   /* v170.83: بستهٔ سئو، «ادامه» (فقط مالک) */
+  if (data.indexOf('lgn:') === 0 && typeof lgOnCb_ === 'function') return lgOnCb_(chat, data);   /* v170.107 (E38، E39): ورود به تجربه برای همه؛ lgn:all فقط مالک */
   if (data.indexOf('pnl:') === 0 && typeof pnlOnCb_ === 'function') return pnlOnCb_(chat, data);   /* v170.98 (E24): لینک تازهٔ ورود به پنل؛ گیرنده در pnlSendLink_ سنجیده می‌شود */
   if (data.indexOf('edu:') === 0 && typeof tgEduAskCb_ === 'function') return tgEduAskCb_(chat, data);   /* v170.99 (E26): تأیید اتصال مدرسه با نام */
   if (data.indexOf('cm:') === 0 && typeof cmCb_ === 'function') return cmCb_(chat, data);     /* v170.2: کامنت‌های هاب (پرسش ترجیح) */
@@ -5574,6 +5577,7 @@ function tgAppendLead_(o, isRetry) {
     const mm = String(o.note || '').match(/chat_id: (\d+)/);
     if (mm) CacheService.getScriptCache().remove('lr' + mm[1]);
     try { bgLeadMark_(); } catch (eBg) {}   /* v170.23.12.5: نشانگر سبک برای tgDutyTick */
+    try { if (typeof brLeadPush_ === 'function') brLeadPush_(o, row); } catch (eBr) {}   /* v170.107 (E39): لید بات به پل؛ شکست کار بات را نمی‌گیرد */
     return row || true;
   } catch (e) {
     tgErr_('tgAppendLead_: ' + e);
