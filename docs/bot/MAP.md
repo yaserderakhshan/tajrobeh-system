@@ -88,19 +88,19 @@
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۴۲۷ | ۳۳ |
-| `telegram.gs` | ۳۸۶۳۵ | ۲۰۸۷ |
-| `building.gs` | ۲۰۵۲ | ۱۷۱ |
+| `Code.gs` | ۳۹۷ | ۳۱ |
+| `telegram.gs` | ۳۷۶۱۳ | ۲۰۱۴ |
+| `building.gs` | ۲۰۵۰ | ۱۶۹ |
 | `social.gs` | ۴۸۹ | ۳۳ |
-| `partners.gs` | ۱۹۲۸ | ۱۶۲ |
+| `partners.gs` | ۱۹۲۰ | ۱۶۱ |
 | `maint.gs` | ۴ | ۱ |
 | `v162.gs` | ۸۰۰ | ۶۴ |
 | `school2.gs` | ۴۳۹ | ۳۲ |
-| `mag_contrib.gs` | ۱۲۴۳ | ۹۷ |
+| `mag_contrib.gs` | ۱۲۳۳ | ۹۶ |
 | `author.gs` | ۱۴۸ | ۱۰ |
-| `voice.gs` | ۱۱۱۸ | ۹۳ |
+| `voice.gs` | ۱۱۱۶ | ۹۲ |
 | `review.gs` | ۶۲۳ | ۵۳ |
-| `seo_gemini.gs` | ۲۳۲ | ۱۶ |
+| `seo_gemini.gs` | ۲۱۸ | ۱۴ |
 | `gemini_setup.gs` | ۵۷۹ | ۴۰ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۸۳۵ | ۱۳۳ |
@@ -113,7 +113,7 @@
 | `bridge.gs` | ۲۰۴ | ۱۴ |
 | `login.gs` | ۲۸۸ | ۲۶ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
-| `stuck.gs` | ۵۷۲ | ۳۹ |
+| `stuck.gs` | ۵۰۹ | ۳۳ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۸۰ | ۶۸ |
 | `dq.gs` | ۶۰۳ | ۴۹ |
@@ -123,7 +123,7 @@
 | `v17013.gs` | ۵۵۷ | ۴۰ |
 | `ebi.gs` | ۱۱۱۵ | ۸۲ |
 | `ci.gs` | ۵۴۵ | ۳۱ |
-| `sitesec.gs` | ۲۷۵ | ۲۲ |
+| `sitesec.gs` | ۲۷۴ | ۲۱ |
 | `sec.gs` | ۱۰۷ | ۱ |
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
@@ -139,8 +139,8 @@
 | `psy3.gs` | ۳۴۳ | ۳۳ |
 | `psyref.gs` | ۲۹۴ | ۲۲ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
-| `assist.gs` | ۱۴۶۵ | ۱۱۴ |
-| `leadspeed.gs` | ۱۱۵۷ | ۸۷ |
+| `assist.gs` | ۱۴۶۴ | ۱۱۳ |
+| `leadspeed.gs` | ۱۱۴۸ | ۸۶ |
 | `leadclaim.gs` | ۶۸۳ | ۴۷ |
 | `nurture.gs` | ۲۹۹ | ۲۶ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
@@ -165,8 +165,8 @@
 | `tgDaily` | `telegram.gs` | atHour(21) | عقب |
 | `tgDigestEvening` | `telegram.gs` | atHour(18) | عقب |
 | `tgDigestMorning` | `telegram.gs` | atHour(9) | عقب |
-| `tgDutyTick` | `telegram.gs` | everyMinutes(5) | رد |
-| `tgMeetTick` | `telegram.gs` | everyMinutes(30) | رد |
+| `tgDutyTick` | `telegram.gs` | onEdit / دستی | رد |
+| `tgMeetTick` | `telegram.gs` | onEdit / دستی | رد |
 | `tgMonWeekly` | `telegram.gs` | onEdit / دستی | عقب |
 | `tgPayTick` | `telegram.gs` | everyMinutes(1) | رد |
 | `tgTherWeekly` | `telegram.gs` | onEdit / دستی | عقب |
@@ -248,7 +248,6 @@
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
 | `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadfix.gs` `specialty.gs` `leadspeed.gs` `leadclaim.gs` `agents.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
-| `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
 | `TG_MIG_TAB` | «تست مهاجرت» | `mig.gs` |
 | `TG_MON_TAB` | «نظارت» | `telegram.gs` |
@@ -265,8 +264,6 @@
 | `TG_POOLS_TAB` | «استخرها» | `telegram.gs` `specialty.gs` |
 | `TG_PQ_QTAB` | «پرسش‌نامهٔ پروفایل» | `telegram.gs` |
 | `TG_PQ_TAB` | «پروفایل سایت» | `telegram.gs` |
-| `TG_PSY_T_APPT` | «نوبت‌ها» | `telegram.gs` |
-| `TG_PSY_T_PAY` | «پرداخت‌ها» | `telegram.gs` |
 | `TG_QUEUE_TAB` | «صف پیام» | `telegram.gs` |
 | `TG_RMSTAT_TAB` | «رودمپ · آمار روزانه» | `telegram.gs` |
 | `TG_RPT_DATA` | «لیدها · داده» | `telegram.gs` |

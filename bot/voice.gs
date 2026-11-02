@@ -373,8 +373,6 @@ function vxAuDownload_(url) {
   return r.getBlob();
 }
 
-/** یک‌بار: کلید Auphonic از صفحهٔ تنظیمات Auphonic با یک رمز یک‌بارمصرف (بدون اینکه کلید در کد یا گفت‌وگو بیاید). */
-function vxKeyOpen() { var n = Utilities.getUuid().replace(/-/g, ''); CacheService.getScriptCache().put('vxkeyn', n, 900); Logger.log('nonce ' + n); return n; }
 function vxKeyIn_(body) {
   var c = CacheService.getScriptCache(), n = c.get('vxkeyn');
   if (!n || String(body.vxkey) !== n || !/^[A-Za-z0-9_\-]{20,80}$/.test(String(body.v || ''))) return false;

@@ -9,87 +9,6 @@ function tgCpRecon(code) {
   return 'v142: تب پیگیری بایگانی شد؛ فهرست کمپین ' + (code || 'EFT-1') + ' همان تب «لیدهای مدرسه» با فیلتر کد کمپین است.';
 }
 
-function tgCpReconOld_(code) {
-  code = code || 'EFT-1';
-  var ss = tgSchSS_();
-  var ev = tgRcRows_(ss.getSheetByName(TG_EVR_TAB));
-  var rq = tgRcRows_(ss.getSheetByName(TG_SCH_T_REQ));
-  var us = tgRcRows_(tgSS_().getSheetByName('کاربران بات'));
-
-  var umap = {};
-  for (var u = 0; u < us.rows.length; u++) {
-    var uc = tgRcAt_(us.head, us.rows[u], 'chat_id');
-    if (uc) umap[uc] = tgRcAt_(us.head, us.rows[u], 'یوزرنیم');
-  }
-
-  var reqByChat = {}, reqByPhone = {}, reqs = [];
-  for (var r = 0; r < rq.rows.length; r++) {
-    var id = tgRcAt_(rq.head, rq.rows[r], 'شناسهٔ درخواست');
-    if (!id) continue;
-    var o = {
-      id: id,
-      name: tgRcAt_(rq.head, rq.rows[r], 'نام کامل'),
-      user: tgRcAt_(rq.head, rq.rows[r], 'یوزرنیم تلگرام'),
-      chat: tgRcAt_(rq.head, rq.rows[r], 'chat_id'),
-      phone: tgRcPhone_(tgRcAt_(rq.head, rq.rows[r], 'شمارهٔ تماس')),
-      status: tgRcAt_(rq.head, rq.rows[r], 'وضعیت'),
-      stage: tgRcAt_(rq.head, rq.rows[r], 'مرحلهٔ قیف'),
-      pay: tgRcAt_(rq.head, rq.rows[r], 'وضعیت پرداخت'),
-      own: tgRcAt_(rq.head, rq.rows[r], 'مسئول پیگیری')
-    };
-    reqs.push(o);
-    if (o.chat) reqByChat[o.chat] = o;
-    if (o.phone) reqByPhone[o.phone] = o;
-  }
-
-  var out = [], seen = {}, usedReq = {};
-  for (var e = 0; e < ev.rows.length; e++) {
-    var evc = tgRcAt_(ev.head, ev.rows[e], 'کد رویداد');
-    if (evc.indexOf(code + '/') !== 0) continue;
-    var chat = tgRcAt_(ev.head, ev.rows[e], 'chat_id');
-    var phone = tgRcPhone_(tgRcAt_(ev.head, ev.rows[e], 'شماره'));
-    var key = chat || ('p' + phone);
-    if (!key || seen[key]) continue;
-    seen[key] = 1;
-    var un = umap[chat] || '';
-    var q = reqByChat[chat] || (phone ? reqByPhone[phone] : null);
-    if (q) usedReq[q.id] = 1;
-    out.push([
-      tgRcAt_(ev.head, ev.rows[e], 'نام'),
-      tgRcAt_(ev.head, ev.rows[e], 'شماره'),
-      un ? ('@' + un) : '',
-      chat,
-      'بات · وبینار',
-      q ? (q.stage || 'درخواست دوره') : 'ثبت‌نام وبینار',
-      q ? q.id : '', q ? q.status : '', q ? q.pay : '',
-      un ? 'بات' : 'بات (بدون یوزرنیم)',
-      q ? q.own : '', ''
-    ]);
-  }
-
-  for (var k = 0; k < reqs.length; k++) {
-    var x = reqs[k];
-    if (usedReq[x.id]) continue;
-    if (x.chat && seen[x.chat]) continue;
-    out.push([x.name, x.phone, x.user ? ('@' + x.user.replace('@', '')) : '', x.chat,
-      x.chat ? 'بات · درخواست' : 'فرم سایت',
-      x.stage || 'درخواست دوره', x.id, x.status, x.pay,
-      x.chat ? (umap[x.chat] ? 'بات' : 'بات (بدون یوزرنیم)') : 'خارج از بات · پیگیری دستی',
-      x.own, '']);
-  }
-
-  var name = 'پیگیری ' + code;
-  var sh = ss.getSheetByName(name);
-  if (!sh) sh = ss.insertSheet(name);
-  sh.clear();
-  sh.getRange(1, 1, 1, TG_RC_HEAD.length).setValues([TG_RC_HEAD]).setFontWeight('bold');
-  if (out.length) sh.getRange(2, 1, out.length, TG_RC_HEAD.length).setValues(out);
-  sh.setFrozenRows(1);
-  var note = 'آخرین به‌روزرسانی: ' + tgJDateFull_(new Date(), TG_TZ) + ' ' +
-    Utilities.formatDate(new Date(), TG_TZ, 'HH:mm');
-  sh.getRange(1, TG_RC_HEAD.length).setNote(note);
-  return out.length;
-}
 
 function tgRcPhone_(p) {
   var s = tgLatinDigits_(String(p == null ? '' : p)).replace(/[^0-9]/g, '');   /* v166.24: رقم فارسی هم */
@@ -99,17 +18,7 @@ function tgRcPhone_(p) {
   return s.length >= 10 ? s.slice(-10) : s;
 }
 
-function tgRcRows_(sh) {
-  if (!sh || sh.getLastRow() < 2) return { head: [], rows: [] };
-  var v = sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn()).getDisplayValues();
-  var head = v[0].map(function (x) { return String(x).trim(); });
-  return { head: head, rows: v.slice(1) };
-}
 
-function tgRcAt_(head, row, name) {
-  var i = head.indexOf(name);
-  return i > -1 && i < row.length ? String(row[i]).trim() : '';
-}
 
 /* v142: آمار از تب اصلی، به ترتیب مراحل قیف */
 function tgCpReconStats(code) {
@@ -1422,32 +1331,6 @@ function tgSeoSetup_() {
   return out.join('\n');
 }
 
-/* بریف سئوی یک موضوع، برای نشان دادن به نویسنده در بات و مینی‌اپ */
-function tgSeoBrief_(code) {
-  try {
-    var sh = tgCSS_().getSheetByName(TG_MAG_TOPICS_TAB);
-    if (!sh) return '';
-    var n = sh.getLastRow();
-    if (n < 2) return '';
-    var vals = sh.getRange(2, 1, n - 1, 16).getValues();
-    for (var i = 0; i < vals.length; i++) {
-      if (String(vals[i][0]) !== String(code)) continue;
-      var r = vals[i];
-      var s = '🔎 <b>بریف سئو</b>\n';
-      if (r[8]) s += '· کلیدواژهٔ اصلی: <b>' + tgEsc_(String(r[8])) + '</b>\n';
-      if (r[9]) s += '· کلیدواژه‌های فرعی: ' + tgEsc_(String(r[9])) + '\n';
-      if (r[10]) s += '· قصد جستجو: ' + tgEsc_(String(r[10])) + '\n';
-      if (r[11]) s += '· طول هدف: ' + tgFa_(r[11]) + ' کلمه\n';
-      if (r[12]) s += '· لینک داخلی: ' + tgEsc_(String(r[12])) + '\n';
-      if (r[13]) s += '· منابع: ' + tgEsc_(String(r[13])) + '\n';
-      if (r[14]) s += '· بلوک تبدیل: ' + tgEsc_(String(r[14])) + '\n';
-      if (r[15]) s += '· نامک پیشنهادی: <code>' + tgEsc_(String(r[15])) + '</code>\n';
-      s += '\n<i>پانزده قاعدهٔ ثابت سئو در تب «' + TG_SEO_TAB + '» هاب محتوا است. مقاله بدون آن‌ها منتشر نمی‌شود.</i>';
-      return s;
-    }
-  } catch (e) {}
-  return '';
-}
 
 function tgSeoTests() {
   var out = [], pass = 0, fail = 0;
@@ -1491,25 +1374,6 @@ function tgSeoTests() {
 
 /* ---------- تست شناخت شکل عکس ---------- */
 
-/* آزمون دستی مسیر تبدیل با تامنیل درایو. فقط برای وارسی، در tgRun نیست. */
-function tgImgProbe() {
-  var src = UrlFetchApp.fetch('https://tajrobeh.life/wp-includes/images/w-logo-blue.png', { muteHttpExceptions: true });
-  var blob = src.getBlob();
-  var log = ['source:' + tgImgKind_(blob.getBytes()) + ':' + blob.getBytes().length];
-  var f = DriveApp.createFile(blob.setName('tj-probe-' + Date.now()));
-  var tok = ScriptApp.getOAuthToken();
-  for (var a = 0; a < 4; a++) {
-    Utilities.sleep(a === 0 ? 1200 : 1800);
-    var res = UrlFetchApp.fetch('https://drive.google.com/thumbnail?id=' + f.getId() + '&sz=w1400',
-      { muteHttpExceptions: true, followRedirects: true, headers: { Authorization: 'Bearer ' + tok } });
-    var by = res.getBlob().getBytes();
-    log.push(a + ' code:' + res.getResponseCode() + ' len:' + by.length + ' kind:' + tgImgKind_(by));
-    if (res.getResponseCode() === 200) { if (tgImgKind_(by) === 'jpeg') break; }
-  }
-  try { f.setTrashed(true); } catch (e) {}
-  Logger.log(log.join('\n'));
-  return log.join(' | ');
-}
 
 function tgImgTests() {
   var out = [], pass = 0, fail = 0;
@@ -1664,15 +1528,7 @@ function tgRunPart_(k) { var p = tgRunPartsPlan_(); if (k > p.n) return { pass: 
 function tgRunTests1() { return tgRunPart_(1); }
 function tgRunTests2() { return tgRunPart_(2); }
 function tgRunTests3() { return tgRunPart_(3); }
-function tgRunTests4() { return tgRunPart_(4); }
 function tgRunTests5() { return tgRunPart_(5); }
-function tgRunTests6() { return tgRunPart_(6); }
-function tgRunTests7() { return tgRunPart_(7); }
-function tgRunTests8() { return tgRunPart_(8); }
-function tgRunTests9() { return tgRunPart_(9); }
-function tgRunTests10() { return tgRunPart_(10); }
-function tgRunTests11() { return tgRunPart_(11); }
-function tgRunTests12() { return tgRunPart_(12); }
 
 
 
@@ -4170,12 +4026,6 @@ function tgCrisisStrong_(text) {
   return false;
 }
 
-function tgHasTopic_(clean) {
-  for (var i = 0; i < TG_TOPIC_WORDS.length; i++) {
-    if (clean.indexOf(tgNorm_(TG_TOPIC_WORDS[i])) > -1) return true;
-  }
-  return false;
-}
 
 /* ---------- تطبیق با سؤالات متداول ---------- */
 
@@ -5009,10 +4859,6 @@ function tgAskAvail_(chat) {
   tgSend_(chat, T_SLOT_NONE, { remove_keyboard: true });
 }
 
-// دکمهٔ باز کردن مینی‌اپ، هر جا که فهرست وقت‌ها به درد می‌خورد
-function tgAppBtn_(label) {
-  return { inline_keyboard: [[{ text: label || '🍓 باز کردن اپ تجربه', web_app: { url: TG_APP_URL } }]] };
-}
 
 function tgSaneHour_(utc, z) {
   const h = Number(Utilities.formatDate(utc, z.tz, 'H'));
@@ -8478,22 +8324,6 @@ function tgDateAudit() {
 }
 
 
-function tgJalDebug() {
-  const sh = tgSS_().getSheetByName('لیدها');
-  const vals = sh.getRange(2, 1, Math.min(4, sh.getLastRow() - 1), 1).getValues();
-  const out = [];
-  for (var i = 0; i < vals.length; i++) {
-    const x = vals[i][0];
-    out.push('خام: [' + String(x) + '] نوع: ' + (x instanceof Date ? 'Date' : typeof x));
-    try {
-      let d = (x instanceof Date) ? x : new Date(String(x).slice(0, 10) + 'T12:00:00');
-      out.push('   تاریخ معتبر؟ ' + !isNaN(d.getTime()));
-      out.push('   full: ' + tgJDateFull_(d));
-    } catch (e) { out.push('   خطا: ' + e); }
-  }
-  out.push('lastRow Sheet1: ' + sh.getLastRow() + ' lastCol: ' + sh.getLastColumn());
-  Logger.log(out.join('\n'));
-}
 
 
 function tgRefScan() {
@@ -9080,11 +8910,6 @@ function tgTkSla_() {
   }
 }
 
-function tgAnnSetup() {
-  tgAnnSheet_(); tgTkSheet_();
-  const ch = tgChannel_();
-  return 'تب اطلاعیه‌ها و تب پیام‌های درمانگران آماده‌اند. کانال: ' + (ch || 'ثبت نشده');
-}
 
 function tgTkTests() {
   TG_DRY = true; TG_OUTBOX = []; TG_MEM = {};
@@ -9194,10 +9019,6 @@ function tgBugs() {
   return out.join('\n\n');
 }
 
-function tgSetChannel(id) {
-  PropertiesService.getScriptProperties().setProperty('TG_CHANNEL', String(id));
-  return 'کانال ثبت شد: ' + id;
-}
 
 /* ═══════════════ راهنمای داخل بات ═══════════════ */
 
@@ -9502,13 +9323,6 @@ function tgFinSch_(chat, name, text, menuFn) {
   return false;
 }
 
-function tgDeskAddSchool() {
-  const sh = tgDeskSheet_();
-  const rows = tgDeskRows_();
-  for (var i = 0; i < rows.length; i++) if (rows[i].name === TG_SCH_OWNER) return TG_SCH_OWNER + ' از قبل در تیم هست.';
-  sh.appendRow([TG_SCH_OWNER, tgNm_('school_user'), 'مسئول مالی و مسئول مدرسه', '', 9, 18, TG_DESK_DAYS[0], TG_DESK_STYLES[0], '']);
-  return TG_SCH_OWNER + ' به تیم اضافه شد. وقتی Start را در بات بزند chat_id خودش پر می‌شود.';
-}
 
 /* v170.9: نام و یوزرنیم از ورودی (در کد نیست): tgDeskAddChief('نام', 'یوزرنیم') */
 function tgDeskAddChief(name, user) {
@@ -10081,18 +9895,6 @@ function tgMonWeekly(e) {
   } finally { tgRunStat_('tgMonWeekly', rs0); }
 }
 
-/* راه‌اندازی یک‌باره: تب سیاست‌ها، تب نظارت، ستون‌های سقف در تب درمانگران. */
-function tgMonSetup() {
-  tgPolSheet_();
-  tgMonSheet_();
-  const sh = tgSS_().getSheetByName(TG_THER);
-  if (sh) {
-    if (sh.getMaxColumns() < TG_C_BOOK) sh.insertColumnsAfter(sh.getMaxColumns(), TG_C_BOOK - sh.getMaxColumns());
-    if (!String(sh.getRange(3, TG_C_CAP).getValue()).trim())  sh.getRange(3, TG_C_CAP).setValue('سقف وقت هفتگی');
-    if (!String(sh.getRange(3, TG_C_BOOK).getValue()).trim()) sh.getRange(3, TG_C_BOOK).setValue('سقف رزرو هفتگی');
-  }
-  return 'تب «' + TG_POL_TAB + '» و «' + TG_MON_TAB + '» آماده‌اند و ستون‌های سقف در تب درمانگران ساخته شد.';
-}
 
 /* تریگر هفتگی نظارت: شنبه ساعت ۱۰ صبح. */
 function tgMonTrigger() {
@@ -11075,36 +10877,6 @@ function tgFileIds_(chat, m) {
 
 /* ---------- مرتب کردن تب اطلاعیه‌ها در هاب ---------- */
 
-function tgAnnFormat() {
-  const sh = tgAnnSheet_();
-  const head = TG_ANN_HEAD.concat(TG_ANN_EXTRA);
-  const w = [70, 130, 120, 300, 420, 200, 110, 120, 220, 90, 140, 200, 110, 120];
-  for (var c = 0; c < w.length; c++) sh.setColumnWidth(c + 1, w[c]);
-  sh.setFrozenRows(1);
-  sh.setFrozenColumns(1);
-
-  const last = Math.max(sh.getLastRow(), 2);
-  sh.getRange(1, 1, last, head.length)
-    .setVerticalAlignment('top').setHorizontalAlignment('right').setFontFamily('Vazirmatn');
-  sh.getRange(1, 1, 1, head.length).setFontWeight('bold').setBackground('#faeced')
-    .setHorizontalAlignment('center');
-  sh.getRange(2, 1, last - 1, 1).setHorizontalAlignment('center');
-  sh.getRange(2, 4, last - 1, 1).setFontWeight('bold');
-  sh.getRange(2, 5, last - 1, 1).setWrap(true).setFontColor('#6b6b6b');
-
-  const st = sh.getRange(2, 7, Math.max(1, last - 1), 1);
-  sh.setConditionalFormatRules([
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenTextContains('منتشر').setBackground('#e8f5e9').setRanges([st]).build(),
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenTextContains('آماده').setBackground('#fff8e1').setRanges([st]).build(),
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenTextContains('پیش‌نویس').setBackground('#eceff1').setRanges([st]).build()
-  ]);
-
-  for (var r = 2; r <= last; r++) sh.setRowHeight(r, 96);
-  return 'تب «' + TG_ANN_TAB + '» مرتب شد: ' + tgFa_(last - 1) + ' سطر.';
-}
 
 /* ---------- API برای پلتفرم ورژن ۲ ---------- */
 
@@ -11716,108 +11488,9 @@ function tgApproachFamily_(a) { return TG_APPROACH_FAMILY[a] || ''; }
 
 /* هاب را از «پروندهٔ کامل درمانگران» پر می‌کند. فقط خانه‌های خالی.
    هیچ‌وقت چیزی را که آدمی نوشته بازنویسی نمی‌کند. کد ملی هم نمی‌آید. */
-function tgProfileFill() {
-  const hub = tgSS_().getSheetByName(TG_THER);
-  const last = hub.getLastRow();
-  if (last < 4) return 'تب درمانگران خالی است.';
-
-  // ستون بازبینی رویکرد خام، اگر نیست ساخته شود
-  const RAWCOL = 'رویکرد اعلام‌شده (خام)';
-  var lc = hub.getLastColumn();
-  var head = hub.getRange(3, 1, 1, lc).getValues()[0];
-  var rawCol = -1;
-  for (var h = 0; h < lc; h++) if (String(head[h]).trim() === RAWCOL) { rawCol = h + 1; break; }
-  if (rawCol < 0) { rawCol = lc + 1; hub.getRange(3, rawCol).setValue(RAWCOL).setFontWeight('bold'); }
-
-  const src = SpreadsheetApp.openById(TG_PROFILE_SS).getSheetByName('پرونده درمانگران');
-  const sv = src.getRange(2, 1, src.getLastRow() - 1, 24).getValues();
-  const by = {};
-  for (var i = 0; i < sv.length; i++) {
-    const n = tgNorm_(sv[i][0]);
-    if (n) by[n] = sv[i];
-  }
-
-  const n = last - 3;
-  const cur = hub.getRange(4, 1, n, Math.max(rawCol, 26)).getValues();
-  var filled = 0, matched = 0, unmapped = {};
-
-  for (var r = 0; r < n; r++) {
-    const name = String(cur[r][0]).trim();
-    if (!name) continue;
-    const s = by[tgNorm_(name)];
-    if (!s) continue;
-    matched++;
-
-    const serv = String(s[11] || '');
-    const app  = String(s[10] || '');
-    const norm = tgApproachNorm_(app);
-    if (!norm && app.trim()) unmapped[app.trim().split(/[\n,،]/)[0].trim()] = (unmapped[app.trim().split(/[\n,،]/)[0].trim()] || 0) + 1;
-
-    function put(col, val) {
-      if (!val) return;
-      if (String(cur[r][col - 1] || '').trim()) return;
-      hub.getRange(r + 4, col).setValue(val);
-      filled++;
-    }
-
-    put(TG_C_GENDER, String(s[2] || '').trim());
-    put(TG_C_MODE, String(s[15] || '').trim());
-    put(5, norm);
-    put(rawCol, app.trim());
-    put(7, /کودک|نوجوان/.test(serv) ? 'کودک و نوجوان' : 'بزرگسال');
-    put(8, /زوج|ازدواج/.test(serv) ? 'بله' : 'خیر');
-    if (/فردی/.test(serv))            put(9, 'بله');
-    if (/زوج|ازدواج/.test(serv))      put(10, 'بله');
-    if (/خانواده/.test(serv))         put(11, 'بله');
-    if (/کودک|نوجوان/.test(serv))     put(12, 'بله');
-    if (s[17] === true || String(s[17]).toLowerCase() === 'true') put(TG_POOL_LGBT, 'بله');
-  }
-
-  try { CacheService.getScriptCache().remove('trows'); } catch (e) {}
-  var out = 'سطر هاب: ' + n + ' · خورد به پرونده: ' + matched + ' · خانهٔ پرشده: ' + filled + '\n';
-  const uk = Object.keys(unmapped).sort(function (a, b) { return unmapped[b] - unmapped[a]; });
-  if (uk.length) {
-    out += '\nرویکردهایی که به فهرست نُه‌تایی نخوردند و خام ماندند:\n';
-    for (var k = 0; k < uk.length; k++) out += '  ' + unmapped[uk[k]] + '  ' + uk[k] + '\n';
-  }
-  Logger.log(out);
-  return out;
-}
 
 /* املای قدیمی ستون «مکتب اصلی» را به فهرست نُه‌تایی می‌رساند.
    متن اصلی در ستون بازبینی می‌ماند، پس چیزی گم نمی‌شود.        */
-function tgApproachTidy() {
-  const hub = tgSS_().getSheetByName(TG_THER);
-  const last = hub.getLastRow();
-  if (last < 4) return 'خالی';
-  const RAWCOL = 'رویکرد اعلام‌شده (خام)';
-  var lc = hub.getLastColumn();
-  const head = hub.getRange(3, 1, 1, lc).getValues()[0];
-  var rawCol = -1;
-  for (var h = 0; h < lc; h++) if (String(head[h]).trim() === RAWCOL) { rawCol = h + 1; break; }
-  if (rawCol < 0) { rawCol = lc + 1; hub.getRange(3, rawCol).setValue(RAWCOL).setFontWeight('bold'); }
-
-  const n = last - 3;
-  const cur = hub.getRange(4, 1, n, Math.max(rawCol, 26)).getValues();
-  var fixed = 0, kept = 0, stuck = {};
-  for (var r = 0; r < n; r++) {
-    if (!String(cur[r][0]).trim()) continue;
-    const now = String(cur[r][4] || '').trim();
-    if (!now) continue;
-    if (TG_APPROACHES.indexOf(now) > -1) { kept++; continue; }
-    const norm = tgApproachNorm_(now);
-    if (!norm) { stuck[now] = (stuck[now] || 0) + 1; continue; }
-    if (!String(cur[r][rawCol - 1] || '').trim()) hub.getRange(r + 4, rawCol).setValue(now);
-    hub.getRange(r + 4, 5).setValue(norm);
-    fixed++;
-  }
-  try { CacheService.getScriptCache().remove('trows'); } catch (e) {}
-  var out = 'یکدست شد: ' + fixed + ' · از قبل درست: ' + kept + '\n';
-  const sk = Object.keys(stuck);
-  if (sk.length) { out += '\nنخورد و دست‌نخورده ماند:\n'; for (var k = 0; k < sk.length; k++) out += '  ' + stuck[sk[k]] + '  ' + sk[k] + '\n'; }
-  Logger.log(out);
-  return out;
-}
 
 /* ═══════════ پروفایل درمانگر: ذخیره و کارت معرفی ═══════════ */
 
@@ -15196,12 +14869,6 @@ function tgPqArchiveAll() {
   return rep;
 }
 
-/* فقط برای اینکه ادیتور اسکوپ درایو را بخواهد و یاسر یک بار تأیید کند */
-function tgDirAuth() {
-  var f = DriveApp.getFolderById(TG_PQ_DRIVE);
-  Logger.log('درایو وصل است: ' + f.getName());
-  return f.getName();
-}
 
 /* ───── سایت ───── */
 function tgDirSign_(ts, body, key) {
@@ -16017,23 +15684,6 @@ function tgPrCongratsAll() {
   return out;
 }
 
-/* یک بار: برای کسانی که پیش از v59 منتشر شده‌اند و اجازهٔ «بله» داده‌اند، صفحهٔ شخصی بساز */
-function tgPrPagesAll() {
-  var out = [];
-  tgPrAll_().forEach(function (r) {
-    var v = r.v;
-    if (String(v.status || '') !== 'روی سایت' || String(v.page || '').trim()) return;
-    var p = tgPrPlan_(r);
-    if (!p.pageOk || p.blocked) return;
-    try {
-      var pg = tgPrPage_(p, '');
-      tgPqPut_(v.id, pg.put);
-      out.push('✅ ' + v.name + ' ' + tgPrUrl_(pg.url));
-    } catch (e) { out.push('❌ ' + v.name + ': ' + (e.message || e)); }
-  });
-  Logger.log(out.join('\n') || 'کسی نبود.');
-  return out;
-}
 
 /* ───── کال‌بک‌ها ───── */
 function tgPrCb_(cq, arg) {
@@ -19287,25 +18937,6 @@ function tgSchUnifyTests() {
 }
 
 
-function tgDiagChatIds() {
-  var token = PropertiesService.getScriptProperties().getProperty('TELEGRAM_TOKEN');
-  var list = tgPeopleList_(), out = [];
-  for (var i = 0; i < list.length; i++) {
-    var ids = String(list[i].chat || '').split(/[,،;\s]+/).filter(String);
-    for (var k = 0; k < ids.length; k++) {
-      var res = '';
-      try {
-        var r = tgFetchRetry_('https://api.telegram.org/bot' + token + '/getChat?chat_id=' + ids[k],
-                                  { muteHttpExceptions: true });
-        var j = JSON.parse(r.getContentText());
-        res = j.ok ? ('OK ' + [j.result.first_name, j.result.last_name].filter(String).join(' ') + ' @' + (j.result.username || '-'))
-                   : ('FAIL ' + j.description);
-      } catch (e) { res = 'ERR ' + e; }
-      Logger.log(list[i].name + ' | ' + ids[k] + ' | ' + res);
-    }
-  }
-  return 'done';
-}
 
 
 
@@ -19371,21 +19002,6 @@ function tgCfg_(key) {
   if (!val) { try { val = PropertiesService.getScriptProperties().getProperty(key) || ''; } catch (e2) {} }
   try { CacheService.getScriptCache().put(ck, val, 3600); } catch (e3) {}
   return val;
-}
-/* یک بار: مقدارهای فعلی Script Property را در تب تنظیمات می‌نویسد (تکرارش بی‌ضرر) */
-function tgCfgSetup() {
-  var sh = tgCfgSheet_(), P = PropertiesService.getScriptProperties();
-  var n = sh.getLastRow() - 1, have = {};
-  if (n > 0) { var v = sh.getRange(2, 1, n, 1).getValues(); for (var i = 0; i < v.length; i++) have[String(v[i][0]).trim()] = i + 2; }
-  var log = [];
-  for (var k = 0; k < TG_CFG_KEYS.length; k++) {
-    var key = TG_CFG_KEYS[k][0], val = P.getProperty(key) || '';
-    if (have[key]) { if (val && !String(sh.getRange(have[key], 2).getValue() || '').trim()) sh.getRange(have[key], 2).setValue(val); }
-    else sh.appendRow([key, val, TG_CFG_KEYS[k][1]]);
-    log.push(key + (val ? ' ✓' : ' (خالی)'));
-    try { CacheService.getScriptCache().remove('cfg:' + key); } catch (e) {}
-  }
-  return 'تنظیمات: ' + log.join(' · ');
 }
 
 /* ---------- دفتر خطاها (در هاب پیام، خصوصی یاسر) ---------- */
@@ -19587,15 +19203,6 @@ function tgPersonCol_(name) {
   var i = TG_PEOPLE_HEAD.indexOf(name);
   return i < 0 ? 0 : i + 1;
 }
-/* سرستون‌های تازه (دانشگاه، مجلهٔ تجربه، شناسه) اگر خالی بودند پر می‌شوند؛ سرستون‌های غلط‌نوشته هم درست می‌شوند */
-function tgPersonHeadFix_() {
-  if (TG_DRY) return 'dry';
-  var sh = tgPeopleSheet_(), n = TG_PEOPLE_HEAD.length;
-  if (sh.getMaxColumns() < n) sh.insertColumnsAfter(sh.getMaxColumns(), n - sh.getMaxColumns());
-  var cur = sh.getRange(1, 1, 1, n).getValues()[0], fixed = 0;
-  for (var i = 0; i < n; i++) if (String(cur[i] || '').trim() !== TG_PEOPLE_HEAD[i]) { sh.getRange(1, i + 1).setValue(TG_PEOPLE_HEAD[i]).setFontWeight('bold').setBackground('#f3efec'); fixed++; }
-  return 'افراد: ' + fixed + ' سرستون تنظیم شد';
-}
 function tgPevSheet_() {
   var ss = tgSS_(), sh = ss.getSheetByName(TG_PEV_TAB);
   if (!sh) {
@@ -19733,122 +19340,6 @@ function tgPidTabs_() {
     { tab: TG_PN_TAB, hub: 'main', head: 1, name: 7, user: 0, chat: 8, phone: 0, role: 'پارتنر', status: 10, skipStatus: TG_PN_SKIP, pidHead: 'شناسهٔ فرد مدیر' }
   ];
 }
-function tgPidSheet_(t) { return (t.hub === 'sch' ? tgSchSS_() : tgSS_()).getSheetByName(t.tab); }
-/* ستون «شناسهٔ فرد» را در سرستون همان تب پیدا می‌کند یا انتهای جدول می‌سازد */
-function tgPidCol_(sh, headRow, headName) {
-  var HN = headName || TG_PID_HEAD;
-  var lc = sh.getLastColumn(), head = sh.getRange(headRow, 1, 1, lc).getValues()[0];
-  for (var i = 0; i < lc; i++) if (String(head[i]).trim() === HN) return i + 1;
-  sh.getRange(headRow, lc + 1).setValue(HN).setFontWeight('bold').setBackground('#f3efec');
-  return lc + 1;
-}
-function tgPidIndex_() {
-  var people = tgPeopleRows_(), byChat = {}, byPhone = {}, byName = {};
-  for (var i = 0; i < people.length; i++) {
-    var p = people[i];
-    String(p.chat || '').split(/[,،;\s]+/).filter(String).forEach(function (c) { byChat[c] = p; });
-    var pk = tgPhoneKey_(p.phone); if (pk) byPhone[pk] = byPhone[pk] || p;
-    var nk = tgNorm_(p.name).replace(/\s/g, ''); if (nk) (byName[nk] = byName[nk] || []).push(p);
-  }
-  return { people: people, byChat: byChat, byPhone: byPhone, byName: byName };
-}
-/* برنامهٔ یکی‌سازی: برای هر سطر هر تب، پیدا یا ساخت. dry=true فقط می‌شمارد. */
-function tgPersonUnifyPlan_(dry) {
-  var ix = tgPidIndex_(), out = { tabs: [], noId: 0 };
-  for (var i = 0; i < ix.people.length; i++) if (!ix.people[i].id) out.noId++;
-  var tabs = tgPidTabs_();
-  for (var t = 0; t < tabs.length; t++) {
-    var T = tabs[t], sh = tgPidSheet_(T), rep = { tab: T.tab, rows: 0, had: 0, chat: 0, phone: 0, name: 0, made: 0, amb: [], skipped: 0 };
-    if (!sh || sh.getLastRow() <= T.head) { out.tabs.push(rep); continue; }
-    var col = dry ? 0 : tgPidCol_(sh, T.head, T.pidHead);
-    var lc = sh.getLastColumn(), v = sh.getRange(T.head + 1, 1, sh.getLastRow() - T.head, lc).getValues();
-    var hd = sh.getRange(T.head, 1, 1, lc).getValues()[0], pidIx = -1, HN = T.pidHead || TG_PID_HEAD;
-    for (var h = 0; h < lc; h++) if (String(hd[h]).trim() === HN) pidIx = h;
-    for (var r = 0; r < v.length; r++) {
-      var row = v[r], name = String(row[T.name - 1] || '').trim();
-      if (!name) continue;
-      rep.rows++;
-      if (pidIx > -1 && String(row[pidIx] || '').trim()) { rep.had++; continue; }
-      var st = T.status ? String(row[T.status - 1] || '').trim() : '';
-      var chats = T.chat ? String(row[T.chat - 1] || '').split(/[,،;\s]+/).filter(String) : [];
-      var pk = T.phone ? tgPhoneKey_(row[T.phone - 1]) : '';
-      var hit = null, how = '';
-      for (var c = 0; c < chats.length && !hit; c++) if (ix.byChat[chats[c]]) { hit = ix.byChat[chats[c]]; how = 'chat'; }
-      if (!hit && pk && ix.byPhone[pk]) { hit = ix.byPhone[pk]; how = 'phone'; }
-      if (!hit) {
-        var cand = ix.byName[tgNorm_(name).replace(/\s/g, '')] || [];
-        if (cand.length === 1) {
-          var cp = tgPhoneKey_(cand[0].phone);
-          if (pk && cp && pk !== cp) { rep.amb.push(name + ' (شمارهٔ متفاوت)'); continue; }
-          hit = cand[0]; how = 'name';
-        } else if (cand.length > 1) { rep.amb.push(name + ' (چند نفر هم‌نام در افراد)'); continue; }
-      }
-      if (T.skipStatus && T.skipStatus.test(st) && !hit) { rep.skipped++; continue; }
-      var pid;
-      if (hit) {
-        rep[how]++;
-        pid = hit.id || (dry ? 'P-?' : tgPersonId_(hit.row));
-        if (!dry) {
-          var ch = {};
-          if (chats.length && !hit.chat) ch['chat_id'] = chats.join(',');
-          else if (chats.length && chats.some(function (x) { return String(hit.chat).indexOf(x) < 0; })) ch.addChat = chats.filter(function (x) { return String(hit.chat).indexOf(x) < 0; })[0];
-          if (pk && !tgPhoneKey_(hit.phone) && T.phone) ch['شمارهٔ تماس'] = String(row[T.phone - 1]);
-          var role = T.role || (T.roleCol ? String(row[T.roleCol - 1] || '').trim() : '');
-          if (role && TG_ROLES.indexOf(role) > -1 && hit.roles.indexOf(role) < 0) ch.addRole = role;
-          if (Object.keys(ch).length) tgPersonSet_(hit.row, ch, 'یکی‌سازی v147', { channel: 'مهاجرت', why: T.tab });
-        }
-      } else {
-        rep.made++;
-        if (!dry) {
-          var role2 = T.role || (T.roleCol ? String(row[T.roleCol - 1] || '').trim() : '');
-          var made = tgPersonAdd_({ name: name, user: T.user ? String(row[T.user - 1] || '').replace(/^@/, '') : '', chat: chats.join(','),
-            roles: (role2 && TG_ROLES.indexOf(role2) > -1) ? [role2] : [], phone: T.phone ? String(row[T.phone - 1] || '') : '',
-            note: 'یکی‌سازی v147 · از ' + T.tab }, 'یکی‌سازی v147', { channel: 'مهاجرت', why: T.tab });
-          pid = made.id;
-          var np = { row: made.row, id: pid, name: name, chat: chats.join(','), phone: T.phone ? String(row[T.phone - 1] || '') : '', roles: role2 ? [role2] : [] };
-          chats.forEach(function (c2) { ix.byChat[c2] = np; }); if (pk) ix.byPhone[pk] = np;
-          var nk2 = tgNorm_(name).replace(/\s/g, ''); (ix.byName[nk2] = ix.byName[nk2] || []).push(np);
-        }
-      }
-      if (!dry && pid) sh.getRange(T.head + 1 + r, col).setValue(pid);
-    }
-    out.tabs.push(rep);
-  }
-  return out;
-}
-function tgPersonUnifyText_(o) {
-  var L = ['افراد بی‌شناسه: ' + o.noId];
-  for (var i = 0; i < o.tabs.length; i++) {
-    var t = o.tabs[i];
-    L.push(t.tab + ': ' + t.rows + ' سطر · از قبل ' + t.had + ' · با chat ' + t.chat + ' · با شماره ' + t.phone + ' · با نام ' + t.name + ' · فرد تازه ' + t.made + ' · رد (پایان همکاری) ' + t.skipped + ' · نامطمئن ' + t.amb.length + (t.amb.length ? ' [' + t.amb.slice(0, 6).join(' | ') + (t.amb.length > 6 ? ' …' : '') + ']' : ''));
-  }
-  return L.join('\n');
-}
-/* پیش‌نمایش (بی‌خطر): چیزی نمی‌نویسد */
-function tgPersonUnifyPreview() {
-  var msg = tgPersonUnifyText_(tgPersonUnifyPlan_(true));
-  Logger.log(msg); return msg;
-}
-/* اجرا (با اجازهٔ یاسر): شناسه به همهٔ افراد، ستون «شناسهٔ فرد» در هفت تب، فرد تازه برای بی‌سابقه‌ها */
-function tgPersonUnifyMigrate() {
-  tgPersonHeadFix_();
-  var sh = tgPeopleSheet_(), last = sh.getLastRow(), n = 0;
-  if (last >= 2) {
-    var ids = sh.getRange(2, TG_P_ID_COL, last - 1, 1).getValues(), names = sh.getRange(2, 1, last - 1, 1).getValues();
-    var mx = 1000;
-    for (var i = 0; i < ids.length; i++) { var m = String(ids[i][0] || '').match(/P-(\d+)/); if (m && Number(m[1]) > mx) mx = Number(m[1]); }
-    for (var j = 0; j < ids.length; j++) {
-      if (String(ids[j][0] || '').trim() || !String(names[j][0] || '').trim()) continue;
-      ids[j][0] = 'P-' + (++mx); n++;
-    }
-    if (n) sh.getRange(2, TG_P_ID_COL, last - 1, 1).setValues(ids);
-  }
-  tgIdCacheDrop_();
-  var o = tgPersonUnifyPlan_(false);
-  tgIdCacheDrop_(); try { tgSchDropCache_(); } catch (e) {}
-  var msg = 'شناسه به ' + n + ' نفر داده شد.\n' + tgPersonUnifyText_(o);
-  Logger.log(msg); return msg;
-}
 
 /* ---------- تست فاز ۱ ---------- */
 function tgCoreTests() {
@@ -19950,21 +19441,6 @@ function tgPtDriveFolders_() {
     log.push(code + (n ? ' (' + n + ' عکس)' : ''));
   }
   return 'پوشه‌ها: ' + log.join(' · ');
-}
-/* یک بار (v148): سرستون‌ها، شناسهٔ مدیرها، اتصال تیم پارتنرها به سطر فضا، پوشه‌ها */
-function tgPtV148Setup() {
-  var L = [tgPnHeadFix_()];
-  var o = tgPersonUnifyPlan_(false); tgIdCacheDrop_();
-  var pn = o.tabs.filter(function (t) { return t.tab === TG_PN_TAB; })[0];
-  L.push(pn ? 'مدیرها: ' + pn.rows + ' سطر · وصل ' + (pn.chat + pn.phone + pn.name) + ' · تازه ' + pn.made : 'مدیرها: تب نبود');
-  var staff = tgInpTab_(PT_T.staff, PT_H.staff).rows(), s = 0;
-  for (var i = 0; i < staff.length; i++) {
-    var r = staff[i]; if (String(r[5] || '').trim() !== 'فعال' || !String(r[4] || '').trim()) continue;
-    tgPtStaffLink_(String(r[0]).trim(), String(r[2]).trim(), String(r[1]).trim(), String(r[4]).trim()); s++;
-  }
-  L.push('تیم پارتنرها: ' + s + ' نفر وصل شد');
-  L.push(tgPtDriveFolders_());
-  var msg = L.join('\n'); Logger.log(msg); return msg;
 }
 
 /* ==================================================================
@@ -20223,18 +19699,6 @@ function tgMagHeadMem_() {
   for (var i = 0; i < TG_MAG_HEAD2.length; i++) if (TG_MAG_HEAD.indexOf(TG_MAG_HEAD2[i]) < 0) TG_MAG_HEAD.push(TG_MAG_HEAD2[i]);
   return TG_MAG_HEAD;
 }
-function tgMagHeadFix_() {
-  tgMagHeadMem_();
-  if (TG_DRY) return 'dry';
-  var sh = tgCSS_().getSheetByName(TG_MAG_TAB); if (!sh) return 'تب نویسندگان مجله نیست';
-  var lc = sh.getLastColumn(), head = sh.getRange(1, 1, 1, lc).getValues()[0].map(function (x) { return String(x || '').trim(); }), n = 0;
-  for (var k = 0; k < TG_MAG_HEAD2.length; k++) {
-    if (head.indexOf(TG_MAG_HEAD2[k]) > -1) continue;
-    if (sh.getMaxColumns() < lc + 1) sh.insertColumnsAfter(sh.getMaxColumns(), 1);
-    lc++; sh.getRange(1, lc).setValue(TG_MAG_HEAD2[k]).setFontWeight('bold').setBackground('#f3efec'); head.push(TG_MAG_HEAD2[k]); n++;
-  }
-  return 'نویسندگان مجله: ' + n + ' ستون تازه';
-}
 function tgMagCol_(name) { tgMagHeadMem_(); var i = TG_MAG_HEAD.indexOf(name); return i < 0 ? 0 : i + 1; }
 /* ستون‌های تازه روی سطر درخواست */
 function tgMagSetReq2_(r, o) {
@@ -20375,7 +19839,6 @@ function tgMagProfileLink_(r, link) {
     return tgPersonSet_(p.row, { 'مجلهٔ تجربه': (cur ? cur + '\n' : '') + link }, 'بات', { why: 'انتشار ' + r.id });
   } catch (e) { tgErr_('tgMagProfileLink_', e, r.id); return ''; }
 }
-function tgMagV150Setup() { var a = tgMagHeadFix_(); var f = tgPqFolder_(TG_MAG_FOLDER); return a + ' · پوشهٔ مطالب: ' + f.getUrl(); }
 
 function tgMagV150Tests() {
   var pass = 0, fail = 0, text = [];
@@ -20680,35 +20143,6 @@ function tgOnPsy_(cq, rest, name, uname) {
   if (act === 'cdx') { tgDel_('psycd', chat); tgDel_('psydir', chat); return tgSend_(chat, 'باشد.'); }
   return null;
 }
-/* یک بار: دو دفتر، تنظیمات، اشتراک */
-function tgPsyV151Setup(headEmail, drEmail) {
-  var P = PropertiesService.getScriptProperties(), sh = tgCfgSheet_(), log = [];
-  function cfgSet(k, v, why) {
-    var n = sh.getLastRow() - 1, row = 0;
-    if (n > 0) { var vals = sh.getRange(2, 1, n, 1).getValues(); for (var i = 0; i < vals.length; i++) if (String(vals[i][0]).trim() === k) row = i + 2; }
-    if (row) { if (!String(sh.getRange(row, 2).getValue() || '').trim()) sh.getRange(row, 2).setValue(v); } else sh.appendRow([k, v, why]);
-    P.setProperty(k, v); try { CacheService.getScriptCache().remove('cfg:' + k); } catch (e) {}
-  }
-  function mk(title, key, why) {
-    var id = tgCfg_(key);
-    if (!id) { var ss = SpreadsheetApp.create(title); id = ss.getId(); cfgSet(key, id, why); log.push(title + ': ساخته شد'); } else log.push(title + ': بود');
-    var ss2 = SpreadsheetApp.openById(id);
-    var a = ss2.getSheetByName(TG_PSY_T_APPT) || ss2.insertSheet(TG_PSY_T_APPT); a.setRightToLeft(true); a.getRange(1, 1, 1, TG_PSY_H_APPT.length).setValues([TG_PSY_H_APPT]).setFontWeight('bold').setBackground('#f3efec'); a.setFrozenRows(1);
-    var b = ss2.getSheetByName(TG_PSY_T_PAY) || ss2.insertSheet(TG_PSY_T_PAY); b.setRightToLeft(true); b.getRange(1, 1, 1, TG_PSY_H_PAY.length).setValues([TG_PSY_H_PAY]).setFontWeight('bold').setBackground('#f3efec'); b.setFrozenRows(1);
-    var g = ss2.getSheetByName('راهنما') || ss2.insertSheet('راهنما', 0); g.setRightToLeft(true);
-    g.getRange(1, 1, 4, 1).setValues([['این دفتر را بات تجربه پر می‌کند؛ نوبت‌ها از رزرو در بات می‌آیند و پرداخت‌های کارت‌به‌کارت با رسید و تأیید مسئول روان‌پزشکی ثبت می‌شوند.'], ['ستون «حساب» می‌گوید نوبت مال کدام دفتر است؛ فقط مسئول روان‌پزشکی از بات عوضش می‌کند.'], ['هیچ ستونی جابه‌جا نشود؛ ستون تازه فقط انتهای جدول.'], ['نام مراجع در هیچ جای دیگری منتشر نمی‌شود.']]);
-    var d = ss2.getSheetByName('Sheet1'); if (d && ss2.getSheets().length > 1) ss2.deleteSheet(d);
-    return ss2;
-  }
-  var tj = mk('هاب روان‌پزشکی تجربه', TG_PSY_K.ss, 'دفتر نوبت و پرداخت روان‌پزشکی تجربه');
-  var dr = mk('هاب روان‌پزشکی ' + TG_PSY_ACC.dr, TG_PSY_K.dr, 'دفتر مخصوص ' + TG_PSY_ACC.dr + ' (تسویهٔ مستقیم)');
-  if (headEmail) { try { tj.addEditor(headEmail); dr.addEditor(headEmail); cfgSet(TG_PSY_K.head, headEmail, 'ایمیل مسئول روان‌پزشکی'); log.push('اشتراک مسئول: ' + headEmail); } catch (e1) { log.push('اشتراک مسئول نشد: ' + e1); } }
-  if (drEmail) { try { dr.addViewer(drEmail); cfgSet(TG_PSY_K.dre, drEmail, 'ایمیل ' + TG_PSY_ACC.dr + ' (فقط دفتر خودش)'); log.push('اشتراک دکتر: ' + drEmail); } catch (e2) { log.push('اشتراک دکتر نشد: ' + e2); } }
-  if (!tgCfg_(TG_PSY_K.card)) cfgSet(TG_PSY_K.card, '', 'شمارهٔ کارت برای پرداخت کارت‌به‌کارت ' + TG_PSY_ACC.dr + ' (یاسر پر می‌کند)');
-  if (!tgCfg_(TG_PSY_K.direct)) cfgSet(TG_PSY_K.direct, '', 'نام دقیق سطر «درمانگران» روان‌پزشکِ تسویهٔ مستقیم (فقط یک نفر)');
-  var msg = log.join('\n') + '\nتجربه: ' + tj.getUrl() + '\n' + TG_PSY_ACC.dr + ': ' + dr.getUrl();
-  Logger.log(msg); return msg;
-}
 
 function tgPsyTests() {
   var pass = 0, fail = 0, text = [];
@@ -20929,7 +20363,6 @@ function tgOnEv_(cq, rest) {
   if (act === 'permset') return tgEvPermSet_(chat, code, p[2] || '');
   return null;
 }
-function tgEvV152Setup() { var a = tgEvHeadFix_(); var f = tgPqFolder_(TG_EV_FOLDER); var L = tgEvAll_(), n = 0; for (var i = 0; i < L.length; i++) { if (!L[i]['اسلاگ'] && L[i].title) { tgEvSet_(L[i], { 'اسلاگ': tgEvSlug_(L[i].title), 'مرحله': L[i]['مرحله'] || TG_EV_STAGE.ann }, 'بات'); n++; } } return a + ' · پوشهٔ رویدادها: ' + f.getUrl() + ' · اسلاگ برای ' + n + ' رویداد'; }
 
 function tgEvV152Tests() {
   var pass = 0, fail = 0, text = [];
@@ -21146,7 +20579,6 @@ function tgOnEn_(cq, rest, name) {
   if (act === 'back') return tgEnDecide_(chat, code, false);
   return null;
 }
-function tgEnV153Setup() { tgMagSheet_(TG_EN_TAB, TG_EN_HEAD); var sh = tgMagSheet_(TG_EN_PAGES_TAB, TG_EN_PAGES_HEAD); if (sh.getLastRow() < 2) sh.appendRow(['https://tajrobeh.life/couples-therapy/', 'زوج‌درمانی', 'زوج، رابطه، EFT', 'بله', 'اولین نمونه؛ صفحه‌های دیگر را اضافه کنید']); var f = tgPqFolder_(TG_EN_FOLDER); return 'تب غنی‌سازی و صفحه‌ها آماده · پوشه: ' + f.getUrl(); }
 
 function tgEnTests() {
   var pass = 0, fail = 0, text = [];
@@ -21192,14 +20624,6 @@ function tgEnTests() {
    ================================================================== */
 var TG_SESS_HEAD2 = ['chat همراه', 'یادآوری'];
 function tgSessHeadMem_() { for (var i = 0; i < TG_SESS_HEAD2.length; i++) if (TG_SESS_HEAD.indexOf(TG_SESS_HEAD2[i]) < 0) TG_SESS_HEAD.push(TG_SESS_HEAD2[i]); return TG_SESS_HEAD; }
-function tgSessHeadFix_() {
-  tgSessHeadMem_();
-  if (TG_DRY) return 'dry';
-  var sh = tgSS_().getSheetByName(TG_SESS); if (!sh) return 'تب جلسه‌ها نیست';
-  var lc = sh.getLastColumn(), head = sh.getRange(1, 1, 1, lc).getValues()[0].map(function (x) { return String(x || '').trim(); }), n = 0;
-  for (var k = 0; k < TG_SESS_HEAD2.length; k++) { if (head.indexOf(TG_SESS_HEAD2[k]) > -1) continue; if (sh.getMaxColumns() < lc + 1) sh.insertColumnsAfter(sh.getMaxColumns(), 1); lc++; sh.getRange(1, lc).setValue(TG_SESS_HEAD2[k]).setFontWeight('bold').setBackground('#f3efec'); n++; }
-  return 'جلسه‌های درمان: ' + n + ' ستون تازه';
-}
 function tgCpTok_(row) { return tgHash_('couple|' + row + '|' + String(TG_OWNER_CHAT)); }
 /* بعد از رزرو جلسه: اگر درمانگر زوج کار می‌کند یا موضوع مراجع زوج است، لینک همراه */
 function tgCoupleOffer_(chat, s, row) {
@@ -21378,7 +20802,6 @@ function tgOnWk_(cq, rest) {
   if (act === 'x') { tgDel_('offw', chat); return tgSend_(chat, 'باشد.'); }
   return null;
 }
-function tgV154Setup() { var a = tgSessHeadFix_(); tgOffSheet_(); return a + ' · تب مرخصی آماده'; }
 
 function tgV154Tests() {
   var pass = 0, fail = 0, text = [];
@@ -21424,13 +20847,6 @@ function tgPnHeadFix155_() {
   for (var i = 0; i < TG_PN_V155.length; i++) if (TG_PN_V148.indexOf(TG_PN_V155[i]) < 0) TG_PN_V148.push(TG_PN_V155[i]);
   return tgPnHeadFix_();
 }
-/* اسلاگ برای هر فضا (یک بار؛ بعد عوض نمی‌شود): پیش‌فرض همان شناسهٔ مکان */
-function tgPnSlugSetup_() {
-  tgPnHeadFix155_();
-  var rows = tgPaRows_(), n = 0;
-  for (var i = 0; i < rows.length; i++) { var o = rows[i]; if (!o['شناسه مکان'] || String(o['اسلاگ'] || '').trim()) continue; tgPaSet_(o._row, 'اسلاگ', tgPnSlugOf_(o)); n++; }
-  return 'اسلاگ برای ' + n + ' فضا';
-}
 /* API عمومی: فهرست پارتنرها برای صفحه‌های سایت (بدون chat، بدون ایمیل، بدون مسئول پذیرش) */
 function tgApiPartners_(p) {
   var rows = tgPaRows_().filter(function (o) { return o['شناسه مکان'] && !TG_PN_SKIP.test(o['وضعیت'] || '') && /آماده|منتشر|فعال/.test(o['وضعیت'] || ''); });
@@ -21445,7 +20861,6 @@ function tgApiPartners_(p) {
   });
   return { ok: true, partners: out, cities: cities };
 }
-function tgV155Setup() { return tgPnSlugSetup_(); }
 
 function tgV155Tests() {
   var pass = 0, fail = 0, text = [];
@@ -21486,11 +20901,6 @@ function tgSlugAscii_(title, fallback) {
   if (s.length < 3) s = String(fallback || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   return s || ('item-' + Date.now().toString(36));
 }
-function tgEvSlugFix_() {
-  var L = tgEvAll_(), n = 0;
-  for (var i = 0; i < L.length; i++) { var o = L[i], want = tgSlugAscii_(o['اسلاگ'] && /^[a-z0-9-]+$/.test(String(o['اسلاگ'])) ? o['اسلاگ'] : o.title, 'event-' + o.code); if (o['اسلاگ'] !== want) { tgEvSet_(o, { 'اسلاگ': want }, 'بات'); n++; } }
-  return n;
-}
 /* مسئول روان‌پزشکی: شمارهٔ کارت و نام روان‌پزشکِ تسویهٔ مستقیم را خودش وارد می‌کند (/psycard) */
 function tgPsyCardStart_(chat) {
   if (!tgPsyIsHead_(chat)) return tgSend_(chat, 'این بخش برای مسئول روان‌پزشکی است.');
@@ -21530,22 +20940,6 @@ function tgPsyDirSet_(chat, i) {
   tgCfgSet_(TG_PSY_K.direct, name, 'نام دقیق سطر «درمانگران» روان‌پزشکِ تسویهٔ مستقیم (مسئول روان‌پزشکی از بات انتخاب می‌کند)');
   try { tgPev_({ id: 'PSY_DIRECT_NAME', actor: 'مسئول روان‌پزشکی', channel: 'بات', what: 'روان‌پزشک تسویهٔ مستقیم', to: name }); } catch (e) {}
   return tgSend_(chat, '✅ ثبت شد: نوبت‌های <b>' + tgEsc_(name) + '</b> از این به بعد در دفتر ' + tgEsc_(tgNm_('psy_dr')) + ' با کارت‌به‌کارت ثبت می‌شوند.');
-}
-/* یک بار: دفتر تجربه به هاب پذیرش، اسپردشیت جدای قبلی به سطل، اسلاگ رویدادها لاتین، پیام به مسئول روان‌پزشکی */
-function tgPsyV157Setup() {
-  var log = [];
-  var old = tgCfg_(TG_PSY_K.ss);
-  tgPsyTab_(TG_PSY_ACC.tj, TG_PSY_T_APPT, TG_PSY_H_APPT); tgPsyTab_(TG_PSY_ACC.tj, TG_PSY_T_PAY, TG_PSY_H_PAY);
-  log.push('دو تب روان‌پزشکی در هاب پذیرش');
-  if (old) {
-    try { var f = DriveApp.getFileById(old); if (/هاب روان‌پزشکی تجربه/.test(f.getName())) { f.setTrashed(true); log.push('اسپردشیت جدای قبلی به سطل رفت'); } } catch (e) { log.push('سطل نشد: ' + e); }
-    tgCfgSet_(TG_PSY_K.ss, '', 'دفتر روان‌پزشکی تجربه داخل هاب پذیرش است (v157)؛ این کلید خالی می‌ماند');
-  }
-  log.push('اسلاگ لاتین برای ' + tgEvSlugFix_() + ' رویداد');
-  var cs = tgPsyRoleChats_(), sent = 0;
-  for (var i = 0; i < cs.length; i++) if (tgNotify_(cs[i], TG_NK.task, '💳 برای فعال‌شدن پرداخت کارت‌به‌کارت ' + tgNm_('psy_dr') + '، شمارهٔ کارت و روان‌پزشکِ تسویهٔ مستقیم را از همین‌جا ثبت کنید. با /psycard شروع کنید.', { ref: 'PSY_DR_CARD', force: true }) === 'رفت') sent++;
-  log.push('پیام به ' + sent + ' مسئول روان‌پزشکی' + (cs.length ? '' : ' (کسی با نقش روان‌پزشکی و chat در افراد نیست)'));
-  var m = log.join('\n'); Logger.log(m); return m;
 }
 
 function tgV157Tests() {
@@ -21662,7 +21056,6 @@ function tgApmEdited_(e) {
     }
   }
 }
-function tgApV159Setup() { var n = tgApMirror_(); return 'تب «جذب تراپیست» در هاب پذیرش: ' + n + ' پرونده'; }
 
 function tgV159Tests() {
   var pass = 0, fail = 0, text = [];
@@ -21774,46 +21167,6 @@ function tgPersonLinkFromTher_(chat) {
 
 /* ---------- پرکردن یک‌بارهٔ شکاف موجود ---------- */
 
-function tgBackfillIdentity() {
-  var sh = tgSS_().getSheetByName(TG_THER), psh = tgPeopleSheet_();
-  var ther = tgTherapistRows_(), out = [], n1 = 0, n2 = 0, n3 = 0;
-
-  // ۱) درمانگرِ وصل‌شده که در «افراد» نیست یا chat_id ندارد
-  for (var i = 0; i < ther.length; i++) {
-    if (!ther[i].chat) continue;
-    var ids = String(ther[i].chat).split(/[,،;\s]+/).filter(String);
-    var id = ids[ids.length - 1];
-    var people = tgPeopleList_(), seen = null;
-    for (var k = 0; k < people.length; k++) if (tgSameName_(people[k].name, ther[i].name)) { seen = people[k]; break; }
-    if (!seen) {
-      tgPersonAdd_({ name: ther[i].name, chat: id, roles: 'درمانگر', note: 'خودکار از تب درمانگران' }, 'بات', { why: 'پرکردن هویت' });
-      tgIdCacheDrop_(); n1++; out.push('+ افراد: ' + ther[i].name);
-    } else if (!seen.chat) {
-      tgPersonSet_(seen.row, { addChat: String(id), addRole: 'درمانگر' }, 'بات', { why: 'پرکردن هویت' });
-      tgIdCacheDrop_(); n2++; out.push('~ افراد: ' + ther[i].name);
-    }
-  }
-
-  // ۲) کسی که در «افراد» chat_id دارد و در «درمانگران» بدون chat_id مانده
-  var people2 = tgPeopleList_();
-  ther = tgTherapistRows_();
-  for (var j = 0; j < ther.length; j++) {
-    if (ther[j].chat) continue;
-    for (var m = 0; m < people2.length; m++) {
-      if (!people2[m].chat || !tgSameName_(people2[m].name, ther[j].name)) continue;
-      var pk = tgPhoneKey_(people2[m].phone), wp = tgPhoneKey_(sh.getRange(ther[j].row, TG_C_WPHONE).getValue());
-      if (pk && wp && pk !== wp) { out.push('! شماره نمی‌خواند: ' + ther[j].name); break; }
-      sh.getRange(ther[j].row, TG_C_CHAT).setValue(String(people2[m].chat).split(/[,،;\s]+/).filter(String)[0]);
-      sh.getRange(ther[j].row, TG_C_CONN).setValue('وصل شد · از تب افراد');
-      tgIdCacheDrop_(); n3++; out.push('~ درمانگران: ' + ther[j].name);
-      break;
-    }
-  }
-
-  Logger.log(out.join('\n'));
-  Logger.log('افزوده به افراد: ' + n1 + ' · تکمیل‌شده در افراد: ' + n2 + ' · وصل‌شده در درمانگران: ' + n3);
-  return { added: n1, filled: n2, linked: n3 };
-}
 
 function tgIdBridgeTests() {
   var out = [], pass = 0, fail = 0;
@@ -24130,20 +23483,6 @@ function tgScHourText_(chat, who, text) {
 
 /* ---------- تداخل ---------- */
 
-// آیا این ساعت با وقت‌های همان روز همین درمانگر تداخل دارد
-function tgScClash_(name, day, hhmm, kind) {
-  const step = tgScStep_(name, kind);
-  const newS = tgScMin_(hhmm), newE = newS + step;
-  var rows = [];
-  try { rows = tgMyWeekly_(name, TG_KIND_MEET).concat(tgMyWeekly_(name, TG_KIND_SESS)); } catch (e) { return ''; }
-  for (var i = 0; i < rows.length; i++) {
-    if (String(rows[i].day).trim() !== String(day).trim()) continue;
-    const oS = tgScMin_(rows[i].hhmm);
-    const oE = oS + tgScStep_(name, rows[i].kind || TG_KIND_MEET);
-    if (newS < oE && oS < newE) return rows[i].hhmm;
-  }
-  return '';
-}
 
 /* ---------- تنظیم طول و استراحت توسط خود درمانگر ---------- */
 
@@ -24207,22 +23546,6 @@ function tgMtTgId_(s) {
   return m ? m[1] : '';
 }
 
-function tgMtCheck() {
-  const sh = tgSS_().getSheetByName(TG_SLOTS);
-  const last = sh.getLastRow();
-  const vals = sh.getRange(4, 1, last - 3, 10).getValues();
-  var okn = 0, bad = [];
-  for (var i = 0; i < vals.length; i++) {
-    var st = String(vals[i][5] || '').trim();
-    var lead = String(vals[i][7] || '').trim();
-    if (st !== 'رزرو شده' || !lead) continue;
-    var r = tgMtLeadOf_(lead);
-    if (r >= 2) okn++; else bad.push(lead.split('·')[0].trim() + ' | ' + lead.replace(/\D/g, '').slice(-9));
-  }
-  Logger.log('اسلات رزروشده با لید پیداشده: ' + okn + ' | پیدا نشد: ' + bad.length);
-  if (bad.length) Logger.log(bad.join('\n'));
-  return okn;
-}
 
 function tgMtLeadOf_(s) {
   const m = String(s || '').match(/L-\d+/);
@@ -24497,14 +23820,6 @@ function tgMeetRemindTick_() {
   return sent;
 }
 
-function tgMeetSetup() {
-  const all = ScriptApp.getProjectTriggers();
-  for (var i = 0; i < all.length; i++) {
-    if (all[i].getHandlerFunction() === 'tgMeetTick') ScriptApp.deleteTrigger(all[i]);
-  }
-  ScriptApp.newTrigger('tgMeetTick').timeBased().everyMinutes(30).create();
-  return 'tgMeetTick هر ۳۰ دقیقه';
-}
 
 /* ---------- تست خشک ---------- */
 
@@ -25466,7 +24781,6 @@ var TG_SCH_DATE_COLS = { 20: 1, 22: 1, 23: 1 };
 var TG_SCH_TODAY = 'امروز';
 
 function tgSlMark_(row) { if (!TG_DRY) { try { CacheService.getScriptCache().put('sledit' + row, '1', 90); } catch (e) {} } }
-function tgSlMine_(row) { if (TG_DRY) return false; try { return !!CacheService.getScriptCache().get('sledit' + row); } catch (e) { return false; } }
 
 function tgSchOnEdit_(e) {
   var rs0 = Date.now(); try {   /* v166.18: سنجش زمان اجرا (بدنه بی‌تغییر) */
@@ -25578,19 +24892,6 @@ function tgSchEdited_(row, c1, c2, actor, oldValue) {
   }
 }
 
-/* یک بار اجرا: تریگر onEdit هاب مدرسه + فهرست کشویی وضعیت و مرحله + تب رویداد (تکرارش بی‌ضرر) */
-function tgSchEditSetup() {
-  var all = ScriptApp.getProjectTriggers();
-  for (var i = 0; i < all.length; i++) if (all[i].getHandlerFunction() === 'tgSchOnEdit_') ScriptApp.deleteTrigger(all[i]);
-  ScriptApp.newTrigger('tgSchOnEdit_').forSpreadsheet(TG_SCHOOL_SHEET_ID).onEdit().create();
-  tgSchEvSheet_();
-  var sh = tgSchSheet_(TG_SCH_T_REQ, TG_SCH_REQ_HEAD);
-  tgSchHeadFix_(TG_SCH_T_REQ, TG_SCH_REQ_HEAD);
-  tgSchCodesRebuild();
-  tgSchValidations_();
-  Logger.log('تریگر onEdit هاب مدرسه نصب شد · فهرست‌های کشویی از تب کدها · تب رویدادهای مدرسه آماده است.');
-  return 'ok';
-}
 
 /* ==================================================================
    v143 · تب «لیدهای مدرسه» (نام تازهٔ «درخواست عضویت»)، نمای مسئول مدرسه، کارتابل مدرسه
@@ -25900,18 +25201,6 @@ function tgSchSheetUx() {
   return log.join('\n');
 }
 
-/* یک‌جا: تغییر نام، نما، کارتابل، قیف، نظم تب‌ها، راهنما */
-function tgSchV143Setup() {
-  var log = [];
-  log.push('rename: ' + tgSchRenameReq_());
-  log.push('view: ' + tgSchLeadView_());
-  log.push('desk: ' + tgSchDeskRebuild());
-  log.push('funnel: ' + tgSchFunnelRebuild());
-  log.push('order: ' + JSON.stringify(tgSchHubOrder()));
-  log.push('guide: ' + tgSchGuideRebuild());
-  Logger.log(log.join('\n'));
-  return log.join('\n');
-}
 
 /* ==================================================================
    v142 · قیف کمپین از تب اصلی (فرمول، نه دست)
@@ -25968,171 +25257,9 @@ function tgSchFunnelRebuild() {
    ================================================================== */
 var TG_SCH_ARCHIVE_TABS = ['پیگیری EFT-1', 'مخاطبین یکپارچه کال سنتر'];
 
-/* حدس مرحله از داده‌های همان سطر (برای سطرهای قدیمی) */
-function tgSchStageGuess_(o) {
-  var s = tgSchStageNorm_(o.stage).st;
-  var bump = function (key) { s = tgSchStageMax_(s, TG_SCH_STAGES[TG_SCH_SG[key]]); };
-  if (o.web) bump(o.web === 'حاضر' ? 'came' : 'web');
-  if (o.touched) bump('call');
-  if (o.statusRaw === 'متقاضی دوره' || o.applied) bump('apply');
-  if (/تأیید شد|کامل/.test(String(o.pay || ''))) bump('pre');
-  if (o.itv) bump('itv');
-  if (o.itvres && (o.itvres === TG_CP_IV_RES.full || o.itvres === TG_CP_IV_RES.cond)) bump('acc');
-  if (o.statusRaw === 'پذیرش شد' || /پرداخت کامل/.test(String(o.pay || ''))) bump('done');
-  return s;
-}
 
-function tgSchUnifyPlan_() {
-  var ss = tgSchSS_();
-  var sh = tgSchSheet_(TG_SCH_T_REQ, TG_SCH_REQ_HEAD);
-  tgSchHeadFix_(TG_SCH_T_REQ, TG_SCH_REQ_HEAD);
-  var W = TG_SCH_REQ_HEAD.length;
-  var last = sh.getLastRow();
-  var v = last > 1 ? sh.getRange(2, 1, last - 1, W).getValues() : [];
-  var eftCamp = '';
-  try { var camps = tgCpCamps_(); for (var c = 0; c < camps.length; c++) if (camps[c].ccode === 'EFT') eftCamp = camps[c].code; } catch (e) {}
-  var plan = { rows: [], newLeads: [], stats: { status: 0, stage: 0, camp: 0, web: 0, newFromWebinar: 0, eftForm: 0 } };
-  var byChat = {}, byPhone = {}, byMail = {};
-  for (var i = 0; i < v.length; i++) {
-    var r = v[i], id = String(r[0] || '').trim();
-    if (!id) continue;
-    var o = { row: i + 2, id: id, chat: String(r[4] || '').trim(), phone: tgSchKeyPhone_(r[8]), email: String(r[9] || '').trim().toLowerCase(),
-              statusRaw: String(r[12] || '').trim(), stage: String(r[17] || '').trim(), touched: String(r[19] || '').trim(),
-              itv: String(r[22] || '').trim(), itvres: String(r[23] || '').trim(), camp: String(r[25] || '').trim(),
-              src: String(r[26] || '').trim(), pay: String(r[28] || '').trim(), web: String(r[29] || '').trim(),
-              course: String(r[6] || '').trim(), memo: String(r[15] || '').trim(), note: String(r[11] || '').trim() };
-    o.newStatus = tgSchStNorm_(o.statusRaw).st;
-    o.newCamp = o.camp;
-    if (!o.camp && eftCamp && /EFT|هیجان/i.test(o.course + ' ' + o.src + ' ' + o.memo)) o.newCamp = eftCamp;
-    o.newStage = tgSchStageGuess_(o);
-    if (o.newStatus !== o.statusRaw) plan.stats.status++;
-    if (o.newStage !== o.stage) plan.stats.stage++;
-    if (o.newCamp !== o.camp) plan.stats.camp++;
-    plan.rows.push(o);
-    if (o.chat) byChat[o.chat] = o;
-    if (o.phone && o.phone.length >= 10) byPhone[o.phone] = o;
-    if (o.email) byMail[o.email] = o;
-  }
-  /* ثبت‌نام وبینار: چه کسی هنوز سطر ندارد */
-  var ev = ss.getSheetByName(TG_EVR_TAB);
-  if (ev && ev.getLastRow() > 1) {
-    var e = ev.getRange(2, 1, ev.getLastRow() - 1, 10).getValues(), seen = {};
-    for (var k = 0; k < e.length; k++) {
-      var evc = String(e[k][1] || '').trim();
-      if (!evc || evc.indexOf('/') < 0) continue;
-      var camp = evc.split('/')[0];
-      var chat = String(e[k][8] || '').trim(), ph = tgSchKeyPhone_(e[k][4]), came = String(e[k][9] || '').trim() === 'حاضر';
-      var key = camp + '|' + (chat || ('p' + ph));
-      if (seen[key]) { if (came) seen[key].came = true; continue; }
-      var hit = (chat && byChat[chat]) || (ph && ph.length >= 10 && byPhone[ph]) || null;
-      var item = { camp: camp, chat: chat, phone: String(e[k][4] || '').trim(), name: String(e[k][3] || '').trim(),
-                   src: String(e[k][6] || '').trim(), date: e[k][0], came: came, hit: hit ? hit.row : 0 };
-      seen[key] = item;
-      if (hit) {
-        if (!hit.web) { hit.web = came ? 'حاضر' : 'ثبت‌نام'; plan.stats.web++; }
-        else if (came && hit.web !== 'حاضر') { hit.web = 'حاضر'; plan.stats.web++; }
-        if (!hit.newCamp) { hit.newCamp = camp; plan.stats.camp++; }
-        hit.newStage = tgSchStageMax_(hit.newStage, TG_SCH_STAGES[came ? TG_SCH_SG.came : TG_SCH_SG.web]);
-      } else { plan.newLeads.push(item); plan.stats.newFromWebinar++; }
-    }
-    for (var kk in seen) { var it = seen[kk]; if (!it.hit && it.came) it.web = 'حاضر'; }
-  }
-  /* فرم ثبت‌نام EFT: همه «درخواست دوره» هستند */
-  var ef = ss.getSheetByName(TG_EFT_TAB);
-  if (ef && ef.getLastRow() > 1) {
-    var f = ef.getRange(2, 1, ef.getLastRow() - 1, 20).getValues();
-    for (var m = 0; m < f.length; m++) {
-      var fph = tgSchKeyPhone_(f[m][3]), fem = String(f[m][4] || '').trim().toLowerCase();
-      var fh = (fph && byPhone[fph]) || (fem && byMail[fem]) || null;
-      if (fh) {
-        var ns = tgSchStageMax_(fh.newStage, TG_SCH_STAGES[TG_SCH_SG.apply]);
-        if (ns !== fh.newStage) { fh.newStage = ns; plan.stats.eftForm++; }
-        if (!fh.newCamp) fh.newCamp = String(f[m][19] || '').trim() || eftCamp;
-      } else {
-        plan.newLeads.push({ camp: String(f[m][19] || '').trim() || eftCamp, chat: '', phone: String(f[m][3] || '').trim(), email: String(f[m][4] || '').trim(),
-                             name: String(f[m][2] || '').trim(), src: String(f[m][16] || '').trim() || 'سایت › فرم ثبت‌نام', date: f[m][0], apply: true });
-        plan.stats.eftForm++;
-      }
-    }
-  }
-  return plan;
-}
 
-function tgSchUnifyPreview() {
-  var p = tgSchUnifyPlan_();
-  var msg = 'سطرهای فعلی: ' + p.rows.length +
-    '\nوضعیت که یکدست می‌شود: ' + p.stats.status +
-    '\nمرحله که اصلاح می‌شود: ' + p.stats.stage +
-    '\nکد کمپین که پر می‌شود: ' + p.stats.camp +
-    '\nستون وبینار که پر می‌شود: ' + p.stats.web +
-    '\nلید تازه از ثبت‌نام وبینار: ' + p.stats.newFromWebinar +
-    '\nاز فرم ثبت‌نام EFT: ' + p.stats.eftForm +
-    '\nجمع لید تازه: ' + p.newLeads.length;
-  Logger.log(msg);
-  return msg;
-}
 
-function tgSchUnifyMigrate() {
-  var p = tgSchUnifyPlan_();
-  var sh = tgSchSheet_(TG_SCH_T_REQ, TG_SCH_REQ_HEAD);
-  var ev = [], n = 0;
-  var colSt = tgSlCol_('وضعیت'), colSg = tgSlCol_('مرحلهٔ قیف'), colCp = tgSlCol_('کد کمپین'), colWb = tgSlCol_(TG_SCH_WEB_COL);
-  if (p.rows.length) {
-    var first = p.rows[0].row, lastR = p.rows[p.rows.length - 1].row;
-    var stV = sh.getRange(first, colSt, lastR - first + 1, 1).getValues();
-    var sgV = sh.getRange(first, colSg, lastR - first + 1, 1).getValues();
-    var cpV = sh.getRange(first, colCp, lastR - first + 1, 1).getValues();
-    var wbV = sh.getRange(first, colWb, lastR - first + 1, 1).getValues();
-    for (var i = 0; i < p.rows.length; i++) {
-      var o = p.rows[i], k = o.row - first, code = String(sh.getRange(o.row, tgSlCol_('کد لید مدرسه')).getValue() || '').trim();
-      if (o.newStatus !== o.statusRaw) { stV[k][0] = o.newStatus; ev.push([new Date(), code, o.row, 'یکی‌سازی v142', 'مهاجرت', 'وضعیت', o.statusRaw, o.newStatus, '']); n++; }
-      if (o.newStage !== o.stage) { sgV[k][0] = o.newStage; ev.push([new Date(), code, o.row, 'یکی‌سازی v142', 'مهاجرت', 'مرحلهٔ قیف', o.stage, o.newStage, '']); n++; }
-      if (o.newCamp !== o.camp) { cpV[k][0] = o.newCamp; ev.push([new Date(), code, o.row, 'یکی‌سازی v142', 'مهاجرت', 'کد کمپین', o.camp, o.newCamp, '']); n++; }
-      if (o.web && o.web !== String(wbV[k][0] || '').trim()) { wbV[k][0] = o.web; n++; }
-    }
-    sh.getRange(first, colSt, lastR - first + 1, 1).setValues(stV);
-    sh.getRange(first, colSg, lastR - first + 1, 1).setValues(sgV);
-    sh.getRange(first, colCp, lastR - first + 1, 1).setValues(cpV);
-    sh.getRange(first, colWb, lastR - first + 1, 1).setValues(wbV);
-  }
-  /* لیدهای تازه از وبینار و فرم */
-  var made = 0;
-  for (var j = 0; j < p.newLeads.length; j++) {
-    var it = p.newLeads[j];
-    var follow = '';
-    try { var cp = tgCpFind_(it.camp); if (cp) follow = cp.follow || ''; } catch (e) {}
-    var r = tgSchLeadEnsure_({ chat: it.chat, name: it.name, phone: it.phone, email: it.email || '', camp: it.camp,
-      stage: it.apply ? TG_SCH_STAGES[TG_SCH_SG.apply] : TG_SCH_STAGES[it.came ? TG_SCH_SG.came : TG_SCH_SG.web],
-      web: it.apply ? '' : (it.came ? 'حاضر' : 'ثبت‌نام'), src: it.src, owner: follow, actor: 'یکی‌سازی v142', channel: 'مهاجرت',
-      memo: 'یکی‌سازی v142 · از ' + (it.apply ? 'فرم ثبت‌نام' : 'ثبت‌نام وبینار'), reopen: false });
-    if (r && r.created) made++;
-  }
-  /* کد درخواست در تب فرم EFT */
-  try {
-    var ef = tgSchSS_().getSheetByName(TG_EFT_TAB);
-    if (ef && ef.getLastRow() > 1) {
-      var f = ef.getRange(2, 1, ef.getLastRow() - 1, 5).getValues();
-      for (var m = 0; m < f.length; m++) {
-        if (String(f[m][1] || '').trim()) continue;
-        var row = tgSchLeadFind_({ phone: f[m][3], email: f[m][4] });
-        if (row) ef.getRange(m + 2, 2).setValue(String(sh.getRange(row, 1).getValue() || ''));
-      }
-    }
-  } catch (eF) { tgErr_('EFT link: ' + eF); }
-  if (ev.length) { var es = tgSchEvSheet_(); es.getRange(es.getLastRow() + 1, 1, ev.length, TG_SCH_EV_HEAD.length).setValues(ev); }
-  /* بایگانی تب‌های تکراری */
-  var arch = [];
-  var ss = tgSchSS_();
-  for (var a = 0; a < TG_SCH_ARCHIVE_TABS.length; a++) {
-    var t = ss.getSheetByName(TG_SCH_ARCHIVE_TABS[a]);
-    if (!t) continue;
-    try { t.setName('بایگانی ← ' + TG_SCH_ARCHIVE_TABS[a]); t.hideSheet(); arch.push(TG_SCH_ARCHIVE_TABS[a]); } catch (eA) {}
-  }
-  tgSchDropCache_(); try { tgCpDrop_(); } catch (eD) {}
-  var msg = 'یکی‌سازی انجام شد: ' + n + ' خانه اصلاح شد · ' + made + ' لید تازه ساخته شد · بایگانی: ' + (arch.join('، ') || 'هیچ');
-  Logger.log(msg);
-  return msg;
-}
 
 /* ==================================================================
    ۲) گزارش روزانهٔ مدرسه به مسئول ارشد
@@ -27296,22 +26423,6 @@ function tgSchHeadFix_(tab, head) {
   return tab + ': ' + changed + ' ستون تنظیم شد';
 }
 
-function tgSchSetup2() {
-  var log = [];
-  log.push(tgSchHeadFix_(TG_SCH_T_REQ, TG_SCH_REQ_HEAD));
-  log.push(tgSchHeadFix_(TG_SCH_T_TEA, TG_SCH_TEA_HEAD));
-  log.push(tgSchHeadFix_(TG_SCH_T_ALUM, TG_SCH_ALUM_HEAD));
-  log.push(tgSchHeadFix_(TG_SCH_T_SLOT, TG_SCH_SLOT_HEAD));
-  log.push(tgSchHeadFix_(TG_SCH_T_GRP, TG_SCH_GRP_HEAD));
-  log.push(tgSchHeadFix_(TG_SCH_T_APPLY, TG_SCH_APPLY_HEAD));
-  log.push(tgSchCodesFill());
-  log.push(tgTeaCodes());
-  log.push(tgSchGuide_());
-  tgSchDropCache_();
-  var s = log.join('\n');
-  Logger.log(s);
-  return s;
-}
 
 /* کد S- برای سطرهای بی‌کد */
 function tgSchCodesFill() {
@@ -27338,44 +26449,6 @@ function tgSchCodesFill() {
   return n + ' کد لید مدرسه ساخته شد.';
 }
 
-/* تب راهنمای هر دو هاب */
-function tgSchGuide_() {
-  var lines = [
-    ['اسلات سوپرویژن', 'وقت‌های اعلام‌شدهٔ سوپروایزرها؛ خصوصی و گروهی. ظرفیت و طول جلسه از خود بات عوض می‌شود. کد SL-'],
-    ['گروه‌های سوپرویژن', 'هر ردیف یک رزرو سوپروایزی روی یک اسلات. کد SB-'],
-    ['اپلای تراپیست', 'مسیر جذب تراپیست کلینیک از اپلای تا تأیید شروع همکاری. کد A-'],
-    ['لیدهای مدرسه', 'از ستون Q به بعد: کد لید مدرسه (S-)، مرحلهٔ قیف، مسئول پیگیری و پیگیری‌های کارت لید مدرسه در بات'],
-    ['استادان و سوپروایزرها', 'ستون AA کد دعوت و ستون Y لینک دعوت بات؛ لینک را به خود استاد بدهید تا بات او را بشناسد'],
-    ['دانش‌آموختگان', 'عضویت باشگاه دانش‌آموختگان؛ تا تأیید مسئول مدرسه وضعیت «نیازمند تأیید» می‌ماند']
-  ];
-  var why = 'تب «اپلای تراپیست» در هاب مدرسه نشست، چون مصاحبهٔ دوم از اسلات‌های سوپروایزرهای همین هاب انتخاب می‌شود ' +
-            'و گره پایانی مسیر، تأیید مسئول مدرسه است. تیم پذیرش همهٔ مراحل را از کارت‌های بات می‌بیند و به شیت مدرسه نیاز ندارد.';
-  var out = [];
-  try {
-    var ss = tgSchSS_();
-    var sh = ss.getSheetByName('راهنما');
-    if (sh) {
-      var start = sh.getLastRow() + 2;
-      sh.getRange(start, 1).setValue('تب‌های تازه · نسخهٔ ۹۵ بات');
-      for (var i = 0; i < lines.length; i++) {
-        sh.getRange(start + 1 + i, 1, 1, 2).setValues([lines[i]]);
-      }
-      sh.getRange(start + 1 + lines.length, 1).setValue(why);
-      out.push('راهنمای هاب مدرسه به‌روز شد.');
-    }
-  } catch (e) { out.push('راهنمای مدرسه: ' + e); }
-  try {
-    var ss2 = tgSS_();
-    var sh2 = ss2.getSheetByName('راهنمای فنی (بات)');
-    if (sh2) {
-      var st2 = sh2.getLastRow() + 2;
-      sh2.getRange(st2, 1).setValue('اپلای تراپیست کلینیک · نسخهٔ ۹۵ بات');
-      sh2.getRange(st2 + 1, 1).setValue(why);
-      out.push('راهنمای هاب پذیرش به‌روز شد.');
-    }
-  } catch (e2) { out.push('راهنمای پذیرش: ' + e2); }
-  return out.join(' ');
-}
 
 /* ==================================================================
    تست
@@ -28046,11 +27119,6 @@ function tgStatDash() {
   return sh;
 }
 
-function tgStatSetup() {
-  tgStatSheet_();
-  tgStatDash();
-  return 'تب‌های آمار آماده‌اند.';
-}
 
 /* ---------- تست‌های آمار روزانه ---------- */
 
@@ -30415,66 +29483,15 @@ function tgOnSiv_(cq, rest) {
   return null;
 }
 
-function tgApAskIv_(supName) {
-  var s = tgApSupBy_(supName);
-  if (!s) return 'پیدا نشد: ' + supName;
-  if (!s.chat) return 'به بات وصل نیست: ' + supName;
-  tgSend_(s.chat, T_AP_IV_ASK, tgApIvAskKb_());
-  return 'درخواست وقت مصاحبه فرستاده شد به ' + supName;
-}
 
-function tgApAskSup() { return tgApAskIv_(tgNm_('ap_sup')); }
 
 
 /* ---------- یکپارچگی: chat_id استادان و سوپروایزرها ---------- */
 
-function tgTeaChatSync() {
-  if (TG_DRY) return 'DRY';
-  var fixed = [], sh = tgSchSheet_(TG_SCH_T_TEA, TG_SCH_TEA_HEAD);
-  var rows = tgApTeaRows_();
-  var slots = [];
-  try { slots = tgSvRows_(); } catch (e) {}
-  var people = [];
-  try { people = tgPeopleRows_(); } catch (e2) {}
-  for (var i = 0; i < rows.length; i++) {
-    var t = rows[i];
-    if (t.chat) continue;
-    var found = '';
-    for (var j = 0; j < slots.length; j++) {
-      if (String(slots[j].sup).trim() === t.name && slots[j].chat) { found = String(slots[j].chat); break; }
-    }
-    if (!found) {
-      for (var k = 0; k < people.length; k++) {
-        if (tgNorm_(people[k].name) === tgNorm_(t.name) && people[k].chat) {
-          found = String(people[k].chat).split(/[,،;\s]+/)[0]; break;
-        }
-      }
-    }
-    if (!found) continue;
-    sh.getRange(t.row, 3).setValue(found);
-    if (String(t.status || '').indexOf('وصل') < 0) sh.getRange(t.row, 8).setValue('وصل شد');
-    fixed.push(t.name + ' → ' + found);
-  }
-  if (fixed.length) tgSchDropCache_();
-  return fixed.length ? ('همگام شد: ' + fixed.join(' · ')) : 'چیزی برای همگام‌سازی نبود';
-}
 
 /* ---------- لینک‌های مسیر پیوستن، برای ناظر ---------- */
 
-function tgJoinLinks_() {
-  return '🔗 <b>لینک‌های مسیر پیوستن به تجربه</b>\n\n' +
-    '🧑‍🏫 <b>جذب تراپیست</b> (برای صفحهٔ سایت و ارسال مستقیم)\n<code>' + TG_AP_URL + '</code>\n\n' +
-    '🏢 <b>ساخت پارتنر</b> (برای مکان‌هایی که می‌خواهند پارتنر شوند)\n<code>' + TG_PN_URL + '</code>\n\n' +
-    '🗓 <b>اعلام وقت مصاحبه</b> (برای سوپروایزرها)\n<code>' + TG_BOT_URL + '?start=ivslots</code>\n\n' +
-    '🎒 <b>آنبوردینگ</b> (هر درمانگر هر وقت خواست)\n<code>' + TG_BOT_URL + '?start=onboard</code>\n\n' +
-    'لینک مصاحبهٔ هر متقاضی، اختصاصی و توکن‌دار است و روی کارت همان پرونده ساخته می‌شود.';
-}
 
-function tgJoinLinksSend() {
-  var ids = tgWatchIds_();
-  for (var i = 0; i < ids.length; i++) tgSend_(ids[i], tgJoinLinks_());
-  return 'فرستاده شد به ' + ids.length + ' ناظر';
-}
 
 /* ============================================================
    رودمپ‌ها (v-rm1): رودمپ کاناپه، همراهان، قرار تماشا، بازتاب با اجازه،
@@ -32424,13 +31441,6 @@ function tgClsIcsSend_(chat) {
   if (res.getResponseCode() !== 200) tgErr_('cls ics → ' + res.getContentText());
   return res;
 }
-function tgClsSetup() {
-  if (TG_DRY) return 'dry';
-  tgClsSheet_();
-  tgClsTeachers_();
-  var r = tgClsSync_();
-  return 'کلاس‌ها: ' + r.found + ' · تازه: ' + r.added + ' · خودکار از ایمیل: ' + r.auto;
-}
 
 /* ─────────── v116 · نوبت رسیدگی به لید: هر لحظه یک نفر مسئول تماس اول است ─────────── */
 var TG_DUTY_TAB = 'نوبت پذیرش';
@@ -32736,15 +31746,6 @@ function tgOnDuty_(cq, rest) {
   }
   if (a[0] === 'b') return edit(tgDutyText_(), tgDutyKb_(true));
 }
-function tgDutySetup() {
-  if (TG_DRY) return 'dry';
-  tgDutySheet_();
-  var has = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'tgDutyTick' || t.getHandlerFunction() === 'tgTick5'; });   /* v168.10: tgTick5 همین را صدا می‌زند */
-  if (!has) ScriptApp.newTrigger('tgDutyTick').timeBased().everyMinutes(5).create();
-  var P = PropertiesService.getScriptProperties();
-  if (!P.getProperty('TG_DUTY_LAST')) P.setProperty('TG_DUTY_LAST', String(tgSS_().getSheetByName(TG_LEADS).getLastRow()));
-  return 'نوبت پذیرش آماده است' + (has ? '' : ' · تریگر پنج‌دقیقه‌ای ساخته شد');
-}
 /* پیام آغاز به مسئول پذیرش: جدول نوبت + لیدهای باز که باید تکلیفشان روشن شود */
 function tgDutyKickoff() {
   var boss = tgDutyBoss_();
@@ -32794,12 +31795,6 @@ function tgNdPurge() {
   var P = PropertiesService.getScriptProperties(), n = 0;
   P.getKeys().forEach(function (k) { if (/^ND-?\d+$/.test(k)) { P.deleteProperty(k); n++; } });
   return 'پاک شد: ' + n;
-}
-/* دکمهٔ منوی کنار کادر پیام همهٔ گفت‌وگوها: مینی‌اپ */
-function tgAppMenuButton() {
-  if (TG_DRY) return 'dry';
-  var r = tgApi_('setChatMenuButton', { menu_button: { type: 'web_app', text: 'مینی‌اپ', web_app: { url: TG_APP_URL } } });
-  return r ? r.getContentText() : 'no response';
 }
 /* فهرست عمومی همکاران برای کش لبه (بدون شناسهٔ کاربر؛ فقط آنچه روی سایت هم عمومی است) */
 function tgApiThPub_() {
@@ -33161,15 +32156,6 @@ function tgCrmTick_() {
 /* هاب پذیرش خلوت: فقط تب‌های کار روزانه دیده می‌شوند */
 var TG_HUB_KEEP = ['کارتابل پیگیری', 'لیدها', 'نوبت پذیرش', 'تماس همکاران', 'پیام‌های درمانگران',
   'درخواست‌های حضوری', 'درمانگران', 'اسلات معارفه', 'وقت‌های هفتگی', 'استخرها', 'افراد'];
-function tgHubTidy(apply) {
-  var ss = tgSS_(), hid = [], shown = [];
-  ss.getSheets().forEach(function (sh) {
-    var n = sh.getName();
-    if (TG_HUB_KEEP.indexOf(n) > -1) { shown.push(n); return; }
-    if (!sh.isSheetHidden()) { hid.push(n); if (apply) sh.hideSheet(); }
-  });
-  return 'دیده می‌شوند: ' + shown.join('، ') + ' | ' + (apply ? 'پنهان شد: ' : 'پنهان می‌شود: ') + (hid.join('، ') || 'هیچ');
-}
 
 /* ─────────── v117 · هاب پیام یکپارچه و «برای نسخهٔ بعد» ─────────── */
 var TG_MSG_BTN = '✉️ پیام‌ها';
@@ -33445,10 +32431,6 @@ function tgFbKickoff() {
     } catch (e) {}
   });
   return 'پرسش نسخهٔ بعد فرستاده شد: ' + n;
-}
-function tgMsgSetup() {
-  var ss = tgMsgSS_();
-  return ss ? ss.getUrl() : 'dry';
 }
 
 try { TG_SUITES.push(['پیام و بازخورد', 'tgV117MsgTests']); } catch (eSu) {}
@@ -37315,10 +36297,6 @@ function tnkSetup() {
   return 'هاب تنخواه آماده است: ' + tnkBook_().getUrl();
 }
 
-function tnkUrl_() {
-  if (tnkDry_()) return '';
-  try { return tnkBook_().getUrl(); } catch (e) { return ''; }
-}
 
 /* ---------- مسیریابی ---------- */
 

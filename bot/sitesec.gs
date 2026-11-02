@@ -10,7 +10,6 @@
 var SS_PROP = 'SITE_LEAD_SECRET';
 var SS_ENFORCE = 'SITE_SIG_ENFORCE';
 
-function ssSecret_() { return ssSecrets_()[0] || ''; }
 /* v170.16.1: رمز فعلی، رمز تازهٔ منتظر سایت (_NEXT) و رمز قبلی در مهلت ۶ ساعت (_PREV)؛ کش ۱۰ دقیقه */
 function ssSecrets_() {
   if (TG_DRY) return ssRotList_(SS_PROP, TG_MEM['ss:secret'] || '');

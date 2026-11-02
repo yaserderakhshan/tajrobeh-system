@@ -214,18 +214,4 @@ function seoDaily() {
   }
 }
 
-/** برای بازبینی: همهٔ ردیف‌ها را در لاگ نشان می‌دهد. */
-function seoShow() {
-  var sh = seoTab_(), d = sh.getDataRange().getDisplayValues();
-  Logger.log('ردیف‌ها: ' + (d.length - 1));
-  for (var i = 1; i < d.length; i++) {
-    Logger.log('==== ' + d[i][1]);
-    [4, 5, 7, 8, 9, 10, 11, 12, 13, 14].forEach(function (k) { Logger.log(SEO_HEAD[k] + ': ' + String(d[i][k]).replace(/https?:\/\/tajrobeh\.life/g, '').slice(0, 1500)); });
-  }
-}
 
-/** همهٔ ردیف‌های تب را پاک می‌کند و پربازدیدها را از نو می‌سازد. */
-function seoRedoPriority() {
-  var sh = seoTab_(); if (sh.getLastRow() > 1) sh.deleteRows(2, sh.getLastRow() - 1);
-  seoRunPriority();
-}
