@@ -973,16 +973,6 @@ function mcApiData_() {
 
 /* ================= راه‌اندازی و نگهداری ================= */
 
-function mcSetup() {
-  var sh = mcSheet_();
-  var H = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
-  if (H.join('|') !== MC_HEAD.join('|')) sh.getRange(1, 1, 1, MC_HEAD.length).setValues([MC_HEAD]).setFontWeight('bold').setBackground('#f6f1e7');
-  sh.setFrozenRows(1);
-  ['تاریخ ثبت', 'تاریخ تصمیم', 'انقضا', 'کد نظام', 'chat_id', 'شناسهٔ مطلب', 'نگه‌دارندهٔ دعوت', 'دعوت‌کننده'].forEach(function (h) { sh.getRange(2, MC_HEAD.indexOf(h) + 1, 998, 1).setNumberFormat('@'); });
-  var st = Object.keys(MC_ST).map(function (k) { return MC_ST[k]; });
-  sh.getRange(2, MC_HEAD.indexOf('وضعیت') + 1, 999, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(st, true).setAllowInvalid(false).build());
-  return 'ok ' + MC_TAB;
-}
 
 /** یادآوری ملایم: بازبینی‌ای که ۷ روز «دعوت شد» مانده، یک بار. از watchdog روزانه صدا زده می‌شود. */
 function mcTick_() {
