@@ -40,7 +40,7 @@ function pnlSendLink_(chat) {
   var who = pnlCan_(chat);
   if (!who) { tgSend_(chat, T_PNL_NO); return false; }
   var url = brUrl_(chat);
-  if (!url) { tgSend_(chat, T_PNL_OFF); tgErr_('pnlSendLink_', 'TG_BRIDGE_HANDOFF_SECRET نیست'); return false; }
+  if (!url) { tgSend_(chat, T_PNL_OFF); tgErr_('pnlSendLink_', 'راز handoff نیست (توکن بات؟)'); return false; }
   tgSend_(chat, T_PNL_LINK, { inline_keyboard: [[{ text: '🔐 باز کردن پنل', url: url }]] });
   if (who.code) pnlMark_(who.code, 'دکمه');
   return true;
