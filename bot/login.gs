@@ -55,7 +55,7 @@ function lgContact_(chat, m) {
 }
 function lgSend_(chat, ph) {
   var t = brToken_(chat, ph);
-  if (!t) { tgSend_(chat, T_PNL_OFF); tgErr_('lgSend_', 'TG_BRIDGE_HANDOFF_SECRET نیست'); return false; }
+  if (!t) { tgSend_(chat, T_PNL_OFF); tgErr_('lgSend_', 'راز handoff نیست (توکن بات؟)'); return false; }
   tgSend_(chat, T_LG_LINK, { inline_keyboard: [[{ text: '🔑 ' + LG_BTN, url: BR_HANDOFF_URL + t }]] });
   return true;
 }
@@ -75,7 +75,7 @@ function lgOnCb_(chat, data) {   // sec:public
 
 /** یک‌بارهٔ خودکار v170.108 (E40): یک لید آزمایشی «آزمون لین E» به پل، و شمار دعوت و لید تا الان. خروجی در گزارش دیپلوی */
 function lgV170108TestLead() {
-  var url = brLeadUrl_(), sec = pnlProp_('TG_BRIDGE_HANDOFF_SECRET');
+  var url = brLeadUrl_(), sec = brHandoffSecret_();
   var out = 'دعوت تا الان: ' + Object.keys(lgInvited_()).length + ' · امروز ' + JSON.stringify((function (c) { return { ok: c.ok, fail: c.fail, q: c.q.length }; })(brLeadState_()));
   if (!TG_DRY) try {   /* کلیدهای روزانهٔ v170.107 در یک کلید BRL جمع می‌شوند؛ شمار قدیمی در خروجی می‌ماند */
     var P = PropertiesService.getScriptProperties();
@@ -91,6 +91,13 @@ function lgV170108TestLead() {
 function lgV170109Count() {
   var c = brLeadState_();
   return 'دعوت تا الان: ' + Object.keys(lgInvited_()).length + ' · امروز لید پل: رسید ' + c.ok + '، شکست ' + c.fail + '، صف ' + c.q.length;
+}
+/** یک‌بارهٔ خودکار v170.110 (E46): اثر انگشت توکن بات و راز ساخته‌شده (۸ نویسهٔ اول SHA-256)، برای مقایسه با پل */
+function lgV170110Fp() {
+  var fp = function (v) { return brHex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(v), Utilities.Charset.UTF_8)).slice(0, 8); };
+  var tok = TG_DRY ? String(TG_MEM['br:token'] || '') : String(PropertiesService.getScriptProperties().getProperty('TELEGRAM_TOKEN') || '');
+  var sec = brHandoffSecret_();
+  return 'توکن بات: ' + (tok ? fp(tok.trim()) : 'نیست') + ' · راز handoff (' + BR_HANDOFF_LABEL + '): ' + (sec ? fp(sec) + ' · ' + sec.length + ' نویسه' : 'نیست');
 }
 try { TG_NIGHT_LINES.push(brLeadNightLine_); } catch (eNl) {}
 
@@ -217,6 +224,14 @@ function lgTests() {
     lgOnCb_('9001', 'lgn:all');
     ok('بیرون از ساعت ۱۰ تا ۲۰ دعوتی نمی‌رود', TG_OUTBOX.length === 1 && /۱۰ تا ۲۰/.test(TG_OUTBOX[0].text));
     ok('یک‌بارهٔ دعوت در فهرست CI', CI_ONCE_AUTO.indexOf('lgV170107Invite') >= 0);
+    /* E46: راز از توکن بات */
+    delete TG_MEM['pnlp:TG_BRIDGE_HANDOFF_SECRET']; TG_MEM['br:token'] = 'test-only-bot-token';
+    var dsec = brB64_(Utilities.computeHmacSha256Signature('tajrobeh-handoff-v1', 'test-only-bot-token'));
+    ok('E46: راز handoff = base64url(HMAC(توکن، tajrobeh-handoff-v1)) بی پرکننده (روی کد قبلی مردود)', brHandoffSecret_() === dsec && dsec.length === 43 && !/=/.test(dsec));
+    var t46 = brToken_('5550060', '+989000000000').split('.');   /* pii:ok ساختگی */
+    ok('E46: نشانه با همان راز امضا می‌شود و شمار پیوند بالا می‌رود', t46[1] === brB64_(Utilities.computeHmacSha256Signature(t46[0], dsec)) && brLeadState_().ln >= 1 && /پیوند «ورود به تجربه» امروز/.test(brLeadNightLine_()));
+    ok('E46: یک‌بارهٔ اثر انگشت بی خود راز، در فهرست CI', /^توکن بات: [0-9a-f]{8} · راز handoff \(tajrobeh-handoff-v1\): [0-9a-f]{8}/.test(lgV170110Fp()) && lgV170110Fp().indexOf(dsec) < 0 &&
+      CI_ONCE_AUTO.indexOf('lgV170110Fp') >= 0 && CI_ONCE_ALLOW.indexOf('lgV170110Fp') >= 0, lgV170110Fp());
     ok('یک‌بارهٔ شمار v170.109 فقط‌خواندنی و در فهرست CI', /^دعوت تا الان: \d+/.test(lgV170109Count()) && CI_ONCE_AUTO.indexOf('lgV170109Count') >= 0 && CI_ONCE_ALLOW.indexOf('lgV170109Count') >= 0);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_OWNER_CHAT = keep.own; TG_CFG_ = keep.cfg;
