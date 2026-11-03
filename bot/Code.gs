@@ -26,23 +26,14 @@ function cfg_(k, dflt) {
 /* عدد پول با جداکنندهٔ هزارگان و رقم فارسی (برای متن بازهٔ نرخ) */
 /* v170.14: نام همکاران در کد نیست (مخزن عمومی). منبع: کلید TG_NAMES (JSON) در «تنظیمات خصوصی بات»؛ رفتار همان است.
    کلیدها: reception، reception_lat، school، school_full، school_user، chief، chief_full، psy، desk3، psy_dr، ap_sup */
-var TG_NAMES_ = cfg_('TG_NAMES', {});
 function tgNm_(k) { var o = cfg_('TG_NAMES', {}) || {}; return String(o[k] == null ? '' : o[k]); }
 function cfgFaMoney_(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '٬').replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; }); }
 
 // ─── تنظیمات ────────────────────────────────────────────────
 var SHEET_ID   = cfg_('TG_SHEET_ID', '');
-var TAB_LEADS  = 'لیدها';
 var TAB_INBOX  = 'WhatsApp Inbox';
 var TIMEZONE   = 'Asia/Tehran';
 
-var AUTO_REPLY_ENABLED = true;
-var AUTO_REPLY_TEXT =
-  'سلام 🍓 به مرکز تجربه زندگی خوش آمدید.\n\n' +
-  'پیام شما رسید. همکاران پذیرش در ساعت کاری (۹:۳۰ تا ۱۷:۳۰ به وقت تهران) پاسخ می‌دهند.\n\n' +
-  'اگر می‌خواهید مسیر تراپی را شروع کنید، از این‌جا ثبت‌نام کنید:\n' +
-  'https://tajrobeh.life\n\n' +
-  'در کنار شما هستیم.';
 
 // اولین تابع فایل تا در انتخابگر Run پیش‌فرض باشد و تست‌ها همیشه از همین‌جا اجرا شوند
 function runAllTests() { tgRun(); }

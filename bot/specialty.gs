@@ -30,7 +30,6 @@ var SP_LINES = [
 ];
 var SP_POOL_FIRST = 18, SP_POOL_LAST = 26;
 var SP_COL_DECL = 'خدمات تخصصی (اعلام‌شده)', SP_COL_OK = 'خدمات تخصصی (تأییدشده)', SP_COL_PATH = 'مسیر', SP_COL_TEXT = 'متن تخصصی (پیش‌نویس)';
-var SP_PATH = ['تحلیلی', 'شناختی با تست', 'هر دو'];
 /* گزینهٔ پروفایل سایت ← خط */
 var SP_FROM_PQ = [['focus', 'مسائل جنسی', 'sex'], ['focus', 'رابطه و زوج', 'couple'], ['focus', 'سوگ و فقدان', 'grief'], ['focus', 'وسواس', 'ocd'],
   ['focus', 'تروما', 'parent'], ['groups', 'کوییر و LGBTQ+', 'affirming'], ['groups', 'بیماری مزمن', 'psychosomatic'],

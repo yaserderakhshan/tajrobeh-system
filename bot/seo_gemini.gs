@@ -6,7 +6,6 @@
 var SEO_SITE = 'https://tajrobeh.life';
 var SEO_SHEET = cfg_('TG_STAT_SHEET_ID', '');
 var SEO_TAB = 'سئو · پیشنهاد Gemini';
-var SEO_MODEL = 'gemini-flash-latest';
 var SEO_SUFFIX = ' | تجربه زندگی';
 var SEO_PRIORITY = [104, 86, 193, 118, 89, 35];
 var SEO_HEAD = ['تاریخ', 'شناسه', 'آدرس', 'تیتر فعلی', 'تیتر پیشنهادی', 'طول تیتر', 'متای فعلی', 'متای پیشنهادی', 'طول متا',
