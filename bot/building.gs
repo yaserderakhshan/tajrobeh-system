@@ -318,6 +318,8 @@ function vkSet_(key, r, col, val) {
   vkSheet_(key).getRange(r, col).setValue(val);
   vkDrop_(key);
 }
+function vkCol_(key, name) { return VK_H[key].indexOf(name) + 1; }
+function vkGet_(row, key, name) { return row[VK_H[key].indexOf(name)]; }
 function vkFind_(key, code) {
   var rows = vkRows_(key);
   for (var i = 0; i < rows.length; i++) if (String(rows[i][0]) === String(code)) return rows[i];

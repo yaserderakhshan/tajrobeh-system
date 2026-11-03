@@ -13,6 +13,7 @@
  */
 
 var WP_PAGE_ID = 503886;
+var WP_PAGE_FILE = 'app_page';
 var WP_PAGE_MIN = 50000;
 var WP_PAGE_BASE = 'https://tajrobeh.life/wp-json/wp/v2/pages/';
 

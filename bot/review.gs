@@ -21,7 +21,9 @@ var RV_ST = { NEW: 'تازه', ED: 'در صف سردبیر', BACKR: 'برگشت 
 var RV_ST_LIST = [RV_ST.NEW, RV_ST.ED, RV_ST.BACKR, RV_ST.OKE, RV_ST.READY, RV_ST.BACKY, RV_ST.PUB, RV_ST.REJ];
 var RV_OPEN = [RV_ST.ED, RV_ST.BACKR, RV_ST.OKE, RV_ST.READY, RV_ST.BACKY];
 var RV_COL = { OWN: 'مالک فعلی', AT: 'زمان ثبت', EDAT: 'زمان تأیید سردبیر', FINAT: 'زمان تأیید نهایی', RAW: 'متن اصلی بازبین', TR: 'متن پیاده‌شدهٔ ویس', PTS: 'امتیاز' };
+var RV_NEW_COLS = [RV_COL.OWN, RV_COL.AT, RV_COL.EDAT, RV_COL.FINAT, RV_COL.RAW, RV_COL.TR, RV_COL.PTS];
 var RV_DEADLINE = { ed: 5, owner: 2 };   /* روز کاری؛ جمعه تعطیل */
+var RV_BOT = 'https://t.me/tajrobehlife_bot';
 
 var RV_PTS_TAB = 'امتیازها';
 var RV_PTS_HEAD = ['کد', 'تاریخ شمسی', 'نفر', 'کار', 'امتیاز', 'کد مرجع'];

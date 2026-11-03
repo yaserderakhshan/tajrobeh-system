@@ -102,6 +102,24 @@ function stkOpen_(r) { return r.st !== STK_ST.DONE; }
 function stkBoss_() {
   try { var b = stkDry_() ? TG_MEM['stk:boss'] : tgDutyBoss_(); var c = b ? tgChatIds_(b.chat)[0] : ''; return c ? { name: b.name || '', chat: String(c) } : null; } catch (e) { return null; }
 }
+function stkKb_(r, def) {
+  var rows = [], lead = (/^L-\d+/.exec(r.lead) || [''])[0];
+  if (def.btn[1] === 'asg' && lead) rows.push([{ text: def.btn[0], callback_data: 'ld:asg:' + lead }]);
+  else if (def.btn[1] === 'out' && lead) rows.push([{ text: def.btn[0], callback_data: 'lm:o:' + lead }]);
+  else if (def.btn[1] === 'q') rows.push([{ text: def.btn[0], callback_data: 'sk:q:' + r.code }]);
+  rows.push([{ text: '🔧 در حال حل', callback_data: 'sk:w:' + r.code }, { text: '✅ حل شد', callback_data: 'sk:ok:' + r.code }]);
+  return { inline_keyboard: rows };
+}
+function stkCardText_(r, def) {
+  return '⛔️ <b>درخواست متوقف · ' + tgEsc_(r.mode) + '</b>\n' + tgEsc_(def.label) + '\n\n' + tgEsc_(r.detail) +
+    (r.lead ? '\nلید: <code>' + tgEsc_(r.lead) + '</code>' : '') + (r.type ? ' · نوع: ' + tgEsc_(r.type) : '') +
+    (r.place ? '\nشهر یا مکان: ' + tgEsc_(r.place) : '') + (r.since ? '\nاز: ' + tgEsc_(r.since) : '') +
+    '\n\n<b>اقدام لازم:</b> ' + tgEsc_(def.next) + '\n<code>' + tgEsc_(r.code) + '</code>';
+}
+function stkLine_(r) {
+  return '⛔️ ' + tgEsc_(r.code) + (r.lead ? ' · ' + tgEsc_(String(r.lead).slice(0, 40)) : '') + ' · ' + tgEsc_(r.mode) + ' · ' + tgEsc_(r.reason) + (r.place ? ' · ' + tgEsc_(r.place) : '') +
+    '\n' + tgEsc_(String(r.detail).slice(0, 200));
+}
 /* برای هر نفر و هر علت روزی یک کارت */
 function stkSentToday_(chat, reason, mark) {
   var k = 'STK_SENT:' + stkDay_(), m = {};
@@ -110,6 +128,22 @@ function stkSentToday_(chat, reason, mark) {
   if (!mark) return !!m[id];
   m[id] = 1; stkProp_(k, JSON.stringify(m));
   return true;
+}
+/* فرستادن کارت یک مورد: کارت کامل به مسئول پذیرش، خط کوتاه به یاسر؛ هر نفر و هر علت روزی یک بار */
+function stkSend_(r) {
+  var def = STK_R[r.key.split(':')[0]]; if (!def) return 0;
+  var boss = stkBoss_(), own = String(TG_OWNER_CHAT), sent = 0, rk = r.key.split(':')[0];
+  var full = boss ? boss.chat : own;
+  [[full, 'card'], [own, 'line']].forEach(function (x) {
+    if (x[1] === 'line' && x[0] === full) return;
+    if (stkSentToday_(x[0], rk)) return;
+    var st = x[1] === 'card' ? tgNotify_(x[0], TG_NK.task, stkCardText_(r, def), { ref: r.code, markup: stkKb_(r, def) })
+                             : tgNotify_(x[0], TG_NK.task, stkLine_(r), { ref: r.code });
+    if (st === 'رفت' || st === 'صف') { stkSentToday_(x[0], rk, true); sent++; }
+  });
+  r.card = sent ? stkStamp_() : (r.card && r.card !== STK_HELD ? r.card : 'فقط در تب و خلاصه');
+  stkWrite_(r);
+  return sent;
 }
 
 /* ثبت یا به‌روزرسانی یک مورد. o: {reason, key, detail, lead, type, place, since, owner, ref} ← ردیف */
@@ -132,6 +166,24 @@ function stkRaise_(o) {
   /* v170.43 (سیاست دائمی یاسر، اسپم نه): هیچ کارت جدایی نمی‌رود؛ همه در خلاصهٔ روزانهٔ هر مسئول (stkDigest_) */
   r.card = STK_DAILY; stkWrite_(r);
   return r;
+}
+/* بعد از تأیید یاسر: کارت‌های نگه‌داشته می‌روند (همان قاعدهٔ هر نفر و هر علت روزی یک کارت) و یک فهرست کامل برای یاسر */
+function stkRelease_() {
+  stkProp_('STK_SEND_OK', '1');
+  var held = stkRows_().filter(function (r) { return stkOpen_(r) && r.card === STK_HELD; }), n = 0;
+  var boss = stkBoss_();
+  held.forEach(function (r) {
+    var def = STK_R[r.key.split(':')[0]]; if (!def || !boss) { r.card = 'فقط در تب و خلاصه'; stkWrite_(r); return; }
+    if (!stkSentToday_(boss.chat, r.key.split(':')[0])) {
+      var st = tgNotify_(boss.chat, TG_NK.task, stkCardText_(r, def), { ref: r.code, markup: stkKb_(r, def) });
+      if (st === 'رفت' || st === 'صف') { stkSentToday_(boss.chat, r.key.split(':')[0], true); r.card = stkStamp_(); n++; }
+    }
+    if (r.card === STK_HELD) r.card = 'فقط در تب و خلاصه';
+    stkWrite_(r);
+  });
+  var t = stkSummaryText_();
+  if (t) tgNotify_(String(TG_OWNER_CHAT), TG_NK.task, t, { ref: 'STK' });
+  return { held: held.length, cards: n };
 }
 /* اسکن: موردی که دیگر شرطش نیست، حل می‌شود (فقط علت‌های اسکنی) */
 function stkSettle_(reasons, liveKeys) {
@@ -320,6 +372,17 @@ function stkScan_() {
   try { stkLeadScan_(live); } catch (e2) { tgErr_('stkLeadScan_', e2); }
   stkSettle_(['inp_noapproved', 'inp_wait48', 'inp_nocity', 'inp_req24', 'inp_noroom', 'lead_botowner', 'lead_abroad', 'lead_stage'], live);
   return Object.keys(live).length;
+}
+function stkSummaryText_() {
+  var open = stkRows_().filter(stkOpen_);
+  if (!open.length) return '';
+  var by = {};
+  open.forEach(function (r) { (by[r.mode + ' · ' + r.reason] = by[r.mode + ' · ' + r.reason] || []).push(r); });
+  return '🧭 <b>درخواست‌های متوقف باز</b> · ' + tgFa_(open.length) + ' مورد\n\n' + Object.keys(by).map(function (k) {
+    return '<b>' + tgEsc_(k) + '</b> (' + tgFa_(by[k].length) + ')\n' + by[k].slice(0, 5).map(function (r) {
+      return '• ' + tgEsc_(r.code) + (r.lead ? ' · ' + tgEsc_(String(r.lead).slice(0, 40)) : '') + (r.st === STK_ST.WORK ? ' 🔧' : '') + ' · ' + tgEsc_(String(r.detail).slice(0, 140));
+    }).join('\n');
+  }).join('\n\n');
 }
 /* از tgWatchdog (ساعتی). تا یاسر «✅ اجرا»ی مدل لید را نزده، کاری نمی‌کند */
 function stkHourly_() {

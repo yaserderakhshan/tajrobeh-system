@@ -881,6 +881,7 @@ function asReviewTeams_(chat) {
 function asRowTeams_(o) { var t = String(o['تیم تأیید'] || '').trim(); return t ? t.split(/\s*(?:،|,| و )\s*/).filter(String) : ['پذیرش']; }
 function asRowFor_(o, teams) { if (!teams.length) return false; if (teams.indexOf('*') > -1 || !asTeamsOn_()) return true; return asRowTeams_(o).some(function (t) { return teams.indexOf(t) > -1; }); }
 function asInQueue_(o) { var s = String(o['تأیید'] || '').trim(); return s !== 'بله' && s !== 'کنار'; }
+function asIsStaff_(chat) { return asReviewTeams_(chat).length > 0; }
 function asStaffName_(chat) {
   try { var d = tgWhoDesk_(chat, ''); if (d && d.name) return d.name; } catch (e) {}
   try { var r = tgRolesOf_(chat, ''); if (r && r.name) return r.name; } catch (e2) {}
