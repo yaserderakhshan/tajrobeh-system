@@ -1534,14 +1534,6 @@ function ptSetup() {
   Logger.log(log.join('\n'));
   return log;
 }
-/* رنگ سبز گروه حضوری و پارتنرز در هاب */
-function ptHubColor() {
-  var ss = tgSS_(), n = 0;
-  ['صفحهٔ پارتنر', 'مکان‌های حضوری', 'اتاق‌های حضوری', 'ساعت‌های حضوری', 'درخواست‌های حضوری', 'درخواست فضای پارتنر', PT_T.staff, PT_T.ther, PT_T.off]
-    .forEach(function (nm) { var sh = ss.getSheetByName(nm); if (sh) { sh.setTabColor('#348a5a'); n++; } });
-  Logger.log(n + ' تب سبز شد');
-  return n;
-}
 
 /* ═══════════ تست ═══════════ */
 function ptTests() {

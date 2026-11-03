@@ -317,26 +317,6 @@ function seenRecently_(key) {
   return false;
 }
 
-// ─── ۵) ارسال پاسخ خودکار واتس‌اپ ───────────────────────────
-function sendWhatsApp_(to, text) {
-  var props = PropertiesService.getScriptProperties();
-  var token = props.getProperty('WHATSAPP_TOKEN');
-  var phoneId = props.getProperty('WHATSAPP_PHONE_ID');
-  if (!token || !phoneId) return;
-
-  UrlFetchApp.fetch('https://graph.facebook.com/v21.0/' + phoneId + '/messages', {
-    method: 'post',
-    contentType: 'application/json',
-    headers: { Authorization: 'Bearer ' + token },
-    muteHttpExceptions: true,
-    payload: JSON.stringify({
-      messaging_product: 'whatsapp',
-      to: to,
-      type: 'text',
-      text: { preview_url: false, body: text }
-    })
-  });
-}
 
 // ─── ابزارهای کمکی ─────────────────────────────────────────
 var SS_CACHE_ = null;
@@ -363,16 +343,6 @@ function appendRow_(tabName, row) { sheet_(tabName).appendRow(tgCellRow_(row)); 
 function tgCell_(v) { return (typeof v === 'string' && /^[=+\-@\t\r]/.test(v)) ? "'" + v : v; }
 function tgCellRow_(row) { return (row || []).map(tgCell_); }
 
-function isNewContact_(phone) {
-  var sh = sheet_(TAB_LEADS);
-  var last = sh.getLastRow();
-  if (last < 2) return true;
-  var col = sh.getRange(2, 6, last - 1, 1).getValues();
-  for (var i = 0; i < col.length; i++) {
-    if (digits_(col[i][0]) === digits_(phone)) return false;
-  }
-  return true;
-}
 
 // v166.12: رقم فارسی و عربی هم (پیش از این «۰۹۱۲…» خالی می‌شد و منطقه و کلید تکرار از دست می‌رفت)
 /* v170.19: یک تابع برای ارقام شماره و یک تابع برای کلید شماره، برای همهٔ فایل‌ها (پیش از این digits_ و tgWaDigits_ و
