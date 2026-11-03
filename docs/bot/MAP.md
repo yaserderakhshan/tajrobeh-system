@@ -111,7 +111,7 @@
 | `panel.gs` | ۲۰۹ | ۱۹ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
 | `bridge.gs` | ۳۳۳ | ۲۷ |
-| `login.gs` | ۲۲۰ | ۱۹ |
+| `login.gs` | ۲۲۶ | ۲۰ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۰۹ | ۳۳ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |

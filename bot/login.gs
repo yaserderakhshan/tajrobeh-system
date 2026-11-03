@@ -87,6 +87,11 @@ function lgV170108TestLead() {
   try { c = brLeadPost_(url, body, sec); } catch (e) { BR_LAST_TXT = String(e.message || e).slice(0, 120); }
   return out + ' · لید آزمایشی: HTTP ' + c + (BR_LAST_TXT ? ' ' + BR_LAST_TXT : '');
 }
+/** یک‌بارهٔ خودکار v170.109 (فقط‌خواندنی): شمار دعوت «ورود به تجربه» و لید پل تا الان، برای گزارش دیپلوی */
+function lgV170109Count() {
+  var c = brLeadState_();
+  return 'دعوت تا الان: ' + Object.keys(lgInvited_()).length + ' · امروز لید پل: رسید ' + c.ok + '، شکست ' + c.fail + '، صف ' + c.q.length;
+}
 try { TG_NIGHT_LINES.push(brLeadNightLine_); } catch (eNl) {}
 
 /* ───── ۳) دعوت درمانگران ───── */
@@ -212,6 +217,7 @@ function lgTests() {
     lgOnCb_('9001', 'lgn:all');
     ok('بیرون از ساعت ۱۰ تا ۲۰ دعوتی نمی‌رود', TG_OUTBOX.length === 1 && /۱۰ تا ۲۰/.test(TG_OUTBOX[0].text));
     ok('یک‌بارهٔ دعوت در فهرست CI', CI_ONCE_AUTO.indexOf('lgV170107Invite') >= 0);
+    ok('یک‌بارهٔ شمار v170.109 فقط‌خواندنی و در فهرست CI', /^دعوت تا الان: \d+/.test(lgV170109Count()) && CI_ONCE_AUTO.indexOf('lgV170109Count') >= 0 && CI_ONCE_ALLOW.indexOf('lgV170109Count') >= 0);
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
   TG_DRY = keep.dry; TG_MEM = keep.mem; TG_OUTBOX = keep.box; TG_OWNER_CHAT = keep.own; TG_CFG_ = keep.cfg;
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ ورود و پل درست است'));
