@@ -7,6 +7,8 @@ add_filter('the_content', function ($c) {
     'analytic-cluster' => array('psychoanalytic-approaches', 'رویکردهای تحلیلی در مجلهٔ تجربه'),
     'abroad-cluster'   => array('', 'راهنمای سلامت روان در مهاجرت'),
     'school-cluster'   => array('learn-psychoanalytic-psychotherapy', 'نقشهٔ آموزش روان‌درمانی تحلیلی'),
+    'adhd-cluster'     => array('adhd', 'نقشهٔ ADHD در مجلهٔ تجربه'),
+    'b2b-cluster'      => array('employee-mental-health-program', 'سلامت روان کارکنان و سازمان'),
     'cbt-cluster'      => array('', 'درمان شناختی رفتاری در مجلهٔ تجربه'),
   );
   $me = get_the_ID();
