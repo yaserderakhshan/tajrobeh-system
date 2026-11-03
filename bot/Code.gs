@@ -26,14 +26,23 @@ function cfg_(k, dflt) {
 /* عدد پول با جداکنندهٔ هزارگان و رقم فارسی (برای متن بازهٔ نرخ) */
 /* v170.14: نام همکاران در کد نیست (مخزن عمومی). منبع: کلید TG_NAMES (JSON) در «تنظیمات خصوصی بات»؛ رفتار همان است.
    کلیدها: reception، reception_lat، school، school_full، school_user، chief، chief_full، psy، desk3، psy_dr، ap_sup */
+var TG_NAMES_ = cfg_('TG_NAMES', {});
 function tgNm_(k) { var o = cfg_('TG_NAMES', {}) || {}; return String(o[k] == null ? '' : o[k]); }
 function cfgFaMoney_(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '٬').replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; }); }
 
 // ─── تنظیمات ────────────────────────────────────────────────
 var SHEET_ID   = cfg_('TG_SHEET_ID', '');
+var TAB_LEADS  = 'لیدها';
 var TAB_INBOX  = 'WhatsApp Inbox';
 var TIMEZONE   = 'Asia/Tehran';
 
+var AUTO_REPLY_ENABLED = true;
+var AUTO_REPLY_TEXT =
+  'سلام 🍓 به مرکز تجربه زندگی خوش آمدید.\n\n' +
+  'پیام شما رسید. همکاران پذیرش در ساعت کاری (۹:۳۰ تا ۱۷:۳۰ به وقت تهران) پاسخ می‌دهند.\n\n' +
+  'اگر می‌خواهید مسیر تراپی را شروع کنید، از این‌جا ثبت‌نام کنید:\n' +
+  'https://tajrobeh.life\n\n' +
+  'در کنار شما هستیم.';
 
 // اولین تابع فایل تا در انتخابگر Run پیش‌فرض باشد و تست‌ها همیشه از همین‌جا اجرا شوند
 function runAllTests() { tgRun(); }
@@ -308,6 +317,26 @@ function seenRecently_(key) {
   return false;
 }
 
+// ─── ۵) ارسال پاسخ خودکار واتس‌اپ ───────────────────────────
+function sendWhatsApp_(to, text) {
+  var props = PropertiesService.getScriptProperties();
+  var token = props.getProperty('WHATSAPP_TOKEN');
+  var phoneId = props.getProperty('WHATSAPP_PHONE_ID');
+  if (!token || !phoneId) return;
+
+  UrlFetchApp.fetch('https://graph.facebook.com/v21.0/' + phoneId + '/messages', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + token },
+    muteHttpExceptions: true,
+    payload: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to: to,
+      type: 'text',
+      text: { preview_url: false, body: text }
+    })
+  });
+}
 
 // ─── ابزارهای کمکی ─────────────────────────────────────────
 var SS_CACHE_ = null;
@@ -334,6 +363,16 @@ function appendRow_(tabName, row) { sheet_(tabName).appendRow(tgCellRow_(row)); 
 function tgCell_(v) { return (typeof v === 'string' && /^[=+\-@\t\r]/.test(v)) ? "'" + v : v; }
 function tgCellRow_(row) { return (row || []).map(tgCell_); }
 
+function isNewContact_(phone) {
+  var sh = sheet_(TAB_LEADS);
+  var last = sh.getLastRow();
+  if (last < 2) return true;
+  var col = sh.getRange(2, 6, last - 1, 1).getValues();
+  for (var i = 0; i < col.length; i++) {
+    if (digits_(col[i][0]) === digits_(phone)) return false;
+  }
+  return true;
+}
 
 // v166.12: رقم فارسی و عربی هم (پیش از این «۰۹۱۲…» خالی می‌شد و منطقه و کلید تکرار از دست می‌رفت)
 /* v170.19: یک تابع برای ارقام شماره و یک تابع برای کلید شماره، برای همهٔ فایل‌ها (پیش از این digits_ و tgWaDigits_ و

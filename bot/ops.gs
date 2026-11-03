@@ -34,6 +34,7 @@ var OPS_FONT = 'Vazirmatn';
 var OPS_INK = '#222222', OPS_WHITE = '#fefefe', OPS_RED = '#c83f49', OPS_SOFT = '#f5f5f8', OPS_LINE = '#dfdfe2';
 var OPS_EMAIL_COL = 'ایمیل';
 /* هاب‌های فاز ۱: یاسر (TG_OWNER_CHAT) و سردبیر (سردبیر، نقش «سردبیر»). بقیه با opsHubMake(نام) در فاز ۲ */
+var OPS_HUB_ROLES = ['ناظر', 'سردبیر'];
 
 /* هاب شخصی */
 var HUB_MINE = 'کارهای من';

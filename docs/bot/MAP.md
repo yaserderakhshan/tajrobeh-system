@@ -82,48 +82,48 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.109`
+نسخهٔ کد: `v170.108`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
-| `Code.gs` | ۳۸۸ | ۳۱ |
-| `telegram.gs` | ۳۷۵۶۹ | ۲۰۱۴ |
-| `building.gs` | ۲۰۵۰ | ۱۶۹ |
+| `Code.gs` | ۴۲۷ | ۳۳ |
+| `telegram.gs` | ۳۸۶۳۵ | ۲۰۸۷ |
+| `building.gs` | ۲۰۵۲ | ۱۷۱ |
 | `social.gs` | ۴۸۹ | ۳۳ |
-| `partners.gs` | ۱۹۱۹ | ۱۶۱ |
+| `partners.gs` | ۱۹۲۸ | ۱۶۲ |
 | `maint.gs` | ۴ | ۱ |
 | `v162.gs` | ۸۰۰ | ۶۴ |
 | `school2.gs` | ۴۳۹ | ۳۲ |
-| `mag_contrib.gs` | ۱۲۳۳ | ۹۶ |
+| `mag_contrib.gs` | ۱۲۴۳ | ۹۷ |
 | `author.gs` | ۱۴۸ | ۱۰ |
-| `voice.gs` | ۱۱۱۶ | ۹۲ |
-| `review.gs` | ۶۲۱ | ۵۳ |
-| `seo_gemini.gs` | ۲۱۷ | ۱۴ |
+| `voice.gs` | ۱۱۱۸ | ۹۳ |
+| `review.gs` | ۶۲۳ | ۵۳ |
+| `seo_gemini.gs` | ۲۳۲ | ۱۶ |
 | `gemini_setup.gs` | ۵۷۹ | ۴۰ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۸۳۵ | ۱۳۳ |
-| `v168.gs` | ۲۵۱۰ | ۱۵۷ |
-| `wppage.gs` | ۱۹۳ | ۱۵ |
+| `v168.gs` | ۲۵۱۳ | ۱۵۷ |
+| `wppage.gs` | ۱۹۴ | ۱۵ |
 | `cover.gs` | ۳۸۷ | ۲۷ |
 | `magseo.gs` | ۶۱۶ | ۴۴ |
-| `panel.gs` | ۲۰۹ | ۱۹ |
+| `panel.gs` | ۲۲۹ | ۲۳ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
-| `bridge.gs` | ۳۳۳ | ۲۷ |
-| `login.gs` | ۲۲۶ | ۲۰ |
+| `bridge.gs` | ۲۰۴ | ۱۴ |
+| `login.gs` | ۲۸۸ | ۲۶ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
-| `stuck.gs` | ۵۰۹ | ۳۳ |
+| `stuck.gs` | ۵۷۲ | ۳۹ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۸۰ | ۶۸ |
 | `dq.gs` | ۶۰۳ | ۴۹ |
 | `cfg.gs` | ۲۰۴ | ۱۴ |
-| `ops.gs` | ۱۱۳۱ | ۱۰۰ |
-| `social_ig.gs` | ۳۲۹ | ۱۴ |
+| `ops.gs` | ۱۱۳۲ | ۱۰۰ |
+| `social_ig.gs` | ۳۳۰ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
 | `ebi.gs` | ۱۱۱۵ | ۸۲ |
 | `ci.gs` | ۵۴۵ | ۳۱ |
-| `sitesec.gs` | ۲۷۱ | ۲۰ |
+| `sitesec.gs` | ۲۷۵ | ۲۲ |
 | `sec.gs` | ۱۰۷ | ۱ |
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
@@ -131,16 +131,16 @@
 | `prauto.gs` | ۴۵۴ | ۳۰ |
 | `statfill.gs` | ۲۰۶ | ۲۰ |
 | `leadfix.gs` | ۱۲۴ | ۱۰ |
-| `specialty.gs` | ۴۶۰ | ۳۵ |
+| `specialty.gs` | ۴۶۱ | ۳۵ |
 | `thq.gs` | ۳۸۳ | ۴۰ |
 | `ai.gs` | ۲۲۰ | ۱۶ |
 | `psy2.gs` | ۱۸۴ | ۱۷ |
 | `migrate.gs` | ۵۶۲ | ۵۶ |
-| `psy3.gs` | ۳۴۲ | ۳۳ |
+| `psy3.gs` | ۳۴۳ | ۳۳ |
 | `psyref.gs` | ۲۹۴ | ۲۲ |
 | `sesslen.gs` | ۲۶۴ | ۲۶ |
-| `assist.gs` | ۱۴۶۴ | ۱۱۳ |
-| `leadspeed.gs` | ۱۱۴۸ | ۸۶ |
+| `assist.gs` | ۱۴۶۵ | ۱۱۴ |
+| `leadspeed.gs` | ۱۱۵۷ | ۸۷ |
 | `leadclaim.gs` | ۶۸۳ | ۴۷ |
 | `nurture.gs` | ۲۹۹ | ۲۶ |
 | `reactivate.gs` | ۲۴۶ | ۲۵ |
@@ -149,7 +149,7 @@
 | `uptime.gs` | ۱۵۴ | ۱۱ |
 | `agents.gs` | ۲۶۸ | ۲۰ |
 | `evlite.gs` | ۶۹۶ | ۶۰ |
-| `ws.gs` | ۱۱۱۵ | ۷۵ |
+| `ws.gs` | ۱۱۱۷ | ۷۶ |
 
 ### کارهای زمان‌دار
 
@@ -165,8 +165,8 @@
 | `tgDaily` | `telegram.gs` | atHour(21) | عقب |
 | `tgDigestEvening` | `telegram.gs` | atHour(18) | عقب |
 | `tgDigestMorning` | `telegram.gs` | atHour(9) | عقب |
-| `tgDutyTick` | `telegram.gs` | onEdit / دستی | رد |
-| `tgMeetTick` | `telegram.gs` | onEdit / دستی | رد |
+| `tgDutyTick` | `telegram.gs` | everyMinutes(5) | رد |
+| `tgMeetTick` | `telegram.gs` | everyMinutes(30) | رد |
 | `tgMonWeekly` | `telegram.gs` | onEdit / دستی | عقب |
 | `tgPayTick` | `telegram.gs` | everyMinutes(1) | رد |
 | `tgTherWeekly` | `telegram.gs` | onEdit / دستی | عقب |
@@ -248,6 +248,7 @@
 | `TG_INP_RULES` | «قوانین حضوری» | `telegram.gs` |
 | `TG_LEADS` | «لیدها» | `Code.gs` `telegram.gs` `partners.gs` `voice.gs` `v168.gs` `leadmodel.gs` `comments.gs` `v17013.gs` `ebi.gs` `leadfix.gs` `specialty.gs` `leadspeed.gs` `leadclaim.gs` `agents.gs` |
 | `TG_LEAD_EV_TAB` | «رویدادهای لید» | `telegram.gs` `comments.gs` `leadspeed.gs` |
+| `TG_MAG_TAB` | «نویسندگان مجله» | `telegram.gs` |
 | `TG_MAG_TOPICS_TAB` | «موضوعات مجله» | `telegram.gs` |
 | `TG_MIG_TAB` | «تست مهاجرت» | `mig.gs` |
 | `TG_MON_TAB` | «نظارت» | `telegram.gs` |
@@ -264,6 +265,8 @@
 | `TG_POOLS_TAB` | «استخرها» | `telegram.gs` `specialty.gs` |
 | `TG_PQ_QTAB` | «پرسش‌نامهٔ پروفایل» | `telegram.gs` |
 | `TG_PQ_TAB` | «پروفایل سایت» | `telegram.gs` |
+| `TG_PSY_T_APPT` | «نوبت‌ها» | `telegram.gs` |
+| `TG_PSY_T_PAY` | «پرداخت‌ها» | `telegram.gs` |
 | `TG_QUEUE_TAB` | «صف پیام» | `telegram.gs` |
 | `TG_RMSTAT_TAB` | «رودمپ · آمار روزانه» | `telegram.gs` |
 | `TG_RPT_DATA` | «لیدها · داده» | `telegram.gs` |
@@ -423,7 +426,7 @@
 | ورود به پنل و موج دعوت v170.98 | `pnlTests` |
 | صندوق راز و پاک‌سازی v170.99 | `secVaultTests` |
 | اتصال حساب فقط با تأیید v170.99 | `e26Tests` |
-| پیوند با پل: رونوشت، صف مشترک و پشتیبان v170.109 | `brTests` |
+| پیوند با پل: رونوشت و پشتیبان v170.99 | `brTests` |
 | ورود به تجربه، لید به پل (E40)، دعوت درمانگران v170.108 | `lgTests` |
 | پشتیبان مدل لید (v170.4) | `lmSafeTests` |
 | اقدام بعدی لید بسته (v170.50) | `lmClosedNextTests` |

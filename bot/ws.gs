@@ -36,6 +36,7 @@ var WS_PULL_LIMIT = 50;
 var WS_DONE_KEEP = 200;          /* چند id اجراشدهٔ آخر نگه داشته شود (سقف هر Script Property حدود ۹KB است) */
 var WS_TRY_MAX = 5;              /* رویدادی که این‌قدر شکست بخورد دیگر امتحان نمی‌شود و در «بی‌صاحب» ثبت می‌شود */
 var WS_TEAM_TEXT = '[متن از تیم]';
+var WS_STAMP = '{now}';
 var WS_SUM_DAYS = 90;
 var WS_DAILY_HOUR = 9;           /* ترکر و پیام تصمیم‌ها: ساعت ۹ تهران */
 
@@ -136,8 +137,9 @@ function wsOn_(v) { var s = wsS_(v); return s === 'بله' || s === 'فعال' |
 function wsEn_(s) { return String(s == null ? '' : s).replace(/[۰-۹]/g, function (d) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)); }).replace(/[٠-٩]/g, function (d) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)); }); }
 function wsNum_(v) { var n = Number(wsEn_(v).replace(/[,٬\s]/g, '')); return isFinite(n) ? n : 0; }
 function wsList_(s) { return wsS_(s).split(/[,،]+/).map(function (x) { return x.trim(); }).filter(String); }
-function wsSig_(msg, key) { return brHex_(Utilities.computeHmacSha256Signature(msg, key, Utilities.Charset.UTF_8)); }
-function wsHash_(s) { return brHex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8)); }
+function wsHex_(bytes) { return bytes.map(function (b) { return ('0' + (b & 255).toString(16)).slice(-2); }).join(''); }
+function wsSig_(msg, key) { return wsHex_(Utilities.computeHmacSha256Signature(msg, key, Utilities.Charset.UTF_8)); }
+function wsHash_(s) { return wsHex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8)); }
 function wsDay_(d) { return Utilities.formatDate(d || wsNow_(), TG_TZ, 'yyyy-MM-dd'); }
 function wsStamp_(d) { return Utilities.formatDate(d || wsNow_(), TG_TZ, 'yyyy-MM-dd HH:mm'); }
 function wsHour_(d) { return Number(Utilities.formatDate(d || wsNow_(), TG_TZ, 'H')); }

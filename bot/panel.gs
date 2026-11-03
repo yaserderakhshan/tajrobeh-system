@@ -13,6 +13,8 @@
  *    (بی فرمان تایپی)؛ با دکمه، پیام تلگرام با دکمهٔ ورود برای درمانگران می‌رود. یادآوری یک بار، ۴۸ ساعت بعد، اگر دکمه
  *    زده نشده. بات پیامک نمی‌فرستد.
  */
+var BR_HANDOFF_URL = 'https://bridge.tajrobeh.life/auth/telegram/handoff#t=';
+var BR_TTL_S = 180;
 var PNL_TAB = 'دعوت موج‌ها';
 var PNL_HEAD = ['موج', 'تاریخ', 'کد درمانگر', 'وضعیت', 'ارسال', 'دکمه', 'یادآوری', 'پیامک', 'یادداشت'];
 var PNL_REMIND_MS = 48 * 3600000;
@@ -26,6 +28,24 @@ var PNL_BTN = 'ورود به پنل';
 
 function pnlNow_() { return TG_DRY && TG_MEM['pnl:now'] ? Number(TG_MEM['pnl:now']) : Date.now(); }
 function pnlProp_(k) { return TG_DRY ? (TG_MEM['pnlp:' + k] || '') : (PropertiesService.getScriptProperties().getProperty(k) || ''); }
+function brB64_(x) { return Utilities.base64EncodeWebSafe(x).replace(/=+$/, ''); }
+/* شانزده بایت تصادفی (دو UUID تصادفی، بی خط) */
+function brJti_() {
+  if (TG_DRY && TG_MEM['br:jti']) return TG_MEM['br:jti'];
+  var hex = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '').slice(0, 32), b = [];
+  for (var i = 0; i < 32; i += 2) { var v = parseInt(hex.substr(i, 2), 16); b.push(v > 127 ? v - 256 : v); }
+  return brB64_(b);
+}
+/** توکن handoff؛ '' اگر رمز نیست. */
+function brToken_(tid, ph) {
+  var sec = pnlProp_('TG_BRIDGE_HANDOFF_SECRET');
+  if (!sec || !tid) return '';
+  var iat = Math.floor(pnlNow_() / 1000), p = { tid: Number(tid), iat: iat, exp: iat + BR_TTL_S, jti: brJti_() };
+  if (ph) p.ph = ph;
+  var payload = brB64_(JSON.stringify(p));
+  return payload + '.' + brB64_(Utilities.computeHmacSha256Signature(payload, sec));
+}
+function brUrl_(tid) { var t = brToken_(tid); return t ? BR_HANDOFF_URL + t : ''; }
 
 /* درمانگر یا عضو فعال وصل‌شده */
 function pnlCan_(chat) {

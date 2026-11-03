@@ -373,6 +373,8 @@ function vxAuDownload_(url) {
   return r.getBlob();
 }
 
+/** یک‌بار: کلید Auphonic از صفحهٔ تنظیمات Auphonic با یک رمز یک‌بارمصرف (بدون اینکه کلید در کد یا گفت‌وگو بیاید). */
+function vxKeyOpen() { var n = Utilities.getUuid().replace(/-/g, ''); CacheService.getScriptCache().put('vxkeyn', n, 900); Logger.log('nonce ' + n); return n; }
 function vxKeyIn_(body) {
   var c = CacheService.getScriptCache(), n = c.get('vxkeyn');
   if (!n || String(body.vxkey) !== n || !/^[A-Za-z0-9_\-]{20,80}$/.test(String(body.v || ''))) return false;
@@ -916,7 +918,7 @@ function vxEdSave_(e, data) { if (vxDry_()) { TG_MEM['vxedfile'] = data; return;
 
 /* ----- صفحهٔ بررسی: لینک امضاشده ----- */
 function vxPageKey_() { var p = vxP_(), k = p.getProperty('VX_PAGE_KEY'); if (!k) { k = Utilities.getUuid() + Utilities.getUuid(); p.setProperty('VX_PAGE_KEY', k); } return k; }
-function vxSig_(code, who) { return brHex_(Utilities.computeHmacSha256Signature(code + '|' + who, vxDry_() ? 'dry' : vxPageKey_())).slice(0, 32); }
+function vxSig_(code, who) { return Utilities.computeHmacSha256Signature(code + '|' + who, vxDry_() ? 'dry' : vxPageKey_()).map(function (b) { return ('0' + (b & 255).toString(16)).slice(-2); }).join('').slice(0, 32); }
 /* v169: ریشهٔ ۴۰۴ «🔍 بررسی اصلاحات»: «w» متغیر عمومی پرس‌وجوی وردپرس است (شمارهٔ هفته)؛ ?w=<chat_id> را آرشیو هفته می‌خواند و ۴۰۴ می‌دهد.
    حالا هر لینک بررسی به خود بات می‌رود (start=rv_E-…) و بات دکمهٔ مینی‌اپ می‌دهد. برگهٔ /review/ هم به همین ریدایرکت می‌شود. */
 function vxPageUrl_(code, who) { return 'https://t.me/tajrobehlife_bot?start=rv_' + code; }
