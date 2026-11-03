@@ -705,15 +705,6 @@ function abInWinMin_(fromMs, toMs, tz, best) {
   }
   return Math.round(sum);
 }
-/** شروع نزدیک‌ترین پنجرهٔ امروز یا فردا (ms) */
-function abWinStartMs_(tz, best, nowMs) {
-  for (var d = 0; d < 3; d++) {
-    var iso = Utilities.formatDate(new Date(nowMs + d * 86400000), TG_TZ, 'yyyy-MM-dd'), base = new Date(iso + 'T00:00:00+03:30').getTime();
-    var r = abWinTehran_(tz, best, base + 12 * 3600000), s = base + r.from * 60000, e = base + r.to * 60000;
-    if (e > nowMs) return Math.max(s, nowMs);
-  }
-  return nowMs;
-}
 /** منطقهٔ زمانی و زمان مناسب یک لید (ستون‌های تازه، وگرنه یادداشت قدیمی) */
 function abLeadTz_(l) { return String(l.tz || '').trim() || abTzFromNote_(l.memo || l.note || ''); }
 function abLeadBest_(l) { return String(l.best || '').trim() || abBestFromNote_(l.memo || l.note || ''); }
