@@ -7530,6 +7530,7 @@ function tgApiRoute_(p) {
   try {
     if (api === 'ping') out = { ok: true, t: Date.now() };
     else if (api === 'camp') out = tgCpApi_(p);
+    else if (api === 'br_ther' && typeof brTherFeed_ === 'function') out = brTherFeed_(p);   /* v170.113 (E53): خوراک امضادار مچ برای پل */
     else if (api === 'config') out = {
       ok: true,
       topics: TG_TOPICS.map(function (x) { return { k: x.k, label: x.label }; }),
@@ -27560,6 +27561,7 @@ var TG_CAP = [
   { key: 'partners', page: 'site', label: 'فهرست پارتنرها برای صفحهٔ سایت (v155)', roles: [], bot: false, api: 'partners', app: false },
 { key: 'ping', page: 'home', label: 'زنده‌بودن سرور', roles: [], bot: true, api: 'ping', app: true },
   { key: 'camp', page: 'home', label: 'وضعیت کمپین ثبت‌نام دوره برای سایت (v122)', roles: [], bot: false, api: 'camp', app: false },
+  { key: 'br_ther', page: 'home', label: 'خوراک امضادار مچ‌میکینگ درمانگران برای پل (v170.113، E53)', roles: [], bot: false, api: 'br_ther', app: false },
   { key: 'boot', page: 'home', label: 'راه‌اندازی مینی‌aپ در یک درخواست', roles: [], bot: false, api: 'boot', app: true },
   { key: 'dash_me', page: 'home', label: 'داشبورد من', roles: [], bot: true, api: 'dash.me', app: true },
   { key: 'task_my', page: 'task', label: 'کارهای من', roles: [], bot: true, api: 'task.my', app: true },

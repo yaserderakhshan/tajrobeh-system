@@ -230,11 +230,13 @@ function brOutQueue_(it) {
 function brLeadPush_(o, row) {
   try {
     var mm = String(o && o.note || '').match(/chat_id: (\d+)/);
-    if (!mm) return 'skip';   /* لید فرم سایت یا واتس‌اپ: سایت خودش به پل می‌فرستد */
+    var web = !mm && String(o && o.channel || '') === 'فرم سایت';   /* v170.113 (E42، E53): لید فرم سایت هم به پل */
+    if (!mm && !web) return 'skip';   /* واتس‌اپ و بقیه: هنوز نه */
     var url = brLeadUrl_(), sec = brHandoffSecret_();
     if (!url || !sec) return 'skip';
     var code = ''; try { code = row && typeof row === 'number' && typeof tgLeadCode_ === 'function' ? tgLeadCode_(row) : ''; } catch (eC) {}
-    var b = brLeadBody_(o, code, mm[1]);
+    var b = brLeadBody_(o, code, mm ? mm[1] : '');
+    if (web) { b.source = 'Website'; b.telegramUsername = ''; if (!b.mobile) return 'skip'; }   /* فرم سایت: موبایل اجباری */
     if (!b.mobile && !b.telegramUsername) return 'skip';   /* پل بی موبایل و یوزرنیم ۴۰۰ می‌دهد */
     var body = JSON.stringify(b), okc = brLeadPost_(url, body, sec), st = brLeadState_();
     var res = okc >= 200 && okc < 300 ? 'ok' : okc === 429 ? 'later' : 'fail';
@@ -260,6 +262,25 @@ function brLeadRetryTick_() {
   brLeadState_(st);
   return n;
 }
+/* ───── ۵) خوراک فقط‌خواندنی مچ‌میکینگ درمانگران برای پل (E53 بند ۳) ─────
+   GET <exec>?api=br_ther&ts=<ثانیهٔ یونیکس>&sig=<هگز HMAC-SHA256("<ts>.br_ther", راز handoff)>؛ اختلاف زمان حداکثر ۵ دقیقه.
+   فقط فیلدهای درمانگر (همان که مچ بات به کار می‌برد، به‌اضافهٔ کد، شهر، قیمت پایه و چت تلگرام)؛ هیچ دادهٔ مراجع. */
+function brTherFeed_(p) {
+  var sec = brHandoffSecret_(), ts = Number(p.ts || 0), now = Math.floor((TG_DRY && TG_MEM['br:now'] ? Number(TG_MEM['br:now']) : Date.now()) / 1000);
+  if (!sec || !ts || Math.abs(now - ts) > 300) return { ok: false, error: 'auth' };
+  var want = brHex_(Utilities.computeHmacSha256Signature(String(p.ts) + '.br_ther', sec));
+  if (!tgSafeEq_(String(p.sig || '').toLowerCase(), want)) return { ok: false, error: 'auth' };
+  var rows = {}; try { (TG_DRY ? (TG_MEM['pnl:thers'] || []) : tgTherapistRows_()).forEach(function (t) { rows[tgNorm_(t.name)] = t; }); } catch (eR) {}
+  var list = tgThPubList_().map(function (t) {
+    var r = rows[tgNorm_(t.n)] || {};
+    return { name: t.d || t.n, code: String(r.code || ''), telegramId: typeof pnlChatOf_ === 'function' ? pnlChatOf_(r) : String(r.chat || ''), active: !!t.a,
+      gender: t.g, approach: t.sp, mode: t.md, city: t.ct || String(r.city || ''), years: t.yr, languages: t.lg, ages: t.ag, focus: t.fc, groups: t.gr, pools: t.pl,
+      couples: !!t.cp, abroad: !!(t.ab || r.abroad), inPerson: !!t.ip, style: t.st, tier: t.tr, rate: r.rate == null ? '' : r.rate, timezone: String(r.tz || ''),
+      about: t.ab2, page: t.pg };
+  });
+  return { ok: true, version: 1, at: new Date(now * 1000).toISOString(), therapists: list };
+}
+
 /** E46 بند ۵: شمار پیوند ورود ساخته‌شدهٔ امروز (در همان کلید BRL) */
 function brLinkCount_() { var st = brLeadState_(); st.ln = (st.ln || 0) + 1; brLeadState_(st); }
 function brLeadNightLine_() {

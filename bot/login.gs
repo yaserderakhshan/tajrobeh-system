@@ -179,7 +179,8 @@ function wvTick_(force) {
     if (lgProp_('WV1_CARD')) return 'منتظر دکمهٔ مالک';
     var abr = {}; cl.forEach(function (c) { if (c.abroad && c.ther) abr[c.ther] = 1; });
     tgSend_(String(TG_OWNER_CHAT), '📨 <b>موج ۱ پل از بات</b>\nدعوت مراجع: ' + tgFa_(cl.length) + ' · پیام درمانگر دارای حساب: ' + tgFa_(d.therapists.length) +
-      ' · پیام «مراجع خارج»: ' + tgFa_(Object.keys(abr).length) + ' درمانگر\nهر نفر یک بار، دسته‌های ۵۰تایی، ساعت ۱۰ تا ۲۰.', { inline_keyboard: [[{ text: '📨 شروع موج ۱', callback_data: 'lgn:wv1' }]] });
+      ' · پیام «مراجع خارج»: ' + tgFa_(Object.keys(abr).length) + ' درمانگر\nهر نفر یک بار، دسته‌های ۵۰تایی، ساعت ۱۰ تا ۲۰.' +
+      '\n\n<b>پیش‌نمایش متن‌ها</b>\n• مراجع: ' + tgEsc_(T_WV_CLIENT) + '\n• درمانگر: ' + tgEsc_(T_WV_THER) + '\n• مراجع خارج: ' + tgEsc_(T_WV_ABROAD), { inline_keyboard: [[{ text: '📨 شروع موج ۱', callback_data: 'lgn:wv1' }]] });
     lgProp_('WV1_CARD', '1');
     return 'کارت شروع برای مالک رفت';
   }
@@ -369,6 +370,22 @@ function lgTests() {
     ok('موج ۱: فقط نشانی پل پذیرفته می‌شود', wvUrl_() === '' && /آماده نیست/.test(wvTick_()));
     ok('یک‌بارهٔ نشانی تتر در فهرست CI', CI_ONCE_AUTO.indexOf('lgV170112Addr') >= 0 && CI_ONCE_ALLOW.indexOf('lgV170112Addr') >= 0 && /TRON \(TRC20\)/.test(lgV170112Addr()));
     TG_CFG_ = {};
+    /* E53 */
+    TG_CFG_ = {}; TG_MEM['br:leads'] = []; TG_MEM['br:leadCode'] = 200;
+    ok('E53: لید فرم سایت با source=Website و موبایل به پل (روی کد قبلی مردود)', brLeadPush_({ name: 'مراجع سایت', phone: '09000000002', channel: 'فرم سایت', note: '', firstText: 'x' }, 0) === 'ok' &&   /* pii:ok */
+      JSON.parse(TG_MEM['br:leads'][0].body).source === 'Website' && JSON.parse(TG_MEM['br:leads'][0].body).mobile === '09000000002');   /* pii:ok */
+    ok('E53: فرم سایت بی موبایل و لید واتس‌اپ به پل نمی‌رود', brLeadPush_({ name: 'x', phone: '', channel: 'فرم سایت', note: '' }, 0) === 'skip' && brLeadPush_({ name: 'x', phone: '+1', channel: 'WhatsApp', note: '' }, 0) === 'skip' && TG_MEM['br:leads'].length === 1);
+    delete TG_MEM['pnlp:TG_BRIDGE_HANDOFF_SECRET']; TG_MEM['br:token'] = 'test-only-bot-token';
+    TG_MEM['thpub'] = [{ n: 'درمانگر یک', d: 'درمانگر یک', a: 1, g: 'f', sp: 'شناختی', ab: 1, tr: 2 }]; TG_MEM['br:now'] = '1790000000000';
+    TG_MEM['pnl:thers'] = [{ name: 'درمانگر یک', code: 'T1', chat: '5550301', rate: 100, status: 'فعال' }];
+    var fsig = brHex_(Utilities.computeHmacSha256Signature('1790000000.br_ther', brHandoffSecret_()));
+    var feed = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: fsig });
+    var fj = feed && typeof feed.getContent === 'function' ? JSON.parse(feed.getContent()) : feed;
+    ok('E53: خوراک مچ امضادار، فقط فیلد درمانگر', fj.ok === true && fj.therapists.length === 1 && fj.therapists[0].approach === 'شناختی' && fj.therapists[0].code === 'T1' && fj.therapists[0].abroad === true &&
+      JSON.stringify(fj).indexOf('lead') < 0, JSON.stringify(fj).slice(0, 300));
+    var bad = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: '00' }), bj = bad && typeof bad.getContent === 'function' ? JSON.parse(bad.getContent()) : bad;
+    var old = tgApiRoute_({ api: 'br_ther', ts: '1789990000', sig: brHex_(Utilities.computeHmacSha256Signature('1789990000.br_ther', brHandoffSecret_())) }), oj = old && typeof old.getContent === 'function' ? JSON.parse(old.getContent()) : old;
+    ok('E53: امضای غلط یا کهنه رد می‌شود', bj.ok === false && oj.ok === false);
     /* E48 */
     TG_CFG_ = { TG_NAMES: { chief: 'همکار آزمون' } }; TG_OUTBOX = []; TG_MEM['lg:now'] = String(new Date('2026-11-04T12:00:00+03:30').getTime());
     TG_MEM['pnl:thers'] = [{ name: 'همکار آزمون یک', chat: '5550091', status: 'فعال' }, { name: 'درمانگر دیگر', chat: '5550092', status: 'فعال' }];
