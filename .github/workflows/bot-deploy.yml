@@ -230,7 +230,8 @@ jobs:
             elif ! diff -q --strip-trailing-cr <(sed -e '$a\' "$R/$f") <(sed -e '$a\' "/tmp/snap/$f") > /dev/null; then
               echo "متفاوت: $f ($(diff --strip-trailing-cr <(sed -e '$a\' "$R/$f") <(sed -e '$a\' "/tmp/snap/$f") | grep -c '^[<>]') خط)"; fi
           done
-          if [ "$FORCE" = "true" ]; then echo "::warning::force روشن است؛ بازنویسی می‌شود."; exit 0; fi
+          # v170.112.1: force اول کد bot-live را می‌نشاند (فایل بیرون از گیت کنار می‌رود) تا پشتوانهٔ برگشت با کد زنده یکی شود
+          if [ "$FORCE" = "true" ]; then echo "::warning::force روشن است؛ اول کد bot-live نشانده می‌شود، بعد بازنویسی."; echo "resync=force" >> "$GITHUB_OUTPUT"; exit 0; fi
           echo "::error::کد زنده تغییرهایی بیرون از گیت دارد. اول آن‌ها را به مخزن بیاور، یا اجرای دستی را با force بزن."
           exit 1
 
