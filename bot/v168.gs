@@ -2009,6 +2009,7 @@ function tgTick5(e) {
   try { if (typeof dqTick5_ === 'function') bgPart_('dqTick5_', function () { return run('dqTick5_', dqTick5_); }); } catch (x5) { tgErr_('tgTick5 dqTick5_', x5); }   /* v170: صف ارسال، هر ۱۰ دقیقه */
   try { if (typeof secWipeTick_ === 'function') bgPart_('secWipeTick_', secWipeTick_); } catch (x7) { tgErr_('tgTick5 secWipeTick_', x7); }   /* v170.99 (E27): پیام راز بعد از ۱۵ دقیقه پاک */
   try { if (!calls && typeof brLeadRetryTick_ === 'function') bgPart_('brLeadRetryTick_', brLeadRetryTick_); } catch (x11) { tgErr_('tgTick5 brLeadRetryTick_', x11); }   /* v170.108 (E40): صف ۴۲۹ لید پل */
+  try { if (!calls && typeof lgE48Tick_ === 'function') lgE48Tick_(); } catch (x12) { tgErr_('tgTick5 lgE48Tick_', x12); }   /* v170.111 (E48): کارت تأیید مالک، یک بار */
   try { if (typeof cmTick5_ === 'function' && bgOk_('light', 'cmTick5_')) bgPart_('cmTick5_', function () { return run('cmTick5_', cmTick5_); }); } catch (x6) { tgErr_('tgTick5 cmTick5_', x6); }   /* v170.2: کامنت‌های هاب پذیرش، هر ۱۵ دقیقه */
   try { if (typeof lsTick_ === 'function') bgPart_('lsTick_', function () { return run('lsTick_', lsTick_); }); } catch (x8) { tgErr_('tgTick5 lsTick_', x8); }   /* v170.23.12: پاسخ زیر ۱۰ دقیقه و اولویت ۹:۳۰ (leadspeed.gs)؛ v170.23.26: شیت فقط با لید تازه */
   try { bgPart_('quotaAlert', v16810QuotaAlert_); } catch (x4) { tgErr_('v16810QuotaAlert_', x4); }
