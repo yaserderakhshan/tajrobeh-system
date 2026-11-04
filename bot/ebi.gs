@@ -935,6 +935,10 @@ try { TG_SUITES.push(['کمپین C-004 (پلی‌لیست ابی)', 'ebiTests']
 function ebiCodeTests() {
   var pass = 0, fail = 0, out = [];
   function ok(n, c, x) { if (c) pass++; else fail++; out.push((c ? '✅ ' : '❌ ') + n + (c || !x ? '' : ' · ' + String(x).slice(0, 240))); }
+  /* v170.112 (E52 بند ۲): روی Apps Script به تنظیمات زندهٔ کمپین (متن خوش‌آمد و آینه) وابسته است و از ۱۳ آبان بی تغییر کد قرمز شد؛
+     فقط آزمون محلی (دادهٔ ساختگی) دروازهٔ انتشار است. */
+  var isLocal = false; try { isLocal = Session.getTemporaryActiveUserKey() === 'local'; } catch (eL) {}
+  if (!isLocal) { ok('روی Apps Script رد شد: وابسته به تنظیمات زندهٔ کمپین؛ آزمون محلی همین مجموعه دروازه است', true); return tgTestTally_(out, 0); }
   var keep = { dry: TG_DRY, mem: TG_MEM, box: TG_OUTBOX, cfg: TG_CFG_ };
   TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
   function msgs(chat) { return TG_OUTBOX.filter(function (x) { return x.kind === 'msg' && (!chat || String(x.chat) === String(chat)); }); }

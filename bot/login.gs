@@ -68,6 +68,12 @@ function lgOnCb_(chat, data) {   // sec:public
     var o = lgInviteAll_();
     return tgSend_(chat, '📨 دعوت «ورود به تجربه»: ' + tgFa_(o.sent) + ' درمانگر دعوت گرفتند · بی چت ' + tgFa_(o.none) + ' · از قبل ' + tgFa_(o.had) + '.');
   }
+  if (data === 'lgn:wv1') {
+    if (String(chat) !== String(TG_OWNER_CHAT)) return tgSend_(chat, T_PNL_NO);
+    lgProp_('WV1_GO', Utilities.formatDate(new Date(lgNow_()), TG_TZ, 'yyyy-MM-dd HH:mm'));
+    var rr = wvTick_(true);
+    return tgSend_(chat, '📨 موج ۱ شروع شد. ' + rr + (lgInWindow_() ? '' : ' ارسال از ساعت ۱۰ ادامه پیدا می‌کند.'));
+  }
   if (data === 'lgn:e48') {
     if (String(chat) !== String(TG_OWNER_CHAT)) return tgSend_(chat, T_PNL_NO);
     return tgSend_(chat, lgE48Send_());
@@ -128,6 +134,90 @@ function lgE48Tick_() {
     { inline_keyboard: [[{ text: '📨 ارسال به ' + t.first, callback_data: 'lgn:e48' }]] });
   lgProp_('LG_E48C', Utilities.formatDate(new Date(lgNow_()), TG_TZ, 'yyyy-MM-dd HH:mm'));
   return true;
+}
+/* ───── ۵) موج ۱ پل از بات (E49، E51، E52): فهرست از GET امضادار پل؛ شروع فقط با دکمهٔ مالک ───── */
+var T_WV_CLIENT = 'سلام {نام}. حساب شما در اپ تازهٔ تجربه آماده است؛ جلسه‌ها و کیف پولتان آنجاست. با دکمهٔ زیر وارد شوید.';
+var T_WV_THER = 'سلام {نام}. دعوت مراجعان شما به پنل تازهٔ تجربه از امروز شروع شد. در پنل، بخش «مراجعان من»، کنار نام هر مراجع دکمهٔ «پیوند دعوت» هست. اگر مراجعی پیامک را ندید یا خارج از ایران است، همین پیوند را برایش بفرستید؛ با آن وارد می‌شود و به شما وصل می‌ماند.';
+var T_WV_ABROAD = 'سلام {نام}. این مراجعان شما خارج از ایران هستند و پیامک به آن‌ها نمی‌رسد: {فهرست}. لطفاً امروز پیوند دعوت هر کدام را از «مراجعان من» بردارید و برایشان بفرستید؛ با آن وارد می‌شوند و به شما وصل می‌مانند.';
+var WV_BATCH = 50;
+/** نشانی رابط موج (لین D، K245.۵) از تنظیمات BRIDGE_WAVE_URL؛ خالی یا off یعنی خاموش */
+function wvUrl_() { var v = String(cfg_('BRIDGE_WAVE_URL', '') || '').trim(); return /^https:\/\/bridge\.tajrobeh\.life\//.test(v) ? v : ''; }
+/** GET امضادار: X-Tajrobeh-Timestamp و X-Tajrobeh-Signature روی «timestamp.» (بدنهٔ خالی). خروجی {clients, therapists} یا null */
+function wvFetch_() {
+  var url = wvUrl_(), sec = brHandoffSecret_(); if (!url || !sec) return null;
+  var j;
+  if (TG_DRY) j = TG_MEM['wv:data'] || null;
+  else {
+    var ts = String(Math.floor(Date.now() / 1000));
+    var r = UrlFetchApp.fetch(url, { method: 'get', muteHttpExceptions: true, followRedirects: false,
+      headers: { 'X-Tajrobeh-Timestamp': ts, 'X-Tajrobeh-Signature': brHex_(Utilities.computeHmacSha256Signature(ts + '.', sec)) } });
+    if (r.getResponseCode() !== 200) { Logger.log('wvFetch_: HTTP ' + r.getResponseCode()); return null; }
+    try { j = JSON.parse(r.getContentText()); } catch (e) { return null; }
+  }
+  if (!j) return null;
+  var pick = function (o, ks) { for (var i = 0; i < ks.length; i++) if (o && o[ks[i]] != null && o[ks[i]] !== '') return o[ks[i]]; return ''; };
+  var cl = (j.clients || j.items || []).map(function (c) { return { tid: String(pick(c, ['telegramId', 'telegram_id', 'tid']) || ''), first: String(pick(c, ['firstName', 'first_name', 'name']) || ''),
+    url: String(pick(c, ['inviteUrl', 'invite_url', 'url']) || ''), ther: String(pick(c, ['therapistTelegramId', 'therapist_telegram_id', 'therapistTid']) || ''),
+    abroad: !!pick(c, ['abroad', 'isAbroad', 'outside']) }; });
+  var th = (j.therapists || []).map(function (t) { return { tid: String(pick(t, ['telegramId', 'telegram_id', 'tid']) || ''), first: String(pick(t, ['firstName', 'first_name', 'name']) || '') }; });
+  return { clients: cl, therapists: th };
+}
+/* مجموعهٔ «فرستاده‌شده» در چند کلید Script Property (هر کدام زیر ۸۰۰۰ نویسه) */
+function wvSent_(k) { var s = {}, i = 0, v; while ((v = lgProp_(k + i))) { v.split(',').forEach(function (x) { if (x) s[x] = 1; }); i++; } return s; }
+function wvMark_(k, ids) {
+  if (!ids.length) return;
+  var i = 0; while (lgProp_(k + i)) i++;
+  var last = i ? lgProp_(k + (i - 1)) : '', add = ids.join(',');
+  if (i && last.length + add.length + 1 < 8000) lgProp_(k + (i - 1), last + ',' + add); else lgProp_(k + i, add);
+}
+/** از tgTick5 و دکمهٔ مالک. بی WV1_GO فقط یک بار کارت شروع برای مالک؛ بعد ۵۰ تا در هر نوبت، ساعت ۱۰ تا ۲۰، هر نفر یک بار */
+function wvTick_(force) {
+  var d; try { d = wvFetch_(); } catch (e) { return 'رابط موج: ' + String(e.message || e).slice(0, 80); }
+  if (!d) return 'رابط موج آماده نیست';
+  var cl = d.clients.filter(function (c) { return /^\d{4,}$/.test(c.tid) && /^https:\/\/bridge\.tajrobeh\.life\/i\//.test(c.url); });
+  if (!lgProp_('WV1_GO')) {
+    if (lgProp_('WV1_CARD')) return 'منتظر دکمهٔ مالک';
+    var abr = {}; cl.forEach(function (c) { if (c.abroad && c.ther) abr[c.ther] = 1; });
+    tgSend_(String(TG_OWNER_CHAT), '📨 <b>موج ۱ پل از بات</b>\nدعوت مراجع: ' + tgFa_(cl.length) + ' · پیام درمانگر دارای حساب: ' + tgFa_(d.therapists.length) +
+      ' · پیام «مراجع خارج»: ' + tgFa_(Object.keys(abr).length) + ' درمانگر\nهر نفر یک بار، دسته‌های ۵۰تایی، ساعت ۱۰ تا ۲۰.', { inline_keyboard: [[{ text: '📨 شروع موج ۱', callback_data: 'lgn:wv1' }]] });
+    lgProp_('WV1_CARD', '1');
+    return 'کارت شروع برای مالک رفت';
+  }
+  if (!lgInWindow_()) return 'بیرون از ساعت ۱۰ تا ۲۰';
+  var n = 0, out = { c: 0, t: 0, a: 0 };
+  var sc = wvSent_('WV1_C'), nc = [];
+  for (var i = 0; i < cl.length && n < WV_BATCH; i++) {
+    var c = cl[i]; if (sc[c.tid]) continue;
+    tgSend_(c.tid, T_WV_CLIENT.replace('{نام}', c.first || 'دوست عزیز'), { inline_keyboard: [[{ text: '🔑 ' + LG_BTN, url: c.url }]] });
+    nc.push(c.tid); n++; out.c++;
+  }
+  wvMark_('WV1_C', nc);
+  var st = wvSent_('WV1_T'), nt = [];
+  for (var j = 0; j < d.therapists.length && n < WV_BATCH; j++) {
+    var t = d.therapists[j]; if (!/^\d{4,}$/.test(t.tid) || st[t.tid]) continue;
+    tgSend_(t.tid, T_WV_THER.replace('{نام}', t.first || 'همکار گرامی')); nt.push(t.tid); n++; out.t++;
+  }
+  wvMark_('WV1_T', nt);
+  var byT = {}; cl.forEach(function (c) { if (c.abroad && /^\d{4,}$/.test(c.ther)) (byT[c.ther] = byT[c.ther] || []).push(c.first || '؟'); });
+  var thName = {}; d.therapists.forEach(function (t) { thName[t.tid] = t.first; });
+  var sa = wvSent_('WV1_A'), na = [];
+  Object.keys(byT).forEach(function (tid) {
+    if (n >= WV_BATCH || sa[tid]) return;
+    tgSend_(tid, T_WV_ABROAD.replace('{نام}', thName[tid] || 'همکار گرامی').replace('{فهرست}', byT[tid].join('، '))); na.push(tid); n++; out.a++;
+  });
+  wvMark_('WV1_A', na);
+  if (n) { var tot = {}; try { tot = JSON.parse(lgProp_('WV1_N') || '{}') || {}; } catch (e2) {} ['c', 't', 'a'].forEach(function (k) { tot[k] = (tot[k] || 0) + out[k]; }); lgProp_('WV1_N', JSON.stringify(tot)); }
+  return 'این نوبت: مراجع ' + out.c + '، درمانگر ' + out.t + '، خارج ' + out.a;
+}
+function wvNightLine_() {
+  var t = {}; try { t = JSON.parse(lgProp_('WV1_N') || '{}') || {}; } catch (e) {}
+  return lgProp_('WV1_GO') ? '📨 موج ۱ از بات تا امروز: مراجع ' + tgFa_(t.c || 0) + ' · درمانگر ' + tgFa_(t.t || 0) + ' · پیام «خارج» ' + tgFa_(t.a || 0) : '';
+}
+try { TG_NIGHT_LINES.push(wvNightLine_); } catch (eWn) {}
+/** یک‌بارهٔ خودکار v170.112 (Q21، فقط‌خواندنی): نشانی‌های عمومی دریافت USDT با نام شبکه */
+function lgV170112Addr() {
+  var a = function (k) { try { return tgPaySet_(k) || 'خالی'; } catch (e) { return 'خطا'; } };
+  return 'USDT روی TRON (TRC20): ' + a('addr_tron') + ' · USDT روی BNB Smart Chain (BEP20): ' + a('addr_bsc');
 }
 try { TG_NIGHT_LINES.push(brLeadNightLine_); } catch (eNl) {}
 
@@ -254,6 +344,31 @@ function lgTests() {
     lgOnCb_('9001', 'lgn:all');
     ok('بیرون از ساعت ۱۰ تا ۲۰ دعوتی نمی‌رود', TG_OUTBOX.length === 1 && /۱۰ تا ۲۰/.test(TG_OUTBOX[0].text));
     ok('یک‌بارهٔ دعوت در فهرست CI', CI_ONCE_AUTO.indexOf('lgV170107Invite') >= 0);
+    /* موج ۱ (E49، E51، E52) */
+    TG_CFG_ = { BRIDGE_WAVE_URL: 'https://bridge.tajrobeh.life/api/v2/x/wave' }; TG_OUTBOX = []; TG_MEM['lg:now'] = String(new Date('2026-11-04T12:00:00+03:30').getTime());
+    ['WV1_GO', 'WV1_CARD', 'WV1_C0', 'WV1_T0', 'WV1_A0', 'WV1_N'].forEach(function (k) { delete TG_MEM['lgp:' + k]; });
+    TG_MEM['wv:data'] = { clients: [{ telegramId: 5550101, firstName: 'الف', inviteUrl: 'https://bridge.tajrobeh.life/i/AAA', therapistTelegramId: 5550201, abroad: true },
+      { telegramId: 5550102, firstName: 'ب', inviteUrl: 'https://bridge.tajrobeh.life/i/BBB', therapistTelegramId: 5550201, abroad: false },
+      { telegramId: '', firstName: 'بی تلگرام', inviteUrl: 'https://bridge.tajrobeh.life/i/CCC' }, { telegramId: 5550103, firstName: 'بد', inviteUrl: 'https://evil.example/i/x' }],
+      therapists: [{ telegramId: 5550201, firstName: 'درمانگر' }] };
+    ok('موج ۱: بی دکمهٔ مالک فقط یک کارت شروع، هیچ پیام به کسی', /کارت شروع/.test(wvTick_()) && TG_OUTBOX.length === 1 && TG_OUTBOX[0].chat === '9001' &&
+      JSON.stringify(TG_OUTBOX[0].markup).indexOf('lgn:wv1') > -1 && /دعوت مراجع: ۲/.test(TG_OUTBOX[0].text) && /منتظر/.test(wvTick_()) && TG_OUTBOX.length === 1, JSON.stringify(TG_OUTBOX[0]));
+    TG_OUTBOX = []; lgOnCb_('5550102', 'lgn:wv1');
+    ok('موج ۱: دکمه فقط مالک', TG_OUTBOX.length === 1 && TG_OUTBOX[0].text === T_PNL_NO && !TG_MEM['lgp:WV1_GO']);
+    TG_OUTBOX = []; lgOnCb_('9001', 'lgn:wv1');
+    var toC = TG_OUTBOX.filter(function (x) { return x.chat === '5550101' || x.chat === '5550102'; });
+    ok('موج ۱: مراجع با پیوند /i/ خودش؛ بی تلگرام و نشانی بیگانه هیچ', toC.length === 2 && toC[0].markup.inline_keyboard[0][0].url === 'https://bridge.tajrobeh.life/i/AAA' && toC[0].text.indexOf('سلام الف.') === 0 &&
+      !TG_OUTBOX.some(function (x) { return x.chat === '5550103'; }));
+    var toT = TG_OUTBOX.filter(function (x) { return x.chat === '5550201'; });
+    ok('موج ۱: درمانگر یک پیام E51 (بی «کپی همه») و یک پیام «خارج» با نام کوچک مراجع خارج', toT.length === 2 && toT[0].text.indexOf('کپی همه') < 0 && /پیوند دعوت/.test(toT[0].text) && /خارج از ایران هستند و پیامک به آن‌ها نمی‌رسد: الف\./.test(toT[1].text), JSON.stringify(toT));
+    TG_OUTBOX = [];
+    ok('موج ۱: هر نفر یک بار؛ شمارش در گزارش شب', /مراجع 0، درمانگر 0، خارج 0/.test(wvTick_()) && TG_OUTBOX.length === 0 && /مراجع ۲ · درمانگر ۱ · پیام «خارج» ۱/.test(wvNightLine_()), wvNightLine_());
+    TG_MEM['lg:now'] = String(new Date('2026-11-04T21:00:00+03:30').getTime()); delete TG_MEM['lgp:WV1_C0'];
+    ok('موج ۱: بیرون از ۱۰ تا ۲۰ هیچ', /بیرون/.test(wvTick_()) && TG_OUTBOX.length === 0);
+    TG_CFG_ = { BRIDGE_WAVE_URL: 'https://evil.example/w' };
+    ok('موج ۱: فقط نشانی پل پذیرفته می‌شود', wvUrl_() === '' && /آماده نیست/.test(wvTick_()));
+    ok('یک‌بارهٔ نشانی تتر در فهرست CI', CI_ONCE_AUTO.indexOf('lgV170112Addr') >= 0 && CI_ONCE_ALLOW.indexOf('lgV170112Addr') >= 0 && /TRON \(TRC20\)/.test(lgV170112Addr()));
+    TG_CFG_ = {};
     /* E48 */
     TG_CFG_ = { TG_NAMES: { chief: 'همکار آزمون' } }; TG_OUTBOX = []; TG_MEM['lg:now'] = String(new Date('2026-11-04T12:00:00+03:30').getTime());
     TG_MEM['pnl:thers'] = [{ name: 'همکار آزمون یک', chat: '5550091', status: 'فعال' }, { name: 'درمانگر دیگر', chat: '5550092', status: 'فعال' }];
