@@ -68,6 +68,10 @@ function lgOnCb_(chat, data) {   // sec:public
     var o = lgInviteAll_();
     return tgSend_(chat, '📨 دعوت «ورود به تجربه»: ' + tgFa_(o.sent) + ' درمانگر دعوت گرفتند · بی چت ' + tgFa_(o.none) + ' · از قبل ' + tgFa_(o.had) + '.');
   }
+  if (data === 'lgn:e48') {
+    if (String(chat) !== String(TG_OWNER_CHAT)) return tgSend_(chat, T_PNL_NO);
+    return tgSend_(chat, lgE48Send_());
+  }
   return null;
 }
 
@@ -98,6 +102,34 @@ function lgV170110Fp() {
   var tok = TG_DRY ? String(TG_MEM['br:token'] || '') : String(PropertiesService.getScriptProperties().getProperty('TELEGRAM_TOKEN') || '');
   var sec = brHandoffSecret_();
   return 'توکن بات: ' + (tok ? fp(tok.trim()) : 'نیست') + ' · راز handoff (' + BR_HANDOFF_LABEL + '): ' + (sec ? fp(sec) + ' · ' + sec.length + ' نویسه' : 'نیست');
+}
+/* ───── ۴) E48: پیام یک‌بارهٔ پنل به مسئول «سازمانی» (tgNm_('chief'))، فقط با دکمهٔ مالک ───── */
+var T_LG_E48 = 'سلام {نام} جان. مشکل نمایش مراجعان در پنل تجربه برطرف شد. مراجعانت حالا در برنامهٔ هفتگی دیده می‌شوند؛ هر کدام را که درست است با «درست است» تأیید کن. اگر جایی گیر کردی، دکمهٔ بازخورد داخل پنل را بزن.';
+/** درمانگر فعال با چت که نامش با نام خصوصی tgNm_('chief') شروع می‌شود؛ دقیقاً یکی، وگرنه null */
+function lgE48Target_() {
+  var nm = String(tgNm_('chief') || '').trim(); if (!nm) return null;
+  var hit = (TG_DRY ? (TG_MEM['pnl:thers'] || []) : tgTherapistRows_()).filter(function (t) {
+    return lgActive_(t) && String(t.name || '').trim().indexOf(nm) === 0;
+  });
+  return hit.length === 1 ? { chat: typeof pnlChatOf_ === 'function' ? pnlChatOf_(hit[0]) : String(hit[0].chat), first: nm.split(/\s+/)[0] } : null;
+}
+function lgE48Send_() {
+  if (lgProp_('LG_E48')) return 'پیام E48 قبلاً رفته بود (' + lgProp_('LG_E48') + ').';
+  var t = lgE48Target_(); if (!t || !t.chat) return '⚠️ گیرندهٔ پیام E48 دقیقاً یک نفر پیدا نشد؛ چیزی نرفت.';
+  tgSend_(t.chat, T_LG_E48.replace('{نام}', t.first));
+  lgProp_('LG_E48', Utilities.formatDate(new Date(lgNow_()), TG_TZ, 'yyyy-MM-dd HH:mm'));
+  return '✅ پیام E48 به ' + tgEsc_(t.first) + ' رفت.';
+}
+/** یک‌بارهٔ خودکار v170.111: کارت پیش‌نمایش E48 برای مالک (ارسال فقط با دکمه) و نشانی‌های عمومی دریافت تتر (E47) */
+function lgV170111E48() {
+  var t = lgE48Target_(), out = [];
+  if (!lgProp_('LG_E48') && t && t.chat) {
+    tgSend_(String(TG_OWNER_CHAT), '📨 <b>پیام E48 (با تأیید شما)</b>\nگیرنده: ' + tgEsc_(t.first) + '\n\n' + tgEsc_(T_LG_E48.replace('{نام}', t.first)),
+      { inline_keyboard: [[{ text: '📨 ارسال به ' + t.first, callback_data: 'lgn:e48' }]] });
+    out.push('کارت E48 برای مالک رفت');
+  } else out.push('E48: ' + (lgProp_('LG_E48') ? 'قبلاً رفته' : 'گیرنده دقیقاً یکی نیست'));
+  try { out.push('USDT TRON: ' + (tgPaySet_('addr_tron') || 'خالی') + ' · USDT BSC: ' + (tgPaySet_('addr_bsc') || 'خالی')); } catch (eP) { out.push('نشانی تتر: ' + String(eP).slice(0, 60)); }
+  return out.join(' · ');
 }
 try { TG_NIGHT_LINES.push(brLeadNightLine_); } catch (eNl) {}
 
@@ -224,6 +256,21 @@ function lgTests() {
     lgOnCb_('9001', 'lgn:all');
     ok('بیرون از ساعت ۱۰ تا ۲۰ دعوتی نمی‌رود', TG_OUTBOX.length === 1 && /۱۰ تا ۲۰/.test(TG_OUTBOX[0].text));
     ok('یک‌بارهٔ دعوت در فهرست CI', CI_ONCE_AUTO.indexOf('lgV170107Invite') >= 0);
+    /* E48 */
+    TG_CFG_ = { TG_NAMES: { chief: 'همکار آزمون' } }; TG_OUTBOX = []; TG_MEM['lg:now'] = String(new Date('2026-11-04T12:00:00+03:30').getTime());
+    TG_MEM['pnl:thers'] = [{ name: 'همکار آزمون یک', chat: '5550091', status: 'فعال' }, { name: 'درمانگر دیگر', chat: '5550092', status: 'فعال' }];
+    var e48 = lgV170111E48();
+    ok('E48: یک‌باره فقط کارت پیش‌نمایش برای مالک می‌فرستد، نه پیام به گیرنده', /کارت E48/.test(e48) && TG_OUTBOX.length === 1 && TG_OUTBOX[0].chat === '9001' &&
+      JSON.stringify(TG_OUTBOX[0].markup).indexOf('lgn:e48') > -1 && CI_ONCE_AUTO.indexOf('lgV170111E48') >= 0 && CI_ONCE_ALLOW.indexOf('lgV170111E48') >= 0, e48);
+    TG_OUTBOX = []; lgOnCb_('5550092', 'lgn:e48');
+    ok('E48: دکمه فقط برای مالک', TG_OUTBOX.length === 1 && TG_OUTBOX[0].text === T_PNL_NO);
+    TG_OUTBOX = []; lgOnCb_('9001', 'lgn:e48');
+    ok('E48: با دکمهٔ مالک فقط به همان یک نفر، با نام کوچک', TG_OUTBOX.length === 2 && TG_OUTBOX[0].chat === '5550091' && TG_OUTBOX[0].text.indexOf('سلام همکار جان') === 0 && /رفت/.test(TG_OUTBOX[1].text));
+    TG_OUTBOX = []; lgOnCb_('9001', 'lgn:e48');
+    ok('E48: فقط یک بار', TG_OUTBOX.length === 1 && /قبلاً رفته/.test(TG_OUTBOX[0].text));
+    TG_MEM['pnl:thers'].push({ name: 'همکار آزمون دو', chat: '5550093', status: 'فعال' }); delete TG_MEM['lgp:LG_E48'];
+    ok('E48: دو نفر هم‌نام یعنی هیچ ارسال', lgE48Target_() === null);
+    TG_CFG_ = {};
     /* E46: راز از توکن بات */
     delete TG_MEM['pnlp:TG_BRIDGE_HANDOFF_SECRET']; TG_MEM['br:token'] = 'test-only-bot-token';
     var dsec = brB64_(Utilities.computeHmacSha256Signature('tajrobeh-handoff-v1', 'test-only-bot-token'));
