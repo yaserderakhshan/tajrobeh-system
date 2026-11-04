@@ -159,6 +159,8 @@ function tgRelayHealth_(hookUrl) {
 /* ─────────────────────────── آزمون ─────────────────────────── */
 try { TG_SUITES.push(['پیوند با پل: رونوشت، صف مشترک و پشتیبان v170.109', 'brTests']); } catch (eSu) {}
 
+/** v170.114 (E55): امضای قرارداد پل: «v1=» و هگز کوچک HMAC-SHA256 با راز handoff */
+function brSign_(text, sec) { return 'v1=' + brHex_(Utilities.computeHmacSha256Signature(text, sec)); }
 /* ───── ۳) توکن handoff ورود ───── */
 function brHandoffSecret_() {
   if (TG_DRY && TG_MEM['pnlp:TG_BRIDGE_HANDOFF_SECRET'] !== undefined) return String(TG_MEM['pnlp:TG_BRIDGE_HANDOFF_SECRET'] || '');   /* فقط آزمون‌های قدیمی */
@@ -201,7 +203,7 @@ function brLeadBody_(o, code, chat) {
 /** یک POST امضاشده؛ خروجی کد HTTP (در آزمون از TG_MEM) */
 function brLeadPost_(url, body, sec) {
   var ts = String(Math.floor(lgNow_() / 1000));
-  var h = { 'X-Tajrobeh-Timestamp': ts, 'X-Tajrobeh-Signature': brHex_(Utilities.computeHmacSha256Signature(ts + '.' + body, sec)) };
+  var h = { 'Tajrobeh-Timestamp': ts, 'Tajrobeh-Signature': brSign_('reception-public-lead.v1:' + ts + ':' + body, sec) };   /* v170.114: قرارداد لین D (E55) */
   if (TG_DRY) { (TG_MEM['br:leads'] = TG_MEM['br:leads'] || []).push({ url: url, body: body, h: h }); var q = TG_MEM['br:leadCodes']; return Number(q && q.length ? q.shift() : (TG_MEM['br:leadCode'] || 200)); }
   var r = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: body, headers: h, muteHttpExceptions: true, followRedirects: false });
   BR_LAST_TXT = String(r.getContentText() || '').slice(0, 160);
@@ -263,13 +265,14 @@ function brLeadRetryTick_() {
   return n;
 }
 /* ───── ۵) خوراک فقط‌خواندنی مچ‌میکینگ درمانگران برای پل (E53 بند ۳) ─────
-   GET <exec>?api=br_ther&ts=<ثانیهٔ یونیکس>&sig=<هگز HMAC-SHA256("<ts>.br_ther", راز handoff)>؛ اختلاف زمان حداکثر ۵ دقیقه.
+   GET <exec>?api=br_ther&ts=<ثانیهٔ یونیکس>&sig=v1=<هگز HMAC-SHA256("bot-match-feed.v1:<ts>:api=br_ther", راز handoff)>؛ اختلاف زمان حداکثر ۵ دقیقه.
    فقط فیلدهای درمانگر (همان که مچ بات به کار می‌برد، به‌اضافهٔ کد، شهر، قیمت پایه و چت تلگرام)؛ هیچ دادهٔ مراجع. */
 function brTherFeed_(p) {
   var sec = brHandoffSecret_(), ts = Number(p.ts || 0), now = Math.floor((TG_DRY && TG_MEM['br:now'] ? Number(TG_MEM['br:now']) : Date.now()) / 1000);
   if (!sec || !ts || Math.abs(now - ts) > 300) return { ok: false, error: 'auth' };
-  var want = brHex_(Utilities.computeHmacSha256Signature(String(p.ts) + '.br_ther', sec));
-  if (!tgSafeEq_(String(p.sig || '').toLowerCase(), want)) return { ok: false, error: 'auth' };
+  /* v170.114 (E56): متن امضا «bot-match-feed.v1:<ts>:api=br_ther»؛ sig با یا بی پیشوند v1= (Apps Script سرآیند GET را نمی‌بیند، پس امضا در پرسمان است) */
+  var want = brSign_('bot-match-feed.v1:' + String(p.ts) + ':api=br_ther', sec).slice(3);
+  if (!tgSafeEq_(String(p.sig || '').toLowerCase().replace(/^v1=/, ''), want)) return { ok: false, error: 'auth' };
   var rows = {}; try { (TG_DRY ? (TG_MEM['pnl:thers'] || []) : tgTherapistRows_()).forEach(function (t) { rows[tgNorm_(t.name)] = t; }); } catch (eR) {}
   var list = tgThPubList_().map(function (t) {
     var r = rows[tgNorm_(t.n)] || {};

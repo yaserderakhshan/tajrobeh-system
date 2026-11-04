@@ -140,26 +140,31 @@ var T_WV_CLIENT = 'سلام {نام}. حساب شما در اپ تازهٔ تج�
 var T_WV_THER = 'سلام {نام}. دعوت مراجعان شما به پنل تازهٔ تجربه از امروز شروع شد. در پنل، بخش «مراجعان من»، کنار نام هر مراجع دکمهٔ «پیوند دعوت» هست. اگر مراجعی پیامک را ندید یا خارج از ایران است، همین پیوند را برایش بفرستید؛ با آن وارد می‌شود و به شما وصل می‌ماند.';
 var T_WV_ABROAD = 'سلام {نام}. این مراجعان شما خارج از ایران هستند و پیامک به آن‌ها نمی‌رسد: {فهرست}. لطفاً امروز پیوند دعوت هر کدام را از «مراجعان من» بردارید و برایشان بفرستید؛ با آن وارد می‌شوند و به شما وصل می‌مانند.';
 var WV_BATCH = 50;
-/** نشانی رابط موج (لین D، K245.۵) از تنظیمات BRIDGE_WAVE_URL؛ خالی یا off یعنی خاموش */
-function wvUrl_() { var v = String(cfg_('BRIDGE_WAVE_URL', '') || '').trim(); return /^https:\/\/bridge\.tajrobeh\.life\//.test(v) ? v : ''; }
-/** GET امضادار: X-Tajrobeh-Timestamp و X-Tajrobeh-Signature روی «timestamp.» (بدنهٔ خالی). خروجی {clients, therapists} یا null */
+var WV_URL_DEF = 'https://bridge.tajrobeh.life/api/v2/legacy/bot-feed?wave=1';
+/** نشانی خوراک موج (قرارداد لین D، E55): پیش‌فرض bot-feed؛ BRIDGE_WAVE_URL جایش را می‌گیرد؛ off یعنی خاموش؛ فقط bridge.tajrobeh.life */
+function wvUrl_() {
+  var v = String(cfg_('BRIDGE_WAVE_URL', '') || '').trim();
+  if (/^(off|0|خاموش)$/i.test(v)) return '';
+  v = v || WV_URL_DEF;
+  return /^https:\/\/bridge\.tajrobeh\.life\//.test(v) ? v : '';
+}
+/** GET امضادار (E55): سرآیند Tajrobeh-Timestamp و Tajrobeh-Signature = v1=<هگز HMAC("legacy-bot-feed.v1:<ts>:<پرسمان خام>")>. خروجی {clients, therapists} یا null */
 function wvFetch_() {
   var url = wvUrl_(), sec = brHandoffSecret_(); if (!url || !sec) return null;
-  var j;
-  if (TG_DRY) j = TG_MEM['wv:data'] || null;
+  var q = url.indexOf('?') > -1 ? url.slice(url.indexOf('?') + 1) : '', j;
+  if (TG_DRY) { j = TG_MEM['wv:data'] || null; TG_MEM['wv:sigtext'] = 'legacy-bot-feed.v1:<ts>:' + q; }
   else {
     var ts = String(Math.floor(Date.now() / 1000));
     var r = UrlFetchApp.fetch(url, { method: 'get', muteHttpExceptions: true, followRedirects: false,
-      headers: { 'X-Tajrobeh-Timestamp': ts, 'X-Tajrobeh-Signature': brHex_(Utilities.computeHmacSha256Signature(ts + '.', sec)) } });
+      headers: { 'Tajrobeh-Timestamp': ts, 'Tajrobeh-Signature': brSign_('legacy-bot-feed.v1:' + ts + ':' + q, sec) } });
     if (r.getResponseCode() !== 200) { Logger.log('wvFetch_: HTTP ' + r.getResponseCode()); return null; }
     try { j = JSON.parse(r.getContentText()); } catch (e) { return null; }
   }
   if (!j) return null;
-  var pick = function (o, ks) { for (var i = 0; i < ks.length; i++) if (o && o[ks[i]] != null && o[ks[i]] !== '') return o[ks[i]]; return ''; };
-  var cl = (j.clients || j.items || []).map(function (c) { return { tid: String(pick(c, ['telegramId', 'telegram_id', 'tid']) || ''), first: String(pick(c, ['firstName', 'first_name', 'name']) || ''),
-    url: String(pick(c, ['inviteUrl', 'invite_url', 'url']) || ''), ther: String(pick(c, ['therapistTelegramId', 'therapist_telegram_id', 'therapistTid']) || ''),
-    abroad: !!pick(c, ['abroad', 'isAbroad', 'outside']) }; });
-  var th = (j.therapists || []).map(function (t) { return { tid: String(pick(t, ['telegramId', 'telegram_id', 'tid']) || ''), first: String(pick(t, ['firstName', 'first_name', 'name']) || '') }; });
+  var thById = {};
+  var th = (j.therapists || []).map(function (t) { var o = { id: String(t.therapistId || ''), tid: String(t.telegramId || ''), first: String(t.displayName || '').split(/\s+/)[0] }; thById[o.id] = o; return o; });
+  var cl = (j.clients || []).map(function (c) { var t = thById[String(c.therapistId || '')] || {};
+    return { tid: String(c.telegramId || ''), first: String(c.firstName || ''), url: String(c.inviteUrl || ''), ther: String(t.tid || ''), abroad: c.abroad === true }; });
   return { clients: cl, therapists: th };
 }
 /* مجموعهٔ «فرستاده‌شده» در چند کلید Script Property (هر کدام زیر ۸۰۰۰ نویسه) */
@@ -178,7 +183,7 @@ function wvTick_(force) {
   if (!lgProp_('WV1_GO')) {
     if (lgProp_('WV1_CARD')) return 'منتظر دکمهٔ مالک';
     var abr = {}; cl.forEach(function (c) { if (c.abroad && c.ther) abr[c.ther] = 1; });
-    tgSend_(String(TG_OWNER_CHAT), '📨 <b>موج ۱ پل از بات</b>\nدعوت مراجع: ' + tgFa_(cl.length) + ' · پیام درمانگر دارای حساب: ' + tgFa_(d.therapists.length) +
+    tgSend_(String(TG_OWNER_CHAT), '📨 <b>موج ۱ پل از بات</b>\nدعوت مراجع: ' + tgFa_(cl.length) + ' · پیام درمانگر دارای حساب: ' + (/^(1|بله|yes|on)$/i.test(String(cfg_('WAVE_THER_MSG', '') || '').trim()) ? tgFa_(d.therapists.length) : 'خاموش') +
       ' · پیام «مراجع خارج»: ' + tgFa_(Object.keys(abr).length) + ' درمانگر\nهر نفر یک بار، دسته‌های ۵۰تایی، ساعت ۱۰ تا ۲۰.' +
       '\n\n<b>پیش‌نمایش متن‌ها</b>\n• مراجع: ' + tgEsc_(T_WV_CLIENT) + '\n• درمانگر: ' + tgEsc_(T_WV_THER) + '\n• مراجع خارج: ' + tgEsc_(T_WV_ABROAD), { inline_keyboard: [[{ text: '📨 شروع موج ۱', callback_data: 'lgn:wv1' }]] });
     lgProp_('WV1_CARD', '1');
@@ -193,8 +198,8 @@ function wvTick_(force) {
     nc.push(c.tid); n++; out.c++;
   }
   wvMark_('WV1_C', nc);
-  var st = wvSent_('WV1_T'), nt = [];
-  for (var j = 0; j < d.therapists.length && n < WV_BATCH; j++) {
+  var st = wvSent_('WV1_T'), nt = [], thOn = /^(1|بله|yes|on)$/i.test(String(cfg_('WAVE_THER_MSG', '') || '').trim());   /* E51 پیام عمومی درمانگر: فقط با کلید (E55 فقط مراجع و «خارج») */
+  for (var j = 0; thOn && j < d.therapists.length && n < WV_BATCH; j++) {
     var t = d.therapists[j]; if (!/^\d{4,}$/.test(t.tid) || st[t.tid]) continue;
     tgSend_(t.tid, T_WV_THER.replace('{نام}', t.first || 'همکار گرامی')); nt.push(t.tid); n++; out.t++;
   }
@@ -304,7 +309,7 @@ function lgTests() {
     ok('E40: بدنه فقط fullName، mobile، telegramUsername، message، source=Bot، homepage خالی (روی کد قبلی مردود)',
       Object.keys(b0).sort().join() === 'fullName,homepage,message,mobile,source,telegramUsername' && b0.source === 'Bot' && b0.homepage === '' &&
       b0.fullName === 'مراجع آزمون' && b0.mobile === '09000000000' && b0.telegramUsername === 'test_user9' && b0.message === 'سلام', L0().body);
-    ok('امضای HMAC روی «timestamp.بدنه»', L0().h['X-Tajrobeh-Signature'] === brHex_(Utilities.computeHmacSha256Signature(L0().h['X-Tajrobeh-Timestamp'] + '.' + L0().body, 'test-only-handoff-secret-0123456789')));
+    ok('E55: سرآیند Tajrobeh-Signature = v1=HMAC(«reception-public-lead.v1:<ts>:<بدنه>»)', L0().h['Tajrobeh-Signature'] === 'v1=' + brHex_(Utilities.computeHmacSha256Signature('reception-public-lead.v1:' + L0().h['Tajrobeh-Timestamp'] + ':' + L0().body, 'test-only-handoff-secret-0123456789')) && !L0().h['X-Tajrobeh-Signature']);
     var long = brLeadBody_({ name: '', firstText: new Array(700).join('ا'), note: '' }, 'L-1', '1');
     ok('message حداکثر ۵۰۰ و نام خالی پر می‌شود', long.message.length === 500 && long.message.indexOf('[L-1] ') === 0 && !!long.fullName);
     ok('بی موبایل و یوزرنیم به پل نمی‌رود (۴۰۰ می‌شد)', brLeadPush_({ name: 'x', note: 'chat_id: 5' }, 0) === 'skip' && TG_MEM['br:leads'].length === 1);
@@ -346,12 +351,12 @@ function lgTests() {
     ok('بیرون از ساعت ۱۰ تا ۲۰ دعوتی نمی‌رود', TG_OUTBOX.length === 1 && /۱۰ تا ۲۰/.test(TG_OUTBOX[0].text));
     ok('یک‌بارهٔ دعوت در فهرست CI', CI_ONCE_AUTO.indexOf('lgV170107Invite') >= 0);
     /* موج ۱ (E49، E51، E52) */
-    TG_CFG_ = { BRIDGE_WAVE_URL: 'https://bridge.tajrobeh.life/api/v2/x/wave' }; TG_OUTBOX = []; TG_MEM['lg:now'] = String(new Date('2026-11-04T12:00:00+03:30').getTime());
+    TG_CFG_ = {}; TG_OUTBOX = []; TG_MEM['lg:now'] = String(new Date('2026-11-04T12:00:00+03:30').getTime());
     ['WV1_GO', 'WV1_CARD', 'WV1_C0', 'WV1_T0', 'WV1_A0', 'WV1_N'].forEach(function (k) { delete TG_MEM['lgp:' + k]; });
-    TG_MEM['wv:data'] = { clients: [{ telegramId: 5550101, firstName: 'الف', inviteUrl: 'https://bridge.tajrobeh.life/i/AAA', therapistTelegramId: 5550201, abroad: true },
-      { telegramId: 5550102, firstName: 'ب', inviteUrl: 'https://bridge.tajrobeh.life/i/BBB', therapistTelegramId: 5550201, abroad: false },
-      { telegramId: '', firstName: 'بی تلگرام', inviteUrl: 'https://bridge.tajrobeh.life/i/CCC' }, { telegramId: 5550103, firstName: 'بد', inviteUrl: 'https://evil.example/i/x' }],
-      therapists: [{ telegramId: 5550201, firstName: 'درمانگر' }] };
+    TG_MEM['wv:data'] = { wave: 1, clients: [{ clientId: 'c1', telegramId: 5550101, firstName: 'الف', inviteCode: 'AAA', inviteUrl: 'https://bridge.tajrobeh.life/i/AAA', therapistId: 't1', therapistName: 'درمانگر آزمون', abroad: true },
+      { clientId: 'c2', telegramId: 5550102, firstName: 'ب', inviteUrl: 'https://bridge.tajrobeh.life/i/BBB', therapistId: 't1' },
+      { clientId: 'c3', firstName: 'بی تلگرام', inviteUrl: 'https://bridge.tajrobeh.life/i/CCC' }, { clientId: 'c4', telegramId: 5550103, firstName: 'بد', inviteUrl: 'https://evil.example/i/x' }],
+      therapists: [{ therapistId: 't1', displayName: 'درمانگر آزمون', telegramId: 5550201 }] };
     ok('موج ۱: بی دکمهٔ مالک فقط یک کارت شروع، هیچ پیام به کسی', /کارت شروع/.test(wvTick_()) && TG_OUTBOX.length === 1 && TG_OUTBOX[0].chat === '9001' &&
       JSON.stringify(TG_OUTBOX[0].markup).indexOf('lgn:wv1') > -1 && /دعوت مراجع: ۲/.test(TG_OUTBOX[0].text) && /منتظر/.test(wvTick_()) && TG_OUTBOX.length === 1, JSON.stringify(TG_OUTBOX[0]));
     TG_OUTBOX = []; lgOnCb_('5550102', 'lgn:wv1');
@@ -361,13 +366,16 @@ function lgTests() {
     ok('موج ۱: مراجع با پیوند /i/ خودش؛ بی تلگرام و نشانی بیگانه هیچ', toC.length === 2 && toC[0].markup.inline_keyboard[0][0].url === 'https://bridge.tajrobeh.life/i/AAA' && toC[0].text.indexOf('سلام الف.') === 0 &&
       !TG_OUTBOX.some(function (x) { return x.chat === '5550103'; }));
     var toT = TG_OUTBOX.filter(function (x) { return x.chat === '5550201'; });
-    ok('موج ۱: درمانگر یک پیام E51 (بی «کپی همه») و یک پیام «خارج» با نام کوچک مراجع خارج', toT.length === 2 && toT[0].text.indexOf('کپی همه') < 0 && /پیوند دعوت/.test(toT[0].text) && /خارج از ایران هستند و پیامک به آن‌ها نمی‌رسد: الف\./.test(toT[1].text), JSON.stringify(toT));
+    ok('E55: درمانگر فقط پیام «خارج» با نام کوچک مراجع خارج (E51 خاموش)؛ امضای bot-feed', toT.length === 1 && /^سلام درمانگر\./.test(toT[0].text) && /خارج از ایران هستند و پیامک به آن‌ها نمی‌رسد: الف\./.test(toT[0].text) &&
+      wvUrl_() === WV_URL_DEF && TG_MEM['wv:sigtext'] === 'legacy-bot-feed.v1:<ts>:wave=1', JSON.stringify(toT));
     TG_OUTBOX = [];
-    ok('موج ۱: هر نفر یک بار؛ شمارش در گزارش شب', /مراجع 0، درمانگر 0، خارج 0/.test(wvTick_()) && TG_OUTBOX.length === 0 && /مراجع ۲ · درمانگر ۱ · پیام «خارج» ۱/.test(wvNightLine_()), wvNightLine_());
+    ok('موج ۱: هر نفر یک بار؛ شمارش در گزارش شب', /مراجع 0، درمانگر 0، خارج 0/.test(wvTick_()) && TG_OUTBOX.length === 0 && /مراجع ۲ · درمانگر ۰ · پیام «خارج» ۱/.test(wvNightLine_()), wvNightLine_());
     TG_MEM['lg:now'] = String(new Date('2026-11-04T21:00:00+03:30').getTime()); delete TG_MEM['lgp:WV1_C0'];
     ok('موج ۱: بیرون از ۱۰ تا ۲۰ هیچ', /بیرون/.test(wvTick_()) && TG_OUTBOX.length === 0);
     TG_CFG_ = { BRIDGE_WAVE_URL: 'https://evil.example/w' };
     ok('موج ۱: فقط نشانی پل پذیرفته می‌شود', wvUrl_() === '' && /آماده نیست/.test(wvTick_()));
+    TG_CFG_ = { BRIDGE_WAVE_URL: 'off' };
+    ok('موج ۱: off خاموش می‌کند', wvUrl_() === '');
     ok('یک‌بارهٔ نشانی تتر در فهرست CI', CI_ONCE_AUTO.indexOf('lgV170112Addr') >= 0 && CI_ONCE_ALLOW.indexOf('lgV170112Addr') >= 0 && /TRON \(TRC20\)/.test(lgV170112Addr()));
     TG_CFG_ = {};
     /* E53 */
@@ -378,13 +386,13 @@ function lgTests() {
     delete TG_MEM['pnlp:TG_BRIDGE_HANDOFF_SECRET']; TG_MEM['br:token'] = 'test-only-bot-token';
     TG_MEM['thpub'] = [{ n: 'درمانگر یک', d: 'درمانگر یک', a: 1, g: 'f', sp: 'شناختی', ab: 1, tr: 2 }]; TG_MEM['br:now'] = '1790000000000';
     TG_MEM['pnl:thers'] = [{ name: 'درمانگر یک', code: 'T1', chat: '5550301', rate: 100, status: 'فعال' }];
-    var fsig = brHex_(Utilities.computeHmacSha256Signature('1790000000.br_ther', brHandoffSecret_()));
+    var fsig = 'v1=' + brHex_(Utilities.computeHmacSha256Signature('bot-match-feed.v1:1790000000:api=br_ther', brHandoffSecret_()));
     var feed = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: fsig });
     var fj = feed && typeof feed.getContent === 'function' ? JSON.parse(feed.getContent()) : feed;
     ok('E53: خوراک مچ امضادار، فقط فیلد درمانگر', fj.ok === true && fj.therapists.length === 1 && fj.therapists[0].approach === 'شناختی' && fj.therapists[0].code === 'T1' && fj.therapists[0].abroad === true &&
       JSON.stringify(fj).indexOf('lead') < 0, JSON.stringify(fj).slice(0, 300));
     var bad = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: '00' }), bj = bad && typeof bad.getContent === 'function' ? JSON.parse(bad.getContent()) : bad;
-    var old = tgApiRoute_({ api: 'br_ther', ts: '1789990000', sig: brHex_(Utilities.computeHmacSha256Signature('1789990000.br_ther', brHandoffSecret_())) }), oj = old && typeof old.getContent === 'function' ? JSON.parse(old.getContent()) : old;
+    var old = tgApiRoute_({ api: 'br_ther', ts: '1789990000', sig: brHex_(Utilities.computeHmacSha256Signature('bot-match-feed.v1:1789990000:api=br_ther', brHandoffSecret_())) }), oj = old && typeof old.getContent === 'function' ? JSON.parse(old.getContent()) : old;
     ok('E53: امضای غلط یا کهنه رد می‌شود', bj.ok === false && oj.ok === false);
     /* E48 */
     TG_CFG_ = { TG_NAMES: { chief: 'همکار آزمون' } }; TG_OUTBOX = []; TG_MEM['lg:now'] = String(new Date('2026-11-04T12:00:00+03:30').getTime());
