@@ -82,7 +82,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.111`
+نسخهٔ کد: `v170.110`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -111,7 +111,7 @@
 | `panel.gs` | ۲۰۹ | ۱۹ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
 | `bridge.gs` | ۳۴۵ | ۲۹ |
-| `login.gs` | ۲۸۸ | ۲۴ |
+| `login.gs` | ۲۴۱ | ۲۱ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۰۹ | ۳۳ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
