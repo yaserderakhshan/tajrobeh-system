@@ -241,6 +241,13 @@ jobs:
         run: |
           set -e
           bash .github/scripts/bot-prev.sh rollback-src "$(git rev-parse 'refs/tags/bot-live^{commit}')" /tmp/resync bot/.clasp.json
+          # v170.112.2: clasp فقط فایل‌های محلی را می‌سنجد و با «already up to date» فایل اضافهٔ پروژهٔ زنده را نگه می‌دارد.
+          # با force اول version.gs با یک خط موقت فرستاده می‌شود تا کل محتوا جایگزین شود (فایل بیرون از گیت کنار می‌رود)، بعد نسخهٔ اصلی.
+          if [ "${{ steps.guard.outputs.resync }}" = "force" ]; then
+            cp /tmp/resync/version.gs /tmp/version.gs.orig
+            echo "// موقت: بازنشانی کامل پروژه (force)" >> /tmp/resync/version.gs
+            (cd /tmp/resync && clasp push --force); cp /tmp/version.gs.orig /tmp/resync/version.gs
+          fi
           (cd /tmp/resync && clasp push --force)
           R=/tmp/remote; rm -rf $R; mkdir -p $R; cp bot/.clasp.json $R/
           (cd $R && clasp pull > /dev/null); rm -f $R/.clasp.json $R/ci_key.gs
