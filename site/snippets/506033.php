@@ -48,7 +48,7 @@ add_filter('the_content', function ($c) {
   if (is_admin() || !in_the_loop() || !is_main_query()) return $c;
   if (strpos($c, 'class="tjeb"') !== false) return $c;
   if (is_front_page()) return tj_ebi_mini_at($c, 'home');
-  if (is_page(294)) return tj_ebi_mini_at($c, 'school');
+  // مدرسه: به درخواست یاسر (آبان ۱۴۰۵) نوار کمپین از صفحهٔ مدرسه برداشته شد
   if (is_singular('post')) return $c . '<div class="tjeb-wrap tjeb-at-mag">' . tj_ebi_mini_html('mag') . '</div>';
   return $c;
 }, 30);
