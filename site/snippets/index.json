@@ -550,6 +550,15 @@
   "active": true
  },
  {
+  "id": 510795,
+  "file": "510795.js",
+  "title": "لین A · دکمهٔ ورود سایت به پل (K272، ۱۵ آبان ۱۴۰۵)",
+  "type": "js",
+  "location": "site_wide_footer",
+  "loc": "site_wide_footer",
+  "active": true
+ },
+ {
   "id": null,
   "file": "ga4-visitor-tz.html",
   "title": "Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz، is_abroad) v1",
