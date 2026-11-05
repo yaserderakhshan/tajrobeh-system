@@ -1526,7 +1526,16 @@ function tgRunPart_(k) { var p = tgRunPartsPlan_(); if (k > p.n) return { pass: 
 function tgRunTests1() { return tgRunPart_(1); }
 function tgRunTests2() { return tgRunPart_(2); }
 function tgRunTests3() { return tgRunPart_(3); }
+/* v170.118: تکه‌های ۴ و ۶ تا ۱۲ (MAX_PARTS در bot-parts.mjs). نام‌شان را نقشهٔ زمانی آزمون‌ها می‌سازد، نه کد؛ پاکسازی کد مرده نباید برشان دارد */
+function tgRunTests4() { return tgRunPart_(4); }
 function tgRunTests5() { return tgRunPart_(5); }
+function tgRunTests6() { return tgRunPart_(6); }
+function tgRunTests7() { return tgRunPart_(7); }
+function tgRunTests8() { return tgRunPart_(8); }
+function tgRunTests9() { return tgRunPart_(9); }
+function tgRunTests10() { return tgRunPart_(10); }
+function tgRunTests11() { return tgRunPart_(11); }
+function tgRunTests12() { return tgRunPart_(12); }
 
 
 
