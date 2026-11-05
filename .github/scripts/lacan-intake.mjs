@@ -78,6 +78,15 @@ if (MODE === 'probe') {
   let fields = [];
   try { const ff = def.json?.form_fields; fields = (typeof ff === 'string' ? JSON.parse(ff) : ff)?.fields || []; } catch {}
   const data = new URLSearchParams();
+  // E62: nonce و فیلدهای پنهان از خود صفحهٔ زنده (بی آن، فلوئنت ۴۲۲ می‌دهد)
+  const PAGE = process.env.PAGE_PATH || '/school/lacan/';
+  const pg = await wp.get(PAGE, { authed: false });
+  const fm = (pg.text || '').match(new RegExp(`<form[^>]*data-form_id="${FORM}"[\\s\\S]*?<\\/form>`));
+  if (!fm) bad(`فرم ${FORM} در ${PAGE} پیدا نشد (HTTP ${pg.status})`);
+  for (const m of fm[0].matchAll(/<input\b([^>]*)>/g)) {
+    const a = m[1]; if (!/type="hidden"/.test(a)) continue;
+    const n = a.match(/\bname="([^"]+)"/)?.[1]; if (n) data.append(n, a.match(/\bvalue="([^"]*)"/)?.[1] ?? '');
+  }
   const walk = (arr) => { for (const x of arr || []) {
     if (x.columns) { for (const c of x.columns) walk(c.fields); continue; }
     const n = x.attributes?.name; if (!n) continue;
@@ -87,15 +96,15 @@ if (MODE === 'probe') {
     else if (/mobile|phone/i.test(n)) data.append(n, '09123456789'); // pii:ok نمونهٔ ساختگی آزمون
     else if (x.element === 'select' || x.element === 'input_radio') data.append(n, opts[0] || '');
     else if (x.element === 'input_checkbox') { if (opts[0]) data.append(`${n}[]`, opts[0]); }
-    else if (x.element === 'input_hidden') data.append(n, x.attributes?.value || '');
+    else if (x.element === 'input_hidden') { if (!data.has(n)) data.append(n, x.attributes?.value || ''); }
     else data.append(n, 'آزمون TEST ورودی لکان، لطفاً نادیده بگیرید');
   } };
   walk(fields);
-  const r = await fetch(B + '/wp-admin/admin-ajax.php', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', Referer: B + '/lacan/' },
+  const r = await fetch(B + '/wp-admin/admin-ajax.php', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', Referer: B + (process.env.PAGE_PATH || '/school/lacan/') },
     body: new URLSearchParams({ action: 'fluentform_submit', form_id: FORM, data: data.toString() }) });
   const txt = await r.text(); let j = null; try { j = JSON.parse(txt); } catch {}
   const id = j?.data?.insert_id || j?.insert_id || '';
-  out.push(`- ورودی آزمایشی «آزمون TEST»: HTTP ${r.status}${id ? `، شمارهٔ ورودی ${id}` : ''}${j?.errors ? `، خطا: ${Object.keys(j.errors).join(',')}` : ''}`);
+  out.push(`- ورودی آزمایشی «آزمون TEST»: HTTP ${r.status}${id ? `، شمارهٔ ورودی ${id}` : ''}${j?.errors ? `، خطا: ${typeof j.errors === 'string' ? j.errors.slice(0, 160) : Object.entries(j.errors).map(([k, v]) => k + ': ' + Object.values(v || {}).join(' ')).join(' | ').slice(0, 300)}` : ''}${!j ? '، پاسخ: ' + txt.slice(0, 160) : ''}`);
   log(out.at(-1));
   if (!r.ok || !(j?.success || id)) bad('ورودی آزمایشی پذیرفته نشد');
 } else bad(`MODE ناشناخته: ${MODE}`);
