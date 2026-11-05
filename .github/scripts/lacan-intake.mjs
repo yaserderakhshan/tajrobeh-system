@@ -1,7 +1,7 @@
 // E58: فید وب‌هوک ورودی لکان روی فرم‌های فلوئنت. گام ۱، فقط خواندن (بی تغییر سایت، بی راز).
 // چاپ می‌کند: مسیرهای REST فلوئنت که webhook یا integration دارند، فرم ۱۹ و فرم‌هایی که عنوانشان «لکان» دارد،
 // نام فیلدهای هر کدام، و فیدهای وب‌هوک موجود (فقط نام و میزبان نشانی). هیچ دادهٔ ثبت‌نامی خوانده نمی‌شود.
-import { loadEnv, wpClient, log, fail, summary } from './site-lib.mjs';
+import { loadEnv, wpClient, log, fail, summary } from '../../site/tools/site-lib.mjs';
 
 loadEnv();
 const wp = wpClient();
