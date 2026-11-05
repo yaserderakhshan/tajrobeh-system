@@ -84,7 +84,7 @@ if (MODE === 'probe') {
     const opts = Object.keys(x.settings?.advanced_options ? Object.fromEntries((x.settings.advanced_options || []).map((o) => [o.value, 1])) : (x.options || {}));
     if (x.element === 'input_name') { data.append(`${n}[first_name]`, 'آزمون'); data.append(`${n}[last_name]`, 'TEST'); }
     else if (x.element === 'input_email') data.append(n, 'test+lacan@example.invalid');
-    else if (/mobile|phone/i.test(n)) data.append(n, '09123456789');
+    else if (/mobile|phone/i.test(n)) data.append(n, '09123456789'); // pii:ok نمونهٔ ساختگی آزمون
     else if (x.element === 'select' || x.element === 'input_radio') data.append(n, opts[0] || '');
     else if (x.element === 'input_checkbox') { if (opts[0]) data.append(`${n}[]`, opts[0]); }
     else if (x.element === 'input_hidden') data.append(n, x.attributes?.value || '');
