@@ -1,0 +1,24 @@
+name: سایت · ورودی لکان (فلوئنت)
+
+# E58: فید وب‌هوک فرم ۱۹ و فرم وبینار لکان به پل. گام ۱ فقط خواندن است: مسیرهای REST فلوئنت، فیلدها و فیدهای موجود.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lacan:
+    environment: production   # رمزها فقط در Environment «production» (فقط main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: خواندن فلوئنت
+        env:
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+        run: node .github/scripts/lacan-intake.mjs
