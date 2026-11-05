@@ -1,0 +1,24 @@
+name: سایت · آزمون مرورگری فرم لکان
+
+# E62: یک ثبت «آزمون TEST» در فرم ۱۹ با مرورگر واقعی، تا از بات به ورودی مدرسهٔ پل برسد.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Playwright
+        run: |
+          npm i --no-save --no-package-lock playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: ثبت آزمایشی
+        run: node .github/scripts/lacan-browser-test.mjs
