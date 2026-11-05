@@ -5,7 +5,8 @@ const URL = process.env.PAGE_URL || 'https://tajrobeh.life/school/lacan/', FID =
 const sum = (s) => { console.log(s); if (process.env.GITHUB_STEP_SUMMARY) import('node:fs').then((fs) => fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, s + '\n')); };
 const br = await chromium.launch();
 const pg = await br.newPage({ locale: 'fa-IR' });
-await pg.goto(URL, { waitUntil: 'networkidle', timeout: 60000 });
+await pg.goto(URL, { waitUntil: 'domcontentloaded', timeout: 90000 });
+await pg.waitForSelector(`form[data-form_id="${FID}"]`, { state: 'attached', timeout: 60000 }).catch(() => {});
 const f = pg.locator(`form[data-form_id="${FID}"]`).first();
 if (!(await f.count())) { sum(`::error::فرم ${FID} در صفحه نیست`); process.exit(1); }
 await f.scrollIntoViewIfNeeded().catch(() => {});
