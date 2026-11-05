@@ -96,7 +96,7 @@ export function registryProblems(reg, sc, php) {
   const regForms = new Set(Object.keys(reg.forms || {}));
   for (const [id, v] of Object.entries(sc.forms)) {
     if (!regForms.has(id)) bad.push(`فرم ${id} در رجیستری نیست (${v.files[0]})`);
-    if (php && !fm.map[id] && !fm.skip.includes(id)) bad.push(`فرم ${id} در $map اسنیپت 501143 نیست؛ بخش و صاحب از روی عنوان حدس زده می‌شود`);
+    if (php && !fm.map[id] && !fm.skip.includes(id) && !reg.forms?.[id]?.bridge) bad.push(`فرم ${id} در $map اسنیپت 501143 نیست؛ بخش و صاحب از روی عنوان حدس زده می‌شود`);
   }
   const gtOk = new Set([...(reg.getTherapy?.params || []), ...(reg.getTherapy?.legacy || []), ...(reg.getTherapy?.extra || [])]);
   for (const [p, v] of Object.entries(sc.gt)) if (!gtOk.has(p)) bad.push(`پارامتر ناشناختهٔ /get-therapy/: «${p}» (${v.files[0]})`);
@@ -116,6 +116,7 @@ export function ctaSelfTest() {
   t('همه ثبت‌شده ← بی مشکل', registryProblems(reg, sc, php).length === 0);
   t('کد ثبت‌نشده ← قرمز', registryProblems({ ...reg, codes: [] }, sc, php).some((x) => /rm_campus/.test(x)));
   t('فرم بی $map ← قرمز', registryProblems(reg, sc, '$map = array(\n);').some((x) => /501143/.test(x)));
+  t('فرم فقط پل (bridge) بی $map ← سبز (E62)', !registryProblems({ ...reg, forms: { ...(reg.forms || {}), ...Object.fromEntries(Object.keys(sc.forms).map((k) => [k, { ...(reg.forms?.[k] || {}), bridge: true }])) } }, sc, '$map = array(\n);').some((x) => /501143/.test(x)));
   t('cta ثبت‌نشده ← قرمز', registryProblems({ ...reg, ctas: [] }, sc, php).some((x) => /home\.hero/.test(x)));
   return bad;
 }

@@ -252,10 +252,12 @@ function brLeadRetryTick_() {
   var st = brLeadState_(); if (!st.q.length) return 0;
   var n = 0;
   while (st.q.length) {
-    var it = st.q[0], tg = it && typeof it === 'object' && it.t === 'tg', c;
-    var url = tg ? brTgUrl_() : brLeadUrl_(), sec = tg ? brSecret_() : brHandoffSecret_();
+    var it = st.q[0], tg = it && typeof it === 'object' && it.t === 'tg', sch = it && typeof it === 'object' && it.t === 'sch', c;
+    var url = tg ? brTgUrl_() : sch ? brSchUrl_() : brLeadUrl_(), sec = tg ? brSecret_() : sch ? brSchSecret_() : brHandoffSecret_();
     if (!url || !sec) { st.q.shift(); continue; }   /* خاموش شد: دور ریخته می‌شود */
-    try { c = tg ? brMirrorPost_(url, it.b, sec) : brLeadPost_(url, it, sec); } catch (e) { c = 0; }
+    try { c = tg ? brMirrorPost_(url, it.b, sec) : sch ? brSchPost_(url, it.b, sec) : brLeadPost_(url, it, sec); } catch (e) { c = 0; }
+    if (sch && (c === 429 || c === 0 || c >= 500)) break;
+    if (sch) { st.q.shift(); st.sch = st.sch || { ok: 0, fail: 0 }; if (c >= 200 && c < 300) st.sch.ok++; else st.sch.fail++; continue; }
     if (c === 429 || c === 0 || (tg && c >= 500)) break;
     st.q.shift();
     if (tg) continue;
@@ -269,10 +271,12 @@ function brLeadRetryTick_() {
    فقط فیلدهای درمانگر (همان که مچ بات به کار می‌برد، به‌اضافهٔ کد، شهر، قیمت پایه و چت تلگرام)؛ هیچ دادهٔ مراجع. */
 function brTherFeed_(p) {
   var sec = brHandoffSecret_(), ts = Number(p.ts || 0), now = Math.floor((TG_DRY && TG_MEM['br:now'] ? Number(TG_MEM['br:now']) : Date.now()) / 1000);
-  if (!sec || !ts || Math.abs(now - ts) > 300) return { ok: false, error: 'auth' };
+  var hit = function (ok) { try { var h = {}; try { h = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (eH) {} h[ok ? 'ok' : 'auth'] = (h[ok ? 'ok' : 'auth'] || 0) + 1; h[ok ? 'at' : 'authAt'] = new Date(now * 1000).toISOString(); lgProp_('BRF', JSON.stringify(h)); } catch (eS) {} };   /* v170.117 (E62.۴) */
+  if (!sec || !ts || Math.abs(now - ts) > 300) { hit(false); return { ok: false, error: 'auth' }; }
   /* v170.114 (E56): متن امضا «bot-match-feed.v1:<ts>:api=br_ther»؛ sig با یا بی پیشوند v1= (Apps Script سرآیند GET را نمی‌بیند، پس امضا در پرسمان است) */
   var want = brSign_('bot-match-feed.v1:' + String(p.ts) + ':api=br_ther', sec).slice(3);
-  if (!tgSafeEq_(String(p.sig || '').toLowerCase().replace(/^v1=/, ''), want)) return { ok: false, error: 'auth' };
+  if (!tgSafeEq_(String(p.sig || '').toLowerCase().replace(/^v1=/, ''), want)) { hit(false); return { ok: false, error: 'auth' }; }
+  hit(true);
   var rows = {}; try { (TG_DRY ? (TG_MEM['pnl:thers'] || []) : tgTherapistRows_()).forEach(function (t) { rows[tgNorm_(t.name)] = t; }); } catch (eR) {}
   var pub = tgThPubList_();
   var list = pub.map(function (t) {
@@ -304,12 +308,56 @@ function brTherSlots_() {
   return { weekly: weekly, intro: intro };
 }
 
+/* ───── v170.117 (E62.۳، Q29): ورودی مدرسهٔ پل برای فرم ۱۹ لکان ─────
+   501143 هر ثبت فرم را به بات می‌فرستد؛ بات همان بدنه را (بی کلیدهای داخلی فلوئنت) به پل می‌دهد، با سربرگ
+   Tajrobeh-Intake-Secret = base64url(HMAC-SHA256(کلید = راز مشترک بات، «tajrobeh-school-intake-v1»)). راز از بات بیرون نمی‌رود.
+   تنظیم: BRIDGE_SCH_URL (off خاموش)، BRIDGE_SCH_FORMS (پیش‌فرض 19). شکست یا ۴۲۹ در صف مشترک BRL (t:'sch') می‌ماند. */
+var BR_SCH_URL_DEF = 'https://bridge.tajrobeh.life/api/v2/school/course-registrations/intake';
+function brSchUrl_() { var u = String(cfg_('BRIDGE_SCH_URL', '') || '').trim(); if (u === 'off') return ''; return /^https:\/\/bridge\.tajrobeh\.life\//.test(u) ? u : BR_SCH_URL_DEF; }
+function brSchSecret_() { var s = brHandoffSecret_(); return s ? brB64_(Utilities.computeHmacSha256Signature('tajrobeh-school-intake-v1', s)) : ''; }
+function brSchForms_() { return String(cfg_('BRIDGE_SCH_FORMS', '') || '19').split(/[\s,،]+/).filter(Boolean); }
+function brSchPost_(url, body, sec) {
+  if (TG_DRY) { (TG_MEM['br:sch'] = TG_MEM['br:sch'] || []).push({ url: url, body: body, h: { 'Tajrobeh-Intake-Secret': sec } }); return Number(TG_MEM['br:schCode'] || 200); }
+  var r = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: body, muteHttpExceptions: true, followRedirects: false, headers: { 'Tajrobeh-Intake-Secret': sec } });
+  return r.getResponseCode();
+}
+/** خروجی: 'ok' | 'skip' | 'later' | 'fail' */
+function brSchIntake_(raw) {
+  try {
+    var fid = String(raw && raw.form_id || '');
+    if (!fid || brSchForms_().indexOf(fid) < 0) return 'skip';
+    var url = brSchUrl_(), sec = brSchSecret_();
+    if (!url || !sec) return 'skip';
+    var b = {};
+    Object.keys(raw).forEach(function (k) { if (/^_fluentform|^__fluent|^_wp_http_referer$/.test(k)) return; b[k] = raw[k]; });
+    if (!b.course) b.course = 'lacan';
+    b.source = 'Website';
+    var body = JSON.stringify(b), c = 0;
+    try { c = brSchPost_(url, body, sec); } catch (eP) { c = 0; }
+    var st = brLeadState_(); st.sch = st.sch || { ok: 0, fail: 0 };
+    if (c >= 200 && c < 300) { st.sch.ok++; brLeadState_(st); return 'ok'; }
+    try { Logger.log('brSchIntake_: پل HTTP ' + c); } catch (eL) {}
+    if (c === 429 || c === 0 || c >= 500) { brLeadState_(st); brOutQueue_({ t: 'sch', b: body }); return 'later'; }
+    st.sch.fail++; brLeadState_(st); return 'fail';
+  } catch (e) { return 'fail'; }
+}
+
+/** یک‌بارهٔ خودکار v170.117 (E62.۴، فقط‌خواندنی): خوراک مچ از درون با امضای درست، فقط شمارها؛ و درخواست‌های پل تا الان */
+function brV170117Stat() {
+  var ts = Math.floor((TG_DRY && TG_MEM['br:now'] ? Number(TG_MEM['br:now']) : Date.now()) / 1000), sec = brHandoffSecret_();
+  var f = brTherFeed_({ ts: String(ts), sig: brSign_('bot-match-feed.v1:' + ts + ':api=br_ther', sec) }), T = (f && f.therapists) || [];
+  var h = {}; try { h = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (e) {}
+  return 'خوراک: ok=' + !!(f && f.ok) + ' نسخه ' + (f && f.version) + ' · درمانگر ' + T.length + ' · با هفتگی ' + T.filter(function (t) { return (t.weekly || []).length; }).length +
+    ' (قاعده ' + T.reduce(function (a, t) { return a + (t.weekly || []).length; }, 0) + ') · با معارفهٔ آزاد ' + T.filter(function (t) { return (t.introSlots || []).length; }).length +
+    ' · درخواست پل: درست ' + (h.ok ? h.ok - 1 : 0) + ' (آخرین ' + (h.at || '-') + ')، امضای رد ' + (h.auth || 0) + ' (آخرین ' + (h.authAt || '-') + ')';
+}
+
 /** E46 بند ۵: شمار پیوند ورود ساخته‌شدهٔ امروز (در همان کلید BRL) */
 function brLinkCount_() { var st = brLeadState_(); st.ln = (st.ln || 0) + 1; brLeadState_(st); }
 function brLeadNightLine_() {
   var c = brLeadState_();
   var inv = 0; try { inv = Object.keys(JSON.parse(lgProp_('LG_INV') || '{}')).length; } catch (e2) {}
-  return '🌉 پل امروز: ' + tgFa_(c.ok || 0) + ' لید بات رسید' + (c.fail ? '، ' + tgFa_(c.fail) + ' شکست' : '') + (c.q.length ? '، ' + tgFa_(c.q.length) + ' در صف ۴۲۹' : '') + ' · پیوند «ورود به تجربه» امروز: ' + tgFa_(c.ln || 0) + ' · دعوت تا امروز: ' + tgFa_(inv) + ' درمانگر';
+  return '🌉 پل امروز: ' + tgFa_(c.ok || 0) + ' لید بات رسید' + (c.fail ? '، ' + tgFa_(c.fail) + ' شکست' : '') + (c.q.length ? '، ' + tgFa_(c.q.length) + ' در صف ۴۲۹' : '') + ' · پیوند «ورود به تجربه» امروز: ' + tgFa_(c.ln || 0) + ' · دعوت تا امروز: ' + tgFa_(inv) + ' درمانگر' + (c.sch ? ' · ثبت مدرسه به پل: ' + tgFa_(c.sch.ok || 0) + (c.sch.fail ? '، ' + tgFa_(c.sch.fail) + ' شکست' : '') : '');
 }
 function brTests() {
   var log = [], fail = 0;

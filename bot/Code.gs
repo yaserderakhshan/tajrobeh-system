@@ -175,6 +175,8 @@ function handleWebForm_(body) {
   var best = String(pickKey_(flat, ['best_time', 'contact_time', 'زمان مناسب']) || '').trim().slice(0, 80);
   var reg = typeof abRegion_ === 'function' ? abRegion_(phone, wtz, lf ? lf.ctry : '') : tgRegion_(phone);
 
+  /* v170.117 (E62.۳، Q29): ثبت فرم ۱۹ لکان به ورودی مدرسهٔ پل، پیش از نگهبان فرم آزمایشی تا ردیف «آزمون» هم برسد؛ هرگز خطا بالا نمی‌دهد */
+  try { if (typeof brSchIntake_ === 'function') brSchIntake_(body); } catch (eSi) {}
   // فرم آزمایشی را وارد کارتابل نکن: نه سطر، نه کارت، نه پیام (پیش از مسیر مدرسه و پرونده‌های تکراری، پس برای همهٔ فرم‌های سایت)
   if (isTestLead_(name, phone, email, flat)) { logError_('فرم تستی نادیده گرفته شد', null); return; }
 
