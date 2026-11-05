@@ -394,6 +394,16 @@ function lgTests() {
     var bad = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: '00' }), bj = bad && typeof bad.getContent === 'function' ? JSON.parse(bad.getContent()) : bad;
     var old = tgApiRoute_({ api: 'br_ther', ts: '1789990000', sig: brHex_(Utilities.computeHmacSha256Signature('bot-match-feed.v1:1789990000:api=br_ther', brHandoffSecret_())) }), oj = old && typeof old.getContent === 'function' ? JSON.parse(old.getContent()) : old;
     ok('E53: امضای غلط یا کهنه رد می‌شود', bj.ok === false && oj.ok === false);
+    /* E60 */
+    TG_MEM['weekrules'] = [{ name: 'درمانگر یک', iso: 7, hhmm: '18:00', pool: 'ایران', kind: TG_KIND_MEET }, { name: 'درمانگر یک', iso: 1, hhmm: '10:00', pool: 'ایران', kind: TG_KIND_SESS }];
+    TG_MEM['slotnow'] = '2026-11-05T08:00:00+03:30'; TG_MEM['offrows'] = [];
+    TG_MEM['slotrows'] = [['درمانگر یک', new Date('2026-11-07T12:00:00+03:30'), 'عصر', '17:00', 'آنلاین', 'آزاد', 'ایران'], ['درمانگر یک', new Date('2026-11-08T12:00:00+03:30'), 'عصر', '16:00', 'آنلاین', 'رزرو شده', 'ایران']];
+    var f2 = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: fsig }), f2j = f2 && typeof f2.getContent === 'function' ? JSON.parse(f2.getContent()) : f2, t2 = (f2j.therapists || [])[0] || {};
+    var wI = (t2.weekly || []).filter(function (w) { return w.kind === 'intro'; })[0] || {}, wT = (t2.weekly || []).filter(function (w) { return w.kind === 'therapy'; })[0] || {};
+    ok('E60: خوراک مچ وقت هفتگی (یکشنبه=0) و ردیف آزاد معارفه دارد، رزروشده نه (روی کد قبلی مردود)', f2j.version === 2 && wI.weekday === 0 && wI.from === '18:00' && wI.to === '18:20' &&
+      wT.weekday === 1 && wT.from === '10:00' && wT.to > '10:00' && (t2.introSlots || []).length === 1 && t2.introSlots[0].date === '2026-11-07' && t2.introSlots[0].from === '17:00' && t2.introSlots[0].to === '17:20' &&
+      JSON.stringify(f2j).indexOf('رزرو') < 0, JSON.stringify(t2).slice(0, 300));
+    delete TG_MEM['weekrules']; delete TG_MEM['slotrows']; delete TG_MEM['slotnow']; delete TG_MEM['offrows'];
     /* E48 */
     TG_CFG_ = { TG_NAMES: { chief: 'همکار آزمون' } }; TG_OUTBOX = []; TG_MEM['lg:now'] = String(new Date('2026-11-04T12:00:00+03:30').getTime());
     TG_MEM['pnl:thers'] = [{ name: 'همکار آزمون یک', chat: '5550091', status: 'فعال' }, { name: 'درمانگر دیگر', chat: '5550092', status: 'فعال' }];

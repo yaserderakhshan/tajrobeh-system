@@ -274,14 +274,34 @@ function brTherFeed_(p) {
   var want = brSign_('bot-match-feed.v1:' + String(p.ts) + ':api=br_ther', sec).slice(3);
   if (!tgSafeEq_(String(p.sig || '').toLowerCase().replace(/^v1=/, ''), want)) return { ok: false, error: 'auth' };
   var rows = {}; try { (TG_DRY ? (TG_MEM['pnl:thers'] || []) : tgTherapistRows_()).forEach(function (t) { rows[tgNorm_(t.name)] = t; }); } catch (eR) {}
-  var list = tgThPubList_().map(function (t) {
+  var pub = tgThPubList_();
+  var list = pub.map(function (t) {
     var r = rows[tgNorm_(t.n)] || {};
     return { name: t.d || t.n, code: String(r.code || ''), telegramId: typeof pnlChatOf_ === 'function' ? pnlChatOf_(r) : String(r.chat || ''), active: !!t.a,
       gender: t.g, approach: t.sp, mode: t.md, city: t.ct || String(r.city || ''), years: t.yr, languages: t.lg, ages: t.ag, focus: t.fc, groups: t.gr, pools: t.pl,
       couples: !!t.cp, abroad: !!(t.ab || r.abroad), inPerson: !!t.ip, style: t.st, tier: t.tr, rate: r.rate == null ? '' : r.rate, timezone: String(r.tz || ''),
       about: t.ab2, page: t.pg };
   });
-  return { ok: true, version: 1, at: new Date(now * 1000).toISOString(), therapists: list };
+  /* v170.115 (E60): وقت‌های درمانگر از همان داده‌ای که tgFreeSlots_ می‌خواند؛ فقط دادهٔ درمانگر، به وقت تهران */
+  var sl = brTherSlots_();
+  list.forEach(function (o, i) { var k = tgNorm_(pub[i].n); o.weekly = sl.weekly[k] || []; o.introSlots = sl.intro[k] || []; });
+  return { ok: true, version: 2, at: new Date(now * 1000).toISOString(), timezone: 'Asia/Tehran', therapists: list };
+}
+
+/** E60: قاعدهٔ هفتگی (weekday 0 یکشنبه تا 6 شنبه، from/to، kind therapy|intro) و ردیف‌های آزاد معارفه، کلید با نام نرمال */
+function brTherSlots_() {
+  var weekly = {}, intro = {};
+  function addM(hhmm, min) { var p = hhmm.split(':'), t = Number(p[0]) * 60 + Number(p[1]) + min; return ('0' + Math.floor(t / 60) % 24).slice(-2) + ':' + ('0' + t % 60).slice(-2); }
+  [[TG_KIND_MEET, 'intro'], [TG_KIND_SESS, 'therapy']].forEach(function (kk) {
+    var rules = []; try { rules = tgWeeklyRules_('', kk[0]); } catch (eW) {}
+    rules.forEach(function (r) {
+      var k = tgNorm_(r.name), len = 0; try { len = tgScLen_(r.name, kk[0]); } catch (eL) { len = TG_SLOT_MIN; }
+      (weekly[k] = weekly[k] || []).push({ weekday: Number(r.iso) % 7, from: r.hhmm, to: addM(r.hhmm, len || TG_SLOT_MIN), kind: kk[1] });
+    });
+  });
+  var free = []; try { free = tgFreeSlots_(''); } catch (eF) {}
+  free.forEach(function (x) { if (x.weekly) return; var k = tgNorm_(x.therapist); (intro[k] = intro[k] || []).push({ date: x.dateIso, from: x.hhmm, to: addM(x.hhmm, TG_SLOT_MIN) }); });
+  return { weekly: weekly, intro: intro };
 }
 
 /** E46 بند ۵: شمار پیوند ورود ساخته‌شدهٔ امروز (در همان کلید BRL) */
