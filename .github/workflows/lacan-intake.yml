@@ -1,8 +1,18 @@
 name: سایت · ورودی لکان (فلوئنت)
 
-# E58: فید وب‌هوک فرم ۱۹ و فرم وبینار لکان به پل. گام ۱ فقط خواندن است: مسیرهای REST فلوئنت، فیلدها و فیدهای موجود.
+# E58: فید وب‌هوک فرم ثبت‌نام لکان به پل (POST /school/course-registrations/intake با سربرگ Tajrobeh-Intake-Secret).
+# probe فقط می‌خواند. apply فید را می‌سازد؛ راز در خود اجرا از توکن بات ساخته و پوشانده می‌شود. test یک ورودی «آزمون TEST» می‌فرستد.
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'probe، apply یا test'
+        type: choice
+        options: [probe, apply, test]
+        default: probe
+      form_id:
+        description: 'شمارهٔ فرم فلوئنت'
+        default: '19'
 
 permissions:
   contents: read
@@ -17,8 +27,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: خواندن فلوئنت
+      - name: فلوئنت
         env:
           WP_USER: ${{ secrets.WP_USER }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          TELEGRAM_TOKEN: ${{ inputs.mode == 'apply' && secrets.TELEGRAM_TOKEN || '' }}
+          MODE: ${{ inputs.mode }}
+          FORM_ID: ${{ inputs.form_id }}
         run: node .github/scripts/lacan-intake.mjs
