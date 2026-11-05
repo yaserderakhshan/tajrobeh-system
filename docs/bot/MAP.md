@@ -82,7 +82,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.120`
+نسخهٔ کد: `v170.121`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -111,7 +111,7 @@
 | `panel.gs` | ۲۰۹ | ۱۹ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
 | `bridge.gs` | ۴۹۷ | ۴۵ |
-| `login.gs` | ۴۶۶ | ۳۱ |
+| `login.gs` | ۵۳۰ | ۳۷ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۰۹ | ۳۳ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
@@ -176,6 +176,7 @@
 | `wsTick` | `ws.gs` | everyMinutes(WS_TICK_MIN) | رد |
 | `ciRunDeferred` | `ci.gs` | at(پویا)، after(5000)، after(60 * 1000) | متوقف نمی‌شود |
 | `evlRun` | `evlite.gs` | after(1000) | متوقف نمی‌شود |
+| `lgInv2Run` | `login.gs` | at(at) | متوقف نمی‌شود |
 | `lgInviteRun` | `login.gs` | at(at) | متوقف نمی‌شود |
 | `tgPoll` | `telegram.gs` | everyMinutes(1) | متوقف نمی‌شود |
 | `tgRun` | `telegram.gs` | after(60 * 1000)، after(1000) | متوقف نمی‌شود |

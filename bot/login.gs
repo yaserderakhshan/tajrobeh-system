@@ -19,6 +19,9 @@ var LG_INV_FROM = 10, LG_INV_TO = 20;
 var T_LG_ASK = 'برای ورود به تجربه، شمارهٔ همین حساب تلگرام را با دکمهٔ زیر بفرستید.';
 var T_LG_OWN = 'فقط شمارهٔ خودتان را با همان دکمهٔ «اشتراک شمارهٔ من» بفرستید.';
 var T_LG_LINK = '🔐 پیوند ورود شما آماده است. فقط یک بار و تا ۳ دقیقه کار می‌کند؛ اگر دیر شد، دوباره «ورود به تجربه» را بزنید.';
+/* v170.116 (E61، متن K273 تأییدشدهٔ یاسر): دعوت همهٔ درمانگرهای فعال به پل، روز استقرار دستهٔ v پل؛ دکمه نشانی ریشهٔ پل */
+var T_LG_INV2 = 'سلام {نام}. پل تجربه دارد برای پذیرش مراجعان تازه آماده می‌شود. وقت‌هایی را که در بات داده بودید به پنلتان آوردیم. لطفاً وارد شوید، وقت‌ها را تأیید کنید و اطلاعات نمایه‌تان را کامل کنید؛ مراجعان تازه شما را با همین نمایه می‌بینند.';
+var LG_BRIDGE_ROOT = 'https://bridge.tajrobeh.life/';
 var T_LG_INVITE = 'سلام {نام}. پنل تازهٔ تجربه آماده است. با دکمهٔ «ورود به تجربه» وارد شوید؛ اگر بات شماره‌تان را خواست، دکمهٔ اشتراک شماره را بزنید.';
 
 function lgNow_() { return TG_DRY && TG_MEM['lg:now'] ? Number(TG_MEM['lg:now']) : Date.now(); }
@@ -62,6 +65,12 @@ function lgSend_(chat, ph) {
 /* دکمه‌ها: lgn:go برای هر کاربر (sec:public، پیوند فقط برای همان چت و همان شمارهٔ اشتراک‌شده ساخته می‌شود)؛ lgn:all فقط مالک */
 function lgOnCb_(chat, data) {   // sec:public
   if (data === 'lgn:go') return lgStart_(chat);
+  if (data === 'lgn:all2') {
+    if (String(chat) !== String(TG_OWNER_CHAT)) return tgSend_(chat, T_PNL_NO);
+    if (!lgInWindow_()) return tgSend_(chat, '⏰ دعوت فقط ساعت ۱۰ تا ۲۰ تهران فرستاده می‌شود. همین دکمه را در آن ساعت بزنید.');
+    var o2 = lgInvite2All_();
+    return tgSend_(chat, '📨 دعوت پل (E61): ' + tgFa_(o2.sent) + ' درمانگر پیام گرفتند · بی چت ' + tgFa_(o2.none) + ' · از قبل ' + tgFa_(o2.had) + '.');
+  }
   if (data === 'lgn:all') {
     if (String(chat) !== String(TG_OWNER_CHAT)) return tgSend_(chat, T_PNL_NO);
     if (!lgInWindow_()) return tgSend_(chat, '⏰ دعوت فقط ساعت ۱۰ تا ۲۰ تهران فرستاده می‌شود. همین دکمه را در آن ساعت بزنید.');
@@ -259,6 +268,46 @@ function lgInviteAll_() {
   lgProp_('LG_INV', JSON.stringify(inv));
   return out;
 }
+/* ───── E61: دعوت همهٔ درمانگرهای فعال به پل (فقط با دکمهٔ مالک، یک بار برای هر نفر، مجموعهٔ جدای LG_INV2) ───── */
+function lgInv2Kb_() { return { inline_keyboard: [[{ text: LG_BTN, url: LG_BRIDGE_ROOT }]] }; }
+function lgInv2Rows_() { return (TG_DRY ? (TG_MEM['pnl:thers'] || []) : tgTherapistRows_()).filter(function (t) { return t && !/پایان|غیرفعال|متوقف/.test(String(t.status || '')); }); }
+/** کارت مالک: پیش‌نمایش عین متن و شمار گیرنده‌ها؛ چیزی برای درمانگرها نمی‌رود */
+function lgInvite2Card_() {
+  var inv = {}; try { inv = JSON.parse(lgProp_('LG_INV2') || '{}') || {}; } catch (e) {}
+  var n = 0; lgInv2Rows_().forEach(function (t) { var c = typeof pnlChatOf_ === 'function' ? pnlChatOf_(t) : String(t.chat || ''); if (c && !inv[c]) n++; });
+  tgSend_(String(TG_OWNER_CHAT), '📨 <b>دعوت درمانگرها به پل (E61)</b>\nپیش‌نمایش پیام:\n\n' + tgEsc_(T_LG_INV2.replace('{نام}', 'نام')) + '\n\nدکمه: «' + LG_BTN + '» به ' + LG_BRIDGE_ROOT +
+    '\n\nبا دکمهٔ زیر برای ' + tgFa_(n) + ' درمانگر فعالِ وصل به بات می‌رود (فقط ساعت ۱۰ تا ۲۰).', { inline_keyboard: [[{ text: '📨 ارسال به همهٔ درمانگران', callback_data: 'lgn:all2' }]] });
+  return n;
+}
+function lgInvite2All_() {
+  var inv = {}; try { inv = JSON.parse(lgProp_('LG_INV2') || '{}') || {}; } catch (e) {}
+  var out = { sent: 0, none: 0, had: 0 }, now = Utilities.formatDate(new Date(lgNow_()), TG_TZ, 'yyyy-MM-dd HH:mm');
+  lgInv2Rows_().forEach(function (t) {
+    var chat = typeof pnlChatOf_ === 'function' ? pnlChatOf_(t) : String(t.chat || '');
+    if (!chat) { out.none++; return; }
+    if (inv[chat]) { out.had++; return; }
+    tgSend_(chat, T_LG_INV2.replace('{نام}', tgEsc_(String(t.name || '').split(/\s+/)[0] || 'همکار گرامی')), lgInv2Kb_());
+    inv[chat] = now; out.sent++;
+  });
+  lgProp_('LG_INV2', JSON.stringify(inv));
+  return out;
+}
+/** یک‌بارهٔ خودکار v170.116: کارت مالک دعوت پل؛ بیرون از ۱۰ تا ۲۰ تهران، تریگر یک‌باره برای ۱۰:۰۵ بعد */
+function lgV170116Inv2() {
+  if (lgInWindow_()) return 'کارت دعوت پل برای مالک رفت · گیرنده‌ها: ' + lgInvite2Card_();
+  if (!TG_DRY) {
+    ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'lgInv2Run') ScriptApp.deleteTrigger(t); });
+    var d = new Date(lgNow_() + 3600000), day = Utilities.formatDate(d, TG_TZ, 'yyyy-MM-dd'), at = new Date(day + 'T10:05:00+03:30');
+    if (at.getTime() <= lgNow_()) at = new Date(at.getTime() + 86400000);
+    ScriptApp.newTrigger('lgInv2Run').timeBased().at(at).create();
+    return 'بیرون از ساعت ۱۰ تا ۲۰؛ تریگر یک‌باره برای ' + Utilities.formatDate(at, TG_TZ, 'yyyy-MM-dd HH:mm');
+  }
+  TG_MEM['lg:arm2'] = 1; return 'تریگر یک‌باره';
+}
+function lgInv2Run() {
+  if (!TG_DRY) ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'lgInv2Run') ScriptApp.deleteTrigger(t); });
+  if (lgInWindow_()) lgInvite2Card_();
+}
 /** یک‌بارهٔ خودکار v170.107: مرحلهٔ آزمایشی دعوت؛ بیرون از ۱۰ تا ۲۰ تهران، تریگر یک‌باره برای ساعت ۱۰ بعد */
 function lgV170107Invite() {
   if (lgInWindow_()) return 'دعوت آزمایشی: ' + lgInviteTest_() + ' پیام · کارت مالک رفت';
@@ -350,6 +399,21 @@ function lgTests() {
     lgOnCb_('9001', 'lgn:all');
     ok('بیرون از ساعت ۱۰ تا ۲۰ دعوتی نمی‌رود', TG_OUTBOX.length === 1 && /۱۰ تا ۲۰/.test(TG_OUTBOX[0].text));
     ok('یک‌بارهٔ دعوت در فهرست CI', CI_ONCE_AUTO.indexOf('lgV170107Invite') >= 0);
+    /* E61 */
+    TG_MEM['lg:now'] = String(new Date('2026-11-06T12:00:00+03:30').getTime()); TG_OUTBOX = []; delete TG_MEM['lgp:LG_INV2'];
+    var r61 = lgV170116Inv2();
+    ok('E61: یک‌باره فقط کارت پیش‌نمایش برای مالک، با عین متن و دکمهٔ lgn:all2 (روی کد قبلی مردود)', TG_OUTBOX.length === 1 && TG_OUTBOX[0].chat === '9001' &&
+      TG_OUTBOX[0].text.indexOf('مراجعان تازه شما را با همین نمایه می‌بینند') > -1 && JSON.stringify(TG_OUTBOX[0].markup).indexOf('lgn:all2') > -1 && /۲ درمانگر فعال/.test(TG_OUTBOX[0].text), r61);
+    TG_OUTBOX = []; lgOnCb_('5550071', 'lgn:all2');
+    ok('E61: دکمه فقط برای مالک', TG_OUTBOX.length === 1 && TG_OUTBOX[0].text === T_PNL_NO);
+    TG_OUTBOX = []; lgOnCb_('9001', 'lgn:all2');
+    var s61 = TG_OUTBOX.filter(function (x) { return x.text && x.text.indexOf('سلام') === 0; });
+    ok('E61: همهٔ درمانگرهای فعال با چت، حتی دعوت‌شدهٔ قبلی، با دکمهٔ نشانی ریشهٔ پل', s61.map(function (x) { return x.chat; }).sort().join() === '5550071,5550074' &&
+      JSON.stringify(s61[0].markup).indexOf('"url":"https://bridge.tajrobeh.life/"') > -1 && s61[0].text.indexOf('{نام}') < 0 && /۲ درمانگر پیام گرفتند/.test(TG_OUTBOX[TG_OUTBOX.length - 1].text), JSON.stringify(s61).slice(0, 200));
+    TG_OUTBOX = []; lgOnCb_('9001', 'lgn:all2');
+    ok('E61: هر درمانگر فقط یک بار', TG_OUTBOX.length === 1 && /۰ درمانگر پیام گرفتند/.test(TG_OUTBOX[0].text));
+    TG_MEM['lg:now'] = String(new Date('2026-11-06T21:30:00+03:30').getTime()); TG_OUTBOX = []; lgOnCb_('9001', 'lgn:all2');
+    ok('E61: بیرون از ۱۰ تا ۲۰ نه؛ یک‌باره در فهرست CI', TG_OUTBOX.length === 1 && /۱۰ تا ۲۰/.test(TG_OUTBOX[0].text) && CI_ONCE_AUTO.indexOf('lgV170116Inv2') >= 0 && CI_ONCE_ALLOW.indexOf('lgV170116Inv2') >= 0);
     /* موج ۱ (E49، E51، E52) */
     TG_CFG_ = {}; TG_OUTBOX = []; TG_MEM['lg:now'] = String(new Date('2026-11-04T12:00:00+03:30').getTime());
     ['WV1_GO', 'WV1_CARD', 'WV1_C0', 'WV1_T0', 'WV1_A0', 'WV1_N'].forEach(function (k) { delete TG_MEM['lgp:' + k]; });
