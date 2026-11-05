@@ -1,0 +1,24 @@
+name: پل · سنجش خوراک مچ
+
+# E62.۴: خوراک زندهٔ br_ther را با همان امضای پل صدا می‌زند و فقط شمارها را چاپ می‌کند.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  feed:
+    environment: production
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: خوراک
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          DEPLOYMENT_ID: ${{ secrets.DEPLOYMENT_ID }}
+        run: node .github/scripts/br-feed-check.mjs
