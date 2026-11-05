@@ -267,7 +267,9 @@
     },
     "19": {
       "line": "sch",
-      "label": "ثبت‌نام دورهٔ لکان"
+      "label": "ثبت‌نام دورهٔ لکان",
+      "bridge": true,
+      "note": "فقط به پل (اسنیپت school-intake، E62)؛ استثنای $map در 501143"
     }
   },
   "getTherapy": {

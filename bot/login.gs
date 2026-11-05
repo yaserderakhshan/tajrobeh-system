@@ -403,7 +403,20 @@ function lgTests() {
     ok('E60: خوراک مچ وقت هفتگی (یکشنبه=0) و ردیف آزاد معارفه دارد، رزروشده نه (روی کد قبلی مردود)', f2j.version === 2 && wI.weekday === 0 && wI.from === '18:00' && wI.to === '18:20' &&
       wT.weekday === 1 && wT.from === '10:00' && wT.to > '10:00' && (t2.introSlots || []).length === 1 && t2.introSlots[0].date === '2026-11-07' && t2.introSlots[0].from === '17:00' && t2.introSlots[0].to === '17:20' &&
       JSON.stringify(f2j).indexOf('رزرو') < 0, JSON.stringify(t2).slice(0, 300));
+    ok('E62.۴: یک‌بارهٔ سنجش خوراک فقط شمار می‌دهد، بی نام', /درمانگر 1/.test(brV170117Stat()) && brV170117Stat().indexOf('درمانگر یک') < 0 && CI_ONCE_AUTO.indexOf('brV170117Stat') >= 0 && CI_ONCE_ALLOW.indexOf('brV170117Stat') >= 0, brV170117Stat());
     delete TG_MEM['weekrules']; delete TG_MEM['slotrows']; delete TG_MEM['slotnow']; delete TG_MEM['offrows'];
+    /* E62.۳ ورودی مدرسه */
+    TG_CFG_ = {}; TG_MEM['br:sch'] = []; TG_MEM['br:schCode'] = 200; delete TG_MEM['lgp:BRL'];
+    var r62 = brSchIntake_({ form_id: '19', entry_id: 5, names: { first_name: 'آزمون' }, mobile: '09000000003', course: '', _fluentform_19_fluentformnonce: 'n', __fluent_form_embded_post_id: '1', _wp_http_referer: '/x' });   /* pii:ok */
+    var s62 = TG_MEM['br:sch'][0] || {}, b62 = s62.body ? JSON.parse(s62.body) : {};
+    ok('E62.۳: فرم ۱۹ به ورودی مدرسهٔ پل با راز ساخته از راز مشترک، بی کلید داخلی فلوئنت (روی کد قبلی مردود)', r62 === 'ok' && s62.url === BR_SCH_URL_DEF &&
+      s62.h['Tajrobeh-Intake-Secret'] === brB64_(Utilities.computeHmacSha256Signature('tajrobeh-school-intake-v1', brHandoffSecret_())) && !/=$/.test(s62.h['Tajrobeh-Intake-Secret']) &&
+      b62.course === 'lacan' && b62.source === 'Website' && b62.mobile === '09000000003' && JSON.stringify(b62).indexOf('fluent') < 0 && !b62._wp_http_referer, JSON.stringify(s62).slice(0, 200));   /* pii:ok */
+    ok('E62.۳: فرم دیگر به مدرسهٔ پل نمی‌رود؛ off خاموش می‌کند', brSchIntake_({ form_id: '7', mobile: '1' }) === 'skip' && (TG_CFG_ = { BRIDGE_SCH_URL: 'off' }, brSchIntake_({ form_id: '19', mobile: '1' }) === 'skip') && TG_MEM['br:sch'].length === 1);
+    TG_CFG_ = {}; TG_MEM['br:schCode'] = 503;
+    var q62 = brSchIntake_({ form_id: '19', mobile: '1' }), qq = brLeadState_().q;
+    TG_MEM['br:schCode'] = 200; var n62 = TG_MEM['br:sch'].length; brLeadRetryTick_();
+    ok('E62.۳: شکست ۵xx در صف مشترک می‌ماند و تیک بعدی دوباره می‌فرستد', q62 === 'later' && qq.length === 1 && qq[0].t === 'sch' && TG_MEM['br:sch'].length === n62 + 1 && brLeadState_().q.length === 0 && brLeadState_().sch.ok === 2);
     /* E48 */
     TG_CFG_ = { TG_NAMES: { chief: 'همکار آزمون' } }; TG_OUTBOX = []; TG_MEM['lg:now'] = String(new Date('2026-11-04T12:00:00+03:30').getTime());
     TG_MEM['pnl:thers'] = [{ name: 'همکار آزمون یک', chat: '5550091', status: 'فعال' }, { name: 'درمانگر دیگر', chat: '5550092', status: 'فعال' }];
