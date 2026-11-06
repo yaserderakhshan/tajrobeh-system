@@ -82,7 +82,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.118`
+نسخهٔ کد: `v170.119`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -104,14 +104,14 @@
 | `gemini_setup.gs` | ۵۷۹ | ۴۰ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۸۳۵ | ۱۳۳ |
-| `v168.gs` | ۲۵۱۲ | ۱۵۷ |
+| `v168.gs` | ۲۵۱۳ | ۱۵۷ |
 | `wppage.gs` | ۱۹۳ | ۱۵ |
 | `cover.gs` | ۳۸۷ | ۲۷ |
 | `magseo.gs` | ۶۱۶ | ۴۴ |
 | `panel.gs` | ۲۰۹ | ۱۹ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
-| `bridge.gs` | ۴۳۷ | ۳۸ |
-| `login.gs` | ۴۴۸ | ۳۱ |
+| `bridge.gs` | ۴۹۳ | ۴۴ |
+| `login.gs` | ۴۶۳ | ۳۱ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۰۹ | ۳۳ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
