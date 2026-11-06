@@ -398,12 +398,27 @@ function lgTests() {
     TG_MEM['weekrules'] = [{ name: 'درمانگر یک', iso: 7, hhmm: '18:00', pool: 'ایران', kind: TG_KIND_MEET }, { name: 'درمانگر یک', iso: 1, hhmm: '10:00', pool: 'ایران', kind: TG_KIND_SESS }];
     TG_MEM['slotnow'] = '2026-11-05T08:00:00+03:30'; TG_MEM['offrows'] = [];
     TG_MEM['slotrows'] = [['درمانگر یک', new Date('2026-11-07T12:00:00+03:30'), 'عصر', '17:00', 'آنلاین', 'آزاد', 'ایران'], ['درمانگر یک', new Date('2026-11-08T12:00:00+03:30'), 'عصر', '16:00', 'آنلاین', 'رزرو شده', 'ایران']];
+    delete TG_MEM['brf:cache'];
     var f2 = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: fsig }), f2j = f2 && typeof f2.getContent === 'function' ? JSON.parse(f2.getContent()) : f2, t2 = (f2j.therapists || [])[0] || {};
     var wI = (t2.weekly || []).filter(function (w) { return w.kind === 'intro'; })[0] || {}, wT = (t2.weekly || []).filter(function (w) { return w.kind === 'therapy'; })[0] || {};
     ok('E60: خوراک مچ وقت هفتگی (یکشنبه=0) و ردیف آزاد معارفه دارد، رزروشده نه (روی کد قبلی مردود)', f2j.version === 2 && wI.weekday === 0 && wI.from === '18:00' && wI.to === '18:20' &&
       wT.weekday === 1 && wT.from === '10:00' && wT.to > '10:00' && (t2.introSlots || []).length === 1 && t2.introSlots[0].date === '2026-11-07' && t2.introSlots[0].from === '17:00' && t2.introSlots[0].to === '17:20' &&
       JSON.stringify(f2j).indexOf('رزرو') < 0, JSON.stringify(t2).slice(0, 300));
     ok('E62.۴: یک‌بارهٔ سنجش خوراک فقط شمار می‌دهد، بی نام', /درمانگر 1/.test(brV170117Stat()) && brV170117Stat().indexOf('درمانگر یک') < 0 && CI_ONCE_AUTO.indexOf('brV170117Stat') >= 0 && CI_ONCE_ALLOW.indexOf('brV170117Stat') >= 0, brV170117Stat());
+    /* E64: کش و راه برعکس */
+    var cached = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: fsig }), cj = cached && typeof cached.getContent === 'function' ? JSON.parse(cached.getContent()) : cached;
+    TG_MEM['weekrules'] = [];
+    var c2 = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: fsig }), c2j = c2 && typeof c2.getContent === 'function' ? JSON.parse(c2.getContent()) : c2;
+    ok('E64: خوراک از کش می‌آید (دادهٔ تازه تا تیک بعدی دیده نمی‌شود) و زمان ساخت ثبت می‌شود (روی کد قبلی مردود)', (c2j.therapists[0].weekly || []).length === (cj.therapists[0].weekly || []).length && (cj.therapists[0].weekly || []).length > 0 && JSON.parse(lgProp_('BRF')).buildMs >= 0);
+    TG_CFG_ = {}; TG_MEM['br:slots'] = [];
+    ok('E64: تیک خوراک را تازه می‌کند و بی نشانی چیزی نمی‌فرستد', brFeedTick_() === 'cache' && (brFeedCacheGet_().therapists[0].weekly || []).length === 0 && TG_MEM['br:slots'].length === 0);
+    TG_CFG_ = { BRIDGE_SLOTS_URL: 'https://bridge.tajrobeh.life/api/v2/legacy/bot-slots' };
+    var p64 = brFeedTick_(), s64 = TG_MEM['br:slots'][0] || {}, ts64 = s64.h ? s64.h['Tajrobeh-Timestamp'] : '';
+    ok('E64: با نشانی، خوراک امضاشده به پل می‌رود؛ بار دوم بی تغییر نه', p64 === 'push 200' && s64.url === TG_CFG_.BRIDGE_SLOTS_URL &&
+      s64.h['Tajrobeh-Signature'] === brSign_('bot-match-feed.v1:' + ts64 + ':' + s64.body, brHandoffSecret_()) && JSON.parse(s64.body).therapists.length === 1 && brFeedTick_() === 'same' && TG_MEM['br:slots'].length === 1, p64);
+    TG_CFG_ = { BRIDGE_SLOTS_URL: 'https://evil.example/x' };
+    ok('E64: فقط نشانی پل؛ یک‌باره در فهرست CI', brFeedTick_() === 'cache' && CI_ONCE_AUTO.indexOf('brV170119Stat') >= 0 && /ساخت خوراک: \d+/.test(brV170119Stat()));
+    TG_CFG_ = {}; delete TG_MEM['brf:cache'];
     delete TG_MEM['weekrules']; delete TG_MEM['slotrows']; delete TG_MEM['slotnow']; delete TG_MEM['offrows'];
     /* E62.۳ ورودی مدرسه */
     TG_CFG_ = {}; TG_MEM['br:sch'] = []; TG_MEM['br:schCode'] = 200; delete TG_MEM['lgp:BRL'];

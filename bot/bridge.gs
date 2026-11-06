@@ -277,6 +277,15 @@ function brTherFeed_(p) {
   var want = brSign_('bot-match-feed.v1:' + String(p.ts) + ':api=br_ther', sec).slice(3);
   if (!tgSafeEq_(String(p.sig || '').toLowerCase().replace(/^v1=/, ''), want)) { hit(false); return { ok: false, error: 'auth' }; }
   hit(true);
+  /* v170.119 (E64): پاسخ از کش (تیک ۳۰ دقیقه‌ای می‌سازد)؛ ساختن زنده با ۱۵۷ درمانگر و هزار قاعده بیش از مهلت ۳۰ ثانیهٔ پل طول می‌کشید */
+  var c = brFeedCacheGet_();
+  if (c) return c;
+  return brFeedBuild_(now, true);
+}
+
+/** ساختن خوراک مچ (درمانگر و وقت‌ها)؛ با keep در کش هم می‌نشیند و زمان ساخت در BRF ثبت می‌شود */
+function brFeedBuild_(now, keep) {
+  var t0 = Date.now();
   var rows = {}; try { (TG_DRY ? (TG_MEM['pnl:thers'] || []) : tgTherapistRows_()).forEach(function (t) { rows[tgNorm_(t.name)] = t; }); } catch (eR) {}
   var pub = tgThPubList_();
   var list = pub.map(function (t) {
@@ -289,7 +298,54 @@ function brTherFeed_(p) {
   /* v170.115 (E60): وقت‌های درمانگر از همان داده‌ای که tgFreeSlots_ می‌خواند؛ فقط دادهٔ درمانگر، به وقت تهران */
   var sl = brTherSlots_();
   list.forEach(function (o, i) { var k = tgNorm_(pub[i].n); o.weekly = sl.weekly[k] || []; o.introSlots = sl.intro[k] || []; });
-  return { ok: true, version: 2, at: new Date(now * 1000).toISOString(), timezone: 'Asia/Tehran', therapists: list };
+  var out = { ok: true, version: 2, at: new Date(now * 1000).toISOString(), timezone: 'Asia/Tehran', therapists: list };
+  try { var h = {}; try { h = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (eH) {} h.buildMs = Date.now() - t0; h.builtAt = out.at; lgProp_('BRF', JSON.stringify(h)); } catch (eB) {}
+  if (keep) brFeedCachePut_(out);
+  return out;
+}
+var BR_FEED_CHUNK = 90000;
+function brFeedCachePut_(o) {
+  try {
+    var s = JSON.stringify(o), n = Math.ceil(s.length / BR_FEED_CHUNK), kv = { 'brf:n': String(n) };
+    for (var i = 0; i < n; i++) kv['brf:' + i] = s.slice(i * BR_FEED_CHUNK, (i + 1) * BR_FEED_CHUNK);
+    if (TG_DRY) { TG_MEM['brf:cache'] = kv; return true; }
+    CacheService.getScriptCache().putAll(kv, 21600); return true;
+  } catch (e) { return false; }
+}
+function brFeedCacheGet_() {
+  try {
+    var c = TG_DRY ? (TG_MEM['brf:cache'] || {}) : null, n;
+    if (!TG_DRY) { var sc = CacheService.getScriptCache(); n = Number(sc.get('brf:n') || 0); if (!n) return null; var keys = []; for (var i = 0; i < n; i++) keys.push('brf:' + i); c = sc.getAll(keys); c['brf:n'] = String(n); }
+    n = Number(c['brf:n'] || 0); if (!n) return null;
+    var s = ''; for (var j = 0; j < n; j++) { if (typeof c['brf:' + j] !== 'string') return null; s += c['brf:' + j]; }
+    return JSON.parse(s);
+  } catch (e) { return null; }
+}
+/** از tgTick5 (هر ۳۰ دقیقه): خوراک تازه در کش، و اگر BRIDGE_SLOTS_URL تنظیم شده، فرستادن همان به پل (راه برعکس، E64) وقتی عوض شده یا ۶ ساعت گذشته */
+function brFeedTick_() {
+  var now = Math.floor((TG_DRY && TG_MEM['br:now'] ? Number(TG_MEM['br:now']) : Date.now()) / 1000);
+  var o = brFeedBuild_(now, true), url = brSlotsUrl_(), sec = brHandoffSecret_();
+  if (!url || !sec) return 'cache';
+  var body = JSON.stringify(o), h = {}; try { h = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (e) {}
+  var sum = brHex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, JSON.stringify(o.therapists), Utilities.Charset.UTF_8)).slice(0, 16);
+  if (h.pushSum === sum && now - Number(h.pushAt || 0) < 21600) return 'same';
+  var ts = String(now), hd = { 'Tajrobeh-Timestamp': ts, 'Tajrobeh-Signature': brSign_('bot-match-feed.v1:' + ts + ':' + body, sec) }, code = 0;
+  try {
+    if (TG_DRY) { (TG_MEM['br:slots'] = TG_MEM['br:slots'] || []).push({ url: url, body: body, h: hd }); code = Number(TG_MEM['br:slotsCode'] || 200); }
+    else code = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: body, headers: hd, muteHttpExceptions: true, followRedirects: false }).getResponseCode();
+  } catch (eP) { code = 0; }
+  h.pushCode = code; if (code >= 200 && code < 300) { h.pushSum = sum; h.pushAt = now; }
+  lgProp_('BRF', JSON.stringify(h));
+  return 'push ' + code;
+}
+function brSlotsUrl_() { var u = String(cfg_('BRIDGE_SLOTS_URL', '') || '').trim(); return /^https:\/\/bridge\.tajrobeh\.life\//.test(u) ? u : ''; }
+/** یک‌بارهٔ خودکار v170.119 (E64، فقط‌خواندنی): زمان ساخت خوراک، و درخواست‌های پل تا الان */
+function brV170119Stat() {
+  var h0 = {}; try { h0 = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (e) {}
+  var now = Math.floor((TG_DRY && TG_MEM['br:now'] ? Number(TG_MEM['br:now']) : Date.now()) / 1000);
+  var o = brFeedBuild_(now, true), h = {}; try { h = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (e2) {}
+  return 'ساخت خوراک: ' + h.buildMs + ' میلی‌ثانیه · درمانگر ' + ((o && o.therapists) || []).length + ' · در کش: ' + (brFeedCacheGet_() ? 'بله' : 'نه') +
+    ' · درخواست پل تا پیش از این: درست ' + (h0.ok ? h0.ok - 1 : 0) + ' (آخرین ' + (h0.at || '-') + ')، امضای رد ' + (h0.auth || 0) + ' (آخرین ' + (h0.authAt || '-') + ')';
 }
 
 /** E60: قاعدهٔ هفتگی (weekday 0 یکشنبه تا 6 شنبه، from/to، kind therapy|intro) و ردیف‌های آزاد معارفه، کلید با نام نرمال */
