@@ -410,12 +410,15 @@ function lgTests() {
     TG_MEM['weekrules'] = [];
     var c2 = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: fsig }), c2j = c2 && typeof c2.getContent === 'function' ? JSON.parse(c2.getContent()) : c2;
     ok('E64: خوراک از کش می‌آید (دادهٔ تازه تا تیک بعدی دیده نمی‌شود) و زمان ساخت ثبت می‌شود (روی کد قبلی مردود)', (c2j.therapists[0].weekly || []).length === (cj.therapists[0].weekly || []).length && (cj.therapists[0].weekly || []).length > 0 && JSON.parse(lgProp_('BRF')).buildMs >= 0);
-    TG_CFG_ = {}; TG_MEM['br:slots'] = [];
-    ok('E64: تیک خوراک را تازه می‌کند و بی نشانی چیزی نمی‌فرستد', brFeedTick_() === 'cache' && (brFeedCacheGet_().therapists[0].weekly || []).length === 0 && TG_MEM['br:slots'].length === 0);
-    TG_CFG_ = { BRIDGE_SLOTS_URL: 'https://bridge.tajrobeh.life/api/v2/legacy/bot-slots' };
+    TG_CFG_ = { BRIDGE_SLOTS_URL: 'off' }; TG_MEM['br:slots'] = [];
+    ok('E64: تیک خوراک را تازه می‌کند و با off چیزی نمی‌فرستد', brFeedTick_() === 'cache' && (brFeedCacheGet_().therapists[0].weekly || []).length === 0 && TG_MEM['br:slots'].length === 0);
+    ok('E65: بی تنظیم، نشانی پیش‌فرض legacy/bot-slots/intake پل', (TG_CFG_ = {}, brSlotsUrl_() === BR_SLOTS_URL_DEF) && /legacy\/bot-slots\/intake$/.test(BR_SLOTS_URL_DEF));
+    ok('E66: نرخ جلسه به تومان و طول جلسه در خوراک (روی کد قبلی مردود)', (TG_MEM['pnl:thers'][0].rate = '۱٬۲۰۰٬۰۰۰', TG_MEM['pnl:thers'][0].slen = '50', brFeedBuild_(1790000000, false).therapists[0].rateToman === 1200000) && brFeedBuild_(1790000000, false).therapists[0].sessionMinutes === 50 &&
+      (TG_MEM['pnl:thers'][0].rate = '', brFeedBuild_(1790000000, false).therapists[0].rateToman === null));
+    TG_CFG_ = { BRIDGE_SLOTS_URL: 'https://bridge.tajrobeh.life/api/v2/legacy/bot-slots/intake' };
     var p64 = brFeedTick_(), s64 = TG_MEM['br:slots'][0] || {}, ts64 = s64.h ? s64.h['Tajrobeh-Timestamp'] : '';
     ok('E64: با نشانی، خوراک امضاشده به پل می‌رود؛ بار دوم بی تغییر نه', p64 === 'push 200' && s64.url === TG_CFG_.BRIDGE_SLOTS_URL &&
-      s64.h['Tajrobeh-Signature'] === brSign_('bot-match-feed.v1:' + ts64 + ':' + s64.body, brHandoffSecret_()) && JSON.parse(s64.body).therapists.length === 1 && brFeedTick_() === 'same' && TG_MEM['br:slots'].length === 1, p64);
+      s64.h['Tajrobeh-Signature'] === brSign_('legacy-bot-slots.v1:' + ts64 + ':' + s64.body, brHandoffSecret_()) && JSON.parse(s64.body).therapists.length === 1 && brFeedTick_() === 'same' && TG_MEM['br:slots'].length === 1, p64);
     TG_CFG_ = { BRIDGE_SLOTS_URL: 'https://evil.example/x' };
     ok('E64: فقط نشانی پل؛ یک‌باره در فهرست CI', brFeedTick_() === 'cache' && CI_ONCE_AUTO.indexOf('brV170119Stat') >= 0 && /ساخت خوراک: \d+/.test(brV170119Stat()));
     TG_CFG_ = {}; delete TG_MEM['brf:cache'];
