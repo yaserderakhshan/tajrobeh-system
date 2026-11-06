@@ -559,6 +559,15 @@
   "active": true
  },
  {
+  "id": 510796,
+  "file": "510796.php",
+  "title": "لین A · مسیرهای ورود نسخهٔ ۱ به پل (۱۵ آبان ۱۴۰۵)",
+  "type": "php",
+  "location": "everywhere",
+  "loc": "everywhere",
+  "active": true
+ },
+ {
   "id": null,
   "file": "ga4-visitor-tz.html",
   "title": "Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz، is_abroad) v1",
