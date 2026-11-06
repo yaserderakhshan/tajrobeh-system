@@ -293,6 +293,8 @@ function brFeedBuild_(now, keep) {
     return { name: t.d || t.n, code: String(r.code || ''), telegramId: typeof pnlChatOf_ === 'function' ? pnlChatOf_(r) : String(r.chat || ''), active: !!t.a,
       gender: t.g, approach: t.sp, mode: t.md, city: t.ct || String(r.city || ''), years: t.yr, languages: t.lg, ages: t.ag, focus: t.fc, groups: t.gr, pools: t.pl,
       couples: !!t.cp, abroad: !!(t.ab || r.abroad), inPerson: !!t.ip, style: t.st, tier: t.tr, rate: r.rate == null ? '' : r.rate, timezone: String(r.tz || ''),
+      /* v170.120 (E66): rate = ستون «نرخ جلسه (تومان)» هاب، برای یک جلسهٔ درمان فردی به طول sessionMinutes؛ قیمت جدای خارج در بات نیست */
+      rateToman: brNum_(r.rate), sessionMinutes: brNum_(r.slen),
       about: t.ab2, page: t.pg };
   });
   /* v170.115 (E60): وقت‌های درمانگر از همان داده‌ای که tgFreeSlots_ می‌خواند؛ فقط دادهٔ درمانگر، به وقت تهران */
@@ -303,6 +305,7 @@ function brFeedBuild_(now, keep) {
   if (keep) brFeedCachePut_(out);
   return out;
 }
+function brNum_(v) { var d = Number(tgLatinDigits_(String(v == null ? '' : v)).replace(/[^\d.]/g, '')); return d > 0 ? d : null; }
 var BR_FEED_CHUNK = 90000;
 function brFeedCachePut_(o) {
   try {
@@ -321,15 +324,15 @@ function brFeedCacheGet_() {
     return JSON.parse(s);
   } catch (e) { return null; }
 }
-/** از tgTick5 (هر ۳۰ دقیقه): خوراک تازه در کش، و اگر BRIDGE_SLOTS_URL تنظیم شده، فرستادن همان به پل (راه برعکس، E64) وقتی عوض شده یا ۶ ساعت گذشته */
+/** از tgTick5 (هر ۳۰ دقیقه): خوراک تازه در کش، و فرستادن همان به پل (راه برعکس، E64، E65: POST legacy/bot-slots/intake، امضای legacy-bot-slots.v1) وقتی عوض شده یا روزی یک بار. پل بعد از ورود منبع حقیقت است */
 function brFeedTick_() {
   var now = Math.floor((TG_DRY && TG_MEM['br:now'] ? Number(TG_MEM['br:now']) : Date.now()) / 1000);
   var o = brFeedBuild_(now, true), url = brSlotsUrl_(), sec = brHandoffSecret_();
   if (!url || !sec) return 'cache';
   var body = JSON.stringify(o), h = {}; try { h = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (e) {}
   var sum = brHex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, JSON.stringify(o.therapists), Utilities.Charset.UTF_8)).slice(0, 16);
-  if (h.pushSum === sum && now - Number(h.pushAt || 0) < 21600) return 'same';
-  var ts = String(now), hd = { 'Tajrobeh-Timestamp': ts, 'Tajrobeh-Signature': brSign_('bot-match-feed.v1:' + ts + ':' + body, sec) }, code = 0;
+  if (h.pushSum === sum && now - Number(h.pushAt || 0) < 86400) return 'same';   /* E65: هر بار که عوض شد، وگرنه روزی یک بار */
+  var ts = String(now), hd = { 'Tajrobeh-Timestamp': ts, 'Tajrobeh-Signature': brSign_('legacy-bot-slots.v1:' + ts + ':' + body, sec) }, code = 0;   /* E65: قرارداد لین D */
   try {
     if (TG_DRY) { (TG_MEM['br:slots'] = TG_MEM['br:slots'] || []).push({ url: url, body: body, h: hd }); code = Number(TG_MEM['br:slotsCode'] || 200); }
     else code = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: body, headers: hd, muteHttpExceptions: true, followRedirects: false }).getResponseCode();
@@ -338,7 +341,8 @@ function brFeedTick_() {
   lgProp_('BRF', JSON.stringify(h));
   return 'push ' + code;
 }
-function brSlotsUrl_() { var u = String(cfg_('BRIDGE_SLOTS_URL', '') || '').trim(); return /^https:\/\/bridge\.tajrobeh\.life\//.test(u) ? u : ''; }
+var BR_SLOTS_URL_DEF = 'https://bridge.tajrobeh.life/api/v2/legacy/bot-slots/intake';   /* E65 */
+function brSlotsUrl_() { var u = String(cfg_('BRIDGE_SLOTS_URL', '') || '').trim(); if (/^(off|0|خاموش)$/i.test(u)) return ''; if (!u) return BR_SLOTS_URL_DEF; return /^https:\/\/bridge\.tajrobeh\.life\//.test(u) ? u : ''; }
 /** یک‌بارهٔ خودکار v170.119 (E64، فقط‌خواندنی): زمان ساخت خوراک، و درخواست‌های پل تا الان */
 function brV170119Stat() {
   var h0 = {}; try { h0 = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (e) {}
