@@ -495,3 +495,240 @@ function brTests() {
   Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ پیوند با پل درست است'));
   return tgTestTally_(log, fail);
 }
+
+/* ─────────────── v170.123 (E70): خوراک امضاشدهٔ هاب برای برش ───────────────
+   راه برعکس، مثل BotSlots: بات هر بخش را به نشانی خودش در پل می‌فرستد.
+   POST <پایه>/<section>/intake؛ امضا «legacy-bot-cutover.v1:<section>:<ts>:<بدنهٔ خام>» با راز handoff.
+   فقط فهرست سفید ستون‌ها (نام سرستون هاب ← نام انگلیسی). ستون کارت، شبا و نام صاحب حساب هرگز (CO_DENY).
+   هر بخش روزی یک بار (BRIDGE_CUTOVER_EVERY_H)؛ شکست ۶ ساعت بعد؛ ۴۰۴ یعنی رابط پل هنوز نیست و تیک می‌ایستد.
+   پایه: تنظیم BRIDGE_CUTOVER_URL (off = خاموش). هیچ پیامی به کسی نمی‌رود. */
+var CO_URL_DEF = 'https://bridge.tajrobeh.life/api/v2/legacy/bot-cutover/';
+var CO_DENY = /کارت|شبا|IBAN|صاحب\s*حساب|حساب\s*بانکی/i;
+var CO_CHUNK_CHARS = 600000;   /* سقف ۲ مگابایت پل؛ هر نویسه در UTF-8 حداکثر ۳ بایت */
+var CO_CHUNK_ROWS = 3000;
+var CO_BUDGET_MS = 120000;
+var CO_SAME = { at: 'زمان', leadKey: 'کد لید', who: 'کی', channel: 'کانال', what: 'چه شد', from: 'از', to: 'به', note: 'یادداشت' };
+/* f: فیلد ← نام سرستون، یا فهرست نام‌ها، و عدد = جای ستون (۰-پایه) اگر سرستون پیدا نشد. th: فیلد نام درمانگر برای افزودن کد و chat */
+var CO_SECTIONS = [
+  { s: 'people', tabs: [{ b: 'hub', t: 'افراد' }], key: function (o) { return o.id || o.chatId; },
+    f: { id: 'شناسه', name: 'نام', telegramUsername: 'یوزرنیم تلگرام', chatId: 'chat_id', roles: 'نقش‌ها', circleOrCourse: 'حلقه یا دوره', status: 'وضعیت', phone: 'شمارهٔ تماس', email: 'ایمیل', approach: 'رویکرد', acceptsSupervision: 'سوپرویژن می‌پذیرد؟' }, list: ['roles'] },
+  { s: 'leads', tabs: [{ b: 'hub', t: 'لیدها' }], key: function (o) { return o.code; },
+    f: { code: 'کد لید', createdDate: ['تاریخ', 0], createdTime: ['زمان', 1], source: ['منبع', 2], name: ['نام', 3], channel: ['کانال', 4], contact: ['شماره / شناسه', 5], insideIran: ['داخل یا خارج', 6], firstText: ['متن اولیه', 7],
+         status: ['وضعیت', 8], owner: ['مسئول', 9], lastContact: ['آخرین تماس', 10], result: ['نتیجه', 11], note: ['یادداشت', 12], requestType: 'نوع درخواست', topic: 'موضوع اصلی',
+         th1: 'درمانگر پیشنهادی ۱', th2: 'درمانگر پیشنهادی ۲', th3: 'درمانگر پیشنهادی ۳', referralDate: 'تاریخ ارجاع', introArranged: 'معارفه هماهنگ شد؟', leadType: 'نوع لید' },
+    fix: function (o) { var l = [o.th1, o.th2, o.th3].filter(Boolean); delete o.th1; delete o.th2; delete o.th3; if (l.length) o.suggestedTherapists = l; delete o.code; } },
+  { s: 'lead-events', tabs: [{ b: 'hub', t: 'رویدادهای لید' }], key: function (o) { return o.leadKey ? [o.leadKey, o.row || '', o.at || ''].join('|') : ''; },
+    f: Object.assign({ row: 'سطر' }, CO_SAME), fix: function (o) { delete o.row; } },
+  { s: 'lead-sources', tabs: [{ b: 'hub', t: 'کدهای start', kind: 'start' }, { b: 'hub', t: 'نقشهٔ کلمه‌ها', kind: 'word' }],
+    key: function (o) { return o.kind === 'start' ? (o.code ? 'start:' + o.code : '') : (o.word ? 'word:' + (o.page || '') + ':' + o.word : ''); },
+    f: { code: 'کد', label: ['برچسب', 'برچسب فارسی'], page: 'پیج', word: 'کلمه', destination: 'مقصد', requestType: 'نوع درخواست', sessionMode: 'حالت جلسه', venueKey: 'شناسهٔ مکان', topic: 'موضوع', utm: 'کد UTM' } },
+  { s: 'lead-clicks', tabs: [{ b: 'hub', t: 'کلیک‌های تماس' }], key: function (o) { return o.date ? [o.date, o.time || '', o.code || ''].join('|') : ''; },
+    f: { date: ['تاریخ', 0], time: ['ساعت', 'زمان', 1], channel: ['کانال', 2], source: ['منبع', 3], page: ['صفحه', 4], owner: ['مسئول', 5], code: ['کد', 6] } },
+  { s: 'tasks', tabs: [{ b: 'hub', t: 'کارها' }], key: function (o) { return o.code; },
+    f: { code: 'کد', title: 'عنوان', description: 'شرح', team: 'تیم', owner: 'مسئول', ownerChatId: 'chat_id', priority: 'اولویت', due: 'مهلت', status: 'وضعیت', ownerNote: 'یادداشت مسئول',
+         createdBy: 'ایجاد توسط', createdAt: 'تاریخ ایجاد', updatedAt: 'آخرین تغییر', link: 'پیوند', recurrence: 'تکرار' }, fix: function (o) { delete o.code; } },
+  { s: 'therapist-leave', tabs: [{ b: 'hub', t: 'مرخصی درمانگران' }], key: function (o) { return o.therapist && o.from ? o.therapist + '|' + o.from : ''; }, th: 'therapist',
+    f: { therapist: 'درمانگر', from: 'از', to: 'تا', registeredAt: 'ثبت', note: 'یادداشت' } },
+  { s: 'therapist-applications', tabs: [{ b: 'hub', t: 'جذب تراپیست', origin: 'reception' }, { b: 'school', t: 'اپلای تراپیست', origin: 'school' }], key: function (o) { return o.code; },
+    f: { code: 'کد اپلای', name: ['نام', 'نام کامل'], date: 'تاریخ', stage: 'مرحله', nextAction: 'اقدام بعدی', nextActionDate: 'تاریخ اقدام بعدی', owner: 'مسئول پذیرش', phone: 'شمارهٔ تماس', email: 'ایمیل',
+         telegram: ['تلگرام', 'یوزرنیم تلگرام'], chatId: 'chat_id', city: 'شهر', approach: 'رویکرد', yearsOfPractice: 'سال‌های کار', interviewSupervisor: ['سوپروایزر مصاحبه', 'سوپروایزر مصاحبهٔ دوم'],
+         interviewAt: ['زمان مصاحبه', 'زمان مصاحبهٔ دوم'], finalResult: 'نتیجهٔ نهایی', note: 'یادداشت' }, fix: function (o) { delete o.code; } },
+  { s: 'venues', tabs: [{ b: 'hub', t: 'مکان‌های حضوری' }], key: function (o) { return o.id; },
+    f: { id: 'شناسه', city: 'شهر', name: 'نام مکان', kind: 'نوع', owner: 'مسئول', area: 'محله', status: 'وضعیت', order: 'ترتیب', note: 'یادداشت' }, fix: function (o) { delete o.id; } },
+  { s: 'venue-rooms', tabs: [{ b: 'hub', t: 'اتاق‌های حضوری' }], key: function (o) { return o.venueKey && o.room ? o.venueKey + '|' + o.room : ''; },
+    f: { venueKey: 'مکان (شناسه)', room: 'اتاق', purpose: 'برای', openDays: 'روزهای باز', from: 'از ساعت', to: 'تا ساعت', status: 'وضعیت', note: 'یادداشت' } },
+  { s: 'venue-hours', tabs: [{ b: 'hub', t: 'ساعت‌های حضوری' }], th: 'therapist',
+    key: function (o) { return o.venueKey && o.therapist && o.weekday ? [o.venueKey, o.therapist, o.weekday, o.from || ''].join('|') : ''; },
+    f: { venueKey: 'مکان (شناسه)', therapist: 'درمانگر', weekday: 'روز', from: 'از ساعت', to: 'تا ساعت', room: 'اتاق', acceptsNewClients: 'مراجع تازه می‌پذیرد؟', therapistConfirmed: 'تأیید درمانگر', recurrence: 'تکرار', fromDate: 'از تاریخ' } },
+  /* ⛔ بی نام مراجع: ستون پنجم (۴) این تب نام مراجع است و در فهرست نیست */
+  { s: 'venue-occupancy', tabs: [{ b: 'hub', t: 'اشغال هفتگی گاندی' }], th: 'therapist',
+    key: function (o) { return o.weekday && o.room && o.hour ? [o.weekday, o.room, o.hour].join('|') : ''; },
+    f: { weekday: ['روز', 0], room: ['اتاق', 1], hour: ['ساعت', 2], therapist: ['درمانگر', 3], state: ['وضعیت', 5], fromDate: 'از تاریخ' } },
+  { s: 'venue-requests', tabs: [{ b: 'hub', t: 'درخواست‌های حضوری' }], key: function (o) { return o.id; }, th: 'therapist',
+    f: { id: 'شناسه', at: 'زمان', therapist: 'درمانگر', therapistChatId: 'chat', venueKey: 'مکان', kind: 'نوع', weekday: 'روز', from: 'از ساعت', to: 'تا ساعت', room: 'اتاق', date: 'تاریخ', text: 'متن',
+         status: 'وضعیت', receptionAnswer: 'پاسخ پذیرش', answeredAt: 'زمان پاسخ' }, fix: function (o) { delete o.id; } },
+  { s: 'school-courses', tabs: [{ b: 'school', t: 'دوره‌ها' }], key: function (o) { return o.code; },
+    f: { code: ['کد دوره', 0], name: ['نام دوره', 'نام', 1], sitePage: ['صفحهٔ سایت', 'صفحه در سایت', 'صفحه', 2], status: ['وضعیت', 3], description: ['توضیح', 'شرح'], owner: 'مسئول', botKey: ['کلید بات', 7] }, fix: function (o) { delete o.code; } },
+  { s: 'school-circles', tabs: [{ b: 'school', t: 'حلقه‌ها' }], key: function (o) { return o.code; },
+    f: { code: ['کد حلقه', 0], courseCode: ['کد دوره', 'دوره', 1], name: ['نام حلقه', 'نام', 2], status: ['وضعیت', 3], studentCount: ['تعداد دانشجو', 'تعداد'], teacher: 'استاد', note: 'یادداشت' }, fix: function (o) { delete o.code; } },
+  { s: 'school-faculty', tabs: [{ b: 'school', t: 'استادان و سوپروایزرها' }], key: function (o) { return o.chatId || o.name; },
+    f: { name: 'نام', telegramUsername: 'یوزرنیم تلگرام', chatId: 'chat_id', role: 'نقش', field: 'دوره / حوزه', approach: 'رویکرد', acceptsSupervision: 'سوپرویژن می‌پذیرد؟', status: 'وضعیت', phone: 'شمارهٔ تماس',
+         department: 'دپارتمان', displayTitle: 'عنوان نمایشی در سایت', latinName: 'نام لاتین', slug: 'اسلاگ صفحه' } },
+  { s: 'school-leads', tabs: [{ b: 'school', t: 'لیدهای مدرسه' }], key: function (o) { return o.id; },
+    f: { id: 'شناسهٔ درخواست', requestedAt: 'تاریخ درخواست', name: 'نام کامل', telegramUsername: 'یوزرنیم تلگرام', chatId: 'chat_id', requestedRole: 'نقش درخواستی', course: 'دوره', circle: 'حلقه', phone: 'شمارهٔ تماس',
+         email: 'ایمیل', fieldAndUniversity: 'رشته و دانشگاه', applicantNote: 'توضیح متقاضی', status: 'وضعیت', reviewer: 'بررسی‌کننده', decidedAt: 'تاریخ تصمیم', schoolNote: 'یادداشت مدرسه',
+         leadCode: 'کد لید مدرسه', funnelStage: 'مرحلهٔ قیف', owner: 'مسئول پیگیری' }, fix: function (o) { delete o.id; } },
+  { s: 'school-lead-events', tabs: [{ b: 'school', t: 'رویدادهای مدرسه' }], key: function (o) { return o.leadKey ? [o.leadKey, o.row || '', o.at || ''].join('|') : ''; },
+    f: Object.assign({ row: 'سطر' }, CO_SAME), fix: function (o) { delete o.row; } },
+  { s: 'scholarships', tabs: [{ b: 'school', t: 'بورسیه' }], key: function (o) { return o.id; },
+    f: { id: 'شناسه', at: 'زمان', name: 'نام', phone: 'شماره', email: 'ایمیل', chatId: 'chat_id', status: 'وضعیت', fieldAndLevel: 'رشته و مقطع', university: 'دانشگاه', areas: 'زمینه‌های همکاری',
+         languageLevel: 'سطح زبان', source: 'منبع', note: 'یادداشت', amount: ['مبلغ', 'مبلغ بورسیه'] }, fix: function (o) { delete o.id; } },
+  { s: 'alumni', tabs: [{ b: 'school', t: 'دانش‌آموختگان' }], key: function (o) { return o.id; },
+    f: { id: 'شناسه', name: 'نام', latinName: 'نام لاتین', slug: 'اسلاگ صفحه', telegramUsername: 'یوزرنیم تلگرام', chatId: 'chat_id', course: 'دوره', circle: 'حلقه', circleCode: 'کد حلقه',
+         graduationYear: 'سال پایان', hours: 'ساعت گذرانده', status: 'وضعیت', clinicTherapist: 'تراپیست کلینیک؟', mentor: 'منتور؟', city: 'شهر', approach: 'رویکرد', email: 'ایمیل', publishAllowed: 'اجازهٔ انتشار' },
+    fix: function (o) { delete o.id; } }
+];
+function coSec_(s) { for (var i = 0; i < CO_SECTIONS.length; i++) if (CO_SECTIONS[i].s === s) return CO_SECTIONS[i]; return null; }
+function coBase_() { var u = String(cfg_('BRIDGE_CUTOVER_URL', '') || '').trim(); if (/^(off|0|خاموش)$/i.test(u)) return ''; if (!u) return CO_URL_DEF; if (!/^https:\/\/bridge\.tajrobeh\.life\//.test(u)) return ''; return /\/$/.test(u) ? u : u + '/'; }
+/** همهٔ خانه‌های تب به‌صورت نمایش هاب (تاریخ همان‌طور که در هاب است)؛ در آزمون از TG_MEM['co:<b>:<t>'] */
+function coGrid_(b, t) {
+  if (TG_DRY) return TG_MEM['co:' + b + ':' + t] || null;
+  var ss = b === 'school' ? tgSchSS_() : tgSS_(), sh = ss.getSheetByName(t);
+  if (!sh || sh.getLastRow() < 1) return null;
+  return sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn()).getDisplayValues();
+}
+/** ستون هر فیلد: نام سرستون در یکی از سه ردیف اول (ردیفی که بیشترین سرستون آشنا را دارد)، وگرنه جای ثابت. ستون ممنوع هرگز */
+function coCols_(sec, grid) {
+  var best = -1, hr = 0, cols = {};
+  for (var r = 0; r < Math.min(3, grid.length); r++) {
+    var hd = grid[r].map(function (x) { return String(x || '').trim(); }), n = 0, c = {};
+    Object.keys(sec.f).forEach(function (k) {
+      var alts = [].concat(sec.f[k]), j = -1;
+      for (var a = 0; a < alts.length && j < 0; a++) if (typeof alts[a] === 'string') j = hd.indexOf(alts[a]);
+      if (j >= 0) { n++; c[k] = j; }
+    });
+    if (n > best) { best = n; hr = r; cols = c; }
+  }
+  var head = grid[hr] || [];
+  Object.keys(sec.f).forEach(function (k) {
+    if (cols[k] === undefined) { var alts = [].concat(sec.f[k]); for (var a = 0; a < alts.length; a++) if (typeof alts[a] === 'number') { cols[k] = alts[a]; break; } }
+    if (cols[k] !== undefined && CO_DENY.test(String(head[cols[k]] || ''))) delete cols[k];
+  });
+  return { hr: hr, cols: cols, found: best };
+}
+/** شناسه‌های درمانگر از تب درمانگران (کد، v1، chat) برای جورکردن در پل */
+function coTherIds_() {
+  var m = {};
+  try { (TG_DRY ? (TG_MEM['pnl:thers'] || []) : tgTherapistRows_()).forEach(function (t) { m[tgNorm_(t.name)] = { code: String(t.code || ''), v1: brNum_(t.v1), chat: typeof pnlChatOf_ === 'function' ? pnlChatOf_(t) : String(t.chat || '') }; }); } catch (e) {}
+  return m;
+}
+/** ردیف‌های یک بخش؛ ردیف تمام‌خالی نمی‌آید، ردیف بی کلید با key خالی می‌آید تا پل بشمارد و رد کند */
+function coRows_(sec, ther) {
+  var out = [], st = [];
+  sec.tabs.forEach(function (tb) {
+    var g = coGrid_(tb.b, tb.t);
+    if (!g) { st.push({ tab: tb.t, found: false }); return; }
+    var cc = coCols_(sec, g), n = 0;
+    for (var i = cc.hr + 1; i < g.length; i++) {
+      var o = {}, any = false;
+      Object.keys(cc.cols).forEach(function (k) { var v = String(g[i][cc.cols[k]] == null ? '' : g[i][cc.cols[k]]).trim(); if (v) { o[k] = v; any = true; } });
+      if (!any) continue;
+      if (tb.kind) o.kind = tb.kind;
+      if (tb.origin) o.origin = tb.origin;
+      (sec.list || []).forEach(function (k) { if (o[k]) o[k] = o[k].split(/\s*[،,]\s*/).filter(Boolean); });
+      var key = String(sec.key(o) || '').trim();
+      if (sec.fix) sec.fix(o);
+      if (sec.th && o[sec.th] && ther) {
+        var id = ther[tgNorm_(o[sec.th])];
+        if (id) { if (id.code) o.therapistCode = id.code; if (id.v1) o.therapistV1UserId = id.v1; if (id.chat && !o.therapistChatId) o.therapistChatId = id.chat; }
+      }
+      var row = { key: key }; Object.keys(o).forEach(function (k) { row[k] = o[k]; });
+      out.push(row); n++;
+    }
+    st.push({ tab: tb.t, found: true, rows: n, cols: Object.keys(cc.cols).length, of: Object.keys(sec.f).length,
+      missing: Object.keys(sec.f).filter(function (k) { return cc.cols[k] === undefined; }) });
+  });
+  return { rows: out, stat: st };
+}
+/** تکه‌ها: هر تکه زیر سقف نویسه و ردیف؛ complete فقط روی تکهٔ آخر */
+function coChunks_(s, rows) {
+  var parts = [], cur = [], size = 0;
+  rows.forEach(function (r) { var n = JSON.stringify(r).length + 1; if (cur.length && (size + n > CO_CHUNK_CHARS || cur.length >= CO_CHUNK_ROWS)) { parts.push(cur); cur = []; size = 0; } cur.push(r); size += n; });
+  if (cur.length || !parts.length) parts.push(cur);
+  return parts.map(function (p, i) { return JSON.stringify({ section: s, version: 1, chunk: i + 1, chunks: parts.length, complete: i === parts.length - 1, rows: p }); });
+}
+function coPost_(url, s, body, sec, now) {
+  var ts = String(now), hd = { 'Tajrobeh-Timestamp': ts, 'Tajrobeh-Signature': brSign_('legacy-bot-cutover.v1:' + s + ':' + ts + ':' + body, sec) };
+  if (TG_DRY) { (TG_MEM['co:sent'] = TG_MEM['co:sent'] || []).push({ url: url, body: body, h: hd }); var c = TG_MEM['co:code']; return Number(typeof c === 'function' ? c(s) : (c || 200)); }
+  try { return UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: body, headers: hd, muteHttpExceptions: true, followRedirects: false }).getResponseCode(); } catch (e) { return 0; }
+}
+/** از tgTick5: بخش‌های سررسیده را به ترتیب E70 بند ۴ می‌فرستد. وضع در BRC: {بخش: {at, code, try, n}} */
+function coTick_() {
+  var base = coBase_(), sec = brHandoffSecret_();
+  if (!base || !sec) return 'off';
+  var now = Math.floor((TG_DRY && TG_MEM['br:now'] ? Number(TG_MEM['br:now']) : Date.now()) / 1000), t0 = Date.now();
+  var st = {}; try { st = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e) {}
+  var every = (Number(tgLatinDigits_(String(cfg_('BRIDGE_CUTOVER_EVERY_H', '') || ''))) || 24) * 3600;
+  if (st._down && now < st._down) return 'wait';
+  var ther = null, done = [];
+  for (var i = 0; i < CO_SECTIONS.length; i++) {
+    if (!TG_DRY && Date.now() - t0 > CO_BUDGET_MS) break;
+    var S = CO_SECTIONS[i], x = st[S.s] || {};
+    if (x.at && now - x.at < every) continue;
+    if (x.try && now - x.try < 6 * 3600) continue;
+    if (!ther) ther = coTherIds_();
+    var R = coRows_(S, ther), code = 0;
+    if (!R.stat.some(function (t) { return t.found; })) { x.code = 'notab'; x.try = now; st[S.s] = x; done.push(S.s + ' notab'); continue; }   /* تب نیست: تکهٔ کامل خالی نفرست، پل همه را پاک‌شده می‌شمارد */
+    var bodies = coChunks_(S.s, R.rows);
+    for (var j = 0; j < bodies.length; j++) { code = coPost_(base + S.s + '/intake', S.s, bodies[j], sec, now); if (code < 200 || code >= 300) break; }
+    x.n = R.rows.length; x.code = code;
+    if (code >= 200 && code < 300) { x.at = now; delete x.try; } else x.try = now;
+    st[S.s] = x; done.push(S.s + ' ' + code);
+    if (code === 404 || code === 429 || code === 401) { if (code === 404) st._down = now + 6 * 3600; break; }   /* رابط هنوز نیست، نرخ یا امضا: بقیه بماند */
+  }
+  if (done.length && !(st._down && now < st._down)) delete st._down;
+  lgProp_('BRC', JSON.stringify(st));
+  return done.join(' · ') || 'same';
+}
+/** یک‌بارهٔ خودکار v170.123 (E70، فقط‌خواندنی): هر بخش چند ردیف و کدام فیلد سرستونش پیدا نشد. بی دادهٔ شخصی، فقط شمار و نام فیلد */
+function coV170123Stat() {
+  var ther = coTherIds_(), out = [];
+  CO_SECTIONS.forEach(function (S) {
+    var R; try { R = coRows_(S, ther); } catch (e) { out.push(S.s + ': خطا'); return; }
+    var nk = R.rows.filter(function (r) { return !r.key; }).length;
+    out.push(S.s + ': ' + R.rows.length + ' ردیف' + (nk ? ' (' + nk + ' بی کلید)' : '') + ' · ' + R.stat.map(function (t) { return t.found ? t.cols + '/' + t.of + ' ستون' + (t.missing.length ? ' بی: ' + t.missing.join(',') : '') : 'تب نیست'; }).join(' | '));
+  });
+  return out.join('\n');
+}
+
+try { TG_SUITES.push(['خوراک برش هاب برای پل (E70) v170.123', 'coTests']); } catch (eSu2) {}
+function coTests() {
+  var log = [], fail = 0;
+  function ok(n, c, d) { if (c) log.push('✓ ' + n); else { fail++; log.push('✗ ' + n + (d ? ' · ' + d : '')); } }
+  var keep = { dry: TG_DRY, mem: TG_MEM, cfg: TG_CFG_ };
+  TG_DRY = true; TG_MEM = { 'lg:now': String(Date.now()), 'br:now': '1800000000000', 'pnlp:TG_BRIDGE_HANDOFF_SECRET': 'test-only-handoff-secret' };
+  try {
+    TG_CFG_ = {};
+    TG_MEM['pnl:thers'] = [{ name: 'درمانگر نمونه', code: 'T-1', chat: '5001', v1: '77' }];
+    TG_MEM['co:hub:افراد'] = [['نام', 'یوزرنیم تلگرام', 'chat_id', 'نقش‌ها', 'شمارهٔ کارت', 'شناسه'], ['همکار نمونه', 'sample_user', '4001', 'پذیرش، مالی', '6037000000000000', 'P-1'], ['', '', '', '', '', ''], ['بی شناسه', '', '', '', '', '']];
+    TG_MEM['co:hub:اشغال هفتگی گاندی'] = [['اشغال هفتگی', '', '', '', '', ''], ['روز', 'اتاق', 'ساعت', 'درمانگر', 'مراجع', 'وضعیت'], ['شنبه', '۱', '۱۰', 'درمانگر نمونه', 'مراجع نمونه', 'پر']];
+    TG_MEM['co:hub:لیدها'] = [['تاریخ', 'زمان', 'منبع', 'نام', 'کانال', 'شماره / شناسه', 'داخل یا خارج', 'متن اولیه', 'وضعیت', 'مسئول', 'آخرین تماس', 'نتیجه', 'یادداشت', 'درمانگر پیشنهادی ۱', 'درمانگر پیشنهادی ۲', 'کد لید'],
+      ['1405/08/19', '10:00', 'سایت', 'مراجع نمونه', 'تلگرام', '@sample', 'خارج', 'سلام', 'تازه', 'پذیرش', '', '', '', 'درمانگر نمونه', 'درمانگر دوم', 'L-1']];
+    TG_MEM['co:hub:مرخصی درمانگران'] = [['درمانگر', 'از', 'تا', 'ثبت', 'یادداشت', 'شبا'], ['درمانگر نمونه', '1405/09/01', '1405/09/05', 'x', '', 'IR000000000000000000000000']];
+    var P = coRows_(coSec_('people'), coTherIds_()).rows;
+    ok('ردیف خالی نمی‌آید؛ بی کلید با key خالی می‌آید تا پل بشمارد', P.length === 2 && P[0].key === 'P-1' && P[1].key === '' && P[1].name === 'بی شناسه');
+    ok('نقش‌ها فهرست است و ستون کارت هرگز نمی‌رود', P[0].roles.join('|') === 'پذیرش|مالی' && JSON.stringify(P).indexOf('6037') < 0);
+    var O = coRows_(coSec_('venue-occupancy'), coTherIds_()).rows;
+    ok('اشغال: سرستون از ردیف دوم، بی نام مراجع، با کد و chat و v1 درمانگر', O.length === 1 && O[0].key === 'شنبه|۱|۱۰' && O[0].state === 'پر' && JSON.stringify(O).indexOf('مراجع نمونه') < 0 &&
+      O[0].therapistCode === 'T-1' && O[0].therapistChatId === '5001' && O[0].therapistV1UserId === 77);
+    var D = coRows_(coSec_('leads'), coTherIds_()).rows;
+    ok('لید: کلید کد لید، سه درمانگر پیشنهادی در یک فهرست', D.length === 1 && D[0].key === 'L-1' && D[0].suggestedTherapists.join('|') === 'درمانگر نمونه|درمانگر دوم' && D[0].createdTime === '10:00' && D[0].code === undefined && D[0].th1 === undefined);
+    var L = coRows_(coSec_('therapist-leave'), coTherIds_()).rows;
+    ok('مرخصی: کلید درمانگر و از؛ شبا نمی‌رود', L.length === 1 && L[0].key === 'درمانگر نمونه|1405/09/01' && JSON.stringify(L).indexOf('IR000') < 0);
+    ok('هیچ فیلد هیچ بخشی به ستون ممنوع اشاره نمی‌کند', CO_SECTIONS.every(function (S) { return Object.keys(S.f).every(function (k) { return [].concat(S.f[k]).every(function (h) { return typeof h !== 'string' || !CO_DENY.test(h); }); }); }));
+    var big = []; for (var i = 0; i < 7000; i++) big.push({ key: 'k' + i, note: 'x' });
+    var C = coChunks_('lead-events', big).map(function (b) { return JSON.parse(b); });
+    ok('تکه‌ها: ۳ تکه، complete فقط روی آخری، همهٔ ردیف‌ها', C.length === 3 && C[0].chunks === 3 && !C[0].complete && !C[1].complete && C[2].complete && C[0].rows.length + C[1].rows.length + C[2].rows.length === 7000);
+    ok('بخش خالی هم یک تکهٔ کامل می‌فرستد (پل پاک‌شده‌ها را بشمارد)', coChunks_('venues', []).length === 1 && JSON.parse(coChunks_('venues', [])[0]).complete === true);
+    TG_MEM['co:code'] = 200;
+    var r1 = coTick_(), sent = TG_MEM['co:sent'] || [], s0 = sent[0] || {}, ts = s0.h ? s0.h['Tajrobeh-Timestamp'] : '';
+    ok('تیک: بخش‌های دارای تب به ترتیب، نشانی هر بخش جدا، امضای legacy-bot-cutover.v1؛ تب ناپیدا فرستاده نمی‌شود', sent.length === 4 && /venues notab/.test(r1) && /\/bot-cutover\/people\/intake$/.test(s0.url) &&
+      s0.h['Tajrobeh-Signature'] === brSign_('legacy-bot-cutover.v1:people:' + ts + ':' + s0.body, brHandoffSecret_()) && /^v1=[0-9a-f]{64}$/.test(s0.h['Tajrobeh-Signature']), r1);
+    ok('تیک دوم در همان روز چیزی نمی‌فرستد', coTick_() === 'same' && TG_MEM['co:sent'].length === 4);
+    lgProp_('BRC', '{}'); TG_MEM['co:sent'] = []; TG_MEM['co:code'] = 404;
+    var r3 = coTick_();
+    ok('۴۰۴ (رابط پل هنوز نیست): همان بخش اول و ایست ۶ ساعته', TG_MEM['co:sent'].length === 1 && /people 404/.test(r3) && coTick_() === 'wait', r3);
+    lgProp_('BRC', '{}'); TG_MEM['co:sent'] = []; TG_MEM['co:code'] = function (s) { return s === 'leads' ? 500 : 200; };
+    coTick_();
+    var st = JSON.parse(lgProp_('BRC'));
+    ok('۵۰۰ در یک بخش بقیه را نمی‌بندد؛ همان بخش ۶ ساعت بعد دوباره', st.leads.try && !st.leads.at && st.people.at && st['therapist-leave'].at && TG_MEM['co:sent'].length === 4);
+    TG_CFG_ = { BRIDGE_CUTOVER_URL: 'off' };
+    ok('خاموش با off؛ نشانی بیرون از پل پذیرفته نمی‌شود', coTick_() === 'off' && (TG_CFG_ = { BRIDGE_CUTOVER_URL: 'https://evil.example/' }, coTick_() === 'off'));
+    TG_CFG_ = {};
+    ok('یک‌بارهٔ آمار فقط شمار و نام فیلد؛ در فهرست CI', /people: 2 ردیف \(1 بی کلید\)/.test(coV170123Stat()) && coV170123Stat().indexOf('همکار نمونه') < 0 && CI_ONCE_AUTO.indexOf('coV170123Stat') >= 0);
+    ok('در tgTick5 صدا زده می‌شود', String(tgTick5).indexOf('coTick_') > -1);
+  } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
+  TG_DRY = keep.dry; TG_MEM = keep.mem; TG_CFG_ = keep.cfg;
+  Logger.log(log.join('\n') + '\n\n' + (fail ? '❌ ' + fail + ' ایراد' : '✅ خوراک برش درست است'));
+  return tgTestTally_(log, fail);
+}

@@ -2011,6 +2011,7 @@ function tgTick5(e) {
   try { if (!calls && typeof brLeadRetryTick_ === 'function') bgPart_('brLeadRetryTick_', brLeadRetryTick_); } catch (x11) { tgErr_('tgTick5 brLeadRetryTick_', x11); }   /* v170.108 (E40): صف ۴۲۹ لید پل */
   try { if (!calls && typeof lgE48Tick_ === 'function') lgE48Tick_(); } catch (x12) { tgErr_('tgTick5 lgE48Tick_', x12); }
   try { if (!calls && typeof brFeedTick_ === 'function') bgPart_('brFeedTick_', brFeedTick_); } catch (x13) { tgErr_('tgTick5 brFeedTick_', x13); }   /* v170.119 (E64): خوراک مچ در کش و فرستادن به پل */   /* v170.111 (E48): کارت تأیید مالک، یک بار */
+  try { if (!calls && typeof coTick_ === 'function') bgPart_('coTick_', coTick_); } catch (x14) { tgErr_('tgTick5 coTick_', x14); }   /* v170.123 (E70): خوراک برش هاب برای پل، هر بخش روزی یک بار */
   try { if (!calls && typeof wvTick_ === 'function' && (lgProp_('WV1_GO') || !lgProp_('WV1_CARD'))) wvTick_(); } catch (x13) { tgErr_('tgTick5 wvTick_', x13); }   /* v170.112 (E49، E51، E52): موج ۱ پل */
   try { if (typeof cmTick5_ === 'function' && bgOk_('light', 'cmTick5_')) bgPart_('cmTick5_', function () { return run('cmTick5_', cmTick5_); }); } catch (x6) { tgErr_('tgTick5 cmTick5_', x6); }   /* v170.2: کامنت‌های هاب پذیرش، هر ۱۵ دقیقه */
   try { if (typeof lsTick_ === 'function') bgPart_('lsTick_', function () { return run('lsTick_', lsTick_); }); } catch (x8) { tgErr_('tgTick5 lsTick_', x8); }   /* v170.23.12: پاسخ زیر ۱۰ دقیقه و اولویت ۹:۳۰ (leadspeed.gs)؛ v170.23.26: شیت فقط با لید تازه */
