@@ -6048,7 +6048,7 @@ function tgTherapistRows_() {
     const ix = function (name) { return hd.indexOf(name); };
     const cEm = ix('ایمیل'), cTz = ix('منطقهٔ زمانی'), cCt = ix('شهر'), cAb = ix('خارج از ایران می‌بیند؟'),
           cSl = ix('طول جلسهٔ درمان (دقیقه)'), cRt = ix('نرخ جلسه (تومان)'), cSo = ix('نرخ حمایتی می‌پذیرد؟'),
-          cSr = ix('نرخ حمایتی (تومان)'), cSc = ix('ظرفیت حمایتی'), cFw = ix('بازهٔ آزاد جلسهٔ اول');
+          cSr = ix('نرخ حمایتی (تومان)'), cSc = ix('ظرفیت حمایتی'), cFw = ix('بازهٔ آزاد جلسهٔ اول'), cV1 = ix('v1_user_id');   /* v170.122 (E68) */
     const g = function (r, c) { return c > -1 ? String(r[c] || '').trim() : ''; };
     const v = sh.getRange(4, 1, sh.getLastRow() - 3, lc).getValues();
     for (var i = 0; i < v.length; i++) {
@@ -6058,7 +6058,7 @@ function tgTherapistRows_() {
         name: n, row: i + 4,
         email: g(v[i], cEm), tz: g(v[i], cTz), city: g(v[i], cCt), abroad: g(v[i], cAb),
         slen: g(v[i], cSl), rate: g(v[i], cRt), supok: g(v[i], cSo), suprate: g(v[i], cSr),
-        supcap: g(v[i], cSc), firstwin: g(v[i], cFw),
+        supcap: g(v[i], cSc), firstwin: g(v[i], cFw), v1: g(v[i], cV1),
         pool:  String(v[i][TG_C_POOL - 1]  || '').trim(),
         code:  String(v[i][TG_C_CODE - 1]  || '').trim(),
         chat:  String(v[i][TG_C_CHAT - 1]  || '').trim(),

@@ -295,6 +295,7 @@ function brFeedBuild_(now, keep) {
       couples: !!t.cp, abroad: !!(t.ab || r.abroad), inPerson: !!t.ip, style: t.st, tier: t.tr, rate: r.rate == null ? '' : r.rate, timezone: String(r.tz || ''),
       /* v170.120 (E66): rate = ستون «نرخ جلسه (تومان)» هاب، برای یک جلسهٔ درمان فردی به طول sessionMinutes؛ قیمت جدای خارج در بات نیست */
       rateToman: brNum_(r.rate), sessionMinutes: brNum_(r.slen),
+      v1UserId: brNum_(r.v1) || undefined,   /* v170.122 (E68): ستون v1_user_id هاب؛ اگر نیست، فیلد نمی‌آید */
       about: t.ab2, page: t.pg };
   });
   /* v170.115 (E60): وقت‌های درمانگر از همان داده‌ای که tgFreeSlots_ می‌خواند؛ فقط دادهٔ درمانگر، به وقت تهران */
