@@ -479,6 +479,8 @@ function lgTests() {
     ok('E65: بی تنظیم، نشانی پیش‌فرض legacy/bot-slots/intake پل', (TG_CFG_ = {}, brSlotsUrl_() === BR_SLOTS_URL_DEF) && /legacy\/bot-slots\/intake$/.test(BR_SLOTS_URL_DEF));
     ok('E66: نرخ جلسه به تومان و طول جلسه در خوراک (روی کد قبلی مردود)', (TG_MEM['pnl:thers'][0].rate = '۱٬۲۰۰٬۰۰۰', TG_MEM['pnl:thers'][0].slen = '50', brFeedBuild_(1790000000, false).therapists[0].rateToman === 1200000) && brFeedBuild_(1790000000, false).therapists[0].sessionMinutes === 50 &&
       (TG_MEM['pnl:thers'][0].rate = '', brFeedBuild_(1790000000, false).therapists[0].rateToman === null));
+    ok('E68: v1UserId از ستون v1_user_id؛ خالی یعنی فیلد نمی‌آید (روی کد قبلی مردود)', (TG_MEM['pnl:thers'][0].v1 = '۴۲', brFeedBuild_(1790000000, false).therapists[0].v1UserId === 42) &&
+      (TG_MEM['pnl:thers'][0].v1 = '', JSON.stringify(brFeedBuild_(1790000000, false).therapists[0]).indexOf('v1UserId') < 0));
     TG_CFG_ = { BRIDGE_SLOTS_URL: 'https://bridge.tajrobeh.life/api/v2/legacy/bot-slots/intake' };
     var p64 = brFeedTick_(), s64 = TG_MEM['br:slots'][0] || {}, ts64 = s64.h ? s64.h['Tajrobeh-Timestamp'] : '';
     ok('E64: با نشانی، خوراک امضاشده به پل می‌رود؛ بار دوم بی تغییر نه', p64 === 'push 200' && s64.url === TG_CFG_.BRIDGE_SLOTS_URL &&
