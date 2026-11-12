@@ -326,6 +326,14 @@ function brFeedCacheGet_() {
   } catch (e) { return null; }
 }
 /** از tgTick5 (هر ۳۰ دقیقه): خوراک تازه در کش، و فرستادن همان به پل (راه برعکس، E64، E65: POST legacy/bot-slots/intake، امضای legacy-bot-slots.v1) وقتی عوض شده یا روزی یک بار. پل بعد از ورود منبع حقیقت است */
+function brFeedMin_() { var n = Number(cfg_('BR_FEED_MIN', 60)); return n >= 10 && n <= 720 ? n : 60; }
+/* v170.124 (E5): brFeedTick_ بی گارد زمان در هر تیک ۵ دقیقه‌ای می‌رفت (از ۱۶ آبان، حدود ۷۶۰ دقیقه در روز) و سهمیه را می‌خورد؛ tgPrTick_ و بقیهٔ سنگین‌ها رد می‌شدند.
+   حالا فقط هر BR_FEED_MIN دقیقه (پیش‌فرض ۶۰؛ کش ۶ ساعته است)، ۸ تا ۲۳ تهران، و بالای ۷۵ دقیقهٔ مصرف نمی‌رود. پل فقط وقتی داده عوض شده یا روزی یک بار می‌گیرد. */
+function brFeedDue_() {
+  var h = typeof bgHour_ === 'function' ? bgHour_() : 12;
+  if (h < 8 || h > 23) return false;
+  return v16810Due_('BR_FEED_AT', brFeedMin_());
+}
 function brFeedTick_() {
   var now = Math.floor((TG_DRY && TG_MEM['br:now'] ? Number(TG_MEM['br:now']) : Date.now()) / 1000);
   var o = brFeedBuild_(now, true), url = brSlotsUrl_(), sec = brHandoffSecret_();
