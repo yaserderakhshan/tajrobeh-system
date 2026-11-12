@@ -30,6 +30,8 @@
 .tjph-pn.c3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 250px;width:min(820px,calc(100vw - 48px))}
 .tjph-pn.c2{grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:min(560px,calc(100vw - 48px))}
 .tjph-pn.c1{grid-template-columns:minmax(0,1fr);width:240px}
+/* لین A: پنل‌های کوچک زیر سرفصل خودشان باز شوند، نه زیر «خدمات» */
+@media (min-width:1025px){.tjph-g:has(>.tjph-pn.c1),.tjph-g:has(>.tjph-pn.c2){position:relative}.tjph-g>.tjph-pn.c1{width:240px!important;min-width:240px;max-width:none;inset-inline-end:auto}.tjph-g>.tjph-pn.c2{width:min(560px,calc(100vw - 48px))!important;min-width:min(560px,calc(100vw - 48px));max-width:none;inset-inline-end:auto}}
 .tjph-col{display:grid;align-content:start;gap:2px;min-width:0}
 .tjph-h{font-size:12px;line-height:1.8;color:var(--mut);padding:2px 12px 4px;margin:0!important}
 .tjph-col+.tjph-col .tjph-h{margin-top:0}
