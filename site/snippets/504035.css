@@ -473,3 +473,17 @@ html .tj2 .tjp-tbgo{background:var(--tj-red,#c83f49);transition:transform .25s e
 html .tj2 .tjp-tb:hover .tjp-tbgo{transform:translateX(-4px)}
 html .tj2 .tjp-hero h1,html .tj2 .tjp-sec .h2{text-wrap:balance}
 @media (prefers-reduced-motion:reduce){html .tj2 .tjp-tbgo{transition:none}}
+
+/* == tj-nav-a (لین A، ۲۱ آبان ۱۴۰۵) · جعبهٔ «بیشتر بخوانید» پایین همهٔ صفحه‌ها: از فهرست خط‌چینِ چسبیده به فوتر به یک نوار روشن با پیوندهای کپسولی == */
+html body nav.tjnav{margin:clamp(32px,5vw,64px) auto clamp(56px,7vw,104px);padding:20px 24px;border:1px solid var(--tj-line,#dfdfe2);border-radius:22px;background:linear-gradient(135deg,#faeced 0%,#fdf4f4 42%,#fff 100%);display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px 22px}
+html body .wp-block-post-content:has(>.tj2)>nav.tjnav{max-width:min(1132px,calc(100% - 48px))}
+html body nav.tjnav h3{margin:0;font-size:15px;font-weight:700;line-height:1.8;color:#c83f49;white-space:nowrap}
+html body nav.tjnav p,html body nav.tjnav .ch,html body nav.tjnav .grp{grid-column:1/-1}
+html body nav.tjnav .nx{display:flex;flex-wrap:wrap;gap:8px}
+html body nav.tjnav .nx a{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border:1px solid #dfdfe2;border-radius:999px;background:#fff;font-size:15px;line-height:1.8;transition:border-color .2s ease,transform .2s ease}
+html body nav.tjnav .nx a::after{content:"";width:7px;height:7px;border-left:1.6px solid #c83f49;border-bottom:1.6px solid #c83f49;transform:rotate(45deg);flex:none}
+html body .wp-block-post-content:has(>nav.tjnav:last-child){padding-bottom:clamp(44px,6vw,88px)}
+html body nav.tjnav .nx a:hover{border-color:#d9737a;transform:translateY(-2px)}
+html body nav.tjnav .ch a.cur{background:#c83f49}
+@media (max-width:760px){html body nav.tjnav{grid-template-columns:minmax(0,1fr);padding:16px;border-radius:18px;gap:8px}html body nav.tjnav .nx a{font-size:14px;padding:6px 13px}}
+@media (prefers-reduced-motion:reduce){html body nav.tjnav .nx a{transition:none}}
