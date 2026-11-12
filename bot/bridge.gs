@@ -707,7 +707,13 @@ function coSummary_() {
 /** یک‌بارهٔ خودکار v170.125 (فوری A ۱۶:۴۵): یک تیک خوراک را همین‌جا می‌زند و کد پل هر بخش را در خلاصهٔ دیپلوی می‌گذارد */
 function coV170125State() {
   var r; try { r = coTick_(); } catch (e) { r = 'خطا ' + String(e).slice(0, 80); }
-  return 'تیک: ' + r + ' · وضع: ' + coSummary_();
+  return 'تیک: ' + r + ' · وضع: ' + coSummary_() + ' · ' + coSplit_();
+}
+/* آزمون تقسیم (D2): اگر خوراک اسلات و لید عمومی با همان راز ۲۰۰ گرفته‌اند، راز درست است و ایراد در خود خوراک برش است. فقط کد و شمار. */
+function coSplit_() {
+  var h = {}; try { h = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (e) {}
+  var l = {}; try { l = brLeadState_() || {}; } catch (e2) {}
+  return 'اسلات: ' + (h.pushCode === undefined ? 'هنوز نرفته' : h.pushCode) + (h.pushAt ? ' (ok)' : '') + ' · لید عمومی امروز: ok ' + (l.ok || 0) + ' fail ' + (l.fail || 0);
 }
 function coNightLine_() {
   var st = {}; try { st = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e) {}
@@ -783,6 +789,7 @@ function coTests() {
     ok('v170.125: زمان امضا همان لحظهٔ ارسال (ثانیه)، نه آغاز تیک', TG_MEM['co:sent'][0].h['Tajrobeh-Timestamp'] === String(Math.floor(Number(TG_MEM['br:now']) / 1000)));
     lgProp_('BRC', '{}'); TG_MEM['co:sent'] = []; TG_MEM['co:code'] = 200; delete TG_MEM['co:err'];
     var st5 = coV170125State();
+    ok('v170.125: آزمون تقسیم: کد اسلات و شمار لید عمومی در همان یک‌باره', /اسلات: .* · لید عمومی امروز: ok \d+ fail \d+/.test(st5), st5);
     ok('v170.125: یک‌بارهٔ وضع: تیک و وضع بخش‌ها، بی ردیف شخصی؛ در فهرست CI', /^تیک: .*people=200\/2 ok/.test(st5) && st5.indexOf('همکار نمونه') < 0 && CI_ONCE_AUTO.indexOf('coV170125State') > -1 && CI_ONCE_ALLOW.indexOf('coV170125State') > -1, st5);
     ok('v170.125: خط شبانه شمار بخش‌های رسیده', /🔗 خوراک برش به پل: .* از .* بخش/.test(coNightLine_()) && TG_NIGHT_LINES.indexOf(coNightLine_) > -1);
     TG_CFG_ = { BRIDGE_CUTOVER_URL: 'off' };

@@ -110,7 +110,7 @@
 | `magseo.gs` | ۶۱۶ | ۴۴ |
 | `panel.gs` | ۲۰۹ | ۱۹ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
-| `bridge.gs` | ۷۹۸ | ۶۱ |
+| `bridge.gs` | ۸۰۵ | ۶۲ |
 | `login.gs` | ۵۳۲ | ۳۷ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۰۹ | ۳۳ |
