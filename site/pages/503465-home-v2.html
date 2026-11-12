@@ -1710,4 +1710,109 @@ root.addEventListener('click',function(e){var a=e.target.closest('a');if(!a){ret
 ev('home_view',{abroad:abroad?1:0});
 })();
 </script>
+<style id="tj-home-m1">
+/* جست‌وجوی هیرو: کم‌استفاده، برداشته شد (همهٔ اندازه‌ها) */
+html body .tj2.v3 #hero #ask{display:none!important}
+html body .tj2.v3 #hero .m1-login,html body .tj2.v3 #hero .m1-ab,html body .tj2.v3 #faq .m1-more{display:none}
+html body .tj2.v3 #hero h1 em{background:linear-gradient(transparent 62%,#faeced 62%) no-repeat right bottom/0% 100%;animation:m1-mark 1s cubic-bezier(.2,.8,.2,1) .5s both;border-radius:4px}
+@keyframes m1-mark{to{background-size:100% 100%}}
+
+@media (max-width:640px){
+/* ۱) هیرو: در همان صفحهٔ اول، تجربه چیست + دو کار */
+html body .tj2.v3 #hero{padding:18px 0 20px!important;min-height:0!important}
+html body .tj2.v3 #hero>.wrap{display:block!important;padding-inline:20px!important}
+html body .tj2.v3 #hero .art{display:none!important}
+html body .tj2.v3 #hero .copy{text-align:right;max-width:none;display:flex!important;flex-direction:column}
+html body .tj2.v3 #hero .copy>*{order:5}
+html body .tj2.v3 #hero .ring{order:1!important;align-self:flex-start}
+html body .tj2.v3 #hero h1{order:2!important}
+html body .tj2.v3 #hero .lede{order:3!important}
+html body .tj2.v3 #hero .ctas{order:4!important}
+html body .tj2.v3 #hero .ring{font-size:12.5px!important;padding:5px 12px!important;margin:0!important}
+html body .tj2.v3 #hero h1{font-size:26px!important;line-height:1.55!important;margin:14px 0 10px!important;max-width:none!important}
+html body .tj2.v3 #hero .lede{font-size:15px!important;line-height:1.9!important;margin:0 0 18px!important;color:#676768}
+html body .tj2.v3 #hero .lede .m1-long{display:none}
+html body .tj2.v3 #hero .ctas{display:grid!important;grid-template-columns:1.25fr 1fr;gap:10px;margin:0!important}
+html body .tj2.v3 #hero .ctas .btn{height:52px!important;min-height:52px;font-size:16px!important;border-radius:14px!important;width:auto!important;justify-content:center}
+html body .tj2.v3 #hero .ctas .btn-ghost:not(.m1-login){display:none!important}
+html body .tj2.v3 #hero .m1-login{display:flex}
+html body .tj2.v3 #hero .back{display:none!important}
+html body .tj2.v3 #hero .m1-ab{display:block;font-size:13.5px;color:#676768;margin:12px 0 0;text-align:center}
+html body .tj2.v3 #hero .m1-ab a{color:#0e0e0e;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+html body .tj2.v3 #hero .needs{order:6!important;margin:16px -20px 0!important;padding:0 20px 2px!important;display:flex!important;flex-wrap:nowrap!important;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+html body .tj2.v3 #hero .needs::-webkit-scrollbar{display:none}
+html body .tj2.v3 #hero .needs .lbl{flex:none;align-self:center;font-size:12.5px;color:#676768;white-space:nowrap}
+html body .tj2.v3 #hero .needs .need{flex:none;white-space:nowrap;font-size:13.5px!important;padding:8px 13px!important;scroll-snap-align:start}
+/* عددها: یک ردیف پنج‌تایی */
+html body .tj2.v3 #hero .nums{display:grid!important;grid-template-columns:1.35fr 1fr 1fr .8fr .7fr;gap:0;margin:16px 0 0!important;padding:12px 0 0!important;border-top:1px solid #dfdfe2;list-style:none}
+html body .tj2.v3 #hero .nums li{display:block!important;text-align:center;padding:0 2px!important;margin:0!important;border:0!important;min-width:0}
+html body .tj2.v3 #hero .nums li+li{border-inline-start:1px solid #ececef!important}
+html body .tj2.v3 #hero .nums b{display:block;font-size:16px!important;line-height:1.5!important}
+html body .tj2.v3 #hero .nums span{display:block;font-size:10.5px!important;line-height:1.5!important;color:#676768;white-space:normal}
+
+/* ۲) بخش‌ها: فاصلهٔ کمتر، سرفصل جمع‌تر */
+html body .tj2.v3>section:not(#hero):not(#tajrobeh-app){padding-block:30px!important}
+html body .tj2.v3 .center{margin-bottom:16px!important}
+html body .tj2.v3 .center .h2{font-size:22px!important;line-height:1.5!important;margin-top:8px!important}
+html body .tj2.v3 .center .eyebrow{font-size:12.5px!important}
+/* راه خودتان: کارت‌ها کوتاه، خدمات در یک ردیف */
+html body .tj2.v3 #paths .pan-l{font-size:13.5px!important;line-height:1.85!important;margin-bottom:14px!important}
+html body .tj2.v3 #paths .tiles{gap:8px!important}
+html body .tj2.v3 #paths .tile{padding:12px 10px!important;min-height:0!important;display:grid!important;grid-template-columns:38px 1fr;align-items:center;gap:8px;text-align:right!important}
+html body .tj2.v3 #paths .tile img{width:38px!important;height:38px!important;object-fit:contain;margin:0!important}
+html body .tj2.v3 #paths .tile b{font-size:14px!important;line-height:1.5!important;margin:0!important}
+html body .tj2.v3 #paths .tile small{display:none!important}
+html body .tj2.v3 #paths .minis{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;margin:14px -24px 0!important;padding:0 24px 2px!important;gap:8px;justify-content:flex-start!important}
+html body .tj2.v3 #paths .minis::-webkit-scrollbar{display:none}
+html body .tj2.v3 #paths .minis>*{flex:none;white-space:nowrap}
+/* چهار قدم: توضیح بالای بخش کوتاه، قول‌ها در یک ردیف */
+html body .tj2.v3 #how .center .lede{display:none!important}
+html body .tj2.v3 #how .steps{gap:10px!important}
+html body .tj2.v3 #how .promise{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;margin:16px -24px!important;padding:0 24px 2px!important;gap:8px;justify-content:flex-start!important}
+html body .tj2.v3 #how .promise::-webkit-scrollbar{display:none}
+html body .tj2.v3 #how .promise li{flex:none;white-space:nowrap;font-size:13px!important}
+/* اکوسیستم: شش خانهٔ کوتاه */
+html body .tj2.v3 #eco .ix a{flex-direction:row!important;text-align:right!important;align-items:center!important;gap:8px!important;padding:12px 10px!important}
+html body .tj2.v3 #eco .ix img{width:34px!important;height:34px!important;object-fit:contain;flex:none}
+html body .tj2.v3 #eco .ix b{font-size:14px!important;line-height:1.5!important}
+html body .tj2.v3 #eco .ix small{display:none!important}
+/* پرسش‌ها: چهار تا، بقیه با یک دکمه */
+html body .tj2.v3 #faq.m1-cut .faq-list details:nth-of-type(n+5){display:none}
+html body .tj2.v3 #faq .m1-more{display:block;width:100%;margin:10px 0 0;height:46px;border:1px solid #dfdfe2;border-radius:12px;background:#fff;color:#0e0e0e;font:inherit;font-size:14.5px;cursor:pointer}
+html body .tj2.v3 #faq:not(.m1-cut) .m1-more{display:none}
+/* توت‌فرنگی پایانی: جمع‌تر */
+html body .tj2.v3 #berry img{width:72px!important;height:auto!important}
+html body .tj2.v3 #berry .lede{font-size:14px!important;line-height:1.9!important}
+}
+@media (max-width:359px){
+html body .tj2.v3 #hero h1{font-size:22px!important}
+html body .tj2.v3 #hero .ctas{grid-template-columns:1fr}
+html body .tj2.v3 #hero .nums span{font-size:9.5px!important}
+}
+@media (prefers-reduced-motion:reduce){html body .tj2.v3 #hero h1 em{animation:none;background-size:100% 100%}}
+</style>
+
+<script id="tj-home-m1-js">
+(function(){
+ var hero=document.getElementById('hero');if(!hero)return;
+ function el(t,c,x){var e=document.createElement(t);if(c){e.className=c}if(x){e.textContent=x}return e}
+ /* توضیح هیرو: جملهٔ بلند در گوشی پنهان، جملهٔ آخر می‌ماند */
+ var lede=hero.querySelector('.copy .lede');
+ if(lede){if(!lede.querySelector('.m1-long')){var t=lede.textContent;var cut=t.lastIndexOf('. ',t.length-3);if(cut>0){var a=el('span','m1-long',t.slice(0,cut+2));var b=el('span','',t.slice(cut+2));lede.textContent='';lede.appendChild(a);lede.appendChild(b)}}}
+ /* کار دوم: ورود به تجربه */
+ var ctas=hero.querySelector('.ctas');
+ if(ctas){if(!ctas.querySelector('.m1-login')){
+  var lg=el('a','btn btn-ghost m1-login','ورود به تجربه');lg.href='/login';lg.rel='nofollow';ctas.appendChild(lg);
+  var ab=el('p','m1-ab');var al=el('a','','خارج از ایران هستید؟');al.href='/persian-therapy/';ab.appendChild(al);
+  ctas.parentNode.insertBefore(ab,ctas.nextSibling)}}
+ var lbl=hero.querySelector('.needs .lbl');if(lbl){if(window.matchMedia){if(window.matchMedia('(max-width:640px)').matches){lbl.textContent='با چه چیزی درگیرید؟'}}}
+ /* پرسش‌ها: چهار تا در گوشی */
+ var faq=document.getElementById('faq');
+ if(faq){var list=faq.querySelector('.faq-list');if(list){if(list.querySelectorAll('details').length>4){if(!faq.querySelector('.m1-more')){
+  faq.classList.add('m1-cut');var mb=el('button','m1-more','پرسش‌های بیشتر');mb.type='button';
+  mb.addEventListener('click',function(){faq.classList.remove('m1-cut')});
+  list.parentNode.insertBefore(mb,list.nextSibling);
+  if(location.hash){if(location.hash.indexOf('#faq-')===0){faq.classList.remove('m1-cut')}}}}}}
+})();
+</script>
 <!-- /wp:html -->

@@ -586,6 +586,15 @@
   "active": true
  },
  {
+  "id": 511603,
+  "file": "511603.html",
+  "title": "tj-team-m1 · موبایل صفحهٔ تیم و درمانگر (لین F)",
+  "type": "html",
+  "location": "site_wide_footer",
+  "loc": "site_wide_footer",
+  "active": true
+ },
+ {
   "id": null,
   "file": "ga4-visitor-tz.html",
   "title": "Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz، is_abroad) v1",
