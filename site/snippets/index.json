@@ -568,6 +568,24 @@
   "active": true
  },
  {
+  "id": 511579,
+  "file": "511579.php",
+  "title": "G9 · فرم‌های سایت به گیرندهٔ پل (لین A)",
+  "type": "php",
+  "location": "everywhere",
+  "loc": "everywhere",
+  "active": false
+ },
+ {
+  "id": 511580,
+  "file": "511580.php",
+  "title": "G9 · فیلد راز فرم‌ها در تنظیمات عمومی (لین A)",
+  "type": "php",
+  "location": "admin_only",
+  "loc": "admin_only",
+  "active": true
+ },
+ {
   "id": null,
   "file": "ga4-visitor-tz.html",
   "title": "Tajrobeh · منطقهٔ زمانی بازدیدکننده در GA4 (visitor_tz، is_abroad) v1",

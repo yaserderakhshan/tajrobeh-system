@@ -2118,6 +2118,7 @@ function tjm3_schema() {
 /* ---------- خروجی v3 ---------- */
 
 function tj_mag_home_v3() {
+	if ( function_exists( 'tjf_mag9_on' ) && tjf_mag9_on() ) { return tjf_mag_home_v9(); }
 	$h  = '<div class="tjg tjg3" dir="rtl" lang="fa">';
 	$h .= tj_mag_css();
 	$h .= tjm3_css();
@@ -2495,3 +2496,168 @@ function tj_mag_swap_v3( $pre, $block ) {
 	return '<main class="tjg-main">' . tj_mag_home_v3() . '</main>';
 }
 add_filter( 'pre_render_block', 'tj_mag_swap_v3', 11, 2 );
+
+/* ---------- mag9 · بازچینی صفحهٔ اصلی مجله به ۹ بخش (لین F، DECISIONS 34؛ منتشر: لین A، ۲۱ آبان ۱۴۰۵) ---------- */
+if ( ! defined( 'TJ_MAG_V9_LIVE' ) ) { define( 'TJ_MAG_V9_LIVE', true ); }
+
+function tjf_mag9_on() {
+	if ( TJ_MAG_V9_LIVE ) { return true; }
+	return isset( $_GET['tjv9'] ) && current_user_can( 'edit_pages' );
+}
+
+function tjf_pane( $html, $first ) {
+	$html = trim( (string) $html );
+	if ( '' === $html || 0 !== strpos( $html, '<section' ) ) { return ''; }
+	$html = preg_replace_callback( '/^<section\b([^>]*)>/u', function ( $m ) use ( $first ) {
+		$a = $m[1];
+		if ( preg_match( '/\bclass="[^"]*"/u', $a ) ) {
+			$a = preg_replace( '/\bclass="([^"]*)"/u', 'class="$1 tjf-pane"', $a, 1 );
+		} else {
+			$a .= ' class="tjf-pane"';
+		}
+		return '<div' . $a . ' role="tabpanel"' . ( $first ? '' : ' hidden' ) . '>';
+	}, $html, 1 );
+	$p = strrpos( $html, '</section>' );
+	if ( false !== $p ) { $html = substr_replace( $html, '</div>', $p, 10 ); }
+	$html = preg_replace( '/<h2\b/u', '<h3', $html, 1 );
+	$html = preg_replace( '/<\/h2>/u', '</h3>', $html, 1 );
+	return $html;
+}
+
+function tjf_tabs( $title, $eyebrow, $items ) {
+	$panes = '';
+	$btns  = '';
+	$i     = 0;
+	foreach ( $items as $it ) {
+		$p = tjf_pane( $it[1], 0 === $i );
+		if ( '' === $p ) { continue; }
+		$btns  .= '<button type="button" role="tab" data-t="' . $i . '" aria-selected="' . ( 0 === $i ? 'true' : 'false' ) . '">' . esc_html( $it[0] ) . '</button>';
+		$panes .= $p;
+		$i++;
+	}
+	if ( ! $i ) { return ''; }
+	return '<section class="tjf-tabs" aria-label="' . esc_attr( $title ) . '"><div class="tjf-tabs-h"><div><p class="tjg-eyebrow">' . esc_html( $eyebrow ) . '</p><h2>' . esc_html( $title ) . '</h2></div><div class="tjf-tabbar" role="tablist" aria-label="' . esc_attr( $title ) . '">' . $btns . '</div></div>' . $panes . '</section>';
+}
+
+function tjf_room() {
+	$c   = tj_mag_cats();
+	$ids = tj_posts( array( 'cat' => $c['ther'], 'posts_per_page' => 4 ) );
+	$h   = '<section class="tjf-room" aria-label="از اتاق درمان">';
+	$h  .= <<<'TJFH'
+<header class="tjg-sec-h"><div><p class="tjg-eyebrow">به قلم درمانگرهای کلینیک</p><h2 class="tjg-sec-t">از اتاق درمان</h2><p class="tjg-sec-n">این نوشته‌ها را درمانگرهایی نوشته‌اند که خودشان در کلینیک تجربه با مراجع کار می‌کنند. اگر نگاه کسی به دلتان نشست، جلسهٔ معارفه را با خود او شروع کنید.</p></div><a class="tjg-more" href="/team/">همهٔ درمانگرها</a></header>
+TJFH;
+	$h  .= '<div class="tjf-room-row" data-auto="team"></div>';
+	if ( $ids ) {
+		$h .= '<p class="tjf-sub">تازه‌ترین نوشته‌ها از اتاق درمان</p>';
+		$h .= tj_row( $ids, array( 'exc' => true ), 'tjg-g4' );
+	}
+	return $h . '</section>';
+}
+
+function tjf_notes() {
+	$c   = tj_mag_cats();
+	$ids = tj_posts( array( 'cat' => $c['note'], 'posts_per_page' => 4 ) );
+	if ( ! $ids ) { return ''; }
+	$h  = '<section aria-label="دست‌نوشته‌ها">';
+	$h .= tj_head( 'نوشته‌های شخصی', 'دست‌نوشته‌ها', get_category_link( $c['note'] ), 'همهٔ دست‌نوشته‌ها' );
+	$h .= tj_row( $ids, array( 'exc' => true ), 'tjg-g4' );
+	return $h . '</section>';
+}
+
+function tjf_mag9_css() {
+	return <<<'TJFC'
+<style id="tjf-mag9-css">
+/* == tj-mag9-f M2 (لین F) · بازچینی صفحهٔ اصلی مجله به ۹ بخش (DECISIONS 34) == */
+/* بخش تازه «از اتاق درمان»: درمانگرهای نویسنده */
+.tjf-room-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-block-end:26px}
+.tjf-wr{display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid var(--tj-line,#dfdfe2);border-radius:18px;padding:14px;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.tjf-wr:hover{transform:translateY(-3px);border-color:var(--tj-red-400,#d9737a);box-shadow:0 20px 36px -30px rgba(200,63,73,.5)}
+.tjf-wr-top{display:flex;align-items:center;gap:12px;min-width:0;text-decoration:none}
+.tjf-wr-ph{flex:none;width:54px;height:66px;border-radius:30px 30px 10px 10px;overflow:hidden;background:var(--tj-tint,#faeced);transition:transform .45s cubic-bezier(.2,.8,.3,1.2)}
+.tjf-wr:hover .tjf-wr-ph{transform:translateY(-3px)}
+.tjf-wr-ph img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block}
+.tjf-wr-tx{min-width:0;display:flex;flex-direction:column}
+.tjf-wr-tx b{font-size:15px;line-height:1.6;color:var(--tj-ink,#0e0e0e);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tjf-wr-tx small{font-size:12px;line-height:1.7;color:var(--tj-soft,#4e4e4e);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tjf-wr-tx em{font-style:normal;font-size:11.5px;color:var(--tj-red,#c83f49);line-height:1.8}
+.tjf-wr-act{display:flex;gap:6px;margin-top:auto}
+.tjf-wr-act a{flex:1;text-align:center;font-size:12.5px;line-height:1.6;padding:7px 8px;border-radius:10px;border:1px solid var(--tj-line,#dfdfe2);color:var(--tj-ink,#0e0e0e);text-decoration:none;background:#fff;transition:.18s}
+.tjf-wr-act a:hover{border-color:var(--tj-red-400,#d9737a);transform:translateY(-1px)}
+.tjf-wr-act a.go{background:var(--tj-red,#c83f49);border-color:var(--tj-red,#c83f49);color:#fff}
+.tjf-wr-act a.go:hover{background:#b63942;color:#fff}
+.tjf-room .tjf-sub{font-size:13px;font-weight:700;color:var(--tj-mut,#676768);margin:0 0 12px}
+/* زبانه‌ها: بخش‌های هم‌خانواده زیر یک سقف؛ همهٔ محتوا در صفحه می‌ماند */
+.tjf-tabbar{display:flex;gap:6px;flex-wrap:wrap;margin-block:8px 18px;padding:5px;border:1px solid var(--tj-line,#dfdfe2);border-radius:999px;width:max-content;max-width:100%;background:#fff}
+.tjf-tabbar button{font:inherit;font-size:14px;line-height:1.6;padding:7px 18px;border-radius:999px;border:0;background:transparent;color:var(--tj-soft,#4e4e4e);cursor:pointer;transition:.18s}
+.tjf-tabbar button[aria-selected="true"]{background:var(--tj-red,#c83f49);color:#fff}
+.tjf-tabs>.tjf-pane[hidden]{display:none}
+.tjf-tabs>.tjf-pane{animation:tjfIn .35s ease both}
+@keyframes tjfIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tjf-tabs-h{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.tjf-tabs-h h2{margin:0;font-size:clamp(22px,2.6vw,28px);color:var(--tj-ink,#0e0e0e)}
+@media (max-width:900px){.tjf-room-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){
+ .tjf-room-row{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:72%;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-16px;padding-inline:16px;padding-bottom:6px;scrollbar-width:none}
+ .tjf-room-row::-webkit-scrollbar{display:none}
+ .tjf-wr{scroll-snap-align:center}
+ .tjf-tabbar{width:100%;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+ .tjf-tabbar button{flex:none}
+}
+@media (prefers-reduced-motion:reduce){.tjf-wr,.tjf-wr-ph,.tjf-tabs>.tjf-pane{transition:none;animation:none}}
+/* تیتر و برچسب درونی هر زبانه برداشته شد؛ نام زبانه همان تیتر است (فقط توضیح و دکمهٔ «همه» می‌ماند) */
+.tjf-tabs>.tjf-pane .tjg-sec-h .tjg-eyebrow,.tjf-tabs>.tjf-pane .tjg-sec-h .tjg-sec-t,.tjf-tabs>.tjf-pane>header .tjg-eyebrow,.tjf-tabs>.tjf-pane>header h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tjf-tabs>.tjf-pane .tjg-sec-h{margin-block-start:0}
+</style>
+TJFC;
+}
+
+function tjf_mag9_js() {
+	return <<<'TJFJ'
+<script id="tjf-mag9-js">
+(function(){var sec=document.querySelector('.tjf-room');if(!sec)return;var row=sec.querySelector('.tjf-room-row');if(!row)return;
+function norm(x){return (x||'').replace(/^\s*دکتر\s+/,'').replace(/[‌\s]+/g,' ').replace(/ي/g,'ی').replace(/ك/g,'ک').trim()}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+var chips=[].slice.call(document.querySelectorAll('.tjg-authors a.tjg-au')).map(function(a){var s=a.querySelectorAll('span');return{n:norm(s[1]?s[1].textContent:''),c:(s[2]?s[2].textContent:'').trim()}});
+fetch(window.TJF_TEAM_SRC||'/team/',{credentials:'omit'}).then(function(r){return r.text()}).then(function(h){
+ var d=new DOMParser().parseFromString(h,'text/html'),T={};
+ d.querySelectorAll('.tjt-card').forEach(function(c){var b=c.querySelector('b'),im=c.querySelector('.av img'),sm=c.querySelector('small');if(!b||!im)return;T[norm(b.textContent)]={h:c.getAttribute('href'),n:b.textContent.trim(),i:im.getAttribute('src'),a:sm?sm.textContent.trim():''}});
+ var n=0;chips.forEach(function(x){var t=T[x.n];if(!t||n>=8)return;n++;
+  var art=el('article','tjf-wr'),top=el('a','tjf-wr-top');top.href=t.h;
+  var ph=el('span','tjf-wr-ph'),im=el('img');im.src=t.i;im.alt=t.n;im.width=108;im.height=132;im.loading='lazy';im.decoding='async';ph.appendChild(im);
+  var tx=el('span','tjf-wr-tx');tx.appendChild(el('b','',t.n));if(t.a)tx.appendChild(el('small','',t.a));tx.appendChild(el('em','',x.c+' نوشته در مجله'));
+  top.appendChild(ph);top.appendChild(tx);
+  var act=el('div','tjf-wr-act'),w=el('a','','نوشته‌ها'),g=el('a','go','جلسهٔ معارفه');w.href=t.h+'#writing';g.href=t.h+'?utm_source=mag&utm_medium=room#book';act.appendChild(w);act.appendChild(g);
+  art.appendChild(top);art.appendChild(act);row.appendChild(art)});
+ if(!n)row.remove()}).catch(function(){row.remove()})})();
+document.querySelectorAll('.tjf-tabs').forEach(function(w){var b=w.querySelectorAll('.tjf-tabbar button'),p=w.querySelectorAll(':scope>.tjf-pane');b.forEach(function(x,i){x.addEventListener('click',function(){b.forEach(function(y,j){y.setAttribute('aria-selected',j===i?'true':'false');p[j].hidden=j!==i})})})});
+</script>
+TJFJ;
+}
+
+function tjf_mag_home_v9() {
+	$h  = '<div class="tjg tjg3" dir="rtl" lang="fa">';
+	$h .= tj_mag_css();
+	$h .= tjm3_css();
+	$h .= tjf_mag9_css();
+	$h .= tjm3_masthead();
+	$h .= tjm3_cover();
+	$h .= tjm3_needs_sec();
+	$h .= tjf_room();
+	$h .= tjm3_issue();
+	$h .= tjm3_hook();
+	$h .= tjm3_calendar();
+	$h .= tjm3_student();
+	$h .= tjf_tabs( 'فرهنگ روی کاناپه', 'فیلم و کتاب', array( array( 'سینما', tj_sec_cinema() ), array( 'قفسهٔ کتاب', tj_sec_shelf() ) ) );
+	$h .= tjf_tabs( 'یاد بگیرید', 'برای فهمیدن زبان روانکاوی', array( array( 'اطلس مفاهیم', tjm3_atlas_sec() ), array( 'مسیرهای مطالعه', tj_sec_paths() ), array( 'خط زمان چهره‌ها', tj_sec_century() ) ) );
+	$h .= tjf_notes();
+	$h .= tj_sec_authors();
+	$h .= tj_sec_archive();
+	$h .= tjm3_foot();
+	$h .= tjm3_schema();
+	$h .= tj_mag_js();
+	$h .= tjm3_js();
+	$h .= tjf_mag9_js();
+	$h .= '</div>';
+	return $h;
+}
+

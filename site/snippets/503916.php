@@ -48,8 +48,13 @@ add_filter( 'language_attributes', function ( $output ) {
 	if ( false === $lang || 0 === strpos( $lang, 'fa' ) ) {
 		return $output;
 	}
-	return preg_replace( '/lang="[^"]*"/', 'lang="' . esc_attr( $lang ) . '"', $output );
+	$output = preg_replace( '/lang="[^"]*"/', 'lang="' . esc_attr( $lang ) . '"', $output );
+	/* F9.4 (۲۱ آبان ۱۴۰۵): برگه‌های en و de چپ‌به‌راست؛ هدر و فوتر فارسی راست‌به‌چپ می‌مانند (CSS پایین) */
+	return preg_replace( '/dir="[^"]*"/', 'dir="ltr"', $output );
 } );
+add_action( 'wp_head', function () {
+	echo '<style id="tj-ltr-fa-chrome">html[dir="ltr"] #tjph,html[dir="ltr"] .wp-site-blocks>header,html[dir="ltr"] .wp-site-blocks>footer,html[dir="ltr"] footer{direction:rtl}</style>' . "\n";
+}, 99 );
 
 /* زبان برگه برای بقیهٔ اسنیپت‌ها (۲۸ مهر ۱۴۰۵): برگه‌ای که در خوشه نیست یا fa-* است، fa برمی‌گرداند؛ وگرنه en یا de. ویجت‌ها و نوار پیشنهاد از همین می‌خوانند. */
 if ( ! function_exists( 'tajrobeh_page_lang' ) ) {

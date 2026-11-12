@@ -669,3 +669,118 @@ html body .tj2 .axes>*,html body .tj2 .ctx-grid>*{scroll-snap-align:center;min-w
 .tjk-svc:hover{border-color:var(--tj-red-400,#d3656d);transform:translateY(-2px)}
 .tjk-svc:hover img{transform:rotate(-5deg) scale(1.06)}
 @media (prefers-reduced-motion:reduce){.tjk-row,.tjk-card,.tjk-card-ph,.tjk-svc,.tjk-svc img{transition:none}}
+
+/* == tj-audit-d2-a (لین A، ۲۱ آبان ۱۴۰۵، از F11 fix-site-d2) == */
+
+/* AUDIT-D2 · دور دوم بازبینی تمام‌قد (با تصویر) · جا: اسنیپت CSS سراسری ۵۰۴۰۳۵ */
+/* رودمپ‌ها: دکمهٔ مشکی «همراه می‌شوم، در تلگرام» */
+html body .tjk-join a.go{background:var(--tj-red,#c83f49)!important;color:#fff!important;border-color:var(--tj-red,#c83f49)!important}
+html body .tjk-join a.go:hover{background:var(--tj-red-600,#b63942)!important;transform:translateY(-1px)}
+/* کلینیک تهران و پارتنرها: حالت انتخاب‌شدهٔ مشکی، قرمز برند (تصمیم ۳۳) */
+html body .gx-chips button[aria-selected=true]{background:var(--tj-red,#c83f49)!important;border-color:var(--tj-red,#c83f49)!important;color:#fff!important}
+html body .hx-pick button[aria-selected=true]{background:var(--tj-red,#c83f49)!important;color:#fff!important}
+html body .hx-pick button[aria-selected=true] small{color:#fbe3e5!important}
+/* تست‌ها: پنج کارت در دسکتاپ زیر هم و باریک بود؛ سه ستون */
+@media (min-width:900px){
+body.page-id-503918 .tj2 section.eco .eco-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:none!important;gap:16px!important}
+}
+/* صفحه‌های رویکرد روی گوشی: تصویر بالای صفحه کوتاه‌تر تا متن زودتر دیده شود */
+@media (max-width:640px){
+.tj-ap .tjx-hero{margin:14px 0 18px!important}
+.tj-ap .tjx-hero img{max-block-size:230px!important}
+}
+/* دکمهٔ شناور، حالت باز: دایره‌های مشکی و خاکستری تیرهٔ «سؤال دارم»، «تماس» و «ورود» */
+#tjFabRoot .tj-fab-item-icon--ask,#tjFabRoot .tj-fab-item-icon--tel,#tjFabRoot .tj-fab-item-icon--login{background:var(--tj-tint,#faeced)!important;color:var(--tj-red,#c83f49)!important}
+
+/* == tj-fix-hover-a (لین A، ۲۱ آبان ۱۴۰۵، از F11 fix-hover) == */
+
+.tj2 .tjp-has:hover b{color:rgb(14, 14, 14)!important}
+.tj2 .btn-ghost:hover{color:rgb(34, 34, 34)!important}
+.tj2 .arrows button:hover{color:rgb(14, 14, 14)!important}
+.tjl .faq summary:hover{color:rgb(14, 14, 14)!important}
+.tj-crumb a:hover{color:rgb(103, 103, 104)!important}
+.tjx-card li a:hover{color:rgb(34, 34, 34)!important}
+.tjl-page .btn-ghost:hover{color:rgb(34, 34, 34)!important}
+.tj2 .social a:hover{color:rgb(34, 34, 34)!important}
+.tj2b .ev-card a:hover{color:rgb(103, 103, 104)!important}
+.tj2b .contact a:hover{color:rgb(14, 14, 14)!important}
+.tjnav .nx a:hover{color:rgb(14, 14, 14)!important}
+.tj2.v3 .minis a:hover{color:rgb(78, 78, 78)!important}
+.tj2 .svc-row:hover b{color:rgb(14, 14, 14)!important}
+.tj2 .svc-row:hover svg{color:rgb(223, 223, 226)!important}
+.tj2 .chip:hover{color:rgb(78, 78, 78)!important}
+.tj-art-au a:hover{color:rgb(14, 14, 14)!important}
+.tj-art-share a:hover{color:rgb(103, 103, 104)!important}
+.tj-art-share button:hover{color:rgb(103, 103, 104)!important}
+.tj-art-tags a:hover{color:rgb(103, 103, 104)!important}
+.tj-next h3 a:hover{color:rgb(14, 14, 14)!important}
+.tjbot-line a:hover{color:rgb(142, 45, 52)!important}
+p.tjbot-line a:hover{color:rgb(142, 45, 52)!important}
+.tjx-cl li a:hover{color:rgb(78, 78, 78)!important}
+.tj2 .crumbs a:hover{color:rgb(103, 103, 104)!important}
+.tj2 .tjk-dr .cls:hover{color:rgb(78, 78, 78)!important}
+.tj2 .tjk-lab:hover b{color:rgb(14, 14, 14)!important}
+.tj2 .tjq-opts button:hover{color:rgb(78, 78, 78)!important}
+.tjh .dd a:hover{color:rgb(34, 34, 34)!important}
+.tj2 .crs-card h3 a:hover{color:rgb(14, 14, 14)!important}
+.tj2 .crs-card:hover .go2{color:rgb(14, 14, 14)!important}
+.tj2 .go2:hover{color:rgb(14, 14, 14)!important}
+.tj2 .lq-crumbs a:hover{color:rgb(103, 103, 104)!important}
+.tj2 .tjt-card:hover b{color:rgb(14, 14, 14)!important}
+.tj2 .tjp-crumb a:hover{color:rgb(103, 103, 104)!important}
+.tj2.v3 .need:hover{color:rgb(78, 78, 78)!important}
+.tj2.v3 .v3h .need:hover{color:rgb(78, 78, 78)!important}
+.tj2.v3 #paths .minis a:hover{color:rgb(78, 78, 78)!important}
+.tj2.v3 #faq summary:hover{color:rgb(14, 14, 14)!important}
+
+
+/* == tj-fix-f11a (لین A، ۲۱ آبان ۱۴۰۵، از F11) == */
+
+/* ۱) اشاره متن را قرمز نکند؛ رنگ همان رنگ عادی عنصر است */
+html body nav.tjnav .nx a:hover{color:#0e0e0e!important}
+html body .tj2 .cc:hover .go{color:#0e0e0e!important}
+html body .tj2 .crumb a:hover{color:#676768!important}
+html body .tj2 .jx-crumb a:hover{color:#676768!important}
+html body .tj2 .depro-h h3 a:hover{color:#0e0e0e!important}
+html body .tj2 .mini .acts a:hover{color:#4e4e4e!important}
+html body .tj2 .mnav .nb button:hover{color:#0e0e0e!important}
+html body .tj2 .wk-nav button:hover{color:#0e0e0e!important}
+html body .tj2 .pp:hover b{color:#0e0e0e!important}
+html body .tj2 .toc-list a:hover b{color:#0e0e0e!important}
+/* بازخورد اشاره به‌جای رنگ: خط زیر برای پیوند متنی */
+html body .tj2 .crumb a:hover,html body .tj2 .jx-crumb a:hover,html body .tj2 .depro-h h3 a:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+/* ۲) حالت انتخاب‌شده و دکمهٔ پُر هنگام اشاره همان رنگ خودش بماند */
+html body .tj2 .chip[aria-pressed="true"]:hover{color:#fff!important}
+html body .tj2 .chip.on:hover{color:#c83f49!important}
+html body .tj2 .mini .acts a.p:hover{color:#fff!important}
+/* ۳) لبهٔ بریدهٔ تصویر هیرو (خدمات ۲۸۸، سکس‌تراپی ۳۰۴): محو نرم لبهٔ راست و پایین */
+body:is(.page-id-288,.page-id-304) .tj2 .hero .art img{-webkit-mask-image:linear-gradient(to right,#000 72%,transparent 99%),linear-gradient(to bottom,#000 86%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,#000 72%,transparent 99%),linear-gradient(to bottom,#000 86%,transparent 100%);mask-composite:intersect}
+
+
+/* == tj-fix-f11b (لین A، ۲۱ آبان ۱۴۰۵، از F11) == */
+
+/* ۱) سطح مشکی نه؛ انتخاب‌شده قرمز برند */
+html body #ebi .sib a[aria-current]{background:#c83f49!important;border-color:#c83f49!important;color:#fff!important}
+html body .tj2 .tjk-dk .veil b{background:#c83f49!important;color:#fff!important}
+html body .tj2 .tjk-wel .pic .bub{background:#c83f49!important;color:#fff!important}
+html body .yd .pbtn{background:#c83f49!important;color:#fff!important}
+html body .yd .pbtn:hover{background:#b63942!important;transform:scale(1.06)}
+/* ۲) اشاره متن را قرمز نکند؛ رنگ همان رنگ عادی عنصر است */
+html body .tj-hub li a:hover{color:#222!important}
+html body .tj2 .hlk:hover{color:#4e4e4e!important}
+html body .tj2 a.pp:hover,html body .tj2 a.pp:hover b{color:#0e0e0e!important}
+html body .tj2 .rcard li a:hover{color:#0e0e0e!important}
+html body .tj2 .srcs li a:hover{color:#0e0e0e!important}
+html body .tj2 .tjk-when button:hover{color:#4e4e4e!important}
+html body .tjm-card h3 a:hover{color:#0e0e0e!important}
+html body .tjm-chips a:hover{color:#676768!important}
+html body .tjm-pag a:hover{color:#0e0e0e!important}
+html body .tjx-cl li a:hover{color:#4e4e4e!important}
+html body .yd .arrows button:hover{color:#0e0e0e!important}
+html body .yd .btn-ghost:hover{color:#222!important}
+html body .yd .chip:hover{color:#676768!important}
+html body .yd .wrow:hover b{color:#0e0e0e!important}
+html body .yd .wrow:hover svg{color:#dfdfe2!important}
+/* بازخورد اشاره به‌جای رنگ */
+html body .tj-hub li a:hover,html body .tj2 .hlk:hover,html body .tj2 .rcard li a:hover,html body .tj2 .srcs li a:hover,html body .tjm-card h3 a:hover,html body .tjx-cl li a:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+
