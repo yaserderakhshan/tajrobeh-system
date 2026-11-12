@@ -358,7 +358,7 @@ function lgTests() {
     ok('E40: بدنه فقط fullName، mobile، telegramUsername، message، source=Bot، homepage خالی (روی کد قبلی مردود)',
       Object.keys(b0).sort().join() === 'fullName,homepage,message,mobile,source,telegramUsername' && b0.source === 'Bot' && b0.homepage === '' &&
       b0.fullName === 'مراجع آزمون' && b0.mobile === '09000000000' && b0.telegramUsername === 'test_user9' && b0.message === 'سلام', L0().body);
-    ok('E55: سرآیند Tajrobeh-Signature = v1=HMAC(«reception-public-lead.v1:<ts>:<بدنه>»)', L0().h['Tajrobeh-Signature'] === 'v1=' + brHex_(Utilities.computeHmacSha256Signature('reception-public-lead.v1:' + L0().h['Tajrobeh-Timestamp'] + ':' + L0().body, 'test-only-handoff-secret-0123456789')) && !L0().h['X-Tajrobeh-Signature']);
+    ok('E55: سرآیند Tajrobeh-Signature = v1=HMAC(«reception-public-lead.v1:<ts>:<بدنه>»)', L0().h['Tajrobeh-Signature'] === 'v1=' + brHex_(Utilities.computeHmacSha256Signature('reception-public-lead.v1:' + L0().h['Tajrobeh-Timestamp'] + ':' + L0().body, 'test-only-handoff-secret-0123456789', Utilities.Charset.UTF_8)) && !L0().h['X-Tajrobeh-Signature']);   /* v170.126: بدنهٔ فارسی؛ امضا UTF-8 (E17) */
     var long = brLeadBody_({ name: '', firstText: new Array(700).join('ا'), note: '' }, 'L-1', '1');
     ok('message حداکثر ۵۰۰ و نام خالی پر می‌شود', long.message.length === 500 && long.message.indexOf('[L-1] ') === 0 && !!long.fullName);
     ok('بی موبایل و یوزرنیم به پل نمی‌رود (۴۰۰ می‌شد)', brLeadPush_({ name: 'x', note: 'chat_id: 5' }, 0) === 'skip' && TG_MEM['br:leads'].length === 1);
