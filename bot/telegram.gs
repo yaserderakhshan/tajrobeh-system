@@ -13220,7 +13220,7 @@ function tgSchoolTests() {
     TG_DRY = true; TG_MEM = {};
     try {
       TG_MEM['sch' + TG_SCH_T_CIRCLE] = [['CLIN-۱۵/۱', 'CLIN', 'a', 'فعال', 1, 'n', 'cal-151', '', '', '', ''], ['CLIN-۱۵/۲', 'CLIN', 'b', 'فعال', 1, 'n', 'cal-152', '', '', '', ''],
-        ['CLIN-۱۳', 'CLIN', 'c', 'فعال', 1, 'n', 'cal-13', '', '', '', ''], ['CLIN-۸', 'CLIN', 'd', 'بایگانی', 1, 'n', 'cal-89', '', '', '', ''],
+        ['CLIN-۱۳', 'CLIN', 'c', 'فعال', 1, 'n', 'cal-13', '', '', '', ''], ['CLIN-۱۴', 'CLIN', 'c2', 'فعال', 1, 'n', 'cal-14', '', '', '', ''], ['CLIN-۸', 'CLIN', 'd', 'بایگانی', 1, 'n', 'cal-89', '', '', '', ''],
         ['MODERN-۱', 'MODERN', 'e', 'فعال', 1, 'n', 'cal-gen', '', '', '', ''], ['EFT-۱', 'EFT', 'f', 'فعال', 1, 'n', 'cal-eft', '', '', '', '']];
       var D = Date.UTC(2026, 10, 15, 6, 0);
       TG_MEM['cal:cal-gen'] = [{ start: new Date(D), title: 'حلقه ۱۵/۱ · کیس' }, { start: new Date(D + 1e6), title: 'حلقه ۱۵/۲ · کیس' }, { start: new Date(D + 2e6), title: 'حلقه ۱۳/۱۴ · متن' },
