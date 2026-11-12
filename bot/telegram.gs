@@ -15865,6 +15865,31 @@ var TG_PR_PAGE = ['title', 'degree', 'since', 'langs', 'ages', 'mode', 'focus', 
                   'teach', 'supaccept', 'articles', 'links', 'approach'];
 function tgPrUrl_(u) { try { return decodeURI(String(u)).replace(/^https?:\/\//, ''); } catch (e) { return String(u); } }
 
+/* v170.127 (E20): نشانی اتاق جلسهٔ آنلاین (Meet، Zoom، اسکای‌روم، Whereby) در «لینک‌ها»ی صفحهٔ تیم نمی‌رود؛ خط یا تکه‌ای که چنین نشانی دارد برداشته می‌شود */
+var TG_PR_MEET_RX = /(?:^|[\s\/.@(])(?:meet\.google\.com|(?:[\w-]+\.)?zoom\.(?:us|com)|(?:www\.)?skyroom\.(?:online|ir)|(?:[\w-]+\.)?whereby\.com)(?:[\/\s?#)]|$)/i;
+function tgPrLinksClean_(s) {
+  s = String(s || '');
+  if (!TG_PR_MEET_RX.test(' ' + s)) return s.trim();
+  return s.split(/\r?\n/).map(function (ln) {
+    if (!TG_PR_MEET_RX.test(' ' + ln)) return ln;
+    return ln.split(/\s*[،,]\s*/).filter(function (x) { return x.trim() && !TG_PR_MEET_RX.test(' ' + x); }).join('، ');
+  }).filter(function (ln) { return ln.trim(); }).join('\n').trim();
+}
+/** یک‌بارهٔ خودکار v170.127 (E20): صفحهٔ تیم هر پروفایل منتشرشده‌ای که در «لینک‌ها» نشانی اتاق جلسه دارد، به‌علاوهٔ ردیف ۱۰۱ «پروفایل سایت»
+ *  (خانه‌اش ۱۶:۵۰ پاک شد ولی سایت فقط با انتشار دوباره عوض می‌شود)، از همان مسیر عادی انتشار دوباره می‌رود. بی پیام به کسی؛ خروجی فقط شمار. */
+var TG_PR_E20_ROW = 101;
+function prV170127Links() {
+  var rows = tgPrAll_().filter(function (r) {
+    var v = r.v; if (!/\/team\//.test(String(v.page || ''))) return false;
+    return r.row === TG_PR_E20_ROW || TG_PR_MEET_RX.test(' ' + String(v.links || '') + ' ' + String(v.pub_links || ''));
+  });
+  var okN = 0, bad = [];
+  rows.forEach(function (r) {
+    var x; try { x = tgPrPublish_(TG_OWNER_CHAT, r, { quiet: true, auto: true, who: 'v170.127' }); } catch (e) { x = { ok: false, pageErr: String(e).slice(0, 40) }; }
+    if (x && x.ok) okN++; else bad.push(r.row + ':' + String((x && (x.pageErr || (x.errs || []).length)) || '?').slice(0, 30));
+  });
+  return 'صفحهٔ دوباره ' + rows.length + ' · موفق ' + okN + (bad.length ? ' · شکست ' + bad.join('، ') : '') + ' · ردیف ' + TG_PR_E20_ROW + ' در فهرست: ' + (rows.some(function (r) { return r.row === TG_PR_E20_ROW; }) ? 'بله' : 'نه');
+}
 /* متن ویرایش‌شدهٔ تیم (pub_*) اگر باشد، وگرنه پاسخ خودش؛ عکس و ویس فقط وقتی عوض شده باشند می‌روند */
 function tgPrPage_(p, b64) {
   var v = p.v;
@@ -15872,6 +15897,7 @@ function tgPrPage_(p, b64) {
             alum: p.school ? 'مدرسهٔ تجربه' : '' };
   TG_PR_PAGE.forEach(function (k) { o[k] = String(v['pub_' + k] || '').trim() || String(v[k] || '').trim(); });
   o.ages = p.ages || o.ages;
+  o.links = tgPrLinksClean_(o.links);   /* v170.127 (E20): نشانی اتاق جلسه هرگز روی صفحهٔ عمومی */
   (p.omit || []).forEach(function (k) { if (k in o && (TG_PR_PAGE.indexOf(k) > -1 || k === 'city')) delete o[k]; });   /* v170.56: فیلد ردشده فرستاده نمی‌شود؛ سایت نسخهٔ قبلی را نگه می‌دارد */
   o.extra = String(v.pub_extra || '').split(/\s*[،,]\s*/).filter(String);
   o.resume = p.extraOk ? String(v.pub_resume || '').trim() : '';   /* v170.23.6: رزومهٔ کامل و ویس فقط با اجازهٔ جدا */
