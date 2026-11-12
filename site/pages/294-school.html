@@ -893,6 +893,47 @@ main.tj-page{margin-block-start:0}
 .tj2 .agenda-sec .stat-line b{color:var(--tj-ink);font-size:15px;margin-inline-end:3px}
 @media (max-width:760px){.tj2 .ftabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-2px;padding-bottom:2px}.tj2 .ftabs [role=tab]{flex:none;white-space:nowrap}.tj2 .hero.sch3 .art img{max-height:180px;max-width:130px}}
 </style>
+<style>
+/* کامیونیتی: پنل نمونهٔ گفت‌وگو روشن شد؛ سطح مشکی ندارد */
+.tj2 #community .cjb-demo{background:linear-gradient(160deg,var(--tj-tint,#faeced) 0%,#fdf6f6 58%,#fff 100%)}
+.tj2 #community .cjb-demo::before{background:radial-gradient(circle,rgba(200,63,73,.18) 1.2px,transparent 1.4px) 0 0/18px 18px}
+.tj2 #community .cjb-demo::after{opacity:.16}
+.tj2 #community .cjb-chat{background:#fff;border-color:var(--tj-line,#dfdfe2);box-shadow:0 30px 50px -34px rgba(14,14,14,.35)}
+.tj2 #community .cjb-top{border-bottom-color:var(--tj-line,#dfdfe2)}
+.tj2 #community .cjb-top b{color:var(--tj-ink,#0e0e0e)}
+.tj2 #community .cjb-top small{color:var(--tj-mut,#676768)}
+.tj2 #community .cjb-chat .bb{background:var(--tj-sunk,#f5f5f8)}
+.tj2 #community .cjb-chat .bb.ok{background:var(--tj-yellow,#f2c14e)}
+/* نردبان: تصویر پله‌ها کنار متن */
+.tj2 #ladder .lad-art{display:block;width:min(100%,250px);height:auto;margin:26px 0 0;transition:transform .6s cubic-bezier(.2,.8,.3,1.2)}
+.tj2 #ladder .rv:hover .lad-art{transform:translateY(-4px)}
+.tj2 #ladder .path>div{transition:transform .2s ease,border-color .2s ease}
+.tj2 #ladder .path>div:hover{transform:translateX(-4px)}
+/* دپارتمان «به‌زودی»: جای خالی کارت با تصویر جوانه‌ها پر شد */
+.tj2 #courses .dept.soon .soon-art{display:block;width:150px;height:auto;margin:auto auto 6px;opacity:.95}
+.tj2 #courses .dept.soon .crow{margin-top:14px}
+.tj2 #courses .crow{transition:border-color .2s ease,transform .2s ease}
+.tj2 #courses .crow:hover{transform:translateY(-2px);border-color:var(--tj-red-400,#d9737a)}
+/* بورسیه: تصویر کنار تیتر */
+.tj2 #support .wrap>.rv:first-child{position:relative;padding-inline-end:0}
+.tj2 #support .sup-art{position:absolute;inset-inline-end:0;bottom:-8px;width:132px;height:auto}
+/* ریزه‌کاری نوشتار */
+.tj2 #courses .h2,.tj2 #programs .h2,.tj2 #community .h2,.tj2 #faculty .h2{text-wrap:balance}
+.tj2 .center .lede{text-wrap:pretty}
+@media (max-width:760px){
+ /* برنامه‌ها و استادان دوره‌ها روی گوشی ورق می‌خورند؛ صفحه کوتاه‌تر می‌شود */
+ .tj2 #programs .pgrid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:84%;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-16px;padding-inline:16px;padding-bottom:6px;scrollbar-width:none;gap:10px}
+ .tj2 #programs .pgrid::-webkit-scrollbar{display:none}
+ .tj2 #programs .pgrid>.pcard{scroll-snap-align:center}
+ :is(#tj2,.tj2):is(#tj2,.tj2) #faculty .facmini.rows{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:78%;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-16px;padding-inline:16px;padding-bottom:6px;scrollbar-width:none}
+ :is(#tj2,.tj2):is(#tj2,.tj2) #faculty .facmini.rows::-webkit-scrollbar{display:none}
+ :is(#tj2,.tj2):is(#tj2,.tj2) #faculty .facmini.rows>.supc{scroll-snap-align:center}
+ .tj2 #ladder .lad-art{width:170px;margin:18px 0 6px}
+ .tj2 #courses .dept.soon .soon-art{width:110px;margin-top:10px}
+ .tj2 #support .sup-art{position:static;display:block;width:96px;margin:0 0 4px}
+}
+@media (prefers-reduced-motion:reduce){.tj2 #ladder .lad-art,.tj2 #ladder .path>div,.tj2 #courses .crow{transition:none}}
+</style>
 <div class="tj2 alignfull" id="tj2">
 <section class="hero sch sch3" id="hero">
 <div class="wrap">
@@ -978,7 +1019,7 @@ main.tj-page{margin-block-start:0}
 <div class="dept soon" data-g="class">
 <div class="dh"><span class="pgi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><div><h3>شناختی و طرحواره</h3><small>به‌زودی</small></div></div>
 <p>دورهٔ این دپارتمان در دست برنامه‌ریزی است و به‌زودی اعلام می‌شود. اگر می‌خواهید در نخستین فراخوان باشید، نامتان را بگذارید.</p>
-<a class="crow" href="#preregister"><span class="l1"><b>خبرم کنید</b></span><span class="l2">پیش‌ثبت‌نام بدون تعهد</span></a>
+<img class="soon-art" src="/wp-content/uploads/2026/11/tjl-ill-seedlings.webp" alt="" width="220" height="90" loading="lazy" decoding="async"><a class="crow" href="#preregister"><span class="l1"><b>خبرم کنید</b></span><span class="l2">پیش‌ثبت‌نام بدون تعهد</span></a>
 </div>
 </div>
 <a class="intro-row rv" href="#preregister"><span class="pgi" data-g="reg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg></span><span><b>دورهٔ آشنایی · به‌زودی</b><small>دوره‌ای کوتاه و آنلاین برای کسی که هنوز وارد حلقه نشده و می‌خواهد مدرسه را از نزدیک بشناسد.</small></span><span class="go">پیش‌ثبت‌نام ←</span></a>
@@ -991,7 +1032,7 @@ main.tj-page{margin-block-start:0}
 <span class="eyebrow">مسیر مدرسه</span>
 <h2 class="h2">مدرسه یک نردبان است، نه چند کلاس جدا</h2>
 <p class="lede">هر پله جای خودش را دارد و ترتیبش عوض نمی‌شود. همین است که مدرسه را از یک مجموعه کارگاه جدا می‌کند.</p>
-<div class="ctas"><a class="btn btn-brand" href="#courses">دوره‌های مدرسه</a><a class="btn btn-ghost" href="/school/faculty/">هیئت علمی و استادان</a></div>
+<div class="ctas"><a class="btn btn-brand" href="#courses">دوره‌های مدرسه</a><a class="btn btn-ghost" href="/school/faculty/">هیئت علمی و استادان</a></div><img class="lad-art" src="/wp-content/uploads/2026/11/tjl-ill-stairs.webp" alt="" width="360" height="242" loading="lazy" decoding="async">
 </div>
 <div class="path rv">
 <div><i>۱</i><span>آشنایی <span class="st soon">به‌زودی</span><small>دورهٔ مقدماتی برای کسی که هنوز وارد حلقه نشده است.</small></span></div>
@@ -1029,7 +1070,7 @@ main.tj-page{margin-block-start:0}
 <p class="sublbl rv">هیئت علمی</p>
 <div class="facmini rv"><div class="supc"><img src="/wp-content/uploads/2026/10/tjl-sup-m6xzw-1.webp" alt="دکتر زهرا قنبری" width="400" height="472" loading="lazy"><div><b>دکتر زهرا قنبری</b><span class="ap">روانکاو · رئیس هیئت علمی مدرسهٔ تجربه</span><span class="role">دورهٔ تجربه بالینی · سرپرست سوپرویژن گروهی</span></div></div><div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-04.webp" alt="دکتر نرگس شریف‌زاده" width="400" height="472" loading="lazy"><div><b>دکتر نرگس شریف‌زاده</b><span class="ap">روان‌پزشک و روان‌درمانگر تحلیلی · عضو هیئت علمی</span><span class="role">دورهٔ تجربه بالینی · کیس‌خوانی فروید</span></div></div><div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-11.webp" alt="شهره فراهانی" width="400" height="472" loading="lazy"><div><b>شهره فراهانی</b><span class="ap">روانکاو رویکرد مدرن · عضو هیئت علمی</span><span class="role">دورهٔ روانکاوی مدرن</span></div></div></div>
 <p class="sublbl rv">استادان دوره‌ها</p>
-<div class="facmini rv"><div class="supc"><img src="/wp-content/uploads/2026/09/ELC-SCHOOL-Mr.MojtabaAleseyedan.webp" alt="مجتبی آل‌سیدان" width="143" height="143" loading="lazy"><div><b>مجتبی آل‌سیدان</b><span class="ap">روان‌درمانگر تحلیلی و سوپروایزر</span><span class="role">دورهٔ تجربه بالینی</span></div></div><div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-12.webp" alt="دکتر احسان گلی" width="400" height="472" loading="lazy"><div><b>دکتر احسان گلی</b><span class="ap">روانکاو تحلیلی و سوپروایزر · عضو IPA</span><span class="role">دورهٔ تجربه بالینی</span></div></div><div class="supc"><img src="/wp-content/uploads/2026/09/ELC-SCHOOL-Dr.MohammadKamran-Derakhshan.webp" alt="دکتر محمدکامران درخشان" width="144" height="145" loading="lazy"><div><b>دکتر محمدکامران درخشان</b><span class="ap">روان‌پزشک، فلوشیپ سایکوسوماتیک</span><span class="role">دورهٔ تجربه بالینی · ملاحظات روان‌پزشکی</span></div></div><div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-06.webp" alt="دکتر مصطفی طوبایی" width="400" height="472" loading="lazy"><div><b>دکتر مصطفی طوبایی</b><span class="ap">روان‌درمانگر هیجان‌مدار · دانش‌آموختهٔ مستقیم پروفسور گرینبرگ</span><span class="role">دورهٔ درمان هیجان‌مدار (EFT)</span></div></div><div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-muyia.webp" alt="دکتر پیمان طاهری" width="400" height="472" loading="lazy"><div><b>دکتر پیمان طاهری</b><span class="ap">روان‌شناس بالینی و روان‌درمانگر هیجان‌مدار</span><span class="role">دورهٔ درمان هیجان‌مدار (EFT)</span></div></div></div>
+<div class="facmini rows rv"><div class="supc"><img src="/wp-content/uploads/2026/09/ELC-SCHOOL-Mr.MojtabaAleseyedan.webp" alt="مجتبی آل‌سیدان" width="143" height="143" loading="lazy"><div><b>مجتبی آل‌سیدان</b><span class="ap">روان‌درمانگر تحلیلی و سوپروایزر</span><span class="role">دورهٔ تجربه بالینی</span></div></div><div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-12.webp" alt="دکتر احسان گلی" width="400" height="472" loading="lazy"><div><b>دکتر احسان گلی</b><span class="ap">روانکاو تحلیلی و سوپروایزر · عضو IPA</span><span class="role">دورهٔ تجربه بالینی</span></div></div><div class="supc"><img src="/wp-content/uploads/2026/09/ELC-SCHOOL-Dr.MohammadKamran-Derakhshan.webp" alt="دکتر محمدکامران درخشان" width="144" height="145" loading="lazy"><div><b>دکتر محمدکامران درخشان</b><span class="ap">روان‌پزشک، فلوشیپ سایکوسوماتیک</span><span class="role">دورهٔ تجربه بالینی · ملاحظات روان‌پزشکی</span></div></div><div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-06.webp" alt="دکتر مصطفی طوبایی" width="400" height="472" loading="lazy"><div><b>دکتر مصطفی طوبایی</b><span class="ap">روان‌درمانگر هیجان‌مدار · دانش‌آموختهٔ مستقیم پروفسور گرینبرگ</span><span class="role">دورهٔ درمان هیجان‌مدار (EFT)</span></div></div><div class="supc"><img src="/wp-content/uploads/2026/09/tjl-sup-muyia.webp" alt="دکتر پیمان طاهری" width="400" height="472" loading="lazy"><div><b>دکتر پیمان طاهری</b><span class="ap">روان‌شناس بالینی و روان‌درمانگر هیجان‌مدار</span><span class="role">دورهٔ درمان هیجان‌مدار (EFT)</span></div></div></div>
 <div class="center" style="margin-top:28px"><a class="btn btn-brand" href="/school/faculty/">هیئت علمی و استادان مدرسه</a></div>
 </div>
 </section>
@@ -1131,7 +1172,7 @@ main.tj-page{margin-block-start:0}
 <div class="rv">
 <span class="eyebrow">بورسیه و همکاری</span>
 <h2 class="h2">اگر پرداخت شهریه تنها مانع شماست</h2>
-<p class="lede">مدرسه برای دانشجویانی که می‌خواهند بیایند اما توان پرداخت کامل شهریه را ندارند، طرح بورسیه دارد. مسیرش از مجلهٔ تجربه می‌گذرد.</p>
+<p class="lede">مدرسه برای دانشجویانی که می‌خواهند بیایند اما توان پرداخت کامل شهریه را ندارند، طرح بورسیه دارد. مسیرش از مجلهٔ تجربه می‌گذرد.</p><img class="sup-art" src="/wp-content/uploads/2026/11/tjl-ill-envelope-bloom.webp" alt="" width="176" height="240" loading="lazy" decoding="async">
 </div>
 <div class="two rv">
 <div><h3>طرح بورسیه</h3><p>پس از مصاحبه با سردبیر مجله، بر اساس مهارت‌های خودتان در بخش‌های مختلف مجلهٔ تجربه زندگی همکاری می‌کنید و میزان تخفیف شهریه با ارزیابی سردبیر تعیین می‌شود. برای افراد بورس‌شده همکاری الزامی است و برای بقیه انتخابی.</p><a class="btn btn-brand" href="/school/scholarship/">درخواست بورسیه</a></div>
