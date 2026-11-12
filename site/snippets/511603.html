@@ -112,3 +112,78 @@ html body .tj2 .tjt-card small:empty{display:none}
   if(bk)new IntersectionObserver(function(es){inBook=es[0].isIntersecting;set();},{threshold:.15}).observe(bk);
 })();
 </script>
+<style id="tj-team-m2">
+html body .tj2 .tjt-city{display:flex;flex-wrap:nowrap;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none;align-items:center}
+html body .tj2 .tjt-city::-webkit-scrollbar{display:none}
+html body .tj2 .tjt-city .lb{flex:none;font-size:12.5px;color:var(--tj-mut,#8a8a8d);margin-inline-end:2px}
+html body .tj2 .tjt-city button{flex:none;font:inherit;font-size:12.5px;line-height:1.6;padding:4px 12px;border-radius:999px;border:1px solid var(--tj-line,#dfdfe2);background:#fff;color:var(--tj-ink,#0e0e0e);cursor:pointer;transition:border-color .2s,transform .15s}
+html body .tj2 .tjt-city button i{font-style:normal;font-size:11px;opacity:.6;margin-inline-start:3px}
+html body .tj2 .tjt-city button:hover{border-color:var(--tj-red-400,#e08a90)}
+html body .tj2 .tjt-city button:active{transform:scale(.96)}
+html body .tj2 .tjt-city button.on{background:var(--tj-tint,#faeced);border-color:var(--tj-red,#c83f49);color:var(--tj-red-600,#c83f49);font-weight:700}
+html body .tj2 .tjt-card.m2-hide{display:none!important}
+html body .tj2 .tjt-grid.m2-on .tjt-gh{display:none}
+html body .tj2 .tjt-m2-none{grid-column:1/-1;margin:18px 0;font-size:14.5px;color:var(--tj-soft,#676768);text-align:center}
+@media(min-width:701px){html body .tj2 .tjt-city{justify-content:flex-start;flex-wrap:wrap}}
+@media(max-width:700px){html body .tj2 .tjt-city{margin-inline:-16px;padding-inline:16px}}
+html body .tj2 .tjp-bk-demo.m2-go{cursor:pointer}
+html body .tj2 .tjp-bk-demo.m2-go:focus-visible{outline:2px solid var(--tj-red,#c83f49);outline-offset:-4px}
+</style>
+<script id="tj-team-m2-js">
+(function(){
+  var root=document.querySelector('.tj2.tjp');if(!root)return;
+  var demo=root.querySelector('.tjp-bk-demo'),go=root.querySelector('.tjp-bk-go');
+  if(demo){if(go){demo.classList.add('m2-go');demo.setAttribute('role','link');demo.setAttribute('tabindex','0');
+    demo.setAttribute('aria-label',go.textContent.replace(/\s+/g,' ').trim());
+    var open=function(){window.open(go.href,'_blank','noopener');};
+    demo.addEventListener('click',open);
+    demo.addEventListener('keydown',function(e){if(e.key==='Enter')open();});}}
+  var grid=root.querySelector('.tjt-grid'),tabs=root.querySelector('.tjt-f');
+  if(!grid||!tabs)return;
+  var cards=grid.querySelectorAll('.tjt-card'),cnt={},i,j;
+  function cities(c){var em=c.querySelector('.mt em');if(!em)return [];
+    var t=em.textContent.replace(/\s+/g,' ').trim();if(!t)return [];
+    var p=t.split(' و '),o=[];for(var k=0;k<p.length;k++){var s=p[k].trim();if(s)o.push(s);}return o;}
+  for(i=0;i<cards.length;i++){var cs=cities(cards[i]);cards[i].__c=cs;for(j=0;j<cs.length;j++){cnt[cs[j]]=(cnt[cs[j]]||0)+1;}}
+  var names=[];for(var n in cnt){if(cnt[n]>=2)names.push(n);}
+  if(names.length<2)return;
+  names.sort(function(a,b){return cnt[b]-cnt[a];});
+  var fa=function(x){return String(x).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.charAt(+d);});};
+  var bar=document.createElement('div');bar.className='tjt-city';
+  var lb=document.createElement('span');lb.className='lb';lb.textContent='شهر:';bar.appendChild(lb);
+  var none=document.createElement('p');none.className='tjt-m2-none';none.textContent='با این دو انتخاب کسی پیدا نشد؛ یکی را بردارید.';none.hidden=true;grid.appendChild(none);
+  var cur='';
+  function apply(){var shown=0;
+    for(var a=0;a<cards.length;a++){var ok=!cur||cards[a].__c.indexOf(cur)>-1;cards[a].classList.toggle('m2-hide',!ok);
+      if(ok&&!cards[a].classList.contains('hide'))shown++;}
+    grid.classList.toggle('m2-on',!!cur);none.hidden=shown>0;
+    var bs=bar.querySelectorAll('button');for(var b=0;b<bs.length;b++){bs[b].classList.toggle('on',bs[b].getAttribute('data-c')===cur);}
+    if(window.dataLayer){window.dataLayer.push({event:'team_city',city:cur||'all'});}}
+  function mk(label,val,num){var b=document.createElement('button');b.type='button';b.setAttribute('data-c',val);b.textContent=label;
+    if(num){var x=document.createElement('i');x.textContent=fa(num);b.appendChild(x);}
+    b.addEventListener('click',function(){cur=val;apply();});bar.appendChild(b);}
+  mk('همه','',0);for(i=0;i<names.length;i++){mk(names[i],names[i],cnt[names[i]]);}
+  tabs.parentNode.insertBefore(bar,tabs.nextSibling);
+  tabs.addEventListener('click',function(){setTimeout(apply,0);});
+  apply();
+})();
+</script>
+<style id="tj-faq6">
+html body .tj2 .faq-list.tj-faq6 details:nth-of-type(n+7){display:none}
+html body .tj2 .tj-faq6-more{display:inline-flex;align-items:center;margin:12px auto 0;padding:6px 0;border:0;background:none;font:inherit;font-size:14px;font-weight:700;color:var(--tj-ink,#0e0e0e);border-bottom:1.5px solid var(--tj-red,#c83f49);cursor:pointer}
+</style>
+<script id="tj-faq6-js">
+(function(){
+  var ls=document.querySelectorAll('.tj2 .faq-list');
+  for(var i=0;i<ls.length;i++){(function(fl){
+    if(fl.classList.contains('m1-few'))return;
+    if(fl.parentNode.querySelector('.m1-more'))return;
+    if(fl.querySelectorAll('details').length<=6)return;
+    if(location.hash){var t=null;try{t=fl.querySelector(location.hash);}catch(e){}if(t)return;}
+    fl.classList.add('tj-faq6');
+    var b=document.createElement('button');b.type='button';b.className='tj-faq6-more';b.textContent='پرسش‌های بیشتر';
+    b.addEventListener('click',function(){fl.classList.remove('tj-faq6');b.remove();});
+    fl.parentNode.insertBefore(b,fl.nextSibling);
+  })(ls[i]);}
+})();
+</script>
