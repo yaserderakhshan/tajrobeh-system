@@ -82,14 +82,14 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.124`
+نسخهٔ کد: `v170.123`
 
 ### فایل‌ها (به ترتیب اجرا)
 
 | فایل | خط | تابع |
 |---|---|---|
 | `Code.gs` | ۳۹۰ | ۳۱ |
-| `telegram.gs` | ۳۷۸۶۹ | ۲۰۴۲ |
+| `telegram.gs` | ۳۷۵۸۰ | ۲۰۲۲ |
 | `building.gs` | ۲۰۵۰ | ۱۶۹ |
 | `social.gs` | ۴۸۹ | ۳۳ |
 | `partners.gs` | ۱۹۱۹ | ۱۶۱ |
@@ -104,20 +104,20 @@
 | `gemini_setup.gs` | ۵۷۹ | ۴۰ |
 | `mig.gs` | ۴۲۲ | ۲۵ |
 | `publish.gs` | ۱۸۳۵ | ۱۳۳ |
-| `v168.gs` | ۲۵۱۷ | ۱۵۷ |
+| `v168.gs` | ۲۵۱۴ | ۱۵۷ |
 | `wppage.gs` | ۱۹۳ | ۱۵ |
 | `cover.gs` | ۳۸۷ | ۲۷ |
 | `magseo.gs` | ۶۱۶ | ۴۴ |
 | `panel.gs` | ۲۰۹ | ۱۹ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
-| `bridge.gs` | ۷۴۳ | ۵۸ |
+| `bridge.gs` | ۷۳۵ | ۵۶ |
 | `login.gs` | ۵۳۲ | ۳۷ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۰۹ | ۳۳ |
 | `leadmodel.gs` | ۸۲۱ | ۴۴ |
 | `comments.gs` | ۱۰۸۰ | ۶۸ |
 | `dq.gs` | ۶۰۳ | ۴۹ |
-| `cfg.gs` | ۲۱۳ | ۱۴ |
+| `cfg.gs` | ۲۰۵ | ۱۴ |
 | `ops.gs` | ۱۱۳۱ | ۱۰۰ |
 | `social_ig.gs` | ۳۲۹ | ۱۴ |
 | `v17013.gs` | ۵۵۷ | ۴۰ |
@@ -128,7 +128,7 @@
 | `version.gs` | ۸ | ۰ |
 | `sitepub.gs` | ۲۳۲ | ۱۵ |
 | `kartable.gs` | ۴۷۷ | ۳۵ |
-| `prauto.gs` | ۴۸۷ | ۳۱ |
+| `prauto.gs` | ۴۵۴ | ۳۰ |
 | `statfill.gs` | ۲۰۶ | ۲۰ |
 | `leadfix.gs` | ۱۲۴ | ۱۰ |
 | `specialty.gs` | ۴۶۰ | ۳۵ |
@@ -150,11 +150,6 @@
 | `agents.gs` | ۲۶۸ | ۲۰ |
 | `evlite.gs` | ۶۹۶ | ۶۰ |
 | `ws.gs` | ۱۱۱۵ | ۷۵ |
-| `brschool.gs` | ۱۰۸ | ۱۰ |
-| `poll.gs` | ۹۹ | ۱۱ |
-| `card.gs` | ۸۴ | ۷ |
-| `biz.gs` | ۱۰۹ | ۱۲ |
-| `prq.gs` | ۱۶۱ | ۱۳ |
 
 ### کارهای زمان‌دار
 
@@ -336,11 +331,6 @@
 | استخر و سئو | `tgSeoTests` |
 | آمار روزانه | `tgStatTests` |
 | مدرسه | `tgSchoolTests` |
-| نظرسنجی کارکنان | `pollTests` |
-| کارت زنده | `cardTests` |
-| حساب‌های رسمی | `bizTests` |
-| برنامهٔ مدرسه از پل | `brsTests` |
-| صف پروفایل در پل | `prqTests` |
 | هاب مدرسه | `tgSchool2Tests` |
 | هستهٔ نسخهٔ ۲ | `tgCoreTests` |
 | موتور پیام | `tgNotifyTests` |
