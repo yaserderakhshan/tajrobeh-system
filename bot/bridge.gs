@@ -285,19 +285,46 @@ function brTherFeed_(p) {
 }
 
 /** ساختن خوراک مچ (درمانگر و وقت‌ها)؛ با keep در کش هم می‌نشیند و زمان ساخت در BRF ثبت می‌شود */
+/* v170.127 (D2، ۲۱ آبان): موبایل درمانگر برای جور کردن در پل (۱۲ از ۱۲۴ جور می‌شد). منبع: ستون «شمارهٔ تماس» تب «افراد»، با chat_id یا نام. فقط رقم و «+». */
+function brPhone_(v) {
+  var d = tgLatinDigits_(String(v == null ? '' : v)).replace(/[^\d+]/g, '');
+  if (d.charAt(0) === '+') d = '+' + d.slice(1).replace(/\+/g, ''); else d = d.replace(/\+/g, '');
+  return d.replace(/\D/g, '').length >= 10 ? d : '';
+}
+function brPhoneMap_() {
+  var m = {};
+  try {
+    tgPeopleList_().forEach(function (p) {
+      var ph = brPhone_(p.phone); if (!ph) return;
+      String(p.chat || '').split(/[,،;\s]+/).forEach(function (c) { c = (c.match(/\d{5,}/) || [''])[0]; if (c) m[c] = ph; });
+      if (p.name) m['n:' + tgNorm_(p.name)] = ph;
+    });
+  } catch (e) {}
+  return m;
+}
+/* telegramId فقط رقم (اولین شناسهٔ عددی؛ خانه‌های چندشناسه‌ای پل را نمی‌خواند) + mobile اگر هست */
+function brFeedIdentity_(chatRaw, name, phoneBy) {
+  var tid = (tgLatinDigits_(String(chatRaw || '')).match(/\d{5,}/) || [''])[0];
+  var o = { telegramId: tid }, mob = (tid && phoneBy[tid]) || phoneBy['n:' + tgNorm_(name)] || '';
+  if (mob) o.mobile = mob;
+  return o;
+}
 function brFeedBuild_(now, keep) {
   var t0 = Date.now();
   var rows = {}; try { (TG_DRY ? (TG_MEM['pnl:thers'] || []) : tgTherapistRows_()).forEach(function (t) { rows[tgNorm_(t.name)] = t; }); } catch (eR) {}
-  var pub = tgThPubList_();
+  var pub = tgThPubList_(), phoneBy = brPhoneMap_();
   var list = pub.map(function (t) {
     var r = rows[tgNorm_(t.n)] || {};
-    return { name: t.d || t.n, code: String(r.code || ''), telegramId: typeof pnlChatOf_ === 'function' ? pnlChatOf_(r) : String(r.chat || ''), active: !!t.a,
+    var idn = brFeedIdentity_(typeof pnlChatOf_ === 'function' ? pnlChatOf_(r) : String(r.chat || ''), t.n, phoneBy);   /* v170.127 (D2): پل با therapistId، موبایل ۱۰ رقم آخر یا telegramId عددی می‌شناسد، نه v1UserId */
+    var o = { name: t.d || t.n, code: String(r.code || ''), telegramId: idn.telegramId, active: !!t.a,
       gender: t.g, approach: t.sp, mode: t.md, city: t.ct || String(r.city || ''), years: t.yr, languages: t.lg, ages: t.ag, focus: t.fc, groups: t.gr, pools: t.pl,
       couples: !!t.cp, abroad: !!(t.ab || r.abroad), inPerson: !!t.ip, style: t.st, tier: t.tr, rate: r.rate == null ? '' : r.rate, timezone: String(r.tz || ''),
       /* v170.120 (E66): rate = ستون «نرخ جلسه (تومان)» هاب، برای یک جلسهٔ درمان فردی به طول sessionMinutes؛ قیمت جدای خارج در بات نیست */
       rateToman: brNum_(r.rate), sessionMinutes: brNum_(r.slen),
       v1UserId: brNum_(r.v1) || undefined,   /* v170.122 (E68): ستون v1_user_id هاب؛ اگر نیست، فیلد نمی‌آید */
       about: t.ab2, page: t.pg };
+    if (idn.mobile) o.mobile = idn.mobile;
+    return o;
   });
   /* v170.115 (E60): وقت‌های درمانگر از همان داده‌ای که tgFreeSlots_ می‌خواند؛ فقط دادهٔ درمانگر، به وقت تهران */
   var sl = brTherSlots_();
@@ -374,7 +401,9 @@ function brTherSlots_() {
     });
   });
   var free = []; try { free = tgFreeSlots_(''); } catch (eF) {}
-  free.forEach(function (x) { if (x.weekly) return; var k = tgNorm_(x.therapist); (intro[k] = intro[k] || []).push({ date: x.dateIso, from: x.hhmm, to: addM(x.hhmm, TG_SLOT_MIN) }); });
+  /* v170.127 (D2 «معارفهٔ تازه ۰»): وقت آزاد معارفه امروز همه از قاعدهٔ هفتگی ساخته می‌شود (ردیف «آزاد» دستی در «اسلات معارفه» تقریباً نیست)؛
+     پیش از این هر وقت weekly کنار گذاشته می‌شد و introSlots همیشه خالی بود. حالا هر وقت آزاد واقعی (رزروشده و مرخصی برداشته) با تاریخ می‌رود. */
+  free.forEach(function (x) { var k = tgNorm_(x.therapist); (intro[k] = intro[k] || []).push({ date: x.dateIso, from: x.hhmm, to: addM(x.hhmm, TG_SLOT_MIN) }); });
   return { weekly: weekly, intro: intro };
 }
 
@@ -527,7 +556,7 @@ var CO_SECTIONS = [
          th1: 'درمانگر پیشنهادی ۱', th2: 'درمانگر پیشنهادی ۲', th3: 'درمانگر پیشنهادی ۳', referralDate: 'تاریخ ارجاع', introArranged: 'معارفه هماهنگ شد؟', leadType: 'نوع لید' },
     fix: function (o) { var l = [o.th1, o.th2, o.th3].filter(Boolean); delete o.th1; delete o.th2; delete o.th3; if (l.length) o.suggestedTherapists = l; delete o.code; } },
   { s: 'lead-events', tabs: [{ b: 'hub', t: 'رویدادهای لید' }], key: function (o) { return o.leadKey ? [o.leadKey, o.row || '', o.at || ''].join('|') : ''; },
-    f: Object.assign({ row: 'سطر' }, CO_SAME), fix: function (o) { delete o.row; } },
+    f: Object.assign({ row: 'سطر' }, CO_SAME), dt: ['at'], fix: function (o) { delete o.row; } },
   { s: 'lead-sources', tabs: [{ b: 'hub', t: 'کدهای start', kind: 'start' }, { b: 'hub', t: 'نقشهٔ کلمه‌ها', kind: 'word' }],
     key: function (o) { return o.kind === 'start' ? (o.code ? 'start:' + o.code : '') : (o.word ? 'word:' + (o.page || '') + ':' + o.word : ''); },
     f: { code: 'کد', label: ['برچسب', 'برچسب فارسی'], page: 'پیج', word: 'کلمه', destination: 'مقصد', requestType: 'نوع درخواست', sessionMode: 'حالت جلسه', venueKey: 'شناسهٔ مکان', topic: 'موضوع', utm: 'کد UTM' } },
@@ -568,7 +597,7 @@ var CO_SECTIONS = [
          email: 'ایمیل', fieldAndUniversity: 'رشته و دانشگاه', applicantNote: 'توضیح متقاضی', status: 'وضعیت', reviewer: 'بررسی‌کننده', decidedAt: 'تاریخ تصمیم', schoolNote: 'یادداشت مدرسه',
          leadCode: 'کد لید مدرسه', funnelStage: 'مرحلهٔ قیف', owner: 'مسئول پیگیری' }, fix: function (o) { delete o.id; } },
   { s: 'school-lead-events', tabs: [{ b: 'school', t: 'رویدادهای مدرسه' }], key: function (o) { return o.leadKey ? [o.leadKey, o.row || '', o.at || ''].join('|') : ''; },
-    f: Object.assign({ row: 'سطر' }, CO_SAME), fix: function (o) { delete o.row; } },
+    f: Object.assign({ row: 'سطر' }, CO_SAME), dt: ['at'], fix: function (o) { delete o.row; } },
   { s: 'scholarships', tabs: [{ b: 'school', t: 'بورسیه' }], key: function (o) { return o.id; },
     f: { id: 'شناسه', at: 'زمان', name: 'نام', phone: 'شماره', email: 'ایمیل', chatId: 'chat_id', status: 'وضعیت', fieldAndLevel: 'رشته و مقطع', university: 'دانشگاه', areas: 'زمینه‌های همکاری',
          languageLevel: 'سطح زبان', source: 'منبع', note: 'یادداشت', amount: ['مبلغ', 'مبلغ بورسیه'] }, fix: function (o) { delete o.id; } },
@@ -580,11 +609,23 @@ var CO_SECTIONS = [
 function coSec_(s) { for (var i = 0; i < CO_SECTIONS.length; i++) if (CO_SECTIONS[i].s === s) return CO_SECTIONS[i]; return null; }
 function coBase_() { var u = String(cfg_('BRIDGE_CUTOVER_URL', '') || '').trim(); if (/^(off|0|خاموش)$/i.test(u)) return ''; if (!u) return CO_URL_DEF; if (!/^https:\/\/bridge\.tajrobeh\.life\//.test(u)) return ''; return /\/$/.test(u) ? u : u + '/'; }
 /** همهٔ خانه‌های تب به‌صورت نمایش هاب (تاریخ همان‌طور که در هاب است)؛ در آزمون از TG_MEM['co:<b>:<t>'] */
-function coGrid_(b, t) {
-  if (TG_DRY) return TG_MEM['co:' + b + ':' + t] || null;
+function coGrid_(b, t, raw) {
+  if (TG_DRY) return TG_MEM['co:' + (raw ? 'raw:' : '') + b + ':' + t] || null;
   var ss = b === 'school' ? tgSchSS_() : tgSS_(), sh = ss.getSheetByName(t);
   if (!sh || sh.getLastRow() < 1) return null;
-  return sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn()).getDisplayValues();
+  var rg = sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn());
+  return raw ? rg.getValues() : rg.getDisplayValues();
+}
+/* v170.127 (D2 ۱۹:۰۴): پل فقط رشتهٔ «سال/ماه/روز ساعت:دقیقه» را می‌پذیرد. خانهٔ «زمان» رویدادها Date است (tgLeadEv_ با new Date())
+   و نمایشش به قالب محلی شیت بستگی دارد (مثلاً ماه/روز/سال)، پس همهٔ ۷۵۶۷ رویداد «تاریخ بد» شدند. حالا از مقدار خام، به وقت تهران با آفست. */
+function coAt_(raw, disp) {
+  if (raw && typeof raw.getTime === 'function' && !isNaN(raw.getTime())) return Utilities.formatDate(raw, 'Asia/Tehran', "yyyy-MM-dd'T'HH:mm:ss") + '+03:30';   /* ایران از ۱۴۰۱ ساعت تابستانی ندارد */
+  var s = tgLatinDigits_(String(disp == null ? '' : disp)).trim();
+  if (!s || /^\d{4}[\/\-.]\d{1,2}[\/\-.]\d{1,2}/.test(s)) return s;
+  var m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[\s,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);   /* ماه/روز/سال (قالب امریکایی شیت) */
+  if (!m) return s;
+  var p2 = function (x) { return ('0' + x).slice(-2); };
+  return m[3] + '-' + p2(m[1]) + '-' + p2(m[2]) + (m[4] ? 'T' + p2(m[4]) + ':' + m[5] + ':' + (m[6] || '00') : '');
 }
 /** ستون هر فیلد: نام سرستون در یکی از سه ردیف اول (ردیفی که بیشترین سرستون آشنا را دارد)، وگرنه جای ثابت. ستون ممنوع هرگز */
 function coCols_(sec, grid) {
@@ -617,10 +658,14 @@ function coRows_(sec, ther) {
   sec.tabs.forEach(function (tb) {
     var g = coGrid_(tb.b, tb.t);
     if (!g) { st.push({ tab: tb.t, found: false }); return; }
-    var cc = coCols_(sec, g), n = 0;
+    var cc = coCols_(sec, g), n = 0, gv = sec.dt ? coGrid_(tb.b, tb.t, true) : null;
     for (var i = cc.hr + 1; i < g.length; i++) {
       var o = {}, any = false;
-      Object.keys(cc.cols).forEach(function (k) { var v = String(g[i][cc.cols[k]] == null ? '' : g[i][cc.cols[k]]).trim(); if (v) { o[k] = v; any = true; } });
+      Object.keys(cc.cols).forEach(function (k) {
+        var v = String(g[i][cc.cols[k]] == null ? '' : g[i][cc.cols[k]]).trim();
+        if (sec.dt && sec.dt.indexOf(k) > -1) v = coAt_(gv && gv[i] ? gv[i][cc.cols[k]] : null, v);   /* v170.127 */
+        if (v) { o[k] = v; any = true; }
+      });
       if (!any) continue;
       if (tb.kind) o.kind = tb.kind;
       if (tb.origin) o.origin = tb.origin;
@@ -716,6 +761,18 @@ function coSplit_() {
   var l = {}; try { l = brLeadState_() || {}; } catch (e2) {}
   return 'اسلات: ' + (h.pushCode === undefined ? 'هنوز نرفته' : h.pushCode) + (h.pushAt ? ' (ok)' : '') + ' · لید عمومی امروز: ok ' + (l.ok || 0) + ' fail ' + (l.fail || 0);
 }
+/** یک‌بارهٔ خودکار v170.127 (D2 ۱۹:۰۴): فقط بخش lead-events دوباره، با زمان درست. وضع همان بخش در BRC پاک و یک تیک زده می‌شود؛
+ *  بخش‌های دیگر دست نمی‌خورند (همه کمتر از ۲۴ ساعت پیش رفته‌اند). خروجی فقط شمار: ردیف، at خالی، at در قالب پل، کد ارسال. */
+function coV170127Events() {
+  var R; try { R = coRows_(coSec_('lead-events'), null); } catch (e) { return 'خطا ' + String(e).slice(0, 80); }
+  var n = R.rows.length, empty = 0, good = 0, nokey = 0;
+  R.rows.forEach(function (r) { if (!r.at) empty++; else if (/^\d{4}[\/\-.]\d{1,2}[\/\-.]\d{1,2}([ T]\d{1,2}:\d{2})?/.test(r.at)) good++; if (!r.key) nokey++; });
+  var st = {}; try { st = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e2) {}
+  delete st['lead-events']; delete st._down; lgProp_('BRC', JSON.stringify(st));
+  var t; try { t = coTick_(); } catch (e3) { t = 'خطا ' + String(e3).slice(0, 60); }
+  var x = {}; try { x = (JSON.parse(lgProp_('BRC') || '{}') || {})['lead-events'] || {}; } catch (e4) {}
+  return 'ردیف ' + n + ' · at قالب پل ' + good + ' · at خالی ' + empty + ' · بی کلید ' + nokey + ' · ارسال lead-events: ' + (x.code === undefined ? '-' : x.code) + (x.err ? '(' + x.err + ')' : '') + (x.at ? ' ok' : '') + ' · تیک: ' + String(t).slice(0, 80);
+}
 /** یک‌بارهٔ v170.126 (فوری A ۱۶:۴۵، D2 ۴۰۱ همهٔ بخش‌ها): اثر انگشت راز (۸ هگز اول SHA-256؛ خود راز هرگز) + کد HTTP و errorCode یک ارسال خالی و بی‌ضرر (بخش venues، بی ردیف، complete نه).
  *  خروجی CI ۲۰۰ نویسه است، پس کوتاه. D2 همان اثر انگشت را از رازِ پل می‌گیرد و مقایسه می‌کند. */
 function coV170126Probe() {
@@ -780,6 +837,17 @@ function coTests() {
     var L = coRows_(coSec_('therapist-leave'), coTherIds_()).rows;
     ok('مرخصی: کلید درمانگر و از؛ شبا نمی‌رود', L.length === 1 && L[0].key === 'درمانگر نمونه|1405/09/01' && JSON.stringify(L).indexOf('IR000') < 0);
     ok('هیچ فیلد هیچ بخشی به ستون ممنوع اشاره نمی‌کند', CO_SECTIONS.every(function (S) { return Object.keys(S.f).every(function (k) { return [].concat(S.f[k]).every(function (h) { return typeof h !== 'string' || !CO_DENY.test(h); }); }); }));
+    /* v170.127 (D2): زمان رویداد از مقدار خام (Date) به «yyyy-MM-ddTHH:mm:ss+03:30»؛ نمایش ماه/روز/سال هم به سال-ماه-روز؛ قالب جلالی همان می‌ماند */
+    TG_MEM['co:hub:رویدادهای لید'] = [['زمان', 'کد لید', 'سطر', 'کی', 'کانال', 'چه شد'], ['11/10/2026 14:30:05', 'L-1', '5', 'بات', 'تلگرام', 'تماس'], ['11/10/2026 9:05', 'L-2', '6', 'بات', 'تلگرام', 'تماس'], ['1405/08/19 14:30', 'L-3', '7', 'بات', 'تلگرام', 'تماس']];
+    TG_MEM['co:raw:hub:رویدادهای لید'] = [['زمان'], [new Date(Date.UTC(2026, 10, 10, 11, 0, 5))], ['11/10/2026 9:05'], ['1405/08/19 14:30']];
+    var EV = coRows_(coSec_('lead-events'), null).rows;
+    ok('v170.127: at رویداد رشتهٔ پذیرفتهٔ پل است (Date ← وقت تهران با آفست؛ ماه/روز/سال ← سال-ماه-روز؛ جلالی بی‌تغییر) و کلید با همان at', EV.length === 3 && EV[0].at === '2026-11-10T14:30:05+03:30' && EV[0].key === 'L-1|5|2026-11-10T14:30:05+03:30' &&
+      EV[1].at === '2026-11-10T09:05:00' && EV[2].at === '1405/08/19 14:30' && EV[0].row === undefined && EV.every(function (r) { return /^\d{4}[\/-]\d{2}[\/-]\d{2}[ T]\d{2}:\d{2}/.test(r.at); }), JSON.stringify(EV.map(function (r) { return r.at; })));
+    ok('v170.127 (E20): نشانی اتاق جلسه از لینک‌های صفحهٔ تیم برداشته می‌شود؛ بقیه می‌ماند', tgPrLinksClean_('اینستاگرام: https://instagram.com/x\nجلسه: https://meet.google.com/abc-defg-hij') === 'اینستاگرام: https://instagram.com/x' &&
+      tgPrLinksClean_('https://zoom.us/j/1، https://example.com') === 'https://example.com' && tgPrLinksClean_('https://www.skyroom.online/ch/x') === '' && tgPrLinksClean_(' https://whereby.com/room ') === '' &&
+      tgPrLinksClean_('https://linkedin.com/in/x') === 'https://linkedin.com/in/x' && tgPrLinksClean_('') === '' && tgPrLinksClean_('https://zoomit.ir/a') === 'https://zoomit.ir/a');
+    ok('v170.127: بخش‌های دیگر بی تبدیل زمان', !coSec_('leads').dt && coSec_('school-lead-events').dt.join() === 'at');
+    delete TG_MEM['co:hub:رویدادهای لید']; delete TG_MEM['co:raw:hub:رویدادهای لید'];
     var big = []; for (var i = 0; i < 7000; i++) big.push({ key: 'k' + i, note: 'x' });
     var C = coChunks_('lead-events', big).map(function (b) { return JSON.parse(b); });
     ok('تکه‌ها: ۳ تکه، complete فقط روی آخری، همهٔ ردیف‌ها', C.length === 3 && C[0].chunks === 3 && !C[0].complete && !C[1].complete && C[2].complete && C[0].rows.length + C[1].rows.length + C[2].rows.length === 7000);
@@ -814,7 +882,12 @@ function coTests() {
     ok('v170.125: آزمون تقسیم: کد اسلات و شمار لید عمومی در همان یک‌باره', /اسلات: .* · لید عمومی امروز: ok \d+ fail \d+/.test(st5), st5);
     ok('v170.125: یک‌بارهٔ وضع: تیک و وضع بخش‌ها، بی ردیف شخصی؛ در فهرست CI', /^تیک: .*people=200\/2 ok/.test(st5) && st5.indexOf('همکار نمونه') < 0 && CI_ONCE_AUTO.indexOf('coV170125State') > -1 && CI_ONCE_ALLOW.indexOf('coV170125State') > -1, st5);
     var VEC_MSG = 'legacy-bot-cutover.v1:people:1794470000:{"section":"people","rows":[{"key":"P-1","name":"درمانگر نمونه"}]}';
-    ok('v170.126: امضای بدنهٔ فارسی = مقدار UTF-8 از Node crypto (E17/E18)', brSign_(VEC_MSG, 'test-key-123') === 'v1=2bac692ec2ba03d0ec2407fa1b83d31e6403aa7574a091cd3a250fe30968b8af', brSign_(VEC_MSG, 'test-key-123'));
+    TG_MEM['people'] = [{ name: 'درمانگر نمونه', chat: '50011', phone: '۰۹۱۲۳۴۵۶۷۸۹', roles: ['درمانگر'] }, { name: 'همکار دو', chat: '70022, 70033', phone: '+98 912 000 0001', roles: [] }, { name: 'بی شماره', chat: '80011', phone: '', roles: [] }];   /* pii:ok ساختگی */
+    var pm = brPhoneMap_();
+    ok('v170.127: خوراک اسلات: موبایل با chat_id یا نام، فقط رقم، رقم فارسی لاتین می‌شود', brFeedIdentity_('50011', 'درمانگر نمونه', pm).mobile === '09123456789' && brFeedIdentity_('70033', 'x', pm).mobile === '+989120000001' && brFeedIdentity_('', 'درمانگر نمونه', pm).mobile === '09123456789' && brFeedIdentity_('80011', 'بی شماره', pm).mobile === undefined);   /* pii:ok ساختگی */
+    ok('v170.127: telegramId فقط رقم و اولین شناسه (خانهٔ چندشناسه‌ای)', brFeedIdentity_('70022, 70033', 'x', pm).telegramId === '70022' && brFeedIdentity_('', 'x', pm).telegramId === '' && brFeedIdentity_('۵۰۰۱۱', 'x', pm).telegramId === '50011');   /* pii:ok ساختگی */
+    delete TG_MEM['people'];
+        ok('v170.126: امضای بدنهٔ فارسی = مقدار UTF-8 از Node crypto (E17/E18)', brSign_(VEC_MSG, 'test-key-123') === 'v1=2bac692ec2ba03d0ec2407fa1b83d31e6403aa7574a091cd3a250fe30968b8af', brSign_(VEC_MSG, 'test-key-123'));
     TG_MEM['co:sent'] = []; TG_MEM['co:code'] = 401; TG_MEM['co:err'] = 'legacy-error.bot-feed-signature-invalid'; CO_LAST_POST = 0;
     lgProp_('BRC', JSON.stringify({ people: { code: 401 }, leads: { code: 401 } })); lgProp_('BRF', JSON.stringify({ pushCode: 401, pushSum: 'x', pushAt: 5, buildMs: 7 }));
     var pr = coV170126Probe();
