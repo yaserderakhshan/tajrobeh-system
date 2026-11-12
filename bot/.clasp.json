@@ -71,7 +71,8 @@
     "poll.gs",
     "card.gs",
     "biz.gs",
-    "prq.gs"
+    "prq.gs",
+    "hubro.gs"
   ],
   "htmlExtensions": [
     ".html"
