@@ -715,6 +715,19 @@ function coSplit_() {
   var l = {}; try { l = brLeadState_() || {}; } catch (e2) {}
   return 'اسلات: ' + (h.pushCode === undefined ? 'هنوز نرفته' : h.pushCode) + (h.pushAt ? ' (ok)' : '') + ' · لید عمومی امروز: ok ' + (l.ok || 0) + ' fail ' + (l.fail || 0);
 }
+/** یک‌بارهٔ v170.126 (فوری A ۱۶:۴۵، D2 ۴۰۱ همهٔ بخش‌ها): اثر انگشت راز (۸ هگز اول SHA-256؛ خود راز هرگز) + کد HTTP و errorCode یک ارسال خالی و بی‌ضرر (بخش venues، بی ردیف، complete نه).
+ *  خروجی CI ۲۰۰ نویسه است، پس کوتاه. D2 همان اثر انگشت را از رازِ پل می‌گیرد و مقایسه می‌کند. */
+function coV170126Probe() {
+  var sec = typeof brHandoffSecret_ === 'function' ? brHandoffSecret_() : '', base = coBase_();
+  var fp = sec ? brHex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, sec, Utilities.Charset.UTF_8)).slice(0, 8) : 'بی‌راز';
+  var code = -1;
+  if (base && sec) code = coPost_(base + 'venues/intake', 'venues', JSON.stringify({ section: 'venues', version: 1, chunk: 1, chunks: 1, complete: false, rows: [] }), sec, 0);
+  var st = {}; try { st = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e) {}
+  var n401 = Object.keys(st).filter(function (k) { return st[k] && st[k].code === 401; }).length;
+  var h = {}; try { h = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (e2) {}
+  var l = {}; try { l = brLeadState_() || {}; } catch (e3) {}
+  return 'fp=' + fp + ' کد=' + code + (CO_LAST_ERR ? ' err=' + String(CO_LAST_ERR).replace('legacy-error.', '') : '') + ' بخش۴۰۱=' + n401 + ' اسلات=' + (h.pushCode === undefined ? '-' : h.pushCode) + ' لید=' + (l.ok || 0) + '/' + (l.fail || 0) + ' ts=' + Math.floor(Date.now() / 1000);
+}
 function coNightLine_() {
   var st = {}; try { st = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e) {}
   var now = Math.floor(Date.now() / 1000), okN = 0, bad = [];
@@ -791,7 +804,10 @@ function coTests() {
     var st5 = coV170125State();
     ok('v170.125: آزمون تقسیم: کد اسلات و شمار لید عمومی در همان یک‌باره', /اسلات: .* · لید عمومی امروز: ok \d+ fail \d+/.test(st5), st5);
     ok('v170.125: یک‌بارهٔ وضع: تیک و وضع بخش‌ها، بی ردیف شخصی؛ در فهرست CI', /^تیک: .*people=200\/2 ok/.test(st5) && st5.indexOf('همکار نمونه') < 0 && CI_ONCE_AUTO.indexOf('coV170125State') > -1 && CI_ONCE_ALLOW.indexOf('coV170125State') > -1, st5);
-    ok('v170.125: خط شبانه شمار بخش‌های رسیده', /🔗 خوراک برش به پل: .* از .* بخش/.test(coNightLine_()) && TG_NIGHT_LINES.indexOf(coNightLine_) > -1);
+    TG_MEM['co:sent'] = []; TG_MEM['co:code'] = 401; TG_MEM['co:err'] = 'legacy-error.bot-feed-signature-invalid'; CO_LAST_POST = 0;
+    var pr = coV170126Probe();
+    ok('v170.126: پروب: اثر انگشت ۸ هگز (نه خود راز)، کد و errorCode، اسلات و لید عمومی، کوتاه‌تر از ۲۰۰ نویسه', /^fp=[0-9a-f]{8} کد=401 err=bot-feed-signature-invalid بخش۴۰۱=\d+ اسلات=\S+ لید=\d+\/\d+ /.test(pr) && pr.length < 200 && pr.indexOf('test-only-handoff-secret') < 0 && TG_MEM['co:sent'].length === 1 && JSON.parse(TG_MEM['co:sent'][0].body).rows.length === 0 && JSON.parse(TG_MEM['co:sent'][0].body).complete === false && CI_ONCE_AUTO.indexOf('coV170126Probe') > -1 && CI_ONCE_ALLOW.indexOf('coV170126Probe') > -1, pr);
+        ok('v170.125: خط شبانه شمار بخش‌های رسیده', /🔗 خوراک برش به پل: .* از .* بخش/.test(coNightLine_()) && TG_NIGHT_LINES.indexOf(coNightLine_) > -1);
     TG_CFG_ = { BRIDGE_CUTOVER_URL: 'off' };
     ok('خاموش با off؛ نشانی بیرون از پل پذیرفته نمی‌شود', coTick_() === 'off' && (TG_CFG_ = { BRIDGE_CUTOVER_URL: 'https://evil.example/' }, coTick_() === 'off'));
     TG_CFG_ = {};
