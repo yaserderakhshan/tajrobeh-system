@@ -160,7 +160,8 @@ function tgRelayHealth_(hookUrl) {
 try { TG_SUITES.push(['پیوند با پل: رونوشت، صف مشترک و پشتیبان v170.109', 'brTests']); } catch (eSu) {}
 
 /** v170.114 (E55): امضای قرارداد پل: «v1=» و هگز کوچک HMAC-SHA256 با راز handoff */
-function brSign_(text, sec) { return 'v1=' + brHex_(Utilities.computeHmacSha256Signature(text, sec)); }
+/* v170.126 (E17/E18، ریشهٔ ۴۰۱ همهٔ بدنه‌های فارسی): بدون charset اپس‌اسکریپت نویسهٔ غیر ASCII را UTF-8 امضا نمی‌کند و پل UTF-8 امضا می‌کند (PublicLeadSignature.Compute). کلید هم UTF-8 */
+function brSign_(text, sec) { return 'v1=' + brHex_(Utilities.computeHmacSha256Signature(text, sec, Utilities.Charset.UTF_8)); }
 /* ───── ۳) توکن handoff ورود ───── */
 function brHandoffSecret_() {
   if (TG_DRY && TG_MEM['pnlp:TG_BRIDGE_HANDOFF_SECRET'] !== undefined) return String(TG_MEM['pnlp:TG_BRIDGE_HANDOFF_SECRET'] || '');   /* فقط آزمون‌های قدیمی */
@@ -720,13 +721,21 @@ function coSplit_() {
 function coV170126Probe() {
   var sec = typeof brHandoffSecret_ === 'function' ? brHandoffSecret_() : '', base = coBase_();
   var fp = sec ? brHex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, sec, Utilities.Charset.UTF_8)).slice(0, 8) : 'بی‌راز';
+  /* شاهد کدگذاری روی خود اپس‌اسکریپت: بردار Node (UTF-8) ← امضای صریح UTF-8 و امضای بی charset */
+  var vecMsg = 'legacy-bot-cutover.v1:people:1794470000:{"section":"people","rows":[{"key":"P-1","name":"درمانگر نمونه"}]}', vec = '2bac692ec2ba03d0ec2407fa1b83d31e6403aa7574a091cd3a250fe30968b8af';
+  var u8 = brHex_(Utilities.computeHmacSha256Signature(vecMsg, 'test-key-123', Utilities.Charset.UTF_8)) === vec ? 1 : 0;
+  var raw = brHex_(Utilities.computeHmacSha256Signature(vecMsg, 'test-key-123')) === vec ? 1 : 0;
   var code = -1;
-  if (base && sec) code = coPost_(base + 'venues/intake', 'venues', JSON.stringify({ section: 'venues', version: 1, chunk: 1, chunks: 1, complete: false, rows: [] }), sec, 0);
+  /* بدنهٔ خالی ولی با یک فیلد فارسی: ۲۰۰ یا ۴۰۰ یعنی امضای فارسی پذیرفته شد، ۴۰۱ یعنی هنوز نه */
+  if (base && sec) code = coPost_(base + 'venues/intake', 'venues', JSON.stringify({ section: 'venues', version: 1, chunk: 1, chunks: 1, complete: false, rows: [], note: 'آزمون امضای فارسی' }), sec, 0);
   var st = {}; try { st = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e) {}
   var n401 = Object.keys(st).filter(function (k) { return st[k] && st[k].code === 401; }).length;
   var h = {}; try { h = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (e2) {}
   var l = {}; try { l = brLeadState_() || {}; } catch (e3) {}
-  return 'fp=' + fp + ' کد=' + code + (CO_LAST_ERR ? ' err=' + String(CO_LAST_ERR).replace('legacy-error.', '') : '') + ' بخش۴۰۱=' + n401 + ' اسلات=' + (h.pushCode === undefined ? '-' : h.pushCode) + ' لید=' + (l.ok || 0) + '/' + (l.fail || 0) + ' ts=' + Math.floor(Date.now() / 1000);
+  var out = 'fp=' + fp + ' u8=' + u8 + ' raw=' + raw + ' کد=' + code + (CO_LAST_ERR ? ' err=' + String(CO_LAST_ERR).replace('legacy-error.', '') : '') + ' ۴۰۱=' + n401 + ' اسلات=' + (h.pushCode === undefined ? '-' : h.pushCode) + ' لید=' + (l.ok || 0) + '/' + (l.fail || 0);
+  /* A (E17.۴): پس از انتشار، وضع خوراک برش و اسلات صفر شود تا هر ۲۰ بخش و اسلات دوباره بروند (ارسال دوباره بی‌زیان است) */
+  try { lgProp_('BRC', '{}'); delete h.pushSum; delete h.pushAt; lgProp_('BRF', JSON.stringify(h)); } catch (e4) {}
+  return out;
 }
 function coNightLine_() {
   var st = {}; try { st = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e) {}
@@ -804,9 +813,13 @@ function coTests() {
     var st5 = coV170125State();
     ok('v170.125: آزمون تقسیم: کد اسلات و شمار لید عمومی در همان یک‌باره', /اسلات: .* · لید عمومی امروز: ok \d+ fail \d+/.test(st5), st5);
     ok('v170.125: یک‌بارهٔ وضع: تیک و وضع بخش‌ها، بی ردیف شخصی؛ در فهرست CI', /^تیک: .*people=200\/2 ok/.test(st5) && st5.indexOf('همکار نمونه') < 0 && CI_ONCE_AUTO.indexOf('coV170125State') > -1 && CI_ONCE_ALLOW.indexOf('coV170125State') > -1, st5);
+    var VEC_MSG = 'legacy-bot-cutover.v1:people:1794470000:{"section":"people","rows":[{"key":"P-1","name":"درمانگر نمونه"}]}';
+    ok('v170.126: امضای بدنهٔ فارسی = مقدار UTF-8 از Node crypto (E17/E18)', brSign_(VEC_MSG, 'test-key-123') === 'v1=2bac692ec2ba03d0ec2407fa1b83d31e6403aa7574a091cd3a250fe30968b8af', brSign_(VEC_MSG, 'test-key-123'));
     TG_MEM['co:sent'] = []; TG_MEM['co:code'] = 401; TG_MEM['co:err'] = 'legacy-error.bot-feed-signature-invalid'; CO_LAST_POST = 0;
+    lgProp_('BRC', JSON.stringify({ people: { code: 401 }, leads: { code: 401 } })); lgProp_('BRF', JSON.stringify({ pushCode: 401, pushSum: 'x', pushAt: 5, buildMs: 7 }));
     var pr = coV170126Probe();
-    ok('v170.126: پروب: اثر انگشت ۸ هگز (نه خود راز)، کد و errorCode، اسلات و لید عمومی، کوتاه‌تر از ۲۰۰ نویسه', /^fp=[0-9a-f]{8} کد=401 err=bot-feed-signature-invalid بخش۴۰۱=\d+ اسلات=\S+ لید=\d+\/\d+ /.test(pr) && pr.length < 200 && pr.indexOf('test-only-handoff-secret') < 0 && TG_MEM['co:sent'].length === 1 && JSON.parse(TG_MEM['co:sent'][0].body).rows.length === 0 && JSON.parse(TG_MEM['co:sent'][0].body).complete === false && CI_ONCE_AUTO.indexOf('coV170126Probe') > -1 && CI_ONCE_ALLOW.indexOf('coV170126Probe') > -1, pr);
+    ok('v170.126: پروب: اثر انگشت ۸ هگز (نه خود راز)، u8، raw، کد و errorCode، اسلات و لید، کوتاه‌تر از ۲۰۰', /^fp=[0-9a-f]{8} u8=[01] raw=[01] کد=401 err=bot-feed-signature-invalid ۴۰۱=2 اسلات=401 لید=\d+\/\d+$/.test(pr) && pr.length < 200 && pr.indexOf('test-only-handoff-secret') < 0 && TG_MEM['co:sent'].length === 1 && JSON.parse(TG_MEM['co:sent'][0].body).rows.length === 0 && JSON.parse(TG_MEM['co:sent'][0].body).complete === false && CI_ONCE_AUTO.indexOf('coV170126Probe') > -1 && CI_ONCE_ALLOW.indexOf('coV170126Probe') > -1, pr);
+    ok('v170.126: پس از پروب BRC خالی و pushSum/pushAt اسلات پاک (ارسال دوباره)', lgProp_('BRC') === '{}' && JSON.parse(lgProp_('BRF')).pushSum === undefined && JSON.parse(lgProp_('BRF')).pushAt === undefined && JSON.parse(lgProp_('BRF')).buildMs === 7);
         ok('v170.125: خط شبانه شمار بخش‌های رسیده', /🔗 خوراک برش به پل: .* از .* بخش/.test(coNightLine_()) && TG_NIGHT_LINES.indexOf(coNightLine_) > -1);
     TG_CFG_ = { BRIDGE_CUTOVER_URL: 'off' };
     ok('خاموش با off؛ نشانی بیرون از پل پذیرفته نمی‌شود', coTick_() === 'off' && (TG_CFG_ = { BRIDGE_CUTOVER_URL: 'https://evil.example/' }, coTick_() === 'off'));
