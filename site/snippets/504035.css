@@ -382,3 +382,94 @@ html:not(#tjq) body .tj2 .steps>div>span{font-size:13.5px}
    نوار پنهان، اسکرول با لمس و ترک‌پد سر جایش؛ به‌جای نوار، لبهٔ انتهایی (چپ) محو می‌شود تا معلوم باشد ادامه دارد. */
 .tj2 .now-row{scrollbar-width:none!important;-ms-overflow-style:none;padding-bottom:0!important;-webkit-mask-image:linear-gradient(to right,transparent 0,#000 64px);mask-image:linear-gradient(to right,transparent 0,#000 64px)}
 .tj2 .now-row::-webkit-scrollbar{display:none!important;width:0;height:0}
+
+/* == tj-school-global-f G2 (لین F) · جا: اسنیپت CSS سراسری ۵۰۴۰۳۵ · روی همهٔ صفحه‌های مدرسه == */
+/* ۱) پنل گفت‌وگوی بات روشن (همان G1) */
+:is(#tj2,.tj2) .cjb-demo{background:linear-gradient(160deg,var(--tj-tint,#faeced) 0%,#fdf6f6 58%,#fff 100%)}
+:is(#tj2,.tj2) .cjb-demo::before{background:radial-gradient(circle,rgba(200,63,73,.18) 1.2px,transparent 1.4px) 0 0/18px 18px}
+:is(#tj2,.tj2) .cjb-demo::after{opacity:.16}
+:is(#tj2,.tj2) .cjb-chat{background:#fff;border-color:var(--tj-line,#dfdfe2);box-shadow:0 30px 50px -34px rgba(14,14,14,.35)}
+:is(#tj2,.tj2) .cjb-top{border-bottom-color:var(--tj-line,#dfdfe2)}
+:is(#tj2,.tj2) .cjb-top b{color:var(--tj-ink,#0e0e0e)}
+:is(#tj2,.tj2) .cjb-top small{color:var(--tj-mut,#676768)}
+:is(#tj2,.tj2) .cjb-chat .bb{background:var(--tj-sunk,#f5f5f8)}
+:is(#tj2,.tj2) .cjb-chat .bb.ok{background:var(--tj-yellow,#f2c14e)}
+/* ۲) دکمهٔ «بعدی» فرم‌های چندگامی: قرمز برند به جای مشکی */
+html:not(#tjq) body .frm-fluent-form .tjs-next{background:var(--tj-red,#c83f49)}
+html:not(#tjq) body .frm-fluent-form .tjs-next:hover{background:var(--tj-red-700,#a8323b)}
+/* ۳) برچسب بالای هیرو در صفحه‌هایی که کلاس v3 ندارند (بورسیه): قرص روشن به جای نوار مشکی */
+.tj2 .hero p.ring{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;padding:5px 12px;border:1px solid var(--tj-red-400,#d9737a);border-radius:999px;background:#fff;color:var(--tj-red,#c83f49);font-size:13px;line-height:1.6;flex-wrap:nowrap}
+.tj2 .hero p.ring span{color:inherit;font-size:inherit;line-height:inherit;flex:none;min-width:0}
+.tj2 .hero p.ring .dot{width:7px;height:7px;background:var(--tj-red,#c83f49)}
+/* == tj-selected-red-f (لین F) · جواب یاسر، ۲۲ آبان: حالت انتخاب‌شده قرمز برند به جای مشکی · جا: اسنیپت CSS سراسری ۵۰۴۰۳۵ == */
+:is(#tj2,.tj2) .wkd.t,:is(#tj2,.tj2) .wkd.t.pk,
+:is(#tj2,.tj2) .chip[aria-pressed="true"],
+:is(#tj2,.tj2) .yv .yrs button[aria-pressed="true"],
+:is(#tj2,.tj2) .ayr button[aria-pressed="true"],
+:is(#tj2,.tj2) .mstrip button.on,
+:is(#tj2,.tj2) .ftabs [role=tab][aria-selected=true]{background:var(--tj-red,#c83f49);border-color:var(--tj-red,#c83f49);color:#fff}
+:is(#tj2,.tj2).v3 .seg-ink{background:var(--tj-red,#c83f49)}
+
+/* لین F: این دو بلوک برای قالب ۵۰۴۰۷۸ است؛ با پیشوند html تا از style خود قالب دقیق‌تر باشد */
+/* == tj-team-f T1 (لین F) · صفحهٔ تیم (/team/) == */
+/* گروه‌بندی: هیئت علمی، سوپروایزرها و منتورها بالا؛ بعد تراپیست‌های کلینیک. همان کارت‌ها، فقط ترتیب. */
+html .tj2 .tjt-grid>.tjt-card:is([data-r~="edu"],[data-r~="sup"],[data-r~="mnt"]){order:-2;border-color:rgba(200,63,73,.28);background:linear-gradient(180deg,var(--tj-tint-2,#fdf4f4),#fff 60%)}
+html .tj2 .tjt-gh{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:14px 0 2px;font-size:15px;font-weight:800;color:var(--tj-ink,#0e0e0e);line-height:1.8}
+html .tj2 .tjt-gh small{font-size:12.5px;font-weight:500;color:var(--tj-mut,#676768)}
+html .tj2 .tjt-gh::after{content:"";flex:1;height:1px;background:var(--tj-line,#dfdfe2)}
+html .tj2 .tjt-gh.g1{order:-3;margin-top:0}
+html .tj2 .tjt-gh.g2{order:-1;margin-top:22px}
+/* با انتخاب یک زبانه، سرگروه‌ها کنار می‌روند و فهرست ساده می‌شود */
+html .tj2 .tjt-grid:has(.tjt-card.hide) .tjt-gh{display:none}
+/* نمک: عکس هنگام اشاره کمی بالا می‌آید */
+html .tj2 .tjt-card .av{transition:transform .45s cubic-bezier(.2,.8,.3,1.2)}
+html .tj2 .tjt-card:hover .av{transform:translateY(-3px)}
+html .tj2 .tjt-hero h1{text-wrap:balance}
+@media (max-width:760px){
+ /* گوشی: کارت فشرده‌تر، عکس کوچک‌تر، پیکان برداشته شد؛ صفحه حدود یک‌سوم کوتاه‌تر */
+ html .tj2 .tjt-art{max-width:104px}
+ html .tj2 .tjt-hw{grid-template-columns:minmax(0,1fr)}
+ html .tj2 .tjt-hw>.copy{min-width:0}
+ html .tj2 .tjt-grid{gap:7px}
+ html .tj2 .tjt-card{gap:11px;padding:7px 10px 7px 8px;border-radius:16px}
+ html .tj2 .tjt-card .av{width:50px;height:60px;border-radius:28px 28px 10px 10px}
+ html .tj2 .tjt-card .go{display:none}
+ html .tj2 .tjt-card b{font-size:14.5px;line-height:1.5}
+ html .tj2 .tjt-card small{font-size:12px;line-height:1.6}
+ html .tj2 .tjt-card .mt{margin-top:3px;flex-wrap:nowrap;overflow:hidden}
+ html .tj2 .tjt-card .mt span{font-size:10.5px;padding:0 7px;white-space:nowrap}
+ html .tj2 .tjt-card .mt span:nth-of-type(n+2){display:none}
+ html .tj2 .tjt-card em{white-space:nowrap;margin-inline-start:auto}
+ html .tj2 .tjt-gh{font-size:14px}
+ /* زبانه‌ها یک ردیف ورق‌خور */
+ html .tj2 .tjt-f{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}
+ html .tj2 .tjt-f::-webkit-scrollbar{display:none}
+ html .tj2 .tjt-f .chip{flex:none}
+}
+@media (prefers-reduced-motion:reduce){html .tj2 .tjt-card .av{transition:none}}
+/* == tj-profile-f P1 (لین F) · قالب صفحهٔ شخصی (اسنیپت ۵۰۴۰۷۸) · برای همهٔ ۶۸ پروفایل == */
+/* ۱) پنل نمونهٔ رزرو در بات: روشن به جای مشکی */
+html .tj2 .tjp-bk-demo{background:linear-gradient(160deg,var(--tj-tint,#faeced) 0%,#fdf6f6 58%,#fff 100%)}
+html .tj2 .tjp-bk-demo::before{background:radial-gradient(circle,rgba(200,63,73,.18) 1.2px,transparent 1.4px) 0 0/18px 18px}
+html .tj2 .tjp-bk-demo::after{opacity:.16}
+html .tj2 .tjp-chat{background:#fff;border-color:var(--tj-line,#dfdfe2);box-shadow:0 30px 50px -34px rgba(14,14,14,.35)}
+html .tj2 .tjp-chat-top{border-bottom-color:var(--tj-line,#dfdfe2)}
+html .tj2 .tjp-chat-top b{color:var(--tj-ink,#0e0e0e)}
+html .tj2 .tjp-chat-top small{color:var(--tj-mut,#676768)}
+html .tj2 .tjp-chat .bb{background:var(--tj-sunk,#f5f5f8)}
+html .tj2 .tjp-chat .bb.ok{background:var(--tj-yellow,#f2c14e)}
+html .tj2 .tjp-chat .ch span{color:var(--tj-ink,#0e0e0e);border-color:var(--tj-line,#dfdfe2);background:#fff}
+html .tj2 .tjp-chat .ch span.on{color:#fff;background:var(--tj-red,#c83f49);border-color:var(--tj-red,#c83f49)}
+/* ۲) جعبهٔ سوپرویژن: پهنهٔ صورتی نرم به جای مشکی */
+html .tj2 .tjp-supbox{background:linear-gradient(135deg,var(--tj-tint,#faeced),var(--tj-tint-2,#fdf4f4));border:1px solid rgba(200,63,73,.16)}
+html .tj2 .tjp-supbox .h2{color:var(--tj-ink,#0e0e0e)}
+html .tj2 .tjp-supbox .lede{color:var(--tj-soft,#4e4e4e)}
+html .tj2 .tjp-supbox .eyebrow{background:#fff;color:var(--tj-red,#c83f49)}
+html .tj2 .tjp-supbox .eyebrow::before{background:var(--tj-red,#c83f49)}
+html .tj2 .tjp-supbox .btn-ghost{background:#fff;color:var(--tj-ink,#0e0e0e);border-color:var(--tj-line,#dfdfe2)}
+/* ۳) برچسب «جلسهٔ اول» و دکمهٔ گرد نوار تیم: قرمز برند */
+html .tj2 .tjp-tag{background:var(--tj-red,#c83f49)}
+html .tj2 .tjp-tbgo{background:var(--tj-red,#c83f49);transition:transform .25s ease}
+html .tj2 .tjp-tb:hover .tjp-tbgo{transform:translateX(-4px)}
+html .tj2 .tjp-hero h1,html .tj2 .tjp-sec .h2{text-wrap:balance}
+@media (prefers-reduced-motion:reduce){html .tj2 .tjp-tbgo{transition:none}}

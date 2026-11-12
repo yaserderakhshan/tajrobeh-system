@@ -1203,7 +1203,7 @@ function tjp_team() {
          . '<p class="lede">هر کدام صفحهٔ خودش را دارد: روش کار، جلسهٔ اول، مسیر حرفه‌ای و صدای خودش. صفحه‌ها را خود اعضا کامل می‌کنند و تیم تجربه پیش از انتشار می‌خواند.</p>'
          . '<div class="tjt-f" id="tjpF">' . $chips . '</div></div>'
          . '<div class="tjt-art"><img src="/wp-content/uploads/2026/09/tjl-cut-orbit.webp" alt="" width="682" height="666" fetchpriority="high" decoding="async"></div></div></div></section>'
-         . '<section class="tjt-list"><div class="wrap"><div class="tjt-grid">' . $cards . '</div>'
+         . '<section class="tjt-list"><div class="wrap"><div class="tjt-grid"><h2 class="tjt-gh g1">هیئت علمی، سوپروایزرها و منتورها</h2><h2 class="tjt-gh g2">تراپیست‌های کلینیک تجربه</h2>' . $cards . '</div>'
          . '<div class="tjt-more rv">'
          . '<p>بیش از صد درمانگر دیگر هم در تجربه کار می‌کنند و صفحه‌هایشان یکی‌یکی اینجا می‌آید. تا آن موقع، پذیرش تجربه کمکتان می‌کند درمانگر مناسبتان را پیدا کنید.</p>'
          . '<a class="btn btn-brand" href="/get-therapy/">شروع تراپی</a></div>'

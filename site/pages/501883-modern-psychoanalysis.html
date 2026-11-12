@@ -615,6 +615,41 @@ main.tj-page{margin-block-start:0}
 .tj2 .formbox fieldset>*{grid-column:1/-1}
 .tj2 .formbox .ff-text-left,.tj2 .formbox .ff_submit_btn_wrapper{text-align:right}
 </style>
+<style>
+/* == tj-course-f (لین F) · قالب مشترک صفحهٔ دوره‌ها: تجربه بالینی، EFT، روانکاوی مدرن == */
+/* سه محور: کارت سفید با پهنهٔ صورتی نرم و تصویر کتابخانه به جای آیکون عمومی */
+.tj2 #pillars .pillars>div{background:linear-gradient(180deg,var(--tj-tint-2,#fdf3f3) 0,#fff 52%);transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.tj2 #pillars .pillars>div:hover{transform:translateY(-3px);border-color:var(--tj-red-400,#d9737a);box-shadow:0 22px 40px -30px rgba(200,63,73,.45)}
+.tj2 #pillars .pillars img{width:auto;height:76px;max-width:132px;margin-bottom:14px;transform-origin:50% 100%;transition:transform .6s cubic-bezier(.2,.8,.3,1.2)}
+.tj2 #pillars .pillars>div:hover img{transform:translateY(-3px) rotate(-3deg)}
+/* مکمل‌ها: تصویر کمی بزرگ‌تر و خوانا */
+.tj2 #side .how-step>img{width:auto;height:60px;max-width:92px;object-fit:contain;transition:transform .6s cubic-bezier(.2,.8,.3,1.2)}
+.tj2 #side .how-step:hover>img{transform:translateY(-3px)}
+/* منابع: جلد کتاب روشن شد؛ سطح مشکی ندارد */
+.tj2 #resources .book i{position:relative;background:var(--tj-tint,#faeced);box-shadow:inset 7px 0 0 var(--tj-red,#c83f49),inset 0 0 0 1px rgba(200,63,73,.22)}
+.tj2 #resources .book i::after{content:"";position:absolute;left:17px;top:15px;width:16px;height:2px;border-radius:2px;background:var(--tj-red-400,#d9737a);box-shadow:0 6px 0 var(--tj-red-400,#d9737a)}
+.tj2 #resources .book{transition:transform .2s ease,border-color .2s ease}
+.tj2 #resources .book:hover{transform:translateY(-2px);border-color:var(--tj-red-400,#d9737a)}
+/* گواهی: تصویر پیشین فایل خالی بود؛ صندلی و کلاه دانش‌آموختگی */
+.tj2 #admission .cert img,.tj2 #tuition .cert img{width:auto;height:84px;max-width:76px}
+.tj2 #admission .cert>div,.tj2 #tuition .cert>div{flex:1 1 260px}
+/* دوره‌های دیگر */
+.tj2 #others .crs-card{transition:transform .2s ease,border-color .2s ease}
+.tj2 #others .crs-card:hover{transform:translateY(-3px);border-color:var(--tj-red-400,#d9737a)}
+.tj2 .center .h2,.tj2 #hero h1{text-wrap:balance}
+.tj2 .center .lede{text-wrap:pretty}
+@media (max-width:760px){
+ /* سه محور و دوره‌های دیگر روی گوشی ورق می‌خورند */
+ .tj2 #pillars .pillars,.tj2 #others .crs-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:82%;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-16px;padding-inline:16px;padding-bottom:6px;scrollbar-width:none;gap:10px}
+ .tj2 #pillars .pillars::-webkit-scrollbar,.tj2 #others .crs-grid::-webkit-scrollbar{display:none}
+ .tj2 #pillars .pillars>div,.tj2 #others .crs-grid>.crs-card{scroll-snap-align:center}
+ .tj2 #pillars .pillars img{height:64px}
+ .tj2 #side .how-grid>.how-step:has(>img){grid-template-columns:52px minmax(0,1fr)}
+ .tj2 #side .how-grid>.how-step>img{width:52px;height:52px}
+ .tj2 #admission .cert img,.tj2 #tuition .cert img{height:68px}
+}
+@media (prefers-reduced-motion:reduce){.tj2 #pillars .pillars>div,.tj2 #pillars .pillars img,.tj2 #side .how-step>img,.tj2 #resources .book,.tj2 #others .crs-card{transition:none}}
+</style>
 <div class="tj2 alignfull" id="tj2">
 
 
@@ -641,7 +676,7 @@ main.tj-page{margin-block-start:0}
 <section class="th" id="pillars">
 <div class="wrap">
 <div class="center rv"><span class="eyebrow">سه تغییر اصلی</span><h2 class="h2">آنچه بعد از دوره در کار درمانگر فرق می‌کند</h2><p class="lede">دقت بیشتر در دیدن، ظرفیت بیشتر در تحمل، تکنیک پخته‌تر در مداخله.</p></div>
-<div class="pillars rv"><div><img src="/wp-content/uploads/2026/09/tjl-crit-science.webp" alt="دقت در دیدن لایه‌های پری‌وربال" loading="lazy"><b>دقت در دیدن لایه‌های پری‌وربال</b><p>درمانگر یاد می‌گیرد آنچه گفته نمی‌شود را بخواند: سکوت، بدن، فاصله، انقباض و حمله‌های ریز هیجانی به داده‌های بالینی قابل‌کاربرد تبدیل می‌شوند.</p></div><div><img src="/wp-content/uploads/2026/09/tjl-crit-personal.webp" alt="ظرفیت تحمل هیجانی" loading="lazy"><b>ظرفیت تحمل هیجانی</b><p>کار با بیماران پری‌ادیپی همواره فشار انتقال متقابل ایجاد می‌کند: خستگی، خشم، پوچی، کلافگی و حس ناتوانی. درمانگر می‌آموزد این فشارها را تشخیص دهد، تحمل کند و از آن‌ها استفادهٔ بالینی کند و کمتر در انتقال متقابل گرفتار شود.</p></div><div><img src="/wp-content/uploads/2026/09/tjl-crit-roleplay.webp" alt="تکنیک پخته‌تر و مؤثرتر" loading="lazy"><b>تکنیک پخته‌تر و مؤثرتر</b><p>چه زمانی سکوت را نگه دارد، چه زمانی فقط حضور نشان دهد بدون تفسیر، چه زمانی یک جملهٔ کوتاه برای سازمان‌دهی بیمار کافی است، چگونه از پرخاشگری خام برای حرکت به‌سوی انسجام استفاده کند و مقاومت‌های اولیه را بدون بُهت یا مقابله‌به‌مثل مدیریت کند.</p></div></div>
+<div class="pillars rv"><div><img height="152" width="91" src="/wp-content/uploads/2026/11/tjl-ill-eye-lens.webp" alt="دقت در دیدن لایه‌های پری‌وربال" loading="lazy"><b>دقت در دیدن لایه‌های پری‌وربال</b><p>درمانگر یاد می‌گیرد آنچه گفته نمی‌شود را بخواند: سکوت، بدن، فاصله، انقباض و حمله‌های ریز هیجانی به داده‌های بالینی قابل‌کاربرد تبدیل می‌شوند.</p></div><div><img height="309" width="360" src="/wp-content/uploads/2026/11/tjl-ill-heart-hug.webp" alt="ظرفیت تحمل هیجانی" loading="lazy"><b>ظرفیت تحمل هیجانی</b><p>کار با بیماران پری‌ادیپی همواره فشار انتقال متقابل ایجاد می‌کند: خستگی، خشم، پوچی، کلافگی و حس ناتوانی. درمانگر می‌آموزد این فشارها را تشخیص دهد، تحمل کند و از آن‌ها استفادهٔ بالینی کند و کمتر در انتقال متقابل گرفتار شود.</p></div><div><img height="360" width="342" src="/wp-content/uploads/2026/11/tjl-ill-berry-branch.webp" alt="تکنیک پخته‌تر و مؤثرتر" loading="lazy"><b>تکنیک پخته‌تر و مؤثرتر</b><p>چه زمانی سکوت را نگه دارد، چه زمانی فقط حضور نشان دهد بدون تفسیر، چه زمانی یک جملهٔ کوتاه برای سازمان‌دهی بیمار کافی است، چگونه از پرخاشگری خام برای حرکت به‌سوی انسجام استفاده کند و مقاومت‌های اولیه را بدون بُهت یا مقابله‌به‌مثل مدیریت کند.</p></div></div>
 </div>
 </section>
 
@@ -657,7 +692,7 @@ main.tj-page{margin-block-start:0}
 <section class="side-sec prog" id="side">
 <div class="wrap">
 <div class="center rv"><span class="eyebrow">سیلابس‌های فرعی</span><h2 class="h2">برنامه‌های مکمل شاخهٔ تحلیلی</h2><p class="lede">دانشجویان این دوره در برنامه‌های همیشگی مدرسه شرکت می‌کنند.</p></div>
-<div class="how-grid rv" style="grid-template-columns:repeat(3,1fr)"><div class="how-step"><img src="/wp-content/uploads/2026/09/tjl-icon-book.webp" alt="جلسات بررسی موارد بالینی فروید" loading="lazy"><h3>جلسات بررسی موارد بالینی فروید</h3><p>خوانش کیس‌های دورا، هانس کوچولو و قاضی شربر با دکتر نرگس شریف‌زاده؛ اولین چهارشنبهٔ هر ماه ساعت ۱۸:۳۰.</p></div><div class="how-step"><img src="/wp-content/uploads/2026/09/tjl-crit-supervision.webp" alt="سوپرویژن گروهی" loading="lazy"><h3>سوپرویژن گروهی</h3><p>بررسی کیس‌های واقعی درمانگران کلینیک با سوپروایزر رویکرد؛ اول ناظر، بعد ارائه‌دهنده. شهره فراهانی سوپروایزر رویکرد مدرن مدرسه است.</p></div><div class="how-step"><img src="/wp-content/uploads/2026/09/tjl-crit-science.webp" alt="ژورنال کلاب‌ها" loading="lazy"><h3>ژورنال کلاب‌ها</h3><p>مقالات روز و متون مرتبط با روانکاوی مدرن، به‌ویژه دربارهٔ انتقال متقابل و پویایی‌های پیشاکلامی.</p></div></div>
+<div class="how-grid rv" style="grid-template-columns:repeat(3,1fr)"><div class="how-step"><img height="360" width="248" src="/wp-content/uploads/2026/11/tjl-ill-analyst-line.webp" alt="جلسات بررسی موارد بالینی فروید" loading="lazy"><h3>جلسات بررسی موارد بالینی فروید</h3><p>خوانش کیس‌های دورا، هانس کوچولو و قاضی شربر با دکتر نرگس شریف‌زاده؛ اولین چهارشنبهٔ هر ماه ساعت ۱۸:۳۰.</p></div><div class="how-step"><img height="230" width="230" src="/wp-content/uploads/2026/11/tjl-ill-eye-heads.webp" alt="سوپرویژن گروهی" loading="lazy"><h3>سوپرویژن گروهی</h3><p>بررسی کیس‌های واقعی درمانگران کلینیک با سوپروایزر رویکرد؛ اول ناظر، بعد ارائه‌دهنده. شهره فراهانی سوپروایزر رویکرد مدرن مدرسه است.</p></div><div class="how-step"><img height="329" width="360" src="/wp-content/uploads/2026/11/tjl-ill-reader-line.webp" alt="ژورنال کلاب‌ها" loading="lazy"><h3>ژورنال کلاب‌ها</h3><p>مقالات روز و متون مرتبط با روانکاوی مدرن، به‌ویژه دربارهٔ انتقال متقابل و پویایی‌های پیشاکلامی.</p></div></div>
 </div>
 </section>
 
@@ -680,7 +715,7 @@ main.tj-page{margin-block-start:0}
 <div class="wrap">
 <div class="center rv"><span class="eyebrow">روند ورود</span><h2 class="h2">از درخواست تا شروع دوره</h2><p class="lede">برای افرادی که آشنایی اولیه‌ای با روانکاوی دارند و می‌خواهند تخصصی‌تر آموزش ببینند.</p></div>
 <div class="steps rv" style="grid-template-columns:repeat(4,1fr)"><div><i>۱</i><b>پر کردن فرم درخواست</b><span>همین صفحه؛ چند دقیقه وقت می‌گیرد.</span></div><div><i>۲</i><b>مصاحبهٔ اولیهٔ آنلاین</b><span>بررسی آشنایی شما با روانکاوی و انگیزهٔ ورود.</span></div><div><i>۳</i><b>پذیرش کامل: ورود به دوره</b><span>راهنمایی برای ثبت‌نام و شروع دوره.</span></div><div><i>۴</i><b>پذیرش مشروط</b><span>ابتدا تراپی فردی تحلیلی را آغاز می‌کنید و سپس وارد دوره می‌شوید.</span></div></div>
-<div class="cert rv"><img src="/wp-content/uploads/2026/09/tjl-sc-medallion.webp" alt="گواهی شرکت در دوره" loading="lazy"><div><b>گواهی شرکت در دوره</b><span>پس از اتمام دوره، گواهی رسمی حضور به زبان‌های فارسی و انگلیسی صادر می‌شود، همراه با ضمیمه‌ای که مباحث بررسی‌شده را توضیح می‌دهد. اعطای گواهی منوط به ارزیابی حضور و تأیید نهایی استاد است.</span></div></div>
+<div class="cert rv"><img height="360" width="223" src="/wp-content/uploads/2026/11/tjl-ill-grad-chair.webp" alt="گواهی شرکت در دوره" loading="lazy"><div><b>گواهی شرکت در دوره</b><span>پس از اتمام دوره، گواهی رسمی حضور به زبان‌های فارسی و انگلیسی صادر می‌شود، همراه با ضمیمه‌ای که مباحث بررسی‌شده را توضیح می‌دهد. اعطای گواهی منوط به ارزیابی حضور و تأیید نهایی استاد است.</span></div></div>
 </div>
 </section>
 

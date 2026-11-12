@@ -646,6 +646,41 @@ main.tj-page{margin-block-start:0}
 .tj2 #tuition .cert>div{flex:1;min-width:0}
 @media (max-width:760px){.tj2 .kv.tiers{grid-template-columns:1fr}.tj2 .kv.tiers b{font-size:26px}}
 </style>
+<style>
+/* == tj-course-f (لین F) · قالب مشترک صفحهٔ دوره‌ها: تجربه بالینی، EFT، روانکاوی مدرن == */
+/* سه محور: کارت سفید با پهنهٔ صورتی نرم و تصویر کتابخانه به جای آیکون عمومی */
+.tj2 #pillars .pillars>div{background:linear-gradient(180deg,var(--tj-tint-2,#fdf3f3) 0,#fff 52%);transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.tj2 #pillars .pillars>div:hover{transform:translateY(-3px);border-color:var(--tj-red-400,#d9737a);box-shadow:0 22px 40px -30px rgba(200,63,73,.45)}
+.tj2 #pillars .pillars img{width:auto;height:76px;max-width:132px;margin-bottom:14px;transform-origin:50% 100%;transition:transform .6s cubic-bezier(.2,.8,.3,1.2)}
+.tj2 #pillars .pillars>div:hover img{transform:translateY(-3px) rotate(-3deg)}
+/* مکمل‌ها: تصویر کمی بزرگ‌تر و خوانا */
+.tj2 #side .how-step>img{width:auto;height:60px;max-width:92px;object-fit:contain;transition:transform .6s cubic-bezier(.2,.8,.3,1.2)}
+.tj2 #side .how-step:hover>img{transform:translateY(-3px)}
+/* منابع: جلد کتاب روشن شد؛ سطح مشکی ندارد */
+.tj2 #resources .book i{position:relative;background:var(--tj-tint,#faeced);box-shadow:inset 7px 0 0 var(--tj-red,#c83f49),inset 0 0 0 1px rgba(200,63,73,.22)}
+.tj2 #resources .book i::after{content:"";position:absolute;left:17px;top:15px;width:16px;height:2px;border-radius:2px;background:var(--tj-red-400,#d9737a);box-shadow:0 6px 0 var(--tj-red-400,#d9737a)}
+.tj2 #resources .book{transition:transform .2s ease,border-color .2s ease}
+.tj2 #resources .book:hover{transform:translateY(-2px);border-color:var(--tj-red-400,#d9737a)}
+/* گواهی: تصویر پیشین فایل خالی بود؛ صندلی و کلاه دانش‌آموختگی */
+.tj2 #admission .cert img,.tj2 #tuition .cert img{width:auto;height:84px;max-width:76px}
+.tj2 #admission .cert>div,.tj2 #tuition .cert>div{flex:1 1 260px}
+/* دوره‌های دیگر */
+.tj2 #others .crs-card{transition:transform .2s ease,border-color .2s ease}
+.tj2 #others .crs-card:hover{transform:translateY(-3px);border-color:var(--tj-red-400,#d9737a)}
+.tj2 .center .h2,.tj2 #hero h1{text-wrap:balance}
+.tj2 .center .lede{text-wrap:pretty}
+@media (max-width:760px){
+ /* سه محور و دوره‌های دیگر روی گوشی ورق می‌خورند */
+ .tj2 #pillars .pillars,.tj2 #others .crs-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:82%;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-16px;padding-inline:16px;padding-bottom:6px;scrollbar-width:none;gap:10px}
+ .tj2 #pillars .pillars::-webkit-scrollbar,.tj2 #others .crs-grid::-webkit-scrollbar{display:none}
+ .tj2 #pillars .pillars>div,.tj2 #others .crs-grid>.crs-card{scroll-snap-align:center}
+ .tj2 #pillars .pillars img{height:64px}
+ .tj2 #side .how-grid>.how-step:has(>img){grid-template-columns:52px minmax(0,1fr)}
+ .tj2 #side .how-grid>.how-step>img{width:52px;height:52px}
+ .tj2 #admission .cert img,.tj2 #tuition .cert img{height:68px}
+}
+@media (prefers-reduced-motion:reduce){.tj2 #pillars .pillars>div,.tj2 #pillars .pillars img,.tj2 #side .how-step>img,.tj2 #resources .book,.tj2 #others .crs-card{transition:none}}
+</style>
 <div class="tj2 alignfull" id="tj2" data-camp="EFT-1" data-camp-src="site-eft">
 
 
@@ -672,7 +707,7 @@ main.tj-page{margin-block-start:0}
 <section class="th" id="pillars">
 <div class="wrap">
 <div class="center rv"><span class="eyebrow">ویژگی‌های متمایز دوره</span><h2 class="h2">سه چیزی که این دوره را از یک کلاس EFT جدا می‌کند</h2><p class="lede">آموزش فرآیندمحور، سوپرویژن استاندارد و مسیر ورود به کلینیک.</p></div>
-<div class="pillars rv"><div><img src="/wp-content/uploads/2026/09/tjl-crit-science.webp" alt="تدریس از منبع اصلی و به‌روز" loading="lazy"><b>تدریس از منبع اصلی و به‌روز</b><p>کل مبانی نظری و تکنیک‌های پیشرفته از فصول اصلی ویرایش ۲۰۲۵ کتاب <span class="ltr">Learning Emotion-Focused Therapy</span> به قلم الیوت، واتسون، گلدمن و گرینبرگ استخراج شده تا یکپارچگی آموزشی حفظ شود؛ همراه با مقالات روز دنیا.</p></div><div><img src="/wp-content/uploads/2026/09/tjl-crit-supervision.webp" alt="سوپرویژن گروهی طبق ISEFT" loading="lazy"><b>سوپرویژن گروهی طبق ISEFT</b><p>ارائهٔ کیس با فایل صوتی یا تصویری جلسات واقعی، بازخورد ساختاریافته بر اساس مقیاس‌های ارزیابی EFT مانند <span class="ltr">PCEPS-EFT-9</span>، و کار روی نقاط کور مثل احساس «گم شدن» یا اجتناب از موضع تجربی فعال.</p></div><div><img src="/wp-content/uploads/2026/09/tjl-crit-roleplay.webp" alt="تمرین هدفمند و ورود به اتاق درمان" loading="lazy"><b>تمرین هدفمند و ورود به اتاق درمان</b><p>ترم سوم به تمرین هدفمند (Deliberate Practice) اختصاص دارد: بازبینی جلسات ضبط‌شده، شبیه‌سازی مداخلات و بازخورد مبتنی بر داده. پس از دوره و مصاحبه، می‌توانید به‌عنوان درمانگر هیجان‌مدار به تیم تجربه بپیوندید.</p></div></div>
+<div class="pillars rv"><div><img height="359" width="360" src="/wp-content/uploads/2026/11/tjl-ill-pen-sprout.webp" alt="تدریس از منبع اصلی و به‌روز" loading="lazy"><b>تدریس از منبع اصلی و به‌روز</b><p>کل مبانی نظری و تکنیک‌های پیشرفته از فصول اصلی ویرایش ۲۰۲۵ کتاب <span class="ltr">Learning Emotion-Focused Therapy</span> به قلم الیوت، واتسون، گلدمن و گرینبرگ استخراج شده تا یکپارچگی آموزشی حفظ شود؛ همراه با مقالات روز دنیا.</p></div><div><img height="152" width="91" src="/wp-content/uploads/2026/11/tjl-ill-eye-lens.webp" alt="سوپرویژن گروهی طبق ISEFT" loading="lazy"><b>سوپرویژن گروهی طبق ISEFT</b><p>ارائهٔ کیس با فایل صوتی یا تصویری جلسات واقعی، بازخورد ساختاریافته بر اساس مقیاس‌های ارزیابی EFT مانند <span class="ltr">PCEPS-EFT-9</span>، و کار روی نقاط کور مثل احساس «گم شدن» یا اجتناب از موضع تجربی فعال.</p></div><div><img height="248" width="360" src="/wp-content/uploads/2026/11/tjl-ill-two-chairs.webp" alt="تمرین هدفمند و ورود به اتاق درمان" loading="lazy"><b>تمرین هدفمند و ورود به اتاق درمان</b><p>ترم سوم به تمرین هدفمند (Deliberate Practice) اختصاص دارد: بازبینی جلسات ضبط‌شده، شبیه‌سازی مداخلات و بازخورد مبتنی بر داده. پس از دوره و مصاحبه، می‌توانید به‌عنوان درمانگر هیجان‌مدار به تیم تجربه بپیوندید.</p></div></div>
 </div>
 </section>
 
@@ -688,7 +723,7 @@ main.tj-page{margin-block-start:0}
 <section class="side-sec prog" id="side">
 <div class="wrap">
 <div class="center rv"><span class="eyebrow">سیلابس‌های فرعی</span><h2 class="h2">مکمل‌هایی که دانش را به شایستگی بالینی تبدیل می‌کنند</h2><p class="lede">این برنامه‌ها در کنار سه ترم اصلی برگزار می‌شوند.</p></div>
-<div class="how-grid rv" style="grid-template-columns:repeat(3,1fr)"><div class="how-step"><img src="/wp-content/uploads/2026/09/tjl-crit-supervision.webp" alt="سوپرویژن گروهی" loading="lazy"><h3>سوپرویژن گروهی</h3><p>رکن اصلی تبدیل دانش نظری به شایستگی بالینی و توصیهٔ استاندارد ISEFT. ارائهٔ کیس با فایل صوتی یا تصویری، بازخورد ساختاریافته با مقیاس‌های EFT و کار روی نقاط کور، با دکتر طوبایی و دکتر طاهری.</p></div><div class="how-step"><img src="/wp-content/uploads/2026/09/tjl-crit-science.webp" alt="ژورنال کلاب تخصصی EFT" loading="lazy"><h3>ژورنال کلاب تخصصی EFT</h3><p>بررسی عمیق و انتقادی آخرین مقالات مجلات معتبر بین‌المللی: شواهد پیامد در جمعیت‌های مختلف، تحلیل فرآیند تغییر درون‌جلسه‌ای، و توسعه‌های نظری تازه مانند مدل تعمیق هیجانی یکپارچه.</p></div><div class="how-step"><img src="/wp-content/uploads/2026/09/tjl-icon-book.webp" alt="ویدیوهای اتاق درمان واقعی" loading="lazy"><h3>ویدیوهای اتاق درمان واقعی</h3><p>جدیدترین ویدیوهای آموزشی از اتاق درمان واقعی زیر نظر استادان برجستهٔ جهانی در اختیار دانشجویان قرار می‌گیرد و مقالات معرفی‌شده در کتاب‌ها به‌عنوان تکلیف یا در قالب ژورنال کلاب بررسی می‌شود.</p></div></div>
+<div class="how-grid rv" style="grid-template-columns:repeat(3,1fr)"><div class="how-step"><img height="230" width="230" src="/wp-content/uploads/2026/11/tjl-ill-eye-heads.webp" alt="سوپرویژن گروهی" loading="lazy"><h3>سوپرویژن گروهی</h3><p>رکن اصلی تبدیل دانش نظری به شایستگی بالینی و توصیهٔ استاندارد ISEFT. ارائهٔ کیس با فایل صوتی یا تصویری، بازخورد ساختاریافته با مقیاس‌های EFT و کار روی نقاط کور، با دکتر طوبایی و دکتر طاهری.</p></div><div class="how-step"><img height="329" width="360" src="/wp-content/uploads/2026/11/tjl-ill-reader-line.webp" alt="ژورنال کلاب تخصصی EFT" loading="lazy"><h3>ژورنال کلاب تخصصی EFT</h3><p>بررسی عمیق و انتقادی آخرین مقالات مجلات معتبر بین‌المللی: شواهد پیامد در جمعیت‌های مختلف، تحلیل فرآیند تغییر درون‌جلسه‌ای، و توسعه‌های نظری تازه مانند مدل تعمیق هیجانی یکپارچه.</p></div><div class="how-step"><img height="311" width="360" src="/wp-content/uploads/2026/11/tjl-ill-video-call.webp" alt="ویدیوهای اتاق درمان واقعی" loading="lazy"><h3>ویدیوهای اتاق درمان واقعی</h3><p>جدیدترین ویدیوهای آموزشی از اتاق درمان واقعی زیر نظر استادان برجستهٔ جهانی در اختیار دانشجویان قرار می‌گیرد و مقالات معرفی‌شده در کتاب‌ها به‌عنوان تکلیف یا در قالب ژورنال کلاب بررسی می‌شود.</p></div></div>
 </div>
 </section>
 
@@ -714,7 +749,7 @@ main.tj-page{margin-block-start:0}
 <div class="wrap">
 <div class="center rv"><span class="eyebrow">روند ورود</span><h2 class="h2">چهار قدم تا شروع</h2><p class="lede">پذیرش با مصاحبه است تا گروه هم‌سطح بماند.</p></div>
 <div class="steps rv" style="grid-template-columns:repeat(4,1fr)"><div><i>۱</i><b>پر کردن فرم درخواست</b><span>همین صفحه؛ چند دقیقه وقت می‌گیرد.</span></div><div><i>۲</i><b>مصاحبهٔ آنلاین</b><span>گفت‌وگویی کوتاه با استاد یا پذیرش مدرسه.</span></div><div><i>۳</i><b>پذیرش و ورود به دوره</b><span>راهنمایی برای ثبت‌نام نهایی و شروع ترم اول.</span></div><div><i>۴</i><b>تراپی و سوپرویژن فردی</b><span>توصیه‌شده در کنار دوره؛ با تخفیف دانشجویی کلینیک.</span></div></div>
-<div class="cert rv"><img src="/wp-content/uploads/2026/09/tjl-sc-medallion.webp" alt="گواهی شرکت در دوره" loading="lazy"><div><b>گواهی شرکت در دوره</b><span>پس از اتمام دوره، گواهی رسمی حضور به زبان‌های فارسی و انگلیسی صادر می‌شود، همراه با ضمیمه‌ای که مباحث بررسی‌شده را توضیح می‌دهد. اعطای گواهی منوط به ارزیابی حضور و تأیید نهایی استادان است.</span></div></div>
+<div class="cert rv"><img height="360" width="223" src="/wp-content/uploads/2026/11/tjl-ill-grad-chair.webp" alt="گواهی شرکت در دوره" loading="lazy"><div><b>گواهی شرکت در دوره</b><span>پس از اتمام دوره، گواهی رسمی حضور به زبان‌های فارسی و انگلیسی صادر می‌شود، همراه با ضمیمه‌ای که مباحث بررسی‌شده را توضیح می‌دهد. اعطای گواهی منوط به ارزیابی حضور و تأیید نهایی استادان است.</span></div></div>
 </div>
 </section>
 
