@@ -582,7 +582,7 @@ var CO_SECTIONS = [
   { s: 'venue-occupancy', tabs: [{ b: 'hub', t: 'اشغال هفتگی گاندی' }], th: 'therapist',
     key: function (o) { return o.weekday && o.room && o.hour ? [o.weekday, o.room, o.hour].join('|') : ''; },
     f: { weekday: ['روز', 0], room: ['اتاق', 1], hour: ['ساعت', 2], therapist: ['درمانگر', 3], state: ['وضعیت', 5], fromDate: 'از تاریخ' } },
-  { s: 'venue-requests', tabs: [{ b: 'hub', t: 'درخواست‌های حضوری' }], key: function (o) { return o.id; }, th: 'therapist',
+  { s: 'venue-requests', tabs: [{ b: 'hub', t: 'درخواست‌های حضوری' }], key: function (o) { return o.id; }, th: 'therapist', dt: ['at', 'answeredAt'],   /* v170.129 (D 02:29): ۲۲ ردیف همه bad-at */
     f: { id: 'شناسه', at: 'زمان', therapist: 'درمانگر', therapistChatId: 'chat', venueKey: 'مکان', kind: 'نوع', weekday: 'روز', from: 'از ساعت', to: 'تا ساعت', room: 'اتاق', date: 'تاریخ', text: 'متن',
          status: 'وضعیت', receptionAnswer: 'پاسخ پذیرش', answeredAt: 'زمان پاسخ' }, fix: function (o) { delete o.id; } },
   { s: 'school-courses', tabs: [{ b: 'school', t: 'دوره‌ها' }], key: function (o) { return o.code; },
@@ -598,7 +598,7 @@ var CO_SECTIONS = [
          leadCode: 'کد لید مدرسه', funnelStage: 'مرحلهٔ قیف', owner: 'مسئول پیگیری' }, fix: function (o) { delete o.id; } },
   { s: 'school-lead-events', tabs: [{ b: 'school', t: 'رویدادهای مدرسه' }], key: function (o) { return o.leadKey ? [o.leadKey, o.row || '', o.at || ''].join('|') : ''; },
     f: Object.assign({ row: 'سطر' }, CO_SAME), dt: ['at'], fix: function (o) { delete o.row; } },
-  { s: 'scholarships', tabs: [{ b: 'school', t: 'بورسیه' }], key: function (o) { return o.id; },
+  { s: 'scholarships', tabs: [{ b: 'school', t: 'بورسیه' }], key: function (o) { return o.id; }, dt: ['at'],
     f: { id: 'شناسه', at: 'زمان', name: 'نام', phone: 'شماره', email: 'ایمیل', chatId: 'chat_id', status: 'وضعیت', fieldAndLevel: 'رشته و مقطع', university: 'دانشگاه', areas: 'زمینه‌های همکاری',
          languageLevel: 'سطح زبان', source: 'منبع', note: 'یادداشت', amount: ['مبلغ', 'مبلغ بورسیه'] }, fix: function (o) { delete o.id; } },
   { s: 'alumni', tabs: [{ b: 'school', t: 'دانش‌آموختگان' }], key: function (o) { return o.id; },
@@ -773,6 +773,14 @@ function coV170127Events() {
   var x = {}; try { x = (JSON.parse(lgProp_('BRC') || '{}') || {})['lead-events'] || {}; } catch (e4) {}
   return 'ردیف ' + n + ' · at قالب پل ' + good + ' · at خالی ' + empty + ' · بی کلید ' + nokey + ' · ارسال lead-events: ' + (x.code === undefined ? '-' : x.code) + (x.err ? '(' + x.err + ')' : '') + (x.at ? ' ok' : '') + ' · تیک: ' + String(t).slice(0, 80);
 }
+/** یک‌بارهٔ خودکار v170.129 (D 02:29): venue-requests و scholarships با زمان درست دوباره؛ فقط همین دو بخش. خروجی فقط شمار و کد */
+function coV170129Resend() {
+  var st = {}; try { st = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e) {}
+  delete st['venue-requests']; delete st.scholarships; delete st._down; lgProp_('BRC', JSON.stringify(st));
+  var t; try { t = coTick_(); } catch (e2) { t = 'خطا ' + String(e2).slice(0, 60); }
+  var x = {}; try { x = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e3) {}
+  return ['venue-requests', 'scholarships'].map(function (k) { var y = x[k] || {}; return k + '=' + (y.code === undefined ? '-' : y.code) + (y.n !== undefined ? '/' + y.n : '') + (y.at ? ' ok' : ''); }).join(' · ') + ' · تیک: ' + String(t).slice(0, 60);
+}
 /** یک‌بارهٔ v170.126 (فوری A ۱۶:۴۵، D2 ۴۰۱ همهٔ بخش‌ها): اثر انگشت راز (۸ هگز اول SHA-256؛ خود راز هرگز) + کد HTTP و errorCode یک ارسال خالی و بی‌ضرر (بخش venues، بی ردیف، complete نه).
  *  خروجی CI ۲۰۰ نویسه است، پس کوتاه. D2 همان اثر انگشت را از رازِ پل می‌گیرد و مقایسه می‌کند. */
 function coV170126Probe() {
@@ -846,7 +854,7 @@ function coTests() {
     ok('v170.127 (E20): نشانی اتاق جلسه از لینک‌های صفحهٔ تیم برداشته می‌شود؛ بقیه می‌ماند', tgPrLinksClean_('اینستاگرام: https://instagram.com/x\nجلسه: https://meet.google.com/abc-defg-hij') === 'اینستاگرام: https://instagram.com/x' &&
       tgPrLinksClean_('https://zoom.us/j/1، https://example.com') === 'https://example.com' && tgPrLinksClean_('https://www.skyroom.online/ch/x') === '' && tgPrLinksClean_(' https://whereby.com/room ') === '' &&
       tgPrLinksClean_('https://linkedin.com/in/x') === 'https://linkedin.com/in/x' && tgPrLinksClean_('') === '' && tgPrLinksClean_('https://zoomit.ir/a') === 'https://zoomit.ir/a');
-    ok('v170.127: بخش‌های دیگر بی تبدیل زمان', !coSec_('leads').dt && coSec_('school-lead-events').dt.join() === 'at');
+    ok('v170.127: بخش‌های دیگر بی تبدیل زمان', !coSec_('leads').dt && coSec_('school-lead-events').dt.join() === 'at' && coSec_('venue-requests').dt.join() === 'at,answeredAt' && coSec_('scholarships').dt.join() === 'at');
     delete TG_MEM['co:hub:رویدادهای لید']; delete TG_MEM['co:raw:hub:رویدادهای لید'];
     var big = []; for (var i = 0; i < 7000; i++) big.push({ key: 'k' + i, note: 'x' });
     var C = coChunks_('lead-events', big).map(function (b) { return JSON.parse(b); });
