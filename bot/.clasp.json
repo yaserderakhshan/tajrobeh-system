@@ -46,7 +46,10 @@
     "sitepub.gs",
     "kartable.gs",
     "prauto.gs",
-    "statfill.gs", "leadfix.gs", "specialty.gs", "thq.gs",
+    "statfill.gs",
+    "leadfix.gs",
+    "specialty.gs",
+    "thq.gs",
     "ai.gs",
     "psy2.gs",
     "migrate.gs",
@@ -63,7 +66,12 @@
     "uptime.gs",
     "agents.gs",
     "evlite.gs",
-    "ws.gs"
+    "ws.gs",
+    "brschool.gs",
+    "poll.gs",
+    "card.gs",
+    "biz.gs",
+    "prq.gs"
   ],
   "htmlExtensions": [
     ".html"

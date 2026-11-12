@@ -1439,6 +1439,11 @@ var TG_SUITES = [
   ['استخر و سئو', 'tgSeoTests'],
   ['آمار روزانه', 'tgStatTests'],
   ['مدرسه', 'tgSchoolTests'],
+  ['نظرسنجی کارکنان', 'pollTests'],
+  ['کارت زنده', 'cardTests'],
+  ['حساب‌های رسمی', 'bizTests'],
+  ['برنامهٔ مدرسه از پل', 'brsTests'],
+  ['صف پروفایل در پل', 'prqTests'],
   ['هاب مدرسه', 'tgSchool2Tests'],
   ['هستهٔ نسخهٔ ۲', 'tgCoreTests'],
   ['موتور پیام', 'tgNotifyTests'],
@@ -1817,8 +1822,7 @@ function tgAllowAll() {
   if (!url) return 'TG_RELAY_URL خالی است.';
   const body = {
     url: url,
-    allowed_updates: ['message', 'edited_message', 'callback_query',
-      'channel_post', 'edited_channel_post', 'my_chat_member', 'chat_member'],
+    allowed_updates: tgAllowedUpdates_(true),
     drop_pending_updates: false
   };
   if (sec) body.secret_token = sec;
@@ -2335,6 +2339,8 @@ function tgHandle(update) {
       } catch (eUt) {}
     }
     if (update.callback_query) return tgOnCallback_(update.callback_query);
+    if (update.business_connection || update.business_message || update.edited_business_message || update.deleted_business_messages) { try { if (tgFeat_('BIZ') && typeof bizHandle_ === 'function') bizHandle_(update); } catch (eBz) { tgErr_('bizHandle_', eBz); } return; }   /* v170.124 (E6.8): حساب‌های رسمی؛ فقط حالت خشک تا TG_BIZ_LIVE */
+    if (update.poll) { try { if (tgFeat_('POLL') && typeof pollUpdate_ === 'function') pollUpdate_(update.poll); } catch (ePl) { tgErr_('pollUpdate_', ePl); } return; }   /* v170.124 (E6.5): فقط شمار */
 
     const m = update.message || update.edited_message;
     if (!m || !m.chat) return;
@@ -2385,6 +2391,7 @@ function tgPrivate_(m) {
   if (tgGetVal_('evf', chat) && tgEvfInput_(chat, m, name)) return;
   if (m.text && tgEvnText_(chat, name, m.text)) return;
   if (m.text && tgGetVal_('inpd', chat) && tgInpDeskText_(chat, m.text)) return;
+  if (typeof pollRoute_ === 'function' && pollRoute_(chat, m)) return;   /* v170.124 (E6.5): /poll و /pollresult فقط برای کارکنان و پشت TG_FEAT_POLL */
   if (typeof tgBcRoute_ === 'function' && tgBcRoute_(m, chat, name, uname)) return;
   if (typeof wsRoute_ === 'function' && wsRoute_(chat, m)) return;   /* v170.78: «🗂 میز کار» برای اعضای تیم (ws.gs) */
   /* v166: موتور صدا (voice.gs): مچ‌میکینگ صوتی، اصلاح متن صدا */
@@ -6781,8 +6788,28 @@ function tgCbTests() {
 }
 try { TG_SUITES.push(['دادهٔ دکمه (v170.9.2)', 'tgCbTests']); } catch (eSu) {}
 
+/* v170.124 (E5، E6 بند ۳): دکمهٔ رنگی. نقشهٔ مرکزی پیشوند callback ← style (primary آبی، success سبز، danger قرمز). پشت TG_FEAT_BTN، پیش‌فرض خاموش؛
+   دکمهٔ بی پیشوند شناخته‌شده رنگ نمی‌گیرد؛ هر کیبورد حداکثر یک primary؛ danger فقط لغو. نماد ایموجی سفارشی نه (به پرمیوم صاحب بات وابسته است). */
+var TG_BTN_STYLE = [[/^(cancelmeet|ld:cx:)/, 'danger'], [/^(lq|ld|sl):take:/, 'primary'], [/^ld:bk:/, 'primary'], [/^cp:in:/, 'primary'], [/^(lq|ld|sl):call:/, 'success'],
+  [/^wk:ok/, 'success'], [/^(tq|iv|cp|en|sj|al|pn|ap|mz):(ok|y):/, 'success']];
+function tgBtnStyle_(markup) {
+  if (!markup || !markup.inline_keyboard || !tgFeat_('BTN')) return markup;
+  var primaries = 0;
+  markup.inline_keyboard.forEach(function (row) {
+    (row || []).forEach(function (b) {
+      if (!b || b.style || typeof b.callback_data !== 'string') return;
+      for (var i = 0; i < TG_BTN_STYLE.length; i++) {
+        if (!TG_BTN_STYLE[i][0].test(b.callback_data)) continue;
+        var st = TG_BTN_STYLE[i][1];
+        if (st === 'primary' && ++primaries > 1) return;
+        b.style = st; return;
+      }
+    });
+  });
+  return markup;
+}
 function tgSend_(chat, text, markup, replyTo) {
-  markup = tgCbFix_(markup);
+  markup = tgCbFix_(tgBtnStyle_(markup));
   if (TG_DRY) tgBtnCheck_('send', markup);   /* زنده از راه tgApi_ سنجیده می‌شود */
   if (TG_API_CHAT && String(chat) === String(TG_API_CHAT)) {
     TG_API_OUT.push({ text: String(text), kb: markup || null });
@@ -6815,6 +6842,36 @@ function tgSend_(chat, text, markup, replyTo) {
   return res;
 }
 
+/* v170.124 (E5، E6 بند ۴): پیام غنی. بلوک‌ها: {t:'h',text} عنوان، {t:'p',text} متن، {t:'rows',rows:[[سلول…]]} جدول (به خط‌های «• الف · ب»)،
+   {t:'fold',title,body:[بلوک…]} بخش بازشونده. فقط HTML مستند تلگرام (b و blockquote expandable)؛ «جدول» بومی تلگرام تأیید نشده، پس جدول همیشه خط‌خط است.
+   با TG_FEAT_RICH خاموش: همان محتوا بی بخش بازشونده، یک متن ساده. با روشن: بخش بازشونده؛ تکه‌تکه شدن در ۳۸۰۰ نویسه؛ خطای HTML را tgSend_ خودش به متن بی قالب برمی‌گرداند. */
+function tgRichBlock_(b, rich) {
+  if (!b) return '';
+  if (b.t === 'h') return '<b>' + tgEsc_(b.text) + '</b>';
+  if (b.t === 'p') return tgEsc_(b.text);
+  if (b.t === 'rows') return (b.rows || []).map(function (r) { return '• ' + (r || []).map(tgEsc_).join(' · '); }).join('\n');
+  if (b.t === 'fold') {
+    var inner = (b.body || []).map(function (x) { return tgRichBlock_(x, rich); }).filter(String).join('\n');
+    return rich ? '<b>' + tgEsc_(b.title) + '</b>\n<blockquote expandable>' + inner + '</blockquote>' : '<b>' + tgEsc_(b.title) + '</b>\n' + inner;
+  }
+  return '';
+}
+function tgRich_(blocks, rich) {
+  var parts = [], cur = '';
+  (blocks || []).forEach(function (b) {
+    var h = tgRichBlock_(b, rich); if (!h) return;
+    if (cur && cur.length + h.length + 2 > 3800) { parts.push(cur); cur = ''; }
+    cur += (cur ? '\n\n' : '') + h;
+  });
+  if (cur) parts.push(cur);
+  return parts;
+}
+function tgSendRich_(chat, blocks, markup) {
+  var parts = tgRich_(blocks, tgFeat_('RICH')), r = null;
+  for (var i = 0; i < parts.length; i++) r = tgSend_(chat, parts[i], i === parts.length - 1 ? markup : null) || r;
+  return r;
+}
+
 function tgPhoto_(chat, url, caption, markup) {
   if (TG_API_CHAT && String(chat) === String(TG_API_CHAT)) {
     TG_API_OUT.push({ text: String(caption || ''), kb: markup || null, photo: url });
@@ -6834,9 +6891,9 @@ function tgApi_(method, body) {
   if (body && body.reply_markup) {
     if (typeof body.reply_markup === 'string') {
       var rmk = null; try { rmk = JSON.parse(body.reply_markup); } catch (e) {}
-      if (rmk && rmk.inline_keyboard) { var before = body.reply_markup; tgCbFix_(rmk); tgBtnCheck_(method, rmk); tgCbDropEmpty_(rmk); var after = JSON.stringify(rmk); if (after !== before) body.reply_markup = after; }
+      if (rmk && rmk.inline_keyboard) { var before = body.reply_markup; tgBtnStyle_(rmk); tgCbFix_(rmk); tgBtnCheck_(method, rmk); tgCbDropEmpty_(rmk); var after = JSON.stringify(rmk); if (after !== before) body.reply_markup = after; }
       else tgBtnCheck_(method, rmk);
-    } else { tgCbFix_(body.reply_markup); tgBtnCheck_(method, body.reply_markup); tgCbDropEmpty_(body.reply_markup); }
+    } else { tgBtnStyle_(body.reply_markup); tgCbFix_(body.reply_markup); tgBtnCheck_(method, body.reply_markup); tgCbDropEmpty_(body.reply_markup); }
   }
   if (TG_API_CHAT) {
     if (method === 'answerCallbackQuery') { if (TG_DRY) TG_OUTBOX.push({ kind: 'api', method: method }); return null; }
@@ -7040,7 +7097,7 @@ function tgUseWebhook() {
   props.setProperty('TG_HOOK_SET_AT', String(Math.floor(Date.now() / 1000)));
   Logger.log('setWebhook → ' + tgApi_('setWebhook', {
     url: url, max_connections: 40, drop_pending_updates: false,
-    allowed_updates: ['message', 'edited_message', 'callback_query']
+    allowed_updates: tgAllowedUpdates_(false)
   }).getContentText());
   Utilities.sleep(1500);
   Logger.log('getWebhookInfo → ' + tgApi_('getWebhookInfo', {}).getContentText().replace(/([?&]t=)[^"&]+/g, '$1***'));   /* v170.9: رمز در لاگ نیاید */
@@ -7166,6 +7223,7 @@ function tgWatchdog(e) {
     } finally { tgLeadsShare_(false); }
   }
   S('tgFollowTick_', 'light', tgFollowTick_);
+  S('tgPrTick_', 'light', function () { var hh = bgHour_(); if (hh < 9 || hh >= 21) return; return tgPrTick_(); });   /* v170.124 (E5): بازبینی پروفایل از «سنگین» به «سبک»: سنگین فقط ۵ ساعت در روز می‌رفت و با مصرف بالای ۵۵ دقیقه رد می‌شد؛ praTick_ خودش نیم‌ساعت صبر و سقف دارد */
   S('grdTick_', 'light', typeof grdTick_ === 'function' ? grdTick_ : null);   /* v170.23.30: نگهبان مهلت‌ها J-04، J-02، J-06 (guard.gs) */
   S('evlTick_', 'light', typeof evlTick_ === 'function' ? evlTick_ : null);   /* v170.23.38: رویداد سبک: بستن ۴۸ ساعته، یادآوری تأیید */
   S('vnTick_', 'light', typeof vnTick_ === 'function' ? function () { if (typeof grdInHours_ === 'function' && !grdInHours_(Date.now())) return; return vnTick_(); } : null);   /* v170.23.31: اعلان نسخه با «خواندم» (changes.gs) */
@@ -7195,7 +7253,6 @@ function tgWatchdog(e) {
     S('tgClsTick_', 'heavy', tgClsTick_);
     S('tgCrmTick_', 'heavy', tgCrmTick_);
     S('tgInpTick_', 'heavy', tgInpTick_);
-    S('tgPrTick_', 'heavy', tgPrTick_);
     S('tgSchDailyTick_', 'heavy', tgSchDailyTick_);
   }
   } finally { bgFlush_(); tgRunStat_('tgWatchdog', rs0); }
@@ -11880,6 +11937,17 @@ var TG_SUP_TAB = 'درخواست سوپرویژن';
 
 var TG_CIRCLE_CAL = cfg_('TG_CIRCLE_CAL', {});
 var TG_CAL_PUBLIC = cfg_('TG_CAL_PUBLIC', []);
+/* v170.124 (E5، E6 بند ۱): کلید ویژگی هر قابلیت تازهٔ تلگرام؛ پیش‌فرض خاموش. با کلید خاموش خروجی و فهرست allowed_updates دقیقاً مثل امروز است.
+   مقدار در «تنظیمات خصوصی بات»: TG_FEAT_TIME، TG_FEAT_BTN، TG_FEAT_RICH، TG_FEAT_POLL، TG_FEAT_CARD، TG_FEAT_BIZ؛ روشن = 1 یا on. */
+function tgFeat_(name) { var v = String(cfg_('TG_FEAT_' + name, '')).toLowerCase(); return v === '1' || v === 'on' || v === 'true'; }
+/* یک فهرست برای هر دو ثبت وبهوک (tgAllowAll و tgUseWebhook؛ پیش از این دو فهرست جدا و ناهمخوان بود). withAll: کانال و عضویت هم. */
+function tgAllowedUpdates_(withAll) {
+  var a = ['message', 'edited_message', 'callback_query'];
+  if (withAll) a.push('channel_post', 'edited_channel_post', 'my_chat_member', 'chat_member');
+  if (tgFeat_('POLL')) a.push('poll');   /* ناشناس: poll_answer نمی‌آید؛ شمار با update نوع poll */
+  if (tgFeat_('BIZ')) a.push('business_connection', 'business_message', 'edited_business_message', 'deleted_business_messages');
+  return a;
+}
 var TG_CIRCLES  = ['۷', '۸', '۹', '۱۰', '۱۱', '۱۲', '۱۳', '۱۴', '۱۵/۱', '۱۵/۲'];
 var TG_APPROACH = ['روانکاوی کلاسیک', 'لکانی', 'روانکاوی مدرن', 'روان‌تحلیلی', 'هیجان‌مدار (EFT)', 'CBT'];
 
@@ -11910,13 +11978,36 @@ var T_SUP_OFF    = 'پذیرش سوپرویژن شما بسته شد.';
 function tgCircleKey_(v) {
   var raw = String(v == null ? '' : v);
   if (!raw) return '';
-  if (raw.indexOf('نامشخص') > -1 || raw.indexOf('تا') > -1) return '';
+  if (raw.indexOf('نامشخص') > -1 || /(^|\s)تا(\s|$)/.test(raw)) return '';   /* v170.124 (E5): «تا» فقط به‌عنوان واژهٔ جدا (۷ تا ۱۲)؛ «ستاره» حلقه را نمی‌اندازد */
   var s = tgLatinDigits_(raw).replace(/\s/g, '');
+  if (/[A-Za-z]/.test(s) && !/^CLIN/i.test(s)) return '';   /* MODERN-۱ و EFT-۱ کلید عددی ندارند؛ پیش از این همه '1' می‌شدند */
   var m = s.match(/(\d{1,2})\/(\d)/);
   if (m) return m[1] + '/' + m[2];
   m = s.match(/(\d{1,2})/);
   return m ? m[1] : '';
 }
+
+/* v170.124 (E5): حلقه و تقویم از تب «حلقه‌ها» (منبع یگانهٔ مدرسه، تصمیم ۲۰ آبان). TG_CIRCLE_CAL و TG_CIRCLES فقط پشتیبان‌اند.
+   ورودی هر شکلی که در شیت هست: «۱۵/۱»، «CLIN-۱۵/۱»، «MODERN-۱»؛ رقم فارسی و لاتین یکسان؛ «نامشخص» و «؟» حلقه نیستند. */
+function tgSchCircNorm_(v) { return tgLatinDigits_(String(v == null ? '' : v)).replace(/\s/g, '').toUpperCase(); }
+function tgSchCircleFind_(raw) {
+  var o = String(raw == null ? '' : raw);
+  if (!o || /نامشخص|؟|\?/.test(o)) return null;
+  var r = tgSchCircNorm_(o);
+  if (!/[A-Z]/.test(r)) r = 'CLIN-' + r;   /* فقط عدد یعنی حلقهٔ تجربهٔ بالینی */
+  var list = []; try { list = tgSchCircles_(); } catch (e) {}
+  for (var i = 0; i < list.length; i++) if (tgSchCircNorm_(list[i].code) === r) return list[i];
+  return null;
+}
+function tgSchCircleActive_(c) { return !!c && !/بایگانی|آرشیو|بسته|غیرفعال/.test(String(c.status || '')); }
+function tgCircleCal_(raw) {
+  var c = tgSchCircleFind_(raw);
+  if (c && c.cal) return c.cal;
+  if (/[A-Za-z]/.test(tgLatinDigits_(String(raw == null ? '' : raw))) && !/^CLIN/i.test(tgSchCircNorm_(raw))) return '';
+  var k = tgCircleKey_(raw);
+  return k && TG_CIRCLE_CAL[k] ? TG_CIRCLE_CAL[k] : '';
+}
+function tgHasCircle_(raw) { return !!tgSchCircleFind_(raw) || !!tgCircleKey_(raw); }
 
 function tgIsSchoolRow_(p) {
   for (var i = 0; i < TG_SCH_ROLES.length; i++) if (p.roles.indexOf(TG_SCH_ROLES[i]) > -1) return true;
@@ -12039,25 +12130,29 @@ function tgEduConnect_(chat, p) {
   var role = p.roles.indexOf('دانشجو') > -1 ? 'دانشجو' : p.roles[0];
   tgSetVal_('role', chat, role);
   tgSend_(chat, T_EDU_OK, tgSchoolMenu_(role));
-  if (role === 'دانشجو' && !tgCircleKey_(p.circle)) return tgAskCircle_(chat);
+  if (role === 'دانشجو' && !tgHasCircle_(p.circle)) return tgAskCircle_(chat, tgCircleUnknown_(p.circle));
   if (role === 'دانشجو' && typeof tgPqUniOffer_ === 'function') tgPqUniOffer_(chat);
   return null;
 }
 
 
-function tgAskCircle_(chat) {
-  var rows = [], r = [];
-  for (var i = 0; i < TG_CIRCLES.length; i++) {
-    r.push(TG_CIRCLES[i]);
-    if (r.length === 3 || i === TG_CIRCLES.length - 1) { rows.push(r); r = []; }
+var T_CIRCLE_UNKNOWN = 'حلقهٔ شما در مدرسه هنوز مشخص نشده. اگر می‌دانید کدام است همین‌جا انتخاب کنید؛ اگر نه، از دکمهٔ «💬 پیام به مدرسه» بپرسید.';   /* v170.124 (ممیزی ۷) */
+function tgCircleUnknown_(raw) { return /؟|\?|نامشخص/.test(String(raw == null ? '' : raw)); }
+function tgAskCircle_(chat, unknown) {
+  var rows = [], r = [], labels = [];
+  try { tgSchCircles_().forEach(function (c) { if (tgSchCircleActive_(c) && c.code) labels.push(c.code); }); } catch (eC) {}
+  if (!labels.length) labels = TG_CIRCLES;   /* پشتیبان وقتی شیت خوانده نشد */
+  for (var i = 0; i < labels.length; i++) {
+    r.push(labels[i]);
+    if (r.length === 3 || i === labels.length - 1) { rows.push(r); r = []; }
   }
   tgSetFlag_('ecircle', chat, 1800);
-  return tgSend_(chat, T_CIRCLE_ASK, { keyboard: rows, resize_keyboard: true, one_time_keyboard: true });
+  return tgSend_(chat, unknown ? T_CIRCLE_UNKNOWN : T_CIRCLE_ASK, { keyboard: rows, resize_keyboard: true, one_time_keyboard: true });
 }
 
 function tgSetCircle_(chat, text) {
-  var key = tgCircleKey_(text);
-  if (!key || !TG_CIRCLE_CAL[key]) return false;
+  var key = tgCircleKey_(text), sc = tgSchCircleFind_(text);
+  if (!(sc && tgSchCircleActive_(sc)) && !(key && TG_CIRCLE_CAL[key] && !sc && !/[A-Za-z]/.test(tgLatinDigits_(String(text))))) return false;
   var p = tgWhoPerson_(chat, '');
   if (!p) return false;
   if (!TG_DRY) {
@@ -12613,15 +12708,73 @@ function tgCalText_(calId, days) {
   } catch (e) { tgErr_('tgCalText_: ' + e); return ''; }
 }
 
+/* v170.124 (E5، ممیزی ۸، قاعدهٔ E9 لین A): تقویم عمومی «مدرسه تجربه زندگی» همهٔ برنامه است و عنوان هر رویداد با «پیشوند · » شروع می‌شود
+   («حلقه ۱۵/۱ · …»، «حلقه ۱۳/۱۴ · …»، «حلقه ۷/۸/۹ · …»، «EFT · …»، «روانکاوی مدرن · …»). دانشجو رویدادهای حلقه یا دورهٔ خودش را می‌بیند
+   (پیشوند ترکیبی برای هر عدد حساب می‌شود) و رویدادهای بی پیشوند (کل مدرسه). تقویم هر حلقه پشتیبان می‌ماند. */
+var TG_CAL_COURSE_PREFIX = { 'EFT': 'EFT', 'روانکاوی مدرن': 'MODERN' };
+function tgCalPrefixHit_(title, circle, subKeys) {
+  var t = String(title == null ? '' : title), i = t.indexOf('·');
+  if (i < 0) return true;   /* بی پیشوند: کل مدرسه */
+  var pre = t.slice(0, i).replace(/^\s+|\s+$/g, '');
+  if (!pre) return true;
+  var code = tgSchCircNorm_(circle && circle.code), course = (code.split('-')[0] || '');
+  for (var name in TG_CAL_COURSE_PREFIX) if (pre === name) return TG_CAL_COURSE_PREFIX[name] === course;
+  if (pre.indexOf('حلقه') !== 0) return false;
+  var key = code.indexOf('CLIN-') === 0 ? code.slice(5) : '';
+  if (!key) return false;
+  var chunks = tgLatinDigits_(pre.slice(4)).split(/[\s,،و]+/);
+  for (var k = 0; k < chunks.length; k++) {
+    var c = chunks[k]; if (!c) continue;
+    if (c === key) return true;
+    if (subKeys && subKeys.indexOf(c) > -1) continue;   /* 15/1 و 15/2 تکه‌ناپذیرند */
+    if (c.indexOf('/') > -1 && c.split('/').indexOf(key) > -1) return true;
+  }
+  return false;
+}
+function tgCalGeneral_() {
+  var g = String(cfg_('TG_CAL_GENERAL', '') || '').trim();
+  if (g) return g;
+  var c = null; try { c = tgSchCircleFind_('MODERN-1'); } catch (e) {}
+  return c && c.cal ? c.cal : '';
+}
+function tgCalEvents_(calId, days) {
+  if (TG_DRY) return (TG_MEM['cal:' + calId] || []).slice(0);
+  try {
+    var cal = CalendarApp.getCalendarById(calId); if (!cal) return [];
+    var from = new Date(), to = new Date(from.getTime() + (days || 14) * 86400000);
+    return cal.getEvents(from, to).map(function (e) { return { start: e.getStartTime(), title: e.getTitle() }; });
+  } catch (e2) { tgErr_('tgCalEvents_: ' + e2); return []; }
+}
+function tgCalFmt_(ev) {
+  return ev.slice(0, 20).map(function (x) {
+    return '• ' + tgJDateFull_(x.start, TG_TZ) + ' ساعت ' + Utilities.formatDate(x.start, TG_TZ, 'HH:mm') + '\n  ' + x.title;
+  }).join('\n');
+}
+/* برنامهٔ دانشجو: عمومی (فیلترشده) + تقویم خود حلقه، بی تکرار، به ترتیب زمان */
+function tgCalForCircle_(raw, days) {
+  var circle = tgSchCircleFind_(raw), own = tgCircleCal_(raw), gen = tgCalGeneral_();
+  if (typeof brsText_ === 'function') { var bt = brsText_(circle, days || 14); if (bt !== null) return bt; }   /* v170.124 (K390.3): پل منبع یگانه وقتی BRIDGE_SCHOOL_READ=1؛ خطا یا ۴۰۴ ← مسیر شیت و تقویم */
+  if (!gen) return own ? tgCalText_(own, days || 14) : '';
+  var subKeys = [];
+  try { tgSchCircles_().forEach(function (c) { var n = tgSchCircNorm_(c.code); if (n.indexOf('CLIN-') === 0 && n.indexOf('/') > -1) subKeys.push(n.slice(5)); }); } catch (eS) {}
+  var ev = tgCalEvents_(gen, days || 14).filter(function (x) { return tgCalPrefixHit_(x.title, circle, subKeys); });
+  if (own && own !== gen) ev = ev.concat(tgCalEvents_(own, days || 14));
+  var seen = {};
+  ev = ev.filter(function (x) { var k = +x.start + '|' + x.title; if (seen[k]) return false; seen[k] = 1; return true; });
+  ev.sort(function (a, b) { return a.start - b.start; });
+  return tgCalFmt_(ev);
+}
+
 function tgMyCal_(chat, role) {
   var p = tgWhoPerson_(chat, '');
   if (!p) return tgEduSignup_(chat);
-  var key = tgCircleKey_(p.circle);
-  if (!key || !TG_CIRCLE_CAL[key]) {
-    if (role === 'دانشجو') return tgAskCircle_(chat);
+  var cal = tgCircleCal_(p.circle);
+  if (!cal) {
+    if (role === 'دانشجو') return tgAskCircle_(chat, tgCircleUnknown_(p.circle));
     return tgPublicCal_(chat, role);
   }
-  var t = tgCalText_(TG_CIRCLE_CAL[key], 14);
+  var t = tgCalForCircle_(p.circle, 14);
+  if (t && tgFeat_('RICH')) return tgSendRich_(chat, [{ t: 'p', text: T_CAL_HEAD }, { t: 'fold', title: 'جلسه‌های دو هفتهٔ آینده', body: [{ t: 'p', text: t }] }], tgSchoolMenu_(role));
   return tgSend_(chat, t ? (T_CAL_HEAD + '\n\n' + t) : T_CAL_EMPTY, tgSchoolMenu_(role));
 }
 
@@ -12810,7 +12963,10 @@ var TG_START_MAP = {
   home_hero: 'هوم › هیرو', home_float: 'هوم › دکمهٔ شناور',
   edu: 'مدرسه › اتصال', ev: 'رویداد › لینک مستقیم',
   join: 'مدرسه › عضویت در بات', sch_join: 'مدرسه › عضویت در بات',
-  comm: 'مدرسه › کامیونیتی در بات', community: 'مدرسه › کامیونیتی در بات'
+  comm: 'مدرسه › کامیونیتی در بات', community: 'مدرسه › کامیونیتی در بات',
+  /* v170.124 (A → E ۲۱ آبان ۰۶:۴۸، FIXLIST ۳ لین F): کدهای شروع تازهٔ سایت؛ منبع ثبت می‌شود، مسیر مثل th_sup، sch_… و th_psy همان شروع عادی با برچسب منبع */
+  'site-supervision': 'سایت › سوپرویژن', 'site-contact': 'سایت › تماس', 'site-enterprise': 'سایت › سازمان‌ها', 'site-help': 'سایت › راهنما',
+  'site-lacan': 'سایت › لکان', 'site-couple': 'سایت › زوج', 'site-individual': 'سایت › فردی', 'site-psychiatry': 'سایت › روان‌پزشکی'
 };
 
 /* منوی مدرسه برای مخاطب عمومی. v170.13: «بورسیه و همکاری» به صفحهٔ بورسیه می‌رود، نه فرم عضویت */
@@ -13027,6 +13183,24 @@ function tgSchoolTests() {
   ok('حلقهٔ ۱۳', tgCircleKey_('۱۳') === '13');
   ok('حلقهٔ نامشخص', tgCircleKey_('۷ تا ۱۲ (نامشخص)') === '');
   ok('حلقهٔ خالی', tgCircleKey_('') === '');
+  ok('کلید: CLIN-۱۵/۱ و CLIN-15/1 هر دو 15/1', tgCircleKey_('CLIN-۱۵/۱') === '15/1' && tgCircleKey_('CLIN-15/1') === '15/1');
+  ok('کلید: «ستاره» تهی نمی‌ماند', tgCircleKey_('حلقه ستاره ۱۳') === '13' && tgCircleKey_('۷ تا ۱۲') === '');
+  ok('کلید: MODERN-۱ و EFT-۱ کلید ۱ نمی‌گیرند', tgCircleKey_('MODERN-۱') === '' && tgCircleKey_('EFT-۱') === '');
+  (function () {   /* v170.124 (E5): حلقه و تقویم از شیت */
+    var kD = TG_DRY, kM = TG_MEM, kO = TG_OUTBOX;
+    TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
+    try {
+      TG_MEM['sch' + TG_SCH_T_CIRCLE] = [['CLIN-۱۵/۱', 'CLIN', 'حلقه پانزده یک', 'فعال', 22, 'حلقه پانزده', 'cal-151', '', '', '', ''],
+        ['CLIN-۸', 'CLIN', 'حلقه هشت', 'بایگانی', 1, 'حلقه ۸و۹', 'cal-89', '', '', '', ''],
+        ['MODERN-۱', 'MODERN', 'مدرن یک', 'فعال', 1, 'مدرسه', 'cal-gen', '', '', '', ''],
+        ['EFT-۱', 'EFT', 'ای اف تی', 'فعال', 0, 'سیلابس', 'cal-eft', '', '', '', '']];
+      ok('شیت: «۱۵/۱» و «CLIN-۱۵/۱» یک حلقه‌اند', tgCircleCal_('۱۵/۱') === 'cal-151' && tgCircleCal_('CLIN-15/1') === 'cal-151' && tgCircleCal_('CLIN-۱۵/۱') === 'cal-151');
+      ok('شیت: MODERN-۱ تقویم خودش را می‌گیرد، نه کلید ۱', tgCircleCal_('MODERN-۱') === 'cal-gen' && tgCircleCal_('EFT-۱') === 'cal-eft');
+      ok('شیت: نامشخص و «CLIN-؟» حلقه ندارند', !tgSchCircleFind_('۷ تا ۱۲ (نامشخص)') && !tgSchCircleFind_('CLIN-؟') && tgCircleCal_('CLIN-؟') === '');
+      ok('شیت: حلقهٔ بایگانی انتخابی نیست', !tgSchCircleActive_(tgSchCircleFind_('CLIN-۸')) && tgSchCircleActive_(tgSchCircleFind_('MODERN-۱')));
+      ok('شیت: انتخاب‌گر فقط فعال‌ها', (function () { tgAskCircle_('t'); var m = JSON.stringify(TG_OUTBOX || []); return m.indexOf('MODERN-۱') > -1 && m.indexOf('CLIN-۸') < 0; })());
+    } finally { TG_DRY = kD; TG_MEM = kM; TG_OUTBOX = kO; }
+  })();
   ok('هر حلقه کلندر دارد', TG_CIRCLES.every(function (c) { return !!TG_CIRCLE_CAL[tgCircleKey_(c)]; }));
   ok('نقش‌های مدرسه در TG_ROLES', TG_SCH_ROLES.every(function (r) { return TG_ROLES.indexOf(r) > -1; }));
   ok('هر نقش دکمهٔ رویداد دارد', TG_SCH_ROLES.every(function (r) {
@@ -13041,6 +13215,101 @@ function tgSchoolTests() {
   ok('تب رویدادها هست', !!tgSchSS_().getSheetByName(TG_EV_TAB));
   ok('رویداد ناموجود از فرم رد می‌شود', tgEvFromForm_({ event: 'یک چیز بی‌معنی ۹۹۹' }).ok === false);
   ok('ستون رویکرد در هدر افراد', TG_PEOPLE_HEAD.indexOf('رویکرد') > -1);
+  (function () {   /* v170.124 (E5، ممیزی ۸، E9): فیلتر رویداد تقویم عمومی به حلقهٔ دانشجو */
+    var kD = TG_DRY, kM = TG_MEM;
+    TG_DRY = true; TG_MEM = {};
+    try {
+      TG_MEM['sch' + TG_SCH_T_CIRCLE] = [['CLIN-۱۵/۱', 'CLIN', 'a', 'فعال', 1, 'n', 'cal-151', '', '', '', ''], ['CLIN-۱۵/۲', 'CLIN', 'b', 'فعال', 1, 'n', 'cal-152', '', '', '', ''],
+        ['CLIN-۱۳', 'CLIN', 'c', 'فعال', 1, 'n', 'cal-13', '', '', '', ''], ['CLIN-۸', 'CLIN', 'd', 'بایگانی', 1, 'n', 'cal-89', '', '', '', ''],
+        ['MODERN-۱', 'MODERN', 'e', 'فعال', 1, 'n', 'cal-gen', '', '', '', ''], ['EFT-۱', 'EFT', 'f', 'فعال', 1, 'n', 'cal-eft', '', '', '', '']];
+      var D = Date.UTC(2026, 10, 15, 6, 0);
+      TG_MEM['cal:cal-gen'] = [{ start: new Date(D), title: 'حلقه ۱۵/۱ · کیس' }, { start: new Date(D + 1e6), title: 'حلقه ۱۵/۲ · کیس' }, { start: new Date(D + 2e6), title: 'حلقه ۱۳/۱۴ · متن' },
+        { start: new Date(D + 3e6), title: 'حلقه ۷/۸/۹ · رویا' }, { start: new Date(D + 4e6), title: 'EFT · جلسه' }, { start: new Date(D + 5e6), title: 'روانکاوی مدرن · جلسه' }, { start: new Date(D + 6e6), title: 'ژورنال کلاب' }];
+      var sub = ['15/1', '15/2'], hit = function (raw, title) { return tgCalPrefixHit_(title, tgSchCircleFind_(raw), sub); };
+      ok('رویداد: ۱۵/۱ فقط رویداد ۱۵/۱ و بی پیشوند', hit('CLIN-۱۵/۱', 'حلقه ۱۵/۱ · کیس') && !hit('CLIN-۱۵/۱', 'حلقه ۱۵/۲ · کیس') && !hit('CLIN-۱۵/۱', 'حلقه ۱۳/۱۴ · متن') && hit('CLIN-۱۵/۱', 'ژورنال کلاب'));
+      ok('رویداد: پیشوند ترکیبی برای هر عدد', hit('۱۳', 'حلقه ۱۳/۱۴ · متن') && hit('۱۴', 'حلقه ۱۳/۱۴ · متن') && hit('CLIN-۸', 'حلقه ۷/۸/۹ · رویا') && !hit('۱۳', 'حلقه ۷/۸/۹ · رویا'));
+      ok('رویداد: ۱۵/۱ در «۱۵/۱» به ۱ و ۱۵ شکسته نمی‌شود', !hit('CLIN-۸', 'حلقه ۱۵/۱ · کیس'));
+      ok('رویداد: دوره', hit('EFT-۱', 'EFT · جلسه') && !hit('EFT-۱', 'روانکاوی مدرن · جلسه') && hit('MODERN-۱', 'روانکاوی مدرن · جلسه') && !hit('CLIN-۱۳', 'EFT · جلسه'));
+      TG_MEM['cal:cal-13'] = [{ start: new Date(D + 2e6), title: 'حلقه ۱۳/۱۴ · متن' }, { start: new Date(D + 9e6), title: 'تقویم خود حلقه' }];
+      var t13 = tgCalForCircle_('۱۳', 14);
+      ok('رویداد: تقویم حلقه ۱۳ = عمومیِ فیلترشده + تقویم خودش، بی تکرار', (t13.match(/حلقه ۱۳\/۱۴ · متن/g) || []).length === 1 && /تقویم خود حلقه/.test(t13) && /ژورنال کلاب/.test(t13) && !/۱۵\/۱ · کیس/.test(t13) && !/EFT/.test(t13));
+    } finally { TG_DRY = kD; TG_MEM = kM; }
+  })();
+  (function () {   /* v170.124 (E5، E6 پیام غنی) */
+    var kc = TG_CFG_, kD = TG_DRY, kO = TG_OUTBOX;
+    var bl = [{ t: 'h', text: 'برنامهٔ حلقهٔ ۱۴' }, { t: 'rows', rows: [['شنبه ۱۴۰۵/۰۸/۲۳', 'استاد نمونه'], ['یکشنبه ۱۴۰۵/۰۸/۲۴', 'کیس']] }, { t: 'fold', title: 'جزئیات', body: [{ t: 'p', text: 'متن <بلند>' }] }];
+    try {
+      TG_CFG_ = {};
+      var off = tgRich_(bl, false);
+      ok('غنی: خاموش یک تکه، بی بخش بازشونده، جدول خط‌خط', off.length === 1 && off[0].indexOf('blockquote') < 0 && off[0].indexOf('• شنبه ۱۴۰۵/۰۸/۲۳ · استاد نمونه') > -1);
+      var on = tgRich_(bl, true);
+      ok('غنی: روشن بخش بازشونده دارد و متن escape می‌شود', on.length === 1 && on[0].indexOf('<blockquote expandable>') > -1 && on[0].indexOf('متن &lt;بلند&gt;') > -1);
+      var big = []; for (var i = 0; i < 30; i++) big.push({ t: 'p', text: new Array(200).join('ب') });
+      var parts = tgRich_(big, true);
+      ok('غنی: طول بیش از حد خودکار تکه می‌شود (هر تکه ≤ ۳۸۰۰)', parts.length > 1 && parts.every(function (x) { return x.length <= 3800; }));
+      TG_DRY = true; TG_OUTBOX = [];
+      tgSendRich_('77', bl, null);
+      ok('غنی: tgSendRich_ با کلید خاموش یک پیام ساده می‌فرستد', TG_OUTBOX.length === 1 && String(TG_OUTBOX[0].text).indexOf('blockquote') < 0);
+    } finally { TG_CFG_ = kc; TG_DRY = kD; TG_OUTBOX = kO; }
+  })();
+  (function () {   /* v170.124 (E5، E6 دکمهٔ رنگی) */
+    var kc = TG_CFG_;
+    var mk = function () { return { inline_keyboard: [[{ text: 'a', callback_data: 'lq:take:5' }, { text: 'b', callback_data: 'lq:call:5' }], [{ text: 'c', callback_data: 'cancelmeet' }, { text: 'd', callback_data: 'zz:unknown' }], [{ text: 'e', callback_data: 'ld:take:9' }, { text: 'f', url: 'https://x.y' }]] }; };
+    try {
+      TG_CFG_ = {};
+      ok('رنگ: با کلید خاموش هیچ style فرستاده نمی‌شود', JSON.stringify(tgBtnStyle_(mk())).indexOf('style') < 0);
+      TG_CFG_ = { TG_FEAT_BTN: '1' };
+      var m = tgBtnStyle_(mk()), j = JSON.stringify(m), n = (j.match(/"style":"primary"/g) || []).length;
+      ok('رنگ: لغو danger، تماس گرفتم success، برداشتم primary', m.inline_keyboard[0][0].style === 'primary' && m.inline_keyboard[0][1].style === 'success' && m.inline_keyboard[1][0].style === 'danger');
+      ok('رنگ: دکمهٔ ناشناس و لینک رنگ نمی‌گیرند', !m.inline_keyboard[1][1].style && !m.inline_keyboard[2][1].style);
+      ok('رنگ: هیچ کیبوردی بیش از یک primary ندارد', n === 1 && !m.inline_keyboard[2][0].style);
+      ok('رنگ: danger فقط برای لغو', (j.match(/"style":"danger"/g) || []).length === 1);
+      var m2 = tgBtnStyle_({ inline_keyboard: [[{ text: 'a', callback_data: 'ld:bk:1' }], [{ text: 'b', callback_data: 'ld:cx:1' }], [{ text: 'c', callback_data: 'wk:ok' }, { text: 'd', callback_data: 'wk:off' }]] });
+      ok('رنگ: رزرو معارفه primary، لغو معارفه danger، «همین است» success، مرخصی بی رنگ', m2.inline_keyboard[0][0].style === 'primary' && m2.inline_keyboard[1][0].style === 'danger' && m2.inline_keyboard[2][0].style === 'success' && !m2.inline_keyboard[2][1].style);
+    } finally { TG_CFG_ = kc; }
+  })();
+  (function () {   /* v170.124 (A → E ۰۶:۴۸): کدهای شروع سایت */
+    var codes = ['site-supervision', 'site-contact', 'site-enterprise', 'site-help', 'site-lacan', 'site-couple', 'site-individual', 'site-psychiatry'];
+    ok('کد شروع سایت: هر ۸ کد برچسب منبع «سایت › …» دارد', codes.every(function (c) { return /^سایت › /.test(tgStartLabel_(c)); }));
+    ok('کد شروع سایت: کد ناشناخته خودش را برمی‌گرداند (شروع ساده)', tgStartLabel_('site-unknown-x') === 'site-unknown-x');
+  })();
+  (function () {   /* v170.124 (E5، ممیزی ۷): «CLIN-؟» جملهٔ شفاف می‌گیرد */
+    var kD = TG_DRY, kM = TG_MEM, kO = TG_OUTBOX;
+    TG_DRY = true; TG_MEM = {}; TG_OUTBOX = [];
+    try {
+      TG_MEM['sch' + TG_SCH_T_CIRCLE] = [['CLIN-۱۳', 'CLIN', 'c', 'فعال', 1, 'n', 'cal-13', '', '', '', ''], ['CLIN-۸', 'CLIN', 'd', 'بایگانی', 1, 'n', 'cal-89', '', '', '', '']];
+      ok('«؟»: تشخیص حلقهٔ نامشخص', tgCircleUnknown_('CLIN-؟') && tgCircleUnknown_('۷ تا ۱۲ (نامشخص)') && !tgCircleUnknown_('CLIN-۱۳') && !tgCircleUnknown_(''));
+      tgAskCircle_('9', true);
+      var a = JSON.stringify(TG_OUTBOX);
+      ok('«؟»: جملهٔ شفاف و فهرست فقط حلقهٔ فعال', /هنوز مشخص نشده/.test(a) && a.indexOf('CLIN-۱۳') > -1 && a.indexOf('CLIN-۸') < 0);
+      TG_OUTBOX = []; tgAskCircle_('9', false);
+      ok('بی «؟»: همان پرسش همیشگی', /حلقه‌تان کدام است/.test(JSON.stringify(TG_OUTBOX)));
+    } finally { TG_DRY = kD; TG_MEM = kM; TG_OUTBOX = kO; }
+  })();
+  (function () {   /* v170.124 (E5، E6 قالب زمان) */
+    var kc = TG_CFG_, st = Date.UTC(2026, 10, 15, 14, 30);
+    try {
+      TG_CFG_ = {};
+      ok('زمان: با کلید خاموش دم خالی است', tgTimeTail_(st, true) === '' && tgTimeTail_(st, false) === '' && tgChatAbroad_('1') === false);
+      TG_CFG_ = { TG_FEAT_TIME: '1' };
+      var tl = tgTimeTail_(st, true);
+      ok('زمان: کلید روشن و خارج: برچسب با unix درست و قالب wt', tl.indexOf('<tg-time unix="' + Math.floor(st / 1000) + '" format="wt">') > -1 && tl.indexOf('</tg-time>') > -1 && /^ \(به وقت شما: /.test(tl));
+      ok('زمان: کلید روشن ولی ایرانی: دم خالی', tgTimeTail_(st, false) === '');
+      ok('زمان: متن جایگزین برای کلاینت قدیمی ساعت تهران است', /۱۴|۱۷|۱۸/.test(tl.replace(/<[^>]+>/g, '')) || /تهران/.test(tl));
+    } finally { TG_CFG_ = kc; }
+  })();
+  (function () {   /* v170.124 (E5، E6 پایه): کلید ویژگی و allowed_updates */
+    var kc = TG_CFG_;
+    try {
+      TG_CFG_ = {};
+      ok('پایه: همهٔ کلیدها پیش‌فرض خاموش', ['TIME', 'BTN', 'RICH', 'POLL', 'CARD', 'BIZ'].every(function (n) { return !tgFeat_(n); }));
+      ok('پایه: با کلید خاموش فهرست همان امروز (وبهوک ساده)', JSON.stringify(tgAllowedUpdates_(false)) === JSON.stringify(['message', 'edited_message', 'callback_query']));
+      ok('پایه: با کلید خاموش فهرست کامل همان امروز', JSON.stringify(tgAllowedUpdates_(true)) === JSON.stringify(['message', 'edited_message', 'callback_query', 'channel_post', 'edited_channel_post', 'my_chat_member', 'chat_member']));
+      TG_CFG_ = { TG_FEAT_POLL: '1', TG_FEAT_BIZ: 'on' };
+      var on = tgAllowedUpdates_(false);
+      ok('پایه: با کلید روشن poll (نه poll_answer) و business_* اضافه می‌شود', on.indexOf('poll') > -1 && on.indexOf('poll_answer') < 0 && on.indexOf('business_message') > -1 && on.indexOf('deleted_business_messages') > -1 && on.length === 8);
+    } finally { TG_CFG_ = kc; }
+  })();
   Logger.log(out.join('\n'));
   Logger.log('نتیجه: ' + pass + ' قبول · ' + fail + ' مردود');
   return { pass: pass, fail: fail, text: out.filter(function (l) { return l.indexOf('❌') === 0; }).join('\n') };
@@ -15239,7 +15508,12 @@ function tgPrList_(chat) {
 function tgPrNotify_(id, note) { return; }
 
 /* ساعت‌های سنگین: صف پاسخ‌های تازه ← انتشار خودکار با گارد (praTick_) */
-function tgPrTick_() { return typeof praTick_ === 'function' ? praTick_() : 0; }
+function tgPrTick_() {
+  var r = typeof praTick_ === 'function' ? praTick_() : 0;
+  try { if (typeof praStale_ === 'function') praStale_(); } catch (e) { tgErr_('praStale_', e); }   /* v170.124 (E5): یادآور صف بیش از ۲۴ ساعت */
+  try { if (typeof prqPoll_ === 'function') prqPoll_(); } catch (eQ) { tgErr_('prqPoll_', eQ); }   /* v170.124 (E11): وضعیت صف پروفایل در پل */
+  return r;
+}
 
 /* ───── عکس و قاب ───── */
 function tgPrCrop_(v) {
@@ -20650,7 +20924,7 @@ function tgSessRemindTick_() {
     var when = tgDay_(Utilities.formatDate(new Date(start), TG_TZ, 'EEE')) + ' ' + tgJDate_(new Date(start), TG_TZ) + ' ساعت ' + tgFa_(hhmm) + ' به وقت تهران';
     var msg = '🔔 یادآوری جلسهٔ درمان: ' + soon + '، ' + when + ' با <b>' + tgEsc_(ther) + '</b>.' + (tInfo.meet ? '\n🔗 لینک جلسه:\n' + tgEsc_(tInfo.meet) : '');
     var who = [String(v[i][5] || '').trim()]; if (cC > -1 && cC < w && String(v[i][cC] || '').trim()) who.push(String(v[i][cC]).trim());
-    for (var k = 0; k < who.length; k++) if (who[k]) tgNotify_(who[k], TG_NK.urgent, msg, { ref: 'جلسه ' + (i + 2) });
+    for (var k = 0; k < who.length; k++) if (who[k]) tgNotify_(who[k], TG_NK.urgent, msg.replace(when, when + tgTimeTail_(start, tgChatAbroad_(who[k]))), { ref: 'جلسه ' + (i + 2) });
     if (tInfo.chat) tgNotify_(tInfo.chat, TG_NK.urgent, '🔔 یادآوری: جلسهٔ درمان با ' + tgEsc_(String(v[i][4] || 'مراجع')) + ' ' + soon + '، ' + when + '.', { ref: 'جلسه ' + (i + 2) });
     if (cR > -1) sh.getRange(i + 2, cR + 1).setValue((flag ? flag + ' · ' : '') + kind + ' ' + Utilities.formatDate(new Date(), TG_TZ, 'MM-dd HH:mm'));
     sent++;
@@ -20658,6 +20932,21 @@ function tgSessRemindTick_() {
   return sent;
 }
 /* v166.16: یادآوری «۲۴ ساعته» برای هر جلسهٔ بین ۲ تا ۲۴ ساعت دیگر می‌رود؛ جلسهٔ همان روز (به وقت تهران، مثل بقیهٔ پیام) «فردا» خوانده می‌شد */
+/* v170.124 (E5، E6 بند ۲، Q1 جواب A): قالب زمان تلگرام. ایرانی: همان متن شمسی «به وقت تهران». خارج از ایران: همان متن + برچسب tg-time که
+   تلگرام خودش به ساعت و روز هفتهٔ دستگاه کاربر نشان می‌دهد. با TG_FEAT_TIME خاموش یا کاربر ایرانی، دم خالی و پیام دقیقاً مثل امروز. */
+function tgTimeTag_(startMs, fallback) { return '<tg-time unix="' + Math.floor(Number(startMs) / 1000) + '" format="wt">' + fallback + '</tg-time>'; }
+function tgTimeTail_(startMs, abroad) {
+  if (!abroad || !tgFeat_('TIME')) return '';
+  return ' (به وقت شما: ' + tgTimeTag_(startMs, tgFa_(Utilities.formatDate(new Date(startMs), TG_TZ, 'HH:mm')) + ' تهران') + ')';
+}
+function tgChatAbroad_(chat) {
+  if (!tgFeat_('TIME')) return false;
+  try {
+    var rw = tgFindLead_(chat); if (!(rw >= 2)) return false;
+    var lr = tgLeadRead_(rw), tz = String((lr && lr.tz) || '');
+    return !!tz && !/tehran|iran|تهران|ایران/i.test(tz);
+  } catch (e) { return false; }
+}
 function tgSoonWord_(startMs, kind) {
   if (kind === '۲س') return 'حدود دو ساعت دیگر';
   var d0 = Utilities.formatDate(new Date(), TG_TZ, 'yyyy-MM-dd'), d1 = Utilities.formatDate(new Date(startMs), TG_TZ, 'yyyy-MM-dd');

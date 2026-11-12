@@ -2010,7 +2010,7 @@ function tgTick5(e) {
   try { if (typeof secWipeTick_ === 'function') bgPart_('secWipeTick_', secWipeTick_); } catch (x7) { tgErr_('tgTick5 secWipeTick_', x7); }   /* v170.99 (E27): پیام راز بعد از ۱۵ دقیقه پاک */
   try { if (!calls && typeof brLeadRetryTick_ === 'function') bgPart_('brLeadRetryTick_', brLeadRetryTick_); } catch (x11) { tgErr_('tgTick5 brLeadRetryTick_', x11); }   /* v170.108 (E40): صف ۴۲۹ لید پل */
   try { if (!calls && typeof lgE48Tick_ === 'function') lgE48Tick_(); } catch (x12) { tgErr_('tgTick5 lgE48Tick_', x12); }
-  try { if (!calls && typeof brFeedTick_ === 'function') bgPart_('brFeedTick_', brFeedTick_); } catch (x13) { tgErr_('tgTick5 brFeedTick_', x13); }   /* v170.119 (E64): خوراک مچ در کش و فرستادن به پل */   /* v170.111 (E48): کارت تأیید مالک، یک بار */
+  try { if (!calls && typeof brFeedTick_ === 'function' && typeof brFeedDue_ === 'function' && brFeedDue_() && bgOk_('light', 'brFeedTick_')) { v16810Prop_('BR_FEED_AT', v16810Now_()); bgPart_('brFeedTick_', brFeedTick_); } } catch (x13) { tgErr_('tgTick5 brFeedTick_', x13); }   /* v170.119 (E64): خوراک مچ در کش و فرستادن به پل */   /* v170.111 (E48): کارت تأیید مالک، یک بار */
   try { if (!calls && typeof coTick_ === 'function') bgPart_('coTick_', coTick_); } catch (x14) { tgErr_('tgTick5 coTick_', x14); }   /* v170.123 (E70): خوراک برش هاب برای پل، هر بخش روزی یک بار */
   try { if (!calls && typeof wvTick_ === 'function' && (lgProp_('WV1_GO') || !lgProp_('WV1_CARD'))) wvTick_(); } catch (x13) { tgErr_('tgTick5 wvTick_', x13); }   /* v170.112 (E49، E51، E52): موج ۱ پل */
   try { if (typeof cmTick5_ === 'function' && bgOk_('light', 'cmTick5_')) bgPart_('cmTick5_', function () { return run('cmTick5_', cmTick5_); }); } catch (x6) { tgErr_('tgTick5 cmTick5_', x6); }   /* v170.2: کامنت‌های هاب پذیرش، هر ۱۵ دقیقه */
@@ -2385,9 +2385,12 @@ function bgNightLine_() {
     .map(function (k) { return k + ' ' + tgFa_((o[k][1] / 60000).toFixed(1)); });
   var sk = bgDry_() ? (TG_MEM['bgp:BGS:' + day] ? JSON.parse(TG_MEM['bgp:BGS:' + day]) : {}) : bgJson_('BGS:' + day);
   var nSk = Object.keys(sk).reduce(function (a, k) { return a + sk[k]; }, 0);
+  /* v170.124 (E5، ممیزی ۳): بخش‌های درون tgTick5+ هم در خط شبانه بیایند (brFeedTick_ در «بیشترین» دیده نمی‌شد و ۷۶۰ دقیقه را پنهان می‌خورد) */
+  var pt = bgJson_('RST:' + day), tp = Object.keys(pt).filter(function (k) { return Array.isArray(pt[k]); }).sort(function (a, b) { return pt[b][1] - pt[a][1]; }).slice(0, 3)
+    .map(function (k) { return k + ' ' + tgFa_((pt[k][1] / 60000).toFixed(1)); });
   if (!bgDry_()) { try { bgDayRow_(day, used, o, sk); } catch (eRow) { tgErr_('bgDayRow_', eRow); } }
   return '⏱ سهمیهٔ اجرا: ' + tgFa_(used.toFixed(1)) + ' از ۹۰ دقیقه (هدف ' + tgFa_(BG_GOAL_MIN) + ')' +
-    (top.length ? ' · بیشترین: ' + top.join('، ') : '') + (nSk ? ' · ' + tgFa_(nSk) + ' کار غیرواجب رد شد' : '');
+    (top.length ? ' · بیشترین: ' + top.join('، ') : '') + (tp.length ? ' · بخش‌های تیک: ' + tp.join('، ') : '') + (nSk ? ' · ' + tgFa_(nSk) + ' کار غیرواجب رد شد' : '');
 }
 /* یک سطر در روز در تب پنهان «سهمیهٔ اجرا» هاب: جمع، هر تابع، قدم‌های واچ‌داگ و ردشده‌ها (برای سنجش بعد از انتشار) */
 var BG_TAB = 'سهمیهٔ اجرا';
