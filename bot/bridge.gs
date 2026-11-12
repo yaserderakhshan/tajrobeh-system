@@ -645,10 +645,27 @@ function coChunks_(s, rows) {
   if (cur.length || !parts.length) parts.push(cur);
   return parts.map(function (p, i) { return JSON.stringify({ section: s, version: 1, chunk: i + 1, chunks: parts.length, complete: i === parts.length - 1, rows: p }); });
 }
+var CO_LAST_ERR = '', CO_LAST_POST = 0;
+/* v170.125 (E، فوری A ۱۶:۴۵): زمان امضا برای هر ارسال تازه گرفته می‌شود (پل پنجرهٔ ±۵ دقیقه دارد و تیک بلند «کهنه» می‌شد)؛ کد خطای پل (errorCode، بی دادهٔ شخصی) برای گزارش نگه داشته می‌شود */
 function coPost_(url, s, body, sec, now) {
-  var ts = String(now), hd = { 'Tajrobeh-Timestamp': ts, 'Tajrobeh-Signature': brSign_('legacy-bot-cutover.v1:' + s + ':' + ts + ':' + body, sec) };
-  if (TG_DRY) { (TG_MEM['co:sent'] = TG_MEM['co:sent'] || []).push({ url: url, body: body, h: hd }); var c = TG_MEM['co:code']; return Number(typeof c === 'function' ? c(s) : (c || 200)); }
-  try { return UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: body, headers: hd, muteHttpExceptions: true, followRedirects: false }).getResponseCode(); } catch (e) { return 0; }
+  var ts = String(Math.floor((TG_DRY && TG_MEM['br:now'] ? Number(TG_MEM['br:now']) : Date.now()) / 1000));
+  var hd = { 'Tajrobeh-Timestamp': ts, 'Tajrobeh-Signature': brSign_('legacy-bot-cutover.v1:' + s + ':' + ts + ':' + body, sec) };
+  CO_LAST_ERR = '';
+  /* سقف پل: ۶ درخواست در دقیقه (D2)؛ هر ارسال دست‌کم ۱۰٫۵ ثانیه بعد از قبلی */
+  var gap = CO_LAST_POST ? 10500 - (Date.now() - CO_LAST_POST) : 0;
+  if (gap > 0) { if (TG_DRY) (TG_MEM['co:gaps'] = TG_MEM['co:gaps'] || []).push(gap); else Utilities.sleep(gap); }
+  CO_LAST_POST = Date.now();
+  if (TG_DRY) {
+    (TG_MEM['co:sent'] = TG_MEM['co:sent'] || []).push({ url: url, body: body, h: hd });
+    var c = TG_MEM['co:code'], code0 = Number(typeof c === 'function' ? c(s) : (c || 200));
+    if (code0 < 200 || code0 >= 300) { var e0 = TG_MEM['co:err']; CO_LAST_ERR = String(typeof e0 === 'function' ? e0(s) : (e0 || '')); }
+    return code0;
+  }
+  try {
+    var r = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: body, headers: hd, muteHttpExceptions: true, followRedirects: false }), code = r.getResponseCode();
+    if (code < 200 || code >= 300) { try { CO_LAST_ERR = String(JSON.parse(r.getContentText()).errorCode || '').slice(0, 80); } catch (eJ) { CO_LAST_ERR = ''; } }
+    return code;
+  } catch (e) { CO_LAST_ERR = 'network'; return 0; }
 }
 /** از tgTick5: بخش‌های سررسیده را به ترتیب E70 بند ۴ می‌فرستد. وضع در BRC: {بخش: {at, code, try, n}} */
 function coTick_() {
@@ -670,7 +687,8 @@ function coTick_() {
     var bodies = coChunks_(S.s, R.rows);
     for (var j = 0; j < bodies.length; j++) { code = coPost_(base + S.s + '/intake', S.s, bodies[j], sec, now); if (code < 200 || code >= 300) break; }
     x.n = R.rows.length; x.code = code;
-    if (code >= 200 && code < 300) { x.at = now; delete x.try; } else x.try = now;
+    if (code < 200 || code >= 300) { x.err = CO_LAST_ERR; try { tgErr_('coTick_ ' + S.s, 'HTTP ' + code + (CO_LAST_ERR ? ' ' + CO_LAST_ERR : '')); } catch (eE) {} } else delete x.err;   /* شکست دیگر بی‌صدا نیست: در «خطاها» می‌آید (v170.125) */
+    if (code >= 200 && code < 300) { x.at = now; delete x.try; } else x.try = code === 429 ? now - 6 * 3600 + 150 : now;   /* ۴۲۹ (سقف نرخ پل): ۲٫۵ دقیقه بعد، نه ۶ ساعت */
     st[S.s] = x; done.push(S.s + ' ' + code);
     if (code === 404 || code === 429 || code === 401) { if (code === 404) st._down = now + 6 * 3600; break; }   /* رابط هنوز نیست، نرخ یا امضا: بقیه بماند */
   }
@@ -678,6 +696,32 @@ function coTick_() {
   lgProp_('BRC', JSON.stringify(st));
   return done.join(' · ') || 'same';
 }
+/* v170.125: خلاصهٔ وضع خوراک برش از BRC؛ فقط نام بخش، کد HTTP، errorCode پل و شمار ردیف (بی دادهٔ شخصی) */
+function coSummary_() {
+  var st = {}; try { st = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e) {}
+  var out = Object.keys(st).filter(function (k) { return k.charAt(0) !== '_' && st[k] && typeof st[k] === 'object'; }).map(function (k) {
+    var x = st[k]; return k + '=' + (x.code === undefined ? '-' : x.code) + (x.err ? '(' + x.err + ')' : '') + (x.n !== undefined ? '/' + x.n : '') + (x.at ? ' ok' : '');
+  });
+  return (st._down ? 'ایست تا ' + st._down + ' · ' : '') + (out.join(' · ') || 'هنوز چیزی نرفته');
+}
+/** یک‌بارهٔ خودکار v170.125 (فوری A ۱۶:۴۵): یک تیک خوراک را همین‌جا می‌زند و کد پل هر بخش را در خلاصهٔ دیپلوی می‌گذارد */
+function coV170125State() {
+  var r; try { r = coTick_(); } catch (e) { r = 'خطا ' + String(e).slice(0, 80); }
+  return 'تیک: ' + r + ' · وضع: ' + coSummary_() + ' · ' + coSplit_();
+}
+/* آزمون تقسیم (D2): اگر خوراک اسلات و لید عمومی با همان راز ۲۰۰ گرفته‌اند، راز درست است و ایراد در خود خوراک برش است. فقط کد و شمار. */
+function coSplit_() {
+  var h = {}; try { h = JSON.parse(lgProp_('BRF') || '{}') || {}; } catch (e) {}
+  var l = {}; try { l = brLeadState_() || {}; } catch (e2) {}
+  return 'اسلات: ' + (h.pushCode === undefined ? 'هنوز نرفته' : h.pushCode) + (h.pushAt ? ' (ok)' : '') + ' · لید عمومی امروز: ok ' + (l.ok || 0) + ' fail ' + (l.fail || 0);
+}
+function coNightLine_() {
+  var st = {}; try { st = JSON.parse(lgProp_('BRC') || '{}') || {}; } catch (e) {}
+  var now = Math.floor(Date.now() / 1000), okN = 0, bad = [];
+  CO_SECTIONS.forEach(function (S) { var x = st[S.s]; if (x && x.at && now - x.at < 48 * 3600) okN++; else if (x && x.code && !(x.code >= 200 && x.code < 300)) bad.push(S.s + ' ' + x.code); });
+  return '🔗 خوراک برش به پل: ' + tgFa_(okN) + ' از ' + tgFa_(CO_SECTIONS.length) + ' بخش در ۴۸ ساعت گذشته رسید' + (bad.length ? ' · مشکل: ' + bad.slice(0, 4).join('، ') : '');
+}
+try { TG_NIGHT_LINES.push(coNightLine_); } catch (eNl) {}
 /** یک‌بارهٔ خودکار v170.123 (E70، فقط‌خواندنی): هر بخش چند ردیف و کدام فیلد سرستونش پیدا نشد. بی دادهٔ شخصی، فقط شمار و نام فیلد */
 function coV170123Stat() {
   var ther = coTherIds_(), out = [];
@@ -730,6 +774,24 @@ function coTests() {
     coTick_();
     var st = JSON.parse(lgProp_('BRC'));
     ok('۵۰۰ در یک بخش بقیه را نمی‌بندد؛ همان بخش ۶ ساعت بعد دوباره', st.leads.try && !st.leads.at && st.people.at && st['therapist-leave'].at && TG_MEM['co:sent'].length === 4);
+    lgProp_('BRC', '{}'); TG_MEM['co:sent'] = []; TG_MEM['co:code'] = 401; TG_MEM['co:err'] = 'legacy-error.bot-feed-signature-invalid';
+    var r4 = coTick_(), sm = coSummary_();
+    ok('v170.125: ۴۰۱ با errorCode پل در خلاصه می‌آید و بقیه بخش‌ها نمی‌روند', /people 401/.test(r4) && /people=401\(legacy-error\.bot-feed-signature-invalid\)/.test(sm) && TG_MEM['co:sent'].length === 1, sm);
+    lgProp_('BRC', '{}'); TG_MEM['co:sent'] = []; TG_MEM['co:gaps'] = []; TG_MEM['co:code'] = 200; CO_LAST_POST = 0;
+    coTick_();
+    ok('v170.125: ارسال‌ها دست‌کم ۱۰٫۵ ثانیه فاصله دارند (سقف ۶ در دقیقه)', TG_MEM['co:sent'].length > 1 && TG_MEM['co:gaps'].length === TG_MEM['co:sent'].length - 1 && TG_MEM['co:gaps'].every(function (g) { return g > 0 && g <= 10500; }), JSON.stringify(TG_MEM['co:gaps']));
+    lgProp_('BRC', '{}'); TG_MEM['co:sent'] = []; TG_MEM['co:code'] = 429;
+    coTick_();
+    var s429 = JSON.parse(lgProp_('BRC')), nowS = Math.floor(Number(TG_MEM['br:now']) / 1000);
+    ok('v170.125: ۴۲۹ فقط ۲٫۵ دقیقه صبر می‌کند و بقیه بخش‌ها نمی‌روند', TG_MEM['co:sent'].length === 1 && s429.people.try && (nowS - s429.people.try) >= 6 * 3600 - 151 && (nowS - s429.people.try) < 6 * 3600, JSON.stringify(s429.people));
+    lgProp_('BRC', '{}'); TG_MEM['co:sent'] = []; TG_MEM['co:code'] = 401; TG_MEM['co:err'] = 'legacy-error.bot-feed-signature-invalid'; CO_LAST_POST = 0;
+    coTick_();
+    ok('v170.125: زمان امضا همان لحظهٔ ارسال (ثانیه)، نه آغاز تیک', TG_MEM['co:sent'][0].h['Tajrobeh-Timestamp'] === String(Math.floor(Number(TG_MEM['br:now']) / 1000)));
+    lgProp_('BRC', '{}'); TG_MEM['co:sent'] = []; TG_MEM['co:code'] = 200; delete TG_MEM['co:err'];
+    var st5 = coV170125State();
+    ok('v170.125: آزمون تقسیم: کد اسلات و شمار لید عمومی در همان یک‌باره', /اسلات: .* · لید عمومی امروز: ok \d+ fail \d+/.test(st5), st5);
+    ok('v170.125: یک‌بارهٔ وضع: تیک و وضع بخش‌ها، بی ردیف شخصی؛ در فهرست CI', /^تیک: .*people=200\/2 ok/.test(st5) && st5.indexOf('همکار نمونه') < 0 && CI_ONCE_AUTO.indexOf('coV170125State') > -1 && CI_ONCE_ALLOW.indexOf('coV170125State') > -1, st5);
+    ok('v170.125: خط شبانه شمار بخش‌های رسیده', /🔗 خوراک برش به پل: .* از .* بخش/.test(coNightLine_()) && TG_NIGHT_LINES.indexOf(coNightLine_) > -1);
     TG_CFG_ = { BRIDGE_CUTOVER_URL: 'off' };
     ok('خاموش با off؛ نشانی بیرون از پل پذیرفته نمی‌شود', coTick_() === 'off' && (TG_CFG_ = { BRIDGE_CUTOVER_URL: 'https://evil.example/' }, coTick_() === 'off'));
     TG_CFG_ = {};
