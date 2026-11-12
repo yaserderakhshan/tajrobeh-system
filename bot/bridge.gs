@@ -881,9 +881,9 @@ function coTests() {
     ok('v170.125: آزمون تقسیم: کد اسلات و شمار لید عمومی در همان یک‌باره', /اسلات: .* · لید عمومی امروز: ok \d+ fail \d+/.test(st5), st5);
     ok('v170.125: یک‌بارهٔ وضع: تیک و وضع بخش‌ها، بی ردیف شخصی؛ در فهرست CI', /^تیک: .*people=200\/2 ok/.test(st5) && st5.indexOf('همکار نمونه') < 0 && CI_ONCE_AUTO.indexOf('coV170125State') > -1 && CI_ONCE_ALLOW.indexOf('coV170125State') > -1, st5);
     var VEC_MSG = 'legacy-bot-cutover.v1:people:1794470000:{"section":"people","rows":[{"key":"P-1","name":"درمانگر نمونه"}]}';
-    TG_MEM['people'] = [{ name: 'درمانگر نمونه', chat: '5001', phone: '۰۹۱۲۳۴۵۶۷۸۹', roles: ['درمانگر'] }, { name: 'همکار دو', chat: '7002, 7003', phone: '+98 912 000 0001', roles: [] }, { name: 'بی شماره', chat: '8001', phone: '', roles: [] }];
+    TG_MEM['people'] = [{ name: 'درمانگر نمونه', chat: '5001', phone: '۰۹۱۲۳۴۵۶۷۸۹', roles: ['درمانگر'] }, { name: 'همکار دو', chat: '7002, 7003', phone: '+98 912 000 0001', roles: [] }, { name: 'بی شماره', chat: '8001', phone: '', roles: [] }];   /* pii:ok ساختگی */
     var pm = brPhoneMap_();
-    ok('v170.127: خوراک اسلات: موبایل با chat_id یا نام، فقط رقم، رقم فارسی لاتین می‌شود', brFeedIdentity_('5001', 'درمانگر نمونه', pm).mobile === '09123456789' && brFeedIdentity_('7003', 'x', pm).mobile === '+989120000001' && brFeedIdentity_('', 'درمانگر نمونه', pm).mobile === '09123456789' && brFeedIdentity_('8001', 'بی شماره', pm).mobile === undefined);
+    ok('v170.127: خوراک اسلات: موبایل با chat_id یا نام، فقط رقم، رقم فارسی لاتین می‌شود', brFeedIdentity_('5001', 'درمانگر نمونه', pm).mobile === '09123456789' && brFeedIdentity_('7003', 'x', pm).mobile === '+989120000001' && brFeedIdentity_('', 'درمانگر نمونه', pm).mobile === '09123456789' && brFeedIdentity_('8001', 'بی شماره', pm).mobile === undefined);   /* pii:ok ساختگی */
     ok('v170.127: telegramId فقط رقم و اولین شناسه (خانهٔ چندشناسه‌ای)', brFeedIdentity_('7002, 7003', 'x', pm).telegramId === '7002' && brFeedIdentity_('', 'x', pm).telegramId === '' && brFeedIdentity_('۵۰۰۱', 'x', pm).telegramId === '5001');
     delete TG_MEM['people'];
         ok('v170.126: امضای بدنهٔ فارسی = مقدار UTF-8 از Node crypto (E17/E18)', brSign_(VEC_MSG, 'test-key-123') === 'v1=2bac692ec2ba03d0ec2407fa1b83d31e6403aa7574a091cd3a250fe30968b8af', brSign_(VEC_MSG, 'test-key-123'));
