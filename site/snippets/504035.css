@@ -487,3 +487,42 @@ html body nav.tjnav .nx a:hover{border-color:#d9737a;transform:translateY(-2px)}
 html body nav.tjnav .ch a.cur{background:#c83f49}
 @media (max-width:760px){html body nav.tjnav{grid-template-columns:minmax(0,1fr);padding:16px;border-radius:18px;gap:8px}html body nav.tjnav .nx a{font-size:14px;padding:6px 13px}}
 @media (prefers-reduced-motion:reduce){html body nav.tjnav .nx a{transition:none}}
+
+/* == tj-dark-out-f D1 (لین F · F6) · سطح‌های مشکی باقی‌مانده در کل سایت · جا: اسنیپت CSS سراسری ۵۰۴۰۳۵ == */
+/* درباره ما: نوار دعوت پایانی */
+:is(#tj2,.tj2) .abt-close .abt-cta{background:linear-gradient(135deg,var(--tj-tint,#faeced),var(--tj-tint-2,#fdf4f4))!important;border:1px solid rgba(200,63,73,.16)}
+:is(#tj2,.tj2) .abt-close .abt-cta h2{color:var(--tj-ink,#0e0e0e)!important}
+:is(#tj2,.tj2) .abt-close .abt-cta p{color:var(--tj-soft,#4e4e4e)!important}
+.tj2 .abt-cta .btn-ghost{background:#fff;color:var(--tj-ink,#0e0e0e);border-color:var(--tj-line,#dfdfe2)}
+/* همکاری با ما: گوشی نمونهٔ گفت‌وگو */
+.tj2 .jx-phone{background:linear-gradient(160deg,var(--tj-tint,#faeced) 0%,#fdf6f6 60%,#fff 100%);border:1px solid var(--tj-line,#dfdfe2);box-shadow:0 40px 70px -46px rgb(14 14 14 / .35)}
+.tj2 .jx-phone .bb{border:1px solid var(--tj-line,#dfdfe2)}
+.tj2 .jx-phone .jx-top{border-bottom-color:var(--tj-line,#dfdfe2)}
+.tj2 .jx-phone .jx-top b{color:var(--tj-ink,#0e0e0e)}
+.tj2 .jx-phone .jx-top small{color:var(--tj-mut,#676768)}
+/* پارتنرها: جعبهٔ پیوستن */
+.tj2 .joinbox{background:linear-gradient(135deg,var(--tj-tint,#faeced),var(--tj-tint-2,#fdf4f4));color:var(--tj-ink,#0e0e0e);border:1px solid rgba(200,63,73,.16)}
+.tj2 .joinbox h2{color:var(--tj-ink,#0e0e0e)}
+.tj2 .joinbox p,.tj2 .joinbox ol{color:var(--tj-soft,#4e4e4e)}
+.tj2 .joinbox .tiny{color:var(--tj-mut,#676768)}
+.tj2 .joinbox .btn-ghost{background:#fff;color:var(--tj-ink,#0e0e0e);border-color:var(--tj-line,#dfdfe2)}
+/* SF1 · سه ایراد دیده‌شده در بازبینی تمام‌قد مدرسه */
+/* ۱) کامیونیتی: برچسب مشکی «تماشای ویدیو» روی کارت استادان */
+:is(#tj2,.tj2) .supc .tjbs a.supmag{background:var(--tj-tint,#faeced)!important;color:var(--tj-red-600,#b63942)!important;border:1px solid #f0cfd2!important}
+:is(#tj2,.tj2) .supc .tjbs a.supmag:hover{border-color:var(--tj-red-400,#d3656d)!important;transform:translateY(-1px)}
+:is(#tj2,.tj2) .supc .tjbs a.supmag svg{color:var(--tj-red,#c83f49)}
+@media (max-width:640px){
+/* ۲) هیئت علمی: کارت‌های دوتایی روی گوشی نام را حرف‌به‌حرف می‌شکستند */
+:is(#tj2,.tj2) .fgrid.few{grid-template-columns:minmax(0,1fr)!important}
+/* ۳) راهنمای EFT: نام انگلیسی منبع از کارت بیرون می‌زد */
+:is(#tj2,.tj2) .rh .ltr{white-space:normal!important;overflow-wrap:anywhere}
+:is(#tj2,.tj2) .rh{min-width:0}
+}
+/* AP1 · صفحه‌های رویکرد: روی گوشی تیتر هر قدم کلمه‌کلمه می‌شکست */
+@media (max-width:640px){
+.tj-ap ol.tj-steps li{flex-wrap:wrap!important;row-gap:4px}
+.tj-ap ol.tj-steps li>b{flex:1 1 calc(100% - 48px)!important;min-width:0}
+.tj-ap ol.tj-steps li>span,.tj-ap ol.tj-steps li>p{flex:1 1 100%!important;min-width:0}
+}
+/* لین A · نوار «بیشتر بخوانید» روی گوشی: دکمهٔ دوخطی گوشهٔ ۱۶ */
+@media (max-width:640px){html body nav.tjnav .nx a{border-radius:16px}}

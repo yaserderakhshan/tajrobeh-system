@@ -934,6 +934,18 @@ main.tj-page{margin-block-start:0}
 }
 @media (prefers-reduced-motion:reduce){.tj2 #ladder .lad-art,.tj2 #ladder .path>div,.tj2 #courses .crow{transition:none}}
 </style>
+<style>
+/* == tj-school-m-f SM1 (لین F · F6 بند ۵) · صفحهٔ مدرسه روی گوشی · جواب یاسر (DECISIONS 32) که در school-f.html جا مانده بود == */
+@media (max-width:760px){
+ /* چهار کارت کامیونیتی ورق می‌خورند */
+ .tj2 #community .cjp{display:grid!important;grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:78%;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-16px;padding-inline:16px;padding-bottom:6px;scrollbar-width:none}
+ .tj2 #community .cjp::-webkit-scrollbar{display:none}
+ .tj2 #community .cjp>*{scroll-snap-align:center;min-width:0}
+ /* اینستاگرام جمع می‌شود: فقط تیتر و دکمه؛ قاب عکس و توضیح روی گوشی نمی‌آید */
+ .tj2 #instagram .pola,.tj2 #instagram .lede{display:none}
+ .tj2 #instagram{padding-block:28px}
+}
+</style>
 <div class="tj2 alignfull" id="tj2">
 <section class="hero sch sch3" id="hero">
 <div class="wrap">
