@@ -1,163 +1,245 @@
 <!-- wp:html -->
+<!-- تجربه · هدر سراسری · لین F · نسخهٔ HF-1 (پیش‌نویس، منتشر نشده)
+     جا: تمپلیت‌پارت tj-header، به جای بلوک فعلی. کلاس‌ها tjph است تا با هدر فعلی (tjh) تداخل نکند.
+     همهٔ پیوندها همان پیوندهای هدر فعلی است؛ هیچ پیوند تازه‌ای افزوده نشده. نشانگر صفحهٔ فعال و رهگیری کلیک‌ها مثل قبل.
+     یک تصویر کتابخانه در رسانهٔ ۲۰۲۶/۱۱ لازم است: tjl-ill-find.webp
+     نشانی لوگو (/wp-content/uploads/2026/09/TajrobehMainLogo.webp) از همان هدر فعلی برداشته شود. -->
 <style>
-/* == tj-header (سراسری؛ نسخهٔ home-v2) == */
-.tjh{font-family:var(--tj-font);direction:rtl;position:sticky;top:0;z-index:70;background:rgba(254,254,254,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(223,223,226,.6)}
-.tjh *{box-sizing:border-box}
-.tjh a,.tjh a:hover,.tjh a:focus-visible{text-decoration:none;color:inherit}
-.tjh .bar{max-width:1180px;margin-inline:auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:68px}
-.tjh .brand{display:flex;align-items:center;gap:36px;min-width:0}
-.tjh .logo{display:block;width:102px;height:29px;flex:none}
-.tjh .logo img{width:102px;height:29px;object-fit:contain;display:block}
-.tjh nav{display:flex;align-items:center;gap:4px}
-.tjh nav>div{position:relative}
-.tjh nav>div>a,.tjh nav>a{display:inline-flex;align-items:center;gap:5px;font-weight:500;font-size:15px;color:var(--tj-soft);padding:8px 12px;border-radius:8px;white-space:nowrap;transition:.15s}
-.tjh nav>div>a:hover,.tjh nav>a:hover,.tjh nav>div:hover>a{background:var(--tj-sunk);color:var(--tj-ink)}
-.tjh nav a[aria-current="page"],.tjh nav>div.on>a{color:var(--tj-red)}
-.tjh nav>div>a svg{width:12px;height:12px;opacity:.6}
-.tjh .dd{position:absolute;top:100%;right:0;min-width:240px;background:#fff;border:1px solid var(--tj-line);border-radius:14px;padding:8px;box-shadow:0 18px 40px -20px rgba(14,14,14,.35);opacity:0;visibility:hidden;transform:translateY(6px);transition:.18s;display:grid;gap:2px}
-.tjh nav>div:hover .dd,.tjh nav>div:focus-within .dd{opacity:1;visibility:visible;transform:none}
-.tjh .dd a{display:block;padding:9px 12px;border-radius:9px;font-size:14px;color:var(--tj-ink-2)}
-.tjh .dd a:hover{background:var(--tj-sunk);color:var(--tj-red)}
-.tjh .dd a small{display:block;font-size:12px;color:var(--tj-mut);margin-top:1px}
-.tjh .dd .sep{height:1px;background:var(--tj-line);margin:6px 4px}
-.tjh .dd.wide{min-width:520px;grid-template-columns:1fr 1fr}
-.tjh .dd.wide .sep{grid-column:1/-1}
-.tjh .dd .h{grid-column:1/-1;font-size:11.5px;color:var(--tj-mut);padding:6px 12px 2px;font-weight:600;letter-spacing:.02em}
-.tjh .end{display:flex;align-items:center;gap:8px}
-.tjh .cta{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 20px;border-radius:var(--tj-r-btn);background:var(--tj-red);color:#fff;font-weight:600;font-size:14px;white-space:nowrap;transition:.15s}
-.tjh .cta:hover{background:var(--tj-red-600);color:#fff}
-.tjh .cta.alt{background:transparent;color:var(--tj-ink);border:1.5px solid var(--tj-line)}
-.tjh .cta.alt:hover{border-color:var(--tj-ink);background:transparent;color:var(--tj-ink)}
-.tjh .burger{display:none;width:42px;height:42px;border:0;background:none;cursor:pointer;color:var(--tj-ink);place-items:center;padding:0;margin:0}
-.tjh .burger svg{width:24px;height:24px}
-.tjh .tog{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;margin:0}
-.tjh .prog{position:absolute;bottom:-1px;right:0;height:2px;background:var(--tj-red);width:0;transition:width .1s linear}
+.tjph{--r:var(--tj-red,#c83f49);--r6:var(--tj-red-600,#b63942);--r4:var(--tj-red-400,#d9737a);--ink:var(--tj-ink,#0e0e0e);--soft:var(--tj-soft,#4e4e4e);--mut:var(--tj-mut,#676768);--line:var(--tj-line,#dfdfe2);--sunk:var(--tj-sunk,#f5f5f8);--tint:var(--tj-tint,#faeced);
+ font-family:var(--tj-font,'Anjoman Max','Vazirmatn',system-ui,sans-serif);direction:rtl;position:sticky;top:0;z-index:70;background:rgba(254,254,254,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .25s ease,box-shadow .25s ease}
+.tjph.is-down{border-bottom-color:var(--line);box-shadow:0 10px 30px -24px rgba(14,14,14,.35)}
+.tjph *{box-sizing:border-box;letter-spacing:0}
+.tjph a,.tjph a:hover,.tjph a:focus{text-decoration:none!important;color:inherit}
+.tjph-bar{max-width:1180px;margin-inline:auto;padding:0 24px;display:flex;align-items:center;gap:28px;height:72px;transition:height .25s ease}
+.tjph.is-down .tjph-bar{height:60px}
+.tjph-logo{display:block;flex:none;line-height:0}
+.tjph-logo img{width:102px;height:29px;object-fit:contain;display:block}
+.tjph-nav{display:flex;align-items:center;gap:2px;flex:1 1 auto;min-width:0;position:relative}
+.tjph-g{position:static}
+.tjph-t{display:inline-flex;align-items:center;gap:5px;font-size:15px;line-height:1;color:var(--soft);padding:12px 12px;border-radius:10px;white-space:nowrap;transition:color .15s ease,background .15s ease;position:relative;background:none;border:0;font-family:inherit;cursor:pointer}
+.tjph-t svg{width:11px;height:11px;opacity:.55;transition:transform .2s ease}
+.tjph-t::after{content:"";position:absolute;inset-inline:12px;bottom:5px;height:2px;border-radius:2px;background:var(--r);transform:scaleX(0);transform-origin:right center;transition:transform .25s cubic-bezier(.2,.8,.3,1)}
+.tjph-t:hover,.tjph-g:hover>.tjph-t,.tjph-g:focus-within>.tjph-t{color:var(--ink)}
+.tjph-t:hover::after,.tjph-g:hover>.tjph-t::after,.tjph-g:focus-within>.tjph-t::after,.tjph-t[aria-current="page"]::after,.tjph-g.on>.tjph-t::after{transform:scaleX(1)}
+.tjph-t[aria-current="page"],.tjph-g.on>.tjph-t{color:var(--r)}
+.tjph-g:hover>.tjph-t svg,.tjph-g:focus-within>.tjph-t svg{transform:rotate(180deg)}
+/* پنل */
+.tjph-pn{position:absolute;top:calc(100% + 6px);inset-inline-start:0;background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 30px 60px -34px rgba(14,14,14,.4);opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .18s ease,transform .18s ease,visibility .18s;display:grid;gap:6px 22px}
+.tjph-pn::before{content:"";position:absolute;inset-inline:0;top:-12px;height:12px}
+.tjph-g:hover>.tjph-pn,.tjph-g:focus-within>.tjph-pn{opacity:1;visibility:visible;transform:none}
+.tjph-pn.c3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 250px;width:min(820px,calc(100vw - 48px))}
+.tjph-pn.c2{grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:min(560px,calc(100vw - 48px))}
+.tjph-pn.c1{grid-template-columns:minmax(0,1fr);width:240px}
+.tjph-col{display:grid;align-content:start;gap:2px;min-width:0}
+.tjph-h{font-size:12px;line-height:1.8;color:var(--mut);padding:2px 12px 4px;margin:0!important}
+.tjph-col+.tjph-col .tjph-h{margin-top:0}
+.tjph-h.sp{margin-top:10px!important}
+.tjph-pn a{display:block;padding:8px 12px;border-radius:12px;font-size:14.5px;line-height:1.7;color:var(--ink);transition:background .15s ease,color .15s ease}
+.tjph-pn a small{display:block;font-size:12.5px;line-height:1.7;color:var(--mut)}
+.tjph-pn a:hover{background:var(--sunk);color:var(--r)}
+.tjph-pn a.go{color:var(--r);display:inline-flex;align-items:center;gap:6px}
+.tjph-pn a.go::after,.tjph-feat a.btn::after{content:"";width:7px;height:7px;flex:none;border-left:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg);transition:transform .2s ease}
+.tjph-pn a.go:hover::after{transform:translateX(-3px) rotate(45deg)}
+.tjph-foot{grid-column:1/-1;border-top:1px dashed var(--line);margin-top:8px;padding-top:8px;display:flex;flex-wrap:wrap;gap:2px 6px}
+.tjph-feat{background:linear-gradient(180deg,var(--tint) 0%,#fdf6f6 100%);border-radius:16px;padding:16px;display:grid;align-content:start;gap:6px;grid-row:1/span 2;grid-column:3}
+.tjph-feat img{width:92px;height:auto;display:block;margin:0 0 4px;transition:transform .5s cubic-bezier(.2,.8,.3,1.2)}
+.tjph-feat:hover img{transform:translateY(-3px) rotate(-3deg)}
+.tjph-feat b{font-size:15.5px;line-height:1.7;font-weight:800;color:var(--ink)}
+.tjph-feat p{font-size:13px;line-height:1.85;color:var(--soft);margin:0 0 6px!important}
+.tjph-feat a.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:12px;background:var(--r);color:#fff;font-size:14px;transition:background .15s ease}
+.tjph-feat a.btn:hover{background:var(--r6);color:#fff}
+/* سمت پایان */
+.tjph-end{display:flex;align-items:center;gap:8px;flex:none}
+.tjph-in{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:12px;font-size:14.5px;color:var(--ink);border:1px solid var(--line);background:#fff;white-space:nowrap;transition:border-color .15s ease,color .15s ease}
+.tjph-in svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tjph-in:hover{border-color:var(--r4);color:var(--r)}
+.tjph-cta{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 20px;border-radius:12px;background:var(--r);color:#fff!important;font-size:14.5px;white-space:nowrap;transition:background .15s ease,transform .15s ease;box-shadow:0 8px 18px -12px rgba(200,63,73,.9)}
+.tjph-cta:hover{background:var(--r6);transform:translateY(-1px)}
+.tjph a:focus-visible,.tjph button:focus-visible,.tjph-bg:focus-visible{outline:2px solid var(--r);outline-offset:2px;border-radius:10px}
+.tjph-tog{position:absolute;opacity:0;pointer-events:none}
+.tjph-bg{display:none}
+.tjph-m{display:none}
+.tjph-prog{position:absolute;inset-inline-start:0;bottom:-1px;height:2px;width:0;background:var(--r);border-radius:2px}
+/* گوشی و تبلت */
 @media (max-width:1024px){
-.tjh .brand{gap:0;flex:1}
-.tjh .burger{display:grid}
-.tjh nav{position:absolute;inset-inline:0;top:100%;flex-direction:column;align-items:stretch;gap:0;background:#fff;border-bottom:1px solid var(--tj-line);padding:8px 16px 16px;display:none;max-height:calc(100vh - 110px);overflow:auto}
-.tjh .tog:checked ~ .bar nav{display:flex}
-.tjh nav>div>a,.tjh nav>a{width:100%;padding:12px 8px;font-size:16px;border-radius:0;border-bottom:1px solid var(--tj-line)}
-.tjh .dd{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:0;padding:0 8px 8px;min-width:0;background:#f8f8fa;border-radius:0 0 10px 10px}
-.tjh .dd.wide{grid-template-columns:1fr}
-.tjh .cta.alt{display:none}
-.tjh .cta{font-size:13px;padding:0 14px;height:38px}
+ .tjph{-webkit-backdrop-filter:none;backdrop-filter:none;background:#fff}
+ .tjph-bar{height:60px;padding:0 16px;gap:10px;justify-content:space-between}
+ .tjph-in{display:none}
+ .tjph-cta{height:38px;padding:0 16px;font-size:14px}
+ .tjph-bg{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;cursor:pointer;position:relative;flex:none}
+ .tjph-bg i{position:absolute;width:20px;height:1.8px;border-radius:2px;background:var(--ink);transition:transform .25s ease,opacity .2s ease}
+ .tjph-bg i:nth-child(1){transform:translateY(-6px)}.tjph-bg i:nth-child(3){transform:translateY(6px)}
+ .tjph-tog:checked~.tjph-bar .tjph-bg i:nth-child(1){transform:rotate(45deg)}
+ .tjph-tog:checked~.tjph-bar .tjph-bg i:nth-child(2){opacity:0}
+ .tjph-tog:checked~.tjph-bar .tjph-bg i:nth-child(3){transform:rotate(-45deg)}
+ .tjph-nav{position:fixed;inset:60px 0 0 0;background:#fff;display:block;overflow-y:auto;overscroll-behavior:contain;padding:10px 16px 150px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .2s ease,transform .2s ease,visibility .2s}
+ .tjph-tog:checked~.tjph-bar .tjph-nav{opacity:1;visibility:visible;transform:none}
+ .tjph-g,.tjph-nav>.tjph-t{border-bottom:1px solid var(--line)}
+ .tjph-t{display:flex;justify-content:space-between;width:100%;font-size:17px;color:var(--ink);padding:18px 4px;border-radius:0}
+ .tjph-t::after{display:none}
+ .tjph-t svg{width:14px;height:14px}
+ .tjph-g.open>.tjph-t svg{transform:rotate(180deg)}
+ .tjph-g:hover>.tjph-t svg,.tjph-g:focus-within>.tjph-t svg{transform:none}
+ .tjph-g.open:hover>.tjph-t svg{transform:rotate(180deg)}
+ .tjph-pn,.tjph-pn.c1,.tjph-pn.c2,.tjph-pn.c3{position:static;width:auto;opacity:1;visibility:visible;transform:none;border:0;box-shadow:none;padding:0 0 14px;border-radius:0;display:none;grid-template-columns:minmax(0,1fr);gap:0}
+ .tjph-pn::before{display:none}
+ .tjph-g.open>.tjph-pn{display:grid}
+ .tjph-pn a{padding:10px 8px;font-size:15.5px}
+ .tjph-h{padding:10px 8px 2px}
+ .tjph-h.e{display:none}
+ .tjph-h.sp{margin-top:0!important}
+ .tjph-t:focus:not(:focus-visible){outline:0}
+ html.tjph-lock [class^="tj-fab"],html.tjph-lock [class*=" tj-fab"]{display:none!important}
+ .tjph-feat{grid-column:auto;grid-row:auto;order:-1;margin:0 0 8px;grid-template-columns:64px minmax(0,1fr);column-gap:12px;align-items:center}
+ .tjph-feat img{width:64px;grid-row:1/span 3;margin:0}
+ .tjph-feat p{display:none}
+ .tjph-feat a.btn{justify-self:start;height:36px}
+ .tjph-m{display:grid;gap:8px;position:fixed;inset-inline:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,255,255,0),#fff 22%);opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s}
+ .tjph-tog:checked~.tjph-bar .tjph-m{opacity:1;visibility:visible}
+ .tjph-m .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .tjph-m a{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:48px;border-radius:14px;font-size:15.5px}
+ .tjph-m a.p{background:var(--r);color:#fff}
+ .tjph-m a.s{border:1px solid var(--line);background:#fff;color:var(--ink)}
+ .tjph-m a.s svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+ .tjph-m a.t{height:auto;padding:4px;font-size:13.5px;color:var(--mut);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--line)}
+ html.tjph-lock,body.tjph-lock{overflow:hidden}
 }
-@media (max-width:600px){
-.tjh .bar{padding:10px 16px;min-height:60px}
-.tjh .logo,.tjh .logo img{width:92px;height:26px}
-}
-
-/* == منوی موبایل: آکاردئون، قفل صفحه، محو انتهای اسکرول، ردیف دکمه == */
-html.tjh-lock,body.tjh-lock{overflow:hidden}
-.tjh .dd a.monly{display:none}
-.tjh .mcta{display:none}
-.tjh nav>div.open>.dd{opacity:1;visibility:visible;transform:none}
-@media (max-width:1024px){
-.tjh nav{padding:4px 16px 0;max-height:calc(100vh - var(--tjh-h,60px));max-height:calc(100dvh - var(--tjh-h,60px));overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-.tjh nav>div>a,.tjh nav>a{padding:14px 6px;font-size:16px;font-weight:600;color:var(--tj-ink)}
-.tjh nav>div>a svg{margin-inline-start:auto;width:18px;height:18px;opacity:.7;transition:transform .2s}
-.tjh nav>div.open>a svg{transform:rotate(180deg)}
-.tjh nav>div.open>a{color:var(--tj-red);border-bottom-color:transparent}
-.tjh nav>div>.dd{display:none}
-.tjh nav>div.open>.dd{display:grid;margin-bottom:6px}
-.tjh .dd a{padding:10px 12px;font-size:15px}
-.tjh .dd a small{font-size:12.5px}
-.tjh .dd a.monly{display:block;font-weight:600;color:var(--tj-red)}
-.tjh .mcta{display:flex;gap:10px;position:sticky;bottom:0;background:#fff;padding:12px 0 14px;margin-top:auto}
-.tjh .mcta::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:40px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff);pointer-events:none;opacity:0;transition:opacity .2s}
-.tjh nav.more .mcta::before{opacity:1}
-.tjh nav::before{content:"";position:fixed;inset:0;top:var(--tjh-h,60px);background:rgba(14,14,14,.38);z-index:-1}
-.tjh .mcta .cta{flex:1;height:46px;font-size:15px;padding:0 10px}
-.tjh .mcta .cta.alt{display:inline-flex}
-}
+@media (prefers-reduced-motion:reduce){.tjph *,.tjph{transition:none!important}}
 </style>
-<header class="tjh" id="tjh">
-<input type="checkbox" id="tjhTog" class="tog">
-<div class="bar">
-<div class="brand">
-<a class="logo" href="/" aria-label="تجربه"><img src="/wp-content/uploads/2026/09/TajrobehMainLogo.webp" alt="مرکز تجربه زندگی" width="102" height="29"></a>
-<nav aria-label="ناوبری اصلی">
-<div><a href="/therapy/">خدمات <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></a>
-<div class="dd wide">
-<span class="h">خدمات</span>
-<a href="/therapy/individual-therapy/">تراپی فردی<small>افسردگی، اضطراب، روابط، خودشناسی</small></a>
-<a href="/therapy/couple-therapy/">تراپی زوج‌ها<small>و مشاوره‌ی پیش از ازدواج</small></a>
-<a href="/therapy/child-therapy/">کودک و نوجوان<small>بازی‌درمانی و درمان تحلیلی</small></a>
-<a href="/therapy/psychiatry/">روانپزشکی<small>ویزیت و دارودرمانی</small></a>
-<a href="/therapy/group-therapy/">گروه‌درمانی<small>گروه‌های تحلیلی</small></a>
-<a href="/therapy/supervision/">سوپرویژن<small>برای درمانگران</small></a>
-<span class="sep"></span>
-<span class="h">رویکردها</span>
-<a href="/approaches/psychoanalysis/">روانکاوی</a>
-<a href="/approaches/psychodynamic-therapy/">روان‌درمانی تحلیلی</a>
-<span class="sep"></span>
-<a href="/get-therapy/" data-tj-fun="start_therapy_click"><b>پیدا کردن تراپیست مناسب ←</b></a>
-<a href="/help/"><b>با چه چیزی درگیرید ←</b></a>
-<a href="/tests/"><b>تست‌های رایگان ←</b></a>
-<a href="/persian-therapy/"><b>فارسی‌زبانان خارج از ایران ←</b></a>
-<a class="monly" href="/therapy/">همه‌ی خدمات ←</a>
-</div></div>
-<div><a href="/partners/">حضوری <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></a>
-<div class="dd">
-<span class="h">تهران</span>
-<a href="/کلینیک-روانکاوی-تهران/">کلینیک تجربه<small>ونک، کوچهٔ بیستم گاندی · ۶ اتاق</small></a>
-<span class="sep"></span>
-<span class="h">شهرهای دیگر</span>
-<a href="/partners/karaj/">کرج<small>میانه، رجایی‌شهر</small></a>
-<a href="/partners/isfahan/">اصفهان<small>تجربه پارتنر اصفهان</small></a>
-<a href="/partners/nur/">نور<small>جان‌پناه، مازندران</small></a>
-<a href="/partners/mashhad/">مشهد<small>مجموعهٔ آن، وکیل‌آباد</small></a>
-<span class="sep"></span>
-<span class="h">خارج از ایران</span>
-<a href="/partners/germany/">آلمان<small>اسن، بوربک · شنبه‌ها</small></a>
-<a href="/partners/new-zealand/">نیوزیلند<small>اوکلند · در حال پیوستن</small></a>
-<span class="sep"></span>
-<a href="/partners/"><b>همهٔ فضاهای حضوری ←</b></a>
-<a href="/partners/rules/"><b>فضایی دارید؟ پارتنر شوید ←</b></a>
-</div></div>
-<a href="/enterprise/">سازمان‌ها</a>
-<div><a href="/school/">مدرسه </a> <div class="dd wide"> <span class="h">دوره‌ها و استادان</span> <a href="/school/clinical-experience/">تجربهٔ بالینی<small>روانکاوی و روان‌درمانی تحلیلی</small></a> <a href="/school/eft/">درمان هیجان‌مدار (EFT)<small>سطح ۱ تا ۳، ۱۲۳ ساعت</small></a> <a href="/school/modern-psychoanalysis/">روانکاوی مدرن<small>کار با ساختارهای پیشاکلامی</small></a> <a href="/school/faculty/">هیئت علمی و استادان<small>سه دپارتمان، سوپروایزرها، منتورها</small></a> <span class="sep"></span> <span class="h">برنامه‌ها و مسیر</span> <a href="/school/events/">تقویم و رویدادها<small>کلاس، سوپرویژن، کیس‌خوانی، ژورنال کلاب</small></a> <a href="/school/community/">کامیونیتی تجربه<small>عضویت رایگان دانشجویان</small></a> <a href="/how-to-become-a-therapist/">چطور درمانگر شویم<small>نقشهٔ راه و تست آمادگی</small></a> <a href="/school/associations/">همکاری با انجمن‌ها<small>برای تشکل‌های دانشجویی</small></a> <span class="sep"></span> <a href="/school/" style="grid-column:1/-1"><b>همهٔ مدرسه ←</b></a> </div></div>
-<a href="/mag/">مجله</a>
-<div><a href="/about-us/">درباره‌ی تجربه <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></a>
-<div class="dd">
-<a href="/about-us/">داستان تجربه</a>
-<a href="/#supervisors">سوپروایزرها</a>
-<a href="/editorial/">تیم تحریریه</a>
-<a href="/joinus/">برای تراپیست‌ها</a>
-<a href="/contact-us/">تماس با ما</a>
-</div></div>
-<div class="mcta"><a class="cta" href="/get-therapy/" data-tj-fun="start_therapy_click">شروع تراپی</a><a class="cta alt" href="https://t.me/tajrobehlife_bot?start=hdr_menu" target="_blank" rel="noopener">بات تلگرام تجربه</a></div>
+<header class="tjph" id="tjph">
+<input type="checkbox" id="tjphTog" class="tjph-tog" aria-hidden="true" tabindex="-1">
+<div class="tjph-bar">
+<a class="tjph-logo" href="/" aria-label="تجربه، صفحهٔ اصلی"><img decoding="async" src="/wp-content/uploads/2026/09/TajrobehMainLogo.webp" alt="مرکز تجربه زندگی" width="102" height="29"></a>
+<nav class="tjph-nav" aria-label="ناوبری اصلی">
+<div class="tjph-g">
+<a class="tjph-t" href="/therapy/">خدمات <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
+<div class="tjph-pn c3">
+ <div class="tjph-col">
+  <p class="tjph-h">خدمات</p>
+  <a href="/therapy/individual-therapy/">تراپی فردی<small>افسردگی، اضطراب، روابط، خودشناسی</small></a>
+  <a href="/therapy/couple-therapy/">تراپی زوج‌ها<small>و مشاورهٔ پیش از ازدواج</small></a>
+  <a href="/therapy/child-therapy/">کودک و نوجوان<small>بازی‌درمانی و درمان تحلیلی</small></a>
+ </div>
+ <div class="tjph-col">
+  <p class="tjph-h e" aria-hidden="true">&nbsp;</p>
+  <a href="/therapy/psychiatry/">روان‌پزشکی<small>ویزیت و دارودرمانی</small></a>
+  <a href="/therapy/group-therapy/">گروه‌درمانی<small>گروه‌های تحلیلی</small></a>
+  <a href="/therapy/supervision/">سوپرویژن<small>برای درمانگران</small></a>
+ </div>
+ <div class="tjph-feat">
+  <img src="/wp-content/uploads/2026/11/tjl-ill-find.webp" alt="" width="200" height="146" loading="lazy" decoding="async">
+  <b>نمی‌دانید از کجا شروع کنید؟</b>
+  <p>چند سؤال کوتاه، پیشنهاد تراپیست و معارفهٔ رایگان.</p>
+  <a class="btn" href="/get-therapy/" data-tj-fun="start_therapy_click">پیدا کردن تراپیست مناسب</a>
+ </div>
+ <div class="tjph-col">
+  <p class="tjph-h sp">رویکردها</p>
+  <a href="/approaches/psychoanalysis/">روانکاوی</a>
+  <a href="/approaches/psychodynamic-therapy/">روان‌درمانی تحلیلی</a>
+ </div>
+ <div class="tjph-col">
+  <p class="tjph-h sp">راه‌های دیگر</p>
+  <a class="go" href="/help/">با چه چیزی درگیرید</a>
+  <a class="go" href="/tests/">تست‌های رایگان</a>
+  <a class="go" href="/persian-therapy/">فارسی‌زبانان خارج از ایران</a>
+  <a class="go" href="/therapy/">همهٔ خدمات</a>
+ </div>
+</div>
+</div>
+<div class="tjph-g">
+<a class="tjph-t" href="/partners/">حضوری <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
+<div class="tjph-pn c2">
+ <div class="tjph-col">
+  <p class="tjph-h">تهران</p>
+  <a href="/کلینیک-روانکاوی-تهران/">کلینیک تجربه<small>ونک، کوچهٔ بیستم گاندی · ۶ اتاق</small></a>
+  <p class="tjph-h sp">خارج از ایران</p>
+  <a href="/partners/germany/">آلمان<small>اسن، بوربک · شنبه‌ها</small></a>
+  <a href="/partners/new-zealand/">نیوزیلند<small>اوکلند · در حال پیوستن</small></a>
+ </div>
+ <div class="tjph-col">
+  <p class="tjph-h">شهرهای دیگر</p>
+  <a href="/partners/karaj/">کرج<small>میانه، رجایی‌شهر</small></a>
+  <a href="/partners/isfahan/">اصفهان<small>تجربه پارتنر اصفهان</small></a>
+  <a href="/partners/nur/">نور<small>جان‌پناه، مازندران</small></a>
+  <a href="/partners/mashhad/">مشهد<small>مجموعهٔ آن، وکیل‌آباد</small></a>
+ </div>
+ <div class="tjph-foot">
+  <a class="go" href="/partners/">همهٔ فضاهای حضوری</a>
+  <a class="go" href="/partners/rules/">فضایی دارید؟ پارتنر شوید</a>
+ </div>
+</div>
+</div>
+<div class="tjph-g">
+<a class="tjph-t" href="/school/">مدرسه <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
+<div class="tjph-pn c2">
+ <div class="tjph-col">
+  <p class="tjph-h">دوره‌ها و استادان</p>
+  <a href="/school/clinical-experience/">تجربهٔ بالینی<small>روانکاوی و روان‌درمانی تحلیلی</small></a>
+  <a href="/school/eft/">درمان هیجان‌مدار (EFT)<small>سطح ۱ تا ۳، ۱۲۳ ساعت</small></a>
+  <a href="/school/modern-psychoanalysis/">روانکاوی مدرن<small>کار با ساختارهای پیشاکلامی</small></a>
+  <a href="/school/faculty/">هیئت علمی و استادان<small>سه دپارتمان، سوپروایزرها، منتورها</small></a>
+ </div>
+ <div class="tjph-col">
+  <p class="tjph-h">برنامه‌ها و مسیر</p>
+  <a href="/school/events/">تقویم و رویدادها<small>کلاس، سوپرویژن، کیس‌خوانی، ژورنال کلاب</small></a>
+  <a href="/school/community/">کامیونیتی تجربه<small>عضویت رایگان دانشجویان</small></a>
+  <a href="/how-to-become-a-therapist/">چطور درمانگر شویم<small>نقشهٔ راه و تست آمادگی</small></a>
+  <a href="/school/associations/">همکاری با انجمن‌ها<small>برای تشکل‌های دانشجویی</small></a>
+ </div>
+ <div class="tjph-foot"><a class="go" href="/school/">همهٔ مدرسه</a></div>
+</div>
+</div>
+<a class="tjph-t" href="/mag/">مجله</a>
+<a class="tjph-t" href="/enterprise/">سازمان‌ها</a>
+<div class="tjph-g">
+<a class="tjph-t" href="/about-us/">دربارهٔ تجربه <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
+<div class="tjph-pn c1">
+ <div class="tjph-col">
+  <a href="/about-us/">داستان تجربه</a>
+  <a href="/#supervisors">سوپروایزرها</a>
+  <a href="/editorial/">تیم تحریریه</a>
+  <a href="/joinus/">برای تراپیست‌ها</a>
+  <a href="/contact-us/">تماس با ما</a>
+ </div>
+</div>
+</div>
+<div class="tjph-m">
+ <div class="row">
+  <a class="p" href="/get-therapy/" data-tj-fun="start_therapy_click">شروع تراپی</a>
+  <a class="s" href="https://tajrobeh.life/login" rel="nofollow"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20c.9-3.6 3.7-5.6 7.2-5.6s6.3 2 7.2 5.6"/></svg>ورود به تجربه</a>
+ </div>
+ <a class="t" href="https://t.me/tajrobehlife_bot?start=hdr_menu" target="_blank" rel="noopener">بات تلگرام تجربه</a>
+</div>
 </nav>
+<div class="tjph-end">
+<a class="tjph-in" href="https://tajrobeh.life/login" rel="nofollow"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20c.9-3.6 3.7-5.6 7.2-5.6s6.3 2 7.2 5.6"/></svg>ورود به تجربه</a>
+<a class="tjph-cta" href="/get-therapy/" data-tj-fun="start_therapy_click">شروع تراپی</a>
+<label class="tjph-bg" for="tjphTog" aria-label="منو" role="button" tabindex="0"><i></i><i></i><i></i></label>
 </div>
-<div class="end">
-<a class="cta alt" href="https://tajrobeh.life/login" rel="nofollow">ورود</a>
-<a class="cta" href="/get-therapy/">شروع تراپی</a>
-<label class="burger" for="tjhTog" aria-label="منو"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></label>
 </div>
-</div>
-<div class="prog" id="tjhProg"></div>
+<div class="tjph-prog" id="tjphProg"></div>
 </header>
-<script>(function(){var h=document.getElementById('tjh');if(!h)return;
-var p=document.getElementById('tjhProg');function u(){var d=document.documentElement,m=d.scrollHeight-d.clientHeight;p.style.width=(m>0?(d.scrollTop/m*100):0)+'%';}window.addEventListener('scroll',u,{passive:true});u();
+<script>
+(function(){var h=document.getElementById('tjph');if(!h)return;
+var p=document.getElementById('tjphProg'),tog=document.getElementById('tjphTog'),nav=h.querySelector('.tjph-nav');
+var mq=window.matchMedia('(max-width:1024px)');
+function onScroll(){var d=document.documentElement,m=d.scrollHeight-d.clientHeight,y=d.scrollTop||window.pageYOffset;
+ p.style.width=(m>0?(y/m*100):0)+'%';h.classList.toggle('is-down',y>8);}
+window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 var path=location.pathname.replace(/\/+$/,'')||'/';
-h.querySelectorAll('nav a[href]').forEach(function(a){var ap=a.getAttribute('href');if(!ap||ap.indexOf('#')>-1||ap.indexOf('http')===0)return;var href;try{href=new URL(ap,location.origin).pathname.replace(/\/+$/,'')||'/';}catch(e){return;}if(href==='/'){if(path!=='/')return;}
-var hit=(path===href);if(!hit){if(href!=='/'){if(path.indexOf(href+'/')===0)hit=true;}}if(hit){a.setAttribute('aria-current','page');var d=a.closest('nav>div');if(d)d.classList.add('on');}});
-var tog=document.getElementById('tjhTog'),nav=h.querySelector('nav');if(!tog)return;if(!nav)return;
-var mq=window.matchMedia('(max-width:1024px)'),touch=window.matchMedia('(hover:none)');
-function setH(){h.style.setProperty('--tjh-h',h.offsetHeight+'px');}
-function more(){nav.classList.toggle('more',nav.scrollTop+nav.clientHeight<nav.scrollHeight-6);}
-function lock(on){document.documentElement.classList.toggle('tjh-lock',on);document.body.classList.toggle('tjh-lock',on);}
-function closeAll(){h.querySelectorAll('nav>div.open').forEach(function(o){o.classList.remove('open');});}
-function closeMenu(){tog.checked=false;lock(false);closeAll();}
-tog.addEventListener('change',function(){setH();lock(tog.checked);if(tog.checked){nav.scrollTop=0;setTimeout(more,60);}else{closeAll();}});
-nav.addEventListener('scroll',more,{passive:true});nav.addEventListener('click',function(e){if(e.target===nav)closeMenu();});
-window.addEventListener('resize',function(){setH();if(!mq.matches)closeMenu();});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMenu();});
-h.querySelectorAll('nav>div>a').forEach(function(a){var d=a.parentNode;a.addEventListener('click',function(e){if(!mq.matches){if(!touch.matches)return;}
-if(!d.classList.contains('open')){e.preventDefault();closeAll();d.classList.add('open');setTimeout(more,260);return;}
-if(mq.matches){e.preventDefault();d.classList.remove('open');setTimeout(more,260);}});});
-nav.querySelectorAll('a[href]').forEach(function(a){a.addEventListener('click',function(){var d=a.parentNode;if(d.parentNode===nav){if(d.tagName==='DIV'){if(!d.classList.contains('mcta'))return;}}closeMenu();});});
-document.addEventListener('click',function(e){if(mq.matches)return;if(h.contains(e.target))return;closeAll();});
-})();</script>
+h.querySelectorAll('.tjph-nav a[href]').forEach(function(a){var ap=a.getAttribute('href');if(!ap)return;if(ap.indexOf('#')>-1)return;if(ap.indexOf('http')===0)return;
+ var href;try{href=new URL(ap,location.origin).pathname.replace(/\/+$/,'')||'/';}catch(e){return;}
+ var hit=(path===href);if(!hit){if(href!=='/'){if(path.indexOf(href+'/')===0){hit=true;}}}
+ if(hit){a.setAttribute('aria-current','page');var g=a.closest('.tjph-g');if(g){g.classList.add('on');}}});
+function lock(on){document.documentElement.classList.toggle('tjph-lock',on);document.body.classList.toggle('tjph-lock',on);}
+function closeMenu(){tog.checked=false;lock(false);h.querySelectorAll('.tjph-g.open').forEach(function(o){o.classList.remove('open');});}
+tog.addEventListener('change',function(){lock(tog.checked);if(tog.checked){nav.scrollTop=0;}});
+h.querySelectorAll('.tjph-g>.tjph-t').forEach(function(t){t.addEventListener('click',function(e){if(!mq.matches)return;e.preventDefault();
+ var g=t.parentNode,was=g.classList.contains('open');h.querySelectorAll('.tjph-g.open').forEach(function(o){o.classList.remove('open');});if(!was){g.classList.add('open');}});});
+var bg=h.querySelector('.tjph-bg');bg.addEventListener('keydown',function(e){if(e.key==='Enter'){tog.checked=!tog.checked;lock(tog.checked);}if(e.key===' '){e.preventDefault();tog.checked=!tog.checked;lock(tog.checked);}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeMenu();}});
+window.addEventListener('resize',function(){if(!mq.matches){closeMenu();}});
+nav.addEventListener('click',function(e){var a=e.target.closest('a');if(!a)return;if(a.classList.contains('tjph-t')){if(a.parentNode.classList.contains('tjph-g')){return;}}closeMenu();});
+})();
+</script>
 <!-- /wp:html -->
