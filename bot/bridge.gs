@@ -619,7 +619,7 @@ function coGrid_(b, t, raw) {
 /* v170.127 (D2 ۱۹:۰۴): پل فقط رشتهٔ «سال/ماه/روز ساعت:دقیقه» را می‌پذیرد. خانهٔ «زمان» رویدادها Date است (tgLeadEv_ با new Date())
    و نمایشش به قالب محلی شیت بستگی دارد (مثلاً ماه/روز/سال)، پس همهٔ ۷۵۶۷ رویداد «تاریخ بد» شدند. حالا از مقدار خام، به وقت تهران با آفست. */
 function coAt_(raw, disp) {
-  if (raw && typeof raw.getTime === 'function' && !isNaN(raw.getTime())) return Utilities.formatDate(raw, 'Asia/Tehran', "yyyy-MM-dd'T'HH:mm:ssXXX");
+  if (raw && typeof raw.getTime === 'function' && !isNaN(raw.getTime())) return Utilities.formatDate(raw, 'Asia/Tehran', "yyyy-MM-dd'T'HH:mm:ss") + '+03:30';   /* ایران از ۱۴۰۱ ساعت تابستانی ندارد */
   var s = tgLatinDigits_(String(disp == null ? '' : disp)).trim();
   if (!s || /^\d{4}[\/\-.]\d{1,2}[\/\-.]\d{1,2}/.test(s)) return s;
   var m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[\s,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);   /* ماه/روز/سال (قالب امریکایی شیت) */
@@ -847,6 +847,7 @@ function coTests() {
       tgPrLinksClean_('https://zoom.us/j/1، https://example.com') === 'https://example.com' && tgPrLinksClean_('https://www.skyroom.online/ch/x') === '' && tgPrLinksClean_(' https://whereby.com/room ') === '' &&
       tgPrLinksClean_('https://linkedin.com/in/x') === 'https://linkedin.com/in/x' && tgPrLinksClean_('') === '' && tgPrLinksClean_('https://zoomit.ir/a') === 'https://zoomit.ir/a');
     ok('v170.127: بخش‌های دیگر بی تبدیل زمان', !coSec_('leads').dt && coSec_('school-lead-events').dt.join() === 'at');
+    delete TG_MEM['co:hub:رویدادهای لید']; delete TG_MEM['co:raw:hub:رویدادهای لید'];
     var big = []; for (var i = 0; i < 7000; i++) big.push({ key: 'k' + i, note: 'x' });
     var C = coChunks_('lead-events', big).map(function (b) { return JSON.parse(b); });
     ok('تکه‌ها: ۳ تکه، complete فقط روی آخری، همهٔ ردیف‌ها', C.length === 3 && C[0].chunks === 3 && !C[0].complete && !C[1].complete && C[2].complete && C[0].rows.length + C[1].rows.length + C[2].rows.length === 7000);
@@ -881,10 +882,10 @@ function coTests() {
     ok('v170.125: آزمون تقسیم: کد اسلات و شمار لید عمومی در همان یک‌باره', /اسلات: .* · لید عمومی امروز: ok \d+ fail \d+/.test(st5), st5);
     ok('v170.125: یک‌بارهٔ وضع: تیک و وضع بخش‌ها، بی ردیف شخصی؛ در فهرست CI', /^تیک: .*people=200\/2 ok/.test(st5) && st5.indexOf('همکار نمونه') < 0 && CI_ONCE_AUTO.indexOf('coV170125State') > -1 && CI_ONCE_ALLOW.indexOf('coV170125State') > -1, st5);
     var VEC_MSG = 'legacy-bot-cutover.v1:people:1794470000:{"section":"people","rows":[{"key":"P-1","name":"درمانگر نمونه"}]}';
-    TG_MEM['people'] = [{ name: 'درمانگر نمونه', chat: '5001', phone: '۰۹۱۲۳۴۵۶۷۸۹', roles: ['درمانگر'] }, { name: 'همکار دو', chat: '7002, 7003', phone: '+98 912 000 0001', roles: [] }, { name: 'بی شماره', chat: '8001', phone: '', roles: [] }];   /* pii:ok ساختگی */
+    TG_MEM['people'] = [{ name: 'درمانگر نمونه', chat: '50011', phone: '۰۹۱۲۳۴۵۶۷۸۹', roles: ['درمانگر'] }, { name: 'همکار دو', chat: '70022, 70033', phone: '+98 912 000 0001', roles: [] }, { name: 'بی شماره', chat: '80011', phone: '', roles: [] }];   /* pii:ok ساختگی */
     var pm = brPhoneMap_();
-    ok('v170.127: خوراک اسلات: موبایل با chat_id یا نام، فقط رقم، رقم فارسی لاتین می‌شود', brFeedIdentity_('5001', 'درمانگر نمونه', pm).mobile === '09123456789' && brFeedIdentity_('7003', 'x', pm).mobile === '+989120000001' && brFeedIdentity_('', 'درمانگر نمونه', pm).mobile === '09123456789' && brFeedIdentity_('8001', 'بی شماره', pm).mobile === undefined);   /* pii:ok ساختگی */
-    ok('v170.127: telegramId فقط رقم و اولین شناسه (خانهٔ چندشناسه‌ای)', brFeedIdentity_('7002, 7003', 'x', pm).telegramId === '7002' && brFeedIdentity_('', 'x', pm).telegramId === '' && brFeedIdentity_('۵۰۰۱', 'x', pm).telegramId === '5001');
+    ok('v170.127: خوراک اسلات: موبایل با chat_id یا نام، فقط رقم، رقم فارسی لاتین می‌شود', brFeedIdentity_('50011', 'درمانگر نمونه', pm).mobile === '09123456789' && brFeedIdentity_('70033', 'x', pm).mobile === '+989120000001' && brFeedIdentity_('', 'درمانگر نمونه', pm).mobile === '09123456789' && brFeedIdentity_('80011', 'بی شماره', pm).mobile === undefined);   /* pii:ok ساختگی */
+    ok('v170.127: telegramId فقط رقم و اولین شناسه (خانهٔ چندشناسه‌ای)', brFeedIdentity_('70022, 70033', 'x', pm).telegramId === '70022' && brFeedIdentity_('', 'x', pm).telegramId === '' && brFeedIdentity_('۵۰۰۱۱', 'x', pm).telegramId === '50011');   /* pii:ok ساختگی */
     delete TG_MEM['people'];
         ok('v170.126: امضای بدنهٔ فارسی = مقدار UTF-8 از Node crypto (E17/E18)', brSign_(VEC_MSG, 'test-key-123') === 'v1=2bac692ec2ba03d0ec2407fa1b83d31e6403aa7574a091cd3a250fe30968b8af', brSign_(VEC_MSG, 'test-key-123'));
     TG_MEM['co:sent'] = []; TG_MEM['co:code'] = 401; TG_MEM['co:err'] = 'legacy-error.bot-feed-signature-invalid'; CO_LAST_POST = 0;

@@ -466,7 +466,8 @@ function lgTests() {
     var f2 = tgApiRoute_({ api: 'br_ther', ts: '1790000000', sig: fsig }), f2j = f2 && typeof f2.getContent === 'function' ? JSON.parse(f2.getContent()) : f2, t2 = (f2j.therapists || [])[0] || {};
     var wI = (t2.weekly || []).filter(function (w) { return w.kind === 'intro'; })[0] || {}, wT = (t2.weekly || []).filter(function (w) { return w.kind === 'therapy'; })[0] || {};
     ok('E60: خوراک مچ وقت هفتگی (یکشنبه=0) و ردیف آزاد معارفه دارد، رزروشده نه (روی کد قبلی مردود)', f2j.version === 2 && wI.weekday === 0 && wI.from === '18:00' && wI.to === '18:20' &&
-      wT.weekday === 1 && wT.from === '10:00' && wT.to > '10:00' && (t2.introSlots || []).length === 1 && t2.introSlots[0].date === '2026-11-07' && t2.introSlots[0].from === '17:00' && t2.introSlots[0].to === '17:20' &&
+      wT.weekday === 1 && wT.from === '10:00' && wT.to > '10:00' && (t2.introSlots || []).length === 4 && t2.introSlots[0].date === '2026-11-07' && t2.introSlots[0].from === '17:00' && t2.introSlots[0].to === '17:20' &&
+      /* v170.127: وقت آزاد معارفه از قاعدهٔ هفتگی (سه یکشنبهٔ ۱۸:۰۰) هم با تاریخ می‌رود */ t2.introSlots.some(function (x) { return x.date === '2026-11-08' && x.from === '18:00' && x.to === '18:20'; }) &&
       JSON.stringify(f2j).indexOf('رزرو') < 0, JSON.stringify(t2).slice(0, 300));
     ok('E62.۴: یک‌بارهٔ سنجش خوراک فقط شمار می‌دهد، بی نام', /درمانگر 1/.test(brV170117Stat()) && brV170117Stat().indexOf('درمانگر یک') < 0 && CI_ONCE_AUTO.indexOf('brV170117Stat') >= 0 && CI_ONCE_ALLOW.indexOf('brV170117Stat') >= 0, brV170117Stat());
     /* E64: کش و راه برعکس */
