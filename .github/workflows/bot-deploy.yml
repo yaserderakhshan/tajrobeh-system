@@ -44,7 +44,7 @@ on:
       run_once:
         description: 'بعد از انتشار سبز، این تابع نگهداری یک بار اجرا شود (فقط با تأیید یاسر؛ فهرست مجاز در ci.gs)'
         type: choice
-        options: ['', tgApResumePrivatize, tgErrScrub]
+        options: ['', tgApResumePrivatize, tgErrScrub, roPeople, roLeads, roLeadEvents, roLeadSources, roLeadClicks, roTasks, roTherapistLeave, roTherapistApplications, roVenues, roVenueRooms, roVenueHours, roVenueOccupancy, roVenueRequests, roSchoolCourses, roSchoolCircles, roSchoolFaculty, roSchoolLeads, roSchoolLeadEvents, roScholarships, roAlumni, roUndoAll]
         default: ''
       force:
         description: 'حتی اگر کد زندهٔ Apps Script تغییری بیرون از گیت دارد، رویش بنویس (فقط با تأیید یاسر)'
