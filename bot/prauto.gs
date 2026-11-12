@@ -118,6 +118,7 @@ function praBadKb_(bad) {
 
 /** r: {row, v}. خروجی: {state: 'pub'|'none'|'blocked'|'fail', ok, bad, changed} */
 function praAutoOne_(r) {
+  if (typeof prqOn_ === 'function' && prqOn_()) return prqOne_(r);   /* v170.124 (E11): با BRIDGE_PROFILE_QUEUE=1 بات فقط تغییر را به صف پل می‌دهد */
   var v = r.v, now = praNow_(), id = String(v.id || '');
   if (/نمی‌رود/.test(String(v.status || ''))) { tgPqPut_(id, { rstamp: String(now) }); return { state: 'blocked', bad: {}, changed: [] }; }
   var snap = praJ_(v.pub_snap), g = praGuard_(v, snap), badK = Object.keys(g.bad);
@@ -229,6 +230,22 @@ function praDaily_(force) {
   parts.forEach(function (x) { tgSend_(boss.chat, x.text, x.kb.length ? { inline_keyboard: x.kb } : null); });
   rows.forEach(function (r) { var p = praJ_(r.v.pub_prev); p.sum = day; tgPqPut_(r.v.id, { pub_prev: JSON.stringify(p) }); });
   return head;
+}
+
+/* v170.124 (E5، ممیزی ۲): صفی که بیش از ۲۴ ساعت خودکار منتشر نشده روزی یک بار به مسئول پذیرش گفته شود (با شمار)، ۱۰ تا ۲۱.
+   انتشار خودکار هر دلیلی برای نرفتن داشته باشد (گارد، سهمیه، خطا) دیگر بی‌صدا نمی‌ماند؛ این همان «قطع خبر» ممیزی ۱ است. */
+var PRA_STALE_MS = 24 * 3600 * 1000;
+function praStale_() {
+  var now = praNow_(), h = Number(Utilities.formatDate(new Date(now), TG_TZ, 'H')), day = praDay_(now);
+  if (h < PRA_SUM_H || h >= 21 || praProp_('PRA_STALE_DAY') === day) return 0;
+  var n = tgPrQueue_().filter(function (r) { var st = tgPrStamp_(r.v); return st > 1 && now - st >= PRA_STALE_MS; }).length;
+  if (!n) return 0;
+  var boss = praBoss_();
+  if (!boss) { tgErr_('praStale_', 'مسئول پذیرش با chat پیدا نشد؛ یادآور صف پروفایل نرفت'); return 0; }
+  praProp_('PRA_STALE_DAY', day);
+  TG_OUT_KIND = 'سیستم'; TG_OUT_REF = 'پروفایل سایت';
+  tgSend_(boss.chat, '⏳ <b>پروفایل منتظر انتشار</b>\n' + tgFa_(n) + ' پروفایل بیش از ۲۴ ساعت در صف مانده و خودکار منتشر نشده است.');
+  return n;
 }
 
 /* ───── برگرداندن ───── */
@@ -388,6 +405,22 @@ function praTests() {
     ok('خلاصه: روزی یک بار', praDaily_() === '' && msgs().length === 1);
     ok('خلاصه: بی تغییر، چیزی نمی‌رود', (function () { TG_MEM['pra:now'] = T0 + 26 * 3600000; TG_OUTBOX = []; return praDaily_() === '' && msgs().length === 0; })());
     ok('متن خلاصه خط تیرهٔ وسط جمله ندارد', !/[—–]/.test(sTxt.replace(/<[^>]+>/g, '')));
+
+    /* یادآور ۲۴ ساعتهٔ صف (ممیزی ۲): دو ردیف بیش از ۲۴ ساعت مانده، یک ردیف تازه */
+    (function () {
+      var nowK = TG_MEM['pra:now'], rowsK = TG_MEM['pqrows'];
+      var mk = function (id, ageH) { return Object.assign({}, base, { id: id, name: id, chat: '9', status: 'تازه', review: '', rstamp: '0', stamp: String(T0 + 26 * 3600000 - ageH * 3600000) }); };
+      TG_MEM['pqrows'] = { 'ther:الف': mk('ther:الف', 30), 'ther:ب': mk('ther:ب', 50), 'ther:ج': mk('ther:ج', 2) };
+      TG_MEM['pra:now'] = T0 + 26 * 3600000 - 3 * 3600000 - 0;   /* ۷:۳۰ تهران روز بعد */
+      TG_OUTBOX = [];
+      var before = praStale_();
+      TG_MEM['pra:now'] = T0 + 26 * 3600000;   /* ۱۰:۳۰ */
+      var first = praStale_(), again = praStale_();
+      ok('یادآور صف: پیش از ساعت ۱۰ نمی‌رود', before === 0);
+      ok('یادآور صف: دقیقاً یک پیام با «۲»، فقط به مسئول پذیرش', first === 2 && again === 0 && msgs().length === 1 && msgs('7800').length === 1 && /۲ پروفایل/.test(said('7800')), JSON.stringify({ first: first, n: msgs().length }));
+      ok('یادآور صف: خط تیرهٔ وسط جمله ندارد', !/[—–]/.test(said('7800').replace(/<[^>]+>/g, '')));
+      TG_MEM['pra:now'] = nowK; TG_MEM['pqrows'] = rowsK; TG_OUTBOX = [];
+    })();
 
     /* برگرداندن */
     var cbd = /pra:rb:[^"]+/.exec(sTxt)[0];
