@@ -4200,7 +4200,7 @@ function tgStyleResult_(chat) {
             '\n\n' + T_STYLE_TAIL;
   tgSend_(chat, t, { inline_keyboard: [
     [{ text: '🍓 با همین نتیجه شروع کنیم', callback_data: 'go' }],
-    [{ text: '🗓 دیدن وقت‌های آزاد معارفه', web_app: { url: TG_APP_URL } }],
+    [brIntroBtn_('🗓 دیدن وقت‌های آزاد معارفه')],
     [{ text: '✏️ دوباره جواب می‌دهم', callback_data: 'pf:redo' }]
   ] });
 }
@@ -4390,7 +4390,7 @@ function tgOnPhone_(chat, name, uname, phone, verified) {
   tgSetFlag_('ft', chat, 3600);
   const nudgeKb = {
     inline_keyboard: [
-      [{ text: '🗓 دیدن وقت‌های آزاد معارفه', web_app: { url: TG_APP_URL } }],
+      [brIntroBtn_('🗓 دیدن وقت‌های آزاد معارفه')],
       [{ text: '🔐 ثبت‌نام در پلتفرم تجربه', url: TG_LINK_SIGNUP }]
     ]
   };
