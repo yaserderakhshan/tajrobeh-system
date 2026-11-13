@@ -12,7 +12,8 @@
 var UP_TAB = 'پایش سایت';
 var UP_HEAD = ['زمان', 'صفحه', 'کد', 'زمان پاسخ (میلی‌ثانیه)', 'سالم', 'خطا', 'ضربان داخل ایران (دقیقه پیش)'];
 var UP_KEEP_DAYS = 30;
-var UP_PAGES_FA = { 'home': 'صفحهٔ اصلی', 'get-therapy': 'شروع تراپی', 'mag': 'مطلب مجله' };
+var UP_PAGES_FA = { 'home': 'صفحهٔ اصلی', 'get-therapy': 'شروع تراپی', 'mag': 'مطلب مجله', 'bridge': 'پل' };
+/* v170.130 (D، OPS-2): ورکر پل را جدا می‌سنجد (bridge.tajrobeh.life/api/health/ready)؛ هشدار bridge_down پس از دو خطای پشت سر هم و bridge_up با مدت قطعی، به همان یاسر و تیم فنی. */
 var UP_ROLE_TECH = 'تیم فنی';
 
 function upDry_() { return typeof TG_DRY !== 'undefined' && TG_DRY; }
@@ -57,6 +58,8 @@ function upAlertText_(a) {
   var bad = (a.bad || []).map(function (b) { return '• ' + (UP_PAGES_FA[b.key] || tgEsc_(String(b.key))) + ' · ' + (b.code ? 'کد ' + tgFa_(String(b.code)) : (b.err === 'timeout' ? 'بی پاسخ در ۱۵ ثانیه' : 'خطای شبکه')) + (b.code === 200 && b.err ? ' · ' + tgEsc_(b.err) : ''); }).join('\n');
   if (a.kind === 'down') return '🔴 <b>سایت tajrobeh.life جواب درست نمی‌دهد</b>\nصفحهٔ اصلی و شروع تراپی هر دو، دو بار پشت سر هم (هر ۵ دقیقه یک سنجش):\n' + bad;
   if (a.kind === 'outside') return '🟠 <b>سایت از خارج ایران در دسترس نیست، ولی از داخل ایران بالاست</b>\nسرور سایت در ۱۵ دقیقهٔ اخیر از داخل ایران ضربان فرستاده، ولی سنجش از بیرون دو بار پشت سر هم ناموفق بود:\n' + bad;
+  if (a.kind === 'bridge_down') return '🔴 <b>پل (bridge.tajrobeh.life) جواب سلامت نمی‌دهد</b>\nدو سنجش پشت سر هم (هر ۵ دقیقه یک سنجش) ناموفق بود:\n' + bad;
+  if (a.kind === 'bridge_up') return '🟢 <b>پل برگشت</b>\nمدت قطعی: ' + tgFa_(String(Math.max(0, Number(a.mins) || 0))) + ' دقیقه';
   if (a.kind === 'up') return '🟢 <b>سایت برگشت</b>\nمدت قطعی: ' + tgFa_(String(Math.max(0, Number(a.mins) || 0))) + ' دقیقه';
   return '';
 }
@@ -67,7 +70,7 @@ function upAlert_(p, dry) {
   var to = upRecipients_();
   if (dry) return { ok: true, data: { would: to.length } };
   to.forEach(function (c) { tgSend_(c, t); });
-  try { upLog_({ key: p.key, entries: [{ t: Date.now(), key: 'هشدار ' + a.kind, code: 0, ms: 0, ok: a.kind === 'up', err: a.kind }] }, false); } catch (e) {}
+  try { upLog_({ key: p.key, entries: [{ t: Date.now(), key: 'هشدار ' + a.kind, code: 0, ms: 0, ok: a.kind === 'up' || a.kind === 'bridge_up', err: a.kind }] }, false); } catch (e) {}
   return { ok: true, data: { n: to.length } };
 }
 try {
@@ -110,6 +113,14 @@ function tgV1702339UpFalse() {
   return { out: marks.length + ' هشدار غلط علامت خورد' };
 }
 
+/* v170.130 (یک بار، CI_ONCE_AUTO): هشدار آزمونی پل فقط به یاسر، تا رسیدن پیام سنجیده شود؛ هیچ کس دیگر. */
+function upV170130Test() {
+  var t = '🧪 <b>آزمون هشدار پل</b> (v170.130)\nاز این پس اگر پل دو سنجش پشت سر هم جواب ندهد، همین‌جا خبر می‌دهم. این پیام فقط آزمون است.';
+  if (!TG_OWNER_CHAT) return { out: 'بی گیرنده' };
+  tgSend_(String(TG_OWNER_CHAT), t);
+  return { out: 'هشدار آزمونی پل به یاسر رفت' + (typeof brBkKeep_ === 'function' ? ' · ' + brBkKeepInfo_() : '') };
+}
+
 function upTests() {
   var pass = 0, fail = 0, text = [];
   function ok(name, c) { if (c) { pass++; text.push('✅ ' + name); } else { fail++; text.push('❌ ' + name); } }
@@ -134,6 +145,13 @@ function upTests() {
     ok('از خارج نه، از داخل بالا: صریح گفته می‌شود', TG_OUTBOX[0].text.indexOf('از خارج ایران در دسترس نیست') > -1 && TG_OUTBOX[0].text.indexOf('از داخل ایران بالاست') > -1);
     TG_OUTBOX = []; upAlert_({ key: 'K2', alert: { kind: 'up', mins: 25 } });
     ok('برگشت با مدت قطعی', TG_OUTBOX[0].text.indexOf('برگشت') > -1 && TG_OUTBOX[0].text.indexOf('۲۵') > -1);
+    TG_OUTBOX = []; upAlert_({ key: 'K2', alert: { kind: 'bridge_down', bad: [{ key: 'bridge', code: 503 }] } });
+    ok('پل پایین: برچسب «پل»، کد، به یاسر و تیم فنی', TG_OUTBOX.length === 2 && TG_OUTBOX[0].text.indexOf('پل') > -1 && TG_OUTBOX[0].text.indexOf('۵۰۳') > -1 && !TG_OUTBOX.some(function (x) { return x.chat === '951'; }));
+    TG_OUTBOX = []; upAlert_({ key: 'K2', alert: { kind: 'bridge_up', mins: 12 } });
+    ok('پل برگشت با مدت', TG_OUTBOX[0].text.indexOf('پل برگشت') > -1 && TG_OUTBOX[0].text.indexOf('۱۲') > -1);
+    upLog_({ key: 'K2', entries: [{ t: now, key: 'bridge', code: 200, ms: 300, ok: true, beat: -1 }] });
+    ok('لاگ پل با برچسب فارسی', TG_MEM['up:rows'].some(function (r) { return r[1] === 'پل'; }));
+    TG_OUTBOX = []; var k0 = TG_OWNER_CHAT; ok('آزمون هشدار پل فقط به یاسر', /یاسر/.test(upV170130Test().out) && TG_OUTBOX.length === 1 && TG_OUTBOX[0].chat === k0);
     ok('هشدار هم در تب ثبت می‌شود', TG_MEM['up:rows'].some(function (r) { return r[1] === 'هشدار up'; }));
     /* v170.23.39: علامت هشدارهای غلط امروز */
     var D = function (hm) { return new Date('2026-10-09T' + hm + ':00+03:30'); };
