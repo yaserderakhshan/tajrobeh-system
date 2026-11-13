@@ -21,6 +21,19 @@
 var BR_MIRROR_HDR = 'X-Telegram-Bot-Api-Secret-Token';
 var BR_BK_FOLDER = 'پشتیبان پل';
 var BR_BK_KEEP = 30;
+/* v170.130 (D، OPS-3): پشتیبان تکه‌تکه شد (هر شب حدود ۴ پرونده)، پس ۳۰ پرونده فقط حدود ۷ شب است. اگر جای آزاد درایو
+   دست‌کم BR_BK_ROOM_MIN باشد ۱۲۰ پرونده (حدود ۳۰ شب) می‌ماند، وگرنه همان ۳۰. سقف بی‌پایان (۰ یا منفی) = جا هست. */
+var BR_BK_KEEP_BIG = 120;
+var BR_BK_ROOM_MIN = 5 * 1024 * 1024 * 1024;
+function brBkKeep_(used, limit) {
+  if (used === undefined) { try { used = DriveApp.getStorageUsed(); limit = DriveApp.getStorageLimit(); } catch (e) { return BR_BK_KEEP; } }
+  if (!(Number(limit) > 0)) return BR_BK_KEEP_BIG;
+  return Number(limit) - Number(used) >= BR_BK_ROOM_MIN ? BR_BK_KEEP_BIG : BR_BK_KEEP;
+}
+function brBkKeepInfo_() {
+  try { var u = DriveApp.getStorageUsed(), l = DriveApp.getStorageLimit(), g = function (b) { return (b / 1073741824).toFixed(1); };
+    return 'درایو ' + g(u) + ' از ' + (l > 0 ? g(l) : '∞') + ' گیگ · نگه‌داشت پشتیبان ' + brBkKeep_(u, l) + ' پرونده'; } catch (e) { return 'جای درایو خوانده نشد'; }
+}
 var BR_BK_SKEW_MS = 10 * 60000;
 var BR_HANDOFF_URL = 'https://bridge.tajrobeh.life/auth/telegram/handoff#t=';
 var BR_TTL_S = 180;
@@ -118,13 +131,13 @@ function brBkFolder_() {
   P.setProperty('BR_BK_FOLDER', f.getId());
   return f;
 }
-/* فقط ۳۰ تای آخر؛ قدیمی‌ترها به سطل زباله */
+/* فقط brBkKeep_() تای آخر (۳۰ یا ۱۲۰، بسته به جای درایو)؛ قدیمی‌ترها به سطل زباله */
 function brBkTrim_(f) {
-  if (TG_DRY) { var a = TG_MEM['br:files']; while (a.length > BR_BK_KEEP) { (TG_MEM['br:trash'] = TG_MEM['br:trash'] || []).push(a.shift().name); } return; }
+  if (TG_DRY) { var a = TG_MEM['br:files'], K = TG_MEM['br:keep'] || BR_BK_KEEP; while (a.length > K) { (TG_MEM['br:trash'] = TG_MEM['br:trash'] || []).push(a.shift().name); } return; }
   var it = f.getFiles(), files = [];
   while (it.hasNext()) files.push(it.next());
   files.sort(function (x, y) { return y.getDateCreated().getTime() - x.getDateCreated().getTime(); });
-  files.slice(BR_BK_KEEP).forEach(function (x) { x.setTrashed(true); });
+  files.slice(brBkKeep_()).forEach(function (x) { x.setTrashed(true); });
 }
 
 /* ───── رلهٔ پایدار (E19): صف رله در واچ‌داگ؛ یک هشدار برای هر رویداد و یک خط «برگشت» ───── */
@@ -520,6 +533,10 @@ function brTests() {
     for (var i = 0; i < 31; i++) TG_MEM['br:files'].push({ name: 'f' + i, size: 1 });
     brBkTrim_();
     ok('فقط ۳۰ تای آخر؛ قدیمی‌ترها به سطل زباله', TG_MEM['br:files'].length === 30 && TG_MEM['br:trash'].length === 2 && TG_MEM['br:trash'][0] === TG_MEM['br:trash'][0]);
+    var G = 1073741824;
+    ok('نگه‌داشت پشتیبان: جای کافی ۱۲۰، کم ۳۰، بی‌سقف ۱۲۰', brBkKeep_(10 * G, 100 * G) === 120 && brBkKeep_(97 * G, 100 * G) === 30 && brBkKeep_(10 * G, 0) === 120);
+    TG_MEM['br:keep'] = 120; for (var j = 0; j < 100; j++) TG_MEM['br:files'].push({ name: 'g' + j, size: 1 }); brBkTrim_();
+    ok('با ۱۲۰، ۱۳۰ پرونده به ۱۲۰ می‌رسد', TG_MEM['br:files'].length === 120); delete TG_MEM['br:keep'];
     var i1 = rlIncident_(null, { pending: 3, oldest_age_s: 200, recovered_24h: 5 }, 1);
     var i2 = rlIncident_(null, { pending: 4, oldest_age_s: 400, recovered_24h: 5 }, 2);
     var i3 = rlIncident_(i2.state, { pending: 9, oldest_age_s: 900, recovered_24h: 5 }, 3);

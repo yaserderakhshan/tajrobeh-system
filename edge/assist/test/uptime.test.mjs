@@ -78,3 +78,28 @@ test('نشانی مطلب مجله: از REST، بعد از KV؛ REST خراب: 
   const evil = async () => ({ status: 200, json: async () => [{ link: 'https://evil.example/x' }] });
   assert.equal(await upMagUrl({ KV: { get: async () => null, put: async () => {} } }, T, evil), '', 'فقط نشانی خود سایت');
 });
+
+/* ۲۲ آبان: پل جدا */
+import { upDecideBridge, UP_BRIDGE } from '../src/uptime.js';
+const brBad = { key: 'bridge', code: 503, ms: 400, has: true, ok: false }, brOk = { key: 'bridge', code: 200, ms: 300, has: true, ok: true };
+test('پل: نشانی سلامت و بی عبارت ثابت', () => {
+  assert.equal(UP_BRIDGE.url, 'https://bridge.tajrobeh.life/api/health/ready'); assert.equal(UP_BRIDGE.must, '');
+});
+test('پل: یک خطا هشدار نه؛ دو خطا bridge_down یک بار', () => {
+  const d1 = upDecideBridge(brBad, null, T); assert.equal(d1.alert, null); assert.equal(d1.changed, true);
+  const d2 = upDecideBridge(brBad, d1.state, T + 300000); assert.equal(d2.alert.kind, 'bridge_down'); assert.equal(d2.alert.bad[0].code, 503);
+  const d3 = upDecideBridge(brBad, d2.state, T + 600000); assert.equal(d3.alert, null); assert.equal(d3.changed, false);
+});
+test('پل: برگشت با مدت، و تک‌خطا بی پیام برگشت', () => {
+  const d1 = upDecideBridge(brBad, null, T), d2 = upDecideBridge(brBad, d1.state, T + 300000), d3 = upDecideBridge(brOk, d2.state, T + 20 * 60000);
+  assert.equal(d3.alert.kind, 'bridge_up'); assert.equal(d3.alert.mins, 20);
+  const e2 = upDecideBridge(brOk, upDecideBridge(brBad, null, T).state, T + 300000); assert.equal(e2.alert, null);
+});
+test('پل مستقل از وردپرس: وردپرس سالم و پل پایین هشدار پل می‌دهد', () => {
+  assert.equal(upDecide(okR, null, 0, T).alert, null);
+  const b = upDecideBridge(brBad, upDecideBridge(brBad, null, T).state, T + 300000); assert.equal(b.alert.kind, 'bridge_down');
+});
+test('سنجش پل: ۲۰۰ با بدنهٔ هر چیزی سالم است', async () => {
+  const r = await upCheckOne(UP_BRIDGE, async () => ({ status: 200, text: async () => 'Healthy' }));
+  assert.equal(r.ok, true);
+});
