@@ -82,7 +82,7 @@
 ## ۶. خودکار از کد
 
 <!-- AUTO:START (node .github/scripts/bot-map.mjs) -->
-نسخهٔ کد: `v170.130`
+نسخهٔ کد: `v170.131`
 
 ### فایل‌ها (به ترتیب اجرا)
 
@@ -110,7 +110,7 @@
 | `magseo.gs` | ۶۱۶ | ۴۴ |
 | `panel.gs` | ۲۰۹ | ۱۹ |
 | `secrets.gs` | ۱۹۵ | ۱۱ |
-| `bridge.gs` | ۹۳۲ | ۷۱ |
+| `bridge.gs` | ۹۶۴ | ۷۶ |
 | `login.gs` | ۵۳۳ | ۳۷ |
 | `wink.gs` | ۱۷۹ | ۱۱ |
 | `stuck.gs` | ۵۰۹ | ۳۳ |
@@ -202,7 +202,7 @@
 | `AG_SEO_TAB` | «تغییرات سئو» | `agents.gs` |
 | `AS_IDX_TAB` | «نمایهٔ دانش» | `assist.gs` |
 | `BG_TAB` | «سهمیهٔ اجرا» | `v168.gs` |
-| `CFG_TAB` | «تنظیمات خصوصی بات» | `gemini_setup.gs` `secrets.gs` `cfg.gs` |
+| `CFG_TAB` | «تنظیمات خصوصی بات» | `gemini_setup.gs` `secrets.gs` `bridge.gs` `cfg.gs` |
 | `CM_FIX_TAB` | «اصلاح کامنت‌ها · پیش‌نمایش» | `comments.gs` |
 | `CM_TAB` | «دفتر کامنت‌ها» | `comments.gs` |
 | `CR_FX_TAB` | «لیدهای بحران · پیش‌نمایش» | `telegram.gs` |

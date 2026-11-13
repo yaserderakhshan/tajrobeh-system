@@ -30,6 +30,25 @@ function brBkKeep_(used, limit) {
   if (!(Number(limit) > 0)) return BR_BK_KEEP_BIG;
   return Number(limit) - Number(used) >= BR_BK_ROOM_MIN ? BR_BK_KEEP_BIG : BR_BK_KEEP;
 }
+/* v170.131 (A ۲۱:۰۱ و ۲۲:۱۶، E): رزرو معارفه در پل. با کلید INTRO_BRIDGE («بله») دکمه‌های رزرو معارفهٔ بات به جای مینی‌اپ
+   به صفحهٔ /match پل می‌روند (پل اگر وارد نشده باشد اول ورود می‌خواهد و بعد همان‌جا برمی‌گرداند). خالی = مثل امروز.
+   روشن و خاموش: یک‌باره‌های brV170131IntroOn و brV170131IntroOff (اجرای دستی دیپلوی، با خبر D پس از فرود قطار ۷). */
+var BR_MATCH_URL = 'https://bridge.tajrobeh.life/match';
+var BR_INTRO_BTN = '🗓 رزرو معارفه در پلتفرم تجربه';
+function brIntroOn_() { return /^(بله|1|on|true)$/i.test(String(cfg_('INTRO_BRIDGE', '') || '').trim()); }
+/** دکمهٔ رزرو معارفه: با کلید روشن نشانی /match پل، وگرنه همان مینی‌اپ */
+function brIntroBtn_(label) {
+  return brIntroOn_() ? { text: BR_INTRO_BTN, url: BR_MATCH_URL } : { text: label, web_app: { url: TG_APP_URL } };
+}
+/* کلید در Property «TG_CFG» (همان که cfg_ می‌خواند) و اگر ردیفش در تب «تنظیمات خصوصی بات» هست همان‌جا هم، تا همگام‌سازی ساعتی برنگرداند */
+function brIntroSet_(v) {
+  var cur = cfgPropGet_(); cur.INTRO_BRIDGE = v; cfgPropSet_(cur);
+  if (!cfgDry_()) { try { var sh = SpreadsheetApp.openById(TG_SHEET_ID).getSheetByName(CFG_TAB), n = sh ? sh.getLastRow() : 0;
+    if (n > 1) { var ks = sh.getRange(2, 1, n - 1, 1).getValues(); for (var i = 0; i < ks.length; i++) if (String(ks[i][0]).trim() === 'INTRO_BRIDGE') sh.getRange(i + 2, 2).setValue(v); } } catch (e) {} }
+  return 'INTRO_BRIDGE=' + v + ' · دکمهٔ معارفه: ' + (brIntroOn_() ? BR_MATCH_URL : 'مینی‌اپ');
+}
+function brV170131IntroOn() { return brIntroSet_('بله'); }
+function brV170131IntroOff() { return brIntroSet_('خاموش'); }
 function brBkKeepInfo_() {
   try { var u = DriveApp.getStorageUsed(), l = DriveApp.getStorageLimit(), g = function (b) { return (b / 1073741824).toFixed(1); };
     return 'درایو ' + g(u) + ' از ' + (l > 0 ? g(l) : '∞') + ' گیگ · نگه‌داشت پشتیبان ' + brBkKeep_(u, l) + ' پرونده'; } catch (e) { return 'جای درایو خوانده نشد'; }
@@ -543,6 +562,19 @@ function brTests() {
     var i4 = rlIncident_(i3.state, { pending: 0, oldest_age_s: 0, recovered_24h: 14, failed_24h: 0 }, 4);
     ok('E19: هشدار رله فقط بعد از ۵ دقیقه، یک بار برای هر رویداد، و یک خط برگشت با شمار رسیده‌ها (روی کد قبلی مردود)', !i1.msg && /۴ پیام/.test(i2.msg) && !i3.msg && i3.state && /۹ پیام نگه‌داشته‌شده به بات رسید/.test(i4.msg) && i4.state === null, [i2.msg, i4.msg].join(' | '));
     ok('E19: واچ‌داگ صف رله را می‌خواند و کش تکراری ۶ ساعت است', String(tgWatchdog).indexOf('tgRelayHealth_') > -1 && /c\.put\('u' \+ id, '1', 21600\)/.test(String(tgHandle)));
+    TG_MEM['cfg:prop'] = JSON.stringify({ X: 1 }); TG_CFG_ = null;
+    var on1 = brV170131IntroOn(), onBtn = brIntroBtn_('z'), off1 = brV170131IntroOff(), offBtn = brIntroBtn_('z');
+    ok('v170.131: یک‌باره‌های روشن و خاموش کلید را در همان TG_CFG می‌نویسند که cfg_ می‌خواند', /match/.test(on1) && onBtn.url === BR_MATCH_URL && /مینی‌اپ/.test(off1) && offBtn.web_app && JSON.parse(TG_MEM['cfg:prop']).X === 1, on1 + ' | ' + off1);
+    TG_CFG_ = {};
+    var bOff = brIntroBtn_('🗓 دیدن وقت‌های آزاد معارفه');
+    TG_CFG_ = { INTRO_BRIDGE: 'بله' };
+    var bOn = brIntroBtn_('🗓 دیدن وقت‌های آزاد معارفه');
+    TG_CFG_ = { INTRO_BRIDGE: 'نه' };
+    var bNo = brIntroBtn_('y');
+    ok('v170.131: معارفه با کلید خالی همان مینی‌اپ، با «بله» نشانی /match پل، با مقدار دیگر خاموش', bOff.web_app && bOff.web_app.url === TG_APP_URL && !bOff.url &&
+      bOn.url === 'https://bridge.tajrobeh.life/match' && !bOn.web_app && bOn.text === BR_INTRO_BTN && bNo.web_app && !bNo.url, JSON.stringify([bOff, bOn, bNo]));
+    ok('v170.131: هر دو دکمهٔ «وقت‌های آزاد معارفه» بات از brIntroBtn_ ساخته می‌شوند', (String(tgStyleResult_) + String(tgOnPhone_)).split('brIntroBtn_(').length === 3 && String(tgStyleResult_).indexOf('web_app: { url: TG_APP_URL }') < 0);
+    TG_CFG_ = {};
     TG_MEM['pnlp:TG_BRIDGE_HANDOFF_SECRET'] = '';
     ok('بی راز، هیچ پشتیبانی پذیرفته نمی‌شود', brBackupIn_({ date: date, sha256: sha, data: b64, sig: sig }).error === 'no_secret');
   } catch (e) { fail++; log.push('✗ خطا: ' + e + (e && e.stack ? ' ' + String(e.stack).slice(0, 300) : '')); }
