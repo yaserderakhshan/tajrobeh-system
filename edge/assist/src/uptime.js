@@ -13,6 +13,9 @@ export const UP_PAGES = [
   { key: 'get-therapy', url: 'https://tajrobeh.life/get-therapy/', must: 'شروع تراپی', main: true },
   { key: 'mag', url: '', must: '</html>', main: false }   /* نشانی از upMagUrl؛ فقط سالم بودن کامل صفحه */
 ];
+/* ۲۲ آبان (D، OPS-2): پل جدا سنجیده می‌شود و هشدار جدا دارد؛ به قاعدهٔ «هر دو صفحهٔ وردپرس» گره نمی‌خورد.
+   «پایین» = دو سنجش پشت سر هم بی ۲۰۰؛ وضعیتش در KV («up:bridge»). */
+export const UP_BRIDGE = { key: 'bridge', url: 'https://bridge.tajrobeh.life/api/health/ready', must: '' };
 export const UP_TIMEOUT_MS = 15000, UP_FAILS = 2, UP_BEAT_FRESH_MS = 15 * 60000, UP_BEAT_WRITE_MS = 10 * 60000, UP_MAG_TTL_MS = 24 * 3600000;
 export const UP_MAG_API = 'https://tajrobeh.life/wp-json/wp/v2/posts?per_page=1&status=publish&orderby=date&order=desc&_fields=link';
 
@@ -65,6 +68,23 @@ export function upDecide(results, state, beat, now) {
   return out;
 }
 
+/** پل: state = { fails, downAt, alerted }؛ هشدار bridge_down پس از دو خطای پشت سر هم، bridge_up با مدت قطعی. */
+export function upDecideBridge(r, state, now) {
+  const s = Object.assign({ fails: 0, downAt: 0, alerted: false }, state || {});
+  const out = { state: s, alert: null, changed: false };
+  if (!r.ok) {
+    if (!s.fails) s.downAt = now;
+    s.fails += 1;
+    if (s.fails >= UP_FAILS && !s.alerted) { s.alerted = true; out.alert = { kind: 'bridge_down', bad: [{ key: r.key, code: r.code, err: r.err || '' }] }; }
+    out.changed = s.fails <= UP_FAILS || !!out.alert;
+  } else if (s.fails) {
+    const was = s.alerted, mins = Math.round((now - (s.downAt || now)) / 60000);
+    out.state = { fails: 0, downAt: 0, alerted: false }; out.changed = true;
+    if (was) out.alert = { kind: 'bridge_up', mins };
+  }
+  return out;
+}
+
 async function botPost(env, action, payload) {
   if (!env.BOT_URL || !env.BOT_KEY) return false;
   for (let i = 0; i < 2; i++) {
@@ -79,15 +99,19 @@ async function botPost(env, action, payload) {
 export async function upTick(env, now = Date.now()) {
   const mag = await upMagUrl(env, now);
   const pages = UP_PAGES.map((p) => (p.key === 'mag' ? Object.assign({}, p, { url: mag }) : p)).filter((p) => p.url);
-  const results = await Promise.all(pages.map((p) => upCheckOne(p)));
-  const [state, beat] = await Promise.all([env.KV.get('up:state', 'json'), env.KV.get('up:beat').then((v) => Number(v) || 0)]);
+  const [results, br] = await Promise.all([Promise.all(pages.map((p) => upCheckOne(p))), upCheckOne(UP_BRIDGE)]);
+  const [state, beat, bstate] = await Promise.all([env.KV.get('up:state', 'json'), env.KV.get('up:beat').then((v) => Number(v) || 0), env.KV.get('up:bridge', 'json')]);
   const d = upDecide(results, state, beat, now);
   if (d.changed) await env.KV.put('up:state', JSON.stringify(d.state));
   if (d.alert) await botPost(env, 'up_alert', { alert: d.alert });
+  const b = upDecideBridge(br, bstate, now);
+  if (b.changed) await env.KV.put('up:bridge', JSON.stringify(b.state));
+  if (b.alert) await botPost(env, 'up_alert', { alert: b.alert });
+  results.push(br);
   /* لاگ: هر ۳۰ دقیقه (دقیقهٔ ۰ تا ۴ و ۳۰ تا ۳۴) یک نمونه، و هر خطا همان لحظه */
   const m = new Date(now).getUTCMinutes(), sample = m % 30 < 5, bad = results.some((r) => !r.ok);
   if (sample || bad) await botPost(env, 'up_log', { entries: results.map((r) => ({ t: now, key: r.key, code: r.code, ms: r.ms, ok: r.ok, err: r.err || (r.ok || r.has ? '' : 'عبارت ثابت نبود'), beat: beat ? Math.round((now - beat) / 60000) : -1 })) });
-  return { results, decision: d };
+  return { results, decision: d, bridge: b };
 }
 
 /** ضربان سرور سایت از داخل ایران؛ فقط اگر آخرین ثبت بیش از ۱۰ دقیقه پیش بوده نوشته می‌شود */
