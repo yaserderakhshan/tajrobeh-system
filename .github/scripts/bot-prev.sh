@@ -13,7 +13,12 @@ set -euo pipefail
 export LC_ALL=C
 
 fp() {
-  (cd "$1" && for f in $(ls -1 | sort); do printf '%s  ' "$f"; sed -e '$a\' "$f" | tr -d '\r' | sha256sum | cut -d' ' -f1; done) | sha256sum | cut -d' ' -f1
+  (cd "$1" && for f in $(ls -1 | sort); do
+    printf '%s  ' "$f"
+    # همان متن، مستقل از CRLF/CR و newline انتهایی: اثر fingerprint باید کد را بسنجد،
+    # نه شکل انتقال فایل بین GitHub runner، Apps Script و سیستم توسعه‌دهنده را.
+    node -e 'const fs=require("fs"),crypto=require("crypto"); let s=fs.readFileSync(process.argv[1],"utf8").replace(/\r\n?/g,"\n"); if(!s.endsWith("\n")) s+="\n"; process.stdout.write(crypto.createHash("sha256").update(s,"utf8").digest("hex"));' "$f"
+  done) | sha256sum | cut -d' ' -f1
 }
 
 reviewed_fp() {
